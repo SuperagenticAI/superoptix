@@ -16,8 +16,8 @@
       <img src="https://img.shields.io/badge/python-3.11+-blue.svg" alt="Python 3.11+" />
     </a>
     <img src="https://img.shields.io/badge/frameworks-7-purple.svg" alt="7 Frameworks" />
-    <a href="https://superoptix.ai">
-      <img src="https://img.shields.io/badge/Website-superoptix.ai-blue.svg" alt="Website" />
+    <a href="https://superagenticai.github.io/superoptix/">
+      <img src="https://img.shields.io/badge/Docs-SuperOptiX-blue.svg" alt="Documentation" />
     </a>
     <a href="https://github.com/SuperagenticAI/superoptix">
       <img src="https://img.shields.io/badge/GitHub-SuperOptiX-green.svg" alt="GitHub" />
@@ -27,6 +27,10 @@
   <p style="font-size: 1.2em; color: #666; margin: 20px 0;">
     <strong>Evaluation-First • Optimization-Core • Multi-Framework • Orchestration-Ready</strong>
   </p>
+
+  <h3>
+    <a href="https://superagenticai.github.io/superoptix/">📚 Read the Complete Documentation</a>
+  </h3>
   
   <p style="font-size: 1.0em; margin: 10px 0;">
     Universal GEPA optimizer for 7 major AI agent frameworks
@@ -95,7 +99,7 @@ pip install crewai==1.2.0
 pip install superoptix[mcp]
 ```
 
-**Full guide:** [docs/setup.md](https://superagenticai.github.io/superoptix/setup/)
+**Full guide:** [docs/setup.md](https://superagenticai.github.io/superoptix/setup.md)
 
 ---
 
@@ -103,6 +107,7 @@ pip install superoptix[mcp]
 
 | Resource | Description | Link |
 |----------|-------------|------|
+| 📚 **Documentation** | Complete guides and API reference | [superagenticai.github.io/superoptix](https://superagenticai.github.io/superoptix/) |
 | 🌐 **Website** | Learn about our vision and solutions | [superoptix.ai](https://superoptix.ai) |
 | 📖 **GitHub** | Source code and project repository | [@SuperagenticAI/superoptix](https://github.com/SuperagenticAI/superoptix) |
 | 📦 **PyPI** | Install via pip | [superoptix](https://pypi.org/project/superoptix/) |
