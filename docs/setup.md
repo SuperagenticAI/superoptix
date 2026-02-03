@@ -188,4 +188,4 @@ uv pip install "json-repair>=0.30.0"  # Ensure compatible version
 ### Still Having Issues?
 
 - 📖 Check our [Troubleshooting Guide](troubleshooting.md)
-- 🐛 Report issues on [GitHub](https://github.com/SuperagenticAI/superoptix-ai/issues)
+- 🐛 Report issues on [GitHub](https://github.com/SuperagenticAI/superoptix/issues)

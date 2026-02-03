@@ -388,9 +388,9 @@ all-with-mlx = [
 
 [project.urls]
 Homepage = "https://superoptix.ai"
-Documentation = "https://superagenticai.github.io/superoptix-ai"
-Repository = "https://github.com/SuperagenticAI/superoptix-ai"
-"Bug Tracker" = "https://github.com/SuperagenticAI/superoptix-ai/issues"
+Documentation = "https://superagenticai.github.io/superoptix"
+Repository = "https://github.com/SuperagenticAI/superoptix"
+"Bug Tracker" = "https://github.com/SuperagenticAI/superoptix/issues"
 Support = "https://superoptix.ai"
 "Download" = "https://pypi.org/project/superoptix/#files"
 

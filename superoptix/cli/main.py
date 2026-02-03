@@ -10,6 +10,7 @@ import os
 # These are caused by a mismatch between opentelemetry versions in dependencies
 # and should be hidden from end users.
 warnings.filterwarnings("ignore", category=DeprecationWarning, module="opentelemetry")
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="opentelemetry.*")
 warnings.filterwarnings("ignore", message="You should use `Logger` instead", category=DeprecationWarning)
 warnings.filterwarnings("ignore", message="You should use `LoggerProvider` instead", category=DeprecationWarning)
 warnings.filterwarnings("ignore", message="You should use `ProxyLoggerProvider` instead", category=DeprecationWarning)

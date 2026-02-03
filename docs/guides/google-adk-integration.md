@@ -576,7 +576,7 @@ Google ADK supports multi-agent architectures:
 Need help?
 
 - 📖 [Documentation](https://superoptix.dev)
-- 💬 [Discord Community](https://Documentation: https://superagenticai.github.io/superoptix-ai/)
+- 💬 [Discord Community](https://Documentation: https://superagenticai.github.io/superoptix/)
 - 🐛 [GitHub Issues](https://mailto:hello@super-agentic.ai)
 
 ---

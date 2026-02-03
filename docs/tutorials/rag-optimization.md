@@ -396,4 +396,4 @@ super agent compile rag_chroma_demo --search-type hybrid
 - [RAG Best Practices](https://docs.superoptix.ai/guides/rag)
 - [Vector Database Comparison](../guides/multi-framework.md)
 - [GEPA Optimization Guide](../guides/gepa-optimization.md)
-- [Community Discord](https://Documentation: https://superagenticai.github.io/superoptix-ai/)
+- [Community Discord](https://Documentation: https://superagenticai.github.io/superoptix/)

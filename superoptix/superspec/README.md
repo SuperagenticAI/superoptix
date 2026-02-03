@@ -380,5 +380,5 @@ SuperSpec DSL is released under the MIT License as part of SuperOptiX.
 
 **Ready to build amazing AI agents?** Start with SuperSpec DSL!
 
-- 💬 **Discussions**: https://github.com/SuperagenticAI/superoptix-ai/discussions  
-- 🐛 **Issues**: https://github.com/SuperagenticAI/superoptix-ai/issues 
+- 💬 **Discussions**: https://github.com/SuperagenticAI/superoptix/discussions  
+- 🐛 **Issues**: https://github.com/SuperagenticAI/superoptix/issues 

@@ -612,7 +612,7 @@ persona:
 Need help? We're here for you:
 
 - 📖 [Documentation](https://superoptix.dev)
-- 💬 [Discord Community](https://Documentation: https://superagenticai.github.io/superoptix-ai/)
+- 💬 [Discord Community](https://Documentation: https://superagenticai.github.io/superoptix/)
 - 🐛 [GitHub Issues](https://mailto:hello@super-agentic.ai)
 - 📧 [Email Support](mailto:support@superoptix.dev)
 
