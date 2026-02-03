@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Renewable Energy Analyst
+  id: renewable_analyst
+  namespace: energy_utilities
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that analyzes renewable energy opportunities and generates investment recommendations.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: project_details
+    type: str
+    description: Renewable energy project specifications, location, and technical requirements
+    required: true
+  - name: market_conditions
+    type: str
+    description: Energy prices, regulatory environment, and competitive landscape
+    required: true
+  output_fields:
+  - name: feasibility_analysis
+    type: str
+    description: Comprehensive project feasibility assessment and risk evaluation
+    required: true
+  - name: investment_recommendations
+    type: str
+    description: Specific investment recommendations and strategic guidance
+    required: true
+  persona:
+    name: RenewableBot
+    role: Renewable Energy Investment Analyst
+    goal: Identify and evaluate renewable energy opportunities for optimal investment decisions
+    traits:
+    - sustainability-focused
+    - data-driven
+    - forward-thinking
+    - economically-minded
+  tasks:
+  - name: analyze_renewable_opportunities
+    instruction: You are a Renewable Energy Investment Analyst. Generate comprehensive analyses of renewable energy projects
+      including feasibility assessments, ROI calculations, and market recommendations.
+    inputs:
+    - name: project_details
+      type: str
+      description: Renewable energy project specifications, location, and technical requirements
+      required: true
+    - name: market_conditions
+      type: str
+      description: Energy prices, regulatory environment, and competitive landscape
+      required: true
+    outputs:
+    - name: feasibility_analysis
+      type: str
+      description: Comprehensive project feasibility assessment and risk evaluation
+    - name: investment_recommendations
+      type: str
+      description: Specific investment recommendations and strategic guidance
+  agentflow:
+  - name: analyze_renewables
+    type: Generate
+    task: analyze_renewable_opportunities
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.7
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: renewable_analyst_comprehensive_task
+      description: Given a complex energy_utilities requirement, the agent should provide detailed analysis and recommendations
+      input:
+        project_details: Complex energy_utilities scenario requiring comprehensive analysis
+        market_conditions: ''
+      expected_output:
+        feasibility_analysis: Detailed step-by-step analysis with energy_utilities-specific recommendations
+        investment_recommendations: ''
+    - name: renewable_analyst_problem_solving
+      description: When facing energy_utilities challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        project_details: Challenging energy_utilities problem requiring creative solutions
+        market_conditions: ''
+      expected_output:
+        feasibility_analysis: Structured problem-solving approach with multiple solution options
+        investment_recommendations: ''
+    - name: renewable_analyst_best_practices
+      description: When asked about energy_utilities best practices, the agent should provide current industry standards and
+        guidelines
+      input:
+        project_details: Industry best practices for energy_utilities operations
+        market_conditions: ''
+      expected_output:
+        feasibility_analysis: Comprehensive best practices guide with implementation steps
+        investment_recommendations: ''
+    - name: renewable_analyst_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to energy_utilities
+      input:
+        project_details: Compliance requirements for energy_utilities operations
+        market_conditions: ''
+      expected_output:
+        feasibility_analysis: Detailed compliance checklist with regulatory requirements
+        investment_recommendations: ''
+    - name: renewable_analyst_strategic_planning
+      description: When developing energy_utilities strategies, the agent should provide forward-thinking recommendations
+      input:
+        project_details: Strategic planning for energy_utilities growth and optimization
+        market_conditions: ''
+      expected_output:
+        feasibility_analysis: Comprehensive strategic plan with measurable objectives and timelines
+        investment_recommendations: ''

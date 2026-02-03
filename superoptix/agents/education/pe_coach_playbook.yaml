@@ -1,0 +1,98 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Physical Education Guide
+  id: pe_coach
+  namespace: education
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that promotes physical fitness and healthy habits.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: exercise
+    type: str
+    description: The exercise or routine to explain.
+    required: true
+  output_fields:
+  - name: guidance
+    type: str
+    description: The explanation of the exercise with form and safety tips.
+    required: true
+  persona:
+    name: CoachBot
+    role: PE Teacher
+    goal: Promote physical fitness and healthy habits
+    traits:
+    - energetic
+    - motivating
+    - safety-conscious
+  tasks:
+  - name: guide_exercise
+    instruction: You are a PE Teacher. Your goal is to promote physical fitness and healthy habits. Guide students through
+      exercises with proper form and safety tips.
+    inputs:
+    - name: exercise
+      type: str
+      description: The exercise or routine to explain.
+      required: true
+    outputs:
+    - name: guidance
+      type: str
+      description: The explanation of the exercise with form and safety tips.
+  agentflow:
+  - name: generate_guidance
+    type: Generate
+    task: guide_exercise
+  evaluation:
+    builtin_metrics:
+    - name: answer_exact_match
+      threshold: 1.0
+  feature_specifications:
+    scenarios:
+    - name: pe_coach_comprehensive_task
+      description: Given a complex education requirement, the agent should provide detailed analysis and recommendations
+      input:
+        exercise: Complex education scenario requiring comprehensive analysis
+      expected_output:
+        guidance: Detailed step-by-step analysis with education-specific recommendations
+    - name: pe_coach_problem_solving
+      description: When facing education challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        exercise: Challenging education problem requiring creative solutions
+      expected_output:
+        guidance: Structured problem-solving approach with multiple solution options
+    - name: pe_coach_best_practices
+      description: When asked about education best practices, the agent should provide current industry standards and guidelines
+      input:
+        exercise: Industry best practices for education operations
+      expected_output:
+        guidance: Comprehensive best practices guide with implementation steps
+    - name: pe_coach_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to education
+      input:
+        exercise: Compliance requirements for education operations
+      expected_output:
+        guidance: Detailed compliance checklist with regulatory requirements
+    - name: pe_coach_strategic_planning
+      description: When developing education strategies, the agent should provide forward-thinking recommendations
+      input:
+        exercise: Strategic planning for education growth and optimization
+      expected_output:
+        guidance: Comprehensive strategic plan with measurable objectives and timelines
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

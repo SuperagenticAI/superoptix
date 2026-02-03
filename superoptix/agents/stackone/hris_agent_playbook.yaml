@@ -1,0 +1,75 @@
+# SuperOptiX Blueprint for StackOne HRIS Agent
+metadata:
+  name: StackOne HRIS Specialist
+  id: stackone_hris_agent
+  version: 1.0.0
+  description: A specialized agent for Human Resources tasks using StackOne's HRIS integration.
+  namespace: stackone
+  level: genies
+  agent_type: Assistant
+
+spec:
+  framework: dspy
+
+  # Model Configuration
+  language_model:
+    provider: openai
+    model: gpt-5.2
+    temperature: 0.0
+
+  # Agent Persona (Required for compilation)
+  persona: |
+    You are an expert HR Specialist with access to the company's HRIS system via StackOne.
+    Your goal is to assist users with employee information, employment details, and team structure.
+    
+    Use the provided HRIS tools to retrieve accurate information. 
+    Always verify the employee ID or name before providing sensitive details.
+    If a user asks for information you cannot find, clearly state what search parameters you used.
+
+  # Agent Instructions (Optimizable by GEPA)
+  instructions: |
+    You are an expert HR Specialist with access to the company's HRIS system via StackOne.
+    Your goal is to assist users with employee information, employment details, and team structure.
+    
+    Use the provided HRIS tools to retrieve accurate information. 
+    Always verify the employee ID or name before providing sensitive details.
+    If a user asks for information you cannot find, clearly state what search parameters you used.
+
+  # Observability Configuration
+  logfire:
+    enabled: true
+
+  observability:
+    enabled: true
+    backends:
+      - mlflow
+    mlflow:
+      experiment_name: "stackone_hris_agent"
+      tracking_uri: "http://localhost:5000"
+      log_artifacts: true
+      log_metrics: true
+      log_params: true
+
+  # Tool Configuration
+  tools:
+    builtin_tools: []
+    custom_tools:
+      - source: stackone
+        category: hris
+        filter: 
+          - hris_get_employee
+          - hris_list_employees
+          - hris_get_employment
+          - hris_list_employments
+          - hris_get_team
+
+  # Optimization Configuration
+  optimization:
+    optimizer: GEPA
+    metric: hris_accuracy
+    auto: medium
+
+  # Evaluation Dataset
+  dataset:
+    benchmark: stackone.HRISBenchmark
+    min_score: 0.9

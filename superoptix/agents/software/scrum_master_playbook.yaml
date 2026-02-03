@@ -1,0 +1,98 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Scrum Master Assistant
+  id: scrum_master
+  namespace: software
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that facilitates Scrum ceremonies and removes impediments.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: ceremony_type
+    type: str
+    description: The type of agile ceremony to facilitate (e.g., 'Daily Standup', 'Sprint Planning').
+    required: true
+  output_fields:
+  - name: ceremony_guide
+    type: str
+    description: A structured guide for facilitating the ceremony.
+    required: true
+  persona:
+    name: ScrumBot
+    role: Scrum Master
+    goal: Facilitate Scrum ceremonies and remove impediments
+    traits:
+    - facilitative
+    - organized
+    - communicative
+  tasks:
+  - name: facilitate_ceremony
+    instruction: You are a Scrum Master. Your goal is to facilitate agile processes. Provide a structured guide for the requested
+      agile ceremony.
+    inputs:
+    - name: ceremony_type
+      type: str
+      description: The type of agile ceremony to facilitate (e.g., 'Daily Standup', 'Sprint Planning').
+      required: true
+    outputs:
+    - name: ceremony_guide
+      type: str
+      description: A structured guide for facilitating the ceremony.
+  agentflow:
+  - name: generate_guide
+    type: Generate
+    task: facilitate_ceremony
+  evaluation:
+    builtin_metrics:
+    - name: answer_exact_match
+      threshold: 1.0
+  feature_specifications:
+    scenarios:
+    - name: scrum_master_comprehensive_task
+      description: Given a complex software requirement, the agent should provide detailed analysis and recommendations
+      input:
+        ceremony_type: Complex software scenario requiring comprehensive analysis
+      expected_output:
+        ceremony_guide: Detailed step-by-step analysis with software-specific recommendations
+    - name: scrum_master_problem_solving
+      description: When facing software challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        ceremony_type: Challenging software problem requiring creative solutions
+      expected_output:
+        ceremony_guide: Structured problem-solving approach with multiple solution options
+    - name: scrum_master_best_practices
+      description: When asked about software best practices, the agent should provide current industry standards and guidelines
+      input:
+        ceremony_type: Industry best practices for software operations
+      expected_output:
+        ceremony_guide: Comprehensive best practices guide with implementation steps
+    - name: scrum_master_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to software
+      input:
+        ceremony_type: Compliance requirements for software operations
+      expected_output:
+        ceremony_guide: Detailed compliance checklist with regulatory requirements
+    - name: scrum_master_strategic_planning
+      description: When developing software strategies, the agent should provide forward-thinking recommendations
+      input:
+        ceremony_type: Strategic planning for software growth and optimization
+      expected_output:
+        ceremony_guide: Comprehensive strategic plan with measurable objectives and timelines
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

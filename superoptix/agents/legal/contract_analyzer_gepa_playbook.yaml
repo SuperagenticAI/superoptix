@@ -1,0 +1,173 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Contract Analyzer GEPA
+  id: contract_analyzer_gepa
+  version: 1.0.0
+  level: oracles
+  description: Legal contract analysis agent optimized with GEPA for contract review, risk assessment, and compliance verification
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    temperature: 0.1
+    max_tokens: 32000
+  input_fields:
+  - name: contract_text
+    type: str
+    description: Contract or agreement text to analyze
+    required: true
+  - name: contract_type
+    type: str
+    description: Type of contract (employment, vendor, service, etc.)
+    required: false
+  output_fields:
+  - name: key_terms
+    type: str
+    description: Critical contract terms and provisions
+    required: true
+  - name: risk_analysis
+    type: str
+    description: Identified risks with severity ratings
+    required: true
+  - name: compliance_issues
+    type: str
+    description: Potential compliance concerns and regulatory issues
+    required: true
+  - name: negotiation_recommendations
+    type: str
+    description: Suggested negotiation points and improvements
+    required: true
+  - name: missing_clauses
+    type: str
+    description: Standard provisions that may be missing
+    required: true
+  - name: legal_disclaimer
+    type: str
+    description: Appropriate legal disclaimer about professional review
+    required: true
+  - name: reasoning
+    type: str
+    description: Legal analysis methodology and confidence assessment
+    required: true
+  persona:
+    role: Legal Contract Analyst
+    goal: Analyze contracts for key terms, risks, and compliance issues while providing actionable legal insights
+    traits:
+    - detail-oriented
+    - analytical
+    - risk-aware
+    - systematic
+    - precise
+  tasks:
+  - name: analyze_contract
+    description: Comprehensive contract analysis including terms, risks, and compliance assessment
+    instruction: 'Perform thorough contract analysis across multiple legal dimensions:
+
+
+      1. **Key Terms Extraction**: Identify critical provisions, obligations, and rights
+
+      2. **Risk Assessment**: Evaluate legal, financial, and operational risks
+
+      3. **Compliance Review**: Check against relevant laws and regulations
+
+      4. **Negotiation Points**: Identify favorable and unfavorable terms
+
+      5. **Missing Provisions**: Flag standard clauses that may be absent
+
+      6. **Enforceability Analysis**: Assess legal validity and enforceability
+
+
+      Provide structured analysis with risk ratings and actionable recommendations.
+
+      Always emphasize the need for qualified legal counsel review.
+
+      '
+    inputs:
+    - name: contract_text
+      type: str
+      description: Contract or agreement text to analyze
+      required: true
+    - name: contract_type
+      type: str
+      description: Type of contract (employment, vendor, service, etc.)
+      required: false
+    outputs:
+    - name: key_terms
+      type: str
+      description: Critical contract terms and provisions
+    - name: risk_analysis
+      type: str
+      description: Identified risks with severity ratings
+    - name: compliance_issues
+      type: str
+      description: Potential compliance concerns and regulatory issues
+    - name: negotiation_recommendations
+      type: str
+      description: Suggested negotiation points and improvements
+    - name: missing_clauses
+      type: str
+      description: Standard provisions that may be missing
+    - name: legal_disclaimer
+      type: str
+      description: Appropriate legal disclaimer about professional review
+    - name: reasoning
+      type: str
+      description: Legal analysis methodology and confidence assessment
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: legal_analysis_feedback
+        auto: light
+        reflection_lm: qwen3:8b
+        reflection_minibatch_size: 3
+        skip_perfect_score: false
+        add_format_failure_as_feedback: true
+        comprehensive_analysis_feedback: true
+  feature_specifications:
+    scenarios:
+    - name: employment_contract_analysis
+      description: Should analyze employment contract terms and risks
+      input:
+        contract_text: Employee agrees to work exclusively for Company for 2 years. Employee cannot work for competitors for
+          24 months after termination. Company may terminate at will with 30 days notice. Employee must relocate if requested.
+        contract_type: employment
+      expected_output:
+        key_terms: 2-year exclusive employment, 24-month non-compete, at-will termination with 30-day notice, mandatory relocation
+          clause
+        risk_analysis: 'High risk: Broad non-compete may be unenforceable; Medium risk: Mandatory relocation without compensation
+          may be problematic'
+        compliance_issues: Non-compete clause may violate state restrictions; Relocation clause may need geographic/compensation
+          limits
+        negotiation_recommendations: Narrow non-compete scope, add mutual termination notice, negotiate relocation compensation
+        missing_clauses: Severability clause, dispute resolution mechanism, intellectual property assignment details
+    - name: vendor_service_agreement
+      description: Should analyze vendor service agreement risks
+      input:
+        contract_text: Vendor provides software services for $10,000/month. No service level guarantees. Vendor owns all intellectual
+          property. Client liable for all damages. Contract automatically renews annually.
+        contract_type: vendor_service
+      expected_output:
+        key_terms: $10,000/month service fee, no SLA guarantees, vendor IP ownership, client damage liability, auto-renewal
+        risk_analysis: 'Critical risk: Unlimited client liability; High risk: No service guarantees; Medium risk: Vendor IP
+          ownership'
+        compliance_issues: Unlimited liability may violate corporate governance; Auto-renewal may need opt-out provisions
+        negotiation_recommendations: Cap liability exposure, add SLA requirements, negotiate IP rights, modify auto-renewal
+          terms
+        missing_clauses: Force majeure, data privacy/security provisions, termination procedures, limitation of liability
+    - name: nda_confidentiality_agreement
+      description: Should analyze confidentiality and NDA terms
+      input:
+        contract_text: Parties agree to keep all information confidential indefinitely. Breaching party pays $100,000 penalty
+          plus legal fees. Non-disclosure covers all communications and observations.
+        contract_type: nda
+      expected_output:
+        key_terms: Indefinite confidentiality period, $100,000 penalty plus legal fees, broad information scope
+        risk_analysis: 'Medium risk: Indefinite term may be excessive; Low risk: Penalty amount seems reasonable for significant
+          breaches'
+        compliance_issues: Indefinite confidentiality may be legally challenging to enforce
+        negotiation_recommendations: Consider time limits on confidentiality (5-7 years), clarify information scope exceptions
+        missing_clauses: Standard exceptions (publicly known, independently developed), return of materials, jurisdictional
+          provisions

@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Event Coordinator
+  id: event_coordinator
+  namespace: hospitality_tourism
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that coordinates events and manages all aspects of event planning and execution.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: event_requirements
+    type: str
+    description: Event type, size, budget, timeline, and client expectations
+    required: true
+  - name: venue_logistics
+    type: str
+    description: Venue constraints, equipment needs, catering requirements, and technical setup
+    required: true
+  output_fields:
+  - name: planning_analysis
+    type: str
+    description: Step-by-step event planning analysis and risk assessment
+    required: true
+  - name: execution_plan
+    type: str
+    description: Detailed event timeline with vendor coordination and contingency planning
+    required: true
+  persona:
+    name: EventBot
+    role: Professional Event Coordinator
+    goal: Execute flawless events through systematic planning and meticulous attention to detail
+    traits:
+    - organized
+    - creative
+    - detail-oriented
+    - stress-resilient
+  tasks:
+  - name: plan_event_execution
+    instruction: You are a Professional Event Coordinator. Think through all event requirements systematically to create comprehensive
+      plans that ensure successful execution and memorable experiences.
+    inputs:
+    - name: event_requirements
+      type: str
+      description: Event type, size, budget, timeline, and client expectations
+      required: true
+    - name: venue_logistics
+      type: str
+      description: Venue constraints, equipment needs, catering requirements, and technical setup
+      required: true
+    outputs:
+    - name: planning_analysis
+      type: str
+      description: Step-by-step event planning analysis and risk assessment
+    - name: execution_plan
+      type: str
+      description: Detailed event timeline with vendor coordination and contingency planning
+  agentflow:
+  - name: coordinate_systematically
+    type: Think
+    task: plan_event_execution
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: event_coordinator_comprehensive_task
+      description: Given a complex hospitality_tourism requirement, the agent should provide detailed analysis and recommendations
+      input:
+        event_requirements: Complex hospitality_tourism scenario requiring comprehensive analysis
+        venue_logistics: ''
+      expected_output:
+        planning_analysis: Detailed step-by-step analysis with hospitality_tourism-specific recommendations
+        execution_plan: ''
+    - name: event_coordinator_problem_solving
+      description: When facing hospitality_tourism challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        event_requirements: Challenging hospitality_tourism problem requiring creative solutions
+        venue_logistics: ''
+      expected_output:
+        planning_analysis: Structured problem-solving approach with multiple solution options
+        execution_plan: ''
+    - name: event_coordinator_best_practices
+      description: When asked about hospitality_tourism best practices, the agent should provide current industry standards
+        and guidelines
+      input:
+        event_requirements: Industry best practices for hospitality_tourism operations
+        venue_logistics: ''
+      expected_output:
+        planning_analysis: Comprehensive best practices guide with implementation steps
+        execution_plan: ''
+    - name: event_coordinator_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to hospitality_tourism
+      input:
+        event_requirements: Compliance requirements for hospitality_tourism operations
+        venue_logistics: ''
+      expected_output:
+        planning_analysis: Detailed compliance checklist with regulatory requirements
+        execution_plan: ''
+    - name: event_coordinator_strategic_planning
+      description: When developing hospitality_tourism strategies, the agent should provide forward-thinking recommendations
+      input:
+        event_requirements: Strategic planning for hospitality_tourism growth and optimization
+        venue_logistics: ''
+      expected_output:
+        planning_analysis: Comprehensive strategic plan with measurable objectives and timelines
+        execution_plan: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

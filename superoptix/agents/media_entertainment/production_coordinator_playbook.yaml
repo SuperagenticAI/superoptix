@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Production Coordinator
+  id: production_coordinator
+  namespace: media_entertainment
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that coordinates media production schedules and manages production logistics.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: production_requirements
+    type: str
+    description: Project scope, timeline, cast, crew, and location needs
+    required: true
+  - name: resource_constraints
+    type: str
+    description: Budget limitations, equipment availability, and scheduling conflicts
+    required: true
+  output_fields:
+  - name: production_analysis
+    type: str
+    description: Step-by-step production planning analysis and risk assessment
+    required: true
+  - name: coordination_plan
+    type: str
+    description: Detailed production schedule with resource allocation and contingencies
+    required: true
+  persona:
+    name: ProductionBot
+    role: Media Production Coordinator
+    goal: Ensure smooth production workflows through systematic planning and resource coordination
+    traits:
+    - organized
+    - detail-oriented
+    - collaborative
+    - problem-solver
+  tasks:
+  - name: plan_production_schedule
+    instruction: You are a Media Production Coordinator. Think through production requirements systematically to create efficient
+      schedules, coordinate resources, and identify potential bottlenecks.
+    inputs:
+    - name: production_requirements
+      type: str
+      description: Project scope, timeline, cast, crew, and location needs
+      required: true
+    - name: resource_constraints
+      type: str
+      description: Budget limitations, equipment availability, and scheduling conflicts
+      required: true
+    outputs:
+    - name: production_analysis
+      type: str
+      description: Step-by-step production planning analysis and risk assessment
+    - name: coordination_plan
+      type: str
+      description: Detailed production schedule with resource allocation and contingencies
+  agentflow:
+  - name: coordinate_systematically
+    type: Think
+    task: plan_production_schedule
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: production_coordinator_comprehensive_task
+      description: Given a complex media_entertainment requirement, the agent should provide detailed analysis and recommendations
+      input:
+        production_requirements: Complex media_entertainment scenario requiring comprehensive analysis
+        resource_constraints: ''
+      expected_output:
+        production_analysis: Detailed step-by-step analysis with media_entertainment-specific recommendations
+        coordination_plan: ''
+    - name: production_coordinator_problem_solving
+      description: When facing media_entertainment challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        production_requirements: Challenging media_entertainment problem requiring creative solutions
+        resource_constraints: ''
+      expected_output:
+        production_analysis: Structured problem-solving approach with multiple solution options
+        coordination_plan: ''
+    - name: production_coordinator_best_practices
+      description: When asked about media_entertainment best practices, the agent should provide current industry standards
+        and guidelines
+      input:
+        production_requirements: Industry best practices for media_entertainment operations
+        resource_constraints: ''
+      expected_output:
+        production_analysis: Comprehensive best practices guide with implementation steps
+        coordination_plan: ''
+    - name: production_coordinator_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to media_entertainment
+      input:
+        production_requirements: Compliance requirements for media_entertainment operations
+        resource_constraints: ''
+      expected_output:
+        production_analysis: Detailed compliance checklist with regulatory requirements
+        coordination_plan: ''
+    - name: production_coordinator_strategic_planning
+      description: When developing media_entertainment strategies, the agent should provide forward-thinking recommendations
+      input:
+        production_requirements: Strategic planning for media_entertainment growth and optimization
+        resource_constraints: ''
+      expected_output:
+        production_analysis: Comprehensive strategic plan with measurable objectives and timelines
+        coordination_plan: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

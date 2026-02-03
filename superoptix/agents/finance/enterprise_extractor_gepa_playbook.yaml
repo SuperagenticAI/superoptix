@@ -1,0 +1,174 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Enterprise Information Extractor GEPA
+  id: enterprise_extractor_gepa
+  version: 1.0.0
+  level: oracles
+  description: Advanced enterprise document processor optimized with GEPA for multi-component information extraction, classification,
+    and structured data analysis
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    temperature: 0.1
+    max_tokens: 32000
+  input_fields:
+  - name: document
+    type: str
+    description: The enterprise document text to analyze
+    required: true
+  output_fields:
+  - name: urgency
+    type: str
+    description: Urgency level with confidence score
+    required: true
+  - name: sentiment
+    type: str
+    description: Overall sentiment analysis
+    required: true
+  - name: categories
+    type: str
+    description: Multi-label categories with relevance scores
+    required: true
+  - name: entities
+    type: str
+    description: Extracted entities with types and confidence
+    required: true
+  - name: action_items
+    type: str
+    description: Identified action items with priorities
+    required: true
+  - name: risk_assessment
+    type: str
+    description: Risk analysis with mitigation suggestions
+    required: true
+  - name: reasoning
+    type: str
+    description: Analytical reasoning and confidence assessment
+    required: true
+  persona:
+    role: Enterprise Information Analyst
+    goal: Extract, classify, and structure information from enterprise documents with high precision and comprehensive analysis
+    traits:
+    - analytical
+    - detail-oriented
+    - systematic
+    - business-savvy
+    - compliance-aware
+  tasks:
+  - name: extract_enterprise_info
+    description: Extract and classify information from enterprise documents including emails, contracts, reports, and communications
+    instruction: "Analyze the given enterprise document and extract structured information across multiple dimensions.\n\n\
+      Your analysis should include:\n1. **Urgency Assessment**: Critical, High, Medium, Low based on language indicators and\
+      \ deadlines\n2. **Sentiment Analysis**: Positive, Neutral, Negative based on tone and emotional indicators  \n3. **Category\
+      \ Classification**: Multi-label classification of document types and purposes\n4. **Key Entity Extraction**: People,\
+      \ organizations, dates, amounts, locations\n5. **Action Items**: Specific tasks or requirements identified\n6. **Risk\
+      \ Assessment**: Potential compliance, financial, or operational risks\n\nProvide structured output with confidence scores\
+      \ and reasoning for each component.\n"
+    inputs:
+    - name: document
+      type: str
+      description: The enterprise document text to analyze
+      required: true
+    outputs:
+    - name: urgency
+      type: str
+      description: Urgency level with confidence score
+    - name: sentiment
+      type: str
+      description: Overall sentiment analysis
+    - name: categories
+      type: str
+      description: Multi-label categories with relevance scores
+    - name: entities
+      type: str
+      description: Extracted entities with types and confidence
+    - name: action_items
+      type: str
+      description: Identified action items with priorities
+    - name: risk_assessment
+      type: str
+      description: Risk analysis with mitigation suggestions
+    - name: reasoning
+      type: str
+      description: Analytical reasoning and confidence assessment
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: multi_component_enterprise_feedback
+        auto: light
+        reflection_lm: qwen3:8b
+        reflection_minibatch_size: 3
+        skip_perfect_score: true
+        add_format_failure_as_feedback: true
+        predictor_level_feedback: true
+  feature_specifications:
+    scenarios:
+    - name: urgent_facility_request
+      description: Should identify urgent facility maintenance requests
+      input:
+        document: 'URGENT: Water leak in server room B-12. This is affecting our critical infrastructure. Need immediate attention
+          before end of business today. Water is spreading toward electrical equipment. Contact facilities ASAP. - John Smith,
+          IT Director'
+      expected_output:
+        urgency: Critical
+        sentiment: Negative
+        categories: facility_maintenance, infrastructure, emergency
+        entities: John Smith (IT Director), server room B-12, electrical equipment
+        action_items: Contact facilities immediately, address water leak, protect electrical equipment
+        risk_assessment: High risk to infrastructure and electrical safety
+    - name: contract_review_request
+      description: Should analyze contract review communications
+      input:
+        document: 'Hi team, Please review the attached vendor contract for Q1 services. Key points to verify: pricing matches
+          SOW ($250K), terms are standard 30-day payment, and includes our standard liability clauses. Deadline for review
+          is Friday. Let me know if you have concerns. Best, Sarah'
+      expected_output:
+        urgency: Medium
+        sentiment: Neutral
+        categories: contract_review, legal, vendor_management
+        entities: Sarah, vendor contract, Q1 services, $250K, 30-day payment, Friday deadline
+        action_items: Review contract pricing, verify payment terms, check liability clauses, provide feedback by Friday
+        risk_assessment: Medium risk - standard contract review with clear deliverables
+    - name: positive_client_feedback
+      description: Should recognize positive customer communications
+      input:
+        document: Thank you for the excellent service delivery on Project Alpha. The team exceeded expectations and delivered
+          2 weeks early. Client satisfaction scores were 9.8/10. Looking forward to expanding our partnership next quarter.
+          - Client Success Team
+      expected_output:
+        urgency: Low
+        sentiment: Positive
+        categories: client_feedback, project_success, partnership_development
+        entities: Project Alpha, Client Success Team, 9.8/10 satisfaction score, 2 weeks early delivery
+        action_items: Document success factors, prepare for partnership expansion, recognize team performance
+        risk_assessment: Low risk - positive outcome with expansion opportunities
+    - name: compliance_concern
+      description: Should identify compliance and regulatory issues
+      input:
+        document: "Compliance alert: Recent audit identified gaps in our data retention policy. We're not meeting GDPR requirements\
+          \ for customer data deletion requests. Legal recommends immediate policy review. Potential fines could reach \u20AC\
+          20M if not addressed within 30 days."
+      expected_output:
+        urgency: Critical
+        sentiment: Negative
+        categories: compliance, legal, data_privacy, audit
+        entities: "GDPR, customer data deletion, \u20AC20M potential fines, 30 days deadline, Legal department"
+        action_items: Review data retention policy, address GDPR compliance gaps, implement deletion procedures
+        risk_assessment: "Critical risk - potential \u20AC20M fine, regulatory non-compliance"
+    - name: budget_planning_discussion
+      description: Should analyze financial planning communications
+      input:
+        document: 'Budget planning session scheduled for next Tuesday. Department heads should prepare: Q4 actuals vs budget
+          variance analysis, Q1 forecast with key assumptions, headcount plans for next 6 months. Focus on cost optimization
+          opportunities. - CFO Office'
+      expected_output:
+        urgency: Medium
+        sentiment: Neutral
+        categories: budget_planning, financial_analysis, resource_planning
+        entities: Tuesday meeting, Q4 actuals, Q1 forecast, 6 months headcount plans, CFO Office
+        action_items: Prepare variance analysis, create Q1 forecast, develop headcount plans, identify cost optimization
+        risk_assessment: Low risk - routine financial planning with optimization focus

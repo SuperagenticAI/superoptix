@@ -1,0 +1,806 @@
+"""
+{{ agent_name | to_pascal_case }} Agent - DeepAgents Implementation
+
+Auto-generated from SuperSpec playbook using SuperOptiX compiler.
+Framework: DeepAgents (LangGraph)
+Generated: {{ timestamp }}
+
+SuperSpec Metadata:
+  Name: {{ metadata.name }}
+  Version: {{ metadata.version }}
+  Description: {{ metadata.description }}
+  Framework: DeepAgents
+"""
+
+from typing import List, Dict, Any, Optional, Sequence, Callable
+
+# Use vendored DeepAgents implementation
+try:
+    from superoptix.vendor.deepagents.graph import create_deep_agent
+    from langchain.chat_models import init_chat_model
+    DEEPAGENTS_AVAILABLE = True
+except ImportError as e:
+    DEEPAGENTS_AVAILABLE = False
+    print(f"⚠️  DeepAgents dependencies not available: {e}")
+    print("⚠️  Using mock implementation for testing")
+
+from superoptix.core.base_component import BaseComponent
+{% if spec.tools %}
+try:
+    from langchain_core.tools import BaseTool
+except ImportError:
+    BaseTool = None
+{% endif %}
+
+
+class {{ agent_name | to_pascal_case }}Component(BaseComponent):
+    """
+    BaseComponent wrapper for DeepAgents - {{ metadata.description }}
+
+    This component wraps a DeepAgents (LangGraph-based) agent and makes it
+    compatible with SuperOptiX's Universal GEPA optimizer.
+
+    Optimizable Variable: system_prompt (the main agent instruction)
+
+    Framework: DeepAgents
+    Input: messages (list of message dicts or string)
+    Output: response (string)
+    """
+
+    def __init__(
+        self,
+        system_prompt: Optional[str] = None,
+        tools: Optional[List] = None,
+        subagents: Optional[List] = None,
+        model: str = "{{ spec.language_model.model | default('anthropic:claude-sonnet-4-20250514') }}",
+        **kwargs
+    ):
+        """
+        Initialize DeepAgent component.
+
+        Args:
+            system_prompt: Main agent instruction (optimizable by GEPA)
+            tools: List of tools for the agent
+            subagents: List of specialized subagents
+            model: Model identifier (e.g., "anthropic:claude-sonnet-4-20250514")
+            **kwargs: Additional configuration
+        """
+        # Default system prompt from playbook
+        default_system_prompt = self._build_default_prompt()
+
+        # Initialize BaseComponent
+        super().__init__(
+            name="{{ agent_name }}",
+            description="""{{ metadata.description | replace('"', '\\"') }}""",
+            input_fields=["messages"],
+            output_fields=["response"],
+            variable=system_prompt or default_system_prompt,  # GEPA optimizes this!
+            variable_type="system_prompt",
+            framework="deepagents",
+            config={
+                "model": model,
+                "tools": tools or [],
+                "subagents": subagents or [],
+                **kwargs
+            }
+        )
+
+        # Lazy initialization
+        self._agent = None
+
+    def _build_default_prompt(self) -> str:
+        """Build default system prompt from playbook."""
+        prompt_parts = []
+{% if spec.persona.role %}
+        prompt_parts.append({{ (spec.persona.role | replace('\n', ' ')) | tojson }})
+{% endif %}
+{% if spec.persona.goal %}
+        prompt_parts.append("\\nGoal: " + {{ (spec.persona.goal | replace('\n', ' ')) | tojson }})
+{% endif %}
+{% if spec.persona.backstory %}
+        prompt_parts.append("\\nBackstory: " + {{ (spec.persona.backstory | replace('\n', ' ')) | tojson }})
+{% endif %}
+{% if spec.reasoning and spec.reasoning.method %}
+        prompt_parts.append("\\n\\nReasoning Method: " + {{ (spec.reasoning.method | replace('\n', ' ')) | tojson }})
+{% endif %}
+{% if spec.reasoning and spec.reasoning.steps %}
+        prompt_parts.append("\\nSteps to follow:")
+{% for step in spec.reasoning.steps %}
+        prompt_parts.append("  {{ loop.index }}. " + {{ (step | replace('\n', ' ')) | tojson }})
+{% endfor %}
+{% endif %}
+{% if spec.constraints %}
+        prompt_parts.append("\\n\\nConstraints:")
+{% for constraint in spec.constraints %}
+        prompt_parts.append("  - " + {{ (constraint | replace('\n', ' ')) | tojson }})
+{% endfor %}
+{% endif %}
+
+        if not prompt_parts:
+            return "You are a helpful AI assistant."
+
+        return "\\n".join(prompt_parts)
+    
+    def _create_backend(self, config: dict):
+        """Create backend based on configuration (DeepAgents 0.2.0+)."""
+        backend_type = config.get("backend_type", "state")
+        
+        try:
+            from superoptix.vendor.deepagents.backends import (
+                state as state_backend,
+                store as store_backend,
+                filesystem as filesystem_backend,
+                composite as composite_backend,
+            )
+            
+            if backend_type == "state":
+                # Ephemeral, per-thread storage (default)
+                return lambda rt: state_backend.StateBackend(rt)
+            
+            elif backend_type == "store":
+                # Persistent, cross-thread storage
+                return lambda rt: store_backend.StoreBackend(rt)
+            
+            elif backend_type == "filesystem":
+                # Local filesystem storage
+                root_dir = config.get("backend_root_dir", "/tmp/deepagent")
+                return filesystem_backend.FilesystemBackend(root_dir=root_dir)
+            
+            elif backend_type == "composite":
+                # Hybrid storage with routing
+                routes_config = config.get("backend_routes", {})
+                default_type = config.get("backend_default", "state")
+                
+                # Create default backend
+                default_config = {**config, "backend_type": default_type}
+                default_backend = self._create_backend(default_config)
+                
+                # Create routed backends
+                routes = {}
+                for path, route_backend_type in routes_config.items():
+                    route_config = {**config, "backend_type": route_backend_type}
+                    routes[path] = self._create_backend(route_config)
+                
+                # For composite, we need to instantiate with runtime
+                def composite_factory(rt):
+                    # Instantiate default and routes
+                    default_inst = default_backend(rt) if callable(default_backend) else default_backend
+                    routes_inst = {
+                        path: backend(rt) if callable(backend) else backend
+                        for path, backend in routes.items()
+                    }
+                    return composite_backend.CompositeBackend(
+                        default=default_inst,
+                        routes=routes_inst
+                    )
+                return composite_factory
+            
+            else:
+                # Default to state backend
+                return lambda rt: state_backend.StateBackend(rt)
+        
+        except ImportError as e:
+            print(f"⚠️  Backend import failed: {e}")
+            print(f"⚠️  Using default backend")
+            return None  # Will use DeepAgents default
+
+    def _initialize_agent(self):
+        """Lazy initialization of DeepAgents agent."""
+        if self._agent is not None:
+            return
+
+        # Convert config to dict if it's a SimpleNamespace
+        import types
+        config = vars(self.config) if isinstance(self.config, types.SimpleNamespace) else self.config
+        if not isinstance(config, dict):
+            config = {}
+
+        # Create DeepAgents agent with current configuration
+        if DEEPAGENTS_AVAILABLE:
+            try:
+                # Get model configuration
+                model_str = config.get("model", "anthropic:claude-sonnet-4-20250514")
+                
+                # Initialize chat model based on provider
+                # Direct initialization is more reliable than init_chat_model
+                if ":" in model_str:
+                    provider, model_name = model_str.split(":", 1)
+                    
+                    if provider == "google-genai":
+                        # Google Gemini models
+                        from langchain_google_genai import ChatGoogleGenerativeAI
+                        import os
+                        model = ChatGoogleGenerativeAI(
+                            model=model_name,
+                            google_api_key=os.getenv("GOOGLE_API_KEY")
+                        )
+                    elif provider == "anthropic":
+                        # Anthropic Claude models
+                        from langchain_anthropic import ChatAnthropic
+                        model = ChatAnthropic(model_name=model_name)
+                    elif provider == "openai":
+                        # OpenAI GPT models
+                        from langchain_openai import ChatOpenAI
+                        model = ChatOpenAI(model=model_name)
+                    else:
+                        # Fall back to init_chat_model for other providers
+                        model = init_chat_model(f"{provider}/{model_name}")
+                else:
+                    # No provider specified, use init_chat_model
+                    model = init_chat_model(model_str)
+                
+                # Create backend (DeepAgents 0.2.0+)
+                backend = self._create_backend(config)
+                
+                # Create the deep agent using vendored implementation
+                self._agent = create_deep_agent(
+                    model=model,
+                    system_prompt=self.variable,  # This gets optimized by GEPA!
+                    tools=config.get("tools", []),
+                    subagents=config.get("subagents", []),
+                    backend=backend,  # NEW in 0.2.0: Pluggable backend!
+                )
+                print(f"✅ DeepAgents agent initialized with model: {model_str}")
+            except Exception as e:
+                print(f"⚠️  Failed to initialize DeepAgents: {e}")
+                print("⚠️  Falling back to mock implementation")
+                # Fall through to mock implementation
+                DEEPAGENTS_AVAILABLE_LOCAL = False
+            else:
+                return  # Successfully initialized, return early
+        
+        # Mock implementation fallback
+        if not DEEPAGENTS_AVAILABLE or 'DEEPAGENTS_AVAILABLE_LOCAL' in locals() and not DEEPAGENTS_AVAILABLE_LOCAL:
+            # Mock agent for testing when DeepAgents is not available
+            class MockDeepAgent:
+                def invoke(self, inputs):
+                    """Mock invoke that returns a reasonable response."""
+                    try:
+                        messages = inputs.get("messages", []) if isinstance(inputs, dict) else []
+                        if messages and len(messages) > 0:
+                            last_msg = messages[-1]
+                            if isinstance(last_msg, dict):
+                                user_msg = last_msg.get("content", "")
+                            else:
+                                user_msg = str(last_msg)
+                            
+                            return {
+                                "messages": [{
+                                    "role": "assistant",
+                                    "content": f"Mock DeepAgents response. Query received: {user_msg[:50]}..."
+                                }]
+                            }
+                    except Exception:
+                        pass
+                    
+                    return {"messages": [{"role": "assistant", "content": "Mock DeepAgents response (framework integration pending)"}]}
+            
+            self._agent = MockDeepAgent()
+
+    def forward(self, **inputs: Any) -> Dict[str, Any]:
+        """
+        Execute the DeepAgents agent.
+
+        Args:
+            **inputs: Must contain 'messages' (str or list of message dicts)
+                     Or individual input fields like 'query', 'text', etc.
+
+        Returns:
+            Dict with 'response' key containing agent output
+        """
+        # Handle different input formats
+        messages = inputs.get("messages")
+
+        if messages is None:
+            # Try to construct from other input fields
+{% if spec.input_fields %}
+{% set first_input = spec.input_fields[0] %}
+            input_value = inputs.get("{{ first_input.name }}", "")
+{% else %}
+            input_value = inputs.get("query") or inputs.get("text") or inputs.get("input", "")
+{% endif %}
+
+            if isinstance(input_value, str):
+                messages = [{"role": "user", "content": input_value}]
+            else:
+                messages = []
+        elif isinstance(messages, str):
+            # Convert string to message format
+            messages = [{"role": "user", "content": messages}]
+
+        # Ensure agent is initialized
+        self._initialize_agent()
+
+        # Invoke DeepAgents agent (LangGraph execution)
+        try:
+            result = self._agent.invoke({"messages": messages})
+            
+            # Convert SimpleNamespace to dict if needed
+            import types
+            if isinstance(result, types.SimpleNamespace):
+                result = vars(result)
+
+            # Extract response from result
+            if result and result.get("messages"):
+                last_message = result["messages"][-1]
+                # LangChain returns AIMessage objects, not dicts
+                if hasattr(last_message, 'content'):
+                    # AIMessage object - extract content directly
+                    response = last_message.content
+                elif isinstance(last_message, dict):
+                    # Dict format - get content field
+                    response = last_message.get("content", "")
+                else:
+                    response = str(last_message)
+            else:
+                response = str(result) if result else ""
+            
+            # Clean up response if it's in complex format
+            if isinstance(response, list):
+                # Gemini sometimes returns list of content blocks
+                text_parts = [block.get('text', '') if isinstance(block, dict) else str(block) for block in response]
+                response = ' '.join(text_parts)
+
+            return {"response": response}
+
+        except Exception as e:
+            # Graceful error handling
+            import traceback
+            error_msg = f"Error executing agent: {str(e)}\n{traceback.format_exc()}"
+            print(f"⚠️  {error_msg}")
+            return {"response": f"Mock response (agent execution pending implementation)"}  # Graceful fallback
+
+    def update(self, new_variable: Any) -> None:
+        """
+        Update system_prompt (called by GEPA optimizer during optimization).
+
+        Args:
+            new_variable: New system prompt text
+        """
+        super().update(new_variable)
+        # Force re-initialization with new prompt
+        self._agent = None
+
+    def __repr__(self) -> str:
+        return (
+            f"{{ agent_name | to_pascal_case }}Component("
+            f"framework=deepagent, "
+            f"model={self.config.get('model')}, "
+            f"optimizable={self.optimizable})"
+        )
+
+
+{% if spec.tools %}
+
+# Tool definitions
+def _create_tools() -> List:
+    """Create tools for the agent."""
+    tools = []
+{% for tool in spec.tools %}
+    # Tool: {{ tool.name }}
+    # Description: {{ tool.description }}
+    # TODO: Implement {{ tool.name }} tool
+{% endfor %}
+
+    return tools
+{% endif %}
+
+
+{% if spec.subagents %}
+
+# Subagent definitions
+def _create_subagents() -> List[Dict[str, Any]]:
+    """Create subagents for specialized tasks."""
+    subagents = []
+{% for subagent in spec.subagents %}
+
+    # Subagent: {{ subagent.name }}
+    {{ subagent.name }}_subagent = {
+        "name": "{{ subagent.name }}",
+        "description": "{{ subagent.description }}",
+        "system_prompt": """{{ subagent.prompt | default('You are a specialized assistant.') }}""",
+        "tools": [],  # Add specific tools if needed
+    }
+    subagents.append({{ subagent.name }}_subagent)
+{% endfor %}
+
+    return subagents
+{% endif %}
+
+
+# Factory function for easy instantiation
+def create_{{ agent_name }}_agent(
+    system_prompt: Optional[str] = None,
+    model: str = "{{ spec.language_model.model | default('anthropic:claude-sonnet-4-20250514') }}",
+    **kwargs
+) -> {{ agent_name | to_pascal_case }}Component:
+    """
+    Factory function to create {{ agent_name }} agent.
+
+    Args:
+        system_prompt: Optional custom system prompt (overrides default)
+        model: Model identifier
+        **kwargs: Additional configuration
+
+    Returns:
+        Initialized {{ agent_name | to_pascal_case }}Component
+    """
+{% if spec.tools %}
+    tools = _create_tools()
+{% else %}
+    tools = []
+{% endif %}
+{% if spec.subagents %}
+    subagents = _create_subagents()
+{% else %}
+    subagents = []
+{% endif %}
+
+    return {{ agent_name | to_pascal_case }}Component(
+        system_prompt=system_prompt,
+        tools=tools,
+        subagents=subagents,
+        model=model,
+        **kwargs
+    )
+
+
+# ======================================================================
+# {{ agent_name | to_pascal_case }}Pipeline - SuperOptiX Workflow Support
+# ======================================================================
+
+import yaml
+from pathlib import Path
+from typing import List, Dict, Any
+
+
+class {{ agent_name | to_pascal_case }}Pipeline:
+    """
+    DeepAgents pipeline with full SuperOptiX workflow support.
+    
+    Supports:
+    - compile: Generate this code from playbook
+    - evaluate: Run BDD scenarios
+    - optimize: GEPA optimization  
+    - run: Execute agent
+    
+    This makes DeepAgents work with standard SuperOptiX commands!
+    """
+    
+    def __init__(self, playbook_path: str = None):
+        """Initialize pipeline from playbook."""
+        # Load playbook
+        if playbook_path:
+            with open(playbook_path) as f:
+                playbook = yaml.safe_load(f)
+                self.spec = playbook.get("spec", {})
+                self.metadata = playbook.get("metadata", {})
+        else:
+            self.spec = {}
+            self.metadata = {}
+        
+        # Create component
+        self.component = create_{{ agent_name }}_agent()
+        
+        # Load BDD scenarios
+        self.test_scenarios = self._load_bdd_scenarios()
+        
+        # Alias for CLI compatibility (CLI looks for test_examples)
+        self.test_examples = self.test_scenarios
+        
+        # Metrics
+        self.is_trained = False
+    
+    def _load_bdd_scenarios(self) -> List[Dict]:
+        """Load BDD test scenarios from playbook."""
+        scenarios = []
+        feature_specs = self.spec.get("feature_specifications", {})
+        scenario_list = feature_specs.get("scenarios", [])
+        
+        for scenario in scenario_list:
+            scenarios.append({
+                "name": scenario.get("name", "Unnamed"),
+                "description": scenario.get("description", ""),
+                "input": scenario.get("input", {}),
+                "expected_output": scenario.get("expected_output", {}),
+            })
+        
+        return scenarios
+    
+    def run(self, **inputs) -> Dict[str, Any]:
+        """
+        Execute agent (unified interface for SuperOptiX CLI).
+        
+        Args:
+            **inputs: Input fields (e.g., query="...", text="...")
+        
+        Returns:
+            Dict with output fields
+        """
+        # Use component's forward method
+        result = self.component.forward(**inputs)
+        return result
+    
+    def evaluate(self) -> Dict[str, Any]:
+        """
+        Evaluate agent with BDD scenarios.
+        
+        Returns:
+            Dict with evaluation results
+        """
+        if not self.test_scenarios:
+            print("⚠️  No BDD scenarios found in playbook")
+            return {"pass": 0, "fail": 0, "pass_rate": 0.0}
+        
+        print(f"\n🔍 Evaluating {{ metadata.name }}...\n")
+        print(f"Testing {len(self.test_scenarios)} BDD scenarios:\n")
+        
+        passed = 0
+        failed = 0
+        results = []
+        
+        for scenario in self.test_scenarios:
+            # Convert SimpleNamespace to dict if needed
+            import types
+            if isinstance(scenario, types.SimpleNamespace):
+                scenario = vars(scenario)
+            
+            scenario_name = scenario.get("name", "Unnamed") if isinstance(scenario, dict) else "Unnamed"
+            
+            try:
+                # Get inputs and expected outputs
+                inputs = scenario.get("input", {}) if isinstance(scenario, dict) else {}
+                expected = scenario.get("expected_output", {}) if isinstance(scenario, dict) else {}
+                
+                # Run scenario
+                result = self.run(**inputs)
+                
+                # Check if output matches expected
+                success = self._evaluate_output(result, expected)
+                
+                if success:
+                    print(f"✅ {scenario_name}: PASS")
+                    passed += 1
+                else:
+                    print(f"❌ {scenario_name}: FAIL")
+                    failed += 1
+                
+                results.append({
+                    "scenario": scenario_name,
+                    "passed": success,
+                    "output": result,
+                })
+            
+            except Exception as e:
+                import traceback
+                print(f"❌ {scenario_name}: ERROR - {e}")
+                traceback.print_exc()  # Print full traceback for debugging
+                failed += 1
+                results.append({
+                    "scenario": scenario_name,
+                    "passed": False,
+                    "error": str(e),
+                })
+        
+        pass_rate = passed / len(self.test_scenarios) if self.test_scenarios else 0.0
+        
+        print(f"\n{'='*60}")
+        print(f"Overall: {passed}/{len(self.test_scenarios)} PASS ({pass_rate*100:.1f}%)")
+        print(f"{'='*60}\n")
+        
+        return {
+            "pass": passed,
+            "fail": failed,
+            "total": len(self.test_scenarios),
+            "pass_rate": pass_rate,
+            "results": results,
+        }
+    
+    def _evaluate_output(self, result: Dict, expected: Dict) -> bool:
+        """Check if result matches expected output."""
+        # Convert SimpleNamespace to dict if needed
+        import types
+        if isinstance(result, types.SimpleNamespace):
+            result = vars(result)
+        if isinstance(expected, types.SimpleNamespace):
+            expected = vars(expected)
+        
+        # Ensure we have dicts
+        if not isinstance(result, dict):
+            result = {"response": str(result)}
+        if not isinstance(expected, dict):
+            expected = {}
+        
+        # Simple keyword matching
+        result_str = str(result).lower()
+        expected_keywords = expected.get("expected_keywords", [])
+        
+        if expected_keywords:
+            # Convert all keywords to strings and lowercase
+            keywords_str = [str(kw).lower() for kw in expected_keywords if kw]
+            matches = sum(1 for kw in keywords_str if kw in result_str)
+            return matches >= len(keywords_str) * 0.5  # 50% threshold
+        
+        # Check response field
+        if "response" in expected and "response" in result:
+            return expected["response"].lower() in result["response"].lower()
+        
+        return True  # Pass if no clear criteria
+    
+    def run_bdd_test_suite(
+        self, auto_tune: bool = False, ignore_checks: bool = False
+    ) -> Dict[str, Any]:
+        """
+        Run BDD test suite (CLI compatibility method).
+        
+        This method is called by the CLI evaluate command and wraps the 
+        standard evaluate() method to format results for CLI display.
+        
+        Args:
+            auto_tune: Whether to automatically optimize based on results (unused)
+            ignore_checks: If True, treats all scenarios as passed
+        
+        Returns:
+            Dict containing test results formatted for CLI
+        """
+        if not self.test_examples:
+            return {
+                "success": False,
+                "message": "No BDD specifications defined in feature_specifications",
+                "summary": {"total": 0, "passed": 0, "failed": 0, "pass_rate": "0.00%"},
+                "bdd_results": {"detailed_results": []},
+                "model_analysis": {},
+                "recommendations": [],
+            }
+        
+        # Run evaluation
+        eval_results = self.evaluate()
+        
+        # Convert to CLI format
+        detailed_results = []
+        for result in eval_results.get("results", []):
+            passed = result.get("passed", False)
+            if ignore_checks:
+                passed = True
+            
+            detailed_results.append({
+                "scenario_name": result.get("scenario", "Unnamed"),
+                "description": result.get("description", ""),
+                "passed": passed,
+                "confidence_score": 1.0 if passed else 0.0,
+                "actual_output": result.get("output", {}),
+            })
+        
+        # Calculate metrics
+        total = eval_results.get("total", 0)
+        passed = eval_results.get("pass", 0) if not ignore_checks else total
+        failed = total - passed
+        pass_rate = eval_results.get("pass_rate", 0.0) * 100
+        
+        return {
+            "success": True,
+            "summary": {
+                "total": total,
+                "passed": passed,
+                "failed": failed,
+                "pass_rate": f"{pass_rate:.1f}%",
+            },
+            "bdd_results": {
+                "detailed_results": detailed_results,
+                "total_scenarios": total,
+                "scenarios_passed": passed,
+                "scenarios_failed": failed,
+                "pass_rate": f"{pass_rate:.1f}%",
+                "bdd_score": pass_rate / 100,
+            },
+            "model_analysis": {
+                "framework": "DeepAgents",
+                "model": "{{ spec.language_model.model }}",
+            },
+            "recommendations": [],
+        }
+    
+    def optimize_with_gepa(
+        self,
+        auto: str = "medium",
+        metric: str = "response_accuracy",
+    ) -> Dict[str, Any]:
+        """
+        Optimize agent with GEPA.
+        
+        Args:
+            auto: Optimization budget ("light", "medium", "heavy")
+            metric: Metric to optimize
+        
+        Returns:
+            Optimization results
+        """
+        from superoptix.optimizers.universal_gepa import UniversalGEPA
+        
+        print(f"\n🔄 Optimizing {{ metadata.name }} with GEPA...\n")
+        print(f"Framework: DeepAgents (LangGraph)")
+        print(f"Optimization level: {auto}")
+        print(f"Optimizing: system_prompt\n")
+        
+        # Define metric function
+        def eval_metric(inputs, outputs, gold, component_name=None):
+            """Metric function for GEPA."""
+            # Simple keyword-based evaluation
+            output_str = str(outputs).lower()
+            expected_keywords = gold.get("expected_keywords", [])
+            
+            if expected_keywords:
+                matches = sum(1 for kw in expected_keywords if kw.lower() in output_str)
+                score = matches / len(expected_keywords)
+            else:
+                score = 0.5  # Default
+            
+            return score
+        
+        # Prepare training data from BDD scenarios
+        trainset = []
+        for scenario in self.test_scenarios[:len(self.test_scenarios)//2]:  # First half for training
+            trainset.append({
+                "inputs": scenario["input"],
+                "expected": scenario["expected_output"],
+            })
+        
+        # Validation set
+        valset = []
+        for scenario in self.test_scenarios[len(self.test_scenarios)//2:]:  # Second half for validation
+            valset.append({
+                "inputs": scenario["input"],
+                "expected": scenario["expected_output"],
+            })
+        
+        if not trainset:
+            print("⚠️  No training data available. Need BDD scenarios in playbook.")
+            return {"error": "No training data"}
+        
+        # Run GEPA optimization
+        try:
+            optimizer = UniversalGEPA(
+                metric=eval_metric,
+                auto=auto,
+                reflection_lm="gpt-4o-mini",
+            )
+            
+            result = optimizer.compile(
+                component=self.component,
+                trainset=trainset,
+                valset=valset if valset else trainset,
+            )
+            
+            print(f"\n✅ Optimization complete!")
+            print(f"Best score: {result.best_score:.2f}")
+            print(f"Optimized system prompt:\n{result.optimized_component.variable[:200]}...\n")
+            
+            # Update component with optimized prompt
+            self.component = result.optimized_component
+            self.is_trained = True
+            
+            return {
+                "best_score": result.best_score,
+                "optimized_prompt": result.optimized_component.variable,
+                "improvement": result.best_score - result.initial_score if hasattr(result, 'initial_score') else 0.0,
+            }
+        
+        except Exception as e:
+            print(f"❌ Optimization failed: {e}")
+            return {"error": str(e)}
+
+
+# Example usage
+if __name__ == "__main__":
+    # Option 1: Use component directly (for Universal GEPA)
+    agent_component = create_{{ agent_name }}_agent()
+    print(f"Agent: {agent_component.name}")
+    print(f"Framework: {agent_component.framework}")
+    result = agent_component.forward(messages="Hello!")
+    print(f"Response: {result['response']}\n")
+    
+    # Option 2: Use pipeline (for full SuperOptiX workflow)
+    # pipeline = {{ agent_name | to_pascal_case }}Pipeline(playbook_path="playbook/{{ agent_name }}_playbook.yaml")
+    # pipeline.evaluate()  # Run BDD tests
+    # pipeline.optimize_with_gepa(auto="medium")  # GEPA optimization
+    # result = pipeline.run(query="Hello!")  # Execute

@@ -1,0 +1,138 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: MCP Agent
+  id: mcp_agent
+  namespace: explicit_agents
+  version: 1.0.0
+  level: genies
+  description: Tool-using agent demonstrating MCP (Model Context Protocol) integration with explicit DSPy template
+  author: SuperOptiX
+  tags:
+  - mcp
+  - tools
+  - react
+  - genies
+  - explicit-dspy
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    temperature: 0.7
+    max_tokens: 3000
+    api_base: http://localhost:11434
+  input_fields:
+  - name: query
+    type: str
+    description: User's request
+    required: true
+  output_fields:
+  - name: response
+    type: str
+    description: Solution using tools
+    required: true
+  persona:
+    name: MCP Agent
+    role: Tool-Using Assistant
+    goal: Help users by leveraging available tools when needed
+    traits:
+    - resourceful
+    - analytical
+    - helpful
+    - practical
+    communication_preferences:
+      style: professional
+      tone: action-oriented
+      verbosity: concise
+  tasks:
+  - name: solve_with_tools
+    description: Solve user requests using available tools
+    instruction: 'You are a resourceful assistant with access to various tools.
+
+      Use tools when they can help solve the user''s request.
+
+      Always explain what tools you''re using and why.
+
+      '
+    schema:
+      style: react
+      reasoning_traces: true
+      max_iterations: 5
+    inputs:
+    - name: query
+      type: str
+      description: User's request
+      required: true
+    outputs:
+    - name: response
+      type: str
+      description: Solution using tools
+  agentflow:
+  - name: solve_with_tools
+    type: ActWithTools
+    task: solve_with_tools
+  tools:
+    enabled: true
+    max_iterations: 5
+    categories:
+    - core
+    - utilities
+    specific_tools:
+    - calculator
+    - date_time
+    - web_search
+  feature_specifications:
+    scenarios:
+    - name: Calculator usage
+      description: Use calculator tool for math
+      input:
+        query: What is 25 * 48 + 17?
+      expected_output:
+        response: Using the calculator tool, 25 * 48 + 17 equals 1217.
+        expected_keywords:
+        - '1217'
+        - calculator
+    - name: Date and time
+      description: Get current date/time
+      input:
+        query: What is the current date and time?
+      expected_output:
+        response: The current date and time is retrieved using the date_time tool.
+        expected_keywords:
+        - '2025'
+        - date
+        - time
+    - name: Web search
+      description: Search for information
+      input:
+        query: Search for information about Python programming
+      expected_output:
+        response: Using web_search to find information about Python programming.
+        expected_keywords:
+        - search
+        - Python
+        - programming
+    - name: Multi-tool usage
+      description: Use multiple tools in sequence
+      input:
+        query: Calculate 15 * 20, then tell me what time it is
+      expected_output:
+        response: 15 * 20 equals 300 using calculator, and the current time is retrieved using date_time tool.
+        expected_keywords:
+        - '300'
+        - time
+  evaluation:
+    builtin_metrics:
+    - name: tool_use_accuracy
+      threshold: 0.8
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: tool_use_accuracy
+        auto: medium
+        reflection_lm: llama3.2:1b
+        max_full_evals: 5
+    metric: tool_use_accuracy
+    metric_threshold: 0.85

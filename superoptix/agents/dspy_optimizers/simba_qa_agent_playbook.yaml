@@ -1,0 +1,178 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: SIMBA Question Answering Agent
+  id: simba-qa-agent
+  version: 1.0.0
+  namespace: education
+  level: oracles
+  stage: stable
+  agent_type: Autonomous
+  description: Question answering agent optimized with SIMBA for fast and accurate responses
+  tags:
+  - qa
+  - education
+  - simba
+  - optimization
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    temperature: 0.3
+    max_tokens: 16000
+    cache: true
+  input_fields:
+  - name: question
+    type: str
+    description: The question to answer
+    required: true
+  - name: context
+    type: str
+    description: Additional context for the question
+    required: false
+  output_fields:
+  - name: answer
+    type: str
+    description: Direct answer to the question
+    required: true
+  - name: explanation
+    type: str
+    description: Detailed explanation and context
+    required: true
+  persona:
+    role: Knowledge Assistant
+    goal: Provide accurate and concise answers to questions across various domains
+    traits:
+    - knowledgeable
+    - concise
+    - accurate
+    - helpful
+    expertise_areas:
+    - general knowledge
+    - science
+    - history
+    - technology
+    communication_preferences:
+      style: conversational
+      tone: friendly
+      verbosity: concise
+  tasks:
+  - name: answer_question
+    description: Answer questions with accurate and well-structured responses
+    instruction: 'Answer the given question accurately and concisely.
+
+
+      Guidelines:
+
+      1. Provide direct, factual answers
+
+      2. Include relevant context when helpful
+
+      3. Cite sources or reasoning when appropriate
+
+      4. Be concise but comprehensive
+
+      5. Use clear, accessible language
+
+
+      Format your response as:
+
+      **Answer:** [Direct answer to the question]
+
+
+      **Explanation:** [Additional context, reasoning, or details]
+
+
+      **Key Points:**
+
+      - [Important point 1]
+
+      - [Important point 2]
+
+      - [Important point 3]
+
+      '
+    inputs:
+    - name: question
+      type: str
+      description: The question to answer
+      required: true
+    - name: context
+      type: str
+      description: Additional context for the question
+      required: false
+    outputs:
+    - name: answer
+      type: str
+      description: Direct answer to the question
+    - name: explanation
+      type: str
+      description: Detailed explanation and context
+  optimization:
+    enabled: true
+    optimizer:
+      name: SIMBA
+      params:
+        metric: answer_exact_match
+        bsize: 8
+        num_candidates: 5
+        max_steps: 10
+        verbose: false
+        timeout: 180
+    evaluation:
+      enabled: true
+      metrics:
+      - answer_exact_match
+      - semantic_f1
+      test_split: 0.2
+    hardware_optimization:
+      target_tier: standard
+      memory_limit_gb: 8
+  feature_specifications:
+    scenarios:
+    - name: science_question
+      description: Should answer basic science questions accurately
+      input:
+        question: What is photosynthesis?
+      expected_output:
+        answer: Photosynthesis is the process by which plants convert sunlight, carbon dioxide, and water into glucose and
+          oxygen
+        explanation: Process occurs in chloroplasts using chlorophyll
+      tags:
+      - science
+      - biology
+      priority: high
+    - name: history_question
+      description: Should provide accurate historical information
+      input:
+        question: When did World War II end?
+      expected_output:
+        answer: World War II ended on September 2, 1945
+        explanation: Formal surrender ceremony took place on USS Missouri in Tokyo Bay
+      tags:
+      - history
+      - dates
+      priority: high
+    - name: technology_question
+      description: Should explain technology concepts clearly
+      input:
+        question: What is artificial intelligence?
+      expected_output:
+        answer: AI is the simulation of human intelligence in machines
+        explanation: Includes learning, reasoning, and problem-solving capabilities
+      tags:
+      - technology
+      - ai
+      priority: medium
+    - name: math_question
+      description: Should solve basic mathematical problems
+      input:
+        question: What is 15% of 240?
+      expected_output:
+        answer: '36'
+        explanation: "15% = 0.15, so 0.15 \xD7 240 = 36"
+      tags:
+      - math
+      - percentage
+      priority: high

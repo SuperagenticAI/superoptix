@@ -1,0 +1,80 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: MIPROv2 Optimizer Demo
+  id: miprov2-demo
+  version: 1.0.0
+  level: oracles
+  description: Demonstrates MIPROv2 (Multi-step Instruction Prompt Optimization) for advanced prompt engineering
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    temperature: 0.0
+    max_tokens: 32000
+  input_fields:
+  - name: question
+    type: str
+    description: The story prompt or theme
+    required: true
+  output_fields:
+  - name: answer
+    type: str
+    description: The complete short story
+    required: true
+  persona:
+    role: Creative Writing Assistant
+    goal: Generate creative and engaging short stories
+    traits:
+    - creative
+    - imaginative
+    - engaging
+    - detailed
+  tasks:
+  - name: write_short_story
+    description: Write a creative short story based on a prompt
+    instruction: 'Write an engaging short story based on the given prompt.
+
+      Include vivid descriptions, interesting characters, and a compelling plot.
+
+      The story should be approximately 200-300 words.
+
+      '
+    inputs:
+    - name: question
+      type: str
+      description: The story prompt or theme
+      required: true
+    outputs:
+    - name: answer
+      type: str
+      description: The complete short story
+  optimization:
+    optimizer:
+      name: MIPROv2
+      params:
+        metric: fuzzy_match
+        num_candidates: 15
+        init_temperature: 1.2
+        max_iterations: 5
+  feature_specifications:
+    scenarios:
+    - name: fantasy_story
+      description: Should write an engaging fantasy story
+      input:
+        question: Write a story about a young wizard discovering their powers
+      expected_output:
+        answer: story wizard magic powers discovery adventure
+    - name: mystery_story
+      description: Should create an intriguing mystery
+      input:
+        question: Write a mystery story about a missing library book
+      expected_output:
+        answer: mystery library book detective investigation clues
+    - name: sci_fi_story
+      description: Should craft a science fiction narrative
+      input:
+        question: Write about a space explorer finding an alien artifact
+      expected_output:
+        answer: space explorer alien artifact discovery technology future

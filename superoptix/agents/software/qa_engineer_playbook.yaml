@@ -1,0 +1,328 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: QA Engineer Assistant
+  id: qa_engineer
+  namespace: software
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that helps design and execute effective test plans.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: feature_specification
+    type: str
+    description: The feature specification to be tested.
+    required: true
+  output_fields:
+  - name: test_plan
+    type: str
+    description: A high-level test plan with key test cases.
+    required: true
+  persona:
+    name: QABot
+    role: QA Engineer
+    goal: Design and execute effective test plans
+    traits:
+    - analytical
+    - detail-oriented
+    - thorough
+  tasks:
+  - name: create_test_plan
+    instruction: You are a Quality Assurance Engineer. Your goal is to ensure software quality. Create a high-level test plan
+      including test cases for the given feature.
+    inputs:
+    - name: feature_specification
+      type: str
+      description: The feature specification to be tested.
+      required: true
+    outputs:
+    - name: test_plan
+      type: str
+      description: A high-level test plan with key test cases.
+  agentflow:
+  - name: generate_test_plan
+    type: Generate
+    task: create_test_plan
+  evaluation:
+    builtin_metrics:
+    - name: answer_exact_match
+      threshold: 1.0
+  feature_specifications:
+    scenarios:
+    - name: comprehensive_test_plan_creation
+      description: Given a complex feature specification, the agent should generate a comprehensive test plan with multiple
+        test categories
+      input:
+        feature_specification: User authentication system with login, registration, password reset, and two-factor authentication.
+          System should handle rate limiting and account lockouts.
+      expected_output:
+        test_plan: '**Test Plan: User Authentication System**
+
+
+          **1. Functional Testing**
+
+          - User Registration: Valid/invalid email formats, password strength requirements
+
+          - User Login: Correct/incorrect credentials, case sensitivity
+
+          - Password Reset: Valid email flow, invalid email handling, link expiration
+
+          - Two-Factor Authentication: Code generation, verification, backup codes
+
+
+          **2. Security Testing**
+
+          - Rate Limiting: Multiple failed login attempts, API request throttling
+
+          - Account Lockout: Brute force protection, unlock mechanisms
+
+          - SQL Injection: Input validation on all authentication fields
+
+          - Session Management: Token expiration, concurrent sessions
+
+
+          **3. Performance Testing**
+
+          - Load Testing: Concurrent user logins, system response under stress
+
+          - Database Performance: Authentication queries optimization
+
+
+          **4. Usability Testing**
+
+          - Error Messages: Clear, actionable feedback for users
+
+          - User Flow: Intuitive navigation through authentication process
+
+          '
+    - name: bug_report_analysis
+      description: When analyzing a bug report, the agent should provide structured analysis with reproduction steps and severity
+        assessment
+      input:
+        feature_specification: 'Bug Report: ''Users can''t upload files larger than 5MB on mobile devices. Desktop works fine.
+          Error message says "Upload failed" with no details.'''
+      expected_output:
+        test_plan: '**Bug Analysis: File Upload Issue on Mobile**
+
+
+          **Severity:** High (Core functionality affected on major platform)
+
+
+          **Reproduction Steps:**
+
+          1. Open application on mobile device
+
+          2. Navigate to file upload section
+
+          3. Select file larger than 5MB
+
+          4. Attempt upload
+
+          5. Observe error message
+
+
+          **Test Cases to Validate:**
+
+          - File size validation: Test exact 5MB threshold
+
+          - Error handling: Verify descriptive error messages
+
+          - Platform compatibility: Compare mobile vs desktop behavior
+
+          - File type verification: Test various file formats
+
+          - Network conditions: Test on different connection speeds
+
+
+          **Additional Investigation:**
+
+          - Check mobile-specific file size limits
+
+          - Verify API endpoint differences between platforms
+
+          - Test on different mobile browsers/apps
+
+          '
+    - name: api_testing_strategy
+      description: Given an API specification, the agent should create a comprehensive API testing approach
+      input:
+        feature_specification: 'REST API for e-commerce product catalog: GET /products (list), POST /products (create), PUT
+          /products/{id} (update), DELETE /products/{id} (delete). Requires authentication and supports pagination.'
+      expected_output:
+        test_plan: '**API Testing Plan: E-commerce Product Catalog**
+
+
+          **1. Endpoint Testing**
+
+          - GET /products: Valid requests, pagination parameters, filtering
+
+          - POST /products: Valid product creation, required fields validation
+
+          - PUT /products/{id}: Product updates, partial updates, non-existent IDs
+
+          - DELETE /products/{id}: Successful deletion, authorization checks
+
+
+          **2. Authentication Testing**
+
+          - Valid tokens: Successful API access
+
+          - Invalid tokens: Proper 401 responses
+
+          - Expired tokens: Token refresh flow
+
+          - No authentication: Proper rejection
+
+
+          **3. Data Validation**
+
+          - Input validation: Required fields, data types, format validation
+
+          - Boundary testing: Max/min values, string lengths
+
+          - Malformed requests: Invalid JSON, missing headers
+
+
+          **4. Error Handling**
+
+          - HTTP status codes: 200, 201, 400, 401, 404, 500
+
+          - Error response format: Consistent error structure
+
+          - Rate limiting: 429 responses for excessive requests
+
+          '
+    - name: test_automation_framework
+      description: When asked to design test automation, the agent should provide a structured framework approach
+      input:
+        feature_specification: Design test automation framework for a web application with user management, inventory tracking,
+          and reporting modules. Need both UI and API test coverage.
+      expected_output:
+        test_plan: '**Test Automation Framework Design**
+
+
+          **1. Framework Architecture**
+
+          - Page Object Model: Separate page classes for UI elements
+
+          - Data-Driven Testing: External test data management
+
+          - Hybrid Framework: Keyword + Data-driven approach
+
+          - Reporting: Detailed test execution reports
+
+
+          **2. Test Layers**
+
+          - Unit Tests: Individual component testing
+
+          - API Tests: Backend service validation
+
+          - Integration Tests: Module interaction testing
+
+          - UI Tests: End-to-end user workflows
+
+
+          **3. Tool Selection**
+
+          - UI Automation: Selenium WebDriver with Python/Java
+
+          - API Testing: RestAssured or Postman/Newman
+
+          - Test Runner: TestNG or pytest
+
+          - CI/CD Integration: Jenkins or GitHub Actions
+
+
+          **4. Test Organization**
+
+          - Smoke Tests: Critical path validation
+
+          - Regression Suite: Full feature coverage
+
+          - Performance Tests: Load and stress testing
+
+          - Cross-browser Testing: Multiple browser support
+
+          '
+    - name: performance_testing_plan
+      description: Given performance requirements, the agent should create a detailed performance testing strategy
+      input:
+        feature_specification: Web application should handle 1000 concurrent users, page load time under 3 seconds, API response
+          time under 500ms. System includes user authentication, product search, and checkout process.
+      expected_output:
+        test_plan: '**Performance Testing Plan**
+
+
+          **1. Performance Requirements**
+
+          - Concurrent Users: 1000 simultaneous users
+
+          - Page Load Time: < 3 seconds
+
+          - API Response Time: < 500ms
+
+          - System Uptime: 99.9% availability
+
+
+          **2. Test Types**
+
+          - Load Testing: Normal expected load (1000 users)
+
+          - Stress Testing: Beyond normal capacity (1500+ users)
+
+          - Spike Testing: Sudden load increases
+
+          - Volume Testing: Large data sets
+
+
+          **3. Key Scenarios**
+
+          - User Login: Authentication under load
+
+          - Product Search: Database query performance
+
+          - Checkout Process: Transaction processing under stress
+
+          - Concurrent Sessions: Multiple user interactions
+
+
+          **4. Monitoring & Metrics**
+
+          - Response Times: Average, median, 95th percentile
+
+          - Throughput: Requests per second
+
+          - Resource Utilization: CPU, memory, disk I/O
+
+          - Error Rates: Failed requests percentage
+
+
+          **5. Tools & Environment**
+
+          - JMeter or LoadRunner for load generation
+
+          - Application Performance Monitoring (APM)
+
+          - Database performance monitoring
+
+          - Production-like test environment
+
+          '
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

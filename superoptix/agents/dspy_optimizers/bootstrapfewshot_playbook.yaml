@@ -1,0 +1,77 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Bootstrap Few-Shot Optimizer Demo
+  id: bootstrapfewshot-demo
+  version: 1.0.0
+  level: oracles
+  description: Demonstrates Bootstrap Few-Shot optimizer for basic prompt optimization with examples
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    temperature: 0.2
+    max_tokens: 32000
+  input_fields:
+  - name: question
+    type: str
+    description: The general knowledge question to answer
+    required: true
+  output_fields:
+  - name: answer
+    type: str
+    description: The accurate and helpful answer
+    required: true
+  persona:
+    role: Question Answering Assistant
+    goal: Provide clear and accurate answers to various questions
+    traits:
+    - helpful
+    - accurate
+    - concise
+  tasks:
+  - name: answer_general_question
+    description: Answer general knowledge questions accurately
+    instruction: 'Answer the question with accurate, helpful information.
+
+      Be concise but comprehensive in your response.
+
+      '
+    inputs:
+    - name: question
+      type: str
+      description: The general knowledge question to answer
+      required: true
+    outputs:
+    - name: answer
+      type: str
+      description: The accurate and helpful answer
+  optimization:
+    optimizer:
+      name: BootstrapFewShot
+      params:
+        metric: answer_exact_match
+        max_bootstrapped_demos: 3
+        max_labeled_demos: 8
+        max_rounds: 2
+  feature_specifications:
+    scenarios:
+    - name: geography_question
+      description: Should answer geography questions
+      input:
+        question: What is the capital of Canada?
+      expected_output:
+        answer: Ottawa
+    - name: animal_question
+      description: Should answer questions about animals
+      input:
+        question: What sound does a cat make?
+      expected_output:
+        answer: meow
+    - name: basic_math
+      description: Should handle simple arithmetic
+      input:
+        question: What is 5 + 3?
+      expected_output:
+        answer: '8'

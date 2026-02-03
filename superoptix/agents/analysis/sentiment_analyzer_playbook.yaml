@@ -1,0 +1,167 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Sentiment Analyzer
+  id: sentiment_analyzer
+  namespace: analysis
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that analyzes the sentiment of text and classifies it as positive, negative, or neutral. Perfect for customer feedback, reviews, and social media monitoring.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+    temperature: 0.3
+    max_tokens: 512
+  
+  input_fields:
+  - name: text
+    type: string
+    description: The text to analyze for sentiment
+    required: true
+  
+  output_fields:
+  - name: sentiment
+    type: string
+    description: The sentiment classification (positive, negative, or neutral)
+    required: true
+  - name: confidence
+    type: string
+    description: The confidence level of the classification (high, medium, or low)
+    required: false
+  
+  persona:
+    name: SentimentBot
+    role: Sentiment Analyst
+    goal: Accurately classify text sentiment as positive, negative, or neutral
+    traits:
+    - analytical
+    - precise
+    - objective
+    - empathetic
+  
+  tasks:
+  - name: analyze_sentiment
+    instruction: |
+      You are a Sentiment Analyst. Your goal is to accurately classify text sentiment.
+      
+      Analyze the given text and determine its sentiment. Respond with:
+      - sentiment: "positive", "negative", or "neutral"
+      - confidence: "high", "medium", or "low"
+      
+      Consider:
+      - Overall tone and emotional content
+      - Word choice (positive words: great, excellent, love vs negative words: terrible, poor, hate)
+      - Context and nuance (sarcasm, mixed feelings)
+      - Intensity of language
+      
+      Be objective and base your classification on the actual content, not assumptions.
+    inputs:
+    - name: text
+      type: str
+      description: The text to analyze for sentiment
+      required: true
+    outputs:
+    - name: sentiment
+      type: str
+      description: The sentiment classification (positive, negative, or neutral)
+    - name: confidence
+      type: str
+      description: The confidence level (high, medium, or low)
+  
+  agentflow:
+  - name: classify_sentiment
+    type: Generate
+    task: analyze_sentiment
+  
+  # NEW: Import external dataset!
+  datasets:
+  - name: sentiment_reviews
+    source: ./data/sentiment_reviews.csv
+    format: csv
+    mapping:
+      input: text
+      output: label
+      input_field_name: text
+      output_field_name: sentiment
+    limit: 10
+    shuffle: true
+  
+  evaluation:
+    builtin_metrics:
+    - name: answer_exact_match
+      threshold: 0.7
+  
+  feature_specifications:
+    scenarios:
+    - name: positive_sentiment_clear
+      description: Clearly positive text should be classified as positive
+      input:
+        text: This product is amazing! I absolutely love it and would highly recommend it to everyone.
+      expected_output:
+        sentiment: positive
+    
+    - name: negative_sentiment_clear
+      description: Clearly negative text should be classified as negative
+      input:
+        text: This is terrible. Worst experience ever. I'm extremely disappointed and frustrated.
+      expected_output:
+        sentiment: negative
+    
+    - name: neutral_sentiment_clear
+      description: Neutral text should be classified as neutral
+      input:
+        text: The package arrived on time. It contains the items I ordered.
+      expected_output:
+        sentiment: neutral
+    
+    - name: positive_sentiment_subtle
+      description: Subtly positive text should be detected
+      input:
+        text: It's decent and does what it's supposed to do. Happy with the purchase overall.
+      expected_output:
+        sentiment: positive
+    
+    - name: negative_sentiment_subtle
+      description: Subtly negative text should be detected
+      input:
+        text: It works, but I expected better quality for the price. Somewhat underwhelmed.
+      expected_output:
+        sentiment: negative
+    
+    - name: positive_with_praise
+      description: Text with praise words indicates positive sentiment
+      input:
+        text: Excellent service! The team was helpful, professional, and went above and beyond.
+      expected_output:
+        sentiment: positive
+    
+    - name: negative_with_complaints
+      description: Text with complaint words indicates negative sentiment
+      input:
+        text: Poor quality and bad customer service. Would not buy again.
+      expected_output:
+        sentiment: negative
+    
+    - name: neutral_factual
+      description: Purely factual statements are neutral
+      input:
+        text: The restaurant is located downtown. They serve Italian food.
+      expected_output:
+        sentiment: neutral
+  
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 5
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8
+

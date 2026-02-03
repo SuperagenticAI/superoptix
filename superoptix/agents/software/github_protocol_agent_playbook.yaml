@@ -1,0 +1,111 @@
+apiVersion: agent/v1
+kind: AgentSpec
+
+metadata:
+  name: "GitHub Protocol Agent"
+  id: "github_protocol_agent"
+  namespace: "software"
+  version: "1.0.0"
+  stage: "stable"
+  level: "genies"
+  agent_type: "Autonomous"
+  description: "Protocol-first agent using MCP for GitHub repository analysis with automatic tool discovery"
+  author: "SuperOptiX"
+  tags:
+    - "protocol-first"
+    - "agenspy"
+    - "mcp"
+    - "github"
+    - "software"
+    - "code-analysis"
+  created_at: "2025-10-20T00:00:00Z"
+
+spec:
+  # PROTOCOL-FIRST CONFIGURATION
+  tool_backend: "agenspy"
+  
+  mcp_servers:
+    - "mcp://localhost:8080/github"
+    - "mcp://localhost:8080/code"
+  
+  # Language Model
+  language_model:
+    location: "cloud"
+    provider: "openai"
+    model: "gpt-4"
+    model_type: "chat"
+    temperature: 0.7
+    max_tokens: 4000
+    cache: true
+  
+  # Agent Persona
+  persona:
+    name: "GitHub Protocol Agent"
+    role: "AI-powered GitHub repository analyst using protocol-first approach"
+    goal: "Analyze GitHub repositories using automatically discovered MCP tools"
+    backstory: |
+      You are an expert GitHub analyst leveraging the Model Context Protocol (MCP)
+      to automatically discover and use tools. Your protocol-first approach allows
+      you to adapt to new tools without reconfiguration.
+    traits:
+      - "analytical"
+      - "technical"
+      - "professional"
+    expertise_areas:
+      - "GitHub API"
+      - "Code review"
+      - "Software architecture"
+    communication_preferences:
+      style: "technical"
+      tone: "professional"
+      verbosity: "concise"
+  
+  # Input/Output Schema
+  input_fields:
+    - name: "query"
+      type: "string"
+      description: "GitHub repository analysis query"
+      required: true
+  
+  output_fields:
+    - name: "analysis"
+      type: "string"
+      description: "Analysis results with findings"
+      required: true
+  
+  # Reasoning
+  reasoning:
+    method: "react"
+    max_iterations: 5
+    allow_tool_calling: true
+  
+  # BDD Test Scenarios
+  feature_specifications:
+    feature_name: "GitHub Repository Analysis via MCP"
+    feature_description: "Analyze GitHub repositories using protocol-discovered tools"
+    
+    scenarios:
+      - name: "Repository search"
+        description: "Search GitHub repositories using MCP protocol"
+        input:
+          query: "Search for SuperOptiX repository"
+        expected_output:
+          analysis: "Found repository with protocol-discovered search tool"
+          expected_keywords: ["repository", "search", "SuperOptiX"]
+      
+      - name: "Code analysis"
+        description: "Analyze code using MCP tools"
+        input:
+          query: "Analyze code quality of protocols module"
+        expected_output:
+          analysis: "Code analysis completed using MCP tools"
+          expected_keywords: ["code", "quality", "analysis"]
+
+# Configuration
+config:
+  max_execution_time: 300
+  verbose: true
+  enable_tracing: true
+  protocol_timeout: 30
+  auto_reconnect: true
+

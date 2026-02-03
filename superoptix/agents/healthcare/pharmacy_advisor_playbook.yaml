@@ -1,0 +1,124 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Pharmacy Advisor
+  id: pharmacy_advisor
+  namespace: healthcare
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that assists pharmacists with medication information and drug interaction checks.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: medication_list
+    type: str
+    description: List of current medications the patient is taking
+    required: true
+  - name: new_medication
+    type: str
+    description: New medication being considered
+    required: true
+  output_fields:
+  - name: interaction_analysis
+    type: str
+    description: Step-by-step analysis of potential drug interactions
+    required: true
+  - name: safety_recommendations
+    type: str
+    description: Safety recommendations and pharmacist consultation advice
+    required: true
+  persona:
+    name: PharmBot
+    role: Pharmacy Assistant
+    goal: Provide accurate medication information and identify potential drug interactions
+    traits:
+    - meticulous
+    - safety-focused
+    - knowledgeable
+    - cautious
+  tasks:
+  - name: check_medication_interactions
+    instruction: You are a Pharmacy Assistant. Think through each medication systematically to identify potential interactions,
+      contraindications, and safety concerns. Always recommend consulting with a licensed pharmacist.
+    inputs:
+    - name: medication_list
+      type: str
+      description: List of current medications the patient is taking
+      required: true
+    - name: new_medication
+      type: str
+      description: New medication being considered
+      required: true
+    outputs:
+    - name: interaction_analysis
+      type: str
+      description: Step-by-step analysis of potential drug interactions
+    - name: safety_recommendations
+      type: str
+      description: Safety recommendations and pharmacist consultation advice
+  agentflow:
+  - name: analyze_interactions
+    type: Think
+    task: check_medication_interactions
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.9
+  feature_specifications:
+    scenarios:
+    - name: pharmacy_advisor_comprehensive_task
+      description: Given a complex healthcare requirement, the agent should provide detailed analysis and recommendations
+      input:
+        medication_list: Complex healthcare scenario requiring comprehensive analysis
+        new_medication: ''
+      expected_output:
+        interaction_analysis: Detailed step-by-step analysis with healthcare-specific recommendations
+        safety_recommendations: ''
+    - name: pharmacy_advisor_problem_solving
+      description: When facing healthcare challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        medication_list: Challenging healthcare problem requiring creative solutions
+        new_medication: ''
+      expected_output:
+        interaction_analysis: Structured problem-solving approach with multiple solution options
+        safety_recommendations: ''
+    - name: pharmacy_advisor_best_practices
+      description: When asked about healthcare best practices, the agent should provide current industry standards and guidelines
+      input:
+        medication_list: Industry best practices for healthcare operations
+        new_medication: ''
+      expected_output:
+        interaction_analysis: Comprehensive best practices guide with implementation steps
+        safety_recommendations: ''
+    - name: pharmacy_advisor_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to healthcare
+      input:
+        medication_list: Compliance requirements for healthcare operations
+        new_medication: ''
+      expected_output:
+        interaction_analysis: Detailed compliance checklist with regulatory requirements
+        safety_recommendations: ''
+    - name: pharmacy_advisor_strategic_planning
+      description: When developing healthcare strategies, the agent should provide forward-thinking recommendations
+      input:
+        medication_list: Strategic planning for healthcare growth and optimization
+        new_medication: ''
+      expected_output:
+        interaction_analysis: Comprehensive strategic plan with measurable objectives and timelines
+        safety_recommendations: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

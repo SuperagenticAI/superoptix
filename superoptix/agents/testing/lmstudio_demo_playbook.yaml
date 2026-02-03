@@ -1,0 +1,239 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: lmstudio_demo_agent
+  namespace: testing
+  id: lmstudio-demo-v1-0-0
+  version: 1.0.0
+  agent_type: Interactive
+  level: genies
+  author: SuperOptiX Team
+  description: A demonstration agent showcasing LM Studio integration with SuperOptiX and DSPy
+spec:
+  language_model:
+    provider: lmstudio
+    model: llama-3.2-3b
+    api_base: http://localhost:1234
+    temperature: 0.7
+    max_tokens: 512
+    timeout: 30
+  input_fields:
+  - name: question
+    type: str
+    description: User's question or request
+    required: true
+  output_fields:
+  - name: answer
+    type: str
+    description: Comprehensive answer based on reasoning and tool usage
+    required: true
+  agent:
+    name: LM Studio Demo Agent
+    description: Demonstrates LM Studio integration with SuperOptiX
+    personality: 'You are a helpful AI assistant powered by LM Studio. You excel at:
+
+      - Providing clear and concise explanations
+
+      - Writing code and technical documentation
+
+      - Creative writing and brainstorming
+
+      - Problem-solving and analysis
+
+
+      Always be helpful, accurate, and follow the user''s instructions carefully.
+
+      '
+  memory:
+    enabled: true
+    type: episodic
+    max_episodes: 10
+    max_tokens_per_episode: 1000
+  tools:
+  - name: web_search
+    description: Search the web for current information
+    enabled: true
+  - name: file_operations
+    description: Read and write files
+    enabled: true
+  - name: code_execution
+    description: Execute Python code
+    enabled: true
+  pipeline:
+    type: dspy
+    modules:
+    - reasoning
+    - planning
+    - execution
+    - reflection
+  observability:
+    enabled: true
+    tracing: true
+    logging: true
+    metrics: true
+  examples:
+  - Write a Python function to calculate fibonacci numbers
+  - Explain how machine learning works in simple terms
+  - Help me brainstorm ideas for a new project
+  - Analyze the pros and cons of different programming languages
+  - Write a creative story about a robot learning to paint
+  usage:
+    setup:
+    - Install LM Studio from https://lmstudio.ai
+    - Download and load your preferred model in LM Studio
+    - Start the LM Studio server (Local Server tab)
+    - Update the model name in this playbook to match your loaded model
+    - 'Run: super agent run lmstudio_demo_playbook.yaml'
+    notes:
+    - LM Studio provides an OpenAI-compatible API
+    - Models are managed through the LM Studio application
+    - Server runs on http://localhost:1234 by default
+    - Supports all standard LM Studio models
+  tasks:
+  - name: answer_question
+    instruction: Answer questions using tools and step-by-step reasoning
+    type: react
+    inputs:
+    - name: question
+      type: str
+      description: User's question or request
+      required: true
+    outputs:
+    - name: answer
+      type: str
+      description: Comprehensive answer based on reasoning and tool usage
+  - name: code_generation
+    instruction: Generate high-quality, well-documented code
+    type: react
+    inputs:
+    - name: requirement
+      type: str
+      description: Code requirement or specification
+      required: true
+    - name: language
+      type: str
+      description: Programming language (optional)
+      required: false
+    outputs:
+    - name: code
+      type: str
+      description: Generated code with documentation
+  - name: creative_writing
+    instruction: Help with creative writing and content generation
+    type: react
+    inputs:
+    - name: request
+      type: str
+      description: Writing request or prompt
+      required: true
+    - name: genre
+      type: str
+      description: Writing genre (optional)
+      required: false
+    outputs:
+    - name: content
+      type: str
+      description: Creative writing content or suggestions
+  - name: problem_solving
+    instruction: Solve complex problems using systematic analysis
+    type: react
+    inputs:
+    - name: problem
+      type: str
+      description: Problem description
+      required: true
+    - name: context
+      type: str
+      description: Additional context (optional)
+      required: false
+    outputs:
+    - name: solution
+      type: str
+      description: Comprehensive problem solution
+  model_configs:
+    general_purpose:
+      model: llama-3.2-3b
+      temperature: 0.7
+      max_tokens: 512
+      description: Good for general tasks and conversations
+    code_generation:
+      model: codellama-7b
+      temperature: 0.2
+      max_tokens: 2048
+      description: Optimized for code generation and analysis
+    reasoning:
+      model: llama-3.2-7b
+      temperature: 0.3
+      max_tokens: 1024
+      description: Better for complex reasoning tasks
+    creative:
+      model: llama-3.2-3b
+      temperature: 0.8
+      max_tokens: 1500
+      description: Optimized for creative writing and brainstorming
+  troubleshooting:
+    connection_error:
+    - Ensure LM Studio is running
+    - Check that the server is started in the Local Server tab
+    - Verify the port in your playbook matches LM Studio's port
+    - Try restarting the LM Studio server
+    model_not_found:
+    - Check the model name in your playbook matches exactly
+    - Ensure the model is downloaded and loaded in LM Studio
+    - Look at the model list in LM Studio's Local Server tab
+    dspy_integration_issues:
+    - Ensure dspy-ai and litellm are installed
+    - Check that the API base URL is correct
+    - Verify LM Studio server is running
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: tool_use_accuracy
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 5
+        skip_perfect_score: true
+        reflection_minibatch_size: 3
+    metric: tool_use_accuracy
+    metric_threshold: 0.75
+  security:
+    local_operation: true
+    no_api_keys: true
+    data_privacy: All data stays on your machine
+    network_isolation: Can run completely offline
+  feature_specifications:
+    scenarios:
+    - name: Basic functionality
+      description: Test basic lmstudio_demo_agent response
+      input:
+        query: What is your role as a Assistant?
+      expected_output:
+        response: Agent should explain its role as Assistant
+        expected_keywords:
+        - assistant
+        - help
+        - assist
+    - name: Domain knowledge
+      description: Test lmstudio_demo_agent domain expertise
+      input:
+        query: Demonstrate your domain knowledge
+      expected_output:
+        response: Agent should demonstrate relevant expertise
+        expected_keywords:
+        - knowledge
+        - expertise
+    - name: Tool usage
+      description: Test lmstudio_demo_agent tool usage
+      input:
+        query: Use available tools to help me
+      expected_output:
+        response: Agent should use tools to provide answer
+        expected_keywords:
+        - tool
+        - search
+        - calculate
+  evaluation:
+    builtin_metrics:
+    - name: tool_use_accuracy
+      threshold: 0.8

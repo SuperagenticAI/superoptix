@@ -1,0 +1,51 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: KNNFewShot Optimizer Demo
+  id: knnfewshot-demo
+  version: 1.0.0
+  level: oracles
+  description: Minimal agent demonstrating KNNFewShot optimizer configuration
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+  input_fields:
+  - name: question
+    type: str
+    description: The question to answer
+    required: true
+  output_fields:
+  - name: answer
+    type: str
+    description: The answer to the question
+    required: true
+  persona:
+    role: Demo Agent
+    goal: Demonstrate KNNFewShot optimizer support
+  tasks:
+  - name: answer_question
+    description: Answer a simple question
+    instruction: Answer the user's question clearly.
+    inputs:
+    - name: question
+      type: str
+      description: The question to answer
+      required: true
+    outputs:
+    - name: answer
+      type: str
+      description: The answer to the question
+  optimization:
+    optimizer:
+      name: KNNFewShot
+      params: {}
+  feature_specifications:
+    scenarios:
+    - name: basic_question
+      description: Should answer a basic question
+      input:
+        question: What is the capital of Spain?
+      expected_output:
+        answer: Should mention Madrid

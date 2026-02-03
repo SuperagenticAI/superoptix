@@ -1,0 +1,1370 @@
+# SuperSpec DSL Extended - Advanced Features
+# Part 2: Genie Tier Capabilities and Advanced Configuration
+
+# === GENIE TIER SPECIFIC FEATURES ===
+genie_features:
+  # Retrieval-Augmented Generation (RAG)
+  retrieval:
+    type: object
+    required: false
+    tier_restriction: "genies"
+    description: "RAG configuration for knowledge retrieval"
+    properties:
+      enabled:
+        type: boolean
+        required: true
+        description: "Enable RAG functionality"
+      retriever_type:
+        type: string
+        required: true
+        enum: ["ColBERTv2", "Weaviate", "ChromaDB", "Pinecone", "FAISS", "Custom"]
+        description: "Retrieval system type"
+      config:
+        type: object
+        required: false
+        properties:
+          top_k:
+            type: integer
+            required: false
+            default: 5
+            minimum: 1
+            maximum: 20
+          similarity_threshold:
+            type: number
+            required: false
+            default: 0.7
+            minimum: 0.0
+            maximum: 1.0
+          chunk_size:
+            type: integer
+            required: false
+            default: 512
+            minimum: 100
+            maximum: 2000
+          chunk_overlap:
+            type: integer
+            required: false
+            default: 50
+            minimum: 0
+            maximum: 200
+      vector_store:
+        type: object
+        required: false
+        properties:
+          provider:
+            type: string
+            required: true
+          collection_name:
+            type: string
+            required: true
+          embedding_model:
+            type: string
+            required: false
+            default: "all-MiniLM-L6-v2"
+          connection_params:
+            type: object
+            required: false
+      reranker:
+        type: object
+        required: false
+        properties:
+          enabled:
+            type: boolean
+            required: false
+            default: false
+          model:
+            type: string
+            required: false
+          top_k:
+            type: integer
+            required: false
+            default: 3
+            minimum: 1
+            maximum: 10
+      document_processing:
+        type: object
+        required: false
+        properties:
+          supported_formats:
+            type: array
+            items:
+              enum: ["pdf", "txt", "docx", "html", "md"]
+          preprocessing_steps:
+            type: array
+            items:
+              type: string
+          metadata_extraction:
+            type: boolean
+            required: false
+            default: true
+
+  # Agent Memory System
+  memory:
+    type: object
+    required: false
+    tier_restriction: "genies"
+    description: "Agent memory configuration"
+    properties:
+      enabled:
+        type: boolean
+        required: false
+        default: true
+      agent_id:
+        type: string
+        required: false
+        description: "Unique identifier for agent's memory"
+      
+      # Backend Configuration
+      backend:
+        type: object
+        required: false
+        properties:
+          type:
+            type: string
+            required: false
+            default: "sqlite"
+            enum: ["file", "sqlite", "redis"]
+          config:
+            type: object
+            required: false
+            properties:
+              storage_path:
+                type: string
+                required: false
+                default: ".superoptix/memory"
+              db_path:
+                type: string
+                required: false
+                default: ".superoptix/memory.db"
+              host:
+                type: string
+                required: false
+                default: "localhost"
+              port:
+                type: integer
+                required: false
+                default: 6379
+              db:
+                type: integer
+                required: false
+                default: 0
+              password:
+                type: string
+                required: false
+              prefix:
+                type: string
+                required: false
+                default: "superoptix:"
+      
+      # Short-term Memory
+      short_term:
+        type: object
+        required: false
+        properties:
+          enabled:
+            type: boolean
+            required: false
+            default: true
+          capacity:
+            type: integer
+            required: false
+            default: 100
+            minimum: 10
+            maximum: 1000
+          retention_policy:
+            type: string
+            required: false
+            default: "lru"
+            enum: ["lru", "fifo", "priority"]
+          max_conversation_length:
+            type: integer
+            required: false
+            default: 50
+            minimum: 5
+            maximum: 200
+          default_ttl:
+            type: integer
+            required: false
+            description: "Default TTL in seconds"
+          working_memory_enabled:
+            type: boolean
+            required: false
+            default: true
+      
+      # Long-term Memory
+      long_term:
+        type: object
+        required: false
+        properties:
+          enabled:
+            type: boolean
+            required: false
+            default: true
+          enable_embeddings:
+            type: boolean
+            required: false
+            default: true
+          embedding_model:
+            type: string
+            required: false
+            default: "all-MiniLM-L6-v2"
+          categories:
+            type: array
+            required: false
+            items:
+              type: object
+              required: ["name"]
+              properties:
+                name:
+                  type: string
+                  required: true
+                description:
+                  type: string
+                  required: false
+          search:
+            type: object
+            required: false
+            properties:
+              default_limit:
+                type: integer
+                required: false
+                default: 10
+                minimum: 1
+                maximum: 50
+              min_similarity_threshold:
+                type: number
+                required: false
+                default: 0.3
+                minimum: 0.0
+                maximum: 1.0
+              fallback_to_keyword:
+                type: boolean
+                required: false
+                default: true
+          indexing:
+            type: object
+            required: false
+            properties:
+              auto_categorize:
+                type: boolean
+                required: false
+                default: false
+              auto_tag:
+                type: boolean
+                required: false
+                default: false
+              importance_scoring:
+                type: boolean
+                required: false
+                default: true
+      
+      # Episodic Memory
+      episodic:
+        type: object
+        required: false
+        properties:
+          enabled:
+            type: boolean
+            required: false
+            default: true
+          auto_start_episodes:
+            type: boolean
+            required: false
+            default: true
+          episode_boundary:
+            type: string
+            required: false
+            default: "interaction"
+            enum: ["time", "task", "manual", "interaction"]
+          max_episode_duration:
+            type: integer
+            required: false
+            default: 3600
+            minimum: 60
+            maximum: 86400
+          compression:
+            type: object
+            required: false
+            properties:
+              enabled:
+                type: boolean
+                required: false
+                default: false
+              strategy:
+                type: string
+                required: false
+                default: "summarization"
+                enum: ["summarization", "key_extraction", "both"]
+              trigger_size:
+                type: integer
+                required: false
+                default: 100
+                minimum: 10
+                maximum: 500
+          pattern_analysis:
+            type: object
+            required: false
+            properties:
+              enabled:
+                type: boolean
+                required: false
+                default: true
+              min_pattern_frequency:
+                type: integer
+                required: false
+                default: 3
+                minimum: 2
+                maximum: 10
+              analysis_window:
+                type: integer
+                required: false
+                default: 30
+                minimum: 1
+                maximum: 365
+      
+      # Context Management
+      context:
+        type: object
+        required: false
+        properties:
+          enabled:
+            type: boolean
+            required: false
+            default: true
+          scopes:
+            type: array
+            required: false
+            default: ["global", "session", "task", "local"]
+            items:
+              enum: ["global", "session", "task", "local"]
+          default_ttl:
+            type: integer
+            required: false
+            description: "Default TTL in seconds"
+          max_context_size:
+            type: integer
+            required: false
+            default: 1000
+            minimum: 100
+            maximum: 5000
+          persistence:
+            type: boolean
+            required: false
+            default: true
+      
+      # Integration Settings
+      integration:
+        type: object
+        required: false
+        properties:
+          dspy_integration:
+            type: boolean
+            required: false
+            default: true
+          auto_learn_from_feedback:
+            type: boolean
+            required: false
+            default: true
+          conversation_context_injection:
+            type: boolean
+            required: false
+            default: true
+          memory_enhanced_responses:
+            type: boolean
+            required: false
+            default: true
+      
+      # Maintenance Configuration
+      maintenance:
+        type: object
+        required: false
+        properties:
+          auto_cleanup:
+            type: boolean
+            required: false
+            default: true
+          cleanup_interval:
+            type: integer
+            required: false
+            default: 3600
+            minimum: 300
+            maximum: 86400
+          expired_item_cleanup:
+            type: boolean
+            required: false
+            default: true
+          memory_optimization:
+            type: boolean
+            required: false
+            default: true
+          retention:
+            type: object
+            required: false
+            properties:
+              short_term_max_age:
+                type: integer
+                required: false
+                default: 86400
+                minimum: 3600
+                maximum: 604800
+              long_term_max_items:
+                type: integer
+                required: false
+                minimum: 100
+                maximum: 100000
+              episodic_max_age:
+                type: integer
+                required: false
+                default: 2592000
+                minimum: 86400
+                maximum: 31536000
+      
+      # Analytics and Performance
+      analytics:
+        type: object
+        required: false
+        properties:
+          enabled:
+            type: boolean
+            required: false
+            default: true
+          track_usage_patterns:
+            type: boolean
+            required: false
+            default: true
+          performance_monitoring:
+            type: boolean
+            required: false
+            default: true
+          generate_insights:
+            type: boolean
+            required: false
+            default: true
+      
+      # Security Settings
+      security:
+        type: object
+        required: false
+        properties:
+          encryption_at_rest:
+            type: boolean
+            required: false
+            default: false
+          pii_detection:
+            type: boolean
+            required: false
+            default: false
+          access_control:
+            type: boolean
+            required: false
+            default: false
+          audit_logging:
+            type: boolean
+            required: false
+            default: false
+      
+      # Performance Optimization
+      performance:
+        type: object
+        required: false
+        properties:
+          cache_embeddings:
+            type: boolean
+            required: false
+            default: true
+          batch_operations:
+            type: boolean
+            required: false
+            default: true
+          connection_pooling:
+            type: boolean
+            required: false
+            default: true
+          lazy_loading:
+            type: boolean
+            required: false
+            default: true
+          threading:
+            type: object
+            required: false
+            properties:
+              thread_safe:
+                type: boolean
+                required: false
+                default: true
+              max_concurrent_operations:
+                type: integer
+                required: false
+                default: 10
+                minimum: 1
+                maximum: 50
+      
+      # Debug Configuration
+      debug:
+        type: object
+        required: false
+        properties:
+          verbose_logging:
+            type: boolean
+            required: false
+            default: false
+          memory_stats_logging:
+            type: boolean
+            required: false
+            default: false
+          trace_memory_operations:
+            type: boolean
+            required: false
+            default: false
+          export_memory_state:
+            type: boolean
+            required: false
+            default: false
+
+  # Tool Calling Configuration
+  tool_calling:
+    type: object
+    required: false
+    tier_restriction: "genies"
+    description: "Tool integration configuration"
+    properties:
+      enabled:
+        type: boolean
+        required: true
+        description: "Enable tool calling"
+      available_tools:
+        type: array
+        required: false
+        items:
+          type: string
+        description: "List of available tools"
+      tool_selection_strategy:
+        type: string
+        required: false
+        default: "automatic"
+        enum: ["automatic", "manual", "hybrid"]
+      max_tool_calls:
+        type: integer
+        required: false
+        default: 5
+        minimum: 1
+        maximum: 20
+      builtin_tools:
+        type: array
+        required: false
+        items:
+          enum: ["calculator", "web_search", "file_reader", "code_executor", "email_sender", "calendar", "database_query", "api_caller"]
+      custom_tools:
+        type: array
+        required: false
+        items:
+          type: object
+          properties:
+            name:
+              type: string
+              required: true
+            description:
+              type: string
+              required: true
+            implementation:
+              type: string
+              required: true
+            parameters:
+              type: object
+              required: false
+
+# === SHARED FEATURES (ORACLE AND GENIE) ===
+shared_features:
+  # Evaluation Configuration
+  evaluation:
+    type: object
+    required: false
+    description: "Agent evaluation configuration"
+    properties:
+      num_threads:
+        type: integer
+        required: false
+        default: 1
+        minimum: 1
+        maximum: 10
+      display_progress:
+        type: boolean
+        required: false
+        default: true
+      display_table:
+        type: boolean
+        required: false
+        default: true
+      max_errors:
+        type: integer
+        required: false
+        default: 5
+        minimum: 1
+        maximum: 20
+      return_all_scores:
+        type: boolean
+        required: false
+        default: false
+      return_outputs:
+        type: boolean
+        required: false
+        default: false
+      provide_traceback:
+        type: boolean
+        required: false
+        default: true
+      failure_score:
+        type: number
+        required: false
+        default: 0.0
+        minimum: 0.0
+        maximum: 1.0
+      builtin_metrics:
+        type: array
+        required: false
+        items:
+          type: object
+          required: ["name"]
+          properties:
+            name:
+              type: string
+              required: true
+              enum: ["answer_exact_match", "answer_passage_match", "semantic_f1", "rouge_l", "bleu", "meteor", "answer_correctness", "faithfulness", "context_relevance"]
+            threshold:
+              type: number
+              required: false
+              default: 0.7
+              minimum: 0.0
+              maximum: 1.0
+            weight:
+              type: number
+              required: false
+              default: 1.0
+              minimum: 0.0
+              maximum: 10.0
+            config:
+              type: object
+              required: false
+      custom_validation:
+        type: array
+        required: false
+        items:
+          type: object
+          required: ["name", "description", "type"]
+          properties:
+            name:
+              type: string
+              required: true
+            description:
+              type: string
+              required: true
+            type:
+              type: string
+              required: true
+              enum: ["syntax", "semantic", "functional", "style", "requirements", "rule_based", "llm_judge", "statistical"]
+            implementation:
+              type: string
+              required: false
+            threshold:
+              type: number
+              required: false
+              default: 0.7
+              minimum: 0.0
+              maximum: 1.0
+            weight:
+              type: number
+              required: false
+              default: 1.0
+              minimum: 0.0
+              maximum: 10.0
+            config:
+              type: object
+              required: false
+              properties:
+                rules:
+                  type: array
+                  items:
+                    type: string
+                judge_prompt:
+                  type: string
+                judge_model:
+                  type: string
+                similarity_threshold:
+                  type: number
+                test_cases:
+                  type: array
+                statistical_tests:
+                  type: array
+                  items:
+                    type: string
+      quality_gates:
+        type: array
+        required: false
+        items:
+          type: object
+          required: ["gate_name", "criteria", "pass_threshold"]
+          properties:
+            gate_name:
+              type: string
+              required: true
+            criteria:
+              type: array
+              required: true
+              items:
+                type: string
+            pass_threshold:
+              type: number
+              required: true
+              minimum: 0.0
+              maximum: 1.0
+            required:
+              type: boolean
+              required: false
+              default: false
+            escalation_policy:
+              type: string
+              required: false
+      test_datasets:
+        type: array
+        required: false
+        items:
+          type: object
+          required: ["name", "source", "location"]
+          properties:
+            name:
+              type: string
+              required: true
+            source:
+              type: string
+              required: true
+              enum: ["file", "database", "synthetic"]
+            location:
+              type: string
+              required: true
+            size:
+              type: integer
+              required: false
+            split_ratio:
+              type: number
+              required: false
+              default: 0.8
+              minimum: 0.1
+              maximum: 0.9
+
+  # Optimization Configuration
+  optimization:
+    type: object
+    required: false
+    description: "Agent optimization configuration"
+    properties:
+      optimizer:
+        type: object
+        required: false
+        description: "DSPy optimizer/teleprompter selection and configuration"
+        properties:
+          name:
+            type: string
+            required: true
+            description: "Optimizer/teleprompter class name (e.g., GEPA, SIMBA, COPRO, KNNFewShot, BetterTogether, BootstrapFewShot, LabeledFewShot, MIPROv2, BootstrapFewShotWithRandomSearch, BootstrapFewShotWithOptuna, InferRules, AvatarOptimizer, Ensemble, GRPO, etc.)"
+          params:
+            type: object
+            required: false
+            description: "Parameters to pass to the optimizer/teleprompter constructor. Keys/values are arbitrary and depend on the optimizer."
+      strategy:
+        type: string
+        required: false
+        default: "few_shot_bootstrapping"
+        enum: ["few_shot_bootstrapping"]
+        description: "Only basic optimization available in current version"
+      metric:
+        type: string
+        required: true
+        description: "Metric to optimize for"
+      metric_threshold:
+        type: number
+        required: false
+        minimum: 0.0
+        maximum: 1.0
+      max_errors:
+        type: integer
+        required: false
+        default: 5
+        minimum: 1
+        maximum: 20
+      optimization_strategy:
+        type: object
+        required: false
+        properties:
+          multi_stage:
+            type: boolean
+            required: false
+            default: false
+          progressive_difficulty:
+            type: boolean
+            required: false
+            default: false
+          curriculum_learning:
+            type: boolean
+            required: false
+            default: false
+      few_shot_bootstrapping_config:
+        type: object
+        required: false
+        properties:
+          max_bootstrapped_demos:
+            type: integer
+            required: false
+            default: 4
+            minimum: 1
+            maximum: 16
+          max_labeled_demos:
+            type: integer
+            required: false
+            default: 16
+            minimum: 1
+            maximum: 50
+          max_rounds:
+            type: integer
+            required: false
+            default: 1
+            minimum: 1
+            maximum: 5
+          teacher_settings:
+            type: object
+            required: false
+          student_settings:
+            type: object
+            required: false
+          validation_split:
+            type: number
+            required: false
+            default: 0.2
+            minimum: 0.1
+            maximum: 0.5
+
+  # Training Configuration
+  training:
+    type: object
+    required: false
+    description: "Training data configuration"
+    properties:
+      training_examples:
+        type: array
+        required: false
+        items:
+          type: object
+      data_sources:
+        type: array
+        required: false
+        items:
+          type: object
+          required: ["type", "location", "format"]
+          properties:
+            type:
+              type: string
+              required: true
+              enum: ["file", "database", "api", "synthetic", "streaming"]
+            location:
+              type: string
+              required: true
+            format:
+              type: string
+              required: true
+              enum: ["json", "csv", "jsonl", "parquet", "hf_dataset"]
+            preprocessing:
+              type: object
+              required: false
+              properties:
+                filters:
+                  type: array
+                  items:
+                    type: string
+                transformations:
+                  type: array
+                  items:
+                    type: string
+                cleaning_steps:
+                  type: array
+                  items:
+                    type: string
+                augmentation:
+                  type: object
+            mapping:
+              type: object
+              required: false
+              properties:
+                input_fields:
+                  type: object
+                output_fields:
+                  type: object
+            validation:
+              type: object
+              required: false
+              properties:
+                schema:
+                  type: object
+                quality_checks:
+                  type: array
+                  items:
+                    type: string
+      synthetic_data:
+        type: object
+        required: false
+        properties:
+          enabled:
+            type: boolean
+            required: false
+            default: false
+          generator_model:
+            type: string
+            required: false
+          num_samples:
+            type: integer
+            required: false
+          diversity_threshold:
+            type: number
+            required: false
+          quality_filter:
+            type: boolean
+            required: false
+
+  # Runtime Configuration
+  runtime:
+    type: object
+    required: false
+    description: "Runtime configuration"
+    properties:
+      caching:
+        type: object
+        required: false
+        properties:
+          enabled:
+            type: boolean
+            required: false
+            default: true
+          backend:
+            type: string
+            required: false
+            default: "memory"
+            enum: ["memory", "disk", "redis"]
+          ttl:
+            type: integer
+            required: false
+            default: 3600
+            minimum: 60
+            maximum: 86400
+          cache_key_strategy:
+            type: string
+            required: false
+            default: "content"
+            enum: ["content", "signature", "custom"]
+          compression:
+            type: boolean
+            required: false
+            default: false
+      monitoring:
+        type: object
+        required: false
+        properties:
+          log_level:
+            type: string
+            required: false
+            default: "info"
+            enum: ["debug", "info", "warn", "error"]
+          trace_execution:
+            type: boolean
+            required: false
+            default: false
+          metrics_collection:
+            type: boolean
+            required: false
+            default: true
+          performance_tracking:
+            type: boolean
+            required: false
+            default: true
+      deployment:
+        type: object
+        required: false
+        properties:
+          async_mode:
+            type: boolean
+            required: false
+            default: false
+          streaming:
+            type: boolean
+            required: false
+            default: false
+            tier_restriction: "genies"
+          batch_size:
+            type: integer
+            required: false
+            minimum: 1
+            maximum: 100
+          timeout:
+            type: integer
+            required: false
+            minimum: 1
+            maximum: 3600
+          retry_policy:
+            type: object
+            required: false
+            properties:
+              max_retries:
+                type: integer
+                required: false
+                default: 3
+                minimum: 0
+                maximum: 10
+              backoff_strategy:
+                type: string
+                required: false
+                default: "exponential"
+                enum: ["exponential", "linear", "fixed"]
+              retry_conditions:
+                type: array
+                required: false
+                items:
+                  type: string
+              circuit_breaker:
+                type: boolean
+                required: false
+                default: false
+
+  # Feature Specifications (Testing)
+  feature_specifications:
+    type: object
+    required: false
+    description: "Test scenarios for agent validation"
+    properties:
+      scenarios:
+        type: array
+        required: false
+        items:
+          type: object
+          required: ["name", "description", "input", "expected_output"]
+          properties:
+            name:
+              type: string
+              required: true
+            description:
+              type: string
+              required: true
+            input:
+              type: object
+              required: true
+            expected_output:
+              type: object
+              required: true
+            validation_criteria:
+              type: array
+              required: false
+              items:
+                type: string
+            timeout:
+              type: integer
+              required: false
+              default: 30
+              minimum: 5
+              maximum: 600
+
+# === OBSERVABILITY CONFIGURATION ===
+observability:
+  type: object
+  required: false
+  description: "Observability and monitoring configuration"
+  properties:
+    enabled:
+      type: boolean
+      required: false
+      default: true
+    debug:
+      type: object
+      required: false
+      properties:
+        debug_mode:
+          type: boolean
+          required: false
+          default: false
+        enable_breakpoints:
+          type: boolean
+          required: false
+          default: false
+        step_mode:
+          type: boolean
+          required: false
+          default: false
+        break_on_error:
+          type: boolean
+          required: false
+          default: true
+        interactive_console:
+          type: boolean
+          required: false
+          default: true
+    tracing:
+      type: object
+      required: false
+      properties:
+        enabled:
+          type: boolean
+          required: false
+          default: true
+        trace_memory:
+          type: boolean
+          required: false
+          default: true
+          tier_restriction: "genies"
+        trace_dspy_modules:
+          type: boolean
+          required: false
+          default: true
+        trace_llm_calls:
+          type: boolean
+          required: false
+          default: true
+        trace_tool_usage:
+          type: boolean
+          required: false
+          default: true
+          tier_restriction: "genies"
+        trace_agent_flow:
+          type: boolean
+          required: false
+          default: true
+        filters:
+          type: object
+          required: false
+          properties:
+            components:
+              type: array
+              items:
+                type: string
+            operations:
+              type: array
+              items:
+                type: string
+            min_duration_ms:
+              type: integer
+              minimum: 0
+            exclude_successful:
+              type: boolean
+              default: false
+        sampling:
+          type: object
+          required: false
+          properties:
+            enabled:
+              type: boolean
+              required: false
+              default: false
+            rate:
+              type: number
+              required: false
+              default: 1.0
+              minimum: 0.0
+              maximum: 1.0
+            strategy:
+              type: string
+              required: false
+              default: "random"
+              enum: ["random", "deterministic"]
+    dashboard:
+      type: object
+      required: false
+      properties:
+        enabled:
+          type: boolean
+          required: false
+          default: true
+        port:
+          type: integer
+          required: false
+          default: 8501
+          minimum: 1024
+          maximum: 65535
+        host:
+          type: string
+          required: false
+          default: "localhost"
+        auto_open:
+          type: boolean
+          required: false
+          default: false
+        auto_refresh:
+          type: boolean
+          required: false
+          default: true
+        refresh_interval:
+          type: integer
+          required: false
+          default: 5
+          minimum: 1
+          maximum: 60
+        features:
+          type: object
+          required: false
+          properties:
+            trace_visualization:
+              type: boolean
+              required: false
+              default: true
+            memory_analysis:
+              type: boolean
+              required: false
+              default: true
+              tier_restriction: "genies"
+            performance_metrics:
+              type: boolean
+              required: false
+              default: true
+            error_analysis:
+              type: boolean
+              required: false
+              default: true
+            real_time_monitoring:
+              type: boolean
+              required: false
+              default: true
+    performance:
+      type: object
+      required: false
+      properties:
+        enabled:
+          type: boolean
+          required: false
+          default: true
+        track_response_times:
+          type: boolean
+          required: false
+          default: true
+        track_memory_usage:
+          type: boolean
+          required: false
+          default: true
+        track_error_rates:
+          type: boolean
+          required: false
+          default: true
+        track_throughput:
+          type: boolean
+          required: false
+          default: true
+        alerts:
+          type: object
+          required: false
+          properties:
+            enabled:
+              type: boolean
+              required: false
+              default: false
+            high_error_rate_threshold:
+              type: number
+              required: false
+              default: 0.05
+              minimum: 0.0
+              maximum: 1.0
+            slow_response_threshold_ms:
+              type: integer
+              required: false
+              default: 5000
+              minimum: 100
+            high_memory_usage_threshold:
+              type: number
+              required: false
+              default: 0.8
+              minimum: 0.0
+              maximum: 1.0
+    export:
+      type: object
+      required: false
+      properties:
+        enabled:
+          type: boolean
+          required: false
+          default: true
+        formats:
+          type: array
+          required: false
+          default: ["json", "csv"]
+          items:
+            enum: ["json", "csv", "parquet"]
+        include_metadata:
+          type: boolean
+          required: false
+          default: true
+        compress_exports:
+          type: boolean
+          required: false
+          default: true
+
+# === SECURITY CONFIGURATION ===
+security:
+  type: object
+  required: false
+  description: "Security configuration"
+  properties:
+    input_validation:
+      type: object
+      required: false
+      properties:
+        enabled:
+          type: boolean
+          required: false
+          default: true
+        sanitization_rules:
+          type: array
+          required: false
+          items:
+            type: string
+        content_filtering:
+          type: boolean
+          required: false
+          default: false
+    output_filtering:
+      type: object
+      required: false
+      properties:
+        enabled:
+          type: boolean
+          required: false
+          default: false
+        pii_detection:
+          type: boolean
+          required: false
+          default: false
+        content_moderation:
+          type: boolean
+          required: false
+          default: false
+    access_control:
+      type: object
+      required: false
+      properties:
+        authentication_required:
+          type: boolean
+          required: false
+          default: false
+        authorization_policy:
+          type: string
+          required: false
+        api_key_required:
+          type: boolean
+          required: false
+          default: false
+    compliance:
+      type: object
+      required: false
+      properties:
+        frameworks:
+          type: array
+          required: false
+          items:
+            enum: ["GDPR", "HIPAA", "SOC2", "PCI_DSS"]
+        data_retention_policy:
+          type: string
+          required: false
+        audit_logging:
+          type: boolean
+          required: false
+          default: false 

@@ -1,0 +1,64 @@
+# Same as Black.
+line-length = 88
+indent-width = 4
+
+# Assume Python 3.8
+target-version = "py38"
+
+# Exclude external dependencies and generated files
+exclude = [
+    "superoptix/dspy-latest",
+    "tests",
+    "docs",
+    "*.md",
+    "README.md",
+    "CHANGELOG.md",
+    "CODE_OF_CONDUCT.md",
+    "CONTRIBUTING.md",
+]
+
+[lint]
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)
+select = ["E", "F", "B", "W", "I001"]
+ignore = [
+    "E501",  # Line too long (temporarily ignored for CI)
+    "E402",  # Module level import not at top of file
+    "E722",  # Bare except
+    "E741",  # Ambiguous variable name
+    "F403",  # 'from module import *' used; unable to detect undefined names
+    "F405",  # Name may be undefined when import * is used
+    "F541",  # f-string without any placeholders (style issue)
+    "F811",  # Redefinition of unused (false positives in some cases)
+    "F821",  # Undefined name (false positives in some cases)
+    "F841",  # Local variable assigned but never used (common in exception handling)
+    "B",     # General bugbear checks – too noisy for current codebase
+    "W",     # Pycodestyle warnings
+    "I001",  # Import sorting (handled by isort separately)
+]
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[format]
+# Use double quotes for strings.
+quote-style = "double"
+
+# Indent with spaces, rather than tabs.
+indent-style = "space"
+
+# Respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# Automatically detect the appropriate line ending.
+line-ending = "auto"
+
+[lint.per-file-ignores]
+"superoptix/ui/junior_designer.py" = ["F821"]
+"superoptix/observability/__init__.py" = ["F401"]  # Optional imports for availability checks
+"superoptix/observability/simple_dashboard.py" = ["F401"]  # Optional imports for availability checks
+"superoptix/optimizers/gepa_rag_adapter/__init__.py" = ["F401"]  # Optional imports for availability checks
+"tests/**/*.py" = ["F401"]  # Test files may import modules just to check availability

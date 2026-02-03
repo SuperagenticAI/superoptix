@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Recruiter Assistant
+  id: recruiter
+  namespace: human_resources
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that assists with recruitment processes, candidate screening, and hiring communications.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: recruitment_type
+    type: str
+    description: Type of recruitment task (job posting, candidate outreach, interview scheduling, etc.)
+    required: true
+  - name: role_details
+    type: str
+    description: Job requirements, company culture, and position specifics
+    required: true
+  output_fields:
+  - name: recruitment_content
+    type: str
+    description: Professional recruitment communication or job posting
+    required: true
+  - name: engagement_strategy
+    type: str
+    description: Recommendations for candidate engagement and next steps
+    required: true
+  persona:
+    name: RecruiterBot
+    role: Recruitment Specialist
+    goal: Attract top talent and facilitate efficient hiring processes
+    traits:
+    - people-focused
+    - persuasive
+    - organized
+    - professional
+  tasks:
+  - name: handle_recruitment_task
+    instruction: You are a Recruitment Specialist. Generate professional recruitment communications, job descriptions, and
+      candidate outreach that attract qualified candidates and enhance the hiring process.
+    inputs:
+    - name: recruitment_type
+      type: str
+      description: Type of recruitment task (job posting, candidate outreach, interview scheduling, etc.)
+      required: true
+    - name: role_details
+      type: str
+      description: Job requirements, company culture, and position specifics
+      required: true
+    outputs:
+    - name: recruitment_content
+      type: str
+      description: Professional recruitment communication or job posting
+    - name: engagement_strategy
+      type: str
+      description: Recommendations for candidate engagement and next steps
+  agentflow:
+  - name: create_recruitment_content
+    type: Generate
+    task: handle_recruitment_task
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.7
+  feature_specifications:
+    scenarios:
+    - name: recruiter_comprehensive_task
+      description: Given a complex human_resources requirement, the agent should provide detailed analysis and recommendations
+      input:
+        recruitment_type: Complex human_resources scenario requiring comprehensive analysis
+        role_details: ''
+      expected_output:
+        recruitment_content: Detailed step-by-step analysis with human_resources-specific recommendations
+        engagement_strategy: ''
+    - name: recruiter_problem_solving
+      description: When facing human_resources challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        recruitment_type: Challenging human_resources problem requiring creative solutions
+        role_details: ''
+      expected_output:
+        recruitment_content: Structured problem-solving approach with multiple solution options
+        engagement_strategy: ''
+    - name: recruiter_best_practices
+      description: When asked about human_resources best practices, the agent should provide current industry standards and
+        guidelines
+      input:
+        recruitment_type: Industry best practices for human_resources operations
+        role_details: ''
+      expected_output:
+        recruitment_content: Comprehensive best practices guide with implementation steps
+        engagement_strategy: ''
+    - name: recruiter_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to human_resources
+      input:
+        recruitment_type: Compliance requirements for human_resources operations
+        role_details: ''
+      expected_output:
+        recruitment_content: Detailed compliance checklist with regulatory requirements
+        engagement_strategy: ''
+    - name: recruiter_strategic_planning
+      description: When developing human_resources strategies, the agent should provide forward-thinking recommendations
+      input:
+        recruitment_type: Strategic planning for human_resources growth and optimization
+        role_details: ''
+      expected_output:
+        recruitment_content: Comprehensive strategic plan with measurable objectives and timelines
+        engagement_strategy: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

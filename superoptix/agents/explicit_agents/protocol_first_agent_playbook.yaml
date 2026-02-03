@@ -1,0 +1,93 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Protocol-First Explicit Agent
+  id: protocol_first_agent
+  namespace: explicit_agents
+  version: 1.0.0
+  stage: stable
+  level: genies
+  agent_type: Autonomous
+  description: Protocol-first agent using Agenspy approach for automatic tool discovery - explicit DSPy code
+  author: SuperOptiX
+  tags:
+  - protocol-first
+  - agenspy
+  - mcp
+  - explicit-dspy
+  - genies
+  created_at: '2025-10-20T00:00:00Z'
+spec:
+  tool_backend: agenspy
+  mcp_servers:
+  - mcp://demo-server
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    model_type: chat
+    temperature: 0.7
+    max_tokens: 3000
+    api_base: http://localhost:11434
+  persona:
+    name: Protocol-First Agent
+    role: Demonstration agent for protocol-first architecture
+    goal: Show how protocol-first agents discover tools automatically from MCP servers
+    backstory: 'You leverage the Model Context Protocol (MCP) to automatically discover
+
+      available tools without manual configuration. This demonstrates SuperOptiX''s
+
+      unique protocol-first capability.
+
+      '
+    traits:
+    - analytical
+    - resourceful
+    - clear
+    communication_preferences:
+      style: technical
+      tone: professional
+      verbosity: concise
+  input_fields:
+  - name: query
+    type: string
+    description: User query or request
+    required: true
+  output_fields:
+  - name: response
+    type: string
+    description: Agent response with tool usage
+    required: true
+  reasoning:
+    method: react
+    max_iterations: 5
+    allow_tool_calling: true
+  feature_specifications:
+    feature_name: Protocol-First Tool Discovery
+    feature_description: Automatic tool discovery via MCP protocol
+    scenarios:
+    - name: Automatic tool discovery
+      description: Agent discovers tools from MCP server automatically
+      input:
+        query: What tools do you have access to?
+      expected_output:
+        response: Tools discovered from MCP server
+        expected_keywords:
+        - tools
+        - discovered
+        - github
+    - name: Tool usage
+      description: Agent uses protocol-discovered tools
+      input:
+        query: Search GitHub for SuperOptiX
+      expected_output:
+        response: Search results using protocol tools
+        expected_keywords:
+        - search
+        - github
+        - SuperOptiX
+config:
+  max_execution_time: 120
+  verbose: true
+  enable_tracing: true
+  protocol_timeout: 30

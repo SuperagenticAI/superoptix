@@ -1,0 +1,124 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Content Creator
+  id: content_creator
+  namespace: marketing
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that creates engaging marketing content for various platforms and audiences.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: content_brief
+    type: str
+    description: Content requirements including topic, platform, and objectives
+    required: true
+  - name: target_audience
+    type: str
+    description: Target audience demographics and characteristics
+    required: true
+  output_fields:
+  - name: content
+    type: str
+    description: Complete marketing content ready for publication
+    required: true
+  - name: optimization_tips
+    type: str
+    description: Platform-specific optimization and engagement recommendations
+    required: true
+  persona:
+    name: CreativeBot
+    role: Content Creator
+    goal: Create compelling and engaging marketing content that resonates with target audiences
+    traits:
+    - creative
+    - engaging
+    - trend-aware
+    - audience-focused
+  tasks:
+  - name: create_marketing_content
+    instruction: You are a Content Creator. Create engaging marketing content tailored to the specified platform and audience.
+      Focus on compelling messaging, clear calls-to-action, and brand consistency.
+    inputs:
+    - name: content_brief
+      type: str
+      description: Content requirements including topic, platform, and objectives
+      required: true
+    - name: target_audience
+      type: str
+      description: Target audience demographics and characteristics
+      required: true
+    outputs:
+    - name: content
+      type: str
+      description: Complete marketing content ready for publication
+    - name: optimization_tips
+      type: str
+      description: Platform-specific optimization and engagement recommendations
+  agentflow:
+  - name: create_content
+    type: Generate
+    task: create_marketing_content
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.7
+  feature_specifications:
+    scenarios:
+    - name: content_creator_comprehensive_task
+      description: Given a complex marketing requirement, the agent should provide detailed analysis and recommendations
+      input:
+        content_brief: Complex marketing scenario requiring comprehensive analysis
+        target_audience: ''
+      expected_output:
+        content: Detailed step-by-step analysis with marketing-specific recommendations
+        optimization_tips: ''
+    - name: content_creator_problem_solving
+      description: When facing marketing challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        content_brief: Challenging marketing problem requiring creative solutions
+        target_audience: ''
+      expected_output:
+        content: Structured problem-solving approach with multiple solution options
+        optimization_tips: ''
+    - name: content_creator_best_practices
+      description: When asked about marketing best practices, the agent should provide current industry standards and guidelines
+      input:
+        content_brief: Industry best practices for marketing operations
+        target_audience: ''
+      expected_output:
+        content: Comprehensive best practices guide with implementation steps
+        optimization_tips: ''
+    - name: content_creator_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to marketing
+      input:
+        content_brief: Compliance requirements for marketing operations
+        target_audience: ''
+      expected_output:
+        content: Detailed compliance checklist with regulatory requirements
+        optimization_tips: ''
+    - name: content_creator_strategic_planning
+      description: When developing marketing strategies, the agent should provide forward-thinking recommendations
+      input:
+        content_brief: Strategic planning for marketing growth and optimization
+        target_audience: ''
+      expected_output:
+        content: Comprehensive strategic plan with measurable objectives and timelines
+        optimization_tips: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

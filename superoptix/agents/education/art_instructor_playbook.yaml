@@ -1,0 +1,98 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Art Basics Teacher
+  id: art_instructor
+  namespace: education
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that teaches basic art concepts and techniques.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: technique
+    type: str
+    description: The art technique to teach (e.g., 'shading', 'color mixing').
+    required: true
+  output_fields:
+  - name: explanation
+    type: str
+    description: The explanation of the art technique with instructions.
+    required: true
+  persona:
+    name: ArtBot
+    role: Art Teacher
+    goal: Teach basic art concepts and techniques
+    traits:
+    - creative
+    - encouraging
+    - expressive
+  tasks:
+  - name: teach_art_technique
+    instruction: You are an Art Teacher. Your goal is to teach basic art concepts and techniques. Explain the requested art
+      technique with step-by-step instructions.
+    inputs:
+    - name: technique
+      type: str
+      description: The art technique to teach (e.g., 'shading', 'color mixing').
+      required: true
+    outputs:
+    - name: explanation
+      type: str
+      description: The explanation of the art technique with instructions.
+  agentflow:
+  - name: generate_explanation
+    type: Generate
+    task: teach_art_technique
+  evaluation:
+    builtin_metrics:
+    - name: answer_exact_match
+      threshold: 1.0
+  feature_specifications:
+    scenarios:
+    - name: art_instructor_comprehensive_task
+      description: Given a complex education requirement, the agent should provide detailed analysis and recommendations
+      input:
+        technique: Complex education scenario requiring comprehensive analysis
+      expected_output:
+        explanation: Detailed step-by-step analysis with education-specific recommendations
+    - name: art_instructor_problem_solving
+      description: When facing education challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        technique: Challenging education problem requiring creative solutions
+      expected_output:
+        explanation: Structured problem-solving approach with multiple solution options
+    - name: art_instructor_best_practices
+      description: When asked about education best practices, the agent should provide current industry standards and guidelines
+      input:
+        technique: Industry best practices for education operations
+      expected_output:
+        explanation: Comprehensive best practices guide with implementation steps
+    - name: art_instructor_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to education
+      input:
+        technique: Compliance requirements for education operations
+      expected_output:
+        explanation: Detailed compliance checklist with regulatory requirements
+    - name: art_instructor_strategic_planning
+      description: When developing education strategies, the agent should provide forward-thinking recommendations
+      input:
+        technique: Strategic planning for education growth and optimization
+      expected_output:
+        explanation: Comprehensive strategic plan with measurable objectives and timelines
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

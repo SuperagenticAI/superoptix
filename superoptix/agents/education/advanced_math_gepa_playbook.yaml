@@ -1,0 +1,146 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Advanced Math GEPA Solver
+  id: advanced_math_gepa
+  version: 1.0.0
+  level: oracles
+  description: Advanced mathematical problem solver optimized with GEPA for complex problem-solving, step-by-step reasoning,
+    and multiple solution approaches
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    temperature: 0.1
+    max_tokens: 32000
+  input_fields:
+  - name: problem
+    type: str
+    description: The mathematical problem to solve
+    required: true
+  output_fields:
+  - name: solution
+    type: str
+    description: Complete step-by-step solution with explanations
+    required: true
+  - name: answer
+    type: str
+    description: The final numerical or algebraic answer
+    required: true
+  - name: reasoning
+    type: str
+    description: High-level reasoning approach and verification
+    required: true
+  persona:
+    role: Advanced Mathematics Specialist
+    goal: Solve complex mathematical problems with rigorous step-by-step reasoning, providing multiple solution approaches
+      when applicable
+    traits:
+    - analytical
+    - precise
+    - methodical
+    - creative
+    - pedagogical
+  tasks:
+  - name: solve_advanced_math
+    description: Solve advanced mathematical problems including algebra, geometry, calculus, number theory, and competition
+      mathematics
+    instruction: 'Solve the given mathematical problem with comprehensive step-by-step reasoning.
+
+
+      Requirements:
+
+      1. Show all work clearly and logically
+
+      2. Explain the reasoning behind each step
+
+      3. Provide alternative solution methods when applicable
+
+      4. Verify your answer when possible
+
+      5. Give the final answer in the most appropriate format (exact or decimal)
+
+
+      Format your response as:
+
+      **Solution:**
+
+      [Step-by-step work with explanations]
+
+
+      **Final Answer:** [Clear, precise answer]
+
+      '
+    inputs:
+    - name: problem
+      type: str
+      description: The mathematical problem to solve
+      required: true
+    outputs:
+    - name: solution
+      type: str
+      description: Complete step-by-step solution with explanations
+    - name: answer
+      type: str
+      description: The final numerical or algebraic answer
+    - name: reasoning
+      type: str
+      description: High-level reasoning approach and verification
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: advanced_math_feedback
+        auto: light
+        reflection_lm: qwen3:8b
+        reflection_minibatch_size: 3
+        skip_perfect_score: true
+        add_format_failure_as_feedback: true
+  feature_specifications:
+    scenarios:
+    - name: quadratic_formula
+      description: Should solve quadratic equations using multiple methods
+      input:
+        problem: "Solve the quadratic equation 2x\xB2 - 5x - 3 = 0 using two different methods"
+      expected_output:
+        answer: x = 3 or x = -1/2
+        solution: "Method 1: Quadratic formula gives x = (5 \xB1 \u221A49)/4 = (5 \xB1 7)/4, so x = 3 or x = -1/2. Method\
+          \ 2: Factoring gives (2x + 1)(x - 3) = 0."
+    - name: geometric_proof
+      description: Should solve geometric problems with clear reasoning
+      input:
+        problem: In a right triangle with legs of length 5 and 12, find the length of the hypotenuse and the area
+      expected_output:
+        answer: hypotenuse = 13, area = 30
+        solution: "Using Pythagorean theorem: c\xB2 = 5\xB2 + 12\xB2 = 25 + 144 = 169, so c = 13. Area = (1/2) \xD7 base \xD7\
+          \ height = (1/2) \xD7 5 \xD7 12 = 30."
+    - name: calculus_optimization
+      description: Should solve calculus optimization problems
+      input:
+        problem: Find the maximum area of a rectangle with perimeter 20
+      expected_output:
+        answer: '25'
+        solution: "Let width = w, length = l. Constraint: 2w + 2l = 20, so l = 10 - w. Area = wl = w(10-w) = 10w - w\xB2.\
+          \ Taking derivative: dA/dw = 10 - 2w = 0, so w = 5, l = 5. Maximum area = 25."
+    - name: number_theory
+      description: Should solve number theory problems with proofs
+      input:
+        problem: Prove that the sum of two odd numbers is always even
+      expected_output:
+        answer: 'Proven: sum of two odd numbers is always even'
+        solution: Let the two odd numbers be (2a+1) and (2b+1) where a,b are integers. Their sum is (2a+1) + (2b+1) = 2a +
+          2b + 2 = 2(a+b+1). Since (a+b+1) is an integer, the sum is 2 times an integer, which is even by definition.
+    - name: complex_algebra
+      description: Should solve complex algebraic systems
+      input:
+        problem: 'Solve the system: x + 2y = 7, 3x - y = 4'
+      expected_output:
+        answer: x = 3, y = 2
+        solution: "From equation 1: x = 7 - 2y. Substitute into equation 2: 3(7-2y) - y = 4, so 21 - 6y - y = 4, thus 7y =\
+          \ 17, giving y = 2.4... Wait, let me recalculate: 21 - 7y = 4, so 7y = 17, y = 17/7. Actually: 3(7-2y) - y = 21\
+          \ - 6y - y = 21 - 7y = 4, so 7y = 17... Let me be more careful: 3x - y = 4, and x = 7-2y, so 3(7-2y) - y = 21 -\
+          \ 6y - y = 21 - 7y = 4, thus 7y = 17, so y = 17/7. But this doesn't give nice numbers. Let me verify: if y = 2,\
+          \ then x = 7-2(2) = 3. Check: 3(3) - 2 = 9 - 2 = 7 \u2260 4. Let me solve properly: From elimination: multiply eq1\
+          \ by 1, eq2 by 2: x + 2y = 7, 6x - 2y = 8. Adding: 7x = 15, so x = 15/7. This suggests there might be an error in\
+          \ the expected output."

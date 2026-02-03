@@ -1,0 +1,156 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: researcher_crew
+  id: researcher_crew
+  namespace: demo
+  version: 1.0.0
+  level: genies
+  description: Research crew built with CrewAI framework, demonstrates multi-framework support
+  author: SuperOptiX
+  tags:
+    - research
+    - crewai
+    - multi-agent
+    - role-based
+    - demo
+    - ollama-compatible
+
+spec:
+  target_framework: crewai
+  
+  # MODEL CONFIGURATION: CrewAI works with Ollama! ✅
+  language_model:
+    location: local
+    provider: ollama
+    model: ollama:gpt-oss:20b
+    temperature: 0.7
+    max_tokens: 3000
+    api_base: http://localhost:11434
+    # Alternative models:
+    # model: gpt-4o-mini  # OpenAI
+    # model: claude-3-5-sonnet  # Anthropic
+  
+  input_fields:
+    - name: topic
+      type: str
+      description: Research topic or question
+      required: true
+  
+  output_fields:
+    - name: report
+      type: str
+      description: Research report
+      required: true
+  
+  # CrewAI Agent Profile (GEPA optimizes role+goal+backstory together)
+  persona:
+    name: AI Research Specialist
+    role: Senior AI Research Analyst
+    goal: Uncover cutting-edge developments in AI and create comprehensive research reports
+    backstory: |
+      You are a seasoned researcher with deep expertise in artificial intelligence
+      and machine learning. Known for your ability to find authoritative sources,
+      synthesize complex information, and present clear, actionable insights.
+      You have 10+ years of experience tracking AI trends and developments.
+    traits:
+      - analytical
+      - thorough
+      - detail-oriented
+      - tech-savvy
+    communication_preferences:
+      style: professional
+      tone: informative
+      verbosity: detailed
+  
+  # CrewAI Task Configuration
+  tasks:
+    - name: research_task
+      description: |
+        Conduct comprehensive research on {topic}.
+        Find the most relevant and up-to-date information.
+        Focus on key developments, trends, and authoritative sources.
+        Current year is 2025.
+      expected_output: |
+        A detailed research report with:
+        - 5-10 key findings
+        - Clear explanations
+        - Relevant context
+        - Well-structured insights
+      agent: ai_researcher
+  
+  reasoning:
+    method: sequential
+    steps:
+      - Analyze the research topic
+      - Identify key areas to investigate
+      - Gather information systematically
+      - Synthesize findings
+      - Create structured report
+  
+  # BDD Scenarios for testing
+  feature_specifications:
+    scenarios:
+      - name: AI frameworks research
+        description: Research AI agent frameworks
+        input:
+          topic: "AI agent frameworks in 2025"
+        expected_output:
+          report: "Research report on AI frameworks"
+          expected_keywords:
+            - agent
+            - framework
+            - AI
+      
+      - name: LangChain research
+        description: Research specific technology
+        input:
+          topic: "What is LangChain?"
+        expected_output:
+          report: "LangChain explanation"
+          expected_keywords:
+            - LangChain
+            - framework
+            - Python
+      
+      - name: Multi-agent systems
+        description: Research multi-agent concepts
+        input:
+          topic: "Multi-agent AI systems"
+        expected_output:
+          report: "Multi-agent systems research"
+          expected_keywords:
+            - multi-agent
+            - collaboration
+            - AI
+      
+      - name: GEPA optimization
+        description: Research optimization techniques
+        input:
+          topic: "Genetic-Pareto (GEPA)"
+        expected_output:
+          report: "GEPA research findings"
+          expected_keywords:
+            - GEPA
+            - optimization
+            - prompting
+  
+  evaluation:
+    builtin_metrics:
+      - name: research_quality
+        threshold: 0.70
+      - name: report_completeness
+        threshold: 0.75
+  
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: research_quality
+        auto: medium
+        reflection_lm: gpt-4o-mini
+        max_full_evals: 5
+    metric: research_quality
+    metric_threshold: 0.85
+
+

@@ -1,0 +1,124 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Merchandising Planner
+  id: merchandising_planner
+  namespace: retail
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that creates merchandising plans and product placement strategies for retail stores.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: store_layout
+    type: str
+    description: Store dimensions, sections, and current layout configuration
+    required: true
+  - name: product_mix
+    type: str
+    description: Available products, categories, and seasonal items
+    required: true
+  output_fields:
+  - name: merchandising_plan
+    type: str
+    description: Detailed merchandising strategy and layout recommendations
+    required: true
+  - name: display_concepts
+    type: str
+    description: Visual display ideas and promotional placement strategies
+    required: true
+  persona:
+    name: MerchandiseBot
+    role: Merchandising Planner
+    goal: Create effective merchandising strategies that drive sales and enhance customer experience
+    traits:
+    - creative
+    - strategic
+    - customer-focused
+    - trend-aware
+  tasks:
+  - name: create_merchandising_plan
+    instruction: You are a Merchandising Planner. Generate comprehensive merchandising strategies including product placement,
+      visual displays, and seasonal arrangements to maximize sales impact.
+    inputs:
+    - name: store_layout
+      type: str
+      description: Store dimensions, sections, and current layout configuration
+      required: true
+    - name: product_mix
+      type: str
+      description: Available products, categories, and seasonal items
+      required: true
+    outputs:
+    - name: merchandising_plan
+      type: str
+      description: Detailed merchandising strategy and layout recommendations
+    - name: display_concepts
+      type: str
+      description: Visual display ideas and promotional placement strategies
+  agentflow:
+  - name: plan_merchandising
+    type: Generate
+    task: create_merchandising_plan
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.7
+  feature_specifications:
+    scenarios:
+    - name: merchandising_planner_comprehensive_task
+      description: Given a complex retail requirement, the agent should provide detailed analysis and recommendations
+      input:
+        store_layout: Complex retail scenario requiring comprehensive analysis
+        product_mix: ''
+      expected_output:
+        merchandising_plan: Detailed step-by-step analysis with retail-specific recommendations
+        display_concepts: ''
+    - name: merchandising_planner_problem_solving
+      description: When facing retail challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        store_layout: Challenging retail problem requiring creative solutions
+        product_mix: ''
+      expected_output:
+        merchandising_plan: Structured problem-solving approach with multiple solution options
+        display_concepts: ''
+    - name: merchandising_planner_best_practices
+      description: When asked about retail best practices, the agent should provide current industry standards and guidelines
+      input:
+        store_layout: Industry best practices for retail operations
+        product_mix: ''
+      expected_output:
+        merchandising_plan: Comprehensive best practices guide with implementation steps
+        display_concepts: ''
+    - name: merchandising_planner_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to retail
+      input:
+        store_layout: Compliance requirements for retail operations
+        product_mix: ''
+      expected_output:
+        merchandising_plan: Detailed compliance checklist with regulatory requirements
+        display_concepts: ''
+    - name: merchandising_planner_strategic_planning
+      description: When developing retail strategies, the agent should provide forward-thinking recommendations
+      input:
+        store_layout: Strategic planning for retail growth and optimization
+        product_mix: ''
+      expected_output:
+        merchandising_plan: Comprehensive strategic plan with measurable objectives and timelines
+        display_concepts: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

@@ -1,0 +1,199 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: MLX Demo Assistant
+  id: mlx_demo
+  namespace: demo
+  version: 1.0.0
+  agent_type: Interactive
+  level: genies
+  description: A comprehensive demo agent showcasing MLX local model capabilities with SuperOptiX framework features including
+    tools, memory, and RAG.
+spec:
+  language_model:
+    location: local
+    provider: mlx
+    model: mlx-community/Llama-3.2-3B-Instruct-4bit
+    api_base: http://localhost:8000
+    temperature: 0.7
+    max_tokens: 2048
+  input_fields:
+  - name: coding_request
+    type: str
+    description: A coding question, algorithm request, or programming concept explanation.
+    required: true
+  output_fields:
+  - name: code_solution
+    type: str
+    description: A complete, well-documented code solution or explanation.
+    required: true
+  persona:
+    name: MLXBot
+    role: MLX Demo Assistant
+    goal: Demonstrate the power of local MLX models with SuperOptiX framework capabilities
+    traits:
+    - helpful
+    - knowledgeable
+    - precise
+    - educational
+    - technical
+  tasks:
+  - name: code_assistance
+    instruction: You are an MLX Demo Assistant. Help users understand and work with code, algorithms, and programming concepts.
+      Provide clear, well-structured responses with examples.
+    inputs:
+    - name: coding_request
+      type: str
+      description: A coding question, algorithm request, or programming concept explanation.
+      required: true
+    outputs:
+    - name: code_solution
+      type: str
+      description: A complete, well-documented code solution or explanation.
+  - name: concept_explanation
+    instruction: Explain programming concepts, algorithms, or technical topics in a clear and educational manner.
+    inputs:
+    - name: concept_query
+      type: str
+      description: A request to explain a programming concept, algorithm, or technical topic.
+      required: true
+    outputs:
+    - name: explanation
+      type: str
+      description: A comprehensive explanation with examples and practical applications.
+  - name: problem_solving
+    instruction: Help solve programming problems and algorithmic challenges with step-by-step reasoning.
+    inputs:
+    - name: problem_statement
+      type: str
+      description: A programming problem or algorithmic challenge to solve.
+      required: true
+    outputs:
+    - name: solution
+      type: str
+      description: A complete solution with step-by-step reasoning and implementation.
+  - name: mlx_demo
+    instruction: Demonstrate MLX-specific capabilities and features. Show how MLX models work with SuperOptiX.
+    inputs:
+    - name: mlx_query
+      type: str
+      description: A query about MLX capabilities or demonstration request.
+      required: true
+    outputs:
+    - name: mlx_demonstration
+      type: str
+      description: A demonstration of MLX features and capabilities.
+  agentflow:
+  - name: analyze_request
+    type: Analyze
+    task: code_assistance
+  - name: generate_response
+    type: Generate
+    task: concept_explanation
+  - name: solve_problem
+    type: Solve
+    task: problem_solving
+  - name: demonstrate_mlx
+    type: Demonstrate
+    task: mlx_demo
+  react_config:
+    max_iters: 5
+    max_tool_calls: 3
+    tool_selection_strategy: automatic
+    reasoning_style: step_by_step
+    error_handling: retry
+    enable_tracing: true
+  tools:
+    enabled: true
+    categories:
+    - development
+    - core
+    - utilities
+    specific_tools:
+    - calculator
+    - file_reader
+    - text_analyzer
+    - code_formatter
+    - web_search
+  memory:
+    enabled: true
+    short_term:
+      enabled: true
+      max_tokens: 1000
+    long_term:
+      enabled: true
+      storage_type: local
+      max_entries: 100
+    episodic:
+      enabled: true
+      max_episodes: 50
+  rag:
+    enabled: true
+    retriever_type: chroma
+    config:
+      top_k: 5
+      chunk_size: 512
+      chunk_overlap: 50
+    vector_store:
+      embedding_model: sentence-transformers/all-MiniLM-L6-v2
+      collection_name: mlx_demo_knowledge
+  evaluation:
+    builtin_metrics:
+    - name: answer_accuracy
+      threshold: 0.8
+    - name: code_quality
+      threshold: 0.7
+    - name: explanation_clarity
+      threshold: 0.8
+    - name: mlx_knowledge
+      threshold: 0.9
+  feature_specifications:
+    scenarios:
+    - name: fibonacci_implementation
+      description: The agent should provide a clear implementation of the Fibonacci sequence with explanations.
+      input:
+        coding_request: Write a Python function to calculate the Fibonacci sequence using recursion
+      expected_output:
+        code_solution: Should include a recursive function with base cases and clear documentation
+    - name: recursion_explanation
+      description: The agent should explain recursion clearly with examples.
+      input:
+        concept_query: Explain recursion with examples
+      expected_output:
+        explanation: Should include clear definition, examples, and practical applications
+    - name: sorting_algorithm
+      description: The agent should implement and explain a sorting algorithm.
+      input:
+        problem_statement: Implement and explain quicksort algorithm
+      expected_output:
+        solution: Should include implementation, time complexity analysis, and step-by-step explanation
+    - name: mlx_capabilities
+      description: The agent should demonstrate MLX-specific capabilities.
+      input:
+        mlx_query: What are the key features of MLX and how does it work with SuperOptiX?
+      expected_output:
+        mlx_demonstration: Should include MLX features, local model benefits, and SuperOptiX integration
+    - name: data_structure_explanation
+      description: The agent should explain data structures clearly.
+      input:
+        concept_query: Explain binary trees and their applications
+      expected_output:
+        explanation: Should include structure explanation, traversal methods, and real-world applications
+    - name: algorithm_optimization
+      description: The agent should help optimize an algorithm.
+      input:
+        problem_statement: Optimize this function for better performance
+      expected_output:
+        solution: Should include performance analysis and optimization suggestions
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: tool_use_accuracy
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 5
+        skip_perfect_score: true
+        reflection_minibatch_size: 3
+    metric: tool_use_accuracy
+    metric_threshold: 0.75

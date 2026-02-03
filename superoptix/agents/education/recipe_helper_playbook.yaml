@@ -1,0 +1,99 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Simple Recipe Helper
+  id: recipe_helper
+  namespace: education
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that helps novice cooks prepare simple, healthy meals.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: dish_request
+    type: str
+    description: The type of dish the user wants to make (e.g., 'pasta', 'sandwich').
+    required: true
+  output_fields:
+  - name: recipe
+    type: str
+    description: The complete recipe with ingredients and instructions.
+    required: true
+  persona:
+    name: RecipeBot
+    role: Beginner Cooking Instructor
+    goal: Help novice cooks prepare simple, healthy meals
+    traits:
+    - helpful
+    - clear
+    - practical
+  tasks:
+  - name: create_simple_recipe
+    instruction: You are a Beginner Cooking Instructor. Your goal is to help novice cooks prepare simple, healthy meals. Create
+      a simple recipe that a beginner can follow. Include an ingredients list, basic equipment needed, and clear step-by-step
+      instructions.
+    inputs:
+    - name: dish_request
+      type: str
+      description: The type of dish the user wants to make (e.g., 'pasta', 'sandwich').
+      required: true
+    outputs:
+    - name: recipe
+      type: str
+      description: The complete recipe with ingredients and instructions.
+  agentflow:
+  - name: generate_recipe
+    type: Generate
+    task: create_simple_recipe
+  evaluation:
+    builtin_metrics:
+    - name: answer_exact_match
+      threshold: 1.0
+  feature_specifications:
+    scenarios:
+    - name: recipe_helper_comprehensive_task
+      description: Given a complex education requirement, the agent should provide detailed analysis and recommendations
+      input:
+        dish_request: Complex education scenario requiring comprehensive analysis
+      expected_output:
+        recipe: Detailed step-by-step analysis with education-specific recommendations
+    - name: recipe_helper_problem_solving
+      description: When facing education challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        dish_request: Challenging education problem requiring creative solutions
+      expected_output:
+        recipe: Structured problem-solving approach with multiple solution options
+    - name: recipe_helper_best_practices
+      description: When asked about education best practices, the agent should provide current industry standards and guidelines
+      input:
+        dish_request: Industry best practices for education operations
+      expected_output:
+        recipe: Comprehensive best practices guide with implementation steps
+    - name: recipe_helper_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to education
+      input:
+        dish_request: Compliance requirements for education operations
+      expected_output:
+        recipe: Detailed compliance checklist with regulatory requirements
+    - name: recipe_helper_strategic_planning
+      description: When developing education strategies, the agent should provide forward-thinking recommendations
+      input:
+        dish_request: Strategic planning for education growth and optimization
+      expected_output:
+        recipe: Comprehensive strategic plan with measurable objectives and timelines
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

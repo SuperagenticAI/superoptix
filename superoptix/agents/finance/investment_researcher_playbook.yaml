@@ -1,0 +1,124 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Investment Researcher
+  id: investment_researcher
+  namespace: finance
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that researches and analyzes investment opportunities for basic portfolio planning.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: investment_type
+    type: str
+    description: Type of investment to analyze (stocks, bonds, ETFs, etc.)
+    required: true
+  - name: risk_tolerance
+    type: str
+    description: Investor's risk tolerance level
+    required: true
+  output_fields:
+  - name: investment_analysis
+    type: str
+    description: Systematic analysis of the investment opportunity
+    required: true
+  - name: risk_assessment
+    type: str
+    description: Risk factors and portfolio fit assessment
+    required: true
+  persona:
+    name: InvestBot
+    role: Investment Researcher
+    goal: Provide fundamental investment research and portfolio diversification guidance
+    traits:
+    - analytical
+    - methodical
+    - cautious
+    - research-focused
+  tasks:
+  - name: analyze_investment
+    instruction: You are an Investment Researcher. Think through the investment systematically by analyzing fundamentals,
+      risks, and market position. Provide balanced, educational investment insights.
+    inputs:
+    - name: investment_type
+      type: str
+      description: Type of investment to analyze (stocks, bonds, ETFs, etc.)
+      required: true
+    - name: risk_tolerance
+      type: str
+      description: Investor's risk tolerance level
+      required: true
+    outputs:
+    - name: investment_analysis
+      type: str
+      description: Systematic analysis of the investment opportunity
+    - name: risk_assessment
+      type: str
+      description: Risk factors and portfolio fit assessment
+  agentflow:
+  - name: research_systematically
+    type: Think
+    task: analyze_investment
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: investment_researcher_comprehensive_task
+      description: Given a complex finance requirement, the agent should provide detailed analysis and recommendations
+      input:
+        investment_type: Complex finance scenario requiring comprehensive analysis
+        risk_tolerance: ''
+      expected_output:
+        investment_analysis: Detailed step-by-step analysis with finance-specific recommendations
+        risk_assessment: ''
+    - name: investment_researcher_problem_solving
+      description: When facing finance challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        investment_type: Challenging finance problem requiring creative solutions
+        risk_tolerance: ''
+      expected_output:
+        investment_analysis: Structured problem-solving approach with multiple solution options
+        risk_assessment: ''
+    - name: investment_researcher_best_practices
+      description: When asked about finance best practices, the agent should provide current industry standards and guidelines
+      input:
+        investment_type: Industry best practices for finance operations
+        risk_tolerance: ''
+      expected_output:
+        investment_analysis: Comprehensive best practices guide with implementation steps
+        risk_assessment: ''
+    - name: investment_researcher_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to finance
+      input:
+        investment_type: Compliance requirements for finance operations
+        risk_tolerance: ''
+      expected_output:
+        investment_analysis: Detailed compliance checklist with regulatory requirements
+        risk_assessment: ''
+    - name: investment_researcher_strategic_planning
+      description: When developing finance strategies, the agent should provide forward-thinking recommendations
+      input:
+        investment_type: Strategic planning for finance growth and optimization
+        risk_tolerance: ''
+      expected_output:
+        investment_analysis: Comprehensive strategic plan with measurable objectives and timelines
+        risk_assessment: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

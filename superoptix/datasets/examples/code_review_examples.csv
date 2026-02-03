@@ -1,0 +1,264 @@
+code,review,severity,category,language
+"def get_user(username):
+    query = ""SELECT * FROM users WHERE name = '"" + username + ""'""
+    return db.execute(query)","Critical security vulnerability: SQL injection risk. The code concatenates user input directly into SQL query without sanitization. Use parameterized queries: db.execute('SELECT * FROM users WHERE name = ?', (username,))",critical,security,python
+"API_KEY = ""sk-1234567890abcdef""
+DB_PASSWORD = ""admin123""
+def connect():
+    return api.connect(API_KEY)","Critical security issue: Hardcoded credentials detected. API keys and passwords should never be committed to code. Use environment variables: API_KEY = os.environ.get('API_KEY')",critical,security,python
+"def process_data(x, y, z):
+    if x > 0:
+        if y > 0:
+            if z > 0:
+                return x + y + z
+            else:
+                return x + y
+        else:
+            if z > 0:
+                return x + z
+            else:
+                return x
+    else:
+        if y > 0:
+            if z > 0:
+                return y + z
+            else:
+                return y
+        else:
+            return z if z > 0 else 0","High cyclomatic complexity detected (complexity: 8). This function has too many nested conditions making it hard to test and maintain. Consider refactoring to reduce nesting.",high,complexity,python
+"def find_duplicates(items):
+    duplicates = []
+    for i in range(len(items)):
+        for j in range(len(items)):
+            if i != j and items[i] == items[j]:
+                if items[i] not in duplicates:
+                    duplicates.append(items[i])
+    return duplicates","Performance issue: O(n²) time complexity with nested loops. This can be optimized to O(n) using a set or Counter: from collections import Counter; return [item for item, count in Counter(items).items() if count > 1]",medium,performance,python
+"def read_config(filename):
+    file = open(filename, 'r')
+    data = json.load(file)
+    file.close()
+    return data","Missing error handling and resource management. Use context manager: with open(filename, 'r') as file: data = json.load(file). Also add try-except for FileNotFoundError and JSONDecodeError.",medium,best_practices,python
+"def calculate_price_with_tax(price):
+    tax = price * 0.1
+    total = price + tax
+    return total
+
+def calculate_discounted_price_with_tax(price, discount):
+    discounted_price = price - (price * discount)
+    tax = discounted_price * 0.1
+    total = discounted_price + tax
+    return total","Code duplication detected. Tax calculation logic is repeated. Apply DRY principle by extracting: def apply_tax(price, rate=0.1): return price * (1 + rate)",low,code_smells,python
+"def f(x, y):
+    z = x + y
+    if z > 100:
+        a = z * 2
+        return a
+    else:
+        b = z / 2
+        return b","Poor naming conventions. Variable names (f, x, y, z, a, b) are not descriptive. Use meaningful names that explain purpose: def calculate_adjusted_sum(first_number, second_number)",low,naming,python
+"result = """"
+for item in items:
+    result += str(item)","Performance issue: String concatenation in loop is inefficient O(n²) due to string immutability. Use join instead: result = ''.join(str(item) for item in items)",medium,performance,python
+"password = ""admin123""
+def login(user):
+    query = ""SELECT * FROM users WHERE username='"" + user + ""'""
+    result = db.execute(query)
+    if result:
+        if result['password'] == password:
+            if result['active']:
+                if result['verified']:
+                    return True
+    return False","Multiple critical issues: 1) Hardcoded password 2) SQL injection vulnerability 3) High cyclomatic complexity 4) Plain text password comparison. Requires complete security overhaul.",critical,security,python
+"@app.route('/search')
+def search():
+    query = request.args.get('q')
+    return f""<h1>Results for: {query}</h1>""","Security vulnerability: XSS (Cross-Site Scripting) risk. User input rendered directly in HTML without escaping. Use template escaping: return render_template_string('<h1>Results for: {{ query }}</h1>', query=escape(query))",high,security,python
+"def process_items(items):
+    for item in items:
+        if item > len(items) / 2:
+            process(item)","Performance issue: len(items) computed in every loop iteration. Cache the value: threshold = len(items) / 2; for item in items: if item > threshold",low,performance,python
+"try:
+    data = process_data()
+except:
+    pass","Poor exception handling: Bare except clause catches all exceptions including SystemExit and KeyboardInterrupt. Be specific: except ValueError as e: logger.error(f'Error: {e}')",medium,error_handling,python
+"class UserManager:
+    def save_user(self, user):
+        db.insert('users', user)
+    def send_email(self, user):
+        send_email(user.email, 'Welcome')
+    def generate_report(self, user):
+        return f'Report: {user.name}'
+    def validate_user(self, user):
+        return user.email and user.name","Single Responsibility Principle violation. UserManager has too many unrelated responsibilities (database, email, reporting, validation). Split into UserRepository, EmailService, ReportGenerator, UserValidator.",medium,design,python
+"def calculate_area(shape):
+    if shape.type == 'circle':
+        return 3.14 * shape.radius ** 2
+    elif shape.type == 'rectangle':
+        return shape.width * shape.height
+    elif shape.type == 'triangle':
+        return 0.5 * shape.base * shape.height","Open/Closed Principle violation. Must modify function for each new shape. Use polymorphism: class Shape(ABC): @abstractmethod def area(self): pass",medium,design,python
+"if item in my_list:
+    process(item)","Performance consideration: Membership check in list is O(n). If this is performance-critical and list is large, consider using a set for O(1) lookup.",info,performance,python
+"def calculate_total(items):
+    total = 0
+    for item in items:
+        if item.discount > 0:
+            total += item.price * (1 - item.discount)
+        else:
+            total += item.price
+    return total","Can be simplified using sum with generator: return sum(item.price * (1 - item.discount) if item.discount > 0 else item.price for item in items)",low,readability,python
+"MAX_SIZE = 100
+if count > MAX_SIZE:
+    resize()","Good practice: Using named constant instead of magic number. Code is clear and maintainable.",info,good_practice,python
+"with open(filename, 'r') as file:
+    data = file.read()","Good practice: Using context manager ensures file is properly closed even if exception occurs.",info,good_practice,python
+"def fetch_user_data(user_id):
+    if not user_id:
+        raise ValueError('user_id is required')
+    return db.query('users', id=user_id)","Good practice: Input validation with clear error message. Fails fast on invalid input.",info,good_practice,python
+"class Bird(ABC):
+    @abstractmethod
+    def move(self):
+        pass
+
+class FlyingBird(Bird):
+    def move(self):
+        return self.fly()
+        
+class Penguin(Bird):
+    def move(self):
+        return self.swim()","Good design: Properly follows Liskov Substitution Principle. Each bird type can move appropriately without breaking contract.",info,good_design,python
+"# Check if user is admin
+if user.role == 'admin'","Unnecessary comment: Code is self-explanatory. Comment doesn't add value. Consider extracting to method: if user.is_admin()",low,comments,python
+"# TODO: Add error handling here
+def process():
+    data = fetch_data()
+    return transform(data)","TODO comment indicates incomplete implementation. Add proper error handling before production deployment.",medium,incomplete,python
+"for i in range(len(items)):
+    print(items[i])","Non-Pythonic iteration. Use direct iteration: for item in items: print(item). More readable and efficient.",low,style,python
+"if flag == True:
+    do_something()","Redundant comparison with True. Simplify to: if flag: do_something()",low,style,python
+"myList = [1, 2, 3]
+userName = ""John""","Naming convention: Use snake_case for Python variables, not camelCase: my_list = [1, 2, 3]; user_name = 'John'",low,naming,python
+"def divide(a, b):
+    return a / b","Missing zero division check. Add validation: if b == 0: raise ValueError('Cannot divide by zero'). Return: a / b",medium,error_handling,python
+"data = None
+if data:
+    process(data)
+else:
+    data = fetch_data()
+    process(data)","Code duplication: process(data) called twice. Refactor: data = data or fetch_data(); process(data)",low,duplication,python
+"def expensive_calculation(n):
+    result = 0
+    for i in range(n):
+        result += complex_operation(i)
+    return result","Consider memoization if function called repeatedly with same arguments. Use @lru_cache decorator for performance improvement.",info,optimization,python
+"import *
+from os import *","Wildcard imports pollute namespace and make code harder to understand. Import specific items: from os import path, environ",medium,imports,python
+"class Config:
+    DEBUG = True
+    DATABASE = 'prod_db'
+    API_KEY = 'secret123'","Configuration issues: 1) Hardcoded sensitive data 2) DEBUG=True with production database. Use environment-specific configs and env variables.",high,configuration,python
+"def process_data(data):
+    # Process data
+    result = transform(data)
+    # Return result
+    return result","Useless comments state the obvious. Remove or replace with meaningful documentation: def process_data(data): '''Transform raw data into processed format.''' return transform(data)",low,comments,python
+"numbers = [1, 2, 3, 4, 5]
+even_numbers = []
+for num in numbers:
+    if num % 2 == 0:
+        even_numbers.append(num)","Use list comprehension for better readability and performance: even_numbers = [num for num in numbers if num % 2 == 0]",low,pythonic,python
+"def calculate_discount(price, customer_type, is_holiday, is_member, purchase_count):
+    pass","Long parameter list (5 parameters). Consider using a configuration object or dataclass: @dataclass class DiscountParams: price: float; customer_type: str; is_holiday: bool; is_member: bool; purchase_count: int",medium,design,python
+"print(""Debug: value ="", value)","Debug print statement left in code. Remove before production or use proper logging: logger.debug(f'Value: {value}')",low,debug,python
+"def get_user_name(user_id):
+    user = fetch_user(user_id)
+    if user:
+        return user.name
+    else:
+        return None","Explicit None return is unnecessary. Python returns None by default. Simplify: def get_user_name(user_id): user = fetch_user(user_id); return user.name if user else None",low,style,python
+"async def fetch_data():
+    data = await api.get('/data')
+    processed = await process(data)
+    cached = await cache.set(processed)
+    return cached","Good practice: Proper async/await usage for asynchronous operations. Code is clean and follows async patterns.",info,good_practice,python
+"from typing import List, Optional
+
+def find_user(user_id: int) -> Optional[User]:
+    users = get_users()
+    return next((u for u in users if u.id == user_id), None)","Good practice: Type hints improve code clarity and enable better IDE support and static analysis.",info,good_practice,python
+"def validate_email(email: str) -> bool:
+    if not email:
+        return False
+    if '@' not in email:
+        return False
+    if '.' not in email.split('@')[1]:
+        return False
+    return True","Email validation is too simplistic and fragile. Use regex or email validation library: from email_validator import validate_email, EmailNotValidError",medium,validation,python
+"user_data = json.loads(request.body)
+username = user_data['username']
+password = user_data['password']","No input validation or error handling. Handle KeyError and validate input: username = user_data.get('username'); if not username: raise ValueError('username required')",high,validation,python
+"while True:
+    item = queue.get()
+    process(item)","Infinite loop without break condition or error handling. Add timeout or shutdown signal: while not shutdown_event.is_set(): try: item = queue.get(timeout=1); process(item) except Empty: continue",medium,safety,python
+"def save_user(user):
+    db.users.insert(user.__dict__)","Saving entire object dict is risky (may include sensitive/unintended fields). Explicitly select fields: db.users.insert({'name': user.name, 'email': user.email})",medium,security,python
+"if value is 0:
+    handle_zero()","Identity comparison with 0 is incorrect. Use equality: if value == 0. 'is' checks object identity, not value equality.",medium,correctness,python
+"def calculate(x):
+    return x * 2 + 10 / 2 - 3 * 4","Complex expression without parentheses makes precedence unclear. Add parentheses for readability: return (x * 2) + (10 / 2) - (3 * 4)",low,readability,python
+"class DatabaseConnection:
+    _instance = None
+    
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance","Good design: Singleton pattern implementation ensures single database connection instance. Well-implemented.",info,good_design,python
+"import logging
+logger = logging.getLogger(__name__)
+
+def process_payment(amount):
+    logger.info(f'Processing payment: ${amount}')
+    try:
+        result = payment_api.charge(amount)
+        logger.info(f'Payment successful: {result.id}')
+        return result
+    except PaymentError as e:
+        logger.error(f'Payment failed: {e}')
+        raise","Good practice: Comprehensive logging with appropriate levels (info, error). Helps debugging and monitoring in production.",info,good_practice,python
+"from dataclasses import dataclass
+from typing import List
+
+@dataclass
+class User:
+    id: int
+    name: str
+    email: str
+    roles: List[str]","Good practice: Using dataclass reduces boilerplate code and provides auto-generated __init__, __repr__, __eq__ methods.",info,good_practice,python
+"def fibonacci(n):
+    if n < 2:
+        return n
+    return fibonacci(n-1) + fibonacci(n-2)","Performance warning: Recursive fibonacci without memoization has O(2^n) time complexity. Add @lru_cache(maxsize=None) for dramatic speedup.",high,performance,python
+"SECRET_KEY = os.environ.get('SECRET_KEY')
+if not SECRET_KEY:
+    raise RuntimeError('SECRET_KEY environment variable must be set')","Excellent practice: Using environment variables for secrets with validation at startup. Fails fast if required config is missing.",info,good_practice,python
+"def divide_numbers(numerator, denominator):
+    '''
+    Divide two numbers.
+    
+    Args:
+        numerator (float): The number to be divided
+        denominator (float): The number to divide by
+        
+    Returns:
+        float: The result of division
+        
+    Raises:
+        ValueError: If denominator is zero
+    '''
+    if denominator == 0:
+        raise ValueError('Cannot divide by zero')
+    return numerator / denominator","Excellent documentation: Clear docstring with parameters, return value, and exceptions. Following NumPy/Google docstring style.",info,good_documentation,python
+

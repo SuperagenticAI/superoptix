@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Government Budget Analyst
+  id: budget_analyst
+  namespace: government_public
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that analyzes government budgets and provides fiscal planning recommendations for public agencies.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: budget_data
+    type: str
+    description: Current budget allocations, historical spending, and revenue sources
+    required: true
+  - name: policy_priorities
+    type: str
+    description: Government priorities, service demands, and strategic objectives
+    required: true
+  output_fields:
+  - name: budget_analysis
+    type: str
+    description: Comprehensive budget performance analysis and efficiency assessment
+    required: true
+  - name: fiscal_recommendations
+    type: str
+    description: Specific budget optimization recommendations and resource allocation strategies
+    required: true
+  persona:
+    name: BudgetBot
+    role: Government Budget Analyst
+    goal: Optimize public resource allocation to maximize citizen benefit while maintaining fiscal responsibility
+    traits:
+    - analytical
+    - detail-oriented
+    - fiscally-responsible
+    - transparent
+  tasks:
+  - name: analyze_government_budget
+    instruction: You are a Government Budget Analyst. Generate comprehensive budget analyses including spending efficiency
+      assessments, revenue projections, and resource allocation recommendations for public agencies.
+    inputs:
+    - name: budget_data
+      type: str
+      description: Current budget allocations, historical spending, and revenue sources
+      required: true
+    - name: policy_priorities
+      type: str
+      description: Government priorities, service demands, and strategic objectives
+      required: true
+    outputs:
+    - name: budget_analysis
+      type: str
+      description: Comprehensive budget performance analysis and efficiency assessment
+    - name: fiscal_recommendations
+      type: str
+      description: Specific budget optimization recommendations and resource allocation strategies
+  agentflow:
+  - name: analyze_budget
+    type: Generate
+    task: analyze_government_budget
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.7
+  feature_specifications:
+    scenarios:
+    - name: budget_analyst_comprehensive_task
+      description: Given a complex government_public requirement, the agent should provide detailed analysis and recommendations
+      input:
+        budget_data: Complex government_public scenario requiring comprehensive analysis
+        policy_priorities: ''
+      expected_output:
+        budget_analysis: Detailed step-by-step analysis with government_public-specific recommendations
+        fiscal_recommendations: ''
+    - name: budget_analyst_problem_solving
+      description: When facing government_public challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        budget_data: Challenging government_public problem requiring creative solutions
+        policy_priorities: ''
+      expected_output:
+        budget_analysis: Structured problem-solving approach with multiple solution options
+        fiscal_recommendations: ''
+    - name: budget_analyst_best_practices
+      description: When asked about government_public best practices, the agent should provide current industry standards
+        and guidelines
+      input:
+        budget_data: Industry best practices for government_public operations
+        policy_priorities: ''
+      expected_output:
+        budget_analysis: Comprehensive best practices guide with implementation steps
+        fiscal_recommendations: ''
+    - name: budget_analyst_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to government_public
+      input:
+        budget_data: Compliance requirements for government_public operations
+        policy_priorities: ''
+      expected_output:
+        budget_analysis: Detailed compliance checklist with regulatory requirements
+        fiscal_recommendations: ''
+    - name: budget_analyst_strategic_planning
+      description: When developing government_public strategies, the agent should provide forward-thinking recommendations
+      input:
+        budget_data: Strategic planning for government_public growth and optimization
+        policy_priorities: ''
+      expected_output:
+        budget_analysis: Comprehensive strategic plan with measurable objectives and timelines
+        fiscal_recommendations: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

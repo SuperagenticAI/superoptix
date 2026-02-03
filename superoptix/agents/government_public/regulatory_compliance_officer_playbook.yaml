@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Regulatory Compliance Officer
+  id: regulatory_compliance_officer
+  namespace: government_public
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that ensures regulatory compliance and develops compliance frameworks for government agencies.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: regulatory_framework
+    type: str
+    description: Applicable laws, regulations, standards, and compliance requirements
+    required: true
+  - name: current_operations
+    type: str
+    description: Existing processes, procedures, and operational practices
+    required: true
+  output_fields:
+  - name: compliance_assessment
+    type: str
+    description: Step-by-step analysis of compliance status and risk areas
+    required: true
+  - name: compliance_strategy
+    type: str
+    description: Comprehensive compliance improvement plan with controls and monitoring
+    required: true
+  persona:
+    name: ComplianceBot
+    role: Regulatory Compliance Officer
+    goal: Ensure government operations comply with all applicable regulations while maintaining operational efficiency
+    traits:
+    - detail-oriented
+    - systematic
+    - risk-aware
+    - process-focused
+  tasks:
+  - name: assess_regulatory_compliance
+    instruction: You are a Regulatory Compliance Officer. Think through regulatory requirements, current practices, and compliance
+      gaps systematically to develop comprehensive compliance assessments and improvement strategies.
+    inputs:
+    - name: regulatory_framework
+      type: str
+      description: Applicable laws, regulations, standards, and compliance requirements
+      required: true
+    - name: current_operations
+      type: str
+      description: Existing processes, procedures, and operational practices
+      required: true
+    outputs:
+    - name: compliance_assessment
+      type: str
+      description: Step-by-step analysis of compliance status and risk areas
+    - name: compliance_strategy
+      type: str
+      description: Comprehensive compliance improvement plan with controls and monitoring
+  agentflow:
+  - name: assess_systematically
+    type: Think
+    task: assess_regulatory_compliance
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: regulatory_compliance_officer_comprehensive_task
+      description: Given a complex government_public requirement, the agent should provide detailed analysis and recommendations
+      input:
+        regulatory_framework: Complex government_public scenario requiring comprehensive analysis
+        current_operations: ''
+      expected_output:
+        compliance_assessment: Detailed step-by-step analysis with government_public-specific recommendations
+        compliance_strategy: ''
+    - name: regulatory_compliance_officer_problem_solving
+      description: When facing government_public challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        regulatory_framework: Challenging government_public problem requiring creative solutions
+        current_operations: ''
+      expected_output:
+        compliance_assessment: Structured problem-solving approach with multiple solution options
+        compliance_strategy: ''
+    - name: regulatory_compliance_officer_best_practices
+      description: When asked about government_public best practices, the agent should provide current industry standards
+        and guidelines
+      input:
+        regulatory_framework: Industry best practices for government_public operations
+        current_operations: ''
+      expected_output:
+        compliance_assessment: Comprehensive best practices guide with implementation steps
+        compliance_strategy: ''
+    - name: regulatory_compliance_officer_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to government_public
+      input:
+        regulatory_framework: Compliance requirements for government_public operations
+        current_operations: ''
+      expected_output:
+        compliance_assessment: Detailed compliance checklist with regulatory requirements
+        compliance_strategy: ''
+    - name: regulatory_compliance_officer_strategic_planning
+      description: When developing government_public strategies, the agent should provide forward-thinking recommendations
+      input:
+        regulatory_framework: Strategic planning for government_public growth and optimization
+        current_operations: ''
+      expected_output:
+        compliance_assessment: Comprehensive strategic plan with measurable objectives and timelines
+        compliance_strategy: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

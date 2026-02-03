@@ -1,0 +1,271 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: KNNFewShot Product Recommender
+  id: knn-product-recommender
+  version: 1.0.0
+  namespace: retail
+  level: oracles
+  stage: stable
+  agent_type: Autonomous
+  description: Product recommendation agent optimized with KNNFewShot for similarity-based learning
+  tags:
+  - recommendation
+  - retail
+  - knn
+  - optimization
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    temperature: 0.5
+    max_tokens: 12000
+    cache: true
+  input_fields:
+  - name: user_query
+    type: str
+    description: User's request or question about products
+    required: true
+  - name: budget
+    type: str
+    description: User's budget range
+    required: false
+  - name: category
+    type: str
+    description: Product category of interest
+    required: false
+  - name: user_history
+    type: str
+    description: Previous purchases or stated preferences
+    required: false
+  output_fields:
+  - name: recommendations
+    type: list[str]
+    description: List of recommended products with explanations
+    required: true
+  - name: reasoning
+    type: str
+    description: Overall reasoning for the recommendation set
+    required: true
+  persona:
+    role: Product Recommendation Specialist
+    goal: Provide personalized product recommendations based on user preferences and behavior
+    traits:
+    - helpful
+    - intuitive
+    - customer-focused
+    - analytical
+    expertise_areas:
+    - product knowledge
+    - customer behavior
+    - market trends
+    - personalization
+    communication_preferences:
+      style: conversational
+      tone: helpful
+      verbosity: concise
+  tasks:
+  - name: recommend_products
+    description: Generate personalized product recommendations based on user preferences and context
+    instruction: 'Provide personalized product recommendations based on the user''s preferences, history, and context.
+
+
+      Recommendation Process:
+
+      1. Analyze user preferences and requirements
+
+      2. Consider user''s purchase history or stated interests
+
+      3. Evaluate product features and benefits
+
+      4. Match products to user needs and preferences
+
+      5. Rank recommendations by relevance and value
+
+      6. Provide clear reasoning for each recommendation
+
+
+      Consider:
+
+      - Budget constraints
+
+      - Use case and intended purpose
+
+      - Quality vs. price trade-offs
+
+      - User experience level
+
+      - Compatibility requirements
+
+      - Current trends and reviews
+
+
+      Format your response as:
+
+      **User Profile:** [Brief summary of user needs/preferences]
+
+      **Budget Range:** [Specified or inferred budget]
+
+
+      **Top Recommendations:**
+
+
+      **1. [Product Name]**
+
+      - **Price:** [Price range]
+
+      - **Why it fits:** [Explanation of why this matches user needs]
+
+      - **Key features:** [2-3 most relevant features]
+
+      - **Best for:** [Specific use case or user type]
+
+
+      **2. [Product Name]**
+
+      [Same format as above]
+
+
+      **3. [Product Name]**
+
+      [Same format as above]
+
+
+      **Additional Considerations:**
+
+      - [Helpful tip or consideration 1]
+
+      - [Helpful tip or consideration 2]
+
+      '
+    inputs:
+    - name: user_query
+      type: str
+      description: User's request or question about products
+      required: true
+    - name: budget
+      type: str
+      description: User's budget range
+      required: false
+    - name: category
+      type: str
+      description: Product category of interest
+      required: false
+    - name: user_history
+      type: str
+      description: Previous purchases or stated preferences
+      required: false
+    outputs:
+    - name: recommendations
+      type: list[str]
+      description: List of recommended products with explanations
+    - name: reasoning
+      type: str
+      description: Overall reasoning for the recommendation set
+  optimization:
+    enabled: true
+    optimizer:
+      name: KNNFewShot
+      params:
+        metric: semantic_f1
+        max_labeled_demos: 20
+        max_rounds: 1
+        verbose: false
+        timeout: 150
+    evaluation:
+      enabled: true
+      metrics:
+      - semantic_f1
+      - answer_correctness
+      test_split: 0.2
+    hardware_optimization:
+      target_tier: lightweight
+      memory_limit_gb: 8
+  feature_specifications:
+    scenarios:
+    - name: laptop_recommendation
+      description: Should recommend laptops based on user needs and budget
+      input:
+        user_query: I need a laptop for programming and occasional gaming
+        budget: $800-1200
+        category: laptops
+      expected_output:
+        recommendations:
+        - Mid-range gaming laptop with good CPU
+        - Developer-focused laptop with SSD
+        - Balanced performance laptop
+        reasoning: Recommendations balance programming needs (good CPU, RAM) with gaming capabilities within budget
+      tags:
+      - electronics
+      - laptop
+      - programming
+      priority: high
+    - name: book_recommendation
+      description: Should recommend books based on reading preferences
+      input:
+        user_query: I love mystery novels with strong female protagonists
+        category: books
+        user_history: Enjoyed Agatha Christie, Louise Penny
+      expected_output:
+        recommendations:
+        - Modern mystery with female detective
+        - Classic mystery series
+        - Psychological thriller
+        reasoning: Recommendations align with user's preference for mystery genre and strong female characters
+      tags:
+      - books
+      - mystery
+      - fiction
+      priority: high
+    - name: fitness_equipment_recommendation
+      description: Should recommend fitness equipment for home workouts
+      input:
+        user_query: Need home workout equipment for small apartment
+        budget: $200-500
+        category: fitness
+      expected_output:
+        recommendations:
+        - Adjustable dumbbells
+        - Resistance bands set
+        - Compact exercise bike
+        reasoning: Space-efficient equipment suitable for apartment living within budget range
+      tags:
+      - fitness
+      - home
+      - equipment
+      priority: medium
+    - name: smartphone_recommendation
+      description: Should recommend smartphones based on usage patterns
+      input:
+        user_query: Looking for a phone with great camera for photography
+        budget: $600-900
+        category: smartphones
+      expected_output:
+        recommendations:
+        - Camera-focused smartphone
+        - Photography-oriented phone
+        - High-quality camera phone
+        reasoning: Prioritizes camera quality and photography features within specified budget
+      tags:
+      - smartphone
+      - camera
+      - photography
+      priority: high
+    - name: kitchen_appliance_recommendation
+      description: Should recommend kitchen appliances for cooking needs
+      input:
+        user_query: Need appliances for healthy meal prep for family of 4
+        budget: $300-800
+        category: kitchen
+      expected_output:
+        recommendations:
+        - Large air fryer
+        - Food processor
+        - Multi-cooker/Instant Pot
+        reasoning: Appliances that facilitate healthy cooking and meal prep for family size
+      tags:
+      - kitchen
+      - healthy-cooking
+      - family
+      priority: medium

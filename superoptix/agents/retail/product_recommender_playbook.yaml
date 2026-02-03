@@ -1,0 +1,124 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Product Recommender
+  id: product_recommender
+  namespace: retail
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that provides personalized product recommendations for e-commerce customers.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: customer_profile
+    type: str
+    description: Customer demographics, preferences, and purchase history
+    required: true
+  - name: product_catalog
+    type: str
+    description: Available products, categories, and current promotions
+    required: true
+  output_fields:
+  - name: product_recommendations
+    type: str
+    description: Personalized product recommendations with explanations
+    required: true
+  - name: upsell_opportunities
+    type: str
+    description: Cross-sell and upsell suggestions with compelling reasons
+    required: true
+  persona:
+    name: RecommendBot
+    role: Product Recommendation Specialist
+    goal: Provide personalized product recommendations that increase customer satisfaction and sales
+    traits:
+    - customer-focused
+    - trend-aware
+    - persuasive
+    - data-savvy
+  tasks:
+  - name: recommend_products
+    instruction: You are a Product Recommendation Specialist. Generate personalized product recommendations based on customer
+      preferences, purchase history, and trending items.
+    inputs:
+    - name: customer_profile
+      type: str
+      description: Customer demographics, preferences, and purchase history
+      required: true
+    - name: product_catalog
+      type: str
+      description: Available products, categories, and current promotions
+      required: true
+    outputs:
+    - name: product_recommendations
+      type: str
+      description: Personalized product recommendations with explanations
+    - name: upsell_opportunities
+      type: str
+      description: Cross-sell and upsell suggestions with compelling reasons
+  agentflow:
+  - name: generate_recommendations
+    type: Generate
+    task: recommend_products
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.7
+  feature_specifications:
+    scenarios:
+    - name: product_recommender_comprehensive_task
+      description: Given a complex retail requirement, the agent should provide detailed analysis and recommendations
+      input:
+        customer_profile: Complex retail scenario requiring comprehensive analysis
+        product_catalog: ''
+      expected_output:
+        product_recommendations: Detailed step-by-step analysis with retail-specific recommendations
+        upsell_opportunities: ''
+    - name: product_recommender_problem_solving
+      description: When facing retail challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        customer_profile: Challenging retail problem requiring creative solutions
+        product_catalog: ''
+      expected_output:
+        product_recommendations: Structured problem-solving approach with multiple solution options
+        upsell_opportunities: ''
+    - name: product_recommender_best_practices
+      description: When asked about retail best practices, the agent should provide current industry standards and guidelines
+      input:
+        customer_profile: Industry best practices for retail operations
+        product_catalog: ''
+      expected_output:
+        product_recommendations: Comprehensive best practices guide with implementation steps
+        upsell_opportunities: ''
+    - name: product_recommender_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to retail
+      input:
+        customer_profile: Compliance requirements for retail operations
+        product_catalog: ''
+      expected_output:
+        product_recommendations: Detailed compliance checklist with regulatory requirements
+        upsell_opportunities: ''
+    - name: product_recommender_strategic_planning
+      description: When developing retail strategies, the agent should provide forward-thinking recommendations
+      input:
+        customer_profile: Strategic planning for retail growth and optimization
+        product_catalog: ''
+      expected_output:
+        product_recommendations: Comprehensive strategic plan with measurable objectives and timelines
+        upsell_opportunities: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

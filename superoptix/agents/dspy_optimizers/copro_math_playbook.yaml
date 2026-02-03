@@ -1,0 +1,121 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: COPRO Math Solver
+  id: copro-math-solver
+  version: 1.0.0
+  level: oracles
+  description: Mathematical problem solver using COPRO optimization for collaborative prompt optimization
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    temperature: 0.1
+    max_tokens: 32000
+  input_fields:
+  - name: problem
+    type: str
+    description: The mathematical problem to solve
+    required: true
+  output_fields:
+  - name: solution
+    type: str
+    description: Complete step-by-step solution with explanations
+    required: true
+  - name: answer
+    type: str
+    description: The final numerical or algebraic answer
+    required: true
+  - name: reasoning
+    type: str
+    description: High-level reasoning approach
+    required: true
+  persona:
+    role: Mathematics Expert
+    goal: Solve mathematical problems with collaborative optimization and clear explanations
+    traits:
+    - collaborative
+    - precise
+    - analytical
+    - clear
+  tasks:
+  - name: solve_math_problem
+    description: Solve mathematical problems using collaborative optimization techniques
+    instruction: 'Solve the given mathematical problem with clear step-by-step reasoning.
+
+
+      Requirements:
+
+      1. Show all work clearly and logically
+
+      2. Explain the reasoning behind each step
+
+      3. Provide alternative approaches when relevant
+
+      4. Give the final answer in the most appropriate format
+
+
+      Format your response as:
+
+      **Solution:**
+
+      [Step-by-step work with explanations]
+
+
+      **Final Answer:** [Clear, precise answer]
+
+      '
+    inputs:
+    - name: problem
+      type: str
+      description: The mathematical problem to solve
+      required: true
+    outputs:
+    - name: solution
+      type: str
+      description: Complete step-by-step solution with explanations
+    - name: answer
+      type: str
+      description: The final numerical or algebraic answer
+    - name: reasoning
+      type: str
+      description: High-level reasoning approach
+  optimization:
+    optimizer:
+      name: COPRO
+      params:
+        metric: answer_exact_match
+        breadth: 6
+        depth: 2
+        init_temperature: 1.2
+  feature_specifications:
+    scenarios:
+    - name: quadratic_equation
+      description: Should solve quadratic equations
+      input:
+        problem: "Solve the quadratic equation 2x\xB2 - 5x - 3 = 0"
+      expected_output:
+        answer: x = 3 or x = -1/2
+        solution: "Using the quadratic formula: x = (5 \xB1 \u221A49)/4 = (5 \xB1 7)/4"
+    - name: geometry_problem
+      description: Should solve geometric problems
+      input:
+        problem: In a right triangle with legs of length 5 and 12, find the length of the hypotenuse
+      expected_output:
+        answer: '13'
+        solution: "Using Pythagorean theorem: c\xB2 = 5\xB2 + 12\xB2 = 25 + 144 = 169, so c = 13"
+    - name: optimization_problem
+      description: Should solve optimization problems
+      input:
+        problem: Find the maximum area of a rectangle with perimeter 20
+      expected_output:
+        answer: '25'
+        solution: "Square maximizes area. Side length = 20/4 = 5. Area = 5\xB2 = 25"
+    - name: basic_arithmetic
+      description: Should solve basic arithmetic problems
+      input:
+        problem: What is 25 + 37?
+      expected_output:
+        answer: '62'
+        solution: 25 + 37 = 62

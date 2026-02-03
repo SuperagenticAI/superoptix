@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Fleet Manager
+  id: fleet_manager
+  namespace: transportation
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that manages vehicle fleets and provides maintenance scheduling and operational guidance.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: fleet_status
+    type: str
+    description: Vehicle conditions, mileage, maintenance history, and utilization data
+    required: true
+  - name: operational_needs
+    type: str
+    description: Delivery schedules, capacity requirements, and business priorities
+    required: true
+  output_fields:
+  - name: fleet_management_plan
+    type: str
+    description: Comprehensive fleet management strategy and recommendations
+    required: true
+  - name: maintenance_schedule
+    type: str
+    description: Detailed maintenance and replacement timeline
+    required: true
+  persona:
+    name: FleetBot
+    role: Fleet Operations Manager
+    goal: Maximize fleet efficiency, safety, and cost-effectiveness while minimizing downtime
+    traits:
+    - organized
+    - proactive
+    - safety-focused
+    - cost-effective
+  tasks:
+  - name: manage_fleet_operations
+    instruction: You are a Fleet Operations Manager. Generate comprehensive fleet management strategies including maintenance
+      schedules, vehicle assignments, and operational improvements.
+    inputs:
+    - name: fleet_status
+      type: str
+      description: Vehicle conditions, mileage, maintenance history, and utilization data
+      required: true
+    - name: operational_needs
+      type: str
+      description: Delivery schedules, capacity requirements, and business priorities
+      required: true
+    outputs:
+    - name: fleet_management_plan
+      type: str
+      description: Comprehensive fleet management strategy and recommendations
+    - name: maintenance_schedule
+      type: str
+      description: Detailed maintenance and replacement timeline
+  agentflow:
+  - name: manage_fleet
+    type: Generate
+    task: manage_fleet_operations
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.7
+  feature_specifications:
+    scenarios:
+    - name: fleet_manager_comprehensive_task
+      description: Given a complex transportation requirement, the agent should provide detailed analysis and recommendations
+      input:
+        fleet_status: Complex transportation scenario requiring comprehensive analysis
+        operational_needs: ''
+      expected_output:
+        fleet_management_plan: Detailed step-by-step analysis with transportation-specific recommendations
+        maintenance_schedule: ''
+    - name: fleet_manager_problem_solving
+      description: When facing transportation challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        fleet_status: Challenging transportation problem requiring creative solutions
+        operational_needs: ''
+      expected_output:
+        fleet_management_plan: Structured problem-solving approach with multiple solution options
+        maintenance_schedule: ''
+    - name: fleet_manager_best_practices
+      description: When asked about transportation best practices, the agent should provide current industry standards and
+        guidelines
+      input:
+        fleet_status: Industry best practices for transportation operations
+        operational_needs: ''
+      expected_output:
+        fleet_management_plan: Comprehensive best practices guide with implementation steps
+        maintenance_schedule: ''
+    - name: fleet_manager_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to transportation
+      input:
+        fleet_status: Compliance requirements for transportation operations
+        operational_needs: ''
+      expected_output:
+        fleet_management_plan: Detailed compliance checklist with regulatory requirements
+        maintenance_schedule: ''
+    - name: fleet_manager_strategic_planning
+      description: When developing transportation strategies, the agent should provide forward-thinking recommendations
+      input:
+        fleet_status: Strategic planning for transportation growth and optimization
+        operational_needs: ''
+      expected_output:
+        fleet_management_plan: Comprehensive strategic plan with measurable objectives and timelines
+        maintenance_schedule: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

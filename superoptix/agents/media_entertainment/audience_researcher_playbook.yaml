@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Audience Researcher
+  id: audience_researcher
+  namespace: media_entertainment
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that researches audience preferences and generates insights for content development.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: audience_data
+    type: str
+    description: Demographic information, viewing habits, and engagement metrics
+    required: true
+  - name: market_trends
+    type: str
+    description: Industry trends, competitor analysis, and emerging preferences
+    required: true
+  output_fields:
+  - name: audience_insights
+    type: str
+    description: Comprehensive audience analysis and key behavioral insights
+    required: true
+  - name: content_recommendations
+    type: str
+    description: Specific content strategy recommendations based on research findings
+    required: true
+  persona:
+    name: AudienceBot
+    role: Entertainment Audience Researcher
+    goal: Generate actionable audience insights that inform content strategy and maximize engagement
+    traits:
+    - analytical
+    - curious
+    - data-driven
+    - consumer-focused
+  tasks:
+  - name: research_audience_preferences
+    instruction: You are an Entertainment Audience Researcher. Generate comprehensive audience research reports including
+      demographic analysis, preference trends, and content recommendations based on market data.
+    inputs:
+    - name: audience_data
+      type: str
+      description: Demographic information, viewing habits, and engagement metrics
+      required: true
+    - name: market_trends
+      type: str
+      description: Industry trends, competitor analysis, and emerging preferences
+      required: true
+    outputs:
+    - name: audience_insights
+      type: str
+      description: Comprehensive audience analysis and key behavioral insights
+    - name: content_recommendations
+      type: str
+      description: Specific content strategy recommendations based on research findings
+  agentflow:
+  - name: research_audience
+    type: Generate
+    task: research_audience_preferences
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.7
+  feature_specifications:
+    scenarios:
+    - name: audience_researcher_comprehensive_task
+      description: Given a complex media_entertainment requirement, the agent should provide detailed analysis and recommendations
+      input:
+        audience_data: Complex media_entertainment scenario requiring comprehensive analysis
+        market_trends: ''
+      expected_output:
+        audience_insights: Detailed step-by-step analysis with media_entertainment-specific recommendations
+        content_recommendations: ''
+    - name: audience_researcher_problem_solving
+      description: When facing media_entertainment challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        audience_data: Challenging media_entertainment problem requiring creative solutions
+        market_trends: ''
+      expected_output:
+        audience_insights: Structured problem-solving approach with multiple solution options
+        content_recommendations: ''
+    - name: audience_researcher_best_practices
+      description: When asked about media_entertainment best practices, the agent should provide current industry standards
+        and guidelines
+      input:
+        audience_data: Industry best practices for media_entertainment operations
+        market_trends: ''
+      expected_output:
+        audience_insights: Comprehensive best practices guide with implementation steps
+        content_recommendations: ''
+    - name: audience_researcher_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to media_entertainment
+      input:
+        audience_data: Compliance requirements for media_entertainment operations
+        market_trends: ''
+      expected_output:
+        audience_insights: Detailed compliance checklist with regulatory requirements
+        content_recommendations: ''
+    - name: audience_researcher_strategic_planning
+      description: When developing media_entertainment strategies, the agent should provide forward-thinking recommendations
+      input:
+        audience_data: Strategic planning for media_entertainment growth and optimization
+        market_trends: ''
+      expected_output:
+        audience_insights: Comprehensive strategic plan with measurable objectives and timelines
+        content_recommendations: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

@@ -1,0 +1,201 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: HuggingFace Demo Assistant
+  id: huggingface_demo
+  namespace: demo
+  version: 1.0.0
+  agent_type: Interactive
+  level: genies
+  description: A comprehensive demo agent showcasing HuggingFace model capabilities with SuperOptiX framework features including
+    tools, memory, and RAG.
+spec:
+  language_model:
+    location: local
+    provider: huggingface
+    model: microsoft/Phi-4
+    api_base: http://localhost:8001
+    temperature: 0.7
+    max_tokens: 2048
+  input_fields:
+  - name: text_request
+    type: str
+    description: A text generation request, language task, or NLP question.
+    required: true
+  output_fields:
+  - name: generated_text
+    type: str
+    description: High-quality generated text or response.
+    required: true
+  persona:
+    name: HFBot
+    role: HuggingFace Demo Assistant
+    goal: Demonstrate the power of HuggingFace models with SuperOptiX framework capabilities
+    traits:
+    - helpful
+    - knowledgeable
+    - precise
+    - educational
+    - technical
+  tasks:
+  - name: text_generation
+    instruction: You are a HuggingFace Demo Assistant. Help users with text generation, language understanding, and NLP tasks.
+      Provide high-quality, contextually appropriate responses.
+    inputs:
+    - name: text_request
+      type: str
+      description: A text generation request, language task, or NLP question.
+      required: true
+    outputs:
+    - name: generated_text
+      type: str
+      description: High-quality generated text or response.
+  - name: language_understanding
+    instruction: Demonstrate advanced language understanding capabilities including sentiment analysis, text classification,
+      and language comprehension.
+    inputs:
+    - name: language_input
+      type: str
+      description: Text for language understanding analysis or processing.
+      required: true
+    outputs:
+    - name: language_analysis
+      type: str
+      description: Comprehensive language understanding analysis.
+  - name: model_explanation
+    instruction: Explain HuggingFace models, transformers, and NLP concepts in detail.
+    inputs:
+    - name: model_query
+      type: str
+      description: A question about HuggingFace models, transformers, or NLP concepts.
+      required: true
+    outputs:
+    - name: model_explanation
+      type: str
+      description: Detailed explanation of HuggingFace models and concepts.
+  - name: huggingface_demo
+    instruction: Demonstrate HuggingFace-specific capabilities and features. Show how HuggingFace models work with SuperOptiX.
+    inputs:
+    - name: hf_query
+      type: str
+      description: A query about HuggingFace capabilities or demonstration request.
+      required: true
+    outputs:
+    - name: hf_demonstration
+      type: str
+      description: A demonstration of HuggingFace features and capabilities.
+  agentflow:
+  - name: analyze_request
+    type: Analyze
+    task: text_generation
+  - name: generate_response
+    type: Generate
+    task: language_understanding
+  - name: explain_models
+    type: Explain
+    task: model_explanation
+  - name: demonstrate_hf
+    type: Demonstrate
+    task: huggingface_demo
+  react_config:
+    max_iters: 5
+    max_tool_calls: 3
+    tool_selection_strategy: automatic
+    reasoning_style: step_by_step
+    error_handling: retry
+    enable_tracing: true
+  tools:
+    enabled: true
+    categories:
+    - development
+    - core
+    - utilities
+    specific_tools:
+    - calculator
+    - file_reader
+    - text_analyzer
+    - code_formatter
+    - web_search
+    - json_processor
+  memory:
+    enabled: true
+    short_term:
+      enabled: true
+      max_tokens: 1000
+    long_term:
+      enabled: true
+      storage_type: local
+      max_entries: 100
+    episodic:
+      enabled: true
+      max_episodes: 50
+  rag:
+    enabled: true
+    retriever_type: chroma
+    config:
+      top_k: 5
+      chunk_size: 512
+      chunk_overlap: 50
+    vector_store:
+      embedding_model: sentence-transformers/all-MiniLM-L6-v2
+      collection_name: hf_demo_knowledge
+  evaluation:
+    builtin_metrics:
+    - name: text_quality
+      threshold: 0.8
+    - name: language_understanding
+      threshold: 0.8
+    - name: model_knowledge
+      threshold: 0.9
+    - name: hf_knowledge
+      threshold: 0.9
+  feature_specifications:
+    scenarios:
+    - name: text_generation_task
+      description: The agent should generate high-quality text based on prompts.
+      input:
+        text_request: Write a professional email requesting a meeting
+      expected_output:
+        generated_text: Should include a well-structured professional email
+    - name: sentiment_analysis
+      description: The agent should demonstrate language understanding through sentiment analysis.
+      input:
+        language_input: I'm really excited about this new project!
+      expected_output:
+        language_analysis: Should include sentiment analysis and language understanding
+    - name: model_explanation_task
+      description: The agent should explain HuggingFace models and concepts.
+      input:
+        model_query: What are transformers and how do they work?
+      expected_output:
+        model_explanation: Should include detailed explanation of transformers and their architecture
+    - name: hf_capabilities
+      description: The agent should demonstrate HuggingFace-specific capabilities.
+      input:
+        hf_query: What are the key features of HuggingFace and how does it work with SuperOptiX?
+      expected_output:
+        hf_demonstration: Should include HuggingFace features, model benefits, and SuperOptiX integration
+    - name: nlp_task_demonstration
+      description: The agent should demonstrate various NLP tasks.
+      input:
+        text_request: 'Classify this text: ''The weather is beautiful today'''
+      expected_output:
+        generated_text: Should include text classification and analysis
+    - name: language_model_comparison
+      description: The agent should compare different language models.
+      input:
+        model_query: Compare GPT models with BERT models
+      expected_output:
+        model_explanation: Should include detailed comparison of different model architectures
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: tool_use_accuracy
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 5
+        skip_perfect_score: true
+        reflection_minibatch_size: 3
+    metric: tool_use_accuracy
+    metric_threshold: 0.75

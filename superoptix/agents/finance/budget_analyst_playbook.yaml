@@ -1,0 +1,164 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Budget Analyst
+  id: budget_analyst
+  namespace: finance
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that helps create and analyze budgets for individuals and small businesses.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: income_sources
+    type: str
+    description: All income sources and amounts
+    required: true
+  - name: expense_categories
+    type: str
+    description: Current expenses by category
+    required: true
+  output_fields:
+  - name: budget_plan
+    type: str
+    description: Detailed budget with categories and allocations
+    required: true
+  - name: savings_recommendations
+    type: str
+    description: Specific recommendations for cost savings
+    required: true
+  persona:
+    name: BudgetBot
+    role: Budget Analyst
+    goal: Create accurate budgets and provide spending analysis
+    traits:
+    - detail-oriented
+    - organized
+    - practical
+    - cost-conscious
+  tasks:
+  - name: create_budget
+    instruction: You are a Budget Analyst. Create a detailed budget based on income, expenses, and financial goals. Provide
+      clear categorization and spending recommendations.
+    inputs:
+    - name: income_sources
+      type: str
+      description: All income sources and amounts
+      required: true
+    - name: expense_categories
+      type: str
+      description: Current expenses by category
+      required: true
+    outputs:
+    - name: budget_plan
+      type: str
+      description: Detailed budget with categories and allocations
+    - name: savings_recommendations
+      type: str
+      description: Specific recommendations for cost savings
+  agentflow:
+  - name: generate_budget
+    type: Generate
+    task: create_budget
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: departmental_budget_variance_analysis
+      description: Given budget variances, the agent should provide detailed analysis with actionable recommendations
+      input:
+        income_sources: 'Q3 budget: Marketing $50k actual vs $40k budgeted, IT $30k actual vs $35k budgeted, Operations $80k
+          actual vs $75k budgeted'
+        expense_categories: Identify root causes of variances, improve budget accuracy, implement cost controls
+      expected_output:
+        budget_plan: "**Q3 Budget Variance Analysis**\n\n**Step 1: Variance Summary**\n- Marketing: $10k over budget (25%\
+          \ variance) - UNFAVORABLE\n- IT: $5k under budget (14% variance) - FAVORABLE  \n- Operations: $5k over budget (7%\
+          \ variance) - MODERATE\n- Net Position: $10k over total budget\n\n**Step 2: Root Cause Analysis**\n- Marketing overage:\
+          \ Likely unplanned campaign expenses or higher than expected costs\n- IT savings: Possible delayed projects or vendor\
+          \ discounts\n- Operations overage: Could indicate increased activity or inefficiencies\n\n**Step 3: Impact Assessment**\n\
+          - Overall budget control: Needs improvement\n- Cash flow impact: Minimal but concerning trend\n- Forecasting accuracy:\
+          \ Review required"
+        savings_recommendations: '**Budget Management Improvement Plan**
+
+
+          **Immediate Actions:**
+
+          1. Meet with Marketing manager to identify overage causes
+
+          2. Document IT savings opportunities for future budgets
+
+          3. Investigate Operations cost drivers
+
+          4. Implement monthly budget reviews
+
+
+          **Process Improvements:**
+
+          - Monthly variance reporting with explanations
+
+          - Approval process for budget overages >10%
+
+          - Quarterly budget reforecasting
+
+          - Department manager budget training
+
+
+          **Q4 Recommendations:**
+
+          - Adjust Marketing budget based on Q3 learnings
+
+          - Reallocate IT savings to high-priority areas
+
+          - Monitor Operations closely for continued overages
+
+          - Implement contingency reserves (5-10% of budget)'
+    - name: budget_analyst_problem_solving
+      description: When facing finance challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        income_sources: Challenging finance problem requiring creative solutions
+        expense_categories: ''
+      expected_output:
+        budget_plan: Structured problem-solving approach with multiple solution options
+        savings_recommendations: ''
+    - name: budget_analyst_best_practices
+      description: When asked about finance best practices, the agent should provide current industry standards and guidelines
+      input:
+        income_sources: Industry best practices for finance operations
+        expense_categories: ''
+      expected_output:
+        budget_plan: Comprehensive best practices guide with implementation steps
+        savings_recommendations: ''
+    - name: budget_analyst_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to finance
+      input:
+        income_sources: Compliance requirements for finance operations
+        expense_categories: ''
+      expected_output:
+        budget_plan: Detailed compliance checklist with regulatory requirements
+        savings_recommendations: ''
+    - name: budget_analyst_strategic_planning
+      description: When developing finance strategies, the agent should provide forward-thinking recommendations
+      input:
+        income_sources: Strategic planning for finance growth and optimization
+        expense_categories: ''
+      expected_output:
+        budget_plan: Comprehensive strategic plan with measurable objectives and timelines
+        savings_recommendations: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

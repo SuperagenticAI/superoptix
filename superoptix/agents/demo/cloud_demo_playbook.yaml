@@ -1,0 +1,198 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Cloud Demo Assistant
+  id: cloud_demo
+  namespace: demo
+  version: 1.0.0
+  agent_type: Interactive
+  level: genies
+  description: A comprehensive demo agent showcasing cloud-based model capabilities with SuperOptiX framework features including
+    tools, memory, and RAG.
+spec:
+  language_model:
+    location: cloud
+    provider: openai
+    model: gpt-3.5-turbo
+    temperature: 0.7
+    max_tokens: 2048
+  input_fields:
+  - name: cloud_request
+    type: str
+    description: A request to demonstrate cloud model capabilities.
+    required: true
+  output_fields:
+  - name: cloud_demonstration
+    type: str
+    description: A demonstration of cloud model capabilities.
+    required: true
+  persona:
+    name: CloudBot
+    role: Cloud Demo Assistant
+    goal: Demonstrate the power of cloud-based models with SuperOptiX framework capabilities
+    traits:
+    - helpful
+    - knowledgeable
+    - precise
+    - educational
+    - cloud-savvy
+  tasks:
+  - name: cloud_capabilities_demo
+    instruction: You are a Cloud Demo Assistant. Demonstrate cloud-based model capabilities including natural language understanding,
+      reasoning, and response generation.
+    inputs:
+    - name: cloud_request
+      type: str
+      description: A request to demonstrate cloud model capabilities.
+      required: true
+    outputs:
+    - name: cloud_demonstration
+      type: str
+      description: A demonstration of cloud model capabilities.
+  - name: knowledge_assistant
+    instruction: Provide comprehensive information and explanations on various topics using cloud model knowledge.
+    inputs:
+    - name: knowledge_query
+      type: str
+      description: A question or request for information on any topic.
+      required: true
+    outputs:
+    - name: knowledge_response
+      type: str
+      description: Comprehensive and accurate information on the requested topic.
+  - name: creative_assistant
+    instruction: Generate creative content including stories, poems, and imaginative responses.
+    inputs:
+    - name: creative_request
+      type: str
+      description: A request for creative content generation.
+      required: true
+    outputs:
+    - name: creative_content
+      type: str
+      description: Creative and engaging content.
+  - name: problem_solving
+    instruction: Help solve problems and provide step-by-step reasoning and solutions.
+    inputs:
+    - name: problem_statement
+      type: str
+      description: A problem or challenge to solve.
+      required: true
+    outputs:
+    - name: solution
+      type: str
+      description: A complete solution with step-by-step reasoning.
+  agentflow:
+  - name: demonstrate_cloud
+    type: Demonstrate
+    task: cloud_capabilities_demo
+  - name: provide_knowledge
+    type: Inform
+    task: knowledge_assistant
+  - name: generate_creative
+    type: Generate
+    task: creative_assistant
+  - name: solve_problem
+    type: Solve
+    task: problem_solving
+  react_config:
+    max_iters: 5
+    max_tool_calls: 3
+    tool_selection_strategy: automatic
+    reasoning_style: step_by_step
+    error_handling: retry
+    enable_tracing: true
+  tools:
+    enabled: true
+    categories:
+    - core
+    - utilities
+    - development
+    specific_tools:
+    - calculator
+    - web_search
+    - text_analyzer
+    - date_time
+    - json_processor
+  memory:
+    enabled: true
+    short_term:
+      enabled: true
+      max_tokens: 1000
+    long_term:
+      enabled: true
+      storage_type: local
+      max_entries: 100
+    episodic:
+      enabled: true
+      max_episodes: 50
+  rag:
+    enabled: true
+    retriever_type: chroma
+    config:
+      top_k: 5
+      chunk_size: 512
+      chunk_overlap: 50
+    vector_store:
+      embedding_model: sentence-transformers/all-MiniLM-L6-v2
+      collection_name: cloud_demo_knowledge
+  evaluation:
+    builtin_metrics:
+    - name: response_quality
+      threshold: 0.8
+    - name: knowledge_accuracy
+      threshold: 0.8
+    - name: creativity_score
+      threshold: 0.7
+    - name: problem_solving_effectiveness
+      threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: cloud_capabilities_test
+      description: The agent should demonstrate cloud model capabilities effectively.
+      input:
+        cloud_request: What are the advantages of cloud-based AI models?
+      expected_output:
+        cloud_demonstration: Should include comprehensive explanation of cloud AI benefits
+    - name: knowledge_test
+      description: The agent should provide accurate information on topics.
+      input:
+        knowledge_query: Explain the benefits of renewable energy
+      expected_output:
+        knowledge_response: Should include comprehensive and accurate information
+    - name: creative_test
+      description: The agent should generate creative content effectively.
+      input:
+        creative_request: Write a short story about a robot learning to paint
+      expected_output:
+        creative_content: Should include a creative and engaging story
+    - name: problem_solving_test
+      description: The agent should solve problems with step-by-step reasoning.
+      input:
+        problem_statement: How can I improve my productivity while working from home?
+      expected_output:
+        solution: Should include structured problem-solving approach
+    - name: tool_integration_test
+      description: The agent should use tools effectively with cloud models.
+      input:
+        cloud_request: Calculate the compound interest for $1000 at 5% for 3 years
+      expected_output:
+        cloud_demonstration: Should use calculator tool and provide accurate results
+    - name: memory_integration_test
+      description: The agent should demonstrate memory capabilities with cloud models.
+      input:
+        cloud_request: Remember that my favorite color is blue. What's my favorite color?
+      expected_output:
+        cloud_demonstration: Should remember and respond with blue
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: tool_use_accuracy
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 5
+        skip_perfect_score: true
+        reflection_minibatch_size: 3
+    metric: tool_use_accuracy
+    metric_threshold: 0.75

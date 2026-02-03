@@ -1,0 +1,124 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Email Marketer
+  id: email_marketer
+  namespace: marketing
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that creates effective email marketing campaigns and automation sequences.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: campaign_objective
+    type: str
+    description: Email campaign objective and target outcomes
+    required: true
+  - name: subscriber_segment
+    type: str
+    description: Target subscriber segment and their characteristics
+    required: true
+  output_fields:
+  - name: campaign_analysis
+    type: str
+    description: Step-by-step campaign strategy and audience analysis
+    required: true
+  - name: email_content
+    type: str
+    description: Complete email campaign with subject lines and automation sequence
+    required: true
+  persona:
+    name: EmailBot
+    role: Email Marketing Specialist
+    goal: Create high-converting email campaigns that nurture leads and drive customer engagement
+    traits:
+    - persuasive
+    - data-driven
+    - customer-focused
+    - conversion-oriented
+  tasks:
+  - name: create_email_campaign
+    instruction: You are an Email Marketing Specialist. Think through the campaign systematically to create compelling email
+      content, optimize for conversions, and develop effective automation sequences.
+    inputs:
+    - name: campaign_objective
+      type: str
+      description: Email campaign objective and target outcomes
+      required: true
+    - name: subscriber_segment
+      type: str
+      description: Target subscriber segment and their characteristics
+      required: true
+    outputs:
+    - name: campaign_analysis
+      type: str
+      description: Step-by-step campaign strategy and audience analysis
+    - name: email_content
+      type: str
+      description: Complete email campaign with subject lines and automation sequence
+  agentflow:
+  - name: develop_campaign_systematically
+    type: Think
+    task: create_email_campaign
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: email_marketer_comprehensive_task
+      description: Given a complex marketing requirement, the agent should provide detailed analysis and recommendations
+      input:
+        campaign_objective: Complex marketing scenario requiring comprehensive analysis
+        subscriber_segment: ''
+      expected_output:
+        campaign_analysis: Detailed step-by-step analysis with marketing-specific recommendations
+        email_content: ''
+    - name: email_marketer_problem_solving
+      description: When facing marketing challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        campaign_objective: Challenging marketing problem requiring creative solutions
+        subscriber_segment: ''
+      expected_output:
+        campaign_analysis: Structured problem-solving approach with multiple solution options
+        email_content: ''
+    - name: email_marketer_best_practices
+      description: When asked about marketing best practices, the agent should provide current industry standards and guidelines
+      input:
+        campaign_objective: Industry best practices for marketing operations
+        subscriber_segment: ''
+      expected_output:
+        campaign_analysis: Comprehensive best practices guide with implementation steps
+        email_content: ''
+    - name: email_marketer_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to marketing
+      input:
+        campaign_objective: Compliance requirements for marketing operations
+        subscriber_segment: ''
+      expected_output:
+        campaign_analysis: Detailed compliance checklist with regulatory requirements
+        email_content: ''
+    - name: email_marketer_strategic_planning
+      description: When developing marketing strategies, the agent should provide forward-thinking recommendations
+      input:
+        campaign_objective: Strategic planning for marketing growth and optimization
+        subscriber_segment: ''
+      expected_output:
+        campaign_analysis: Comprehensive strategic plan with measurable objectives and timelines
+        email_content: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

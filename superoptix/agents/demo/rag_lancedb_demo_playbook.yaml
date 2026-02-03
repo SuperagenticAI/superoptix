@@ -1,0 +1,204 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: RAG LanceDB Demo Assistant
+  id: rag_lancedb_demo
+  namespace: demo
+  version: 1.0.0
+  agent_type: Interactive
+  level: genies
+  description: A comprehensive demo agent showcasing high-performance RAG capabilities with LanceDB vector database and SuperOptiX
+    framework features.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+    temperature: 0.7
+    max_tokens: 2048
+  input_fields:
+  - name: retrieval_query
+    type: str
+    description: A question or query that requires high-performance knowledge retrieval from LanceDB.
+    required: true
+  output_fields:
+  - name: high_performance_response
+    type: str
+    description: A fast and accurate response based on retrieved knowledge.
+    required: true
+  persona:
+    name: RAGLanceBot
+    role: RAG LanceDB Demo Assistant
+    goal: Demonstrate the power of high-performance RAG with LanceDB vector database in SuperOptiX framework
+    traits:
+    - helpful
+    - knowledgeable
+    - precise
+    - educational
+    - performance-oriented
+  tasks:
+  - name: high_performance_retrieval
+    instruction: You are a RAG LanceDB Demo Assistant. Use high-performance RAG capabilities to retrieve and synthesize information
+      from the LanceDB knowledge base. Provide fast, accurate, and contextually relevant responses.
+    inputs:
+    - name: retrieval_query
+      type: str
+      description: A question or query that requires high-performance knowledge retrieval from LanceDB.
+      required: true
+    outputs:
+    - name: high_performance_response
+      type: str
+      description: A fast and accurate response based on retrieved knowledge.
+  - name: large_scale_analysis
+    instruction: Analyze large-scale datasets and documents stored in LanceDB. Provide insights and summaries based on high-performance
+      retrieval.
+    inputs:
+    - name: large_scale_request
+      type: str
+      description: A request to analyze large-scale data or documents in the knowledge base.
+      required: true
+    outputs:
+    - name: large_scale_analysis
+      type: str
+      description: Large-scale data analysis with insights and interpretations.
+  - name: performance_demonstration
+    instruction: Demonstrate LanceDB performance capabilities and explain how high-performance vector search works.
+    inputs:
+    - name: performance_query
+      type: str
+      description: A query about LanceDB performance capabilities or demonstration request.
+      required: true
+    outputs:
+    - name: performance_explanation
+      type: str
+      description: A demonstration of LanceDB performance features and capabilities.
+  - name: lancedb_demo
+    instruction: Demonstrate LanceDB-specific capabilities and features. Show how LanceDB works with SuperOptiX for high-performance
+      RAG.
+    inputs:
+    - name: lancedb_query
+      type: str
+      description: A query about LanceDB capabilities or demonstration request.
+      required: true
+    outputs:
+    - name: lancedb_demonstration
+      type: str
+      description: A demonstration of LanceDB features and capabilities.
+  agentflow:
+  - name: high_performance_retrieve
+    type: Retrieve
+    task: high_performance_retrieval
+  - name: large_scale_analyze
+    type: Analyze
+    task: large_scale_analysis
+  - name: demonstrate_performance
+    type: Demonstrate
+    task: performance_demonstration
+  - name: demonstrate_lancedb
+    type: Demonstrate
+    task: lancedb_demo
+  react_config:
+    max_iters: 5
+    max_tool_calls: 3
+    tool_selection_strategy: automatic
+    reasoning_style: step_by_step
+    error_handling: retry
+    enable_tracing: true
+  tools:
+    enabled: true
+    categories:
+    - core
+    - utilities
+    - development
+    specific_tools:
+    - calculator
+    - file_reader
+    - text_analyzer
+    - web_search
+    - data_processor
+    - json_processor
+  memory:
+    enabled: true
+    short_term:
+      enabled: true
+      max_tokens: 1000
+    long_term:
+      enabled: true
+      storage_type: local
+      max_entries: 100
+    episodic:
+      enabled: true
+      max_episodes: 50
+  rag:
+    enabled: true
+    retriever_type: lancedb
+    config:
+      top_k: 10
+      chunk_size: 1024
+      chunk_overlap: 100
+      similarity_threshold: 0.75
+    vector_store:
+      embedding_model: sentence-transformers/all-MiniLM-L6-v2
+      table_name: lancedb_demo_table
+      database_path: ./data/lancedb
+  evaluation:
+    builtin_metrics:
+    - name: retrieval_speed
+      threshold: 0.9
+    - name: retrieval_accuracy
+      threshold: 0.8
+    - name: large_scale_performance
+      threshold: 0.8
+    - name: lancedb_knowledge
+      threshold: 0.9
+  feature_specifications:
+    scenarios:
+    - name: high_performance_retrieval_test
+      description: The agent should perform high-speed knowledge retrieval from LanceDB.
+      input:
+        retrieval_query: What are the performance benefits of using LanceDB for vector search?
+      expected_output:
+        high_performance_response: Should include fast and accurate information about LanceDB performance
+    - name: large_scale_analysis_test
+      description: The agent should analyze large-scale datasets efficiently.
+      input:
+        large_scale_request: Analyze the performance characteristics of different vector databases
+      expected_output:
+        large_scale_analysis: Should include comprehensive analysis of vector database performance
+    - name: performance_capabilities
+      description: The agent should demonstrate LanceDB performance capabilities.
+      input:
+        performance_query: How does LanceDB achieve high-performance vector search?
+      expected_output:
+        performance_explanation: Should include detailed explanation of LanceDB performance features
+    - name: lancedb_capabilities
+      description: The agent should demonstrate LanceDB-specific capabilities.
+      input:
+        lancedb_query: What are the key features of LanceDB and how does it work with SuperOptiX?
+      expected_output:
+        lancedb_demonstration: Should include LanceDB features, performance benefits, and SuperOptiX integration
+    - name: apache_arrow_integration
+      description: The agent should demonstrate Apache Arrow integration benefits.
+      input:
+        retrieval_query: How does Apache Arrow integration benefit LanceDB performance?
+      expected_output:
+        high_performance_response: Should include information about Apache Arrow integration benefits
+    - name: scalability_demonstration
+      description: The agent should demonstrate LanceDB scalability features.
+      input:
+        large_scale_request: Explain how LanceDB handles large-scale vector operations
+      expected_output:
+        large_scale_analysis: Should include information about LanceDB scalability and large-scale operations
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: tool_use_accuracy
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 5
+        skip_perfect_score: true
+        reflection_minibatch_size: 3
+    metric: tool_use_accuracy
+    metric_threshold: 0.75

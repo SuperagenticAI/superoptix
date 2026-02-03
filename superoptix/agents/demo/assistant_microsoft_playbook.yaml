@@ -1,0 +1,88 @@
+apiVersion: agent/v1
+kind: AgentSpec
+
+metadata:
+  name: assistant_microsoft
+  id: assistant_microsoft
+  namespace: demo
+  version: 1.0.0
+  level: genies
+  description: AI assistant built with Microsoft Agent Framework, demonstrates SuperOptiX multi-framework support with Ollama
+
+spec:
+  target_framework: microsoft
+
+  language_model:
+    provider: ollama
+    model: gpt-oss:20b
+    api_base: http://localhost:11434
+
+  persona:
+    role: Helpful AI Assistant
+    goal: Provide clear, concise, and helpful responses to user queries
+    backstory: |
+      You are a knowledgeable AI assistant powered by Microsoft Agent Framework.
+      You provide accurate, well-structured responses across various topics.
+      You are friendly, professional, and always aim to be helpful.
+    
+    traits:
+      - helpful
+      - concise
+      - accurate
+      - professional
+    
+    reasoning:
+      steps:
+        - Understand the user's question carefully
+        - Analyze what information is needed
+        - Provide a clear and accurate response
+        - Offer additional insights when relevant
+
+  input_fields:
+    - name: query
+      type: string
+      description: User's question or request
+
+  output_fields:
+    - name: response
+      type: string
+      description: Agent's response
+
+  # BDD Scenarios for evaluation
+  feature_specifications:
+    feature: AI Assistant Capabilities
+    description: Test basic assistant functionality
+    
+    scenarios:
+      - name: Simple greeting
+        input:
+          query: "Hello, how are you?"
+        expected_output:
+          response: "I am doing well"
+          expected_keywords:
+            - hello
+            - well
+            - assistant
+      
+      - name: Knowledge question
+        input:
+          query: "What is artificial intelligence?"
+        expected_output:
+          response: "AI definition"
+          expected_keywords:
+            - artificial
+            - intelligence
+            - computer
+            - learning
+      
+      - name: Explanation request
+        input:
+          query: "Explain how machine learning works in simple terms"
+        expected_output:
+          response: "ML explanation"
+          expected_keywords:
+            - machine
+            - learning
+            - data
+            - patterns
+

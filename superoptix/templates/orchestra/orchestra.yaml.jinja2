@@ -1,0 +1,115 @@
+# {{ orchestra_name }}_orchestra.yaml
+# 
+# 🤖 AUTO-GENERATED ORCHESTRA
+# This orchestra was automatically created based on your agent playbooks.
+# You should refine this orchestra based on your specific goal to make it more targeted.
+# 
+# Customization options:
+# • Add more agents that align with your goal
+# • Modify task descriptions to be more specific  
+# • Adjust execution strategy (sequential/parallel)
+# • Add dependencies between tasks
+# • Set custom timeouts and priorities
+#
+# 📝 VERSION NOTES:
+# • Free version: Only sequential execution strategy supported
+# • Pro version: Supports parallel, hierarchical, mixed strategies + Kubernetes orchestration
+#
+
+metadata:
+  name: "{{ orchestra_name | title | replace('_', ' ') }} Orchestra"
+  id: "{{ orchestra_name }}"
+  version: "1.0.0"
+  kind: "basic"
+  description: "An orchestra to accomplish a specific goal with flexible execution strategies."
+  created_at: "{{ timestamp }}"
+
+orchestra:
+  id: "{{ orchestra_name }}"
+  name: "{{ orchestra_name | title | replace('_', ' ') }} Orchestra"
+  description: "An orchestra to accomplish a specific goal with flexible execution strategies."
+  
+  # The shared workspace for stateful collaboration between agents.
+  workspace:
+    type: local_fs 
+    path: "./orchestra_workspaces/{{ orchestra_name }}"
+  
+  # Execution configuration
+  execution:
+    strategy: "{{ execution_strategy }}"  # Free version: sequential only | Pro version: sequential, parallel, hierarchical, mixed
+    max_parallel_tasks: {{ max_parallel_tasks }}
+    task_timeout_seconds: {{ task_timeout_seconds }}
+    retry_strategy: "exponential_backoff"
+    
+    {% if execution_strategy == "mixed" and task_groups -%}
+    # Task groups for mixed execution
+    task_groups:
+      {%- for group in task_groups %}
+      - name: "{{ group.name }}"
+        tasks: {{ group.tasks | tojson }}
+        execution_strategy: "{{ group.strategy | default('parallel') }}"
+        max_concurrency: {{ group.max_concurrency | default(2) }}
+      {%- endfor %}
+    {%- endif %}
+    
+    # Performance monitoring
+    enable_metrics: true
+    enable_trace: true
+
+# List the agents that are part of this orchestra
+agents:
+{% for agent_task in agent_tasks %}
+  - {{ agent_task.agent_name }}
+{% endfor %}
+
+# Define tasks with enhanced configuration
+tasks:
+  {%- if agent_tasks %}
+  # Auto-generated tasks from agent playbooks
+  {%- for task in agent_tasks %}
+  - name: {{ task.task_name }}
+    agent: {{ task.agent_name }}
+    description: >
+      {{ task.description | replace('{goal}', '{goal}') }}
+    {%- if not loop.first and execution_strategy == "sequential" %}
+    context: ["{{ agent_tasks[loop.index - 2].task_name }}"]
+    {%- endif %}
+    priority: "medium"
+    timeout_seconds: 600
+  {%- endfor %}
+  {%- elif project_agents %}
+  # Default tasks when no playbook tasks found
+  {%- for agent in project_agents %}
+  - name: {{ agent }}_task
+    agent: {{ agent }}
+    description: >
+      {% if loop.first -%}
+      Start working on '{goal}' using {{ agent }} capabilities.
+      {%- elif loop.last -%}
+      Finalize '{goal}' using the output from previous tasks.
+      {%- else -%}
+      Continue working on '{goal}' using insights from the previous task.
+      {%- endif %}
+      {%- if not loop.first and execution_strategy == "sequential" %}
+    context: ["{{ project_agents[loop.index - 2] }}_task"]
+      {%- endif %}
+    priority: "medium"
+    timeout_seconds: 600
+  {%- endfor %}
+  {%- else %}
+  # Placeholder tasks
+  - name: task_one
+    agent: agent_one
+    description: >
+      Start working on '{goal}'. This task will create the initial output.
+    priority: "medium"
+    timeout_seconds: 300
+
+  - name: task_two
+    agent: agent_two
+    description: >
+      Complete '{goal}' using the output from the previous task.
+    context: ["task_one"]
+    priority: "medium"
+    timeout_seconds: 300
+  {%- endif %} 

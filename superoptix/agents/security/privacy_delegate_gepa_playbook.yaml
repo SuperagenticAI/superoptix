@@ -1,0 +1,147 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Privacy-Conscious Delegate GEPA
+  id: privacy_delegate_gepa
+  version: 1.0.0
+  level: oracles
+  description: Privacy-preserving delegation agent optimized with GEPA for secure information handling, data anonymization,
+    and privacy-aware task delegation
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    temperature: 0.2
+    max_tokens: 32000
+  input_fields:
+  - name: user_query
+    type: str
+    description: The user's original query that may contain sensitive information
+    required: true
+  output_fields:
+  - name: redacted_request
+    type: str
+    description: Privacy-preserving version suitable for external processing
+    required: true
+  - name: privacy_assessment
+    type: str
+    description: Analysis of privacy risks and protection measures applied
+    required: true
+  - name: safe_response
+    type: str
+    description: Final response that addresses user needs without privacy exposure
+    required: true
+  - name: reasoning
+    type: str
+    description: Privacy protection reasoning and risk mitigation approach
+    required: true
+  persona:
+    role: Privacy Protection Specialist
+    goal: Handle sensitive queries while preserving privacy through intelligent redaction, anonymization, and secure delegation
+      patterns
+    traits:
+    - security-conscious
+    - privacy-aware
+    - analytical
+    - methodical
+    - trustworthy
+  tasks:
+  - name: privacy_conscious_delegation
+    description: Process user queries while preserving privacy through redaction and secure delegation to external systems
+    instruction: "Handle the user query with strict privacy preservation:\n\n1. **Identify Sensitive Information**: Detect\
+      \ PII, confidential data, personal details\n2. **Create Redacted Request**: Generate privacy-preserving version for\
+      \ external processing\n3. **Evaluate Privacy Risk**: Assess potential privacy leakage and mitigation strategies\n4.\
+      \ **Generate Safe Response**: Provide helpful response without exposing sensitive information\n\nPrivacy Protection\
+      \ Levels:\n- **High**: Personal identifiers, financial data, health information\n- **Medium**: Business confidential,\
+      \ location data, behavioral patterns  \n- **Low**: General preferences, public information, aggregated data\n\nAlways\
+      \ err on the side of privacy protection.\n"
+    inputs:
+    - name: user_query
+      type: str
+      description: The user's original query that may contain sensitive information
+      required: true
+    outputs:
+    - name: redacted_request
+      type: str
+      description: Privacy-preserving version suitable for external processing
+    - name: privacy_assessment
+      type: str
+      description: Analysis of privacy risks and protection measures applied
+    - name: safe_response
+      type: str
+      description: Final response that addresses user needs without privacy exposure
+    - name: reasoning
+      type: str
+      description: Privacy protection reasoning and risk mitigation approach
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: privacy_preservation_feedback
+        auto: light
+        reflection_lm: qwen3:8b
+        reflection_minibatch_size: 3
+        skip_perfect_score: true
+        add_format_failure_as_feedback: true
+        llm_as_judge_feedback: true
+  feature_specifications:
+    scenarios:
+    - name: medical_query_redaction
+      description: Should redact medical information while preserving query intent
+      input:
+        user_query: I'm John Smith, DOB 03/15/1985, SSN 123-45-6789. I have diabetes and high blood pressure. Can you help
+          me find information about medication interactions between metformin and lisinopril?
+      expected_output:
+        redacted_request: A person with diabetes and hypertension needs information about potential medication interactions
+          between metformin and ACE inhibitors.
+        privacy_assessment: High privacy risk - removed PII (name, DOB, SSN) while preserving medical context for accurate
+          information retrieval
+        safe_response: I can help you find information about medication interactions. Based on the medical conditions mentioned,
+          I'll research interactions between diabetes and blood pressure medications.
+    - name: financial_planning_privacy
+      description: Should handle financial queries with privacy protection
+      input:
+        user_query: 'Hi, I''m Sarah Johnson from account #4567-8901. I earn $95,000 annually and have $45,000 in student loans.
+          What''s the best strategy for paying off debt while saving for a house down payment?'
+      expected_output:
+        redacted_request: A professional earning approximately $95K annually with significant student loan debt seeks advice
+          on debt repayment strategies while saving for home purchase.
+        privacy_assessment: High privacy risk - removed personal identifiers and account information, generalized income level
+        safe_response: I can provide general debt repayment and savings strategies. For personalized advice, I recommend consulting
+          with a financial advisor who can review your specific situation securely.
+    - name: work_project_confidentiality
+      description: Should protect business confidential information
+      input:
+        user_query: Our company TechCorp is developing Project Phoenix, a new AI product launching Q2 2024. Budget is $2.3M.
+          Can you help create a competitive analysis framework?
+      expected_output:
+        redacted_request: A technology company developing an AI product needs a competitive analysis framework for market
+          research.
+        privacy_assessment: Medium privacy risk - removed company name, project codename, specific budget, and timeline details
+        safe_response: I can help create a general competitive analysis framework for technology products. This will include
+          market positioning, feature comparison, and pricing strategy components.
+    - name: personal_relationship_advice
+      description: Should handle personal queries with appropriate privacy
+      input:
+        user_query: My wife Lisa and I live at 123 Main St, Springfield. We're having marriage counseling with Dr. Brown.
+          Can you suggest communication exercises we could try at home?
+      expected_output:
+        redacted_request: A married couple currently in counseling seeks communication exercise recommendations for improving
+          their relationship.
+        privacy_assessment: High privacy risk - removed spouse name, address, and therapist information while preserving relationship
+          context
+        safe_response: I can suggest general communication exercises that many couples find helpful. For personalized recommendations,
+          your counselor would be the best resource for your specific situation.
+    - name: child_education_concern
+      description: Should protect family and child information
+      input:
+        user_query: My 8-year-old daughter Emma attends Lincoln Elementary. She's struggling with reading and the teacher
+          Mrs. Peterson suggested we get her tested for dyslexia. What should I know about the evaluation process?
+      expected_output:
+        redacted_request: A parent of an elementary school child who may have reading difficulties seeks information about
+          educational evaluation processes for learning differences.
+        privacy_assessment: High privacy risk - removed child's name, age, school, and teacher information while preserving
+          educational context
+        safe_response: I can provide general information about educational evaluations for reading difficulties. For specific
+          guidance about your child's situation, I recommend consulting with your school's special education coordinator.

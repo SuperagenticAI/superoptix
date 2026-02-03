@@ -1,0 +1,500 @@
+"""
+LITELLM_DROP_PARAMS=true: This environment variable tells the litellm library to silently drop any unsupported parameters (such as 'n', 'logprobs', etc.) when calling LLM providers like Ollama, instead of raising an error. This is required for compatibility with some LLMs that do not support all OpenAI-style parameters.
+"""
+import dspy
+from typing import List, Dict, Any, Optional
+from datetime import datetime
+from pathlib import Path
+import yaml
+
+# SuperOptiX Core Utilities (eliminates ~600 lines of boilerplate)
+from superoptix.core.pipeline_utils import (
+    TracingMixin,
+    ModelSetupMixin,
+    ToolsMixin,
+    BDDTestMixin,
+    UsageTrackingMixin,
+    EvaluationMixin,
+    PipelineUtilities
+)
+from superoptix.core.optimizer_factory import DSPyOptimizerFactory
+
+# ==============================================================================
+# 1. DSPy Signature (Input / Output Schema) – CUSTOM LOGIC
+# ==============================================================================
+
+class {{ agent_name | to_pascal_case }}Signature(dspy.Signature):
+    """
+    {{ spec.persona.role | default('AI Assistant') }}: {{ spec.persona.goal | default('Help users with their tasks') }}
+    
+    Role: {{ spec.persona.role | default('Helper') }}
+    {%- if spec.persona.traits %}
+    Traits: {{ spec.persona.traits | join(', ') }}
+    {%- endif %}
+    {%- if spec.tasks and spec.tasks[0] and spec.tasks[0].instruction %}
+    
+    Instruction: {{ spec.tasks[0].instruction | clean }}
+    {%- endif %}
+    """
+    # Input Fields
+    {% if spec.tasks and spec.tasks[0] and spec.tasks[0].inputs -%}
+    {% for input_field in spec.tasks[0].inputs -%}
+{{ "    " }}{{ input_field.name | to_snake_case }}: str = dspy.InputField(desc="{{ input_field.description | default('Input field') | clean }}")
+    {% endfor %}
+    {%- else -%}
+{{ "    " }}query: str = dspy.InputField(desc="User input or question")
+    {%- endif %}
+    
+    # Output Fields
+{{ "    " }}reasoning: str = dspy.OutputField(desc="The step-by-step reasoning process to arrive at the answer.")
+    {% if spec.tasks and spec.tasks[0] and spec.tasks[0].outputs -%}
+    {% for output_field in spec.tasks[0].outputs -%}
+{{ "    " }}{{ output_field.name | to_snake_case }}: str = dspy.OutputField(desc="{{ output_field.description | default('Output field') | clean }}")
+    {% endfor %}
+    {%- else -%}
+{{ "    " }}response: str = dspy.OutputField(desc="Generated response")
+    {%- endif %}
+
+# ==============================================================================
+# 2. DSPy Module (Reasoning Logic) – CUSTOM LOGIC
+# ==============================================================================
+
+class {{ agent_name | to_pascal_case }}Module(dspy.Module):
+    """Main reasoning module using Chain of Thought
+    (Reference: gepa_demo pipelines for robust input handling)"""
+    def __init__(self, bdd_questions=None):
+        super().__init__()
+        self.predictor = dspy.ChainOfThought({{ agent_name | to_pascal_case }}Signature)
+        self.bdd_questions = bdd_questions or []
+        self._fallback_idx = 0
+
+    def forward(self, *args, **kwargs):
+        print(f"[DEBUG] {self.__class__.__name__}.forward called with args={args} (types: {[type(a) for a in args]}), kwargs={kwargs}")
+        {% if spec.tasks and spec.tasks[0] and spec.tasks[0].inputs %}
+        input_field = "{{ spec.tasks[0].inputs[0].name | to_snake_case }}"
+        {% else %}
+        input_field = "query"
+        {% endif %}
+        # Try to extract the input from any input type
+        input_val = None
+        # 1. DSPy Example object as first positional arg
+        if not kwargs and len(args) == 1:
+            arg0 = args[0]
+            if hasattr(arg0, '__class__') and arg0.__class__.__name__ == 'Example':
+                print(f"[DEBUG] Received DSPy Example: {arg0}")
+                input_val = getattr(arg0, input_field, None)
+            elif isinstance(arg0, dict):
+                print(f"[DEBUG] Received dict: {arg0}")
+                input_val = arg0.get(input_field, None)
+            elif isinstance(arg0, str):
+                print(f"[DEBUG] Received str: {arg0}")
+                input_val = arg0
+        # 2. kwargs
+        if not input_val and input_field in kwargs:
+            print(f"[DEBUG] Received in kwargs: {kwargs}")
+            input_val = kwargs[input_field]
+        # 3. If we found an input, call the LLM
+        if input_val:
+            print(f"[DEBUG] Calling LLM with {input_field}: {input_val}")
+            return self.predictor(**{input_field: input_val})
+        # 4. Fallback: If no valid input, cycle through self.bdd_questions
+        if self.bdd_questions:
+            q = self.bdd_questions[self._fallback_idx % len(self.bdd_questions)]
+            self._fallback_idx += 1
+            print(f"[DEBUG] Fallback: Using bdd_question #{self._fallback_idx}: {q}")
+            return self.predictor(**{input_field: q})
+        # 5. Defensive: Return dummy prediction if no valid input
+        print(f"[DEBUG] Returning dummy prediction: no valid input found.")
+        import dspy.primitives.prediction as pred_module
+        prediction = pred_module.Prediction()
+        for _field in ["answer", "context", "response"]:
+            setattr(prediction, _field, "")
+        {% if spec.tasks and spec.tasks[0] and spec.tasks[0].outputs %}
+        {% for output_field in spec.tasks[0].outputs %}
+        setattr(prediction, '{{ output_field.name | to_snake_case }}', "")
+        {% endfor %}
+        {% endif %}
+        return prediction
+
+# ==============================================================================
+# 3. Oracle Tier Pipeline Class - USES UTILITY MIXINS
+# ==============================================================================
+
+class {{ agent_name | to_pascal_case }}Pipeline(
+    TracingMixin,
+    ModelSetupMixin, 
+    ToolsMixin,
+    BDDTestMixin,
+    UsageTrackingMixin,
+    EvaluationMixin
+):
+    """
+    DSPy Oracle Pipeline for {{ metadata.name | default('Agent') }}
+    
+    Oracle tier capabilities:
+    - Basic question-answering with Chain of Thought
+    - Basic evaluation and optimization
+    - Sequential task orchestration
+    - Full compatibility with SuperOptiX commands
+    """
+    
+    def __init__(self, playbook_data=None):
+        playbook_data = playbook_data or {}
+        super().__init__()
+        self.config = playbook_data.get('config', {})
+        
+        self.tier_level = "oracles"
+        
+        # Setup core components using mixins (eliminates boilerplate)
+        self.setup_tracing("{{ agent_name }}", {})
+
+        # Lazy-load spec directly from the playbook YAML so it remains the single source of truth
+        # Pipeline file: agents/<agent_name>/pipelines/.*
+        # Playbook path:  agents/<agent_name>/playbook/<agent_name>_playbook.yaml
+        playbook_path = Path(__file__).resolve().parent.parent / "playbook" / "{{ agent_name }}_playbook.yaml"
+        with playbook_path.open() as f:
+            playbook_data = yaml.safe_load(f)
+
+        self.spec_data = playbook_data.get("spec", {})
+        
+        # Setup language model from playbook configuration
+        self._setup_language_model()
+        
+        # Configure DSPy to use this LM
+        import dspy
+        dspy.configure(lm=self.lm)
+        
+        # Initialize pipeline components
+        self.test_examples = self.load_bdd_scenarios(self.spec_data)
+        {% if spec.tasks and spec.tasks[0] and spec.tasks[0].inputs %}
+        input_field = "{{ spec.tasks[0].inputs[0].name | to_snake_case }}"
+        {% else %}
+        input_field = "query"
+        {% endif %}
+        bdd_questions = [getattr(ex, input_field, '') for ex in self.test_examples] if self.test_examples else []
+        self.module = {{ agent_name | to_pascal_case }}Module(bdd_questions=bdd_questions)
+        self.is_trained = False
+        
+        print(f"✅ {{ agent_name | to_pascal_case }}Pipeline (Oracle tier) initialized with {len(self.test_examples)} BDD scenarios")
+
+    def _setup_language_model(self):
+        """Setup language model from playbook configuration."""
+        lm_config = self.spec_data.get('language_model', {})
+        
+        # Extract values directly from playbook YAML - no hardcoded fallbacks
+        model = lm_config.get('model')
+        provider = lm_config.get('provider')
+        temperature = lm_config.get('temperature', 0.7)
+        max_tokens = lm_config.get('max_tokens', 2048)
+        
+        if not model or not provider:
+            raise ValueError(f"Language model configuration missing in playbook. Required: model, provider. Found: {lm_config}")
+        
+        print(f"🔧 Setting up LM: {provider}/{model} (temp={temperature}, max_tokens={max_tokens})")
+        
+        from dspy import LM
+        
+        if provider == 'ollama':
+            # Handle Ollama-specific configuration
+            model_str = f'ollama_chat/{model}' if not model.startswith('ollama_chat/') else model
+            self.lm = LM(
+                model=model_str,
+                provider='ollama',
+                api_base='http://localhost:11434',
+                api_key='',
+                temperature=temperature,
+                max_tokens=max_tokens
+            )
+        else:
+            # Generic LM configuration
+            self.lm = LM(
+                model=model,
+                provider=provider,
+                temperature=temperature,
+                max_tokens=max_tokens
+            )
+
+    def setup(self) -> None:
+        """Setup method called by the runner when no training data is available"""
+        print("ℹ️  Setting up Oracle pipeline with base model configuration")
+        # Initialize any required state or configuration here
+        pass
+
+    def train(self, training_data: List[Dict[str, Any]], save_optimized: bool = False, optimized_path: str = None) -> Dict[str, Any]:
+        """Train the pipeline with examples using DSPy optimizer factory"""
+        from dspy import Example, configure
+        
+        # Ensure LM is configured from playbook
+        configure(lm=self.lm)
+        if not training_data:
+            if self.test_examples:
+                print("[DEBUG] Using BDD scenarios as training data...")
+                # Convert examples to training data format
+                training_data = []
+                {% if spec.tasks and spec.tasks[0] and spec.tasks[0].inputs %}
+                input_field = "{{ spec.tasks[0].inputs[0].name | to_snake_case }}"
+                {% else %}
+                input_field = "query"
+                {% endif %}
+                {% if spec.tasks and spec.tasks[0] and spec.tasks[0].outputs %}
+                output_field = "{{ spec.tasks[0].outputs[0].name | to_snake_case }}"
+                {% else %}
+                output_field = "response"
+                {% endif %}
+                for ex in self.test_examples[:3]:  # Limit for oracle tier
+                    training_data.append({
+                        input_field: getattr(ex, input_field, ''),
+                        output_field: getattr(ex, output_field, '')
+                    })
+                print(f"[DEBUG] BDD scenarios used as training_data (count={len(training_data)}):")
+                for ex in training_data:
+                    print(f"[DEBUG] BDD example: {ex}")
+            else:
+                print("[DEBUG] No training data and no BDD scenarios available.")
+        print(f"[DEBUG] Final training_data length: {len(training_data)}")
+        for ex in training_data:
+            print(f"[DEBUG] Training example: {ex}")
+        if training_data and isinstance(training_data[0], dict):
+            examples = [Example(**ex) for ex in training_data]
+            # Defensive: ensure correct positional input for .with_inputs()
+            {% if spec.tasks and spec.tasks[0] and spec.tasks[0].inputs %}
+            input_field = "{{ spec.tasks[0].inputs[0].name | to_snake_case }}"
+            {% else %}
+            input_field = "query"
+            {% endif %}
+            training_data = [ex.with_inputs(orig[input_field]) if isinstance(orig.get(input_field, None), str) else ex for ex, orig in zip(examples, training_data)]
+            print("[DEBUG] Printing LLM outputs for each training example:")
+            for ex in training_data:
+                try:
+                    pred = self.module.forward(**{input_field: getattr(ex, input_field, '')})
+                    print(f"[LLM OUTPUT] Q: {getattr(ex, input_field, '')}")
+                    print(f"[LLM OUTPUT] Prediction object: {pred}")
+                    print(f"[LLM OUTPUT] Fields: {getattr(pred, '__dict__', pred)}")
+                    {% if spec.tasks and spec.tasks[0] and spec.tasks[0].outputs %}
+                    {% for output_field in spec.tasks[0].outputs %}
+                    print(f"[LLM OUTPUT] {{ output_field.name | to_snake_case }}: {getattr(pred, '{{ output_field.name | to_snake_case }}', None)} | reasoning: {getattr(pred, 'reasoning', None)} | context: {getattr(pred, 'context', None)} | response: {getattr(pred, 'response', None)}")
+                    {% endfor %}
+                    {% else %}
+                    print(f"[LLM OUTPUT] response: {getattr(pred, 'response', None)} | reasoning: {getattr(pred, 'reasoning', None)} | context: {getattr(pred, 'context', None)}")
+                    {% endif %}
+                except Exception as e:
+                    print(f"[LLM OUTPUT ERROR] Q: {getattr(ex, input_field, '')} | Error: {e}")
+        training_stats = {
+            "started_at": datetime.now().isoformat(),
+            "training_data_size": 0,
+            "success": False,
+            "usage_stats": {},
+            "error": None
+        }
+        
+        # Use BDD scenarios if no training data provided
+        if not training_data:
+            if self.test_examples:
+                print("🔄 Using BDD scenarios as training data...")
+                # Convert examples to training data format
+                training_data = []
+                {% if spec.tasks and spec.tasks[0] and spec.tasks[0].inputs %}
+                input_field = "{{ spec.tasks[0].inputs[0].name | to_snake_case }}"
+                {% else %}
+                input_field = "query"
+                {% endif %}
+                {% if spec.tasks and spec.tasks[0] and spec.tasks[0].outputs %}
+                output_field = "{{ spec.tasks[0].outputs[0].name | to_snake_case }}"
+                {% else %}
+                output_field = "response"
+                {% endif %}
+                
+                for ex in self.test_examples[:3]:  # Limit for oracle tier
+                    training_data.append({
+                        input_field: getattr(ex, input_field, ''),
+                        output_field: getattr(ex, output_field, '')
+                    })
+            else:
+                print("ℹ️  No training data available - using base model")
+                training_stats["training_data_size"] = 0
+                training_stats["success"] = True
+                training_stats["note"] = "No training data provided, using base model"
+                return training_stats
+        
+        training_stats["training_data_size"] = len(training_data)
+        print(f"🚀 Training with {len(training_data)} examples...")
+        
+        try:
+            # Get optimizer configuration from playbook
+            optimizer_config = self.spec_data.get("optimization", {}).get("optimizer", {})
+            print(f"🔧 Optimizer config: {optimizer_config}")
+            
+            if optimizer_config and optimizer_config.get("name"):
+                # Use specified optimizer from playbook
+                optimizer_name = optimizer_config["name"]
+                params = optimizer_config.get("params", {})
+                
+                # Extract LM configuration from playbook for optimizers that need it (like GEPA)
+                lm_config = self.spec_data.get('language_model', {})
+                
+                print(f"🚀 Creating {optimizer_name} optimizer with params: {params}")
+                optimizer = DSPyOptimizerFactory.create_optimizer(
+                    optimizer_name=optimizer_name,
+                    params=params,
+                    lm_config=lm_config
+                )
+            else:
+                # Use tier-optimized default optimizer
+                print(f"🔧 Creating tier-optimized optimizer for oracles tier")
+                optimizer = DSPyOptimizerFactory.create_tier_optimized_optimizer(
+                    tier="oracles",
+                    training_data_size=len(training_data),
+                    optimizer_config=optimizer_config
+                )
+            
+            # Compile the module with the optimizer
+            optimizer_name = optimizer.__class__.__name__
+            print(f"🔧 Compiling with optimizer: {optimizer_name}")
+            
+            if optimizer_name == "COPRO":
+                # COPRO requires eval_kwargs parameter
+                self.module = optimizer.compile(self.module, trainset=training_data, eval_kwargs={})
+            else:
+                # Standard compilation for other optimizers
+                self.module = optimizer.compile(self.module, trainset=training_data)
+            self.is_trained = True
+
+            if save_optimized and optimized_path:
+                try:
+                    self.module.save(optimized_path)
+                    print(f"💾 Optimized model saved to {optimized_path}")
+                    training_stats["optimized_saved"] = True
+                    training_stats["optimized_path"] = optimized_path
+                except Exception as save_error:
+                    print(f"⚠️ Failed to save optimized model: {save_error}")
+                    training_stats["optimized_saved"] = False
+            
+            training_stats["usage_stats"] = self.current_call_usage
+            
+            training_stats["success"] = True
+                    
+        except Exception as e:
+            error_msg = f"Training failed: {e}"
+            print(f"❌ {error_msg}")
+            training_stats["error"] = str(e)
+            training_stats["success"] = False
+        
+        training_stats["completed_at"] = datetime.now().isoformat()
+        return training_stats
+
+    def load_optimized(self, optimized_path: str) -> bool:
+        """Load optimized model from file"""
+        try:
+            self.module.load(optimized_path)
+            self.is_trained = True
+            print(f"✅ Loaded optimized model from {optimized_path}")
+            return True
+        except Exception as e:
+            print(f"❌ Failed to load optimized model: {e}")
+            return False
+
+    def run(self, **inputs) -> Dict[str, Any]:
+        """Run prediction with DSPy usage-tracking and context management"""
+        
+        prediction = None
+        with self.usage_tracking_context():
+            with dspy.context(lm=self.lm):
+                prediction = self.module(**inputs)
+
+        # Prepare result with all expected validation fields
+        result = {}
+        result["reasoning"] = getattr(prediction, 'reasoning', "")
+        {% if spec.tasks and spec.tasks[0] and spec.tasks[0].outputs %}
+        {% for output_field in spec.tasks[0].outputs %}
+        result["{{ output_field.name | to_snake_case }}"] = getattr(prediction, '{{ output_field.name | to_snake_case }}', "")
+        {% endfor %}
+        {% else %}
+        result["response"] = getattr(prediction, 'response', "")
+        {% endif %}
+        
+        # Add required metadata fields for validation system
+        result["trained"] = self.is_trained
+        result["usage"] = self.current_call_usage
+        result["agent_id"] = self.agent_id if hasattr(self, 'agent_id') else "{{ agent_name }}"
+        result["tier"] = "oracles"
+        
+        return result
+
+    async def __call__(self, *args, **inputs) -> Dict[str, Any]:
+        """Async interface for orchestra compatibility"""
+        # Handle both positional and keyword arguments
+        if args:
+            # If called with positional args, treat first as the main input
+            {% if spec.tasks and spec.tasks[0] and spec.tasks[0].inputs %}
+            input_field = "{{ spec.tasks[0].inputs[0].name | to_snake_case }}"
+            {% else %}
+            input_field = "query"
+            {% endif %}
+            inputs[input_field] = args[0]
+        
+        # For Oracle tier, we can run synchronously since it's simpler
+        # The async is just for interface compatibility
+        return self.run(**inputs)
+
+    def evaluate(self) -> Dict[str, Any]:
+        """Evaluate pipeline performance using BDD scenarios"""
+        if not self.test_examples:
+            return {
+                "message": "No BDD scenarios available for evaluation",
+                "success": False
+            }
+        
+        print("📊 Running BDD scenario evaluation...")
+        
+        # Convert examples to evaluation data
+        eval_data = []
+        for ex in self.test_examples:
+            {% if spec.tasks and spec.tasks[0] and spec.tasks[0].inputs %}
+            input_field = "{{ spec.tasks[0].inputs[0].name | to_snake_case }}"
+            {% else %}
+            input_field = "query"
+            {% endif %}
+            {% if spec.tasks and spec.tasks[0] and spec.tasks[0].outputs %}
+            output_field = "{{ spec.tasks[0].outputs[0].name | to_snake_case }}"
+            {% else %}
+            output_field = "response"
+            {% endif %}
+            
+            eval_data.append({
+                input_field: getattr(ex, input_field, ''),
+                output_field: getattr(ex, output_field, '')
+            })
+        
+        # Use evaluation mixin
+        eval_results = self.evaluate_pipeline(eval_data, input_field, output_field)
+        
+        # Also run BDD scenario execution
+        bdd_results = self.execute_bdd_scenarios(self.test_examples)
+        
+        # Combine results
+        return {
+            **eval_results,
+            "bdd_scenarios": bdd_results,
+            "evaluation_type": "BDD + Semantic F1",
+            "tier": "oracles"
+        }
+
+    # ==============================================================================
+    # Orchestra Compatibility Methods
+    # ==============================================================================
+    
+    def predict(self, **inputs):
+        """Legacy predict method for runner compatibility"""
+        return self.run(**inputs)
+    
+    def __repr__(self):
+        return f"{{ agent_name | to_pascal_case }}Pipeline(trained={self.is_trained}, tier=oracle)"
+    
+    def __del__(self):
+        """Ensure traces are exported when pipeline is destroyed."""
+        if hasattr(self, 'tracer') and self.tracer:
+            try:
+                # Export traces to .superoptix/traces/*.jsonl format
+                self.tracer.export_traces()
+            except Exception:
+                pass  # Ignore errors during cleanup 

@@ -1,0 +1,192 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Security Analyzer GEPA
+  id: security_analyzer_gepa
+  version: 1.0.0
+  level: oracles
+  description: Advanced security code analyzer optimized with GEPA for vulnerability detection, secure coding practices, and
+    comprehensive security assessment
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    temperature: 0.1
+    max_tokens: 32000
+  input_fields:
+  - name: code_or_config
+    type: str
+    description: Code snippet, configuration file, or system design to analyze
+    required: true
+  - name: context
+    type: str
+    description: Additional context about the system, framework, or deployment environment
+    required: false
+  output_fields:
+  - name: vulnerabilities
+    type: str
+    description: Detailed list of identified security vulnerabilities with severity
+    required: true
+  - name: risk_assessment
+    type: str
+    description: Risk analysis with exploitability and impact evaluation
+    required: true
+  - name: remediation_plan
+    type: str
+    description: Step-by-step remediation guidance with priorities
+    required: true
+  - name: security_score
+    type: str
+    description: Overall security assessment score with breakdown
+    required: true
+  - name: compliance_status
+    type: str
+    description: Compliance check against security standards
+    required: true
+  - name: reasoning
+    type: str
+    description: Security analysis methodology and confidence assessment
+    required: true
+  persona:
+    role: Security Analysis Specialist
+    goal: Analyze code and systems for security vulnerabilities, provide remediation guidance, and ensure secure development
+      practices
+    traits:
+    - security-focused
+    - detail-oriented
+    - systematic
+    - defensive-minded
+    - thorough
+  tasks:
+  - name: analyze_security_vulnerabilities
+    description: Comprehensive security analysis of code, configurations, and system designs
+    instruction: 'Perform thorough security analysis across multiple dimensions:
+
+
+      1. **Vulnerability Detection**: Identify security flaws, weaknesses, and attack vectors
+
+      2. **Risk Assessment**: Evaluate severity, exploitability, and potential impact
+
+      3. **Remediation Guidance**: Provide specific, actionable fix recommendations
+
+      4. **Secure Coding Review**: Check adherence to security best practices
+
+      5. **Compliance Verification**: Validate against security standards (OWASP, CWE, etc.)
+
+      6. **Defense-in-Depth Analysis**: Assess layered security measures
+
+
+      Focus on both immediate threats and long-term security posture improvements.
+
+      Provide confidence scores and prioritization for identified issues.
+
+      '
+    inputs:
+    - name: code_or_config
+      type: str
+      description: Code snippet, configuration file, or system design to analyze
+      required: true
+    - name: context
+      type: str
+      description: Additional context about the system, framework, or deployment environment
+      required: false
+    outputs:
+    - name: vulnerabilities
+      type: str
+      description: Detailed list of identified security vulnerabilities with severity
+    - name: risk_assessment
+      type: str
+      description: Risk analysis with exploitability and impact evaluation
+    - name: remediation_plan
+      type: str
+      description: Step-by-step remediation guidance with priorities
+    - name: security_score
+      type: str
+      description: Overall security assessment score with breakdown
+    - name: compliance_status
+      type: str
+      description: Compliance check against security standards
+    - name: reasoning
+      type: str
+      description: Security analysis methodology and confidence assessment
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: vulnerability_detection_feedback
+        auto: light
+        reflection_lm: gwen3:8b
+        reflection_minibatch_size: 3
+        skip_perfect_score: false
+        add_format_failure_as_feedback: true
+        format_failure_feedback: true
+  feature_specifications:
+    scenarios:
+    - name: sql_injection_vulnerability
+      description: Should detect SQL injection vulnerabilities
+      input:
+        code_or_config: "def get_user(username):\n    query = \"SELECT * FROM users WHERE username = '\" + username + \"'\"\
+          \n    cursor.execute(query)\n    return cursor.fetchone()\n"
+        context: Python web application using MySQL database
+      expected_output:
+        vulnerabilities: 'Critical: SQL Injection vulnerability in user lookup function'
+        risk_assessment: Critical severity - allows arbitrary database access, data exfiltration, and potential system compromise
+        remediation_plan: 1. Use parameterized queries with placeholders 2. Implement input validation 3. Add database access
+          controls
+        security_score: 2/10 - Critical vulnerability present
+        compliance_status: Fails OWASP Top 10 - Injection (A03:2021)
+    - name: cross_site_scripting
+      description: Should identify XSS vulnerabilities
+      input:
+        code_or_config: "app.get('/search', (req, res) => {\n    const query = req.query.q;\n    res.send('<h1>Search Results\
+          \ for: ' + query + '</h1>');\n});\n"
+        context: Node.js Express web application
+      expected_output:
+        vulnerabilities: 'High: Reflected Cross-Site Scripting (XSS) in search endpoint'
+        risk_assessment: High severity - enables session hijacking, credential theft, and malicious script execution
+        remediation_plan: 1. Implement output encoding/escaping 2. Use templating engine with auto-escaping 3. Add Content
+          Security Policy headers
+        security_score: 3/10 - High severity XSS vulnerability
+        compliance_status: Fails OWASP Top 10 - Injection/XSS prevention
+    - name: weak_authentication
+      description: Should detect weak authentication mechanisms
+      input:
+        code_or_config: "def authenticate(username, password):\n    stored_hash = users[username]['password']\n    if hashlib.md5(password.encode()).hexdigest()\
+          \ == stored_hash:\n        return True\n    return False\n"
+        context: User authentication system in Python
+      expected_output:
+        vulnerabilities: 'High: Weak password hashing using MD5, Medium: No salt implementation'
+        risk_assessment: High severity - MD5 is cryptographically broken, passwords vulnerable to rainbow table attacks
+        remediation_plan: 1. Replace MD5 with bcrypt, scrypt, or Argon2 2. Implement proper salt generation 3. Add password
+          complexity requirements
+        security_score: 4/10 - Weak cryptographic implementation
+        compliance_status: Fails password storage best practices and NIST guidelines
+    - name: insecure_file_upload
+      description: Should identify file upload security issues
+      input:
+        code_or_config: "@app.route('/upload', methods=['POST'])\ndef upload_file():\n    file = request.files['file']\n \
+          \   file.save(f'uploads/{file.filename}')\n    return 'File uploaded successfully'\n"
+        context: Flask web application with file upload functionality
+      expected_output:
+        vulnerabilities: 'Critical: Unrestricted file upload, High: Path traversal vulnerability, Medium: No file type validation'
+        risk_assessment: Critical severity - allows remote code execution, server compromise, and arbitrary file access
+        remediation_plan: 1. Implement file type validation 2. Sanitize filenames 3. Store uploads outside web root 4. Add
+          file size limits 5. Scan for malware
+        security_score: 1/10 - Multiple critical vulnerabilities
+        compliance_status: Fails secure file handling practices
+    - name: secure_code_example
+      description: Should recognize secure implementation
+      input:
+        code_or_config: "import bcrypt\nfrom flask import request, session\nimport secrets\n\ndef authenticate(username, password):\n\
+          \    user = get_user_by_username(username)  # Parameterized query\n    if user and bcrypt.checkpw(password.encode(),\
+          \ user.password_hash):\n        session['user_id'] = user.id\n        session['csrf_token'] = secrets.token_hex(16)\n\
+          \        return True\n    return False\n"
+        context: Secure authentication implementation in Flask
+      expected_output:
+        vulnerabilities: None identified - secure implementation detected
+        risk_assessment: Low risk - follows security best practices for authentication
+        remediation_plan: 'Consider adding: 1. Rate limiting for login attempts 2. Account lockout after failed attempts 3.
+          Multi-factor authentication'
+        security_score: 8/10 - Good security implementation with room for enhancement
+        compliance_status: Meets password hashing and session management best practices

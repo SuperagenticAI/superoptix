@@ -1,0 +1,124 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Campaign Strategist
+  id: campaign_strategist
+  namespace: marketing
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that develops comprehensive marketing campaign strategies and plans.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: campaign_objective
+    type: str
+    description: Primary campaign objective and business goals
+    required: true
+  - name: brand_information
+    type: str
+    description: Brand details, positioning, and competitive landscape
+    required: true
+  output_fields:
+  - name: strategy_analysis
+    type: str
+    description: Step-by-step strategic analysis and campaign framework
+    required: true
+  - name: campaign_plan
+    type: str
+    description: Detailed campaign plan with tactics and timeline
+    required: true
+  persona:
+    name: StrategyBot
+    role: Campaign Strategist
+    goal: Develop comprehensive marketing strategies that drive engagement and conversions
+    traits:
+    - strategic
+    - analytical
+    - goal-oriented
+    - data-driven
+  tasks:
+  - name: develop_campaign_strategy
+    instruction: You are a Campaign Strategist. Think through the marketing challenge systematically to develop a comprehensive
+      campaign strategy with clear objectives, target audience analysis, and tactical recommendations.
+    inputs:
+    - name: campaign_objective
+      type: str
+      description: Primary campaign objective and business goals
+      required: true
+    - name: brand_information
+      type: str
+      description: Brand details, positioning, and competitive landscape
+      required: true
+    outputs:
+    - name: strategy_analysis
+      type: str
+      description: Step-by-step strategic analysis and campaign framework
+    - name: campaign_plan
+      type: str
+      description: Detailed campaign plan with tactics and timeline
+  agentflow:
+  - name: strategize_systematically
+    type: Think
+    task: develop_campaign_strategy
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: campaign_strategist_comprehensive_task
+      description: Given a complex marketing requirement, the agent should provide detailed analysis and recommendations
+      input:
+        campaign_objective: Complex marketing scenario requiring comprehensive analysis
+        brand_information: ''
+      expected_output:
+        strategy_analysis: Detailed step-by-step analysis with marketing-specific recommendations
+        campaign_plan: ''
+    - name: campaign_strategist_problem_solving
+      description: When facing marketing challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        campaign_objective: Challenging marketing problem requiring creative solutions
+        brand_information: ''
+      expected_output:
+        strategy_analysis: Structured problem-solving approach with multiple solution options
+        campaign_plan: ''
+    - name: campaign_strategist_best_practices
+      description: When asked about marketing best practices, the agent should provide current industry standards and guidelines
+      input:
+        campaign_objective: Industry best practices for marketing operations
+        brand_information: ''
+      expected_output:
+        strategy_analysis: Comprehensive best practices guide with implementation steps
+        campaign_plan: ''
+    - name: campaign_strategist_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to marketing
+      input:
+        campaign_objective: Compliance requirements for marketing operations
+        brand_information: ''
+      expected_output:
+        strategy_analysis: Detailed compliance checklist with regulatory requirements
+        campaign_plan: ''
+    - name: campaign_strategist_strategic_planning
+      description: When developing marketing strategies, the agent should provide forward-thinking recommendations
+      input:
+        campaign_objective: Strategic planning for marketing growth and optimization
+        brand_information: ''
+      expected_output:
+        strategy_analysis: Comprehensive strategic plan with measurable objectives and timelines
+        campaign_plan: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

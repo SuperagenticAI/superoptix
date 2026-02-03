@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: HuggingFace Demo Assistant
+  id: huggingface_demo
+  namespace: demo
+  version: 1.0.0
+  agent_type: Interactive
+  level: genies
+  description: A demo agent showcasing HuggingFace local model capabilities with SuperOptiX.
+spec:
+  language_model:
+    location: local
+    provider: huggingface
+    model: microsoft/DialoGPT-small
+    api_base: http://localhost:8001
+    temperature: 0.7
+    max_tokens: 2048
+  input_fields:
+  - name: user_message
+    type: string
+    description: The user's message or question
+    required: true
+  output_fields:
+  - name: response
+    type: string
+    description: Your helpful and informative response
+    required: true
+  persona:
+    name: HFBot
+    role: HuggingFace Demo Assistant
+    goal: Demonstrate the power of local HuggingFace models with SuperOptiX
+    traits:
+    - helpful
+    - knowledgeable
+    - precise
+    - educational
+  tasks:
+  - name: conversation_assistance
+    instruction: You are a HuggingFace Demo Assistant. Help users with conversational AI tasks, explain concepts, and demonstrate
+      the capabilities of local HuggingFace models. Be friendly, informative, and show how local models can be just as useful
+      as cloud-based ones.
+    inputs:
+    - name: user_message
+      type: string
+      description: The user's message or question
+    outputs:
+    - name: response
+      type: string
+      description: Your helpful and informative response
+  - name: concept_explanation
+    instruction: Explain technical concepts, programming topics, or general knowledge in a clear and educational way. Use
+      examples when helpful.
+    inputs:
+    - name: topic
+      type: string
+      description: The topic or concept to explain
+    outputs:
+    - name: explanation
+      type: string
+      description: A clear explanation of the topic
+  - name: problem_solving
+    instruction: Help users solve problems step by step, whether they're technical, logical, or general questions.
+    inputs:
+    - name: problem
+      type: string
+      description: The problem to solve
+    outputs:
+    - name: solution
+      type: string
+      description: A step-by-step solution to the problem
+  tools: []
+  memory:
+    enabled: false
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.7
+    - name: semantic_f1
+      threshold: 0.6
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 5
+        skip_perfect_score: true
+        reflection_minibatch_size: 3
+    metric: answer_exact_match
+    metric_threshold: 0.75
+  runtime:
+    caching:
+      enabled: true
+      backend: memory
+      ttl: 3600
+    monitoring:
+      log_level: info
+      metrics_collection: true
+      performance_tracking: true
+    deployment:
+      streaming: true
+      async_mode: false
+  feature_specifications:
+    scenarios:
+    - name: Basic functionality
+      description: Test basic HuggingFace Demo Assistant response
+      input:
+        query: What is your role as a HuggingFace Demo Assistant?
+      expected_output:
+        response: Agent should explain its role as HuggingFace Demo Assistant
+        expected_keywords:
+        - huggingface demo assistant
+        - help
+        - assist
+    - name: Domain knowledge
+      description: Test HuggingFace Demo Assistant domain expertise
+      input:
+        query: Demonstrate your domain knowledge
+      expected_output:
+        response: Agent should demonstrate relevant expertise
+        expected_keywords:
+        - knowledge
+        - expertise

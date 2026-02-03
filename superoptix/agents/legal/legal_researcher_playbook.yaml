@@ -1,0 +1,124 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Legal Researcher
+  id: legal_researcher
+  namespace: legal
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that assists with basic legal research and provides general legal information.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: legal_topic
+    type: str
+    description: Legal topic or question to research
+    required: true
+  - name: jurisdiction
+    type: str
+    description: Relevant jurisdiction (state, federal, etc.)
+    required: false
+  output_fields:
+  - name: legal_information
+    type: str
+    description: General legal information and relevant concepts
+    required: true
+  - name: next_steps
+    type: str
+    description: Recommended next steps and professional consultation advice
+    required: true
+  persona:
+    name: ResearchBot
+    role: Legal Researcher
+    goal: Provide general legal information and research assistance
+    traits:
+    - thorough
+    - accurate
+    - objective
+    - informative
+  tasks:
+  - name: research_legal_topic
+    instruction: You are a Legal Researcher. Provide general legal information and research on the specified topic. Always
+      clarify that this is informational only and not legal advice.
+    inputs:
+    - name: legal_topic
+      type: str
+      description: Legal topic or question to research
+      required: true
+    - name: jurisdiction
+      type: str
+      description: Relevant jurisdiction (state, federal, etc.)
+      required: false
+    outputs:
+    - name: legal_information
+      type: str
+      description: General legal information and relevant concepts
+    - name: next_steps
+      type: str
+      description: Recommended next steps and professional consultation advice
+  agentflow:
+  - name: provide_information
+    type: Generate
+    task: research_legal_topic
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.7
+  feature_specifications:
+    scenarios:
+    - name: legal_researcher_comprehensive_task
+      description: Given a complex legal requirement, the agent should provide detailed analysis and recommendations
+      input:
+        legal_topic: Complex legal scenario requiring comprehensive analysis
+        jurisdiction: ''
+      expected_output:
+        legal_information: Detailed step-by-step analysis with legal-specific recommendations
+        next_steps: ''
+    - name: legal_researcher_problem_solving
+      description: When facing legal challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        legal_topic: Challenging legal problem requiring creative solutions
+        jurisdiction: ''
+      expected_output:
+        legal_information: Structured problem-solving approach with multiple solution options
+        next_steps: ''
+    - name: legal_researcher_best_practices
+      description: When asked about legal best practices, the agent should provide current industry standards and guidelines
+      input:
+        legal_topic: Industry best practices for legal operations
+        jurisdiction: ''
+      expected_output:
+        legal_information: Comprehensive best practices guide with implementation steps
+        next_steps: ''
+    - name: legal_researcher_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to legal
+      input:
+        legal_topic: Compliance requirements for legal operations
+        jurisdiction: ''
+      expected_output:
+        legal_information: Detailed compliance checklist with regulatory requirements
+        next_steps: ''
+    - name: legal_researcher_strategic_planning
+      description: When developing legal strategies, the agent should provide forward-thinking recommendations
+      input:
+        legal_topic: Strategic planning for legal growth and optimization
+        jurisdiction: ''
+      expected_output:
+        legal_information: Comprehensive strategic plan with measurable objectives and timelines
+        next_steps: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

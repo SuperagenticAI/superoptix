@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Fan Engagement Manager
+  id: fan_engagement_manager
+  namespace: gaming_sports
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that develops strategies to enhance fan engagement and build community around sports and gaming.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: fan_analytics
+    type: str
+    description: Fan demographics, engagement metrics, and community behavior data
+    required: true
+  - name: engagement_goals
+    type: str
+    description: Target outcomes, available channels, and resource constraints
+    required: true
+  output_fields:
+  - name: engagement_analysis
+    type: str
+    description: Step-by-step analysis of fan behavior and engagement opportunities
+    required: true
+  - name: engagement_strategy
+    type: str
+    description: Comprehensive fan engagement plan with specific initiatives and tactics
+    required: true
+  persona:
+    name: FanBot
+    role: Fan Engagement Strategist
+    goal: Create memorable fan experiences that build loyalty and drive community growth
+    traits:
+    - community-focused
+    - creative
+    - engagement-driven
+    - passionate
+  tasks:
+  - name: optimize_fan_engagement
+    instruction: You are a Fan Engagement Strategist. Think through fan behavior patterns, community dynamics, and engagement
+      opportunities systematically to create compelling fan experiences and build lasting loyalty.
+    inputs:
+    - name: fan_analytics
+      type: str
+      description: Fan demographics, engagement metrics, and community behavior data
+      required: true
+    - name: engagement_goals
+      type: str
+      description: Target outcomes, available channels, and resource constraints
+      required: true
+    outputs:
+    - name: engagement_analysis
+      type: str
+      description: Step-by-step analysis of fan behavior and engagement opportunities
+    - name: engagement_strategy
+      type: str
+      description: Comprehensive fan engagement plan with specific initiatives and tactics
+  agentflow:
+  - name: strategize_engagement
+    type: Think
+    task: optimize_fan_engagement
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.8
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: fan_engagement_manager_comprehensive_task
+      description: Given a complex gaming_sports requirement, the agent should provide detailed analysis and recommendations
+      input:
+        fan_analytics: Complex gaming_sports scenario requiring comprehensive analysis
+        engagement_goals: ''
+      expected_output:
+        engagement_analysis: Detailed step-by-step analysis with gaming_sports-specific recommendations
+        engagement_strategy: ''
+    - name: fan_engagement_manager_problem_solving
+      description: When facing gaming_sports challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        fan_analytics: Challenging gaming_sports problem requiring creative solutions
+        engagement_goals: ''
+      expected_output:
+        engagement_analysis: Structured problem-solving approach with multiple solution options
+        engagement_strategy: ''
+    - name: fan_engagement_manager_best_practices
+      description: When asked about gaming_sports best practices, the agent should provide current industry standards and
+        guidelines
+      input:
+        fan_analytics: Industry best practices for gaming_sports operations
+        engagement_goals: ''
+      expected_output:
+        engagement_analysis: Comprehensive best practices guide with implementation steps
+        engagement_strategy: ''
+    - name: fan_engagement_manager_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to gaming_sports
+      input:
+        fan_analytics: Compliance requirements for gaming_sports operations
+        engagement_goals: ''
+      expected_output:
+        engagement_analysis: Detailed compliance checklist with regulatory requirements
+        engagement_strategy: ''
+    - name: fan_engagement_manager_strategic_planning
+      description: When developing gaming_sports strategies, the agent should provide forward-thinking recommendations
+      input:
+        fan_analytics: Strategic planning for gaming_sports growth and optimization
+        engagement_goals: ''
+      expected_output:
+        engagement_analysis: Comprehensive strategic plan with measurable objectives and timelines
+        engagement_strategy: ''

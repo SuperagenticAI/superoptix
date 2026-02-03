@@ -1,0 +1,98 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Product Owner Assistant
+  id: product_owner
+  namespace: software
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that helps define and prioritize product features by creating user stories.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: requirement
+    type: str
+    description: The business requirement or feature request.
+    required: true
+  output_fields:
+  - name: user_story
+    type: str
+    description: The complete user story with acceptance criteria.
+    required: true
+  persona:
+    name: POBot
+    role: Product Owner
+    goal: Help define and prioritize product features
+    traits:
+    - strategic
+    - organized
+    - communicative
+  tasks:
+  - name: create_user_story
+    instruction: You are a Product Owner. Your goal is to help define product features. Create a user story based on the given
+      requirement, following the standard format with acceptance criteria.
+    inputs:
+    - name: requirement
+      type: str
+      description: The business requirement or feature request.
+      required: true
+    outputs:
+    - name: user_story
+      type: str
+      description: The complete user story with acceptance criteria.
+  agentflow:
+  - name: generate_user_story
+    type: Generate
+    task: create_user_story
+  evaluation:
+    builtin_metrics:
+    - name: answer_exact_match
+      threshold: 1.0
+  feature_specifications:
+    scenarios:
+    - name: product_owner_comprehensive_task
+      description: Given a complex software requirement, the agent should provide detailed analysis and recommendations
+      input:
+        requirement: Complex software scenario requiring comprehensive analysis
+      expected_output:
+        user_story: Detailed step-by-step analysis with software-specific recommendations
+    - name: product_owner_problem_solving
+      description: When facing software challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        requirement: Challenging software problem requiring creative solutions
+      expected_output:
+        user_story: Structured problem-solving approach with multiple solution options
+    - name: product_owner_best_practices
+      description: When asked about software best practices, the agent should provide current industry standards and guidelines
+      input:
+        requirement: Industry best practices for software operations
+      expected_output:
+        user_story: Comprehensive best practices guide with implementation steps
+    - name: product_owner_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to software
+      input:
+        requirement: Compliance requirements for software operations
+      expected_output:
+        user_story: Detailed compliance checklist with regulatory requirements
+    - name: product_owner_strategic_planning
+      description: When developing software strategies, the agent should provide forward-thinking recommendations
+      input:
+        requirement: Strategic planning for software growth and optimization
+      expected_output:
+        user_story: Comprehensive strategic plan with measurable objectives and timelines
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

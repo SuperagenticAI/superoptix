@@ -1,0 +1,122 @@
+name: 🚀 Feature Request
+description: Suggest a new feature or enhancement for SuperOptiX
+title: "[Feature]: "
+labels: ["enhancement", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a new feature! 🚀
+        
+        Before submitting, please search existing issues to see if this has been requested before.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: 🎯 Feature Summary
+      description: A clear and concise summary of the feature you'd like to see
+      placeholder: Briefly describe the feature...
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 🤔 Problem Statement
+      description: What problem does this feature solve? What's the current limitation?
+      placeholder: |
+        As a SuperOptiX user, I find it difficult to...
+        Currently, there's no way to...
+        This would help because...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: 💡 Proposed Solution
+      description: Describe the solution you'd like to see
+      placeholder: |
+        I would like SuperOptiX to support...
+        The feature should work by...
+        Users would interact with it by...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 🔄 Alternatives Considered
+      description: Describe any alternative solutions or workarounds you've considered
+      placeholder: |
+        Alternative 1: ...
+        Alternative 2: ...
+        Current workaround: ...
+
+  - type: dropdown
+    id: feature_type
+    attributes:
+      label: 🏷️ Feature Type
+      description: What type of feature is this?
+      options:
+        - Agent Framework Enhancement
+        - DSPy Integration Improvement
+        - CLI Tool Enhancement
+        - Orchestration Feature
+        - Memory System Enhancement
+        - Observability/Debugging Tool
+        - Performance Optimization
+        - Documentation/Examples
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 📊 Priority Level
+      description: How important is this feature to you?
+      options:
+        - Low - Nice to have
+        - Medium - Would be helpful
+        - High - Important for my use case
+        - Critical - Blocking my work
+    validations:
+      required: true
+
+  - type: textarea
+    id: usecase
+    attributes:
+      label: 🎭 Use Case Examples
+      description: Provide specific examples of how this feature would be used
+      placeholder: |
+        Example 1: When building a customer service agent...
+        Example 2: In a multi-agent orchestration scenario...
+        Example 3: For debugging complex agent behaviors...
+
+  - type: textarea
+    id: implementation
+    attributes:
+      label: 🛠️ Implementation Ideas
+      description: If you have ideas about how this could be implemented, share them here
+      placeholder: |
+        This could be implemented by...
+        It might involve changes to...
+        The API could look like...
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: ✅ Checklist
+      description: Please confirm the following
+      options:
+        - label: I have searched existing issues and this feature hasn't been requested
+          required: true
+        - label: This feature aligns with SuperOptiX's core mission of agentic AI orchestration
+          required: true
+        - label: I would be willing to help test this feature when available
+          required: false
+        - label: I would be interested in contributing to the implementation
+          required: false 

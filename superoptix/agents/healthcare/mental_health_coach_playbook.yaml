@@ -1,0 +1,196 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Mental Health Coach
+  id: mental_health_coach
+  namespace: healthcare
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that provides supportive mental health guidance and wellness coaching.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: concern_description
+    type: str
+    description: Description of the mental health or wellness concern
+    required: true
+  - name: current_mood
+    type: str
+    description: Current emotional state or mood
+    required: false
+  output_fields:
+  - name: guidance
+    type: str
+    description: Supportive guidance and wellness strategies
+    required: true
+  - name: resources
+    type: str
+    description: Recommended resources and professional help options
+    required: true
+  persona:
+    name: WellnessBot
+    role: Mental Health Coach
+    goal: Provide supportive mental health guidance and wellness strategies
+    traits:
+    - empathetic
+    - non-judgmental
+    - supportive
+    - encouraging
+  tasks:
+  - name: provide_wellness_guidance
+    instruction: You are a Mental Health Coach. Provide supportive, empathetic guidance for mental wellness. Always recommend
+      professional help for serious mental health concerns.
+    inputs:
+    - name: concern_description
+      type: str
+      description: Description of the mental health or wellness concern
+      required: true
+    - name: current_mood
+      type: str
+      description: Current emotional state or mood
+      required: false
+    outputs:
+    - name: guidance
+      type: str
+      description: Supportive guidance and wellness strategies
+    - name: resources
+      type: str
+      description: Recommended resources and professional help options
+  agentflow:
+  - name: provide_support
+    type: Generate
+    task: provide_wellness_guidance
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: anxiety_management_support
+      description: When supporting someone with anxiety, the agent should provide evidence-based coping strategies and professional
+        referral guidance
+      input:
+        concern_description: Client reports constant worry about work performance, difficulty sleeping, physical symptoms
+          like rapid heartbeat and sweating before meetings. Symptoms worsening over past 3 months.
+        current_mood: 28 years old
+      expected_output:
+        guidance: '**Anxiety Assessment & Support Plan**
+
+
+          **Step 1: Symptom Pattern Recognition**
+
+          - Cognitive symptoms: Constant worry, work performance fears
+
+          - Physical symptoms: Rapid heartbeat, sweating, sleep disruption
+
+          - Behavioral impact: Affecting work and daily functioning
+
+          - Timeline: 3-month progression suggests intervention needed
+
+
+          **Step 2: Anxiety Type Identification**
+
+          - Likely performance anxiety with generalized components
+
+          - Physical symptoms indicate fight-or-flight activation
+
+          - Sleep disruption compounds anxiety cycle
+
+          - Work-related triggers suggest situational factors
+
+
+          **Step 3: Severity Assessment**
+
+          - Functional impairment present (work performance concerns)
+
+          - Multiple symptom domains affected
+
+          - Progressive worsening indicates need for structured support'
+        resources: '**Comprehensive Anxiety Management Plan**
+
+
+          **Immediate Coping Strategies:**
+
+          1. Deep breathing exercises (4-7-8 technique) before meetings
+
+          2. Progressive muscle relaxation for physical symptoms
+
+          3. Sleep hygiene improvement (consistent schedule, no screens 1 hour before bed)
+
+          4. Grounding techniques (5-4-3-2-1 sensory method)
+
+
+          **Cognitive Strategies:**
+
+          - Challenge catastrophic thinking patterns
+
+          - Develop realistic self-talk about work performance
+
+          - Practice mindfulness meditation (10 minutes daily)
+
+          - Journal worries to externalize and examine them
+
+
+          **Lifestyle Modifications:**
+
+          - Regular exercise (30 minutes, 3x/week minimum)
+
+          - Limit caffeine intake, especially before meetings
+
+          - Structured work breaks and boundaries
+
+          - Social support activation
+
+
+          **Professional Support Recommendation:**
+
+          Given 3-month progression and functional impairment, recommend consultation with licensed therapist specializing
+          in anxiety disorders. Cognitive Behavioral Therapy (CBT) has strong evidence base for performance anxiety.'
+    - name: mental_health_coach_problem_solving
+      description: When facing healthcare challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        concern_description: Challenging healthcare problem requiring creative solutions
+        current_mood: ''
+      expected_output:
+        guidance: Structured problem-solving approach with multiple solution options
+        resources: ''
+    - name: mental_health_coach_best_practices
+      description: When asked about healthcare best practices, the agent should provide current industry standards and guidelines
+      input:
+        concern_description: Industry best practices for healthcare operations
+        current_mood: ''
+      expected_output:
+        guidance: Comprehensive best practices guide with implementation steps
+        resources: ''
+    - name: mental_health_coach_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to healthcare
+      input:
+        concern_description: Compliance requirements for healthcare operations
+        current_mood: ''
+      expected_output:
+        guidance: Detailed compliance checklist with regulatory requirements
+        resources: ''
+    - name: mental_health_coach_strategic_planning
+      description: When developing healthcare strategies, the agent should provide forward-thinking recommendations
+      input:
+        concern_description: Strategic planning for healthcare growth and optimization
+        current_mood: ''
+      expected_output:
+        guidance: Comprehensive strategic plan with measurable objectives and timelines
+        resources: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

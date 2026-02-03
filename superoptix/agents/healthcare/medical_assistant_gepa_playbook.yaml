@@ -1,0 +1,170 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Medical Assistant GEPA
+  id: medical_assistant_gepa
+  version: 1.0.0
+  level: oracles
+  description: Medical information assistant optimized with GEPA for clinical decision support, medical knowledge synthesis,
+    and patient education
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    temperature: 0.1
+    max_tokens: 32000
+  input_fields:
+  - name: medical_query
+    type: str
+    description: Medical question or clinical scenario to analyze
+    required: true
+  - name: patient_context
+    type: str
+    description: Relevant patient context (age range, general health status)
+    required: false
+  output_fields:
+  - name: clinical_analysis
+    type: str
+    description: Evidence-based medical information synthesis
+    required: true
+  - name: risk_factors
+    type: str
+    description: Relevant risk factors and contraindications
+    required: true
+  - name: recommendations
+    type: str
+    description: General guidance emphasizing professional consultation
+    required: true
+  - name: patient_education
+    type: str
+    description: Clear, accessible explanation for patient understanding
+    required: true
+  - name: medical_disclaimer
+    type: str
+    description: Appropriate medical disclaimer and consultation guidance
+    required: true
+  - name: reasoning
+    type: str
+    description: Clinical reasoning process and evidence sources
+    required: true
+  persona:
+    role: Medical Information Specialist
+    goal: Provide accurate medical information, clinical decision support, and patient education while emphasizing professional
+      medical consultation
+    traits:
+    - evidence-based
+    - cautious
+    - thorough
+    - empathetic
+    - precise
+  tasks:
+  - name: medical_information_synthesis
+    description: Synthesize medical information for clinical decision support and patient education
+    instruction: 'Provide comprehensive medical information analysis with strict adherence to safety:
+
+
+      1. **Evidence-Based Analysis**: Use current medical literature and guidelines
+
+      2. **Clinical Reasoning**: Apply systematic diagnostic and treatment approaches
+
+      3. **Risk Assessment**: Identify contraindications, interactions, and warnings
+
+      4. **Patient Safety**: Always emphasize professional medical consultation
+
+      5. **Educational Content**: Provide clear, accessible explanations
+
+      6. **Differential Considerations**: Present multiple perspectives when appropriate
+
+
+      CRITICAL: Always include disclaimers about professional medical consultation.
+
+      Never provide specific diagnoses or treatment recommendations.
+
+      '
+    inputs:
+    - name: medical_query
+      type: str
+      description: Medical question or clinical scenario to analyze
+      required: true
+    - name: patient_context
+      type: str
+      description: Relevant patient context (age range, general health status)
+      required: false
+    outputs:
+    - name: clinical_analysis
+      type: str
+      description: Evidence-based medical information synthesis
+    - name: risk_factors
+      type: str
+      description: Relevant risk factors and contraindications
+    - name: recommendations
+      type: str
+      description: General guidance emphasizing professional consultation
+    - name: patient_education
+      type: str
+      description: Clear, accessible explanation for patient understanding
+    - name: medical_disclaimer
+      type: str
+      description: Appropriate medical disclaimer and consultation guidance
+    - name: reasoning
+      type: str
+      description: Clinical reasoning process and evidence sources
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: medical_accuracy_feedback
+        auto: light
+        reflection_lm: qwen3:8b
+        reflection_minibatch_size: 3
+        skip_perfect_score: false
+        add_format_failure_as_feedback: true
+        safety_focused_feedback: true
+  feature_specifications:
+    scenarios:
+    - name: medication_interaction_query
+      description: Should provide comprehensive medication interaction analysis
+      input:
+        medical_query: What are the interactions between warfarin and ibuprofen?
+        patient_context: Adult patient on anticoagulation therapy
+      expected_output:
+        clinical_analysis: Warfarin and ibuprofen have a significant drug interaction. Ibuprofen can increase bleeding risk
+          by affecting platelet function and potentially displacing warfarin from protein binding sites.
+        risk_factors: Increased bleeding risk, potential for dangerous INR elevation, gastrointestinal bleeding risk
+        recommendations: Consult prescribing physician before combining these medications. Alternative pain management may
+          be recommended.
+        patient_education: These medications can interact to increase bleeding risk. Your doctor needs to monitor you closely
+          if both are necessary.
+        medical_disclaimer: This information is for educational purposes only. Always consult your healthcare provider before
+          making medication changes.
+    - name: symptom_analysis_chest_pain
+      description: Should analyze chest pain symptoms systematically
+      input:
+        medical_query: 35-year-old reports sharp chest pain that worsens with deep breathing, started after coughing fit
+        patient_context: Otherwise healthy adult, no cardiac risk factors
+      expected_output:
+        clinical_analysis: Sharp chest pain worsening with inspiration (pleuritic pain) following cough suggests possible
+          musculoskeletal strain, costochondritis, or pleuritis.
+        risk_factors: 'Must rule out serious causes: pneumothorax, pulmonary embolism, cardiac causes despite low risk'
+        recommendations: Requires immediate medical evaluation to rule out serious causes. Chest pain should always be evaluated
+          promptly.
+        patient_education: Chest pain can have many causes, from muscle strain to serious conditions. Medical evaluation is
+          essential for proper diagnosis.
+        medical_disclaimer: Chest pain requires immediate medical attention. This analysis does not replace emergency medical
+          care.
+    - name: preventive_care_guidance
+      description: Should provide evidence-based preventive care information
+      input:
+        medical_query: What preventive screenings are recommended for a 45-year-old woman?
+        patient_context: Average risk, no family history of major diseases
+      expected_output:
+        clinical_analysis: 'Age 45 preventive care typically includes: mammography screening, cervical cancer screening, cardiovascular
+          risk assessment, diabetes screening, and age-appropriate immunizations.'
+        risk_factors: Individual risk factors may modify screening recommendations (family history, personal risk factors)
+        recommendations: Discuss personalized screening schedule with primary care provider based on individual risk factors
+          and preferences.
+        patient_education: Preventive screenings help detect diseases early when treatment is most effective. Your doctor
+          will create a personalized plan.
+        medical_disclaimer: Screening recommendations vary by individual risk factors. Consult your healthcare provider for
+          personalized guidance.

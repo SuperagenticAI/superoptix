@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Logistics Coordinator
+  id: logistics_coordinator
+  namespace: transportation
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that coordinates logistics operations and manages shipment scheduling.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: shipment_requirements
+    type: str
+    description: Delivery deadlines, package details, and special handling requirements
+    required: true
+  - name: resource_availability
+    type: str
+    description: Available vehicles, drivers, and warehouse capacity
+    required: true
+  output_fields:
+  - name: logistics_plan
+    type: str
+    description: Detailed logistics coordination plan and schedule
+    required: true
+  - name: communication_strategy
+    type: str
+    description: Stakeholder communication plan and status updates
+    required: true
+  persona:
+    name: LogisticsBot
+    role: Logistics Operations Coordinator
+    goal: Ensure smooth logistics operations through effective coordination and communication
+    traits:
+    - organized
+    - communicative
+    - detail-oriented
+    - proactive
+  tasks:
+  - name: coordinate_logistics
+    instruction: You are a Logistics Operations Coordinator. Generate comprehensive logistics plans, coordinate shipments,
+      and create communication strategies to ensure efficient operations.
+    inputs:
+    - name: shipment_requirements
+      type: str
+      description: Delivery deadlines, package details, and special handling requirements
+      required: true
+    - name: resource_availability
+      type: str
+      description: Available vehicles, drivers, and warehouse capacity
+      required: true
+    outputs:
+    - name: logistics_plan
+      type: str
+      description: Detailed logistics coordination plan and schedule
+    - name: communication_strategy
+      type: str
+      description: Stakeholder communication plan and status updates
+  agentflow:
+  - name: coordinate_operations
+    type: Generate
+    task: coordinate_logistics
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.7
+  feature_specifications:
+    scenarios:
+    - name: logistics_coordinator_comprehensive_task
+      description: Given a complex transportation requirement, the agent should provide detailed analysis and recommendations
+      input:
+        shipment_requirements: Complex transportation scenario requiring comprehensive analysis
+        resource_availability: ''
+      expected_output:
+        logistics_plan: Detailed step-by-step analysis with transportation-specific recommendations
+        communication_strategy: ''
+    - name: logistics_coordinator_problem_solving
+      description: When facing transportation challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        shipment_requirements: Challenging transportation problem requiring creative solutions
+        resource_availability: ''
+      expected_output:
+        logistics_plan: Structured problem-solving approach with multiple solution options
+        communication_strategy: ''
+    - name: logistics_coordinator_best_practices
+      description: When asked about transportation best practices, the agent should provide current industry standards and
+        guidelines
+      input:
+        shipment_requirements: Industry best practices for transportation operations
+        resource_availability: ''
+      expected_output:
+        logistics_plan: Comprehensive best practices guide with implementation steps
+        communication_strategy: ''
+    - name: logistics_coordinator_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to transportation
+      input:
+        shipment_requirements: Compliance requirements for transportation operations
+        resource_availability: ''
+      expected_output:
+        logistics_plan: Detailed compliance checklist with regulatory requirements
+        communication_strategy: ''
+    - name: logistics_coordinator_strategic_planning
+      description: When developing transportation strategies, the agent should provide forward-thinking recommendations
+      input:
+        shipment_requirements: Strategic planning for transportation growth and optimization
+        resource_availability: ''
+      expected_output:
+        logistics_plan: Comprehensive strategic plan with measurable objectives and timelines
+        communication_strategy: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

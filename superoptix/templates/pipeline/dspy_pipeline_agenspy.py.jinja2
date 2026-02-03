@@ -1,0 +1,687 @@
+"""
+{{ agent_name | to_pascal_case }} Agent - Protocol-First DSPy Implementation
+
+Auto-generated from SuperSpec playbook using SuperOptiX compiler.
+Framework: DSPy + Agenspy (Protocol-First)
+Generated: {{ timestamp }}
+
+This is PROTOCOL-FIRST DSPy code using Agenspy's approach!
+Instead of manually loading tools, protocols (like MCP) are used as
+first-class primitives for automatic tool discovery.
+
+Key Differentiator:
+- Traditional DSPy: Tool-first (manual tool loading)
+- SuperOptiX Agenspy: Protocol-first (automatic discovery)
+
+Metadata:
+  Name: {{ metadata.name }}
+  Version: {{ metadata.version }}
+  Description: {{ metadata.description }}
+"""
+
+import dspy
+import yaml
+import json
+import logging
+from pathlib import Path
+from typing import Dict, Any, List, Optional
+from datetime import datetime
+
+# SuperOptiX Protocol-First imports (vendored Agenspy)
+from superoptix.protocols import ProtocolType, registry
+from superoptix.protocols.mcp import MCPClient
+from superoptix.agent_bases import ProtocolAgent
+from dspy.adapters.types.tool import Tool
+
+# Setup logging
+logging.basicConfig(
+	level=logging.INFO,
+	format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+{% if spec.rag and spec.rag.enabled %}
+# RAG-specific imports
+try:
+	import chromadb
+	from chromadb.config import Settings
+	RAG_AVAILABLE = True
+except ImportError:
+	RAG_AVAILABLE = False
+	print("⚠️  ChromaDB not installed. Install with: pip install chromadb sentence-transformers")
+{% endif %}
+
+
+# ==============================================================================
+# 1. DSPy Signature (Input/Output Schema)
+# ==============================================================================
+
+class {{ agent_name | to_pascal_case }}Signature(dspy.Signature):
+	"""
+	{{ spec.persona.role | default('AI Assistant') }}
+
+	{% if spec.persona.goal -%}
+	Goal: {{ spec.persona.goal }}
+	{%- endif %}
+	{% if spec.persona.backstory -%}
+	Backstory: {{ spec.persona.backstory }}
+	{%- endif %}
+	"""
+
+	# Input Fields
+{% if spec.input_fields %}
+{% for field in spec.input_fields %}
+	{{ field.name | to_snake_case }}: str = dspy.InputField(desc="{{ field.description | default('Input field') }}")
+{% endfor %}
+{% else %}
+	query: str = dspy.InputField(desc="User query or question")
+{% endif %}
+
+	# Output Fields
+{% if spec.output_fields %}
+{% for field in spec.output_fields %}
+	{{ field.name | to_snake_case }}: str = dspy.OutputField(desc="{{ field.description | default('Output field') }}")
+{% endfor %}
+{% else %}
+	response: str = dspy.OutputField(desc="Generated response")
+{% endif %}
+
+
+# ==============================================================================
+# 2. Protocol-First Agent Module (extends ProtocolAgent)
+# ==============================================================================
+
+class {{ agent_name | to_pascal_case }}Agent(ProtocolAgent):
+	"""
+	Protocol-first agent using automatic tool discovery from MCP servers.
+
+	This agent connects to protocol servers (like MCP) and automatically
+	discovers available tools, eliminating manual tool configuration.
+
+	Key Features:
+	- Automatic tool discovery via protocols
+	- No manual tool loading or registration
+	- Protocol-level optimization compatible with GEPA
+	- Session management for stateful interactions
+	"""
+
+	def __init__(self, mcp_servers: Optional[List[str]] = None):
+		"""
+		Initialize protocol-first agent.
+
+		Args:
+			mcp_servers: List of MCP server URIs (e.g., ['mcp://localhost:8080/math'])
+		"""
+		super().__init__(agent_id="{{ agent_name }}")
+
+		# Connect to MCP servers and discover tools automatically
+		self.protocol_tools = []
+
+		if mcp_servers:
+			logger.info(f"🔌 Connecting to {len(mcp_servers)} MCP server(s)...")
+
+			for server_uri in mcp_servers:
+				try:
+					# Create MCP protocol client
+					protocol = registry.create_protocol(
+						ProtocolType.MCP,
+						server_url=server_uri
+					)
+
+					# Connect to server
+					if protocol.connect():
+						self.add_protocol(protocol)
+
+						# Discover tools automatically
+						tools = self._discover_tools_from_protocol(protocol)
+						self.protocol_tools.extend(tools)
+
+						logger.info(
+							f"✅ Connected to {server_uri}: "
+							f"discovered {len(tools)} tools"
+						)
+					else:
+						logger.warning(f"❌ Failed to connect to {server_uri}")
+
+				except Exception as e:
+					logger.error(f"Error connecting to {server_uri}: {e}")
+
+			logger.info(
+				f"🛠️  Total tools discovered: {len(self.protocol_tools)} "
+				f"from {len(self.protocols)} protocol(s)"
+			)
+
+{% if spec.reasoning and spec.reasoning.method == 'react' or spec.tools and spec.tools.enabled %}
+		# Initialize ReAct with protocol-discovered tools
+		if self.protocol_tools:
+			self.react = dspy.ReAct(
+				{{ agent_name | to_pascal_case }}Signature,
+				tools=self.protocol_tools,
+				max_iters={{ spec.tools.max_iterations | default(5) if spec.tools else spec.reasoning.max_iterations | default(5) if spec.reasoning else 5 }}
+			)
+			logger.info(f"✅ ReAct initialized with {len(self.protocol_tools)} protocol tools")
+		else:
+			# Fallback to ChainOfThought if no tools discovered
+			self.react = dspy.ChainOfThought({{ agent_name | to_pascal_case }}Signature)
+			logger.warning("⚠️  No tools discovered - falling back to ChainOfThought")
+{% else %}
+		# Chain of Thought for reasoning (Oracles tier)
+		self.react = dspy.ChainOfThought({{ agent_name | to_pascal_case }}Signature)
+		logger.info("✅ ChainOfThought initialized (Oracles tier)")
+{% endif %}
+
+	def _discover_tools_from_protocol(self, protocol: MCPClient) -> List[Tool]:
+		"""
+		Discover and convert tools from MCP protocol to DSPy Tools.
+
+		This is the protocol-first magic: tools are discovered automatically
+		from the protocol server, not manually configured!
+
+		Args:
+			protocol: Connected MCP protocol instance
+
+		Returns:
+			List of DSPy Tool objects
+		"""
+		dspy_tools = []
+
+		try:
+			# Get protocol capabilities
+			caps = protocol.get_capabilities()
+			tool_names = caps.get("tools", [])
+
+			# Convert each MCP tool to DSPy Tool
+			for tool_name in tool_names:
+				if tool_name in protocol.available_tools:
+					tool_spec = protocol.available_tools[tool_name]
+
+					# Create DSPy Tool wrapper
+					dspy_tool = Tool(
+						func=lambda args, tn=tool_name, p=protocol: self._execute_protocol_tool(p, tn, args),
+						name=tool_spec.get("name", tool_name),
+						desc=tool_spec.get("description", f"Tool: {tool_name}"),
+						args={},  # Protocol tools handle args dynamically
+						arg_types={},
+						arg_desc={}
+					)
+
+					dspy_tools.append(dspy_tool)
+					logger.debug(f"Converted protocol tool: {tool_name}")
+
+		except Exception as e:
+			logger.error(f"Error discovering tools from protocol: {e}")
+
+		return dspy_tools
+
+	def _execute_protocol_tool(self, protocol: MCPClient, tool_name: str, args: Dict[str, Any]) -> str:
+		"""
+		Execute a tool via the protocol.
+
+		Args:
+			protocol: MCP protocol instance
+			tool_name: Name of tool to execute
+			args: Tool arguments
+
+		Returns:
+			Tool execution result as string
+		"""
+		try:
+			# Execute tool via protocol session
+			if protocol.session:
+				result = protocol.session.execute_tool(tool_name, args)
+				return str(result)
+			else:
+				return f"Error: Protocol not connected"
+		except Exception as e:
+			logger.error(f"Error executing protocol tool {tool_name}: {e}")
+			return f"Error: {str(e)}"
+
+	def forward(self, {% if spec.input_fields %}{% for field in spec.input_fields %}{{ field.name | to_snake_case }}{% if not loop.last %}, {% endif %}{% endfor %}{% else %}query{% endif %}):
+		"""
+		Execute the agent - standard DSPy forward pass.
+
+		Args:
+{% if spec.input_fields %}
+{% for field in spec.input_fields %}
+			{{ field.name | to_snake_case }}: {{ field.description | default('Input field') }}
+{% endfor %}
+{% else %}
+			query: User query or question
+{% endif %}
+
+		Returns:
+			dspy.Prediction with agent response
+		"""
+		return self.react({% if spec.input_fields %}{% for field in spec.input_fields %}{{ field.name | to_snake_case }}={{ field.name | to_snake_case }}{% if not loop.last %}, {% endif %}{% endfor %}{% else %}query=query{% endif %})
+
+
+# ==============================================================================
+# 3. Protocol-First Pipeline Class
+# ==============================================================================
+
+class {{ agent_name | to_pascal_case }}Pipeline:
+	"""
+	Protocol-first pipeline for {{ metadata.name }}.
+
+	This pipeline uses the protocol-first approach where tools are
+	automatically discovered from MCP servers rather than manually loaded.
+
+	Key Differentiators from Tool-First:
+	- Automatic tool discovery
+	- Protocol-level optimization
+	- Session management
+	- No manual tool configuration
+	- Future-ready for Agent2Agent protocol
+
+	Features:
+	- Playbook loading from YAML
+	- DSPy LM configuration
+	- Protocol connection management
+	- BDD scenario loading for testing
+	- Evaluation against test scenarios
+	- GEPA optimization support
+	- Optional tracing
+	"""
+
+	def __init__(self, playbook_path: Optional[str] = None, enable_tracing: bool = False):
+		"""
+		Initialize the protocol-first pipeline.
+
+		Args:
+			playbook_path: Path to playbook YAML (auto-detected if None)
+			enable_tracing: Enable execution tracing (optional)
+		"""
+		# ======================================================================
+		# PLAYBOOK LOADING
+		# ======================================================================
+		if playbook_path is None:
+			# Auto-detect playbook path relative to this pipeline file
+			playbook_path = Path(__file__).parent.parent / "playbook" / "{{ agent_name }}_playbook.yaml"
+
+		with open(playbook_path) as f:
+			self.playbook = yaml.safe_load(f)
+
+		self.spec = self.playbook.get("spec", {})
+		self.config = self.playbook.get("config", {})
+		self.metadata = self.playbook.get("metadata", {})
+
+		# ======================================================================
+		# MODEL SETUP
+		# ======================================================================
+		lm_config = self.spec.get("model", self.spec.get("language_model", {}))
+
+		model = lm_config.get("model")
+		provider = lm_config.get("provider", "openai")
+		temperature = lm_config.get("temperature", 0.7)
+		max_tokens = lm_config.get("max_tokens", 2048)
+
+		if not model:
+			raise ValueError(f"Model configuration missing in playbook. Found: {lm_config}")
+
+		print(f"🔧 Setting up LM: {provider}/{model} (temp={temperature}, max_tokens={max_tokens})")
+
+		# Provider-specific LM configuration
+		if provider == 'ollama':
+			model_str = f'ollama_chat/{model}' if not model.startswith('ollama_chat/') else model
+			self.lm = dspy.LM(
+				model=model_str,
+				provider='ollama',
+				api_base='http://localhost:11434',
+				api_key='',
+				temperature=temperature,
+				max_tokens=max_tokens
+			)
+		else:
+			self.lm = dspy.LM(
+				model=model,
+				provider=provider,
+				temperature=temperature,
+				max_tokens=max_tokens
+			)
+
+		dspy.configure(lm=self.lm)
+		print(f"🤖 Initialized DSPy LM: {model}")
+
+		# ======================================================================
+		# BDD SCENARIO LOADING
+		# ======================================================================
+		self.test_scenarios = self._load_bdd_scenarios()
+		self.test_examples = self.test_scenarios  # Alias for CLI compatibility
+
+		if self.test_scenarios:
+			print(f"📋 Loaded {len(self.test_scenarios)} BDD test scenarios")
+
+		# ======================================================================
+		# TRACING SETUP
+		# ======================================================================
+		self.enable_tracing = enable_tracing
+		self.traces = []
+
+		if self.enable_tracing:
+			self.traces_dir = Path.cwd() / ".superoptix" / "traces"
+			self.traces_dir.mkdir(parents=True, exist_ok=True)
+			print(f"🔍 Tracing enabled - traces saved to: {self.traces_dir}")
+
+{% if spec.rag and spec.rag.enabled %}
+		# ======================================================================
+		# RAG SETUP
+		# ======================================================================
+		self.rag_enabled = False
+		self.retriever = None
+
+		if RAG_AVAILABLE:
+			rag_config = self.spec.get("rag", {})
+			if rag_config.get("enabled", True):
+				try:
+					collection_name = rag_config.get("collection", "{{ spec.rag.collection | default('documents') }}")
+					persist_dir = rag_config.get("persist_directory", ".superoptix/chromadb")
+
+					chroma_client = chromadb.PersistentClient(
+						path=persist_dir,
+						settings=Settings(anonymized_telemetry=False)
+					)
+
+					self.collection = chroma_client.get_or_create_collection(
+						name=collection_name,
+						metadata={"hnsw:space": "cosine"}
+					)
+
+{% if spec.rag.knowledge_base %}
+					knowledge_base = rag_config.get("knowledge_base", [])
+					if knowledge_base or {{ spec.rag.knowledge_base | length }} > 0:
+						self._load_documents_to_rag()
+{% endif %}
+
+					self.retriever = dspy.Retrieve(k={{ spec.rag.top_k | default(5) }})
+					self.rag_enabled = True
+
+					print(f"📚 RAG enabled with ChromaDB collection: {collection_name}")
+
+				except Exception as e:
+					print(f"⚠️  Failed to setup RAG: {e}")
+					print("   Continuing without RAG...")
+{% endif %}
+
+		# ======================================================================
+		# PROTOCOL CONNECTION SETUP (Protocol-First Approach!)
+		# ======================================================================
+		mcp_servers = self.spec.get("mcp_servers", [])
+
+		if not mcp_servers:
+			logger.warning(
+				"⚠️  No MCP servers configured in playbook. "
+				"Add 'mcp_servers' to spec for protocol-first tool discovery."
+			)
+			logger.info(
+				"   Example:\n"
+				"   spec:\n"
+				"     mcp_servers:\n"
+				"       - mcp://localhost:8080/math\n"
+				"       - mcp://localhost:8080/github"
+			)
+
+		# Initialize protocol-first agent
+		self.agent = {{ agent_name | to_pascal_case }}Agent(mcp_servers=mcp_servers)
+
+		# Create references for CLI compatibility
+		self.module = self.agent
+		self.react = self.agent.react if hasattr(self.agent, 'react') else self.agent
+
+		print(f"✅ {{ agent_name | to_pascal_case }} protocol-first pipeline initialized")
+		print(f"   Protocols connected: {len(self.agent.protocols)}")
+		print(f"   Tools discovered: {len(self.agent.protocol_tools)}")
+
+	# ==========================================================================
+	# BDD SCENARIO LOADING
+	# ==========================================================================
+
+	def _load_bdd_scenarios(self) -> List[dspy.Example]:
+		"""
+		Load BDD scenarios from playbook as DSPy Example objects.
+		"""
+		feature_specs = self.spec.get("feature_specifications", {})
+		scenario_list = feature_specs.get("scenarios", [])
+
+		examples = []
+
+		for scenario in scenario_list:
+			try:
+				inputs = scenario.get("input", {})
+				expected_outputs = scenario.get("expected_output", {})
+
+				# Convert to DSPy Example
+				example_data = {**inputs, **expected_outputs}
+				example = dspy.Example(**example_data).with_inputs(*list(inputs.keys()))
+				examples.append(example)
+
+			except Exception as e:
+				logger.warning(f"Failed to load scenario: {scenario.get('name', 'unknown')}: {e}")
+
+		return examples
+
+{% if spec.rag and spec.rag.enabled and spec.rag.knowledge_base %}
+	# ==========================================================================
+	# RAG DOCUMENT LOADING
+	# ==========================================================================
+
+	def _load_documents_to_rag(self):
+		"""Load documents from knowledge base into RAG system."""
+		knowledge_base = self.spec.get("rag", {}).get("knowledge_base", [])
+
+		docs_loaded = 0
+		for doc_path in knowledge_base:
+			try:
+				full_path = Path(doc_path)
+				if full_path.exists():
+					with open(full_path) as f:
+						content = f.read()
+
+					# Chunk and add to ChromaDB
+					chunks = self._chunk_document(content, chunk_size=500)
+					for i, chunk in enumerate(chunks):
+						self.collection.add(
+							documents=[chunk],
+							ids=[f"{full_path.name}_{i}"]
+						)
+					docs_loaded += len(chunks)
+
+			except Exception as e:
+				logger.warning(f"Failed to load document {doc_path}: {e}")
+
+		logger.info(f"📄 Loaded {docs_loaded} document chunks to RAG")
+
+	def _chunk_document(self, text: str, chunk_size: int = 500) -> List[str]:
+		"""Split document into chunks."""
+		words = text.split()
+		chunks = []
+		for i in range(0, len(words), chunk_size):
+			chunk = ' '.join(words[i:i + chunk_size])
+			chunks.append(chunk)
+		return chunks
+{% endif %}
+
+	# ==========================================================================
+	# EXECUTION METHODS
+	# ==========================================================================
+
+	def run(self, {% if spec.input_fields %}{% for field in spec.input_fields %}{{ field.name | to_snake_case }}: str{% if not loop.last %}, {% endif %}{% endfor %}{% else %}query: str{% endif %}) -> Dict[str, Any]:
+		"""
+		Execute the protocol-first agent.
+
+		Args:
+{% if spec.input_fields %}
+{% for field in spec.input_fields %}
+			{{ field.name | to_snake_case }}: {{ field.description | default('Input field') }}
+{% endfor %}
+{% else %}
+			query: User query or question
+{% endif %}
+
+		Returns:
+			Dictionary containing agent response and metadata
+		"""
+		try:
+			# Execute agent
+			result = self.agent({% if spec.input_fields %}{% for field in spec.input_fields %}{{ field.name | to_snake_case }}={{ field.name | to_snake_case }}{% if not loop.last %}, {% endif %}{% endfor %}{% else %}query=query{% endif %})
+
+			# Extract response
+			response_data = {
+{% if spec.output_fields %}
+{% for field in spec.output_fields %}
+				"{{ field.name | to_snake_case }}": getattr(result, "{{ field.name | to_snake_case }}", ""),
+{% endfor %}
+{% else %}
+				"response": getattr(result, "response", str(result)),
+{% endif %}
+			}
+
+			# Add metadata
+			response_data["metadata"] = {
+				"agent_id": self.agent.agent_id,
+				"protocols_used": [p.protocol_type.value for p in self.agent.protocols],
+				"tools_available": len(self.agent.protocol_tools),
+				"timestamp": datetime.now().isoformat()
+			}
+
+			# Optionally save trace
+			if self.enable_tracing:
+				self._save_trace(response_data)
+
+			return response_data
+
+		except Exception as e:
+			logger.error(f"Error executing agent: {e}")
+			return {
+				"error": str(e),
+				"metadata": {
+					"agent_id": self.agent.agent_id,
+					"timestamp": datetime.now().isoformat()
+				}
+			}
+
+	def _save_trace(self, trace_data: Dict[str, Any]):
+		"""Save execution trace to file."""
+		timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+		trace_file = self.traces_dir / f"trace_{timestamp}.json"
+
+		with open(trace_file, 'w') as f:
+			json.dump(trace_data, f, indent=2)
+
+	# ==========================================================================
+	# EVALUATION METHODS
+	# ==========================================================================
+
+	def evaluate(self, test_examples: Optional[List[dspy.Example]] = None) -> Dict[str, Any]:
+		"""
+		Evaluate agent against test scenarios.
+
+		Args:
+			test_examples: Optional test examples (uses loaded BDD scenarios if None)
+
+		Returns:
+			Evaluation metrics dictionary
+		"""
+		examples = test_examples or self.test_scenarios
+
+		if not examples:
+			logger.warning("No test examples available for evaluation")
+			return {"error": "No test examples available"}
+
+		results = []
+		correct = 0
+		total = len(examples)
+
+		for example in examples:
+			try:
+				# Get prediction
+				prediction = self.agent(**example.inputs())
+
+				# Check if correct (basic string matching)
+				expected = example.labels()
+				actual = {k: getattr(prediction, k, "") for k in expected.keys()}
+
+				is_correct = all(
+					expected.get(k, "").lower() in str(actual.get(k, "")).lower()
+					for k in expected.keys()
+				)
+
+				if is_correct:
+					correct += 1
+
+				results.append({
+					"inputs": example.inputs(),
+					"expected": expected,
+					"actual": actual,
+					"correct": is_correct
+				})
+
+			except Exception as e:
+				logger.error(f"Error evaluating example: {e}")
+				results.append({
+					"inputs": example.inputs(),
+					"error": str(e),
+					"correct": False
+				})
+
+		accuracy = (correct / total * 100) if total > 0 else 0
+
+		evaluation_results = {
+			"accuracy": accuracy,
+			"correct": correct,
+			"total": total,
+			"results": results,
+			"metadata": {
+				"agent_id": self.agent.agent_id,
+				"timestamp": datetime.now().isoformat(),
+				"protocols": [p.protocol_type.value for p in self.agent.protocols],
+				"tools_count": len(self.agent.protocol_tools)
+			}
+		}
+
+		logger.info(f"📊 Evaluation: {correct}/{total} correct ({accuracy:.1f}%)")
+
+		return evaluation_results
+
+	# ==========================================================================
+	# CLEANUP
+	# ==========================================================================
+
+	def cleanup(self):
+		"""Clean up agent resources."""
+		logger.info("Cleaning up protocol-first agent...")
+		self.agent.cleanup()
+		logger.info("✅ Cleanup complete")
+
+
+# ==============================================================================
+# MAIN EXECUTION (for testing)
+# ==============================================================================
+
+if __name__ == "__main__":
+	print("=" * 80)
+	print(f"{{ agent_name | to_pascal_case }} Agent - Protocol-First Mode")
+	print("=" * 80)
+
+	# Initialize pipeline
+	pipeline = {{ agent_name | to_pascal_case }}Pipeline(enable_tracing=True)
+
+	# Example query
+	test_query = {% if spec.input_fields %}"{{ spec.input_fields[0].description | default('Test query') }}"{% else %}"Hello, how can you help me?"{% endif %}
+
+	print(f"\n🔄 Running agent with query: {test_query}")
+
+	try:
+		result = pipeline.run({% if spec.input_fields %}{% for field in spec.input_fields %}{{ field.name | to_snake_case }}=test_query{% if not loop.last %}, {% endif %}{% endfor %}{% else %}query=test_query{% endif %})
+
+		print("\n✅ Result:")
+		print(json.dumps(result, indent=2))
+
+	except Exception as e:
+		print(f"\n❌ Error: {e}")
+
+	finally:
+		# Cleanup
+		pipeline.cleanup()
+
+	print("\n" + "=" * 80)
+

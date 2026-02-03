@@ -1,0 +1,203 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Memory Demo Assistant
+  id: memory_demo
+  namespace: demo
+  version: 1.0.0
+  agent_type: Interactive
+  level: genies
+  description: A comprehensive demo agent showcasing the multi-layered memory system capabilities in SuperOptiX framework.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+    temperature: 0.7
+    max_tokens: 2048
+  input_fields:
+  - name: conversation_input
+    type: str
+    description: A conversational input that requires short-term memory context.
+    required: true
+  output_fields:
+  - name: contextual_response
+    type: str
+    description: A response that demonstrates short-term memory awareness.
+    required: true
+  persona:
+    name: MemoryBot
+    role: Memory Demo Assistant
+    goal: Demonstrate the power of multi-layered memory systems in SuperOptiX framework
+    traits:
+    - helpful
+    - knowledgeable
+    - precise
+    - educational
+    - memory-aware
+  tasks:
+  - name: short_term_memory_demo
+    instruction: You are a Memory Demo Assistant. Demonstrate short-term memory capabilities by maintaining context within
+      conversations and recalling recent information.
+    inputs:
+    - name: conversation_input
+      type: str
+      description: A conversational input that requires short-term memory context.
+      required: true
+    outputs:
+    - name: contextual_response
+      type: str
+      description: A response that demonstrates short-term memory awareness.
+  - name: long_term_memory_demo
+    instruction: Demonstrate long-term memory capabilities by storing and retrieving persistent information across sessions.
+    inputs:
+    - name: memory_request
+      type: str
+      description: A request that requires long-term memory retrieval or storage.
+      required: true
+    outputs:
+    - name: memory_response
+      type: str
+      description: A response that demonstrates long-term memory capabilities.
+  - name: episodic_memory_demo
+    instruction: Demonstrate episodic memory capabilities by recalling specific events, experiences, and contextual information.
+    inputs:
+    - name: episodic_request
+      type: str
+      description: A request that requires episodic memory recall or storage.
+      required: true
+    outputs:
+    - name: episodic_response
+      type: str
+      description: A response that demonstrates episodic memory capabilities.
+  - name: memory_integration_demo
+    instruction: Demonstrate how different memory layers work together seamlessly in the SuperOptiX framework.
+    inputs:
+    - name: integration_request
+      type: str
+      description: A request that requires integration of multiple memory types.
+      required: true
+    outputs:
+    - name: integration_response
+      type: str
+      description: A response that demonstrates memory integration capabilities.
+  agentflow:
+  - name: process_short_term
+    type: Process
+    task: short_term_memory_demo
+  - name: process_long_term
+    type: Process
+    task: long_term_memory_demo
+  - name: process_episodic
+    type: Process
+    task: episodic_memory_demo
+  - name: process_integration
+    type: Process
+    task: memory_integration_demo
+  react_config:
+    max_iters: 5
+    max_tool_calls: 3
+    tool_selection_strategy: automatic
+    reasoning_style: step_by_step
+    error_handling: retry
+    enable_tracing: true
+  tools:
+    enabled: true
+    categories:
+    - core
+    - utilities
+    specific_tools:
+    - calculator
+    - text_analyzer
+    - date_time
+    - json_processor
+  memory:
+    enabled: true
+    short_term:
+      enabled: true
+      max_tokens: 2000
+      window_size: 10
+    long_term:
+      enabled: true
+      storage_type: local
+      max_entries: 500
+      persistence: true
+    episodic:
+      enabled: true
+      max_episodes: 100
+      episode_retention: 30
+    context_manager:
+      enabled: true
+      max_context_length: 4000
+      context_strategy: sliding_window
+  rag:
+    enabled: true
+    retriever_type: chroma
+    config:
+      top_k: 5
+      chunk_size: 512
+      chunk_overlap: 50
+    vector_store:
+      embedding_model: sentence-transformers/all-MiniLM-L6-v2
+      collection_name: memory_demo_knowledge
+  evaluation:
+    builtin_metrics:
+    - name: memory_accuracy
+      threshold: 0.8
+    - name: context_retention
+      threshold: 0.8
+    - name: memory_integration
+      threshold: 0.8
+    - name: memory_knowledge
+      threshold: 0.9
+  feature_specifications:
+    scenarios:
+    - name: short_term_memory_test
+      description: The agent should maintain short-term memory context effectively.
+      input:
+        conversation_input: My name is Alice. What's my name?
+      expected_output:
+        contextual_response: Should remember and respond with 'Alice'
+    - name: long_term_memory_test
+      description: The agent should store and retrieve long-term information.
+      input:
+        memory_request: Remember that I prefer coffee over tea. What's my drink preference?
+      expected_output:
+        memory_response: Should remember and respond with coffee preference
+    - name: episodic_memory_test
+      description: The agent should recall specific episodes and experiences.
+      input:
+        episodic_request: Remember our conversation about AI yesterday. What did we discuss?
+      expected_output:
+        episodic_response: Should recall specific details from the previous conversation
+    - name: memory_integration_test
+      description: The agent should integrate different memory types effectively.
+      input:
+        integration_request: Based on our previous conversations, what are my preferences and recent activities?
+      expected_output:
+        integration_response: Should combine short-term, long-term, and episodic memories
+    - name: context_continuity
+      description: The agent should maintain context across multiple interactions.
+      input:
+        conversation_input: Continuing our previous discussion about machine learning...
+      expected_output:
+        contextual_response: Should maintain context from previous interactions
+    - name: memory_persistence
+      description: The agent should demonstrate memory persistence across sessions.
+      input:
+        memory_request: What information do you remember about me from our previous sessions?
+      expected_output:
+        memory_response: Should retrieve persistent information from long-term memory
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: tool_use_accuracy
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 5
+        skip_perfect_score: true
+        reflection_minibatch_size: 3
+    metric: tool_use_accuracy
+    metric_threshold: 0.75

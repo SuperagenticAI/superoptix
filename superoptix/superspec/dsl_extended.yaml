@@ -1,0 +1,187 @@
+# SuperSpec DSL Extended Features
+# Genie Tier Capabilities and Shared Configuration Options
+
+# === GENIE-SPECIFIC FEATURES ===
+genie_features:
+  # Memory System (Genie only)
+  memory:
+    enabled: true
+    types: ["short_term", "episodic", "long_term"]
+    backend: ["file", "sqlite", "redis"]
+    features:
+      - "Conversation context retention"
+      - "Knowledge accumulation"
+      - "Pattern recognition"
+      - "Preference learning"
+      - "Experience replay"
+    
+  # Tool Integration (Genie only)
+  tools:
+    builtin_tools:
+      - "calculator"
+      - "web_search"
+      - "file_operations"
+      - "code_executor"
+      - "api_caller"
+      - "data_processor"
+    custom_tools: "Supported with plugin system"
+    react_reasoning: true
+    max_tool_calls: 10
+    
+  # RAG Capabilities (Genie only)
+  rag:
+    vector_stores: ["ChromaDB", "FAISS", "Pinecone", "Weaviate"]
+    embedding_models: ["all-MiniLM-L6-v2", "text-embedding-ada-002"]
+    retrieval_methods: ["semantic", "keyword", "hybrid"]
+    reranking: "Optional"
+    
+  # Streaming (Genie only)
+  streaming:
+    supported: true
+    types: ["token_streaming", "thought_streaming"]
+    formats: ["text", "json", "markdown"]
+
+# === SHARED FEATURES (ORACLE AND GENIE) ===
+shared_features:
+  # Basic DSPy Modules
+  dspy_modules:
+    oracle: ["Predict", "ChainOfThought"]
+    genie: ["Predict", "ChainOfThought", "ReAct"]
+    
+  # Optimization Strategies
+  optimization:
+    oracle: ["BootstrapFewShot"]
+    genie: ["BootstrapFewShot"]
+    
+  # Evaluation Metrics
+  evaluation:
+    basic_metrics:
+      - "exact_match"
+      - "semantic_f1"
+      - "answer_correctness"
+      - "rouge_l"
+      - "bleu"
+    
+  # Orchestration
+  orchestration:
+    strategies: ["sequential"]
+    task_dependencies: true
+    error_handling: true
+    retry_policies: true
+    
+  # Observability
+  observability:
+    tracing: true
+    dashboard: true
+    metrics: true
+    debugging: true
+
+# === TIER VALIDATION RULES ===
+validation_rules:
+  oracle:
+    forbidden_features:
+      - "react_config"
+      - "tools"
+      - "memory"
+      - "rag_config"
+      - "streaming"
+    allowed_agentflow_types:
+      - "Generate"
+      - "Think" 
+      - "Compare"
+      - "Route"
+    
+  genie:
+    allowed_features:
+      - "react_config"
+      - "tools"
+      - "memory"
+      - "rag_config"
+      - "streaming"
+    allowed_agentflow_types:
+      - "Generate"
+      - "Think"
+      - "ActWithTools"
+      - "Search"
+      - "Compare"
+      - "Route"
+
+# === CURRENT VERSION LIMITATIONS ===
+limitations:
+  advanced_optimizers:
+    - "GRPO (Gradient-based Reward Policy Optimization)"
+    - "Avatar (Advanced Variational Auto-Teacher)"
+    - "MIPROv2 (Multi-Iteration Prompt Refinement Optimization v2)"
+    - "Custom teleprompt development"
+    
+  orchestration:
+    - "Parallel execution strategies"
+    - "Hierarchical orchestration"
+    - "Kubernetes-style orchestration"
+    - "Auto-scaling capabilities"
+    - "Multi-cluster deployment"
+    
+  enterprise_features:
+    - "White-label options"
+    - "Custom branding"
+    - "Advanced security features"
+    - "Enterprise support"
+    - "Professional services"
+
+# === CONFIGURATION EXAMPLES ===
+examples:
+  oracle_basic:
+    apiVersion: "agent/v1"
+    kind: "AgentSpec"
+    metadata:
+      name: "Basic Oracle Agent"
+      level: "oracles"
+    spec:
+      language_model:
+        provider: "ollama"
+        model: "llama3.2:1b"
+      persona:
+        role: "Question Answering Assistant"
+      tasks:
+        - name: "answer_question"
+          instruction: "Answer the user's question clearly and accurately"
+          schema:
+            style: "chain_of_thought"
+      agentflow:
+        - name: "think_and_answer"
+          type: "Think"
+          task: "answer_question"
+  
+  genie_advanced:
+    apiVersion: "agent/v1"
+    kind: "AgentSpec"
+    metadata:
+      name: "Advanced Genie Agent"
+      level: "genies"
+    spec:
+      language_model:
+        provider: "ollama"
+        model: "llama3.2:3b"
+      persona:
+        role: "Intelligent Assistant with Tools"
+      tasks:
+        - name: "solve_problem"
+          instruction: "Solve the user's problem using available tools"
+      agentflow:
+        - name: "analyze_problem"
+          type: "Think"
+          task: "solve_problem"
+        - name: "use_tools"
+          type: "ActWithTools"
+          task: "solve_problem"
+          config:
+            max_iters: 5
+      memory:
+        enabled: true
+        short_term:
+          capacity: 100
+        episodic:
+          enabled: true
+      tool_calling:
+        enabled: true
+        available_tools: ["calculator", "web_search"] 

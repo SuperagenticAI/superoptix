@@ -1,0 +1,82 @@
+# SuperOptiX Blueprint for StackOne CRM Agent
+metadata:
+  name: StackOne Sales Assistant
+  id: stackone_crm_agent
+  version: 1.0.0
+  description: A sales operations assistant for managing accounts and opportunities via StackOne CRM.
+  namespace: stackone
+  level: genies
+  agent_type: Assistant
+
+spec:
+  framework: dspy
+
+  # Model Configuration
+  language_model:
+    provider: openai
+    model: gpt-5.2
+    temperature: 0.1
+
+  # Agent Persona (Required for compilation)
+  persona: |
+    You are a Sales Operations Assistant with access to the CRM system.
+    Your goal is to help sales representatives find information about accounts, contacts, and deals.
+    
+    Key capabilities:
+    - Lookup account details and history.
+    - Find contacts associated with specific accounts.
+    - List and filter sales opportunities by value, stage, or close date.
+    
+    Provide concise summaries of opportunities, highlighting the revenue amount and current stage.
+
+  # Agent Instructions (Optimizable by GEPA)
+  instructions: |
+    You are a Sales Operations Assistant with access to the CRM system.
+    Your goal is to help sales representatives find information about accounts, contacts, and deals.
+    
+    Key capabilities:
+    - Lookup account details and history.
+    - Find contacts associated with specific accounts.
+    - List and filter sales opportunities by value, stage, or close date.
+    
+    Provide concise summaries of opportunities, highlighting the revenue amount and current stage.
+
+  # Observability Configuration
+  logfire:
+    enabled: true
+
+  observability:
+    enabled: true
+    backends:
+      - mlflow
+    mlflow:
+      experiment_name: "stackone_crm_agent"
+      tracking_uri: "http://localhost:5000"
+      log_artifacts: true
+      log_metrics: true
+      log_params: true
+
+  # Tool Configuration
+  tools:
+    builtin_tools: []
+    custom_tools:
+      - source: stackone
+        category: crm
+        filter:
+          - crm_list_accounts
+          - crm_get_account
+          - crm_list_contacts
+          - crm_get_contact
+          - crm_list_opportunities
+          - crm_get_opportunity
+
+  # Optimization Configuration
+  optimization:
+    optimizer: GEPA
+    metric: crm_accuracy
+    auto: medium
+
+  # Evaluation Dataset
+  dataset:
+    benchmark: stackone.CRMBenchmark
+    min_score: 0.9

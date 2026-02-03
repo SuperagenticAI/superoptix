@@ -1,0 +1,124 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Social Media Manager
+  id: social_media_manager
+  namespace: marketing
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that manages social media presence and creates engagement strategies.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: brand_voice
+    type: str
+    description: Brand voice, tone, and personality guidelines
+    required: true
+  - name: platform_goals
+    type: str
+    description: Social media goals and target platforms
+    required: true
+  output_fields:
+  - name: content_strategy
+    type: str
+    description: Comprehensive social media content strategy and calendar
+    required: true
+  - name: engagement_plan
+    type: str
+    description: Community engagement and growth tactics
+    required: true
+  persona:
+    name: SocialBot
+    role: Social Media Manager
+    goal: Build engaging social media presence and grow brand awareness through strategic content
+    traits:
+    - social
+    - trendy
+    - responsive
+    - community-focused
+  tasks:
+  - name: manage_social_media
+    instruction: You are a Social Media Manager. Create a comprehensive social media strategy including content planning,
+      engagement tactics, and community management approaches.
+    inputs:
+    - name: brand_voice
+      type: str
+      description: Brand voice, tone, and personality guidelines
+      required: true
+    - name: platform_goals
+      type: str
+      description: Social media goals and target platforms
+      required: true
+    outputs:
+    - name: content_strategy
+      type: str
+      description: Comprehensive social media content strategy and calendar
+    - name: engagement_plan
+      type: str
+      description: Community engagement and growth tactics
+  agentflow:
+  - name: create_social_strategy
+    type: Generate
+    task: manage_social_media
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.7
+  feature_specifications:
+    scenarios:
+    - name: social_media_manager_comprehensive_task
+      description: Given a complex marketing requirement, the agent should provide detailed analysis and recommendations
+      input:
+        brand_voice: Complex marketing scenario requiring comprehensive analysis
+        platform_goals: ''
+      expected_output:
+        content_strategy: Detailed step-by-step analysis with marketing-specific recommendations
+        engagement_plan: ''
+    - name: social_media_manager_problem_solving
+      description: When facing marketing challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        brand_voice: Challenging marketing problem requiring creative solutions
+        platform_goals: ''
+      expected_output:
+        content_strategy: Structured problem-solving approach with multiple solution options
+        engagement_plan: ''
+    - name: social_media_manager_best_practices
+      description: When asked about marketing best practices, the agent should provide current industry standards and guidelines
+      input:
+        brand_voice: Industry best practices for marketing operations
+        platform_goals: ''
+      expected_output:
+        content_strategy: Comprehensive best practices guide with implementation steps
+        engagement_plan: ''
+    - name: social_media_manager_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to marketing
+      input:
+        brand_voice: Compliance requirements for marketing operations
+        platform_goals: ''
+      expected_output:
+        content_strategy: Detailed compliance checklist with regulatory requirements
+        engagement_plan: ''
+    - name: social_media_manager_strategic_planning
+      description: When developing marketing strategies, the agent should provide forward-thinking recommendations
+      input:
+        brand_voice: Strategic planning for marketing growth and optimization
+        platform_goals: ''
+      expected_output:
+        content_strategy: Comprehensive strategic plan with measurable objectives and timelines
+        engagement_plan: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

@@ -1,0 +1,699 @@
+"""
+Auto-generated DSPy Genie Pipeline (Tool-Enhanced Agent)
+Generated from: {{ metadata.name | default('Agent Pipeline') }}
+Agent ID: {{ metadata.id | default('agent') }}
+
+This pipeline uses SuperOptiX utility mixins with Genie tier capabilities:
+- ReAct reasoning with tool integration
+- RAG (Retrieval-Augmented Generation)
+- Agent memory system
+- Basic streaming responses
+"""
+import dspy
+from typing import Dict, Any, List, Optional
+from datetime import datetime
+import asyncio
+import logging
+from pathlib import Path
+import yaml
+
+# SuperOptiX Core Utilities (eliminates ~350 lines of boilerplate)
+from superoptix.core.pipeline_utils import (
+    TracingMixin,
+    ModelSetupMixin,
+    ToolsMixin,
+    BDDTestMixin,
+    UsageTrackingMixin,
+    EvaluationMixin,
+    PipelineUtilities
+)
+from superoptix.core.optimizer_factory import DSPyOptimizerFactory
+
+# RAG Support
+try:
+    from superoptix.core.rag_mixin import RAGMixin
+    RAG_AVAILABLE = True
+except ImportError:
+    RAGMixin = None
+    RAG_AVAILABLE = False
+
+# DSPy ReAct Imports with fallbacks
+try:
+    from dspy import ReAct, ChainOfThought, context
+    from dspy.predict import Predict
+except ImportError:
+    ReAct = None
+    ChainOfThought = None
+    Predict = None
+
+# Silence overly-verbose field warnings from DSPy during optimization
+logging.getLogger("dspy.predict.predict").setLevel(logging.ERROR)
+
+# ==============================================================================
+# 1. ReAct Signature (Tool-Enhanced Reasoning) – CUSTOM LOGIC
+# ==============================================================================
+
+class {{ agent_name | to_pascal_case }}ReActSignature(dspy.Signature):
+    """
+    {{ spec.persona.role | default('AI Assistant') }}: {{ spec.persona.goal | default('Help users with their tasks') }}
+    
+    Think step-by-step and use available tools to provide comprehensive answers.
+    
+    Role: {{ spec.persona.role | default('Helper') }}
+    {%- if spec.persona.traits %}
+    Traits: {{ spec.persona.traits | join(', ') }}
+    {%- endif %}
+    {%- if spec.tasks and spec.tasks[0] and spec.tasks[0].instruction %}
+    
+    Instruction: {{ spec.tasks[0].instruction | clean }}
+    {%- endif %}
+    """
+    # Input Fields
+    {% if spec.tasks and spec.tasks[0] and spec.tasks[0].inputs -%}
+    {% for input_field in spec.tasks[0].inputs -%}
+{{ "    " }}{{ input_field.name | to_snake_case }}: str = dspy.InputField(desc="{{ input_field.description | default('Input field') | clean }}")
+    {% endfor %}
+    {%- else -%}
+{{ "    " }}question: str = dspy.InputField(desc="The user's question or request")
+    {%- endif %}
+{{ "    " }}context: str = dspy.InputField(desc="Additional context or background information", default="")
+    
+    # Output Fields
+{{ "    " }}reasoning: str = dspy.OutputField(desc="Step-by-step reasoning process with tool usage")
+    {% if spec.tasks and spec.tasks[0] and spec.tasks[0].outputs -%}
+    {% for output_field in spec.tasks[0].outputs -%}
+{{ "    " }}{{ output_field.name | to_snake_case }}: str = dspy.OutputField(desc="{{ output_field.description | default('Output field') | clean }}")
+    {% endfor %}
+    {%- else -%}
+{{ "    " }}answer: str = dspy.OutputField(desc="Comprehensive answer based on reasoning and tool usage")
+    {%- endif %}
+
+# ==============================================================================
+# 2. Genie Tier Pipeline Class - USES UTILITY MIXINS
+# ==============================================================================
+
+class {{ agent_name | to_pascal_case }}Pipeline(
+    TracingMixin,
+    ModelSetupMixin,
+    ToolsMixin,
+    BDDTestMixin,
+    UsageTrackingMixin,
+    EvaluationMixin
+    , RAGMixin
+):
+    """
+    DSPy Genie Pipeline for {{ metadata.name | default('Agent') }}
+    
+    Genie tier capabilities:
+    - ReAct reasoning with tool integration
+    - RAG (knowledge retrieval)
+    - Agent memory system
+    - Basic streaming responses
+    - Full compatibility with SuperOptiX commands
+    """
+
+    def __init__(self, config=None):
+        # Initialize mixins
+        super().__init__()
+        
+        self.tier_level = "genies"
+        self.config = config or {}
+        self.is_trained = False
+        self.module = self  # Reference for runner compatibility
+        
+        # Setup core components using mixins (eliminates boilerplate)
+        self.setup_tracing("{{ agent_name }}", self.config)
+
+        # Lazy-load spec from YAML playbook
+        # Pipeline file: agents/<agent_name>/pipelines/, playbook located at agents/<agent_name>/playbook/
+        playbook_path = Path(__file__).resolve().parent.parent / "playbook" / "{{ agent_name }}_playbook.yaml"
+        with playbook_path.open() as f:
+            playbook_data = yaml.safe_load(f)
+
+        self.spec_data = playbook_data.get("spec", {})
+        
+        # Setup language model from playbook configuration
+        self._setup_language_model()
+        
+        # Configure DSPy and setup tools
+        dspy.configure(lm=self.lm)
+        self.setup_tools(self.spec_data)
+        
+        # Setup RAG if available and configured
+        self.rag_enabled = self.setup_rag(self.spec_data) if RAG_AVAILABLE else False
+        if self.rag_enabled:
+            print(f"🔍 RAG system initialized for {{ agent_name | to_pascal_case }}Pipeline")
+        
+        # Setup ReAct agent
+        self._setup_react_agent()
+        
+        # Load BDD scenarios
+        self.test_examples = self.load_bdd_scenarios(self.spec_data)
+        
+        print(f"✅ {{ agent_name | to_pascal_case }}Pipeline (Genie tier) initialized with ReAct and {len(self.test_examples)} BDD scenarios")
+
+    def _setup_language_model(self):
+        """Setup language model from playbook configuration."""
+        lm_config = self.spec_data.get('language_model', {})
+        
+        # Extract values directly from playbook YAML - no hardcoded fallbacks
+        model = lm_config.get('model')
+        provider = lm_config.get('provider')
+        temperature = lm_config.get('temperature', 0.7)
+        max_tokens = lm_config.get('max_tokens', 2048)
+        
+        if not model or not provider:
+            raise ValueError(f"Language model configuration missing in playbook. Required: model, provider. Found: {lm_config}")
+        
+        print(f"🔧 Setting up LM: {provider}/{model} (temp={temperature}, max_tokens={max_tokens})")
+        
+        from dspy import LM
+        
+        if provider == 'ollama':
+            # Handle Ollama-specific configuration
+            model_str = f'ollama_chat/{model}' if not model.startswith('ollama_chat/') else model
+            self.lm = LM(
+                model=model_str,
+                provider='ollama',
+                api_base='http://localhost:11434',
+                api_key='',
+                temperature=temperature,
+                max_tokens=max_tokens
+            )
+        else:
+            # Generic LM configuration
+            self.lm = LM(
+                model=model,
+                provider=provider,
+                temperature=temperature,
+                max_tokens=max_tokens
+            )
+
+    def _setup_react_agent(self):
+        """Setup ReAct agent with proper signature and tools."""
+        try:
+            # Create ReAct agent with tools
+            self.react = PipelineUtilities.create_react_agent(
+                {{ agent_name | to_pascal_case }}ReActSignature,
+                self.tools,
+                max_iters={{ spec.react_config.max_iters if spec.react_config else 5 }}
+            )
+            
+            agent_type = "ReAct" if ReAct and self.tools else "ChainOfThought"
+            print(f"✅ {agent_type} agent configured with {len(self.tools)} tools")
+            
+            if hasattr(self, 'tracer'):
+                self.tracer.add_event(
+                    "react_agent_initialized",
+                    "pipeline",
+                    data={
+                        "agent_type": agent_type,
+                        "tools_available": len(self.tools),
+                        "max_iters": {{ spec.react_config.max_iters if spec.react_config else 5 }}
+                    },
+                    status="success"
+                )
+                
+        except Exception as e:
+            error_msg = f"Failed to setup ReAct agent: {str(e)}"
+            print(f"❌ {error_msg}")
+            
+            if hasattr(self, 'tracer'):
+                self.tracer.add_event(
+                    "react_setup_failed",
+                    "pipeline",
+                    data={"error": error_msg},
+                    status="error"
+                )
+            
+            # Create a simple fallback
+            self.react = None
+
+    async def forward(self, *args, **kwargs) -> Dict[str, Any]:
+        """Execute the ReAct pipeline with async support (robust input handling, see gepa_demo pipelines)"""
+        # Defensive: handle dict, str, or kwargs
+        {% if spec.tasks and spec.tasks[0] and spec.tasks[0].inputs %}
+        input_field = "{{ spec.tasks[0].inputs[0].name | to_snake_case }}"
+        {% else %}
+        input_field = "question"
+        {% endif %}
+        context_field = "context"
+        if not kwargs and len(args) == 1 and isinstance(args[0], dict) and input_field in args[0]:
+            kwargs = {input_field: args[0][input_field], context_field: args[0].get(context_field, "")}
+        elif not kwargs and len(args) == 1 and isinstance(args[0], str):
+            kwargs = {input_field: args[0], context_field: ""}
+        question = kwargs.get(input_field, "")
+        context = kwargs.get(context_field, "")
+        if not isinstance(question, str):
+            raise ValueError(f"GeniesPipeline.forward requires '{input_field}' as a string. Got: args={args}, kwargs={kwargs}")
+        
+        start_time = datetime.now()
+        
+        if hasattr(self, 'tracer'):
+            with self.tracer.trace_operation("pipeline_forward", "execution", question=question):
+                return await self._execute_forward(question, context, start_time)
+        else:
+            return await self._execute_forward(question, context, start_time)
+
+    async def _execute_forward(self, question: str, context: str, start_time: datetime) -> Dict[str, Any]:
+        """Internal forward execution logic."""
+        try:
+            if not self.react:
+                error_msg = "ReAct agent not properly initialized"
+                return {
+                    {% if spec.tasks and spec.tasks[0] and spec.tasks[0].outputs %}
+                    "{{ spec.tasks[0].outputs[0].name | to_snake_case }}": f"❌ Error: {error_msg}",
+                    {% else %}
+                    "answer": f"❌ Error: {error_msg}",
+                    {% endif %}
+                    "reasoning": "Pipeline not properly initialized",
+                    "success": False,
+                    "execution_time": 0
+                }
+
+            # Retrieve relevant context using RAG if available
+            retrieved_context = ""
+            if hasattr(self, 'rag_enabled') and self.rag_enabled:
+                try:
+                    retrieved_docs = await self.retrieve_context(question)
+                    if retrieved_docs:
+                        retrieved_context = "\n\n".join(retrieved_docs)
+                        print(f"🔍 Retrieved {len(retrieved_docs)} relevant documents")
+                except Exception as rag_error:
+                    print(f"⚠️ RAG retrieval failed: {rag_error}")
+                    retrieved_context = ""
+            
+            # Combine user context with retrieved context
+            enhanced_context = context
+            if retrieved_context:
+                enhanced_context = f"{context}\n\nRelevant Information:\n{retrieved_context}" if context else f"Relevant Information:\n{retrieved_context}"
+
+            # Execute ReAct agent with context management
+            with dspy.context(lm=self.lm):
+                try:
+                    # Map question to the expected input field name
+                    {% if spec.tasks and spec.tasks[0] and spec.tasks[0].inputs %}
+                    input_field = "{{ spec.tasks[0].inputs[0].name | to_snake_case }}"
+                    inputs = {input_field: question, "context": enhanced_context}
+                    {% else %}
+                    inputs = {"question": question, "context": enhanced_context}
+                    {% endif %}
+                    
+                    if hasattr(self.react, '__call__'):
+                        result = self.react(**inputs)
+                    else:
+                        result = self.react.forward(**inputs)
+                    
+                    # Handle potential async result
+                    if hasattr(result, '__await__'):
+                        result = await result
+                        
+                except Exception as react_error:
+                    error_msg = f"ReAct execution failed: {str(react_error)}"
+                    print(f"❌ {error_msg}")
+                    
+                    return {
+                        {% if spec.tasks and spec.tasks[0] and spec.tasks[0].outputs %}
+                        "{{ spec.tasks[0].outputs[0].name | to_snake_case }}": f"❌ ReAct Error: {str(react_error)}",
+                        {% else %}
+                        "answer": f"❌ ReAct Error: {str(react_error)}",
+                        {% endif %}
+                        "reasoning": f"The ReAct agent encountered an error: {str(react_error)}",
+                        "success": False,
+                        "execution_time": 0,
+                        "error": error_msg
+                    }
+
+            execution_time = (datetime.now() - start_time).total_seconds()
+            
+            # Extract results
+            {% if spec.tasks and spec.tasks[0] and spec.tasks[0].outputs %}
+            output_field = "{{ spec.tasks[0].outputs[0].name | to_snake_case }}"
+            {% else %}
+            output_field = "answer"
+            {% endif %}
+            
+            answer = getattr(result, output_field, str(result))
+            reasoning = getattr(result, 'reasoning', 'Reasoning not available')
+            
+            if hasattr(self, 'tracer'):
+                self.tracer.add_event(
+                    "execution_completed",
+                    "pipeline",
+                    data={"execution_time": execution_time, "success": True},
+                    status="success"
+                )
+            
+            return {
+                output_field: answer,
+                "reasoning": reasoning,
+                "success": True,
+                "execution_time": execution_time,
+                "agent_id": self.agent_id if hasattr(self, 'agent_id') else "{{ agent_name }}",
+                "tier": "genies"
+            }
+            
+        except Exception as e:
+            error_msg = f"Pipeline execution failed: {str(e)}"
+            print(f"❌ {error_msg}")
+            
+            if hasattr(self, 'tracer'):
+                self.tracer.add_event(
+                    "execution_failed",
+                    "pipeline",
+                    data={"error": error_msg},
+                    status="error"
+                )
+            
+            return {
+                {% if spec.tasks and spec.tasks[0] and spec.tasks[0].outputs %}
+                "{{ spec.tasks[0].outputs[0].name | to_snake_case }}": f"❌ Error: {error_msg}",
+                {% else %}
+                "answer": f"❌ Error: {error_msg}",
+                {% endif %}
+                "reasoning": f"Pipeline error: {error_msg}",
+                "success": False,
+                "execution_time": 0,
+                "error": error_msg
+            }
+
+    def run(self, **inputs) -> Dict[str, Any]:
+        """Synchronous run method for runner compatibility (robust input handling, see gepa_demo pipelines)"""
+        {% if spec.tasks and spec.tasks[0] and spec.tasks[0].inputs %}
+        input_field = "{{ spec.tasks[0].inputs[0].name | to_snake_case }}"
+        {% else %}
+        input_field = "question"
+        {% endif %}
+        context_field = "context"
+        question = inputs.get(input_field, inputs.get("question", ""))
+        context = inputs.get(context_field, "")
+        if not isinstance(question, str):
+            raise ValueError(f"GeniesPipeline.run requires '{input_field}' as a string. Got: {inputs}")
+        
+        # Check if we're already in an async context
+        try:
+            # Try to get the current event loop
+            loop = asyncio.get_running_loop()
+            # If we get here, we're in an async context
+            # We need to run the coroutine in the current loop
+            import concurrent.futures
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future = executor.submit(self._run_sync, question, context)
+                result = future.result()
+            return result
+        except RuntimeError:
+            # No event loop running, we can create one
+            return asyncio.run(self.forward(question, context))
+
+    def _run_sync(self, question: str, context: str) -> Dict[str, Any]:
+        """Helper method to run async forward in a new event loop."""
+        # Create a new event loop for this thread
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        
+        try:
+            result = loop.run_until_complete(self.forward(question, context))
+            return result
+        finally:
+            try:
+                # Cancel any remaining tasks
+                pending_tasks = asyncio.all_tasks(loop)
+                for task in pending_tasks:
+                    task.cancel()
+                
+                # Run the loop once more to let cancelled tasks finish
+                if pending_tasks:
+                    loop.run_until_complete(asyncio.gather(*pending_tasks, return_exceptions=True))
+            except Exception:
+                pass  # Ignore errors during cleanup
+            finally:
+                loop.close()
+                # Reset event loop for thread
+                asyncio.set_event_loop(None)
+
+    async def __call__(self, *args, **inputs) -> Dict[str, Any]:
+        """Async interface for orchestra compatibility"""
+        # Handle both positional and keyword arguments
+        if args:
+            # If called with positional args, treat first as the main input
+            {% if spec.tasks and spec.tasks[0] and spec.tasks[0].inputs %}
+            input_field = "{{ spec.tasks[0].inputs[0].name | to_snake_case }}"
+            {% else %}
+            input_field = "question"
+            {% endif %}
+            inputs[input_field] = args[0]
+        
+        # Map inputs to the expected format for async execution
+        {% if spec.tasks and spec.tasks[0] and spec.tasks[0].inputs %}
+        input_field = "{{ spec.tasks[0].inputs[0].name | to_snake_case }}"
+        question = inputs.get(input_field, inputs.get("question", ""))
+        {% else %}
+        question = inputs.get("question", "")
+        {% endif %}
+        context = inputs.get("context", "")
+        
+        # Call forward directly since we're already in async context
+        return await self.forward(question, context)
+
+    def evaluate(self) -> Dict[str, Any]:
+        """Evaluate pipeline performance using BDD scenarios"""
+        if not self.test_examples:
+            return {
+                "message": "No BDD scenarios available for evaluation",
+                "success": False
+            }
+        
+        print("📊 Running BDD scenario evaluation...")
+        
+        # Convert examples to evaluation data
+        eval_data = []
+        input_fields = [{% if spec.tasks and spec.tasks[0] and spec.tasks[0].inputs %}{% for field in spec.tasks[0].inputs %}"{{ field.name | to_snake_case }}"{% if not loop.last %}, {% endif %}{% endfor %}{% else %}"question"{% endif %}]
+        {% if "context" not in spec.tasks[0].inputs|map(attribute='name')|map('to_snake_case')|list %}
+        input_fields.append("context")
+        {% endif %}
+
+        {% if spec.tasks and spec.tasks[0] and spec.tasks[0].outputs %}
+        output_field = "{{ spec.tasks[0].outputs[0].name | to_snake_case }}"
+        {% else %}
+        output_field = "answer"
+        {% endif %}
+
+        for ex in self.test_examples[:5]:
+            sample = {fld: getattr(ex, fld, "") for fld in input_fields}
+            if "context" not in sample:
+                sample["context"] = ""
+            sample[output_field] = getattr(ex, output_field, "")
+            eval_data.append(sample)
+        
+        # Use evaluation mixin
+        {% if spec.tasks and spec.tasks[0] and spec.tasks[0].inputs %}
+        input_field = "{{ spec.tasks[0].inputs[0].name | to_snake_case }}"
+        {% else %}
+        input_field = "question"
+        {% endif %}
+        eval_results = self.evaluate_pipeline(eval_data, input_field, output_field)
+        
+        # Also run BDD scenario execution
+        bdd_results = self.execute_bdd_scenarios(self.test_examples)
+        
+        # Combine results
+        return {
+            **eval_results,
+            "bdd_scenarios": bdd_results,
+            "evaluation_type": "BDD + Semantic F1 + ReAct",
+            "tier": "genies",
+            "tools_used": len(self.tools)
+        }
+
+    # ==============================================================================
+    # Training and Optimization - Simplified with Mixins
+    # ==============================================================================
+    
+    def train(self, training_data: List[Dict[str, Any]], save_optimized: bool = False, optimized_path: str = None) -> Dict[str, Any]:
+        """Train the pipeline with examples using DSPy context management (see gepa_demo pipelines for robust logic)"""
+        from dspy import Example, LM, configure, settings
+        training_stats = {
+            "started_at": datetime.now().isoformat(),
+            "training_data_size": 0,
+            "success": False,
+            "usage_stats": {},
+            "error": None
+        }
+        
+        # Use BDD scenarios if no training data provided
+        if not training_data:
+            if self.test_examples:
+                print("🔄 Using BDD scenarios as training data...")
+                training_data = []
+                input_fields = [{% if spec.tasks and spec.tasks[0] and spec.tasks[0].inputs %}{% for field in spec.tasks[0].inputs %}"{{ field.name | to_snake_case }}"{% if not loop.last %}, {% endif %}{% endfor %}{% else %}"question"{% endif %}]
+                {% if "context" not in spec.tasks[0].inputs|map(attribute='name')|map('to_snake_case')|list %}
+                input_fields.append("context")
+                {% endif %}
+
+                {% if spec.tasks and spec.tasks[0] and spec.tasks[0].outputs %}
+                output_field = "{{ spec.tasks[0].outputs[0].name | to_snake_case }}"
+                {% else %}
+                output_field = "answer"
+                {% endif %}
+
+                for ex in self.test_examples[:5]:
+                    sample = {fld: getattr(ex, fld, "") for fld in input_fields}
+                    if "context" not in sample:
+                        sample["context"] = ""
+                    sample[output_field] = getattr(ex, output_field, "")
+                    training_data.append(sample)
+            else:
+                print("ℹ️  No training data available - using base ReAct model")
+                training_stats["success"] = True
+                training_stats["note"] = "No training data provided, using base ReAct model"
+                return training_stats
+        
+        training_stats["training_data_size"] = len(training_data)
+        print(f"🚀 Training ReAct agent with {len(training_data)} examples...")
+        
+        try:
+            # Ensure LM is configured from playbook
+            configure(lm=self.lm)
+            # Defensive: always convert to Example and use .with_inputs() with correct positional args
+            if training_data and isinstance(training_data[0], dict):
+                examples = [Example(**ex) for ex in training_data]
+                # Define input fields needed for training
+                {% if spec.tasks and spec.tasks[0] and spec.tasks[0].inputs %}
+                input_field = "{{ spec.tasks[0].inputs[0].name | to_snake_case }}"
+                {% else %}
+                input_field = "question"
+                {% endif %}
+                context_field = "context"
+                training_data = [ex.with_inputs(orig[input_field], orig.get(context_field, "")) if isinstance(orig.get(input_field, None), str) else ex for ex, orig in zip(examples, training_data)]
+            
+            # Get optimizer configuration from playbook
+            optimizer_config = self.spec_data.get("optimization", {}).get("optimizer", {})
+            print(f"🔧 Optimizer config: {optimizer_config}")
+            
+            if optimizer_config and optimizer_config.get("name"):
+                # Use specified optimizer from playbook
+                optimizer_name = optimizer_config["name"]
+                params = optimizer_config.get("params", {})
+                
+                # Extract LM configuration from playbook for optimizers that need it (like GEPA)
+                lm_config = self.spec_data.get('language_model', {})
+                
+                print(f"🚀 Creating {optimizer_name} optimizer with params: {params}")
+                optimizer = DSPyOptimizerFactory.create_optimizer(
+                    optimizer_name=optimizer_name,
+                    params=params,
+                    lm_config=lm_config
+                )
+            else:
+                # Use tier-optimized default optimizer
+                print(f"🔧 Creating tier-optimized optimizer for genies tier")
+                optimizer = DSPyOptimizerFactory.create_tier_optimized_optimizer(
+                    tier="genies",
+                    training_data_size=len(training_data),
+                    optimizer_config=optimizer_config
+                )
+            
+            with self.usage_tracking_context():
+                with dspy.context(lm=self.lm):
+                    {% if spec.tasks and spec.tasks[0] and spec.tasks[0].inputs %}
+                    input_keys = [{% for field in spec.tasks[0].inputs %}"{{ field.name | to_snake_case }}"{% if not loop.last %}, {% endif %}{% endfor %}, "context"]
+                    {% else %}
+                    input_keys = ["question", "context"]
+                    {% endif %}
+                    
+                    trainset = self.create_examples(training_data, input_keys)
+                    if not trainset:
+                        raise ValueError("No valid training examples created")
+                    
+                    # Train the ReAct agent
+                    if self.react:
+                        # Handle optimizer-specific compilation requirements
+                        optimizer_name = optimizer.__class__.__name__
+                        print(f"🔧 Compiling ReAct agent with optimizer: {optimizer_name}")
+                        
+                        if optimizer_name == "COPRO":
+                            # COPRO requires eval_kwargs parameter
+                            self.react = optimizer.compile(self.react, trainset=trainset, eval_kwargs={})
+                        else:
+                            # Standard compilation for other optimizers
+                            self.react = optimizer.compile(self.react, trainset=trainset)
+                        self.is_trained = True
+                    else:
+                        raise ValueError("ReAct agent not available for training")
+
+                    if save_optimized and optimized_path:
+                        try:
+                            self.react.save(optimized_path)
+                            print(f"💾 Optimized ReAct model saved to {optimized_path}")
+                            training_stats["optimized_saved"] = True
+                            training_stats["optimized_path"] = optimized_path
+                        except Exception as save_error:
+                            print(f"⚠️ Failed to save optimized model: {save_error}")
+                            training_stats["optimized_saved"] = False
+            
+            training_stats["usage_stats"] = self.current_call_usage
+            print("✅ ReAct training completed successfully")
+            training_stats["success"] = True
+                    
+        except Exception as e:
+            error_msg = f"ReAct training failed: {e}"
+            print(f"❌ {error_msg}")
+            training_stats["error"] = str(e)
+            training_stats["success"] = False
+        
+        training_stats["completed_at"] = datetime.now().isoformat()
+        return training_stats
+
+    def load_optimized(self, optimized_path: str) -> bool:
+        """Load optimized ReAct model from file"""
+        try:
+            if self.react:
+                self.react.load(optimized_path)
+                self.is_trained = True
+                print(f"✅ Loaded optimized ReAct model from {optimized_path}")
+                return True
+            else:
+                print(f"❌ ReAct agent not available for loading")
+                return False
+        except Exception as e:
+            print(f"❌ Failed to load optimized ReAct model: {e}")
+            return False
+
+    # ==============================================================================
+    # Legacy Compatibility Methods
+    # ==============================================================================
+    
+    def predict(self, **inputs):
+        """Legacy predict method for runner compatibility"""
+        return self.run(**inputs)
+    
+    def setup(self) -> None:
+        """Setup method called by the runner when no training data is available"""
+        print("ℹ️  Setting up ReAct pipeline with base model configuration")
+    
+    def __repr__(self):
+        return f"{{ agent_name | to_pascal_case }}Pipeline(trained={self.is_trained}, tier=genie, tools={len(self.tools)})"
+    
+    def add_documents(self, documents: List[Dict[str, Any]]) -> bool:
+        """Add documents to the RAG system."""
+        if hasattr(self, 'rag_enabled') and self.rag_enabled:
+            return self.add_documents(documents)
+        else:
+            print("⚠️ RAG not enabled - cannot add documents")
+            return False
+
+    def get_rag_status(self) -> Dict[str, Any]:
+        """Get RAG system status."""
+        if hasattr(self, 'rag_enabled') and self.rag_enabled:
+            return self.get_rag_status()
+        else:
+            return {"enabled": False, "reason": "RAG not configured"}
+
+    def __del__(self):
+        """Ensure traces are exported when pipeline is destroyed."""
+        if hasattr(self, 'tracer') and self.tracer:
+            try:
+                # Export traces to .superoptix/traces/*.jsonl format
+                self.tracer.export_traces()
+            except Exception:
+                pass  # Ignore errors during cleanup 

@@ -1,0 +1,236 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Tools Demo Assistant
+  id: tools_demo
+  namespace: demo
+  version: 1.0.0
+  agent_type: Interactive
+  level: genies
+  description: A comprehensive demo agent showcasing all tool categories and capabilities available in SuperOptiX framework.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+    temperature: 0.7
+    max_tokens: 2048
+  input_fields:
+  - name: core_tools_request
+    type: str
+    description: A request to demonstrate core tools functionality.
+    required: true
+  output_fields:
+  - name: core_tools_demonstration
+    type: str
+    description: A demonstration of core tools capabilities.
+    required: true
+  persona:
+    name: ToolsBot
+    role: Tools Demo Assistant
+    goal: Demonstrate the comprehensive tool ecosystem and capabilities available in SuperOptiX framework
+    traits:
+    - helpful
+    - knowledgeable
+    - precise
+    - educational
+    - tool-savvy
+  tasks:
+  - name: core_tools_demo
+    instruction: You are a Tools Demo Assistant. Demonstrate core tools including calculator, file operations, text analysis,
+      and web search capabilities.
+    inputs:
+    - name: core_tools_request
+      type: str
+      description: A request to demonstrate core tools functionality.
+      required: true
+    outputs:
+    - name: core_tools_demonstration
+      type: str
+      description: A demonstration of core tools capabilities.
+  - name: development_tools_demo
+    instruction: Demonstrate development tools including code formatting, debugging, and software development capabilities.
+    inputs:
+    - name: dev_tools_request
+      type: str
+      description: A request to demonstrate development tools functionality.
+      required: true
+    outputs:
+    - name: dev_tools_demonstration
+      type: str
+      description: A demonstration of development tools capabilities.
+  - name: industry_tools_demo
+    instruction: Demonstrate industry-specific tools across various domains including finance, healthcare, education, and
+      more.
+    inputs:
+    - name: industry_tools_request
+      type: str
+      description: A request to demonstrate industry-specific tools functionality.
+      required: true
+    outputs:
+    - name: industry_tools_demonstration
+      type: str
+      description: A demonstration of industry-specific tools capabilities.
+  - name: tool_integration_demo
+    instruction: Demonstrate how tools integrate with the SuperOptiX framework and work together seamlessly.
+    inputs:
+    - name: integration_request
+      type: str
+      description: A request to demonstrate tool integration capabilities.
+      required: true
+    outputs:
+    - name: integration_demonstration
+      type: str
+      description: A demonstration of tool integration capabilities.
+  agentflow:
+  - name: demonstrate_core_tools
+    type: Demonstrate
+    task: core_tools_demo
+  - name: demonstrate_dev_tools
+    type: Demonstrate
+    task: development_tools_demo
+  - name: demonstrate_industry_tools
+    type: Demonstrate
+    task: industry_tools_demo
+  - name: demonstrate_integration
+    type: Demonstrate
+    task: tool_integration_demo
+  react_config:
+    max_iters: 5
+    max_tool_calls: 3
+    tool_selection_strategy: automatic
+    reasoning_style: step_by_step
+    error_handling: retry
+    enable_tracing: true
+  tools:
+    enabled: true
+    categories:
+    - core
+    - development
+    - utilities
+    - finance
+    - healthcare
+    - education
+    - legal
+    - marketing
+    - real_estate
+    - retail
+    - transportation
+    - energy
+    - agriculture
+    - human_resources
+    - hospitality
+    - manufacturing
+    - gaming_sports
+    - media_entertainment
+    - government_public
+    - consulting
+    specific_tools:
+    - calculator
+    - file_reader
+    - text_analyzer
+    - web_search
+    - date_time
+    - json_processor
+    - code_formatter
+    - data_processor
+    - financial_calculator
+    - health_assessment
+    - educational_content
+    - legal_analyzer
+    - marketing_analyzer
+    - property_analyzer
+    - inventory_manager
+    - route_optimizer
+    - energy_calculator
+    - crop_advisor
+    - hr_analyzer
+    - hospitality_manager
+    - production_planner
+    - game_analyzer
+    - content_analyzer
+    - policy_analyzer
+    - business_consultant
+  memory:
+    enabled: true
+    short_term:
+      enabled: true
+      max_tokens: 1000
+    long_term:
+      enabled: true
+      storage_type: local
+      max_entries: 100
+    episodic:
+      enabled: true
+      max_episodes: 50
+  rag:
+    enabled: true
+    retriever_type: chroma
+    config:
+      top_k: 5
+      chunk_size: 512
+      chunk_overlap: 50
+    vector_store:
+      embedding_model: sentence-transformers/all-MiniLM-L6-v2
+      collection_name: tools_demo_knowledge
+  evaluation:
+    builtin_metrics:
+    - name: tool_usage_accuracy
+      threshold: 0.8
+    - name: tool_integration_quality
+      threshold: 0.8
+    - name: tool_knowledge
+      threshold: 0.9
+    - name: demonstration_effectiveness
+      threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: core_tools_test
+      description: The agent should demonstrate core tools effectively.
+      input:
+        core_tools_request: Calculate the compound interest for $1000 at 5% for 3 years and analyze this text
+      expected_output:
+        core_tools_demonstration: Should include calculator usage and text analysis
+    - name: development_tools_test
+      description: The agent should demonstrate development tools effectively.
+      input:
+        dev_tools_request: Format this Python code and analyze its structure
+      expected_output:
+        dev_tools_demonstration: Should include code formatting and analysis
+    - name: industry_tools_test
+      description: The agent should demonstrate industry-specific tools effectively.
+      input:
+        industry_tools_request: Analyze this financial data and provide investment insights
+      expected_output:
+        industry_tools_demonstration: Should include financial analysis and insights
+    - name: tool_integration_test
+      description: The agent should demonstrate tool integration effectively.
+      input:
+        integration_request: Search for information about AI tools, analyze the results, and create a summary
+      expected_output:
+        integration_demonstration: Should include web search, text analysis, and content creation
+    - name: multi_domain_tools
+      description: The agent should demonstrate tools across multiple domains.
+      input:
+        industry_tools_request: Compare healthcare analytics with financial analytics tools
+      expected_output:
+        industry_tools_demonstration: Should include healthcare and financial tool comparisons
+    - name: tool_ecosystem_overview
+      description: The agent should provide an overview of the entire tool ecosystem.
+      input:
+        core_tools_request: What tools are available in SuperOptiX and how do they work together?
+      expected_output:
+        core_tools_demonstration: Should include comprehensive tool ecosystem overview
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: tool_use_accuracy
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 5
+        skip_perfect_score: true
+        reflection_minibatch_size: 3
+    metric: tool_use_accuracy
+    metric_threshold: 0.75

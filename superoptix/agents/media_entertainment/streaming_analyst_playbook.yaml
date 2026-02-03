@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Streaming Analytics Specialist
+  id: streaming_analyst
+  namespace: media_entertainment
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that analyzes streaming platform data and generates audience insights and content recommendations.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: streaming_metrics
+    type: str
+    description: Viewership data, engagement rates, and platform performance metrics
+    required: true
+  - name: content_portfolio
+    type: str
+    description: Content library, genres, and performance benchmarks
+    required: true
+  output_fields:
+  - name: performance_insights
+    type: str
+    description: Detailed streaming performance analysis and key findings
+    required: true
+  - name: optimization_recommendations
+    type: str
+    description: Specific recommendations for content and platform optimization
+    required: true
+  persona:
+    name: StreamingBot
+    role: Streaming Platform Analyst
+    goal: Generate actionable insights from streaming data to optimize content performance and audience engagement
+    traits:
+    - data-savvy
+    - trend-focused
+    - audience-oriented
+    - strategic
+  tasks:
+  - name: analyze_streaming_performance
+    instruction: You are a Streaming Platform Analyst. Generate comprehensive reports on streaming performance, audience behavior,
+      and content optimization opportunities based on platform analytics.
+    inputs:
+    - name: streaming_metrics
+      type: str
+      description: Viewership data, engagement rates, and platform performance metrics
+      required: true
+    - name: content_portfolio
+      type: str
+      description: Content library, genres, and performance benchmarks
+      required: true
+    outputs:
+    - name: performance_insights
+      type: str
+      description: Detailed streaming performance analysis and key findings
+    - name: optimization_recommendations
+      type: str
+      description: Specific recommendations for content and platform optimization
+  agentflow:
+  - name: generate_insights
+    type: Generate
+    task: analyze_streaming_performance
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.7
+  feature_specifications:
+    scenarios:
+    - name: streaming_analyst_comprehensive_task
+      description: Given a complex media_entertainment requirement, the agent should provide detailed analysis and recommendations
+      input:
+        streaming_metrics: Complex media_entertainment scenario requiring comprehensive analysis
+        content_portfolio: ''
+      expected_output:
+        performance_insights: Detailed step-by-step analysis with media_entertainment-specific recommendations
+        optimization_recommendations: ''
+    - name: streaming_analyst_problem_solving
+      description: When facing media_entertainment challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        streaming_metrics: Challenging media_entertainment problem requiring creative solutions
+        content_portfolio: ''
+      expected_output:
+        performance_insights: Structured problem-solving approach with multiple solution options
+        optimization_recommendations: ''
+    - name: streaming_analyst_best_practices
+      description: When asked about media_entertainment best practices, the agent should provide current industry standards
+        and guidelines
+      input:
+        streaming_metrics: Industry best practices for media_entertainment operations
+        content_portfolio: ''
+      expected_output:
+        performance_insights: Comprehensive best practices guide with implementation steps
+        optimization_recommendations: ''
+    - name: streaming_analyst_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to media_entertainment
+      input:
+        streaming_metrics: Compliance requirements for media_entertainment operations
+        content_portfolio: ''
+      expected_output:
+        performance_insights: Detailed compliance checklist with regulatory requirements
+        optimization_recommendations: ''
+    - name: streaming_analyst_strategic_planning
+      description: When developing media_entertainment strategies, the agent should provide forward-thinking recommendations
+      input:
+        streaming_metrics: Strategic planning for media_entertainment growth and optimization
+        content_portfolio: ''
+      expected_output:
+        performance_insights: Comprehensive strategic plan with measurable objectives and timelines
+        optimization_recommendations: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

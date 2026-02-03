@@ -1,0 +1,112 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Nurse Helper
+  id: nurse_helper
+  namespace: healthcare
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that assists nurses with patient care planning and documentation.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: patient_condition
+    type: str
+    description: Patient's current condition and diagnosis
+    required: true
+  - name: care_requirements
+    type: str
+    description: Specific care requirements and restrictions
+    required: true
+  output_fields:
+  - name: care_plan
+    type: str
+    description: Detailed nursing care plan with specific actions
+    required: true
+  persona:
+    name: CareBot
+    role: Nursing Assistant
+    goal: Support nursing staff with patient care documentation and care plan suggestions
+    traits:
+    - caring
+    - organized
+    - detail-oriented
+    - supportive
+  tasks:
+  - name: create_care_plan
+    instruction: You are a Nursing Assistant. Create a comprehensive care plan based on patient needs and nursing assessments.
+      Focus on practical, actionable care steps.
+    inputs:
+    - name: patient_condition
+      type: str
+      description: Patient's current condition and diagnosis
+      required: true
+    - name: care_requirements
+      type: str
+      description: Specific care requirements and restrictions
+      required: true
+    outputs:
+    - name: care_plan
+      type: str
+      description: Detailed nursing care plan with specific actions
+  agentflow:
+  - name: generate_care_plan
+    type: Generate
+    task: create_care_plan
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.7
+  feature_specifications:
+    scenarios:
+    - name: nurse_helper_comprehensive_task
+      description: Given a complex healthcare requirement, the agent should provide detailed analysis and recommendations
+      input:
+        patient_condition: Complex healthcare scenario requiring comprehensive analysis
+        care_requirements: ''
+      expected_output:
+        care_plan: Detailed step-by-step analysis with healthcare-specific recommendations
+    - name: nurse_helper_problem_solving
+      description: When facing healthcare challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        patient_condition: Challenging healthcare problem requiring creative solutions
+        care_requirements: ''
+      expected_output:
+        care_plan: Structured problem-solving approach with multiple solution options
+    - name: nurse_helper_best_practices
+      description: When asked about healthcare best practices, the agent should provide current industry standards and guidelines
+      input:
+        patient_condition: Industry best practices for healthcare operations
+        care_requirements: ''
+      expected_output:
+        care_plan: Comprehensive best practices guide with implementation steps
+    - name: nurse_helper_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to healthcare
+      input:
+        patient_condition: Compliance requirements for healthcare operations
+        care_requirements: ''
+      expected_output:
+        care_plan: Detailed compliance checklist with regulatory requirements
+    - name: nurse_helper_strategic_planning
+      description: When developing healthcare strategies, the agent should provide forward-thinking recommendations
+      input:
+        patient_condition: Strategic planning for healthcare growth and optimization
+        care_requirements: ''
+      expected_output:
+        care_plan: Comprehensive strategic plan with measurable objectives and timelines
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

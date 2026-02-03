@@ -1,0 +1,124 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Contract Analyzer
+  id: contract_analyzer
+  namespace: legal
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that assists with basic contract analysis and identifies key terms and potential issues.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: contract_text
+    type: str
+    description: Contract text or key sections to analyze
+    required: true
+  - name: contract_type
+    type: str
+    description: Type of contract (employment, service, lease, etc.)
+    required: true
+  output_fields:
+  - name: contract_analysis
+    type: str
+    description: Step-by-step analysis of contract terms and structure
+    required: true
+  - name: risk_assessment
+    type: str
+    description: Identified risks, red flags, and recommendations
+    required: true
+  persona:
+    name: LegalBot
+    role: Contract Analyst
+    goal: Provide systematic contract analysis and identify key legal terms and risks
+    traits:
+    - meticulous
+    - analytical
+    - detail-oriented
+    - cautious
+  tasks:
+  - name: analyze_contract
+    instruction: You are a Contract Analyst. Think through the contract systematically, examining key terms, obligations,
+      risks, and potential issues. Always recommend consulting with a qualified attorney for legal advice.
+    inputs:
+    - name: contract_text
+      type: str
+      description: Contract text or key sections to analyze
+      required: true
+    - name: contract_type
+      type: str
+      description: Type of contract (employment, service, lease, etc.)
+      required: true
+    outputs:
+    - name: contract_analysis
+      type: str
+      description: Step-by-step analysis of contract terms and structure
+    - name: risk_assessment
+      type: str
+      description: Identified risks, red flags, and recommendations
+  agentflow:
+  - name: analyze_systematically
+    type: Think
+    task: analyze_contract
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: contract_analyzer_comprehensive_task
+      description: Given a complex legal requirement, the agent should provide detailed analysis and recommendations
+      input:
+        contract_text: Complex legal scenario requiring comprehensive analysis
+        contract_type: ''
+      expected_output:
+        contract_analysis: Detailed step-by-step analysis with legal-specific recommendations
+        risk_assessment: ''
+    - name: contract_analyzer_problem_solving
+      description: When facing legal challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        contract_text: Challenging legal problem requiring creative solutions
+        contract_type: ''
+      expected_output:
+        contract_analysis: Structured problem-solving approach with multiple solution options
+        risk_assessment: ''
+    - name: contract_analyzer_best_practices
+      description: When asked about legal best practices, the agent should provide current industry standards and guidelines
+      input:
+        contract_text: Industry best practices for legal operations
+        contract_type: ''
+      expected_output:
+        contract_analysis: Comprehensive best practices guide with implementation steps
+        risk_assessment: ''
+    - name: contract_analyzer_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to legal
+      input:
+        contract_text: Compliance requirements for legal operations
+        contract_type: ''
+      expected_output:
+        contract_analysis: Detailed compliance checklist with regulatory requirements
+        risk_assessment: ''
+    - name: contract_analyzer_strategic_planning
+      description: When developing legal strategies, the agent should provide forward-thinking recommendations
+      input:
+        contract_text: Strategic planning for legal growth and optimization
+        contract_type: ''
+      expected_output:
+        contract_analysis: Comprehensive strategic plan with measurable objectives and timelines
+        risk_assessment: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

@@ -1,0 +1,223 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Observability Demo Assistant
+  id: observability_demo
+  namespace: demo
+  version: 1.0.0
+  agent_type: Interactive
+  level: genies
+  description: A comprehensive demo agent showcasing observability, monitoring, tracing, and debugging capabilities in SuperOptiX
+    framework.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+    temperature: 0.7
+    max_tokens: 2048
+  input_fields:
+  - name: tracing_request
+    type: str
+    description: A request that will generate traceable actions and decisions.
+    required: true
+  output_fields:
+  - name: traced_response
+    type: str
+    description: A response that demonstrates tracing capabilities with execution details.
+    required: true
+  persona:
+    name: ObservabilityBot
+    role: Observability Demo Assistant
+    goal: Demonstrate the comprehensive observability and monitoring capabilities in SuperOptiX framework
+    traits:
+    - helpful
+    - knowledgeable
+    - precise
+    - educational
+    - analytical
+  tasks:
+  - name: tracing_demo
+    instruction: You are an Observability Demo Assistant. Demonstrate tracing capabilities by showing how agent actions and
+      decisions are tracked and monitored.
+    inputs:
+    - name: tracing_request
+      type: str
+      description: A request that will generate traceable actions and decisions.
+      required: true
+    outputs:
+    - name: traced_response
+      type: str
+      description: A response that demonstrates tracing capabilities with execution details.
+  - name: monitoring_demo
+    instruction: Demonstrate monitoring capabilities by tracking performance metrics, resource usage, and system health.
+    inputs:
+    - name: monitoring_request
+      type: str
+      description: A request that requires monitoring and performance analysis.
+      required: true
+    outputs:
+    - name: monitoring_response
+      type: str
+      description: A response that includes monitoring data and performance insights.
+  - name: debugging_demo
+    instruction: Demonstrate debugging capabilities by identifying and resolving issues in agent behavior and performance.
+    inputs:
+    - name: debugging_request
+      type: str
+      description: A request that requires debugging or issue resolution.
+      required: true
+    outputs:
+    - name: debugging_response
+      type: str
+      description: A response that demonstrates debugging capabilities and issue resolution.
+  - name: analytics_demo
+    instruction: Demonstrate analytics capabilities by providing insights into agent performance, usage patterns, and optimization
+      opportunities.
+    inputs:
+    - name: analytics_request
+      type: str
+      description: A request for analytics and performance insights.
+      required: true
+    outputs:
+    - name: analytics_response
+      type: str
+      description: A response that includes analytics data and insights.
+  agentflow:
+  - name: trace_execution
+    type: Trace
+    task: tracing_demo
+  - name: monitor_performance
+    type: Monitor
+    task: monitoring_demo
+  - name: debug_issues
+    type: Debug
+    task: debugging_demo
+  - name: analyze_metrics
+    type: Analyze
+    task: analytics_demo
+  react_config:
+    max_iters: 5
+    max_tool_calls: 3
+    tool_selection_strategy: automatic
+    reasoning_style: step_by_step
+    error_handling: retry
+    enable_tracing: true
+  tools:
+    enabled: true
+    categories:
+    - core
+    - utilities
+    - development
+    specific_tools:
+    - calculator
+    - text_analyzer
+    - file_reader
+    - json_processor
+    - data_processor
+  memory:
+    enabled: true
+    short_term:
+      enabled: true
+      max_tokens: 1000
+    long_term:
+      enabled: true
+      storage_type: local
+      max_entries: 100
+    episodic:
+      enabled: true
+      max_episodes: 50
+  rag:
+    enabled: true
+    retriever_type: chroma
+    config:
+      top_k: 5
+      chunk_size: 512
+      chunk_overlap: 50
+    vector_store:
+      embedding_model: sentence-transformers/all-MiniLM-L6-v2
+      collection_name: observability_demo_knowledge
+  observability:
+    enabled: true
+    tracing:
+      enabled: true
+      level: detailed
+      include_tools: true
+      include_memory: true
+      include_rag: true
+    monitoring:
+      enabled: true
+      metrics:
+      - response_time
+      - token_usage
+      - tool_usage
+      - memory_usage
+      - rag_retrieval_accuracy
+      alerts:
+      - response_time_threshold: 5.0
+      - error_rate_threshold: 0.1
+    dashboard:
+      enabled: true
+      auto_open: false
+      port: 8501
+  evaluation:
+    builtin_metrics:
+    - name: observability_coverage
+      threshold: 0.9
+    - name: tracing_accuracy
+      threshold: 0.8
+    - name: monitoring_effectiveness
+      threshold: 0.8
+    - name: debugging_capability
+      threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: tracing_test
+      description: The agent should demonstrate comprehensive tracing capabilities.
+      input:
+        tracing_request: Calculate the factorial of 5 and explain the process
+      expected_output:
+        traced_response: Should include detailed tracing of the calculation process
+    - name: monitoring_test
+      description: The agent should demonstrate monitoring and performance tracking.
+      input:
+        monitoring_request: Analyze this text and provide performance metrics
+      expected_output:
+        monitoring_response: Should include performance metrics and monitoring data
+    - name: debugging_test
+      description: The agent should demonstrate debugging capabilities.
+      input:
+        debugging_request: Identify potential issues in this code snippet
+      expected_output:
+        debugging_response: Should include debugging analysis and issue identification
+    - name: analytics_test
+      description: The agent should demonstrate analytics and insights capabilities.
+      input:
+        analytics_request: Provide analytics on agent performance and usage patterns
+      expected_output:
+        analytics_response: Should include comprehensive analytics and insights
+    - name: observability_integration
+      description: The agent should demonstrate integrated observability features.
+      input:
+        tracing_request: Perform a complex task and show all observability data
+      expected_output:
+        traced_response: Should include tracing, monitoring, and analytics data
+    - name: performance_optimization
+      description: The agent should demonstrate performance optimization insights.
+      input:
+        analytics_request: Analyze performance bottlenecks and suggest optimizations
+      expected_output:
+        analytics_response: Should include performance analysis and optimization suggestions
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: tool_use_accuracy
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 5
+        skip_perfect_score: true
+        reflection_minibatch_size: 3
+    metric: tool_use_accuracy
+    metric_threshold: 0.75

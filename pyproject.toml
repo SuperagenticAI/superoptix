@@ -1,0 +1,544 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[project]
+name = "superoptix"
+version = "0.2.6"
+description = "Full Stack Agentic AI Optimization Framework - Universal GEPA optimizer for major frameworks"
+authors = [
+    {name = "Superagentic AI", email = "hello@super-agentic.ai"},
+    {name = "Shashi Jagtap", email = "shashikant.jagtap@icloud.com"},
+    {name = "Shashi Jagtap", email = "shashi@super-agentic.ai"},
+]
+maintainers = [
+    {name = "Superagentic AI", email = "hello@super-agentic.ai"},
+]
+license = {file = "LICENCE"}
+readme = "README.md"
+requires-python = ">=3.11"
+keywords = ["ai", "agents", "dspy", "orchestration", "multi-agent", "autonomous", "artificial-intelligence", "machine-learning", "llm", "framework", "optimization", "evaluation", "rag", "memory", "observability", "prompt-engineering", "bdd", "testing", "superspec", "dspy-ai", "agent-framework", "ai-agents", "llm-framework", "prompt-optimization", "context-engineering", "agent-orchestration", "ai-development", "agent-development", "llm-optimization", "ai-testing", "agent-testing", "vector-database", "semantic-search", "ai-memory", "agent-memory", "ai-observability", "agent-observability"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Distributed Computing",
+]
+
+# Core dependencies - minimal installation for CLI and basic functionality
+# NOTE: DSPy included for v0.2.0 since GEPA depends on it. Future versions will make it optional.
+# NOTE: MCP included since Super CLI acts as MCP client for tool usage and knowledge access
+dependencies = [
+    "colorama",
+    "pyyaml",
+    "numpy",
+    "rich",
+    "typer-slim",
+    "jinja2",
+    "requests",
+    "transformers",
+    "torch",
+    "accelerate",
+    "dspy",  # Required for GEPA optimization (transitional - will be optional in future)
+    "litellm",  # Required for LLM inference in CLI and agents
+    "pydantic",  # Required for data validation
+    "python-dotenv",  # Required for environment variables
+    "mcp",  # Required for Super CLI MCP client functionality
+]
+
+[project.optional-dependencies]
+# ============================================================================
+# FRAMEWORK INTEGRATIONS - Multi-Framework Support (NEW in 0.2.0)
+# ============================================================================
+
+# DSPy - Now optional to avoid conflicts with CrewAI
+frameworks-dspy = [
+    "dspy",  # PyPI package name
+]
+
+# OpenAI Agents SDK
+frameworks-openai = [
+    "openai-agents",
+    "openai",
+]
+
+# Google ADK (Agent Development Kit)
+frameworks-google = [
+    "google-adk",
+    "google-generativeai",
+]
+
+# Microsoft Agent Framework (pre-release)
+frameworks-microsoft = [
+    "agent-framework",
+    "azure-identity",
+]
+
+# DeepAgents (LangChain) - 0.2.0 with pluggable backends
+frameworks-deepagents = [
+    "deepagents",  # Requires 0.2.0+ for backend abstraction
+]
+
+# Pydantic AI - Type-safe agent framework (full package)
+# Upstream repo: https://github.com/pydantic/pydantic-ai
+frameworks-pydantic-ai = [
+    "pydantic-ai",
+]
+
+# CrewAI - Conflicts with DSPy due to json-repair version
+# CrewAI 1.2.0 requires json-repair==0.25.2
+# DSPy 3.0.4b1 requires json-repair>=0.30.0
+# 
+# ⚠️ IMPORTANT: Cannot be installed together with DSPy
+# Choose ONE:
+#   - For CrewAI: pip install superoptix[frameworks-crewai] (no DSPy support)
+#   - For DSPy: pip install superoptix[frameworks] (no CrewAI support)
+# TEMPORARILY DISABLED FOR BUILD - Conflicts with DSPy (json-repair version mismatch)
+# Users can manually install: pip install superoptix crewai==1.2.0 (without [all])
+# frameworks-crewai = [
+#     "crewai==1.2.0",
+# ]
+
+# All frameworks (including DSPy, excluding CrewAI)
+# NOTE: DSPy and CrewAI conflict - choose one or the other
+frameworks = [
+    "dspy",  # DSPy framework
+    "openai-agents",
+    "openai",
+    "google-adk",
+    "google-generativeai",
+    "agent-framework",
+    "azure-identity",
+    "deepagents",  # 0.2.0+ required for backend abstraction
+    "pydantic-ai",  # Pydantic AI framework
+    # NOTE: crewai==1.2.0 excluded - conflicts with DSPy
+    # For CrewAI: pip install superoptix[frameworks-crewai]
+]
+
+# MCP tool optimization (vendored from GEPA PR #105)
+mcp = [
+    "mcp",
+]
+
+# LogFire observability for Pydantic AI
+# Note: Separate from frameworks-pydantic-ai to avoid dependency conflicts with google-adk
+# LogFire requires opentelemetry-sdk>=1.39.0 while google-adk requires opentelemetry-sdk==1.37.0
+logfire = [
+    "logfire",
+]
+
+# ============================================================================
+# EXISTING OPTIONAL DEPENDENCIES
+# ============================================================================
+
+# Note: CrewAI has known dependency conflicts with dspy due to json-repair version requirements.
+# See optimas-crewai section below for manual installation instructions.
+
+# Development dependencies
+dev = [
+    "pytest",
+    "black",
+    "ruff",
+    "pre-commit",
+    "mypy",
+    "pytest-cov",
+    "pytest-asyncio",
+]
+
+# Optimas integration (optional) - DISABLED for 0.2.0b1
+# Optimas has additional dependencies that may conflict with framework integrations
+# Will be re-enabled in a future release
+# optimas = [
+#     "optimas-ai==0.0.4",
+#     "openai",
+#     "autogen-agentchat>=0.2,<1.0",
+#     "autogen-ext>=0.2,<1.0",
+# ]
+#
+# # Target-specific extras (install only what you need)
+# optimas-openai = [
+#     "openai",
+# ]
+# optimas-autogen = [
+#     "autogen-agentchat>=0.2,<1.0",
+#     "autogen-ext>=0.2,<1.0",
+# ]
+# CrewAI integration (requires manual installation due to dependency conflicts)
+# NOTE: CrewAI has a dependency conflict with dspy due to json-repair version requirements:
+# - dspy==3.0.0 requires json-repair>=0.30.0
+# - crewai==0.157.0 requires json-repair==0.25.2
+#
+# To use CrewAI with SuperOptiX, install it manually after installing superoptix[optimas]:
+# 1. pip install superoptix[optimas]  # This installs dspy with compatible json-repair
+# 2. pip install crewai==0.157.0 --no-deps  # Install crewai without dependencies
+# 3. pip install "json-repair>=0.30.0"  # Ensure compatible json-repair version
+#
+# IMPORTANT: This group is commented out to prevent build conflicts.
+# Users must install crewai manually using the steps above.
+# optimas-crewai = [
+#     "crewai==0.157.0",
+# ]
+
+# UI and visualization dependencies
+ui = [
+    "streamlit",
+    "plotly",
+    "pandas",
+]
+
+# Vector database dependencies
+chromadb = [
+    "chromadb",
+    "sentence-transformers",
+]
+
+lancedb = [
+    "lancedb",
+    "sentence-transformers",
+]
+
+faiss = [
+    "faiss-cpu",
+    "sentence-transformers",
+]
+
+weaviate = [
+    "weaviate-client",
+    "sentence-transformers",
+]
+
+qdrant = [
+    "qdrant-client",
+    "sentence-transformers",
+]
+
+milvus = [
+    "pymilvus",
+    "sentence-transformers",
+]
+
+# All vector databases
+vectordb = [
+    "chromadb",
+    "lancedb",
+    "faiss-cpu",
+    "weaviate-client",
+    "qdrant-client",
+    "pymilvus",
+    "sentence-transformers",
+]
+
+# Local model management dependencies (Apple Silicon only)
+mlx = [
+    "mlx-lm",
+]
+
+# Cross-platform ML dependencies (excludes Apple Silicon specific packages)
+ml-cross-platform = [
+    "transformers",
+    "torch",
+    "huggingface-hub",
+]
+
+huggingface = [
+    "transformers",
+    "torch",
+    "fastapi",
+    "huggingface-hub",
+    "uvicorn",
+]
+
+# Memory and caching dependencies
+redis = [
+    "redis",
+]
+
+# Observability and monitoring dependencies
+observability = [
+    "mlflow",
+    "langfuse",
+    "pandas",
+    "plotly",
+]
+
+# Web framework dependencies
+web = [
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+]
+
+# Data processing dependencies (for future use / upper tiers)
+data = [
+    # Future ML, plotting, and statistical visualization features
+]
+
+# Cloud and deployment dependencies (for future use / upper tiers)
+cloud = [
+    # Future AWS, Azure, GCP, Kubernetes, and Docker integrations
+]
+
+# Testing and evaluation dependencies
+testing = [
+    "pytest",
+    "pytest-asyncio",
+    "pytest-cov",
+    "pytest-mock",
+    "responses",
+]
+
+# Documentation dependencies
+docs = [
+    "mkdocs",
+    "mkdocs-material",
+    "pymdown-extensions",
+    "mkdocs-mermaid2-plugin",
+]
+
+# All optional dependencies (excluding dev, Apple Silicon specific, CrewAI, and LogFire)
+# NOTE: Includes DSPy; CrewAI excluded due to conflict with DSPy
+# NOTE: LogFire excluded due to opentelemetry-sdk conflict with google-adk
+#       LogFire must be installed separately: pip install superoptix[logfire]
+#       Cannot be combined with [all] due to google-adk dependency conflict
+all = [
+    # Framework dependencies (NEW in 0.2.0)
+    "dspy",  # DSPy framework
+    "openai-agents",
+    "openai",
+    "google-adk",
+    "google-generativeai",
+    "agent-framework",
+    "azure-identity",
+    "deepagents",  # 0.2.0+ required for backend abstraction
+    "pydantic-ai",  # Pydantic AI framework
+    # crewai==1.2.0 - EXCLUDED (conflicts with DSPy)
+    # logfire==4.15.0 - EXCLUDED (conflicts with google-adk's opentelemetry-sdk version)
+    # Existing dependencies
+    "streamlit",
+    "plotly",
+    "pandas",
+    "chromadb",
+    "lancedb",
+    "faiss-cpu",
+    "weaviate-client",
+    "qdrant-client",
+    "pymilvus",
+    "sentence-transformers",
+    "redis",
+    "mlflow",
+    "langfuse",
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+    "transformers",
+    "torch",
+    "huggingface-hub",
+    # optimas-ai and autogen-ext temporarily disabled for 0.2.0b1
+]
+
+# All dependencies including Apple Silicon specific (use with caution on non-Apple platforms)
+# NOTE: Includes DSPy; CrewAI excluded due to conflict with DSPy
+# NOTE: LogFire excluded due to opentelemetry-sdk conflict with google-adk
+all-with-mlx = [
+    # Framework dependencies (NEW in 0.2.0)
+    "dspy",  # DSPy framework
+    "openai-agents",
+    "openai",
+    "google-adk",
+    "google-generativeai",
+    "agent-framework",
+    "azure-identity",
+    "deepagents",  # 0.2.0+ required for backend abstraction
+    "pydantic-ai",  # Pydantic AI framework
+    # crewai==1.2.0 - EXCLUDED (conflicts with DSPy)
+    # logfire==4.15.0 - EXCLUDED (conflicts with google-adk's opentelemetry-sdk version)
+    # Existing dependencies
+    "streamlit",
+    "plotly",
+    "pandas",
+    "chromadb",
+    "lancedb",
+    "faiss-cpu",
+    "weaviate-client",
+    "qdrant-client",
+    "pymilvus",
+    "sentence-transformers",
+    "redis",
+    "mlflow",
+    "langfuse",
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+    "mlx-lm",
+    "transformers",
+    "torch",
+    "huggingface-hub",
+    # autogen-ext temporarily disabled for 0.2.0b1
+]
+
+[project.urls]
+Homepage = "https://superoptix.ai"
+Documentation = "https://superagenticai.github.io/superoptix-ai"
+Repository = "https://github.com/SuperagenticAI/superoptix-ai"
+"Bug Tracker" = "https://github.com/SuperagenticAI/superoptix-ai/issues"
+Support = "https://superoptix.ai"
+"Download" = "https://pypi.org/project/superoptix/#files"
+
+[project.scripts]
+super = "superoptix.cli.main:main"
+
+# Standard build configuration (for development installation)
+[tool.hatch.build.targets.wheel]
+packages = ["superoptix"]
+
+[tool.hatch.build.targets.wheel.sources]
+"superoptix" = "superoptix"
+
+[tool.hatch.build.targets.wheel.include]
+"superoptix/templates" = "superoptix/templates"
+"superoptix/validators" = "superoptix/validators"
+"superoptix/agents" = "superoptix/agents"
+"superoptix/tools" = "superoptix/tools"
+"superoptix/config" = "superoptix/config"
+"superoptix/metaspecs" = "superoptix/metaspecs"
+"superoptix/superspec" = "superoptix/superspec"
+"superoptix/ui" = "superoptix/ui"
+"superoptix/adapters" = "superoptix/adapters"
+
+exclude = [
+    "docs",
+    "tests",
+    "plan",
+    "reference",
+    "odsc_demo",
+    ".github",
+    ".venv",
+    "build",
+    "dist",
+    "*.egg-info",
+    ".pytest_cache",
+    ".mypy_cache",
+    ".ruff_cache",
+    "htmlcov",
+    ".tox",
+    "RELEASE_GUIDE.md",
+    "DEVELOPMENT.md",
+    "CONTRIBUTING.md",
+    "CODE_OF_CONDUCT.md",
+    "CHANGELOG.md",
+    "mkdocs.yml",
+    "release_to_pypi.py",
+    "test_package_contents.py",
+    "pyproject.toml",
+    "uv.lock",
+    "install.sh",
+    "tox.ini",
+    "ruff.toml",
+    ".pre-commit-config.yaml"
+]
+
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+[tool.ruff]
+line-length = 88
+indent-width = 4
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "W", "I001", "N", "UP", "ANN", "S", "C4", "DTZ", "EM", "G", "PIE", "PT", "RSE", "RET", "SIM", "TCH", "ARG", "PTH", "ERA", "PD", "PGH", "PL", "TRY", "NPY", "RUF"]
+ignore = [
+    "ANN101", # Missing type annotation for self
+    "ANN102", # Missing type annotation for cls
+    "S101",   # Use of assert
+    "S104",   # Possible binding to all interfaces
+    "PLR2004", # Magic value used in comparison
+    "PLR0913", # Too many arguments
+    "TRY003",  # Avoid specifying long messages outside the exception class
+]
+fixable = ["ALL"]
+unfixable = []
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q --strict-markers --strict-config"
+testpaths = [
+    "tests",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+]
+
+[tool.coverage.run]
+source = ["superoptix"]
+omit = [
+    "*/tests/*",
+    "*/test_*.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+
+# Note: File inclusion is handled by MANIFEST.in

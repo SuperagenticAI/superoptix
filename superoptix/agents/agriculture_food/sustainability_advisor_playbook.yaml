@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Agricultural Sustainability Advisor
+  id: sustainability_advisor
+  namespace: agriculture_food
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that analyzes and promotes sustainable agricultural practices.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: current_practices
+    type: str
+    description: Existing farming methods, resource usage, and environmental impact
+    required: true
+  - name: sustainability_goals
+    type: str
+    description: Environmental targets, regulatory requirements, and business objectives
+    required: true
+  output_fields:
+  - name: sustainability_analysis
+    type: str
+    description: Step-by-step assessment of current practices and improvement opportunities
+    required: true
+  - name: improvement_recommendations
+    type: str
+    description: Specific sustainable practices and implementation strategies
+    required: true
+  persona:
+    name: SustainBot
+    role: Agricultural Sustainability Advisor
+    goal: Promote environmentally sustainable farming practices that maintain profitability
+    traits:
+    - environmentally-conscious
+    - analytical
+    - forward-thinking
+    - balanced
+  tasks:
+  - name: assess_sustainability
+    instruction: You are an Agricultural Sustainability Advisor. Think through current farming practices systematically to
+      identify opportunities for environmental improvement while maintaining economic viability.
+    inputs:
+    - name: current_practices
+      type: str
+      description: Existing farming methods, resource usage, and environmental impact
+      required: true
+    - name: sustainability_goals
+      type: str
+      description: Environmental targets, regulatory requirements, and business objectives
+      required: true
+    outputs:
+    - name: sustainability_analysis
+      type: str
+      description: Step-by-step assessment of current practices and improvement opportunities
+    - name: improvement_recommendations
+      type: str
+      description: Specific sustainable practices and implementation strategies
+  agentflow:
+  - name: analyze_sustainability
+    type: Think
+    task: assess_sustainability
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.8
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: sustainability_advisor_comprehensive_task
+      description: Given a complex agriculture_food requirement, the agent should provide detailed analysis and recommendations
+      input:
+        current_practices: Complex agriculture_food scenario requiring comprehensive analysis
+        sustainability_goals: ''
+      expected_output:
+        sustainability_analysis: Detailed step-by-step analysis with agriculture_food-specific recommendations
+        improvement_recommendations: ''
+    - name: sustainability_advisor_problem_solving
+      description: When facing agriculture_food challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        current_practices: Challenging agriculture_food problem requiring creative solutions
+        sustainability_goals: ''
+      expected_output:
+        sustainability_analysis: Structured problem-solving approach with multiple solution options
+        improvement_recommendations: ''
+    - name: sustainability_advisor_best_practices
+      description: When asked about agriculture_food best practices, the agent should provide current industry standards and
+        guidelines
+      input:
+        current_practices: Industry best practices for agriculture_food operations
+        sustainability_goals: ''
+      expected_output:
+        sustainability_analysis: Comprehensive best practices guide with implementation steps
+        improvement_recommendations: ''
+    - name: sustainability_advisor_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to agriculture_food
+      input:
+        current_practices: Compliance requirements for agriculture_food operations
+        sustainability_goals: ''
+      expected_output:
+        sustainability_analysis: Detailed compliance checklist with regulatory requirements
+        improvement_recommendations: ''
+    - name: sustainability_advisor_strategic_planning
+      description: When developing agriculture_food strategies, the agent should provide forward-thinking recommendations
+      input:
+        current_practices: Strategic planning for agriculture_food growth and optimization
+        sustainability_goals: ''
+      expected_output:
+        sustainability_analysis: Comprehensive strategic plan with measurable objectives and timelines
+        improvement_recommendations: ''

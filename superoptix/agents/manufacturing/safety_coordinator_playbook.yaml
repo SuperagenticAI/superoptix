@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Safety Coordinator
+  id: safety_coordinator
+  namespace: manufacturing
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that helps identify safety hazards and develop workplace safety protocols.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: workplace_description
+    type: str
+    description: Description of the workplace environment and activities
+    required: true
+  - name: observed_conditions
+    type: str
+    description: Current workplace conditions and safety observations
+    required: true
+  output_fields:
+  - name: safety_assessment
+    type: str
+    description: Step-by-step safety hazard analysis
+    required: true
+  - name: safety_recommendations
+    type: str
+    description: Specific safety protocols and corrective actions
+    required: true
+  persona:
+    name: SafetyBot
+    role: Safety Coordinator
+    goal: Ensure workplace safety through hazard identification and safety protocol development
+    traits:
+    - safety-first
+    - thorough
+    - proactive
+    - risk-aware
+  tasks:
+  - name: assess_workplace_safety
+    instruction: You are a Safety Coordinator. Think through the workplace systematically to identify potential hazards, assess
+      risks, and recommend safety measures and protocols.
+    inputs:
+    - name: workplace_description
+      type: str
+      description: Description of the workplace environment and activities
+      required: true
+    - name: observed_conditions
+      type: str
+      description: Current workplace conditions and safety observations
+      required: true
+    outputs:
+    - name: safety_assessment
+      type: str
+      description: Step-by-step safety hazard analysis
+    - name: safety_recommendations
+      type: str
+      description: Specific safety protocols and corrective actions
+  agentflow:
+  - name: assess_safety_systematically
+    type: Think
+    task: assess_workplace_safety
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.9
+  feature_specifications:
+    scenarios:
+    - name: safety_coordinator_comprehensive_task
+      description: Given a complex manufacturing requirement, the agent should provide detailed analysis and recommendations
+      input:
+        workplace_description: Complex manufacturing scenario requiring comprehensive analysis
+        observed_conditions: ''
+      expected_output:
+        safety_assessment: Detailed step-by-step analysis with manufacturing-specific recommendations
+        safety_recommendations: ''
+    - name: safety_coordinator_problem_solving
+      description: When facing manufacturing challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        workplace_description: Challenging manufacturing problem requiring creative solutions
+        observed_conditions: ''
+      expected_output:
+        safety_assessment: Structured problem-solving approach with multiple solution options
+        safety_recommendations: ''
+    - name: safety_coordinator_best_practices
+      description: When asked about manufacturing best practices, the agent should provide current industry standards and
+        guidelines
+      input:
+        workplace_description: Industry best practices for manufacturing operations
+        observed_conditions: ''
+      expected_output:
+        safety_assessment: Comprehensive best practices guide with implementation steps
+        safety_recommendations: ''
+    - name: safety_coordinator_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to manufacturing
+      input:
+        workplace_description: Compliance requirements for manufacturing operations
+        observed_conditions: ''
+      expected_output:
+        safety_assessment: Detailed compliance checklist with regulatory requirements
+        safety_recommendations: ''
+    - name: safety_coordinator_strategic_planning
+      description: When developing manufacturing strategies, the agent should provide forward-thinking recommendations
+      input:
+        workplace_description: Strategic planning for manufacturing growth and optimization
+        observed_conditions: ''
+      expected_output:
+        safety_assessment: Comprehensive strategic plan with measurable objectives and timelines
+        safety_recommendations: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

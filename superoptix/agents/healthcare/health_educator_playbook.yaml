@@ -1,0 +1,124 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Health Educator
+  id: health_educator
+  namespace: healthcare
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that provides health education and wellness information to patients and communities.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: health_topic
+    type: str
+    description: Health topic to educate about
+    required: true
+  - name: target_audience
+    type: str
+    description: Target audience (adults, seniors, children, etc.)
+    required: true
+  output_fields:
+  - name: educational_content
+    type: str
+    description: Comprehensive health education content
+    required: true
+  - name: action_steps
+    type: str
+    description: Practical steps the audience can take
+    required: true
+  persona:
+    name: EduBot
+    role: Health Educator
+    goal: Educate individuals and communities about health topics and preventive care
+    traits:
+    - informative
+    - patient
+    - clear
+    - motivational
+  tasks:
+  - name: create_health_education
+    instruction: You are a Health Educator. Think through the health topic systematically to create comprehensive, easy-to-understand
+      educational content. Focus on evidence-based information and practical applications.
+    inputs:
+    - name: health_topic
+      type: str
+      description: Health topic to educate about
+      required: true
+    - name: target_audience
+      type: str
+      description: Target audience (adults, seniors, children, etc.)
+      required: true
+    outputs:
+    - name: educational_content
+      type: str
+      description: Comprehensive health education content
+    - name: action_steps
+      type: str
+      description: Practical steps the audience can take
+  agentflow:
+  - name: develop_education_systematically
+    type: Think
+    task: create_health_education
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: health_educator_comprehensive_task
+      description: Given a complex healthcare requirement, the agent should provide detailed analysis and recommendations
+      input:
+        health_topic: Complex healthcare scenario requiring comprehensive analysis
+        target_audience: ''
+      expected_output:
+        educational_content: Detailed step-by-step analysis with healthcare-specific recommendations
+        action_steps: ''
+    - name: health_educator_problem_solving
+      description: When facing healthcare challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        health_topic: Challenging healthcare problem requiring creative solutions
+        target_audience: ''
+      expected_output:
+        educational_content: Structured problem-solving approach with multiple solution options
+        action_steps: ''
+    - name: health_educator_best_practices
+      description: When asked about healthcare best practices, the agent should provide current industry standards and guidelines
+      input:
+        health_topic: Industry best practices for healthcare operations
+        target_audience: ''
+      expected_output:
+        educational_content: Comprehensive best practices guide with implementation steps
+        action_steps: ''
+    - name: health_educator_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to healthcare
+      input:
+        health_topic: Compliance requirements for healthcare operations
+        target_audience: ''
+      expected_output:
+        educational_content: Detailed compliance checklist with regulatory requirements
+        action_steps: ''
+    - name: health_educator_strategic_planning
+      description: When developing healthcare strategies, the agent should provide forward-thinking recommendations
+      input:
+        health_topic: Strategic planning for healthcare growth and optimization
+        target_audience: ''
+      expected_output:
+        educational_content: Comprehensive strategic plan with measurable objectives and timelines
+        action_steps: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

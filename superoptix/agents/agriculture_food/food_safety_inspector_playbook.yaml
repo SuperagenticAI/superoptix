@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Food Safety Inspector
+  id: food_safety_inspector
+  namespace: agriculture_food
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that ensures food safety compliance and generates inspection reports for food production facilities.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: facility_information
+    type: str
+    description: Facility type, size, production processes, and previous inspection history
+    required: true
+  - name: inspection_findings
+    type: str
+    description: Current observations, violations, safety concerns, and compliance status
+    required: true
+  output_fields:
+  - name: inspection_report
+    type: str
+    description: Detailed inspection findings and compliance assessment
+    required: true
+  - name: corrective_actions
+    type: str
+    description: Specific recommendations and required improvements for compliance
+    required: true
+  persona:
+    name: SafetyBot
+    role: Food Safety Inspector
+    goal: Ensure food safety standards and protect public health through thorough inspections and compliance monitoring
+    traits:
+    - detail-oriented
+    - safety-focused
+    - regulatory-minded
+    - thorough
+  tasks:
+  - name: conduct_safety_inspection
+    instruction: You are a Food Safety Inspector. Generate comprehensive food safety inspection reports including compliance
+      assessments, risk evaluations, and corrective action recommendations.
+    inputs:
+    - name: facility_information
+      type: str
+      description: Facility type, size, production processes, and previous inspection history
+      required: true
+    - name: inspection_findings
+      type: str
+      description: Current observations, violations, safety concerns, and compliance status
+      required: true
+    outputs:
+    - name: inspection_report
+      type: str
+      description: Detailed inspection findings and compliance assessment
+    - name: corrective_actions
+      type: str
+      description: Specific recommendations and required improvements for compliance
+  agentflow:
+  - name: inspect_safety
+    type: Generate
+    task: conduct_safety_inspection
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: food_safety_inspector_comprehensive_task
+      description: Given a complex agriculture_food requirement, the agent should provide detailed analysis and recommendations
+      input:
+        facility_information: Complex agriculture_food scenario requiring comprehensive analysis
+        inspection_findings: ''
+      expected_output:
+        inspection_report: Detailed step-by-step analysis with agriculture_food-specific recommendations
+        corrective_actions: ''
+    - name: food_safety_inspector_problem_solving
+      description: When facing agriculture_food challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        facility_information: Challenging agriculture_food problem requiring creative solutions
+        inspection_findings: ''
+      expected_output:
+        inspection_report: Structured problem-solving approach with multiple solution options
+        corrective_actions: ''
+    - name: food_safety_inspector_best_practices
+      description: When asked about agriculture_food best practices, the agent should provide current industry standards and
+        guidelines
+      input:
+        facility_information: Industry best practices for agriculture_food operations
+        inspection_findings: ''
+      expected_output:
+        inspection_report: Comprehensive best practices guide with implementation steps
+        corrective_actions: ''
+    - name: food_safety_inspector_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to agriculture_food
+      input:
+        facility_information: Compliance requirements for agriculture_food operations
+        inspection_findings: ''
+      expected_output:
+        inspection_report: Detailed compliance checklist with regulatory requirements
+        corrective_actions: ''
+    - name: food_safety_inspector_strategic_planning
+      description: When developing agriculture_food strategies, the agent should provide forward-thinking recommendations
+      input:
+        facility_information: Strategic planning for agriculture_food growth and optimization
+        inspection_findings: ''
+      expected_output:
+        inspection_report: Comprehensive strategic plan with measurable objectives and timelines
+        corrective_actions: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

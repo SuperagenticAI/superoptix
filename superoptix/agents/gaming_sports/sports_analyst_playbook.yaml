@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Sports Performance Analyst
+  id: sports_analyst
+  namespace: gaming_sports
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that analyzes sports performance data and generates insights for teams and athletes.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: performance_data
+    type: str
+    description: Player statistics, game footage analysis, and performance metrics
+    required: true
+  - name: competitive_context
+    type: str
+    description: Opponent analysis, league standings, and upcoming matchups
+    required: true
+  output_fields:
+  - name: performance_insights
+    type: str
+    description: Detailed analysis of individual and team performance trends
+    required: true
+  - name: strategic_recommendations
+    type: str
+    description: Specific recommendations for performance improvement and game strategy
+    required: true
+  persona:
+    name: SportsBot
+    role: Sports Performance Analyst
+    goal: Provide data-driven insights to improve athletic performance and team strategy
+    traits:
+    - analytical
+    - performance-focused
+    - strategic
+    - competitive
+  tasks:
+  - name: analyze_sports_performance
+    instruction: You are a Sports Performance Analyst. Generate comprehensive performance analyses including player statistics,
+      team dynamics, and strategic recommendations based on sports data.
+    inputs:
+    - name: performance_data
+      type: str
+      description: Player statistics, game footage analysis, and performance metrics
+      required: true
+    - name: competitive_context
+      type: str
+      description: Opponent analysis, league standings, and upcoming matchups
+      required: true
+    outputs:
+    - name: performance_insights
+      type: str
+      description: Detailed analysis of individual and team performance trends
+    - name: strategic_recommendations
+      type: str
+      description: Specific recommendations for performance improvement and game strategy
+  agentflow:
+  - name: analyze_sports
+    type: Generate
+    task: analyze_sports_performance
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.7
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: sports_analyst_comprehensive_task
+      description: Given a complex gaming_sports requirement, the agent should provide detailed analysis and recommendations
+      input:
+        performance_data: Complex gaming_sports scenario requiring comprehensive analysis
+        competitive_context: ''
+      expected_output:
+        performance_insights: Detailed step-by-step analysis with gaming_sports-specific recommendations
+        strategic_recommendations: ''
+    - name: sports_analyst_problem_solving
+      description: When facing gaming_sports challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        performance_data: Challenging gaming_sports problem requiring creative solutions
+        competitive_context: ''
+      expected_output:
+        performance_insights: Structured problem-solving approach with multiple solution options
+        strategic_recommendations: ''
+    - name: sports_analyst_best_practices
+      description: When asked about gaming_sports best practices, the agent should provide current industry standards and
+        guidelines
+      input:
+        performance_data: Industry best practices for gaming_sports operations
+        competitive_context: ''
+      expected_output:
+        performance_insights: Comprehensive best practices guide with implementation steps
+        strategic_recommendations: ''
+    - name: sports_analyst_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to gaming_sports
+      input:
+        performance_data: Compliance requirements for gaming_sports operations
+        competitive_context: ''
+      expected_output:
+        performance_insights: Detailed compliance checklist with regulatory requirements
+        strategic_recommendations: ''
+    - name: sports_analyst_strategic_planning
+      description: When developing gaming_sports strategies, the agent should provide forward-thinking recommendations
+      input:
+        performance_data: Strategic planning for gaming_sports growth and optimization
+        competitive_context: ''
+      expected_output:
+        performance_insights: Comprehensive strategic plan with measurable objectives and timelines
+        strategic_recommendations: ''

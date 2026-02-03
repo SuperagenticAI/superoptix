@@ -1,0 +1,265 @@
+site_name: SUPEROPTIX AI
+site_description: 'Professional AI Agent Development Framework: Evaluation-First. Enterprise-Grade. Production-Ready.'
+site_url: https://docs.super-agentic.ai
+site_author: SuperagenticAI
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: false
+      linenums: false
+      pygments_lang_class: true
+      auto_title: false
+      pygments_style: monokai
+      line_spans: ""
+      anchor_linenums: false
+      line_anchors: ""
+  - pymdownx.inlinehilite
+  - pymdownx.magiclink
+  - pymdownx.snippets
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.tilde
+  - pymdownx.caret
+  - toc:
+      permalink: false
+      title: "On this page"
+  - footnotes
+  - def_list
+  - abbr
+
+extra_javascript:
+  - https://unpkg.com/mermaid@10/dist/mermaid.min.js
+  - javascripts/extra.js
+
+theme:
+  name: material
+  language: en
+  favicon: 'favicon.png'
+  logo: 'logo.png'
+  palette:
+    # Light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: grey
+      accent: purple
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+    # Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: grey
+      accent: purple
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode
+  font:
+    text: Inter
+    code: Fira Code
+  features:
+    - navigation.instant.prefetch
+    - navigation.tracking
+    - navigation.path
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+
+extra_css:
+  - stylesheets/extra.css?v=24.0  # Fixed tables - removed animation observer, aggressive CSS
+
+extra:
+  # homepage: https://superoptix.docs
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/SuperagenticAI
+    - icon: fontawesome/brands/twitter
+      link: https://x.com/SuperagenticAI
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/company/superagenticai
+  generator: false
+
+plugins:
+  - search:
+      lang: en
+
+nav:
+  - 🏠 Home: index.md
+  - 🚀 Get Started:
+      - '📖 Introduction': introduction.md
+      - '🚀 Quick Start': quick-start.md
+      - '🌐 Multi-Framework Quick Start': tutorials/multi-framework-quickstart.md
+      - '⚙️ Setup & Installation': setup.md
+      - '🧠 LLM Setup': llm-setup.md
+      - '🏗️ Environment Setup': environment-setup.md
+      - '📁 Project Structure': project-structure.md
+      - '🎓 Tutorials':
+          - '📚 Tutorials Overview': tutorials/index.md
+          - '🔮 Your First Agent (Oracle)': tutorials/oracles-agent.md
+          - '🧞 Agent with Tools & RAG (Genie)': tutorials/genies-agent.md
+          - '🔧 OpenAI SDK + GEPA Optimization': tutorials/openai-sdk-gepa-optimization.md
+  - 🔬 Frameworks:
+      - '📚 Frameworks Overview': guides/index.md
+      - '🌐 Comparison': guides/multi-framework.md
+      - '🤖 OpenAI SDK': guides/openai-sdk-integration.md
+      - '🐍 Pydantic AI': guides/pydantic-ai-integration.md
+      - '🐍 Pydantic AI MCP Demo': guides/pydantic-ai-mcp-demo.md
+      - '👥 CrewAI': guides/crewai-integration.md
+      - '⚡ CrewAI Advanced': guides/crewai-task-optimization.md
+      - '🔮 Google ADK': guides/google-adk-integration.md
+      - '🏢 Microsoft': guides/microsoft-framework-integration.md
+      - '🌊 DeepAgents': guides/deepagents-integration.md
+  - 📝 SuperSpec:
+      - '📝 SuperSpec Overview': guides/superspec.md
+      - '📗 DSL Reference': guides/superspec-dsl-reference.md
+      - '📙 DSL Examples': guides/superspec-dsl-examples.md
+      - '🏗️ Agent Building': guides/superspec-agent-building.md
+      - '⚙️ Configuration': guides/superspec-configuration.md
+      - '🧠 Context Engineering': guides/superspec-context-engineering.md
+  - 🛠️ Build:
+      - '🏆 Agent Tiers': guides/tiers.md
+      - '🎨 Agent Patterns': agent-patterns.md
+      - '🔍 Agent Discovery': guides/agent-discovery.md
+      - '🤖 Agent Development': guides/agent-development.md
+      - '🔧 Tool Development': guides/tool-development.md
+      - '🏛️ Technical Architecture': guides/technical-architecture.md
+  - ✅ Evaluate:
+      - '✅ Evaluation & Testing': guides/evaluation-testing.md
+      - '🎭 RSpec-Style BDD Testing': guides/bdd.md
+  - 🎯 Agent Optimization:
+      - '📖 Overview': guides/agent-optimization/overview.md
+      - '💬 Prompt Optimization': guides/agent-optimization/prompts.md
+      - '🔍 RAG Optimization': guides/agent-optimization/rag.md
+      - '🛠️ Tool Optimization': guides/agent-optimization/tools.md
+      - '🧠 Memory Optimization': guides/agent-optimization/memory.md
+      - '🔌 Protocol Optimization (MCP)': guides/agent-optimization/protocols.md
+      - '📊 Dataset-Driven Optimization': guides/agent-optimization/datasets.md
+      - '🎯 Full-Stack Example': guides/agent-optimization/full-stack-example.md
+  - ⚡ Optimize:
+      - '🧬 GEPA Optimizer': guides/gepa-optimization.md
+      - '📈 Optimization Guide': guides/optimization.md
+      - '🔬 DSPy Optimizers': guides/dspy-optimizers.md
+      - '🔧 OpenAI SDK + GEPA Tutorial': tutorials/openai-sdk-gepa-optimization.md
+      - '🔍 RAG Optimization': tutorials/rag-optimization.md
+      - '🔌 MCP Optimization': tutorials/mcp-optimization.md
+      - '💡 Memory Optimization': guides/memory-optimization.md
+  - 🎼 Orchestrate:
+      - '🎼 Orchestra Development': guides/orchestra-development.md
+      - '🎼 Multi-Agent Orchestra': tutorials/first-orchestra.md
+  - 📊 Monitor:
+      - '📊 Observability Overview': guides/observability.md
+      - '🧿 MLFlow': guides/mlflow-guide.md
+      - '🧬 LangFuse': guides/langfuse-integration.md
+      - '🔥 LogFire': guides/logfire-integration.md
+      - '📈 Weights & Biases': guides/weights-biases-integration.md
+      - '⚖️ Comparison': guides/observability-comparison.md
+      - '🚀 Enhanced': guides/enhanced-observability.md
+  - 🗄️ Context:
+      - '🔍 RAG & MCP Guide': guides/mcp-rag-complete-guide.md
+      - '📚 RAG Configuration': guides/rag.md
+      - '🔌 MCP Protocol': guides/protocol-first-agents.md
+      - '📊 Dataset Import': guides/dataset-import.md
+      - '🧠 Memory Systems': guides/memory.md
+  - 🔌 Integrations:
+      - '⚡ Optimas': examples/agents/optimas-examples.md
+      - '⚡ Optimas Guide': guides/optimas-integration.md
+      - '🌉 StackOne Integration': guides/stackone-integration.md
+      - '🚥 ChromaDB': examples/agents/rag-chroma-demo.md
+      - '🍀 LanceDB': examples/agents/rag-lancedb-demo.md
+      - '🔰 Weaviate': examples/agents/weaviate-demo.md
+      - '🔸 Qdrant': examples/agents/qdrant-demo.md
+      - '👁️ Milvus': examples/agents/milvus-demo.md
+      - '🛠️ Tools': examples/agents/tools-demo.md
+      - '🧠 Memory': examples/agents/memory-demo.md
+      - '📊 Observability': examples/agents/observability-demo.md
+      - '🧿 MLFlow': examples/agents/mlflow-integration.md
+      - '🧬 LangFuse': examples/agents/langfuse-integration.md
+      - '🚀 GEPA': examples/agents/gepa-integration.md
+  - 💻 CLI:
+      - '📘 CLI Complete Guide': guides/cli-complete-guide.md
+      - '📖 CLI Reference': reference/cli.md
+  - ✨ Super CLI (Beta):
+      - '💬 Overview': guides/super-cli.md
+      - '🔧 Technical Details': guides/conversational-interface.md
+  - 🤖 Models:
+      - '🧠 Model Management': guides/model-management.md
+      - '💡 Model Intelligence': guides/model-intelligence.md
+      - '💻 Local Inference':
+          - '💻 MLX (Apple Silicon)': examples/agents/mlx-demo.md
+          - '🐼 Ollama': examples/agents/ollama-demo.md
+          - '🤗 HuggingFace': examples/agents/huggingface-demo.md
+          - '🎛️ LM Studio': examples/agents/lmstudio-demo.md
+      - '☁️ Cloud & Production':
+          - '☁️ Cloud Inference (OpenAI, Anthropic, Google)': guides/cloud-inference.md
+          - '🚀 vLLM (High-Performance Serving)': guides/vllm-inference.md
+          - '⚡ SGLang (Structured Generation)': guides/sglang-inference.md
+  - 📚 Examples:
+      - '📚 Examples Overview': examples/index.md
+      - '⚡ Optimas': examples/agents/optimas-examples.md
+      - '🚥 ChromaDB RAG': examples/agents/rag-chroma-demo.md
+      - '🍀 LanceDB RAG': examples/agents/rag-lancedb-demo.md
+      - '🔰 Weaviate': examples/agents/weaviate-demo.md
+      - '🔸 Qdrant': examples/agents/qdrant-demo.md
+      - '👁️ Milvus': examples/agents/milvus-demo.md
+      - '🛠️ Tools': examples/agents/tools-demo.md
+      - '🧠 Memory': examples/agents/memory-demo.md
+      - '📊 Observability': examples/agents/observability-demo.md
+      - '🧿 MLFlow Integration': examples/agents/mlflow-integration.md
+      - '🧬 LangFuse Integration': examples/agents/langfuse-integration.md
+      - '📈 Weights & Biases': examples/agents/weights-biases-demo.md
+      - '🚀 GEPA': examples/agents/gepa-integration.md
+  - 🎯 Techniques:
+      - '🎯 Overview': techniques/index.md
+      - '🧠 Memory Systems': guides/memory.md
+      - '💡 Memory Optimization': guides/memory-optimization.md
+      - '🔍 RAG Integration': guides/rag.md
+      - '📈 Optimization': guides/optimization.md
+      - '✅ Evaluation & Testing': guides/evaluation-testing.md
+      - '📊 Observability': guides/observability.md
+      - '🎭 RSpec-Style BDD Testing': guides/bdd.md
+      - '🔄 CI/CD Integration': guides/cicd-integration.md
+      - '🚂 Rails Analogy (For Rails Devs)': guides/rails-analogy.md
+  - 🛍️ Marketplace:
+      - '🛍️ Marketplace Overview': guides/marketplace.md
+  - ✅ Responsible AI:
+      - '✅ Responsible AI Guide': guides/responsible-ai.md
+  - 🏢 Company:
+      - '🌟 Superagentic AI': superagentic-ai.md
+  - 📖 Reference:
+      - '📚 Overview': reference/index.md
+      - '🔧 API Reference':
+          - 'API Overview': reference/api/index.md
+          - '📝 SuperSpec API': reference/api/superspec.md
+          - '🧬 GEPA API': reference/api/gepa.md
+          - '🔬 DSPy Optimizers API': reference/api/dspy-optimizers.md
+          - '🏃 Runners API': reference/api/runners.md
+          - '🧠 Memory API': reference/api/memory.md
+          - '🤖 Models API': reference/api/models.md
+          - '🔧 Tools API': reference/api/tools.md
+          - '📊 Observability API': reference/api/observability.md
+          - '💻 CLI API': reference/api/cli.md
+          - '🔧 Core API': reference/api/core.md
+      - '❓ FAQ': faq.md
+      - '🐛 Debugging': debugging-guide.md
+
+copyright: Copyright © 2025 Superagentic AI. Made with ❤️ for the Agentic AI community. 

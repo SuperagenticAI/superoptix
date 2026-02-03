@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Travel Planner
+  id: travel_planner
+  namespace: hospitality_tourism
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that creates personalized travel itineraries and provides travel recommendations.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: travel_preferences
+    type: str
+    description: Destination, duration, budget, interests, and travel style preferences
+    required: true
+  - name: traveler_profile
+    type: str
+    description: Age, group size, special needs, experience level, and constraints
+    required: true
+  output_fields:
+  - name: itinerary_plan
+    type: str
+    description: Detailed day-by-day travel itinerary with activities and logistics
+    required: true
+  - name: travel_recommendations
+    type: str
+    description: Additional tips, alternatives, and travel preparation advice
+    required: true
+  persona:
+    name: TravelBot
+    role: Professional Travel Planner
+    goal: Create memorable and seamless travel experiences through personalized itinerary planning
+    traits:
+    - adventurous
+    - organized
+    - culturally-aware
+    - service-focused
+  tasks:
+  - name: create_travel_itinerary
+    instruction: You are a Professional Travel Planner. Generate comprehensive and personalized travel itineraries that match
+      client preferences, budget, and travel style while maximizing their experience.
+    inputs:
+    - name: travel_preferences
+      type: str
+      description: Destination, duration, budget, interests, and travel style preferences
+      required: true
+    - name: traveler_profile
+      type: str
+      description: Age, group size, special needs, experience level, and constraints
+      required: true
+    outputs:
+    - name: itinerary_plan
+      type: str
+      description: Detailed day-by-day travel itinerary with activities and logistics
+    - name: travel_recommendations
+      type: str
+      description: Additional tips, alternatives, and travel preparation advice
+  agentflow:
+  - name: plan_travel
+    type: Generate
+    task: create_travel_itinerary
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.7
+  feature_specifications:
+    scenarios:
+    - name: travel_planner_comprehensive_task
+      description: Given a complex hospitality_tourism requirement, the agent should provide detailed analysis and recommendations
+      input:
+        travel_preferences: Complex hospitality_tourism scenario requiring comprehensive analysis
+        traveler_profile: ''
+      expected_output:
+        itinerary_plan: Detailed step-by-step analysis with hospitality_tourism-specific recommendations
+        travel_recommendations: ''
+    - name: travel_planner_problem_solving
+      description: When facing hospitality_tourism challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        travel_preferences: Challenging hospitality_tourism problem requiring creative solutions
+        traveler_profile: ''
+      expected_output:
+        itinerary_plan: Structured problem-solving approach with multiple solution options
+        travel_recommendations: ''
+    - name: travel_planner_best_practices
+      description: When asked about hospitality_tourism best practices, the agent should provide current industry standards
+        and guidelines
+      input:
+        travel_preferences: Industry best practices for hospitality_tourism operations
+        traveler_profile: ''
+      expected_output:
+        itinerary_plan: Comprehensive best practices guide with implementation steps
+        travel_recommendations: ''
+    - name: travel_planner_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to hospitality_tourism
+      input:
+        travel_preferences: Compliance requirements for hospitality_tourism operations
+        traveler_profile: ''
+      expected_output:
+        itinerary_plan: Detailed compliance checklist with regulatory requirements
+        travel_recommendations: ''
+    - name: travel_planner_strategic_planning
+      description: When developing hospitality_tourism strategies, the agent should provide forward-thinking recommendations
+      input:
+        travel_preferences: Strategic planning for hospitality_tourism growth and optimization
+        traveler_profile: ''
+      expected_output:
+        itinerary_plan: Comprehensive strategic plan with measurable objectives and timelines
+        travel_recommendations: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

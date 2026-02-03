@@ -1,0 +1,124 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Listing Creator
+  id: listing_creator
+  namespace: real_estate
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that creates compelling property listings and marketing descriptions.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: property_features
+    type: str
+    description: Property specifications, amenities, and unique features
+    required: true
+  - name: target_market
+    type: str
+    description: Target buyer/renter demographic and price range
+    required: true
+  output_fields:
+  - name: listing_description
+    type: str
+    description: Complete property listing with headline and detailed description
+    required: true
+  - name: marketing_highlights
+    type: str
+    description: Key selling points and marketing strategy recommendations
+    required: true
+  persona:
+    name: ListingBot
+    role: Listing Specialist
+    goal: Create attractive and effective property listings that generate buyer interest
+    traits:
+    - persuasive
+    - descriptive
+    - market-savvy
+    - customer-focused
+  tasks:
+  - name: create_property_listing
+    instruction: You are a Listing Specialist. Create compelling property listings that highlight key features, benefits,
+      and selling points to attract potential buyers or renters.
+    inputs:
+    - name: property_features
+      type: str
+      description: Property specifications, amenities, and unique features
+      required: true
+    - name: target_market
+      type: str
+      description: Target buyer/renter demographic and price range
+      required: true
+    outputs:
+    - name: listing_description
+      type: str
+      description: Complete property listing with headline and detailed description
+    - name: marketing_highlights
+      type: str
+      description: Key selling points and marketing strategy recommendations
+  agentflow:
+  - name: create_listing
+    type: Generate
+    task: create_property_listing
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.7
+  feature_specifications:
+    scenarios:
+    - name: listing_creator_comprehensive_task
+      description: Given a complex real_estate requirement, the agent should provide detailed analysis and recommendations
+      input:
+        property_features: Complex real_estate scenario requiring comprehensive analysis
+        target_market: ''
+      expected_output:
+        listing_description: Detailed step-by-step analysis with real_estate-specific recommendations
+        marketing_highlights: ''
+    - name: listing_creator_problem_solving
+      description: When facing real_estate challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        property_features: Challenging real_estate problem requiring creative solutions
+        target_market: ''
+      expected_output:
+        listing_description: Structured problem-solving approach with multiple solution options
+        marketing_highlights: ''
+    - name: listing_creator_best_practices
+      description: When asked about real_estate best practices, the agent should provide current industry standards and guidelines
+      input:
+        property_features: Industry best practices for real_estate operations
+        target_market: ''
+      expected_output:
+        listing_description: Comprehensive best practices guide with implementation steps
+        marketing_highlights: ''
+    - name: listing_creator_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to real_estate
+      input:
+        property_features: Compliance requirements for real_estate operations
+        target_market: ''
+      expected_output:
+        listing_description: Detailed compliance checklist with regulatory requirements
+        marketing_highlights: ''
+    - name: listing_creator_strategic_planning
+      description: When developing real_estate strategies, the agent should provide forward-thinking recommendations
+      input:
+        property_features: Strategic planning for real_estate growth and optimization
+        target_market: ''
+      expected_output:
+        listing_description: Comprehensive strategic plan with measurable objectives and timelines
+        marketing_highlights: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

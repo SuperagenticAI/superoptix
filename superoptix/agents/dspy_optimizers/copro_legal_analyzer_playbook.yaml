@@ -1,0 +1,290 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: COPRO Legal Document Analyzer
+  id: copro-legal-analyzer
+  version: 1.0.0
+  namespace: legal
+  level: oracles
+  stage: stable
+  agent_type: Autonomous
+  description: Legal document analysis agent optimized with COPRO for collaborative prompt optimization
+  tags:
+  - legal
+  - analysis
+  - copro
+  - optimization
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    temperature: 0.1
+    max_tokens: 32000
+    cache: true
+  input_fields:
+  - name: document
+    type: str
+    description: The legal document text to analyze
+    required: true
+  - name: document_type
+    type: str
+    description: Type of legal document (contract, agreement, policy, etc.)
+    required: false
+  - name: jurisdiction
+    type: str
+    description: Relevant jurisdiction for legal interpretation
+    required: false
+  output_fields:
+  - name: analysis
+    type: str
+    description: Comprehensive legal analysis
+    required: true
+  - name: risk_level
+    type: str
+    description: Overall risk assessment (Low/Medium/High)
+    required: true
+  - name: recommendations
+    type: list[str]
+    description: List of specific recommendations
+    required: true
+  persona:
+    role: Legal Document Analyst
+    goal: Analyze legal documents for key terms, risks, and compliance issues with high accuracy
+    traits:
+    - meticulous
+    - analytical
+    - objective
+    - detail-oriented
+    expertise_areas:
+    - contract law
+    - compliance
+    - risk assessment
+    - legal terminology
+    communication_preferences:
+      style: formal
+      tone: professional
+      verbosity: detailed
+  tasks:
+  - name: analyze_legal_document
+    description: Comprehensive analysis of legal documents for key terms, risks, and recommendations
+    instruction: 'Perform a thorough analysis of the provided legal document.
+
+
+      Analysis Framework:
+
+      1. Document Classification and Purpose
+
+      2. Key Terms and Clauses Identification
+
+      3. Risk Assessment and Potential Issues
+
+      4. Compliance Considerations
+
+      5. Recommendations and Next Steps
+
+
+      Focus Areas:
+
+      - Contractual obligations and rights
+
+      - Liability and indemnification clauses
+
+      - Termination and renewal terms
+
+      - Payment and penalty clauses
+
+      - Jurisdiction and governing law
+
+      - Confidentiality and non-disclosure requirements
+
+
+      Format your response as:
+
+      **Document Type:** [Contract/Agreement/Policy/etc.]
+
+      **Document Purpose:** [Main objective of the document]
+
+
+      **Key Terms Analysis:**
+
+      - Term 1: [Description and implications]
+
+      - Term 2: [Description and implications]
+
+      - Term 3: [Description and implications]
+
+
+      **Risk Assessment:**
+
+      **High Risk Items:**
+
+      - [Risk 1 with explanation]
+
+      - [Risk 2 with explanation]
+
+
+      **Medium Risk Items:**
+
+      - [Risk 1 with explanation]
+
+
+      **Compliance Considerations:**
+
+      - [Compliance requirement 1]
+
+      - [Compliance requirement 2]
+
+
+      **Recommendations:**
+
+      1. [Specific recommendation with rationale]
+
+      2. [Specific recommendation with rationale]
+
+      3. [Specific recommendation with rationale]
+
+      '
+    inputs:
+    - name: document
+      type: str
+      description: The legal document text to analyze
+      required: true
+    - name: document_type
+      type: str
+      description: Type of legal document (contract, agreement, policy, etc.)
+      required: false
+    - name: jurisdiction
+      type: str
+      description: Relevant jurisdiction for legal interpretation
+      required: false
+    outputs:
+    - name: analysis
+      type: str
+      description: Comprehensive legal analysis
+    - name: risk_level
+      type: str
+      description: Overall risk assessment (Low/Medium/High)
+    - name: recommendations
+      type: list[str]
+      description: List of specific recommendations
+  optimization:
+    enabled: true
+    optimizer:
+      name: COPRO
+      params:
+        metric: legal_analysis_feedback
+        num_candidates: 6
+        max_steps: 12
+        verbose: false
+        timeout: 300
+    evaluation:
+      enabled: true
+      metrics:
+      - legal_analysis_feedback
+      - answer_correctness
+      test_split: 0.2
+    hardware_optimization:
+      target_tier: standard
+      memory_limit_gb: 16
+  feature_specifications:
+    scenarios:
+    - name: service_agreement_analysis
+      description: Should analyze service agreements for key terms and risks
+      input:
+        document: 'Service Agreement: Provider agrees to deliver cloud hosting services with 99.9% uptime guarantee. Client
+          pays $500/month with 30-day payment terms. Either party may terminate with 60 days written notice. Provider disclaims
+          all warranties except as required by law. Client indemnifies Provider against third-party claims. Governing law:
+          California.'
+        document_type: service agreement
+      expected_output:
+        analysis: Service agreement with uptime guarantees and termination provisions
+        risk_level: Medium
+        recommendations:
+        - Clarify uptime penalty terms
+        - Review indemnification scope
+        - Add data protection clauses
+      tags:
+      - contract
+      - service
+      - analysis
+      priority: high
+    - name: employment_contract_analysis
+      description: Should analyze employment contracts for compliance and fairness
+      input:
+        document: 'Employment Contract: Employee hired as Software Engineer at $80,000 annual salary. 2-week vacation, health
+          benefits included. 6-month probationary period. Non-compete clause prohibits working for competitors within 50 miles
+          for 2 years after termination. Confidentiality agreement covers all company information. Termination requires 2
+          weeks notice from either party.'
+        document_type: employment contract
+      expected_output:
+        analysis: Employment contract with standard terms but broad non-compete clause
+        risk_level: Medium
+        recommendations:
+        - Review non-compete enforceability
+        - Clarify confidentiality scope
+        - Add severability clause
+      tags:
+      - employment
+      - contract
+      - non-compete
+      priority: high
+    - name: privacy_policy_analysis
+      description: Should analyze privacy policies for compliance requirements
+      input:
+        document: 'Privacy Policy: We collect personal information including name, email, and usage data. Information is used
+          for service provision and marketing. We may share data with third-party partners. Users can request data deletion
+          by emailing support. Cookies are used for analytics. Policy updated monthly without notice. Contact us for questions.'
+        document_type: privacy policy
+      expected_output:
+        analysis: Privacy policy lacking specific GDPR and CCPA compliance elements
+        risk_level: High
+        recommendations:
+        - Add explicit consent mechanisms
+        - Specify data retention periods
+        - Include user rights under GDPR/CCPA
+        - Require notice for policy changes
+      tags:
+      - privacy
+      - policy
+      - gdpr
+      - ccpa
+      priority: high
+    - name: vendor_contract_analysis
+      description: Should analyze vendor contracts for procurement compliance
+      input:
+        document: 'Vendor Agreement: Vendor supplies office equipment for $10,000 monthly. 12-month minimum term with auto-renewal.
+          90-day payment terms. Vendor warrants equipment for 1 year. Force majeure clause included. Disputes resolved through
+          binding arbitration in New York. Either party may audit the other''s relevant records.'
+        document_type: vendor agreement
+      expected_output:
+        analysis: Vendor agreement with standard commercial terms and arbitration clause
+        risk_level: Low
+        recommendations:
+        - Negotiate shorter payment terms
+        - Add performance metrics
+        - Clarify audit scope and frequency
+      tags:
+      - vendor
+      - procurement
+      - contract
+      priority: medium
+    - name: licensing_agreement_analysis
+      description: Should analyze software licensing agreements for usage rights and restrictions
+      input:
+        document: 'Software License: Company grants non-exclusive license to use Software for internal business purposes.
+          Maximum 100 users. No reverse engineering, copying, or distribution permitted. Support included for first year.
+          License fee: $5,000 annually. Termination for breach with 30-day cure period. Updates provided at vendor discretion.'
+        document_type: licensing agreement
+      expected_output:
+        analysis: Software license with user limits and standard restrictions
+        risk_level: Low
+        recommendations:
+        - Clarify update policy
+        - Add data portability rights
+        - Specify support response times
+      tags:
+      - software
+      - license
+      - intellectual-property
+      priority: medium

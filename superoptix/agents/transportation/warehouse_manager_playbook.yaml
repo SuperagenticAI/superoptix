@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Warehouse Manager
+  id: warehouse_manager
+  namespace: transportation
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that manages warehouse operations and optimizes storage and fulfillment processes.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: warehouse_metrics
+    type: str
+    description: Current throughput, accuracy rates, storage utilization, and operational costs
+    required: true
+  - name: operational_challenges
+    type: str
+    description: Space constraints, staffing levels, and performance bottlenecks
+    required: true
+  output_fields:
+  - name: warehouse_analysis
+    type: str
+    description: Step-by-step warehouse performance analysis
+    required: true
+  - name: optimization_plan
+    type: str
+    description: Comprehensive warehouse improvement strategy
+    required: true
+  persona:
+    name: WarehouseBot
+    role: Warehouse Operations Manager
+    goal: Optimize warehouse efficiency, accuracy, and throughput while maintaining safety standards
+    traits:
+    - systematic
+    - efficiency-focused
+    - safety-conscious
+    - process-oriented
+  tasks:
+  - name: optimize_warehouse_operations
+    instruction: You are a Warehouse Operations Manager. Think through warehouse data systematically to identify efficiency
+      improvements, optimize layouts, and enhance fulfillment processes.
+    inputs:
+    - name: warehouse_metrics
+      type: str
+      description: Current throughput, accuracy rates, storage utilization, and operational costs
+      required: true
+    - name: operational_challenges
+      type: str
+      description: Space constraints, staffing levels, and performance bottlenecks
+      required: true
+    outputs:
+    - name: warehouse_analysis
+      type: str
+      description: Step-by-step warehouse performance analysis
+    - name: optimization_plan
+      type: str
+      description: Comprehensive warehouse improvement strategy
+  agentflow:
+  - name: optimize_systematically
+    type: Think
+    task: optimize_warehouse_operations
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: warehouse_manager_comprehensive_task
+      description: Given a complex transportation requirement, the agent should provide detailed analysis and recommendations
+      input:
+        warehouse_metrics: Complex transportation scenario requiring comprehensive analysis
+        operational_challenges: ''
+      expected_output:
+        warehouse_analysis: Detailed step-by-step analysis with transportation-specific recommendations
+        optimization_plan: ''
+    - name: warehouse_manager_problem_solving
+      description: When facing transportation challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        warehouse_metrics: Challenging transportation problem requiring creative solutions
+        operational_challenges: ''
+      expected_output:
+        warehouse_analysis: Structured problem-solving approach with multiple solution options
+        optimization_plan: ''
+    - name: warehouse_manager_best_practices
+      description: When asked about transportation best practices, the agent should provide current industry standards and
+        guidelines
+      input:
+        warehouse_metrics: Industry best practices for transportation operations
+        operational_challenges: ''
+      expected_output:
+        warehouse_analysis: Comprehensive best practices guide with implementation steps
+        optimization_plan: ''
+    - name: warehouse_manager_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to transportation
+      input:
+        warehouse_metrics: Compliance requirements for transportation operations
+        operational_challenges: ''
+      expected_output:
+        warehouse_analysis: Detailed compliance checklist with regulatory requirements
+        optimization_plan: ''
+    - name: warehouse_manager_strategic_planning
+      description: When developing transportation strategies, the agent should provide forward-thinking recommendations
+      input:
+        warehouse_metrics: Strategic planning for transportation growth and optimization
+        operational_challenges: ''
+      expected_output:
+        warehouse_analysis: Comprehensive strategic plan with measurable objectives and timelines
+        optimization_plan: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

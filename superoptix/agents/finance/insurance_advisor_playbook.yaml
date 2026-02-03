@@ -1,0 +1,124 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Insurance Advisor
+  id: insurance_advisor
+  namespace: finance
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that helps assess insurance needs and provides coverage recommendations.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: life_situation
+    type: str
+    description: Personal situation including family, assets, and income
+    required: true
+  - name: current_coverage
+    type: str
+    description: Existing insurance coverage, if any
+    required: false
+  output_fields:
+  - name: needs_assessment
+    type: str
+    description: Step-by-step analysis of insurance needs
+    required: true
+  - name: coverage_recommendations
+    type: str
+    description: Specific insurance recommendations and coverage amounts
+    required: true
+  persona:
+    name: InsureBot
+    role: Insurance Advisor
+    goal: Help individuals understand insurance needs and find appropriate coverage
+    traits:
+    - protective
+    - analytical
+    - thorough
+    - risk-aware
+  tasks:
+  - name: assess_insurance_needs
+    instruction: You are an Insurance Advisor. Think through the person's life situation systematically to assess insurance
+      needs, identify coverage gaps, and recommend appropriate protection strategies.
+    inputs:
+    - name: life_situation
+      type: str
+      description: Personal situation including family, assets, and income
+      required: true
+    - name: current_coverage
+      type: str
+      description: Existing insurance coverage, if any
+      required: false
+    outputs:
+    - name: needs_assessment
+      type: str
+      description: Step-by-step analysis of insurance needs
+    - name: coverage_recommendations
+      type: str
+      description: Specific insurance recommendations and coverage amounts
+  agentflow:
+  - name: assess_needs_systematically
+    type: Think
+    task: assess_insurance_needs
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: insurance_advisor_comprehensive_task
+      description: Given a complex finance requirement, the agent should provide detailed analysis and recommendations
+      input:
+        life_situation: Complex finance scenario requiring comprehensive analysis
+        current_coverage: ''
+      expected_output:
+        needs_assessment: Detailed step-by-step analysis with finance-specific recommendations
+        coverage_recommendations: ''
+    - name: insurance_advisor_problem_solving
+      description: When facing finance challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        life_situation: Challenging finance problem requiring creative solutions
+        current_coverage: ''
+      expected_output:
+        needs_assessment: Structured problem-solving approach with multiple solution options
+        coverage_recommendations: ''
+    - name: insurance_advisor_best_practices
+      description: When asked about finance best practices, the agent should provide current industry standards and guidelines
+      input:
+        life_situation: Industry best practices for finance operations
+        current_coverage: ''
+      expected_output:
+        needs_assessment: Comprehensive best practices guide with implementation steps
+        coverage_recommendations: ''
+    - name: insurance_advisor_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to finance
+      input:
+        life_situation: Compliance requirements for finance operations
+        current_coverage: ''
+      expected_output:
+        needs_assessment: Detailed compliance checklist with regulatory requirements
+        coverage_recommendations: ''
+    - name: insurance_advisor_strategic_planning
+      description: When developing finance strategies, the agent should provide forward-thinking recommendations
+      input:
+        life_situation: Strategic planning for finance growth and optimization
+        current_coverage: ''
+      expected_output:
+        needs_assessment: Comprehensive strategic plan with measurable objectives and timelines
+        coverage_recommendations: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

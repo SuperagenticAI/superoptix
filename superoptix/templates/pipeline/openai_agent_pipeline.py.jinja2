@@ -1,0 +1,327 @@
+"""
+{{ agent_name | to_pascal_case }} Agent - OpenAI Agents SDK Implementation
+
+Auto-generated from SuperSpec playbook using SuperOptiX compiler.
+Framework: OpenAI Agents SDK
+Generated: {{ timestamp }}
+
+This agent uses OpenAI's official Agents SDK with Runner pattern.
+"""
+
+import asyncio
+from typing import List, Dict, Any, Optional
+from datetime import datetime
+from pathlib import Path
+import os
+
+# OpenAI Agents SDK imports
+from agents import Agent, Runner, function_tool
+
+# SuperOptiX utilities for tracing and evaluation
+from superoptix.core.base_component import BaseComponent
+from superoptix.observability.tracer import SuperOptixTracer
+
+
+# ==============================================================================
+# 1. Tool Definitions (if any)
+# ==============================================================================
+
+{% if spec.tools and spec.tools is mapping and spec.tools.enabled %}
+# Tools enabled via categories in playbook
+# Categories: {{ spec.tools.categories | join(', ') if spec.tools.categories else 'none' }}
+# TODO: Import tools from SuperOptiX tool registry based on categories
+
+AGENT_TOOLS = []  # Will be populated from tool registry
+{% elif spec.tools and spec.tools is iterable and spec.tools is not mapping and spec.tools is not string %}
+# Custom tools defined in playbook
+{% for tool in spec.tools %}
+@function_tool
+def {{ tool.name | to_snake_case }}(
+    {%- if tool.parameters %}
+    {%- for param in tool.parameters %}
+    {{ param.name }}: {{ param.type | default('str') }},
+    {%- endfor %}
+    {%- endif %}
+) -> str:
+    """{{ tool.description | default('Tool function') }}"""
+    # TODO: Implement tool logic here
+    # This is a placeholder - customize based on your requirements
+    return f"Tool {{ tool.name }} called"
+
+{% endfor %}
+
+# Collect all tools
+AGENT_TOOLS = [
+    {%- for tool in spec.tools %}
+    {{ tool.name | to_snake_case }},
+    {%- endfor %}
+]
+{% else %}
+# No tools defined in playbook
+AGENT_TOOLS = []
+{% endif %}
+
+
+# ==============================================================================
+# 2. BaseComponent Wrapper (for Universal GEPA Optimization)
+# ==============================================================================
+
+class {{ agent_name | to_pascal_case }}Component(BaseComponent):
+    """
+    BaseComponent wrapper for {{ agent_name | to_pascal_case }} agent.
+
+    This wrapper allows the OpenAI agent to be optimized with GEPA
+    and other DSPy optimizers in a framework-agnostic way.
+    """
+
+    def __init__(
+        self,
+        instructions: Optional[str] = None,
+        tools: Optional[List] = None,
+        model: str = "gpt-4o-mini",
+    ):
+        """
+        Initialize the OpenAI agent component.
+
+        Args:
+            instructions: Agent instructions (optimizable by GEPA)
+            tools: List of tool functions
+            model: Model name (e.g., "gpt-4o-mini", "gpt-4o")
+        """
+        # Default instructions from playbook
+        default_instructions = """{{ spec.persona.role | default('You are a helpful AI assistant.') }}
+
+{% if spec.persona.goal -%}
+Goal: {{ spec.persona.goal }}
+{%- endif %}
+
+{% if spec.persona.traits -%}
+Traits: {{ spec.persona.traits | join(', ') }}
+{%- endif %}
+
+{% if spec.tasks and spec.tasks[0] and spec.tasks[0].instruction -%}
+Task: {{ spec.tasks[0].instruction }}
+{%- endif %}"""
+
+        super().__init__(
+            name="{{ agent_name }}",
+            description="{{ metadata.description | default('OpenAI Agents SDK agent') }}",
+            input_fields=["query"],
+            output_fields=["response"],
+            variable=instructions or default_instructions,  # GEPA optimizes this!
+            variable_type="instructions",
+            framework="openai",
+            config={
+                "model": model,
+                "tools": tools or AGENT_TOOLS,
+            }
+        )
+
+        self._agent = None
+
+    def _initialize_agent(self):
+        """Lazy initialization of OpenAI agent."""
+        if self._agent is not None:
+            return
+
+        # Validate API key
+        if "OPENAI_API_KEY" not in os.environ:
+            raise ValueError(
+                "OPENAI_API_KEY environment variable required. "
+                "Set it with: export OPENAI_API_KEY='your-api-key'"
+            )
+
+        # Create agent with current instructions (may be optimized by GEPA)
+        self._agent = Agent(
+            name="{{ agent_name }}",
+            instructions=self.variable,  # Optimized instructions
+            model=self.config.model,
+            tools=self.config.tools if self.config.tools else None,
+        )
+
+    def forward(self, **inputs: Any) -> Dict[str, Any]:
+        """
+        Execute the agent (async wrapper for sync interface).
+
+        Args:
+            **inputs: Input fields (e.g., query="What is AI?")
+
+        Returns:
+            Dict with output fields (e.g., {"response": "AI is..."})
+        """
+        query = inputs.get("query", "")
+
+        # Run async agent in sync context
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            # If event loop is already running, create a task
+            import nest_asyncio
+            nest_asyncio.apply()
+            result = loop.run_until_complete(self._async_forward(query))
+        else:
+            result = asyncio.run(self._async_forward(query))
+
+        return result
+
+    async def _async_forward(self, query: str) -> Dict[str, Any]:
+        """Async execution of the agent."""
+        self._initialize_agent()
+
+        # Run the agent with Runner
+        result = await Runner.run(self._agent, input=query)
+
+        return {"response": result.final_output}
+
+    def update(self, new_variable: Any) -> None:
+        """
+        Update instructions (called by GEPA optimizer).
+
+        When GEPA optimizes the agent, it will call this method
+        with improved instructions.
+        """
+        super().update(new_variable)
+
+        # Recreate agent with new instructions
+        self._agent = None  # Force re-initialization with new instructions
+
+
+# ==============================================================================
+# 3. Pipeline Class (Main Agent Interface)
+# ==============================================================================
+
+class {{ agent_name | to_pascal_case }}Pipeline:
+    """
+    Main pipeline for {{ agent_name | to_pascal_case }} agent.
+
+    This class provides the standard SuperOptiX pipeline interface
+    for running, evaluating, and optimizing the agent.
+    """
+
+    def __init__(
+        self,
+        model: str = "gpt-4o-mini",
+        enable_tracing: bool = True,
+    ):
+        """
+        Initialize the pipeline.
+
+        Args:
+            model: OpenAI model name (e.g., "gpt-4o-mini", "gpt-4o")
+            enable_tracing: Enable observability tracing
+        """
+        self.model = model
+        self.enable_tracing = enable_tracing
+
+        # Initialize component
+        self.component = {{ agent_name | to_pascal_case }}Component(
+            model=model,
+        )
+
+        # Initialize tracer
+        if enable_tracing:
+            self.tracer = SuperOptixTracer(agent_id="{{ agent_name }}")
+        else:
+            self.tracer = None
+
+    async def run_async(self, query: str, **kwargs) -> str:
+        """
+        Run the agent asynchronously.
+
+        Args:
+            query: User query
+            **kwargs: Additional parameters
+
+        Returns:
+            Agent response
+        """
+        if self.tracer:
+            trace_id = self.tracer.start_trace(
+                component="{{ agent_name }}",
+                inputs={"query": query}
+            )
+
+        try:
+            # Execute component
+            result = await self.component._async_forward(query)
+            response = result["response"]
+
+            if self.tracer:
+                self.tracer.end_trace(
+                    trace_id=trace_id,
+                    outputs={"response": response},
+                    status="success"
+                )
+
+            return response
+
+        except Exception as e:
+            if self.tracer:
+                self.tracer.end_trace(
+                    trace_id=trace_id,
+                    outputs={},
+                    status="error",
+                    error=str(e)
+                )
+            raise
+
+    def run(self, query: str, **kwargs) -> str:
+        """
+        Run the agent synchronously.
+
+        Args:
+            query: User query
+            **kwargs: Additional parameters
+
+        Returns:
+            Agent response
+        """
+        return asyncio.run(self.run_async(query, **kwargs))
+
+    def get_component(self) -> BaseComponent:
+        """
+        Get the BaseComponent for optimization.
+
+        This is used by GEPA and other optimizers to access
+        the optimizable variable (instructions).
+        """
+        return self.component
+
+
+# ==============================================================================
+# 4. Main Entry Point (for testing)
+# ==============================================================================
+
+async def main():
+    """Test the agent with sample queries."""
+    print("=" * 80)
+    print(f"{{ agent_name | to_pascal_case }} Agent - OpenAI Agents SDK")
+    print("=" * 80)
+
+    # Validate API key
+    if "OPENAI_API_KEY" not in os.environ:
+        print("\n❌ ERROR: OPENAI_API_KEY environment variable not set!")
+        print("Set it with: export OPENAI_API_KEY='your-api-key'")
+        return
+
+    # Initialize pipeline
+    pipeline = {{ agent_name | to_pascal_case }}Pipeline(
+        model="gpt-4o-mini",
+    )
+
+    # Test query
+    test_query = "{{ spec.tasks[0].examples[0].input if (spec.tasks and spec.tasks[0] and spec.tasks[0].examples and spec.tasks[0].examples[0]) else 'Hello, how can you help me?' }}"
+
+    print(f"\n🔹 Query: {test_query}")
+    print("\n🤖 Agent Response:")
+
+    response = await pipeline.run_async(test_query)
+    print(response)
+
+    print("\n" + "=" * 80)
+    print("✅ Agent test complete!")
+    print("=" * 80)
+
+
+if __name__ == "__main__":
+    # Run the agent
+    asyncio.run(main())

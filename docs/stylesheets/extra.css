@@ -1,0 +1,583 @@
+/* SuperOptiX Documentation - Live Docs Navigation + Black Body */
+
+/* ============================================================================
+   HEADER COLORS - BLACK (DARK) / WHITE (LIGHT)
+   ============================================================================ */
+
+/* Dark mode - Black header */
+[data-md-color-scheme="slate"] .md-header {
+	background-color: #000000 !important;
+}
+
+/* Light mode - White header */
+[data-md-color-scheme="default"] .md-header {
+	background-color: #FFFFFF !important;
+}
+
+/* ============================================================================
+   HEADER LOGO - LARGER AND MORE VISIBLE
+   ============================================================================ */
+
+.md-header__button.md-logo img,
+.md-header__button.md-logo svg {
+	width: 80px !important;
+	height: 80px !important;
+	max-width: 80px !important;
+	max-height: 80px !important;
+}
+
+.md-header__button.md-logo {
+	padding: 0.2rem !important;
+	margin: 0 !important;
+}
+
+/* Make header compact but fit logo */
+.md-header {
+	min-height: 4rem !important;
+	padding: 0.3rem 0 !important;
+}
+
+/* Vertically center all header content */
+.md-header__inner {
+	padding: 0.2rem 0.4rem !important;
+	display: flex !important;
+	align-items: center !important;
+}
+
+/* Reduce nav tab spacing */
+.md-tabs {
+	margin-top: 0 !important;
+}
+
+/* ============================================================================
+   HEADER TEXT COLORS - BLACK IN LIGHT MODE, WHITE IN DARK MODE
+   ============================================================================ */
+
+/* Light mode - Black text on white background */
+[data-md-color-scheme="default"] .md-header__title,
+[data-md-color-scheme="default"] .md-header__topic,
+[data-md-color-scheme="default"] .md-header__button,
+[data-md-color-scheme="default"] .md-header__button svg,
+[data-md-color-scheme="default"] .md-search__input {
+	color: #000000 !important;
+	fill: #000000 !important;
+}
+
+/* Dark mode - White text on black background */
+[data-md-color-scheme="slate"] .md-header__title,
+[data-md-color-scheme="slate"] .md-header__topic,
+[data-md-color-scheme="slate"] .md-header__button,
+[data-md-color-scheme="slate"] .md-header__button svg {
+	color: #FFFFFF !important;
+	fill: #FFFFFF !important;
+}
+
+/* ============================================================================
+   BLACK BODY FOR DARK MODE
+   ============================================================================ */
+
+[data-md-color-scheme="slate"] {
+	--md-default-bg-color: #000000;
+	--md-code-bg-color: #000000;
+}
+
+[data-md-color-scheme="slate"] body,
+[data-md-color-scheme="slate"] html,
+[data-md-color-scheme="slate"] .md-main,
+[data-md-color-scheme="slate"] .md-content,
+[data-md-color-scheme="slate"] .md-sidebar,
+[data-md-color-scheme="slate"] .md-nav,
+[data-md-color-scheme="slate"] article {
+	background-color: #000000 !important;
+}
+
+/* ============================================================================
+   REMOVE CONTENT GAP - FLUSH WITH HEADER
+   ============================================================================ */
+
+.md-main {
+	padding-top: 0 !important;
+	margin-top: 0 !important;
+}
+
+.md-main__inner {
+	padding-top: 0.5rem !important;
+	margin-top: 0 !important;
+}
+
+.md-content {
+	padding-top: 0 !important;
+	margin-top: 0 !important;
+}
+
+.md-content__inner {
+	padding-top: 1rem !important;
+	margin-top: 0 !important;
+}
+
+.md-typeset {
+	margin-top: 0 !important;
+	padding-top: 0 !important;
+}
+
+/* ============================================================================
+   FORCE LEFT ALIGNMENT FOR CODE BLOCKS
+   ============================================================================ */
+
+.md-typeset pre,
+.md-typeset code,
+.highlight,
+.highlighttable {
+	text-align: left !important;
+	margin-left: 0 !important;
+	margin-right: auto !important;
+}
+
+.md-typeset .highlight pre,
+.md-typeset .highlight code {
+	text-align: left !important;
+}
+
+/* Ensure all content in divs and tables is left-aligned */
+.md-typeset div[style*="padding"],
+.md-typeset table {
+	text-align: left !important;
+}
+
+.md-typeset div[style*="padding"] pre {
+	text-align: left !important;
+	margin: 0 !important;
+}
+
+/* ============================================================================
+   TABLE STYLING - PROPER BORDERS AND LAYOUT
+   ============================================================================ */
+
+/* All tables - aggressive styling to prevent JS from breaking them */
+.md-typeset table,
+.md-typeset table:not([class]),
+table {
+	display: table !important;
+	width: 100% !important;
+	border-collapse: collapse !important;
+	margin: 1.5rem 0 !important;
+	text-align: left !important;
+	border: 1px solid var(--md-default-fg-color--lightest) !important;
+	table-layout: auto !important;
+}
+
+.md-typeset table thead,
+.md-typeset table:not([class]) thead,
+table thead {
+	background: var(--md-code-bg-color) !important;
+}
+
+.md-typeset table th,
+.md-typeset table td,
+.md-typeset table:not([class]) th,
+.md-typeset table:not([class]) td,
+table th,
+table td {
+	border: 1px solid var(--md-default-fg-color--lightest) !important;
+	padding: 0.8rem 1rem !important;
+	text-align: left !important;
+	vertical-align: top !important;
+}
+
+.md-typeset table th,
+.md-typeset table:not([class]) th,
+table th {
+	font-weight: 600 !important;
+	background: var(--md-code-bg-color) !important;
+}
+
+/* Dark mode table adjustments */
+[data-md-color-scheme="slate"] .md-typeset table,
+[data-md-color-scheme="slate"] .md-typeset table:not([class]),
+[data-md-color-scheme="slate"] table {
+	border-color: #2d2d2d !important;
+}
+
+[data-md-color-scheme="slate"] .md-typeset table th,
+[data-md-color-scheme="slate"] .md-typeset table td,
+[data-md-color-scheme="slate"] .md-typeset table:not([class]) th,
+[data-md-color-scheme="slate"] .md-typeset table:not([class]) td,
+[data-md-color-scheme="slate"] table th,
+[data-md-color-scheme="slate"] table td {
+	border-color: #2d2d2d !important;
+}
+
+[data-md-color-scheme="slate"] .md-typeset table thead,
+[data-md-color-scheme="slate"] .md-typeset table:not([class]) thead,
+[data-md-color-scheme="slate"] table thead {
+	background: #1a1a1a !important;
+}
+
+[data-md-color-scheme="slate"] .md-typeset table th,
+[data-md-color-scheme="slate"] .md-typeset table:not([class]) th,
+[data-md-color-scheme="slate"] table th {
+	background: #1a1a1a !important;
+}
+
+/* Prevent animations from affecting tables */
+.md-typeset table.animate-in,
+table.animate-in {
+	animation: none !important;
+	opacity: 1 !important;
+	transform: none !important;
+}
+
+/* ============================================================================
+   HIDE RIGHT SIDEBAR (TOC) TO GIVE MORE SPACE
+   ============================================================================ */
+
+.md-sidebar--secondary {
+	display: none !important;
+}
+
+.md-content {
+	max-width: none !important;
+}
+
+.md-grid {
+	max-width: 80rem !important;
+}
+
+/* ============================================================================
+   NAVIGATION STYLING - EXACT LIVE DOCS MATCH
+   ============================================================================ */
+
+/* Left Sidebar Navigation */
+.md-nav__link {
+	color: var(--md-default-fg-color);
+	padding: 0.4rem 0.75rem;
+	border-radius: 8px;
+	transition: all 0.3s ease;
+	font-weight: 500;
+	position: relative;
+	margin: 0 0.5rem;
+	font-size: 0.8rem;
+}
+
+.md-nav__link::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 3px;
+	height: 0;
+	background: linear-gradient(135deg, #9F7AEA 0%, #ED64A6 50%, #F6AD55 100%);
+	border-radius: 2px;
+	transition: height 0.3s ease;
+}
+
+/* Light mode navigation hover */
+[data-md-color-scheme="default"] .md-nav__link:hover {
+	background: linear-gradient(135deg, rgba(232, 213, 255, 0.5) 0%, rgba(255, 222, 233, 0.5) 50%, rgba(255, 229, 204, 0.5) 100%);
+	transform: translateX(3px);
+	border-radius: 8px;
+}
+
+/* Dark mode navigation hover */
+[data-md-color-scheme="slate"] .md-nav__link:hover {
+	background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(236, 72, 153, 0.15) 50%, rgba(245, 158, 11, 0.15) 100%);
+	color: #F7FAFC;
+}
+
+.md-nav__link:hover::before {
+	height: 60%;
+}
+
+/* Light mode navigation active */
+[data-md-color-scheme="default"] .md-nav__link--active {
+	color: #553C9A;
+	background: linear-gradient(135deg, rgba(232, 213, 255, 0.8) 0%, rgba(255, 222, 233, 0.8) 50%, rgba(255, 229, 204, 0.8) 100%);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+	font-weight: 600;
+	border-radius: 8px;
+}
+
+/* Dark mode navigation active */
+[data-md-color-scheme="slate"] .md-nav__link--active {
+	background: linear-gradient(135deg, rgba(139, 92, 246, 0.3) 0%, rgba(236, 72, 153, 0.3) 50%, rgba(245, 158, 11, 0.3) 100%);
+	color: #DDD6FE;
+	font-weight: 600;
+}
+
+.md-nav__link--active::before {
+	height: 80%;
+}
+
+/* ============================================================================
+   CODE BLOCKS - BLACK BACKGROUND WITH MONOKAI SYNTAX
+   ============================================================================ */
+
+[data-md-color-scheme="slate"] pre,
+[data-md-color-scheme="slate"] .highlight {
+	background-color: #000000 !important;
+	border: 1px solid #1a1a1a;
+}
+
+[data-md-color-scheme="slate"] code {
+	background-color: #0a0a0a !important;
+	color: #f8f8f2;
+}
+
+[data-md-color-scheme="slate"] pre code {
+	background-color: #000000 !important;
+}
+
+/* Monokai Syntax Highlighting */
+[data-md-color-scheme="slate"] .highlight .k,
+[data-md-color-scheme="slate"] .highlight .kn,
+[data-md-color-scheme="slate"] .highlight .kd,
+[data-md-color-scheme="slate"] .highlight .kc { 
+	color: #ff6188; 
+}
+
+[data-md-color-scheme="slate"] .highlight .s,
+[data-md-color-scheme="slate"] .highlight .s1,
+[data-md-color-scheme="slate"] .highlight .s2 { 
+	color: #ffd866; 
+}
+
+[data-md-color-scheme="slate"] .highlight .nf,
+[data-md-color-scheme="slate"] .highlight .nc { 
+	color: #a9dc76; 
+}
+
+[data-md-color-scheme="slate"] .highlight .nb { 
+	color: #78dce8; 
+}
+
+[data-md-color-scheme="slate"] .highlight .c,
+[data-md-color-scheme="slate"] .highlight .c1,
+[data-md-color-scheme="slate"] .highlight .cm { 
+	color: #727072; 
+	font-style: italic; 
+}
+
+[data-md-color-scheme="slate"] .highlight .o { 
+	color: #ff6188; 
+}
+
+[data-md-color-scheme="slate"] .highlight .m,
+[data-md-color-scheme="slate"] .highlight .mi,
+[data-md-color-scheme="slate"] .highlight .mf { 
+	color: #ab9df2; 
+}
+
+/* ============================================================================
+   HEADING GRADIENT COLORS - PURPLE → PINK → ORANGE
+   ============================================================================ */
+
+/* H1 headings - Purple to Pink gradient */
+.md-typeset h1 {
+	background: linear-gradient(135deg, #9F7AEA 0%, #ED64A6 100%);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+	font-weight: 700;
+}
+
+/* H2 headings - Pink to Orange gradient */
+.md-typeset h2 {
+	background: linear-gradient(135deg, #ED64A6 0%, #F6AD55 100%);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+	font-weight: 700;
+}
+
+/* H3 headings - Purple to Orange gradient */
+.md-typeset h3 {
+	background: linear-gradient(135deg, #9F7AEA 0%, #F6AD55 100%);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+	font-weight: 600;
+}
+
+/* H4 headings - Full gradient */
+.md-typeset h4 {
+	background: linear-gradient(135deg, #9F7AEA 0%, #ED64A6 50%, #F6AD55 100%);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+	font-weight: 600;
+}
+
+/* ============================================================================
+   BASH COMMAND COLORS - YELLOW (DARK) / BLUE (LIGHT)
+   ============================================================================ */
+
+/* Dark mode - Yellow/warm bash commands */
+[data-md-color-scheme="slate"] .highlight .language-bash,
+[data-md-color-scheme="slate"] pre code.language-bash,
+[data-md-color-scheme="slate"] .highlight:has(code.language-bash) {
+	color: #ffd866 !important;
+}
+
+[data-md-color-scheme="slate"] .highlight .nb { 
+	color: #ffd866 !important;
+}
+
+[data-md-color-scheme="slate"] .highlight .o { 
+	color: #ff6188; 
+}
+
+[data-md-color-scheme="slate"] .highlight .s,
+[data-md-color-scheme="slate"] .highlight .s1,
+[data-md-color-scheme="slate"] .highlight .s2 { 
+	color: #ffd866; 
+}
+
+[data-md-color-scheme="slate"] .highlight .c,
+[data-md-color-scheme="slate"] .highlight .c1 { 
+	color: #78dce8; 
+	font-style: italic; 
+}
+
+/* Light mode - Blue bash commands */
+[data-md-color-scheme="default"] .highlight .language-bash,
+[data-md-color-scheme="default"] pre code.language-bash,
+[data-md-color-scheme="default"] .highlight:has(code.language-bash) {
+	color: #1976D2 !important;
+}
+
+[data-md-color-scheme="default"] .highlight .nb { 
+	color: #1976D2 !important;
+}
+
+[data-md-color-scheme="default"] .highlight .o { 
+	color: #C62828;
+}
+
+[data-md-color-scheme="default"] .highlight .s,
+[data-md-color-scheme="default"] .highlight .s1,
+[data-md-color-scheme="default"] .highlight .s2 { 
+	color: #F57C00;
+}
+
+[data-md-color-scheme="default"] .highlight .c,
+[data-md-color-scheme="default"] .highlight .c1 { 
+	color: #388E3C;
+	font-style: italic;
+}
+
+/* ============================================================================
+   TABBED CODE BLOCKS - LIVE DOCS GRADIENT STYLING
+   ============================================================================ */
+
+/* Tabbed content labels - same gradient as navigation */
+.tabbed-set > label,
+.md-typeset .tabbed-set > label,
+.tabbed-labels > label,
+.md-typeset .tabbed-labels > label {
+	color: var(--md-default-fg-color) !important;
+	padding: 0.6rem 1.2rem !important;
+	border-radius: 8px 8px 0 0 !important;
+	transition: all 0.3s ease !important;
+	font-weight: 500 !important;
+	font-size: 0.85rem !important;
+	margin: 0 0.2rem !important;
+	cursor: pointer !important;
+	border: none !important;
+	position: relative !important;
+	background: transparent !important;
+}
+
+/* Light mode tab hover */
+[data-md-color-scheme="default"] .tabbed-set > label:hover,
+[data-md-color-scheme="default"] .md-typeset .tabbed-set > label:hover,
+[data-md-color-scheme="default"] .tabbed-labels > label:hover,
+[data-md-color-scheme="default"] .md-typeset .tabbed-labels > label:hover {
+	background: linear-gradient(135deg, rgba(232, 213, 255, 0.5) 0%, rgba(255, 222, 233, 0.5) 50%, rgba(255, 229, 204, 0.5) 100%) !important;
+	color: #2D3748 !important;
+}
+
+/* Dark mode tab hover */
+[data-md-color-scheme="slate"] .tabbed-set > label:hover,
+[data-md-color-scheme="slate"] .md-typeset .tabbed-set > label:hover,
+[data-md-color-scheme="slate"] .tabbed-labels > label:hover,
+[data-md-color-scheme="slate"] .md-typeset .tabbed-labels > label:hover {
+	background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(236, 72, 153, 0.15) 50%, rgba(245, 158, 11, 0.15) 100%) !important;
+	color: #F7FAFC !important;
+}
+
+/* Light mode tab active/checked */
+[data-md-color-scheme="default"] .tabbed-set > input:checked + label,
+[data-md-color-scheme="default"] .md-typeset .tabbed-set > input:checked + label,
+[data-md-color-scheme="default"] .tabbed-set > input:checked ~ .tabbed-labels > label[for]:first-of-type,
+[data-md-color-scheme="default"] .md-typeset .tabbed-set > input:checked ~ .tabbed-labels > label[for]:first-of-type {
+	background: linear-gradient(135deg, rgba(232, 213, 255, 0.8) 0%, rgba(255, 222, 233, 0.8) 50%, rgba(255, 229, 204, 0.8) 100%) !important;
+	color: #553C9A !important;
+	font-weight: 600 !important;
+	border-bottom: 3px solid #553C9A !important;
+}
+
+/* Dark mode tab active/checked */
+[data-md-color-scheme="slate"] .tabbed-set > input:checked + label,
+[data-md-color-scheme="slate"] .md-typeset .tabbed-set > input:checked + label,
+[data-md-color-scheme="slate"] .tabbed-set > input:checked ~ .tabbed-labels > label[for]:first-of-type,
+[data-md-color-scheme="slate"] .md-typeset .tabbed-set > input:checked ~ .tabbed-labels > label[for]:first-of-type {
+	background: linear-gradient(135deg, rgba(139, 92, 246, 0.3) 0%, rgba(236, 72, 153, 0.3) 50%, rgba(245, 158, 11, 0.3) 100%) !important;
+	color: #DDD6FE !important;
+	font-weight: 600 !important;
+	border-bottom: 3px solid #C4B5FD !important;
+}
+
+/* Tab container background */
+.tabbed-labels,
+.md-typeset .tabbed-labels {
+	background: transparent !important;
+	display: flex !important;
+	flex-wrap: wrap !important;
+	gap: 0.2rem !important;
+}
+
+/* Tab content area */
+.tabbed-content,
+.md-typeset .tabbed-content {
+	background: transparent !important;
+	padding: 1rem 0 0 0 !important;
+}
+
+/* ============================================================================
+   HIDE LINE NUMBERS COMPLETELY
+   ============================================================================ */
+
+.linenodiv,
+.linenos,
+.lineno,
+span.linenos,
+span.lineno,
+.linenodiv *,
+.linenos *,
+.lineno *,
+table.highlighttable td.linenos,
+.highlight-linenos,
+.code-block-linenos,
+*[class*="lineno"],
+*[id*="lineno"],
+*[class*="line-"],
+*[id*="line"] {
+	display: none !important;
+	visibility: hidden !important;
+	width: 0 !important;
+	height: 0 !important;
+	opacity: 0 !important;
+	padding: 0 !important;
+	margin: 0 !important;
+}
+
+[data-md-color-scheme="slate"] .linenodiv,
+[data-md-color-scheme="slate"] .linenos,
+[data-md-color-scheme="slate"] .lineno,
+[data-md-color-scheme="slate"] *[class*="lineno"],
+[data-md-color-scheme="slate"] *[id*="lineno"],
+[data-md-color-scheme="slate"] *[class*="line"],
+[data-md-color-scheme="slate"] *[id*="line"] {
+	display: none !important;
+}

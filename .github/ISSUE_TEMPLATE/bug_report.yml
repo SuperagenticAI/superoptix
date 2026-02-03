@@ -1,0 +1,94 @@
+name: 🐛 Bug Report
+description: Report a bug or unexpected behavior in SuperOptiX
+title: "[Bug]: "
+labels: ["bug", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report! 🙏
+        
+        Before submitting, please search existing issues to avoid duplicates.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 🐛 Bug Description
+      description: A clear and concise description of what the bug is
+      placeholder: Describe the bug...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 🔄 Steps to Reproduce
+      description: Steps to reproduce the behavior
+      placeholder: |
+        1. Run command `sox init my_project`
+        2. Navigate to the project
+        3. Execute `sox agent create...`
+        4. See error...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: ✅ Expected Behavior
+      description: What you expected to happen
+      placeholder: Describe what should have happened...
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: ❌ Actual Behavior
+      description: What actually happened
+      placeholder: Describe what actually happened...
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: 🌍 Environment
+      description: Please provide your environment details
+      placeholder: |
+        - OS: [e.g. macOS 14.0, Ubuntu 22.04, Windows 11]
+        - Python version: [e.g. 3.12.1]
+        - SuperOptiX version: [e.g. 0.1.0]
+        - DSPy version: [e.g. 3.0.0b1]
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 📋 Error Logs
+      description: Please copy and paste any relevant log output
+      render: shell
+      placeholder: Paste your error logs here...
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 📝 Additional Context
+      description: Add any other context about the problem here
+      placeholder: Any additional information that might help...
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: ✅ Checklist
+      description: Please confirm the following
+      options:
+        - label: I have searched existing issues and this is not a duplicate
+          required: true
+        - label: I have provided all the required information above
+          required: true
+        - label: This issue is related to SuperOptiX (not DSPy or other dependencies)
+          required: true 

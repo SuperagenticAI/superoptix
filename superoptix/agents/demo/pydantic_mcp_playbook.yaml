@@ -1,0 +1,162 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Pydantic AI MCP Demo
+  id: pydantic_mcp
+  namespace: demo
+  version: 1.0.0
+  level: genies
+  description: Pydantic AI agent with MCP (Model Context Protocol) integration for file operations and tool usage
+  author: SuperOptiX
+  tags:
+    - pydantic-ai
+    - mcp
+    - filesystem
+    - tools
+    - demo
+
+spec:
+  # MODEL CONFIGURATION: Ollama (FREE local model)
+  # Works great with 8b models thanks to plain text output mode!
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b  # Works well with MCP tools in plain text mode
+    max_tokens: 4000  # Increased for detailed responses
+    top_p: 0.9
+    api_base: http://localhost:11434
+  
+  input_fields:
+    - name: query
+      type: string
+      description: User's request that may require file operations
+      required: true
+  
+  output_fields:
+    - name: response
+      type: string
+      description: Detailed response including file operations performed
+      required: true
+  
+  persona:
+    name: MCP Assistant
+    role: File Operations Assistant
+    goal: Help users with file system operations using MCP tools
+    backstory: |
+      You are an intelligent assistant with access to filesystem tools through the
+      Model Context Protocol (MCP). You can read files, write files, list directories,
+      and perform various file operations. Always use the appropriate tools when
+      the user's request involves file operations.
+    traits:
+      - resourceful
+      - systematic
+      - helpful
+      - thorough
+  
+  # MCP Configuration - Filesystem Server
+  mcp:
+    enabled: true
+    servers:
+      - name: filesystem
+        type: stdio
+        config:
+          command: "npx"
+          args: ["-y", "@modelcontextprotocol/server-filesystem", "/tmp"]
+        tool_prefix: "fs_"  # Tools will be prefixed (fs_read_file, fs_write_file, etc.)
+    
+    # MCP Tool Description Optimization
+    optimization:
+      optimize_tool_descriptions: true
+      # Note: Use actual MCP server tool names (without prefix)
+      # The MCP adapter queries the server directly to find tools
+      tool_names: ["read_file", "write_file", "list_directory"]
+  
+  # BDD Test Scenarios
+  feature_specifications:
+    feature_name: MCP File Operations
+    feature_description: Test agent's ability to use MCP filesystem tools effectively
+    
+    scenarios:
+      # Scenario 1: Read file
+      - name: read_file_operation
+        description: Agent should read a file using MCP filesystem tools
+        input:
+          query: Read the file /tmp/test.txt and tell me what's in it
+        expected_output:
+          response: read_file fs_read_file /tmp/test.txt content file
+          expected_keywords:
+            - read
+            - file
+            - /tmp/test.txt
+            - content
+      
+      # Scenario 2: List directory
+      - name: list_directory_operation
+        description: Agent should list files in a directory
+        input:
+          query: List all files in the /tmp directory
+        expected_output:
+          response: list_directory fs_list_files /tmp directory files
+          expected_keywords:
+            - list
+            - directory
+            - /tmp
+            - files
+      
+      # Scenario 3: Write file
+      - name: write_file_operation
+        description: Agent should write content to a file
+        input:
+          query: Create a file /tmp/hello.txt with the content "Hello, MCP!"
+        expected_output:
+          response: write_file fs_write_file /tmp/hello.txt create file content
+          expected_keywords:
+            - write
+            - file
+            - /tmp/hello.txt
+            - create
+            - content
+      
+      # Scenario 4: Multi-step file operations
+      - name: multi_step_file_operations
+        description: Agent should perform multiple file operations in sequence
+        input:
+          query: 'Create a file /tmp/data.json with {"name": "test"}, then read it back'
+        expected_output:
+          response: write_file read_file fs_write_file fs_read_file /tmp/data.json create read
+          expected_keywords:
+            - write
+            - read
+            - /tmp/data.json
+            - create
+      
+      # Scenario 5: File content analysis
+      - name: analyze_file_content
+        description: Agent should read and analyze file content
+        input:
+          query: Read /tmp/config.json and tell me what database host is configured
+        expected_output:
+          response: read_file fs_read_file /tmp/config.json database host config analyze
+          expected_keywords:
+            - read
+            - config.json
+            - database
+            - host
+  
+  # GEPA Optimization Configuration
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        auto: light  # Start with light optimization for faster iteration
+        reflection_lm: ollama/llama3.1:8b  # Smaller model for reflection (LiteLLM format)
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_substring_match
+    metric_threshold: 0.8
+
+# Configuration
+config:
+  max_execution_time: 300
+  verbose: true
+  enable_tracing: true

@@ -1,0 +1,227 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Customer Service Agent
+  id: customer_service
+  namespace: retail
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that handles customer service inquiries and provides support for retail/e-commerce businesses.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: customer_issue
+    type: str
+    description: Customer's question, complaint, or request
+    required: true
+  - name: customer_context
+    type: str
+    description: Customer history, order details, or relevant context
+    required: true
+  output_fields:
+  - name: service_response
+    type: str
+    description: Professional customer service response
+    required: true
+  - name: resolution_steps
+    type: str
+    description: Action items and follow-up steps to resolve the issue
+    required: true
+  persona:
+    name: ServiceBot
+    role: Customer Service Representative
+    goal: Provide exceptional customer service and resolve customer issues promptly
+    traits:
+    - empathetic
+    - helpful
+    - professional
+    - solution-oriented
+  tasks:
+  - name: handle_customer_inquiry
+    instruction: You are a Customer Service Representative. Generate helpful, professional responses to customer inquiries
+      and provide solutions that enhance customer satisfaction.
+    inputs:
+    - name: customer_issue
+      type: str
+      description: Customer's question, complaint, or request
+      required: true
+    - name: customer_context
+      type: str
+      description: Customer history, order details, or relevant context
+      required: true
+    outputs:
+    - name: service_response
+      type: str
+      description: Professional customer service response
+    - name: resolution_steps
+      type: str
+      description: Action items and follow-up steps to resolve the issue
+  agentflow:
+  - name: provide_service
+    type: Generate
+    task: handle_customer_inquiry
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.7
+  feature_specifications:
+    scenarios:
+    - name: difficult_customer_resolution
+      description: When handling difficult customer situations, the agent should provide de-escalation strategies and solution-focused
+        approaches
+      input:
+        customer_issue: Customer received damaged product, waited 2 weeks for replacement, now wants full refund plus compensation
+          for 'wasted time'. Customer is raising voice and threatening to leave negative reviews.
+        customer_context: Frustrated customer who feels unheard and wants immediate resolution
+      expected_output:
+        service_response: '**De-escalation & Resolution Script**
+
+
+          **Step 1: Acknowledge & Empathize (30 seconds)**
+
+          "I completely understand your frustration, and I sincerely apologize for the damaged product and delay. Two weeks
+          is far too long to wait for a replacement, and I can hear how disappointed you are. I''m here to make this right
+          for you today."
+
+
+          **Step 2: Active Listening & Validation**
+
+          "Let me make sure I understand everything that''s happened:
+
+          - You received a damaged [product name]
+
+          - You''ve been waiting 2 weeks for a replacement
+
+          - This has caused significant inconvenience
+
+          - You''d like a full refund plus compensation
+
+          Is there anything else I should know about this situation?"
+
+
+          **Step 3: Solution Presentation**
+
+          "Here''s what I can do for you right now:
+
+          1. Process a full refund to your original payment method (2-3 business days)
+
+          2. Provide a 20% credit for future purchases as an apology for your experience
+
+          3. Arrange expedited shipping for any future orders at no charge
+
+          4. Escalate this to our quality team to prevent similar issues
+
+
+          Would this resolution work for you, or is there something specific you''d prefer?"
+
+
+          **Step 4: Follow-up Commitment**
+
+          "I''m personally going to follow up with you via email in 3 days to ensure your refund processed correctly. You''ll
+          also receive our customer service survey, and I hope you''ll give us another chance in the future."
+
+
+          **Key Phrases for De-escalation:**
+
+          - "I understand how frustrating this must be"
+
+          - "Let me fix this for you right now"
+
+          - "Your experience is not what we stand for"
+
+          - "I appreciate your patience while I resolve this"
+
+          '
+        resolution_steps: '**Customer Service Best Practices:**
+
+
+          **De-escalation Techniques:**
+
+          - Lower your voice when customer raises theirs
+
+          - Use customer''s name throughout conversation
+
+          - Avoid saying "policy doesn''t allow" - focus on what you CAN do
+
+          - Acknowledge their feelings before presenting solutions
+
+
+          **Solution Framework:**
+
+          - Always offer MORE than they asked for when possible
+
+          - Provide multiple options to give customer control
+
+          - Set clear expectations for timing and next steps
+
+          - Document everything for future reference
+
+
+          **Follow-up Protocol:**
+
+          - Send confirmation email within 1 hour
+
+          - Personal follow-up call/email in 3-5 days
+
+          - Flag account for VIP service on future interactions
+
+          - Use feedback to improve processes
+
+
+          **Red Flags - Escalate If:**
+
+          - Customer threatens violence or harassment
+
+          - Requests exceed reasonable compensation limits
+
+          - Legal threats are made
+
+          - Situation involves discrimination or harassment'
+    - name: customer_service_problem_solving
+      description: When facing retail challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        customer_issue: Challenging retail problem requiring creative solutions
+        customer_context: ''
+      expected_output:
+        service_response: Structured problem-solving approach with multiple solution options
+        resolution_steps: ''
+    - name: customer_service_best_practices
+      description: When asked about retail best practices, the agent should provide current industry standards and guidelines
+      input:
+        customer_issue: Industry best practices for retail operations
+        customer_context: ''
+      expected_output:
+        service_response: Comprehensive best practices guide with implementation steps
+        resolution_steps: ''
+    - name: customer_service_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to retail
+      input:
+        customer_issue: Compliance requirements for retail operations
+        customer_context: ''
+      expected_output:
+        service_response: Detailed compliance checklist with regulatory requirements
+        resolution_steps: ''
+    - name: customer_service_strategic_planning
+      description: When developing retail strategies, the agent should provide forward-thinking recommendations
+      input:
+        customer_issue: Strategic planning for retail growth and optimization
+        customer_context: ''
+      expected_output:
+        service_response: Comprehensive strategic plan with measurable objectives and timelines
+        resolution_steps: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

@@ -1,0 +1,98 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Developer Assistant
+  id: developer
+  namespace: software
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that helps write clean, efficient, and maintainable code.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: feature_requirement
+    type: string
+    description: A detailed description of the feature to implement
+    required: true
+  output_fields:
+  - name: implementation
+    type: string
+    description: The code implementation of the feature
+    required: true
+  persona:
+    name: DevBot
+    role: Software Developer
+    goal: Write clean, efficient, and maintainable code
+    traits:
+    - analytical
+    - detail-oriented
+    - problem-solver
+  tasks:
+  - name: implement_feature
+    instruction: You are a Software Developer. Your goal is to write clean, efficient, and maintainable code. Implement the
+      feature based on the provided requirement.
+    inputs:
+    - name: feature_requirement
+      type: str
+      description: A detailed description of the feature to implement.
+      required: true
+    outputs:
+    - name: implementation
+      type: str
+      description: The code implementation of the feature.
+  agentflow:
+  - name: generate_code
+    type: Generate
+    task: implement_feature
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.6
+  feature_specifications:
+    scenarios:
+    - name: function_implementation
+      description: Implement a Python function with proper error handling
+      input:
+        feature_requirement: Create a Python function that validates email addresses. It should check if the email has @ symbol, valid domain, and proper format. Return True if valid, False otherwise.
+      expected_output:
+        implementation: function def validate_email regex pattern email @ symbol domain format return True False boolean
+    - name: api_endpoint
+      description: Design a REST API endpoint with proper structure
+      input:
+        feature_requirement: Design a REST API endpoint for user registration that accepts username, email, and password. Include validation and error responses.
+      expected_output:
+        implementation: POST /api/users/register endpoint username email password validation status code 400 error response
+    - name: bug_fix
+      description: Identify and fix a common programming bug
+      input:
+        feature_requirement: Fix this code that causes a memory leak - it keeps adding items to a global list without cleanup. Provide the corrected version.
+      expected_output:
+        implementation: memory leak global list clear cleanup remove items fixed corrected version
+    - name: code_optimization
+      description: Optimize code for better performance
+      input:
+        feature_requirement: Optimize this nested loop that processes a large dataset. The current O(n²) complexity is too slow. Suggest improvements.
+      expected_output:
+        implementation: nested loop O(n²) complexity hash map dictionary set optimize performance faster algorithm
+    - name: test_writing
+      description: Write unit tests for a function
+      input:
+        feature_requirement: Write unit tests for a function that calculates the total price of items in a shopping cart, including edge cases like empty cart and invalid inputs.
+      expected_output:
+        implementation: unit test pytest unittest def test assert empty cart edge case invalid input total price
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_correctness
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_correctness
+    metric_threshold: 0.6

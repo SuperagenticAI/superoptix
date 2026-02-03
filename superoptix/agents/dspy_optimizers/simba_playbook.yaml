@@ -1,0 +1,82 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: SIMBA Optimizer Demo
+  id: simba-demo
+  version: 1.0.0
+  level: oracles
+  description: Demonstrates SIMBA (Stochastic Introspective Mini-Batch Ascent) optimizer for advanced optimization
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    temperature: 0.1
+    max_tokens: 32000
+  input_fields:
+  - name: question
+    type: str
+    description: The factual question to answer
+    required: true
+  output_fields:
+  - name: answer
+    type: str
+    description: The comprehensive answer with explanation
+    required: true
+  persona:
+    role: Knowledge Assistant
+    goal: Provide accurate and comprehensive answers to factual questions
+    traits:
+    - knowledgeable
+    - accurate
+    - comprehensive
+  tasks:
+  - name: answer_factual_question
+    description: Answer factual questions with detailed explanations
+    instruction: 'Answer the factual question with accurate information.
+
+      Provide context and explanation where helpful.
+
+      '
+    inputs:
+    - name: question
+      type: str
+      description: The factual question to answer
+      required: true
+    outputs:
+    - name: answer
+      type: str
+      description: The comprehensive answer with explanation
+  optimization:
+    optimizer:
+      name: SIMBA
+      params:
+        metric: answer_substring_match
+        max_steps: 6
+        bsize: 16
+        num_candidates: 4
+        max_demos: 3
+        demo_input_field_maxlen: 50000
+        num_threads: 1
+        temperature_for_sampling: 0.3
+        temperature_for_candidates: 0.2
+  feature_specifications:
+    scenarios:
+    - name: geography_question
+      description: Should answer geography questions accurately
+      input:
+        question: What is the capital of Germany?
+      expected_output:
+        answer: Berlin
+    - name: history_question
+      description: Should answer historical questions with context
+      input:
+        question: When did World War II end?
+      expected_output:
+        answer: '1945'
+    - name: science_question
+      description: Should explain scientific concepts
+      input:
+        question: What is photosynthesis?
+      expected_output:
+        answer: process plants convert sunlight energy

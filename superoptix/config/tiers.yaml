@@ -1,0 +1,111 @@
+# SuperOptiX Tier Configuration
+# This file defines the simplified tier system for the current version
+
+# Default tier for new users
+default_tier: "oracles"
+
+# Tier definitions with descriptions - only Oracles and Genies for current version
+tiers:
+  oracles:
+    name: "Oracles Agent"
+    description: "Basic question-answering with reasoning capabilities"
+    price: "Free"
+    monthly_agents: "Unlimited"
+    capabilities:
+      - "Question-answering with basic thinking"
+      - "Chain of Thought reasoning"
+      - "Basic evaluation (exact match, F1)"
+      - "Basic optimization (BootstrapFewShot)"
+      - "Sequential task orchestration"
+    features:
+      - "Basic DSPy modules (Predict, ChainOfThought)"
+      - "Bootstrap Few-Shot optimization"
+      - "Basic evaluation metrics"
+      - "Sequential orchestra execution"
+      - "Basic tracing and observability"
+    
+  genies:
+    name: "Genies Agent"
+    description: "Tool-using agent with knowledge connection and memory"
+    price: "Free"
+    monthly_agents: "Unlimited"
+    capabilities:
+      - "All Oracles capabilities plus:"
+      - "Tool integration and ReAct reasoning"
+      - "RAG (knowledge retrieval)"
+      - "Agent memory (short-term and episodic)"
+      - "Basic streaming responses"
+    features:
+      - "All Oracles features"
+      - "ReAct agents with tool integration"
+      - "RAG (Retrieval-Augmented Generation)"
+      - "Agent memory system"
+      - "Basic streaming"
+      - "JSON/XML adapters"
+      - "Tool registry and management"
+
+# Simplified feature access matrix
+feature_access:
+  optimization_strategies:
+    oracles: ["bootstrap_fewshot"]
+    genies: ["bootstrap_fewshot"]
+  
+  dspy_modules:
+    oracles: ["predict", "chain_of_thought"]
+    genies: ["predict", "chain_of_thought", "react"]
+  
+  adapters:
+    oracles: ["chat"]
+    genies: ["chat", "json", "xml"]
+  
+  orchestration:
+    oracles: ["sequential"]
+    genies: ["sequential"]
+  
+  memory:
+    oracles: []
+    genies: ["short_term", "episodic"]
+  
+  tools:
+    oracles: []
+    genies: ["builtin_tools", "custom_tools"]
+
+# Upgrade information
+upgrade_info:
+  from_oracles:
+    to: "genies"
+    benefits:
+      - "Unlock tool integration"
+      - "Access to RAG capabilities"
+      - "Agent memory system"
+      - "Enhanced reasoning with ReAct"
+      - "Streaming responses"
+    how_to_upgrade: "Simply change your agent tier to 'genies' in your playbook"
+  
+  advanced_features:
+    message: "Advanced features like complex orchestration, advanced optimizers, and enterprise capabilities are available in our commercial version."
+    contact: "For enterprise features, contact us at enterprise@super-agentic.ai"
+
+# Limitations for current version
+limitations:
+  orchestration:
+    - "Only sequential execution supported"
+    - "No parallel or hierarchical orchestration"
+    - "No Kubernetes-style orchestration"
+    - "Basic task dependencies only"
+  
+  optimization:
+    - "Only BootstrapFewShot optimizer available"
+    - "No advanced optimizers (GRPO, Avatar, MIPROv2)"
+    - "Basic evaluation metrics only"
+  
+  enterprise_features:
+    - "No custom teleprompt development"
+    - "No distributed optimization"
+    - "No white-label options"
+    - "Community support only"
+
+# Contact information
+contact:
+  enterprise: "enterprise@super-agentic.ai"
+  website: "https://super-agentic.ai" 

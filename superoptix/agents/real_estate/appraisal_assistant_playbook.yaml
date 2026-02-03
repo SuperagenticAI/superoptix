@@ -1,0 +1,124 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Appraisal Assistant
+  id: appraisal_assistant
+  namespace: real_estate
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that assists with property appraisals and valuation analysis.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: subject_property
+    type: str
+    description: Details of the property being appraised
+    required: true
+  - name: comparable_sales
+    type: str
+    description: Recent comparable sales data in the area
+    required: true
+  output_fields:
+  - name: valuation_analysis
+    type: str
+    description: Step-by-step appraisal analysis and methodology
+    required: true
+  - name: estimated_value_range
+    type: str
+    description: Estimated property value range with supporting rationale
+    required: true
+  persona:
+    name: AppraisalBot
+    role: Appraisal Assistant
+    goal: Support property valuation through systematic analysis of comparable sales and market data
+    traits:
+    - precise
+    - methodical
+    - data-focused
+    - detail-oriented
+  tasks:
+  - name: assist_property_appraisal
+    instruction: You are an Appraisal Assistant. Think through the valuation process systematically, analyzing comparable
+      sales, property conditions, and market adjustments to support accurate property valuations.
+    inputs:
+    - name: subject_property
+      type: str
+      description: Details of the property being appraised
+      required: true
+    - name: comparable_sales
+      type: str
+      description: Recent comparable sales data in the area
+      required: true
+    outputs:
+    - name: valuation_analysis
+      type: str
+      description: Step-by-step appraisal analysis and methodology
+    - name: estimated_value_range
+      type: str
+      description: Estimated property value range with supporting rationale
+  agentflow:
+  - name: analyze_valuation
+    type: Think
+    task: assist_property_appraisal
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: appraisal_assistant_comprehensive_task
+      description: Given a complex real_estate requirement, the agent should provide detailed analysis and recommendations
+      input:
+        subject_property: Complex real_estate scenario requiring comprehensive analysis
+        comparable_sales: ''
+      expected_output:
+        valuation_analysis: Detailed step-by-step analysis with real_estate-specific recommendations
+        estimated_value_range: ''
+    - name: appraisal_assistant_problem_solving
+      description: When facing real_estate challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        subject_property: Challenging real_estate problem requiring creative solutions
+        comparable_sales: ''
+      expected_output:
+        valuation_analysis: Structured problem-solving approach with multiple solution options
+        estimated_value_range: ''
+    - name: appraisal_assistant_best_practices
+      description: When asked about real_estate best practices, the agent should provide current industry standards and guidelines
+      input:
+        subject_property: Industry best practices for real_estate operations
+        comparable_sales: ''
+      expected_output:
+        valuation_analysis: Comprehensive best practices guide with implementation steps
+        estimated_value_range: ''
+    - name: appraisal_assistant_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to real_estate
+      input:
+        subject_property: Compliance requirements for real_estate operations
+        comparable_sales: ''
+      expected_output:
+        valuation_analysis: Detailed compliance checklist with regulatory requirements
+        estimated_value_range: ''
+    - name: appraisal_assistant_strategic_planning
+      description: When developing real_estate strategies, the agent should provide forward-thinking recommendations
+      input:
+        subject_property: Strategic planning for real_estate growth and optimization
+        comparable_sales: ''
+      expected_output:
+        valuation_analysis: Comprehensive strategic plan with measurable objectives and timelines
+        estimated_value_range: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

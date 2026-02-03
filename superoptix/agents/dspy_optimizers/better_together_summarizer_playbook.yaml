@@ -1,0 +1,265 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: BetterTogether Document Summarizer
+  id: better-together-summarizer
+  version: 1.0.0
+  namespace: software
+  level: oracles
+  stage: stable
+  agent_type: Autonomous
+  description: Document summarization agent optimized with BetterTogether ensemble approach
+  tags:
+  - summarization
+  - nlp
+  - better-together
+  - optimization
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    temperature: 0.4
+    max_tokens: 16000
+    cache: true
+  input_fields:
+  - name: document
+    type: str
+    description: The document text to summarize
+    required: true
+  - name: target_length
+    type: str
+    description: Desired summary length (brief, medium, detailed)
+    required: false
+  - name: focus_areas
+    type: list[str]
+    description: Specific areas to emphasize in the summary
+    required: false
+  output_fields:
+  - name: summary
+    type: str
+    description: The comprehensive document summary
+    required: true
+  - name: key_points
+    type: list[str]
+    description: List of key points extracted
+    required: true
+  - name: document_type
+    type: str
+    description: Identified type of document
+    required: true
+  persona:
+    role: Document Summarization Expert
+    goal: Create concise, accurate, and informative summaries of various types of documents
+    traits:
+    - analytical
+    - concise
+    - thorough
+    - objective
+    expertise_areas:
+    - text analysis
+    - information extraction
+    - content synthesis
+    communication_preferences:
+      style: professional
+      tone: neutral
+      verbosity: concise
+  tasks:
+  - name: summarize_document
+    description: Create comprehensive summaries of documents while preserving key information
+    instruction: 'Create a comprehensive summary of the provided document.
+
+
+      Guidelines:
+
+      1. Identify and extract the main topics and key points
+
+      2. Preserve important details, facts, and conclusions
+
+      3. Maintain objectivity and avoid personal interpretation
+
+      4. Structure the summary logically
+
+      5. Ensure the summary is proportionate to the original length
+
+      6. Include relevant context when necessary
+
+
+      Format your response as:
+
+      **Document Type:** [Type of document]
+
+      **Main Topic:** [Central theme or subject]
+
+
+      **Summary:**
+
+      [Comprehensive summary preserving key information]
+
+
+      **Key Points:**
+
+      - [Important point 1]
+
+      - [Important point 2]
+
+      - [Important point 3]
+
+
+      **Conclusion/Outcome:** [If applicable]
+
+      '
+    inputs:
+    - name: document
+      type: str
+      description: The document text to summarize
+      required: true
+    - name: target_length
+      type: str
+      description: Desired summary length (brief, medium, detailed)
+      required: false
+    - name: focus_areas
+      type: list[str]
+      description: Specific areas to emphasize in the summary
+      required: false
+    outputs:
+    - name: summary
+      type: str
+      description: The comprehensive document summary
+    - name: key_points
+      type: list[str]
+      description: List of key points extracted
+    - name: document_type
+      type: str
+      description: Identified type of document
+  optimization:
+    enabled: true
+    optimizer:
+      name: BetterTogether
+      params:
+        metric: rouge_l
+        max_bootstrapped_demos: 6
+        max_labeled_demos: 12
+        max_rounds: 2
+        verbose: false
+        timeout: 180
+    evaluation:
+      enabled: true
+      metrics:
+      - rouge_l
+      - semantic_f1
+      - faithfulness
+      test_split: 0.2
+    hardware_optimization:
+      target_tier: standard
+      memory_limit_gb: 12
+  feature_specifications:
+    scenarios:
+    - name: research_paper_summary
+      description: Should summarize academic research papers effectively
+      input:
+        document: 'Abstract: This study investigates the effects of machine learning algorithms on predictive accuracy in
+          financial markets. We analyzed 1000 trading days using various ML models including neural networks, random forests,
+          and support vector machines. Results show that ensemble methods achieved 78% accuracy compared to 65% for traditional
+          statistical methods. The study concludes that ML approaches significantly improve prediction accuracy but require
+          careful hyperparameter tuning and feature selection.'
+        target_length: medium
+      expected_output:
+        summary: Research study comparing machine learning vs traditional methods for financial market prediction
+        key_points:
+        - ML models tested on 1000 trading days
+        - Ensemble methods achieved 78% vs 65% accuracy
+        - Requires careful tuning and feature selection
+        document_type: Research paper
+      tags:
+      - research
+      - academic
+      priority: high
+    - name: news_article_summary
+      description: Should summarize news articles with key facts
+      input:
+        document: 'Breaking: Local tech company XYZ Corp announced today a major breakthrough in quantum computing. The company''s
+          new quantum processor can perform calculations 100 times faster than classical computers for specific algorithms.
+          CEO Jane Smith stated that this technology could revolutionize cryptography, drug discovery, and financial modeling.
+          The processor will be available for research institutions starting next quarter. Stock prices rose 15% following
+          the announcement.'
+        target_length: brief
+      expected_output:
+        summary: XYZ Corp announces quantum computing breakthrough with 100x speed improvement
+        key_points:
+        - 100x faster than classical computers
+        - Applications in cryptography, drugs, finance
+        - Available to research institutions next quarter
+        - Stock rose 15%
+        document_type: News article
+      tags:
+      - news
+      - technology
+      priority: high
+    - name: policy_document_summary
+      description: Should summarize policy documents with key regulations
+      input:
+        document: 'New Data Privacy Regulation 2024: All organizations processing personal data must implement encryption
+          for data at rest and in transit. Organizations must conduct privacy impact assessments for new data processing activities.
+          Data breach notifications must be made within 72 hours to regulatory authorities and affected individuals. Penalties
+          for non-compliance range from warnings to fines up to 4% of annual revenue. The regulation takes effect January
+          1, 2025.'
+        target_length: detailed
+      expected_output:
+        summary: New data privacy regulation requiring encryption, impact assessments, and breach notification
+        key_points:
+        - Encryption required for data at rest/transit
+        - Privacy impact assessments mandatory
+        - 72-hour breach notification requirement
+        - Penalties up to 4% revenue
+        - Effective January 1, 2025
+        document_type: Policy document
+      tags:
+      - policy
+      - privacy
+      - regulation
+      priority: high
+    - name: meeting_minutes_summary
+      description: Should summarize meeting minutes with decisions and action items
+      input:
+        document: 'Project Review Meeting - March 15, 2024. Attendees: John (PM), Sarah (Dev), Mike (QA). Discussed current
+          sprint progress: 8/10 features completed. Blocker identified in payment integration requiring vendor support. Decided
+          to extend sprint by 3 days. Action items: John to contact vendor by March 18, Sarah to complete user authentication
+          by March 20, Mike to prepare test cases for next sprint. Next meeting scheduled for March 22.'
+        target_length: medium
+      expected_output:
+        summary: Project review meeting discussing sprint progress and addressing payment integration blocker
+        key_points:
+        - 8/10 features completed
+        - Payment integration blocker
+        - Sprint extended 3 days
+        - Action items assigned with deadlines
+        document_type: Meeting minutes
+      tags:
+      - meeting
+      - project
+      - action-items
+      priority: medium
+    - name: technical_documentation_summary
+      description: Should summarize technical documentation with key procedures
+      input:
+        document: 'API Authentication Guide: To access our REST API, obtain an API key from the developer portal. Include
+          the key in the Authorization header as ''Bearer [your-key]''. Rate limits apply: 1000 requests per hour for free
+          tier, 10000 for premium. All requests must use HTTPS. Response formats supported: JSON and XML. Error codes follow
+          HTTP standards. For webhook notifications, register your endpoint URL and specify desired events. Test your integration
+          using our sandbox environment before production deployment.'
+        target_length: medium
+      expected_output:
+        summary: API authentication guide covering key requirements, rate limits, and integration steps
+        key_points:
+        - API key required in Authorization header
+        - 'Rate limits: 1000/hour free, 10000 premium'
+        - HTTPS mandatory
+        - JSON/XML responses
+        - Sandbox testing recommended
+        document_type: Technical documentation
+      tags:
+      - technical
+      - api
+      - documentation
+      priority: medium

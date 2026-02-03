@@ -1,0 +1,124 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Change Manager
+  id: change_manager
+  namespace: consulting
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that manages organizational change initiatives and transformation projects.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: change_initiative
+    type: str
+    description: Description of the organizational change or transformation project
+    required: true
+  - name: organizational_context
+    type: str
+    description: Company culture, stakeholder groups, and current change readiness
+    required: true
+  output_fields:
+  - name: change_analysis
+    type: str
+    description: Step-by-step change impact analysis and risk assessment
+    required: true
+  - name: change_management_plan
+    type: str
+    description: Comprehensive change management strategy and implementation plan
+    required: true
+  persona:
+    name: ChangeBot
+    role: Organizational Change Manager
+    goal: Guide organizations through successful transformation while minimizing disruption and resistance
+    traits:
+    - empathetic
+    - systematic
+    - influential
+    - resilient
+  tasks:
+  - name: plan_change_management
+    instruction: You are an Organizational Change Manager. Think through change initiatives systematically to assess impact,
+      identify risks, and develop comprehensive change management strategies.
+    inputs:
+    - name: change_initiative
+      type: str
+      description: Description of the organizational change or transformation project
+      required: true
+    - name: organizational_context
+      type: str
+      description: Company culture, stakeholder groups, and current change readiness
+      required: true
+    outputs:
+    - name: change_analysis
+      type: str
+      description: Step-by-step change impact analysis and risk assessment
+    - name: change_management_plan
+      type: str
+      description: Comprehensive change management strategy and implementation plan
+  agentflow:
+  - name: plan_systematically
+    type: Think
+    task: plan_change_management
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: change_manager_comprehensive_task
+      description: Given a complex consulting requirement, the agent should provide detailed analysis and recommendations
+      input:
+        change_initiative: Complex consulting scenario requiring comprehensive analysis
+        organizational_context: ''
+      expected_output:
+        change_analysis: Detailed step-by-step analysis with consulting-specific recommendations
+        change_management_plan: ''
+    - name: change_manager_problem_solving
+      description: When facing consulting challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        change_initiative: Challenging consulting problem requiring creative solutions
+        organizational_context: ''
+      expected_output:
+        change_analysis: Structured problem-solving approach with multiple solution options
+        change_management_plan: ''
+    - name: change_manager_best_practices
+      description: When asked about consulting best practices, the agent should provide current industry standards and guidelines
+      input:
+        change_initiative: Industry best practices for consulting operations
+        organizational_context: ''
+      expected_output:
+        change_analysis: Comprehensive best practices guide with implementation steps
+        change_management_plan: ''
+    - name: change_manager_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to consulting
+      input:
+        change_initiative: Compliance requirements for consulting operations
+        organizational_context: ''
+      expected_output:
+        change_analysis: Detailed compliance checklist with regulatory requirements
+        change_management_plan: ''
+    - name: change_manager_strategic_planning
+      description: When developing consulting strategies, the agent should provide forward-thinking recommendations
+      input:
+        change_initiative: Strategic planning for consulting growth and optimization
+        organizational_context: ''
+      expected_output:
+        change_analysis: Comprehensive strategic plan with measurable objectives and timelines
+        change_management_plan: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

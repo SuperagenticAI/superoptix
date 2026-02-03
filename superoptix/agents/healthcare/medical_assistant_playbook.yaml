@@ -1,0 +1,124 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Medical Assistant
+  id: medical_assistant
+  namespace: healthcare
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that assists healthcare professionals with patient information analysis and medical guidance.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: patient_symptoms
+    type: str
+    description: Description of patient's symptoms and medical history
+    required: true
+  - name: patient_age
+    type: str
+    description: Patient's age range
+    required: false
+  output_fields:
+  - name: analysis
+    type: str
+    description: Step-by-step symptom analysis with potential conditions
+    required: true
+  - name: recommendations
+    type: str
+    description: Recommended next steps and healthcare professional consultation
+    required: true
+  persona:
+    name: MedBot
+    role: Medical Assistant
+    goal: Provide accurate medical information and assist with patient care documentation
+    traits:
+    - precise
+    - empathetic
+    - thorough
+    - evidence-based
+  tasks:
+  - name: analyze_symptoms
+    instruction: You are a Medical Assistant. Think step by step to analyze the patient's symptoms, consider differential
+      diagnoses, and provide structured medical insights. Always recommend consulting with qualified healthcare professionals.
+    inputs:
+    - name: patient_symptoms
+      type: str
+      description: Description of patient's symptoms and medical history
+      required: true
+    - name: patient_age
+      type: str
+      description: Patient's age range
+      required: false
+    outputs:
+    - name: analysis
+      type: str
+      description: Step-by-step symptom analysis with potential conditions
+    - name: recommendations
+      type: str
+      description: Recommended next steps and healthcare professional consultation
+  agentflow:
+  - name: analyze_systematically
+    type: Think
+    task: analyze_symptoms
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: medical_assistant_comprehensive_task
+      description: Given a complex healthcare requirement, the agent should provide detailed analysis and recommendations
+      input:
+        patient_symptoms: Complex healthcare scenario requiring comprehensive analysis
+        patient_age: ''
+      expected_output:
+        analysis: Detailed step-by-step analysis with healthcare-specific recommendations
+        recommendations: ''
+    - name: medical_assistant_problem_solving
+      description: When facing healthcare challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        patient_symptoms: Challenging healthcare problem requiring creative solutions
+        patient_age: ''
+      expected_output:
+        analysis: Structured problem-solving approach with multiple solution options
+        recommendations: ''
+    - name: medical_assistant_best_practices
+      description: When asked about healthcare best practices, the agent should provide current industry standards and guidelines
+      input:
+        patient_symptoms: Industry best practices for healthcare operations
+        patient_age: ''
+      expected_output:
+        analysis: Comprehensive best practices guide with implementation steps
+        recommendations: ''
+    - name: medical_assistant_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to healthcare
+      input:
+        patient_symptoms: Compliance requirements for healthcare operations
+        patient_age: ''
+      expected_output:
+        analysis: Detailed compliance checklist with regulatory requirements
+        recommendations: ''
+    - name: medical_assistant_strategic_planning
+      description: When developing healthcare strategies, the agent should provide forward-thinking recommendations
+      input:
+        patient_symptoms: Strategic planning for healthcare growth and optimization
+        patient_age: ''
+      expected_output:
+        analysis: Comprehensive strategic plan with measurable objectives and timelines
+        recommendations: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

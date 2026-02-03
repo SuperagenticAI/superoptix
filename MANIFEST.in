@@ -1,0 +1,72 @@
+# Include all Python files
+recursive-include superoptix *.py
+
+# Include all YAML files (agent playbooks, configs)
+recursive-include superoptix *.yaml
+recursive-include superoptix *.yml
+
+# Include all JSON files
+recursive-include superoptix *.json
+
+# Include all template files
+recursive-include superoptix/templates *
+
+# Include all agent playbooks
+recursive-include superoptix/agents *
+
+# Include all tool definitions
+recursive-include superoptix/tools *
+
+# Include all configuration files
+recursive-include superoptix/config *
+
+# Include all metaspecs
+recursive-include superoptix/metaspecs *
+
+# Include all superspec files
+recursive-include superoptix/superspec *
+
+# Include all UI files
+recursive-include superoptix/ui *
+
+# Include all adapter files
+recursive-include superoptix/adapters *
+
+# Include all validator files
+recursive-include superoptix/validators *
+
+# Include all runners
+recursive-include superoptix/runners *
+
+# Include all models
+recursive-include superoptix/models *
+
+# Include all memory systems
+recursive-include superoptix/memory *
+
+# Include all observability files
+recursive-include superoptix/observability *
+
+# Include all CLI files
+recursive-include superoptix/cli *
+
+# Include all core files
+recursive-include superoptix/core *
+
+# Include all compiler files
+recursive-include superoptix/compiler *
+
+# Include README and documentation
+include README.md
+include LICENSE
+include LICENCE
+
+# Exclude development files
+global-exclude *.pyc
+global-exclude *.pyo
+global-exclude __pycache__
+global-exclude .git*
+global-exclude .DS_Store
+global-exclude *.so
+global-exclude *.dylib
+global-exclude *.dll

@@ -1,0 +1,98 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Study Skills Mentor
+  id: study_coach
+  namespace: education
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that helps students develop effective study habits.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: skill
+    type: str
+    description: The study skill to teach (e.g., 'time management', 'note-taking').
+    required: true
+  output_fields:
+  - name: explanation
+    type: str
+    description: The explanation of the study skill with examples.
+    required: true
+  persona:
+    name: StudyBot
+    role: Study Skills Coach
+    goal: Help develop effective study habits
+    traits:
+    - organized
+    - motivating
+    - systematic
+  tasks:
+  - name: teach_study_skill
+    instruction: You are a Study Skills Coach. Your goal is to help students develop effective study habits. Teach the requested
+      study skill with practical examples.
+    inputs:
+    - name: skill
+      type: str
+      description: The study skill to teach (e.g., 'time management', 'note-taking').
+      required: true
+    outputs:
+    - name: explanation
+      type: str
+      description: The explanation of the study skill with examples.
+  agentflow:
+  - name: generate_explanation
+    type: Generate
+    task: teach_study_skill
+  evaluation:
+    builtin_metrics:
+    - name: answer_exact_match
+      threshold: 1.0
+  feature_specifications:
+    scenarios:
+    - name: study_coach_comprehensive_task
+      description: Given a complex education requirement, the agent should provide detailed analysis and recommendations
+      input:
+        skill: Complex education scenario requiring comprehensive analysis
+      expected_output:
+        explanation: Detailed step-by-step analysis with education-specific recommendations
+    - name: study_coach_problem_solving
+      description: When facing education challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        skill: Challenging education problem requiring creative solutions
+      expected_output:
+        explanation: Structured problem-solving approach with multiple solution options
+    - name: study_coach_best_practices
+      description: When asked about education best practices, the agent should provide current industry standards and guidelines
+      input:
+        skill: Industry best practices for education operations
+      expected_output:
+        explanation: Comprehensive best practices guide with implementation steps
+    - name: study_coach_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to education
+      input:
+        skill: Compliance requirements for education operations
+      expected_output:
+        explanation: Detailed compliance checklist with regulatory requirements
+    - name: study_coach_strategic_planning
+      description: When developing education strategies, the agent should provide forward-thinking recommendations
+      input:
+        skill: Strategic planning for education growth and optimization
+      expected_output:
+        explanation: Comprehensive strategic plan with measurable objectives and timelines
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

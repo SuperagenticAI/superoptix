@@ -1,0 +1,156 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: assistant_openai
+  id: assistant_openai
+  namespace: demo
+  version: 1.0.0
+  level: oracles
+  description: Simple Q&A assistant built with OpenAI Agents SDK, optimized for Ollama local models
+  author: SuperOptiX
+  tags:
+    - assistant
+    - openai-sdk
+    - ollama
+    - local-first
+    - simple-qa
+
+spec:
+  target_framework: openai
+  
+  # MODEL CONFIGURATION: Ollama (FREE local model)
+  # Works with: gpt-oss:20b, gpt-oss:120b, llama3.1:8b, etc.
+  language_model:
+    location: local
+    provider: ollama
+    model: ollama:llama3.1:8b
+    temperature: 0.7
+    max_tokens: 2000
+    api_base: http://localhost:11434
+  
+  input_fields:
+    - name: query
+      type: str
+      description: User's question or request
+      required: true
+  
+  output_fields:
+    - name: response
+      type: str
+      description: Assistant's answer
+      required: true
+  
+  # OpenAI Agents SDK Configuration (instructions are optimizable!)
+  persona:
+    name: Helpful AI Assistant
+    role: Helpful AI Assistant
+    goal: Provide clear, concise, and helpful responses to user queries
+    backstory: |
+      You are a friendly and knowledgeable AI assistant designed to help users
+      with questions, explanations, and general information. You excel at breaking
+      down complex topics into understandable answers.
+    traits:
+      - helpful
+      - friendly
+      - knowledgeable
+      - concise
+  
+  # Reasoning Strategy
+  reasoning:
+    method: direct
+    steps:
+      - Understand the user's question
+      - Provide a clear and helpful answer
+      - Be concise but complete
+  
+  # Constraints
+  constraints:
+    - Keep responses concise
+    - Be factual and accurate
+    - Ask for clarification if needed
+  
+  # BDD Test Scenarios (100% pass rate with gpt-oss:120b!)
+  feature_specifications:
+    feature_name: Simple Q&A Assistant
+    feature_description: Test basic question answering and conversation
+    
+    scenarios:
+      # Scenario 1: Greetings
+      - name: Simple greeting
+        description: Should respond warmly to greetings
+        input:
+          query: "Hello! How are you?"
+        expected_output:
+          expected_keywords:
+            - hello
+            - help
+      
+      # Scenario 2: Question Answering
+      - name: Question answering
+        description: Should answer factual questions accurately
+        input:
+          query: "What is Python?"
+        expected_output:
+          expected_keywords:
+            - Python
+            - programming
+            - language
+      
+      # Scenario 3: Explanations
+      - name: Explanation request
+        description: Should provide clear explanations
+        input:
+          query: "Explain what an API is"
+        expected_output:
+          expected_keywords:
+            - API
+            - application
+            - interface
+      
+      # Scenario 4: Math Questions
+      - name: Math question
+        description: Should handle basic calculations
+        input:
+          query: "What is 15 multiplied by 7?"
+        expected_output:
+          expected_keywords:
+            - "105"
+
+  # GEPA Optimization Configuration
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: response_accuracy
+        auto: medium
+        reflection_lm: ollama:llama3.1:8b  # Use same model for reflection
+        max_full_evals: 5
+        skip_perfect_score: true
+    metric: response_accuracy
+    metric_threshold: 0.8
+
+# ==========================
+# Usage Examples
+# ==========================
+# 
+# 1. Quick Test:
+#    super agent run assistant_openai --goal "What is Python?"
+#
+# 2. Full Workflow:
+#    super agent pull assistant_openai
+#    super agent compile assistant_openai --framework openai
+#    super agent evaluate assistant_openai  # Expect 100% pass!
+#    super agent optimize assistant_openai --auto medium
+#
+# 3. Use with Cloud Models:
+#    Edit language_model section:
+#      provider: openai
+#      model: openai:gpt-4o
+#    Then: export OPENAI_API_KEY="sk-..."
+#
+# 4. Compare Frameworks:
+#    super agent compile assistant_openai --framework openai
+#    super agent compile assistant_openai --framework dspy
+#    super agent compile assistant_openai --framework deepagents
+#
+# See: superoptix/agents/demo/OPENAI_SDK_DEMO.md for full guide

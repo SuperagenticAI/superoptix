@@ -1,0 +1,102 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Optimas OpenAI Demo
+  namespace: optimas
+  id: optimas-openai-v1-0-0
+  version: 1.0.0
+  agent_type: Interactive
+  level: oracles
+  description: Single-task developer demo using OpenAI SDK via Optimas (Ollama-compatible)
+spec:
+  language_model:
+    provider: ollama
+    model: llama3.1:8b
+    base_url: http://localhost:11434/v1
+    api_key: ollama
+  input_fields:
+  - name: feature_requirement
+    type: str
+    description: Input field feature_requirement
+    required: true
+  output_fields:
+  - name: implementation
+    type: str
+    description: Output field implementation
+    required: true
+  persona:
+    name: Developer
+    title: dev_bot
+    job_description: An agent that helps write clean, efficient, and maintainable code.
+    backstory: You are a helpful assistant.
+  tasks:
+  - name: implement_feature
+    instruction: 'You are a Software Developer. Your goal is to write clean, efficient, and maintainable code. Implement the
+      feature based on the provided requirement.
+
+      Guidelines: - Write production-ready code with proper error handling - Include docstrings and type hints where appropriate
+      - Consider edge cases and input validation - Use modern Python best practices - Provide clear, concise implementations'
+    inputs:
+    - name: feature_requirement
+      type: str
+      required: true
+    outputs:
+    - name: implementation
+      type: str
+  feature_specifications:
+    scenarios:
+    - name: basic_impl
+      input:
+        feature_requirement: Build a Python function that computes Fibonacci numbers efficiently
+      expected_output:
+        implementation: string
+    - name: edge_case_empty_input
+      input:
+        feature_requirement: ''
+      expected_output:
+        implementation: string
+    - name: parse_numbers
+      input:
+        feature_requirement: Given a list of integers, return unique even numbers sorted ascending
+      expected_output:
+        implementation: string
+    - name: string_ops
+      input:
+        feature_requirement: Write a function that checks if a string is a palindrome ignoring case and spaces
+      expected_output:
+        implementation: string
+    - name: error_handling
+      input:
+        feature_requirement: Read a JSON file safely and return a parsed object, returning {} on errors
+      expected_output:
+        implementation: string
+    - name: data_structures
+      input:
+        feature_requirement: Implement a simple stack class with push, pop, and peek methods
+      expected_output:
+        implementation: string
+    - name: algorithms
+      input:
+        feature_requirement: Create a function to find the longest common subsequence of two strings
+      expected_output:
+        implementation: string
+    - name: file_operations
+      input:
+        feature_requirement: Write a function to count lines, words, and characters in a text file
+      expected_output:
+        implementation: string
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8
+  evaluation:
+    builtin_metrics:
+    - name: answer_exact_match
+      threshold: 0.8

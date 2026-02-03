@@ -1,0 +1,124 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Property Analyzer
+  id: property_analyzer
+  namespace: real_estate
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that analyzes real estate properties for investment potential and market value.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: property_details
+    type: str
+    description: Property specifications, location, and asking price
+    required: true
+  - name: market_context
+    type: str
+    description: Local market conditions and comparable sales
+    required: true
+  output_fields:
+  - name: property_analysis
+    type: str
+    description: Step-by-step property evaluation and market assessment
+    required: true
+  - name: investment_recommendation
+    type: str
+    description: Investment recommendation with financial projections
+    required: true
+  persona:
+    name: PropertyBot
+    role: Property Analyst
+    goal: Provide comprehensive property analysis for investment and valuation decisions
+    traits:
+    - analytical
+    - market-aware
+    - detail-oriented
+    - investment-focused
+  tasks:
+  - name: analyze_property_investment
+    instruction: You are a Property Analyst. Think through the property systematically, evaluating location, market conditions,
+      financial metrics, and investment potential to provide comprehensive analysis.
+    inputs:
+    - name: property_details
+      type: str
+      description: Property specifications, location, and asking price
+      required: true
+    - name: market_context
+      type: str
+      description: Local market conditions and comparable sales
+      required: true
+    outputs:
+    - name: property_analysis
+      type: str
+      description: Step-by-step property evaluation and market assessment
+    - name: investment_recommendation
+      type: str
+      description: Investment recommendation with financial projections
+  agentflow:
+  - name: analyze_systematically
+    type: Think
+    task: analyze_property_investment
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: property_analyzer_comprehensive_task
+      description: Given a complex real_estate requirement, the agent should provide detailed analysis and recommendations
+      input:
+        property_details: Complex real_estate scenario requiring comprehensive analysis
+        market_context: ''
+      expected_output:
+        property_analysis: Detailed step-by-step analysis with real_estate-specific recommendations
+        investment_recommendation: ''
+    - name: property_analyzer_problem_solving
+      description: When facing real_estate challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        property_details: Challenging real_estate problem requiring creative solutions
+        market_context: ''
+      expected_output:
+        property_analysis: Structured problem-solving approach with multiple solution options
+        investment_recommendation: ''
+    - name: property_analyzer_best_practices
+      description: When asked about real_estate best practices, the agent should provide current industry standards and guidelines
+      input:
+        property_details: Industry best practices for real_estate operations
+        market_context: ''
+      expected_output:
+        property_analysis: Comprehensive best practices guide with implementation steps
+        investment_recommendation: ''
+    - name: property_analyzer_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to real_estate
+      input:
+        property_details: Compliance requirements for real_estate operations
+        market_context: ''
+      expected_output:
+        property_analysis: Detailed compliance checklist with regulatory requirements
+        investment_recommendation: ''
+    - name: property_analyzer_strategic_planning
+      description: When developing real_estate strategies, the agent should provide forward-thinking recommendations
+      input:
+        property_details: Strategic planning for real_estate growth and optimization
+        market_context: ''
+      expected_output:
+        property_analysis: Comprehensive strategic plan with measurable objectives and timelines
+        investment_recommendation: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

@@ -1,0 +1,114 @@
+"""
+Auto-generated Optimas-AutoGen pipeline for agent: {{ metadata.get('id', agent_name) }}
+Builds an Optimas CompoundAISystem from AutoGen AssistantAgents via the Optimas adapter.
+"""
+
+from __future__ import annotations
+
+from typing import Dict, Any, List
+
+from optimas.arch.system import CompoundAISystem
+from optimas.adapt.autogen import create_component_from_autogen
+
+try:
+	from autogen_agentchat.agents import AssistantAgent
+	from autogen_ext.models.openai import OpenAIChatCompletionClient
+except Exception:
+	AssistantAgent = None
+	OpenAIChatCompletionClient = None
+
+
+def _require_autogen():
+	if AssistantAgent is None or OpenAIChatCompletionClient is None:
+		raise ImportError(
+			"AutoGen is required for optimas-autogen pipelines. Install: pip install autogen_agentchat autogen_ext"
+		)
+
+
+
+def _build_agent(name: str, system_message: str, model: str, base_url: str = "", api_key: str = "", model_info: dict | None = None) -> "AssistantAgent":
+	_require_autogen()
+	
+	# Handle Ollama URLs properly - ensure base_url is not empty string
+	if base_url and base_url.strip():
+		# For Ollama, ensure the URL is properly formatted
+		if "localhost:11434" in base_url:
+			# Ensure we have the full path for Ollama
+			if not base_url.endswith("/v1"):
+				base_url = base_url.rstrip("/") + "/v1"
+	else:
+		base_url = None  # Use default OpenAI endpoints
+	
+	client = OpenAIChatCompletionClient(
+		model=model or "gpt-4o-mini",
+		base_url=base_url,
+		api_key=api_key or None,
+		model_info=model_info or None,
+	)
+	return AssistantAgent(
+		name=name or "Agent",
+		description="AutoGen agent",
+		model_client=client,
+		system_message=system_message or "You are a helpful assistant.",
+	)
+
+
+def build_optimas_system() -> CompoundAISystem:
+	components: Dict[str, Any] = {}
+	model_name = "{{ spec.get('language_model', {}).get('model', 'gpt-4o-mini') }}"
+	base_url = "{{ spec.get('language_model', {}).get('base_url', '') }}"
+	api_key = "{{ spec.get('language_model', {}).get('api_key', '') }}"
+	model_info = {{ spec.get('language_model', {}).get('model_info', {}) }}
+
+{% set tasks = spec.get('tasks', []) %}
+{% if not tasks %}
+	agent = _build_agent("default", "You are a helpful assistant.", model_name, base_url, api_key, model_info)
+	component = create_component_from_autogen(
+		agent,
+		input_fields=["query"],
+		output_fields=["response"],
+	)
+	components["default_task"] = component
+	final_outputs: List[str] = ["response"]
+{% else %}
+{% for task in tasks %}
+	{{ task.get('name','task_' ~ loop.index)|to_snake_case }} = _build_agent(
+		"{{ task.get('name','task_' ~ loop.index)|to_snake_case }}",
+		"{{ (task.get('instruction') or metadata.get('description') or 'You are a helpful assistant.')|clean }}",
+		model_name,
+		base_url,
+		api_key,
+		model_info,
+	)
+	{{ task.get('name','task_' ~ loop.index)|to_snake_case }}_component = create_component_from_autogen(
+		{{ task.get('name','task_' ~ loop.index)|to_snake_case }},
+		input_fields=[{% for f in task.get('inputs', []) %}"{{ f.get('name')|to_snake_case }}"{% if not loop.last %}, {% endif %}{% endfor %}],
+		output_fields=[{% for f in task.get('outputs', []) %}"{{ f.get('name')|to_snake_case }}"{% if not loop.last %}, {% endif %}{% endfor %}],
+	)
+	components["{{ task.get('name','task_' ~ loop.index)|to_snake_case }}"] = {{ task.get('name','task_' ~ loop.index)|to_snake_case }}_component
+{% endfor %}
+{% set last_task = tasks[-1] %}
+	final_outputs: List[str] = [{% for f in last_task.get('outputs', []) %}"{{ f.get('name')|to_snake_case }}"{% if not loop.last %}, {% endif %}{% endfor %}]
+{% endif %}
+
+	def eval_func(**kwargs) -> float:
+		for k in final_outputs:
+			val = kwargs.get(k)
+			if isinstance(val, str) and val.strip():
+				return 1.0
+			if val not in (None, "", [], {}):
+				return 1.0
+		return 0.0
+
+	return CompoundAISystem(
+		components=components,
+		final_output_fields=final_outputs,
+		ground_fields=[],
+		eval_func=eval_func,
+	)
+
+
+def system_engine() -> CompoundAISystem:
+	return build_optimas_system()
+
+

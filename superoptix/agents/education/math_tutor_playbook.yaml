@@ -1,0 +1,98 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Simple Math Tutor
+  id: math_tutor
+  namespace: education
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that helps elementary students solve basic math problems step by step.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: problem
+    type: str
+    description: Basic math problem to solve (e.g., '12 + 8', '25 - 7').
+    required: true
+  output_fields:
+  - name: solution
+    type: str
+    description: Step-by-step solution with the final answer.
+    required: true
+  persona:
+    name: MathBot
+    role: Elementary Math Teacher
+    goal: Help students solve basic math problems step by step
+    traits:
+    - patient
+    - encouraging
+    - clear
+  tasks:
+  - name: solve_math_problem
+    instruction: You are an Elementary Math Teacher. Your goal is to help students solve basic math problems step by step.
+      Solve the given math problem by showing each step clearly. Use simple language appropriate for elementary students.
+    inputs:
+    - name: problem
+      type: str
+      description: Basic math problem to solve (e.g., '12 + 8', '25 - 7').
+      required: true
+    outputs:
+    - name: solution
+      type: str
+      description: Step-by-step solution with the final answer.
+  agentflow:
+  - name: generate_solution
+    type: Generate
+    task: solve_math_problem
+  evaluation:
+    builtin_metrics:
+    - name: answer_exact_match
+      threshold: 1.0
+  feature_specifications:
+    scenarios:
+    - name: math_tutor_comprehensive_task
+      description: Given a complex education requirement, the agent should provide detailed analysis and recommendations
+      input:
+        problem: Complex education scenario requiring comprehensive analysis
+      expected_output:
+        solution: Detailed step-by-step analysis with education-specific recommendations
+    - name: math_tutor_problem_solving
+      description: When facing education challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        problem: Challenging education problem requiring creative solutions
+      expected_output:
+        solution: Structured problem-solving approach with multiple solution options
+    - name: math_tutor_best_practices
+      description: When asked about education best practices, the agent should provide current industry standards and guidelines
+      input:
+        problem: Industry best practices for education operations
+      expected_output:
+        solution: Comprehensive best practices guide with implementation steps
+    - name: math_tutor_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to education
+      input:
+        problem: Compliance requirements for education operations
+      expected_output:
+        solution: Detailed compliance checklist with regulatory requirements
+    - name: math_tutor_strategic_planning
+      description: When developing education strategies, the agent should provide forward-thinking recommendations
+      input:
+        problem: Strategic planning for education growth and optimization
+      expected_output:
+        solution: Comprehensive strategic plan with measurable objectives and timelines
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

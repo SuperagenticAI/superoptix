@@ -1,0 +1,162 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: content_creator_crew
+  id: content_creator_crew
+  namespace: demo
+  version: 1.0.0
+  level: genies
+  description: Content creation crew with COMBINED agent+task optimization (Phase 2)
+  author: SuperOptiX
+  tags:
+    - content
+    - writing
+    - crewai
+    - phase2
+    - task-optimization
+    - demo
+    - ollama-compatible
+
+spec:
+  target_framework: crewai
+  
+  # MODEL CONFIGURATION
+  language_model:
+    location: local
+    provider: ollama
+    model: ollama:gpt-oss:20b
+    temperature: 0.7
+    max_tokens: 3000
+    api_base: http://localhost:11434
+  
+  input_fields:
+    - name: topic
+      type: str
+      description: Content topic or subject
+      required: true
+  
+  output_fields:
+    - name: content
+      type: str
+      description: Generated content
+      required: true
+  
+  # CrewAI Agent Profile (Part 1 of combined optimization)
+  persona:
+    name: Content Creator Specialist
+    role: Professional Content Writer
+    goal: Create engaging, high-quality content that informs and captivates readers
+    backstory: |
+      You are an experienced content writer with 8+ years of expertise
+      in creating compelling articles, blog posts, and technical documentation.
+      Known for your ability to simplify complex topics, maintain reader
+      engagement, and deliver polished, publication-ready content.
+    traits:
+      - creative
+      - articulate
+      - detail-oriented
+      - audience-focused
+    communication_preferences:
+      style: engaging
+      tone: informative
+      verbosity: balanced
+  
+  # CrewAI Task Configuration (Part 2 of combined optimization)
+  # PHASE 2: This gets optimized TOGETHER with agent profile!
+  tasks:
+    - name: content_creation_task
+      description: |
+        Create compelling content about {topic}.
+        Research the topic thoroughly.
+        Write in a clear, engaging style.
+        Include relevant examples and insights.
+      expected_output: |
+        A well-structured article with:
+        - Engaging introduction (2-3 sentences)
+        - 3-5 main points with explanations
+        - Relevant examples or case studies
+        - Clear conclusion with takeaways
+        - Approximately 300-500 words
+      agent: content_creator
+  
+  reasoning:
+    method: sequential
+    steps:
+      - Understand the topic and audience
+      - Research key points and insights
+      - Structure content logically
+      - Write engaging introduction
+      - Develop main points with examples
+      - Craft compelling conclusion
+  
+  # BDD Scenarios for testing
+  feature_specifications:
+    scenarios:
+      - name: Tech article creation
+        description: Create article about AI technology
+        input:
+          topic: "The Future of AI in Healthcare"
+        expected_output:
+          content: "Article about AI in healthcare"
+          expected_keywords:
+            - AI
+            - healthcare
+            - future
+            - technology
+      
+      - name: Business content
+        description: Create business-focused content
+        input:
+          topic: "Remote Work Best Practices"
+        expected_output:
+          content: "Article about remote work"
+          expected_keywords:
+            - remote
+            - work
+            - practices
+            - productivity
+      
+      - name: Educational content
+        description: Create educational article
+        input:
+          topic: "Introduction to Machine Learning"
+        expected_output:
+          content: "Educational ML article"
+          expected_keywords:
+            - machine learning
+            - introduction
+            - algorithms
+            - data
+      
+      - name: Tutorial content
+        description: Create how-to tutorial
+        input:
+          topic: "How to Start a Podcast"
+        expected_output:
+          content: "Podcast tutorial"
+          expected_keywords:
+            - podcast
+            - start
+            - guide
+            - steps
+  
+  evaluation:
+    builtin_metrics:
+      - name: content_quality
+        threshold: 0.70
+      - name: engagement_score
+        threshold: 0.75
+  
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: content_quality
+        auto: medium
+        reflection_lm: gpt-4o-mini
+        max_full_evals: 5
+    metric: content_quality
+    metric_threshold: 0.85
+
+
+

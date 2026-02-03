@@ -1,0 +1,202 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: RAG Weaviate Demo Assistant
+  id: rag_weaviate_demo
+  namespace: demo
+  version: 1.0.0
+  agent_type: Interactive
+  level: genies
+  description: A comprehensive demo agent showcasing RAG capabilities with Weaviate vector database and SuperOptiX framework
+    features.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+    temperature: 0.7
+    max_tokens: 2048
+  input_fields:
+  - name: knowledge_query
+    type: str
+    description: A question or query that requires knowledge retrieval from the vector database.
+    required: true
+  output_fields:
+  - name: retrieved_response
+    type: str
+    description: A response based on retrieved knowledge with proper citations.
+    required: true
+  persona:
+    name: RAGWeaviateBot
+    role: RAG Weaviate Demo Assistant
+    goal: Demonstrate the power of RAG with Weaviate vector database in SuperOptiX framework
+    traits:
+    - helpful
+    - knowledgeable
+    - precise
+    - educational
+    - research-oriented
+  tasks:
+  - name: knowledge_retrieval
+    instruction: You are a RAG Weaviate Demo Assistant. Use RAG capabilities to retrieve and synthesize information from the
+      knowledge base. Provide accurate, contextually relevant responses based on retrieved documents.
+    inputs:
+    - name: knowledge_query
+      type: str
+      description: A question or query that requires knowledge retrieval from the vector database.
+      required: true
+    outputs:
+    - name: retrieved_response
+      type: str
+      description: A response based on retrieved knowledge with proper citations.
+  - name: document_analysis
+    instruction: Analyze and interpret documents stored in the vector database. Provide insights and summaries based on retrieved
+      content.
+    inputs:
+    - name: analysis_request
+      type: str
+      description: A request to analyze or interpret documents in the knowledge base.
+      required: true
+    outputs:
+    - name: analysis_result
+      type: str
+      description: Document analysis with insights and interpretations.
+  - name: rag_demonstration
+    instruction: Demonstrate RAG capabilities and explain how the retrieval-augmented generation process works.
+    inputs:
+    - name: rag_query
+      type: str
+      description: A query about RAG capabilities or demonstration request.
+      required: true
+    outputs:
+    - name: rag_explanation
+      type: str
+      description: A demonstration of RAG features and capabilities.
+  - name: weaviate_demo
+    instruction: Demonstrate Weaviate-specific capabilities and features. Show how Weaviate works with SuperOptiX RAG.
+    inputs:
+    - name: weaviate_query
+      type: str
+      description: A query about Weaviate capabilities or demonstration request.
+      required: true
+    outputs:
+    - name: weaviate_demonstration
+      type: str
+      description: A demonstration of Weaviate features and capabilities.
+  agentflow:
+  - name: retrieve_knowledge
+    type: Retrieve
+    task: knowledge_retrieval
+  - name: analyze_documents
+    type: Analyze
+    task: document_analysis
+  - name: demonstrate_rag
+    type: Demonstrate
+    task: rag_demonstration
+  - name: demonstrate_weaviate
+    type: Demonstrate
+    task: weaviate_demo
+  react_config:
+    max_iters: 5
+    max_tool_calls: 3
+    tool_selection_strategy: automatic
+    reasoning_style: step_by_step
+    error_handling: retry
+    enable_tracing: true
+  tools:
+    enabled: true
+    categories:
+    - core
+    - utilities
+    - development
+    specific_tools:
+    - calculator
+    - file_reader
+    - text_analyzer
+    - web_search
+    - json_processor
+  memory:
+    enabled: true
+    short_term:
+      enabled: true
+      max_tokens: 1000
+    long_term:
+      enabled: true
+      storage_type: local
+      max_entries: 100
+    episodic:
+      enabled: true
+      max_episodes: 50
+  rag:
+    enabled: true
+    retriever_type: weaviate
+    config:
+      top_k: 5
+      chunk_size: 512
+      chunk_overlap: 50
+      similarity_threshold: 0.7
+    vector_store:
+      embedding_model: sentence-transformers/all-MiniLM-L6-v2
+      url: http://localhost:8080
+      class_name: SuperOptiXKnowledge
+  evaluation:
+    builtin_metrics:
+    - name: retrieval_accuracy
+      threshold: 0.8
+    - name: response_relevance
+      threshold: 0.8
+    - name: rag_knowledge
+      threshold: 0.9
+    - name: weaviate_knowledge
+      threshold: 0.9
+  feature_specifications:
+    scenarios:
+    - name: knowledge_retrieval_test
+      description: The agent should retrieve relevant information from the knowledge base.
+      input:
+        knowledge_query: What is the SuperOptiX framework and its key features?
+      expected_output:
+        retrieved_response: Should include accurate information retrieved from the knowledge base
+    - name: document_analysis_test
+      description: The agent should analyze documents and provide insights.
+      input:
+        analysis_request: Analyze the benefits of using RAG in AI applications
+      expected_output:
+        analysis_result: Should include document analysis with insights and interpretations
+    - name: rag_capabilities
+      description: The agent should demonstrate RAG-specific capabilities.
+      input:
+        rag_query: How does RAG work and what are its benefits?
+      expected_output:
+        rag_explanation: Should include detailed explanation of RAG process and benefits
+    - name: weaviate_capabilities
+      description: The agent should demonstrate Weaviate-specific capabilities.
+      input:
+        weaviate_query: What are the key features of Weaviate and how does it work with SuperOptiX?
+      expected_output:
+        weaviate_demonstration: Should include Weaviate features, benefits, and SuperOptiX integration
+    - name: semantic_search
+      description: The agent should demonstrate semantic search capabilities.
+      input:
+        knowledge_query: Find information about vector databases and their applications
+      expected_output:
+        retrieved_response: Should include semantically relevant information from the knowledge base
+    - name: context_aware_response
+      description: The agent should provide context-aware responses using RAG.
+      input:
+        knowledge_query: Explain how DSPy integrates with RAG systems
+      expected_output:
+        retrieved_response: Should include context-aware response based on retrieved knowledge
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: tool_use_accuracy
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 5
+        skip_perfect_score: true
+        reflection_minibatch_size: 3
+    metric: tool_use_accuracy
+    metric_threshold: 0.75

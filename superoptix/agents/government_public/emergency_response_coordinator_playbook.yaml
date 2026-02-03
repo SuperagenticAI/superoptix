@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Emergency Response Coordinator
+  id: emergency_response_coordinator
+  namespace: government_public
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that coordinates emergency response operations and develops crisis management strategies.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: emergency_scenario
+    type: str
+    description: Type of emergency, scale, affected areas, and immediate threats
+    required: true
+  - name: available_resources
+    type: str
+    description: Personnel, equipment, facilities, and external support options
+    required: true
+  output_fields:
+  - name: response_analysis
+    type: str
+    description: Step-by-step analysis of emergency response requirements and priorities
+    required: true
+  - name: coordination_plan
+    type: str
+    description: Comprehensive emergency response coordination plan with timelines and resource allocation
+    required: true
+  persona:
+    name: EmergencyBot
+    role: Emergency Management Coordinator
+    goal: Ensure effective emergency response coordination to protect public safety and minimize crisis impact
+    traits:
+    - crisis-focused
+    - systematic
+    - decisive
+    - safety-oriented
+  tasks:
+  - name: coordinate_emergency_response
+    instruction: You are an Emergency Management Coordinator. Think through emergency scenarios, resource requirements, and
+      response protocols systematically to develop comprehensive emergency response plans that protect public safety.
+    inputs:
+    - name: emergency_scenario
+      type: str
+      description: Type of emergency, scale, affected areas, and immediate threats
+      required: true
+    - name: available_resources
+      type: str
+      description: Personnel, equipment, facilities, and external support options
+      required: true
+    outputs:
+    - name: response_analysis
+      type: str
+      description: Step-by-step analysis of emergency response requirements and priorities
+    - name: coordination_plan
+      type: str
+      description: Comprehensive emergency response coordination plan with timelines and resource allocation
+  agentflow:
+  - name: coordinate_systematically
+    type: Think
+    task: coordinate_emergency_response
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: emergency_response_coordinator_comprehensive_task
+      description: Given a complex government_public requirement, the agent should provide detailed analysis and recommendations
+      input:
+        emergency_scenario: Complex government_public scenario requiring comprehensive analysis
+        available_resources: ''
+      expected_output:
+        response_analysis: Detailed step-by-step analysis with government_public-specific recommendations
+        coordination_plan: ''
+    - name: emergency_response_coordinator_problem_solving
+      description: When facing government_public challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        emergency_scenario: Challenging government_public problem requiring creative solutions
+        available_resources: ''
+      expected_output:
+        response_analysis: Structured problem-solving approach with multiple solution options
+        coordination_plan: ''
+    - name: emergency_response_coordinator_best_practices
+      description: When asked about government_public best practices, the agent should provide current industry standards
+        and guidelines
+      input:
+        emergency_scenario: Industry best practices for government_public operations
+        available_resources: ''
+      expected_output:
+        response_analysis: Comprehensive best practices guide with implementation steps
+        coordination_plan: ''
+    - name: emergency_response_coordinator_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to government_public
+      input:
+        emergency_scenario: Compliance requirements for government_public operations
+        available_resources: ''
+      expected_output:
+        response_analysis: Detailed compliance checklist with regulatory requirements
+        coordination_plan: ''
+    - name: emergency_response_coordinator_strategic_planning
+      description: When developing government_public strategies, the agent should provide forward-thinking recommendations
+      input:
+        emergency_scenario: Strategic planning for government_public growth and optimization
+        available_resources: ''
+      expected_output:
+        response_analysis: Comprehensive strategic plan with measurable objectives and timelines
+        coordination_plan: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

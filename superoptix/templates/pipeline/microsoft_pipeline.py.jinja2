@@ -1,0 +1,435 @@
+"""
+{{ agent_name | to_pascal_case }} Agent - Microsoft Agent Framework Implementation
+
+Auto-generated from SuperSpec playbook using SuperOptiX compiler.
+Framework: Microsoft Agent Framework
+Generated: {{ timestamp }}
+
+SuperSpec Metadata:
+	Name: {{ metadata.name }}
+	Version: {{ metadata.version }}
+	Description: {{ metadata.description }}
+	Framework: Microsoft Agent Framework
+"""
+
+from typing import List, Dict, Any, Optional
+import asyncio
+import os
+
+# Microsoft Agent Framework imports
+try:
+	from agent_framework import ChatAgent
+	from agent_framework.openai import OpenAIChatClient
+	from agent_framework.azure import AzureOpenAIChatClient
+	MICROSOFT_FRAMEWORK_AVAILABLE = True
+except ImportError as e:
+	MICROSOFT_FRAMEWORK_AVAILABLE = False
+	print(f"⚠️  Microsoft Agent Framework not available: {e}")
+	print("⚠️  Install with: pip install agent-framework --pre")
+
+from superoptix.core.base_component import BaseComponent
+
+
+class {{ agent_name | to_pascal_case }}Component(BaseComponent):
+	"""
+	BaseComponent wrapper for Microsoft Agent Framework - {{ metadata.description }}
+	
+	This component wraps a Microsoft ChatAgent and makes it compatible with 
+	SuperOptiX's Universal GEPA optimizer.
+	
+	Optimizable Variable: instructions (the agent's system prompt)
+	
+	Framework: Microsoft Agent Framework
+	Input: Any field from input_fields
+	Output: Any field from output_fields
+	"""
+	
+	def __init__(
+		self,
+		instructions: Optional[str] = None,
+		model_config: Optional[Dict] = None,
+		tools: Optional[List] = None,
+		**kwargs
+	):
+		"""
+		Initialize Microsoft Agent component.
+		
+		Args:
+			instructions: Agent instructions (system prompt) - optimizable by GEPA!
+			model_config: Model configuration dict
+			tools: List of tools for the agent
+			**kwargs: Additional configuration
+		"""
+		# Default instructions from playbook
+		default_instructions = self._build_default_instructions()
+		
+		# Initialize BaseComponent
+		super().__init__(
+			name="{{ agent_name }}",
+			description="""{{ metadata.description | replace('"', '\\"') }}""",
+			input_fields={{ spec.input_fields | map(attribute='name') | list | tojson }},
+			output_fields={{ spec.output_fields | map(attribute='name') | list | tojson }},
+			variable=instructions or default_instructions,  # GEPA optimizes this!
+			variable_type="instructions",
+			framework="microsoft",
+			config=model_config or {},
+		)
+		
+		# Store tools
+		self._tools = tools or []
+		
+		# Lazy initialization
+		self._chat_client = None
+		self._agent = None
+	
+	def _build_default_instructions(self) -> str:
+		"""Build default instructions from playbook persona."""
+		instruction_parts = []
+		
+		{% if spec.persona and spec.persona.role %}
+		instruction_parts.append("You are a {{ spec.persona.role }}")
+		{% endif %}
+		
+		{% if spec.persona and spec.persona.goal %}
+		instruction_parts.append("Your goal is: {{ spec.persona.goal }}")
+		{% endif %}
+		
+		{% if spec.persona and spec.persona.backstory %}
+		instruction_parts.append({{ spec.persona.backstory | tojson }})
+		{% endif %}
+		
+		{% if spec.persona and spec.persona.reasoning and spec.persona.reasoning.steps %}
+		instruction_parts.append("Your approach:")
+		{% for step in spec.persona.reasoning.steps %}
+		instruction_parts.append("  {{ loop.index }}. {{ step }}")
+		{% endfor %}
+		{% endif %}
+		
+		if not instruction_parts:
+			return "You are a helpful AI assistant."
+		
+		return "\n".join(instruction_parts)
+	
+	def _initialize_chat_client(self):
+		"""Initialize the appropriate chat client based on provider."""
+		if self._chat_client is not None:
+			return
+		
+		{% if spec.language_model.provider == "azure" %}
+		# Azure OpenAI configuration
+		self._chat_client = AzureOpenAIChatClient(
+			endpoint=os.getenv("AZURE_OPENAI_ENDPOINT", "{{ spec.language_model.api_base if spec.language_model.api_base else '' }}"),
+			api_key=os.getenv("AZURE_OPENAI_API_KEY", "{{ spec.language_model.api_key if spec.language_model.api_key else '' }}"),
+			deployment_name="{{ spec.language_model.model }}",
+		)
+		{% elif spec.language_model.provider == "ollama" %}
+		# Ollama (OpenAI-compatible API)
+		self._chat_client = OpenAIChatClient(
+			api_key="ollama",  # Dummy key for Ollama
+			base_url="{{ spec.language_model.api_base if spec.language_model.api_base else 'http://localhost:11434/v1' }}",
+			model_id="{{ spec.language_model.model }}",
+		)
+		{% else %}
+		# Default: OpenAI
+		api_key = os.getenv("OPENAI_API_KEY", "{{ spec.language_model.api_key if spec.language_model.api_key else '' }}")
+		base_url = "{{ spec.language_model.api_base if spec.language_model.api_base else '' }}"
+		
+		kwargs = {"model_id": "{{ spec.language_model.model }}"}
+		if api_key:
+			kwargs["api_key"] = api_key
+		if base_url:
+			kwargs["base_url"] = base_url
+		
+		self._chat_client = OpenAIChatClient(**kwargs)
+		{% endif %}
+	
+	def _initialize_agent(self):
+		"""Initialize the Microsoft ChatAgent."""
+		if self._agent is not None:
+			return
+		
+		self._initialize_chat_client()
+		
+		# Create agent with current instructions
+		self._agent = self._chat_client.create_agent(
+			name="{{ agent_name }}",
+			instructions=self.variable,  # GEPA-optimized instructions!
+			tools=self._tools if self._tools else None,
+		)
+	
+	async def forward(self, **inputs: Any) -> Dict[str, Any]:
+		"""
+		Execute the agent with given inputs.
+		
+		Args:
+			**inputs: Input fields as defined in playbook
+		
+		Returns:
+			Dict with output fields as defined in playbook
+		"""
+		if not MICROSOFT_FRAMEWORK_AVAILABLE:
+			raise ImportError(
+				"Microsoft Agent Framework not available. "
+				"Install with: pip install agent-framework --pre"
+			)
+		
+		# Re-initialize agent if instructions changed (after GEPA update)
+		self._agent = None
+		self._initialize_agent()
+		
+		# Build user message from inputs
+		{% if spec.input_fields and spec.input_fields|length > 0 %}
+		{% set first_input = spec.input_fields[0] %}
+		user_message = inputs.get("{{ first_input.name }}", "")
+		{% else %}
+		user_message = inputs.get("query", "")
+		{% endif %}
+		
+		# Run agent
+		response = await self._agent.run(user_message)
+		
+		# Extract response text
+		if hasattr(response, 'text'):
+			response_text = response.text
+		elif hasattr(response, 'content'):
+			response_text = response.content
+		else:
+			response_text = str(response)
+		
+		# Return output
+		{% if spec.output_fields and spec.output_fields|length > 0 %}
+		{% set first_output = spec.output_fields[0] %}
+		return {"{{ first_output.name }}": response_text}
+		{% else %}
+		return {"response": response_text}
+		{% endif %}
+	
+	def update(self, new_variable: str):
+		"""
+		Update the optimizable variable (called by GEPA during optimization).
+		
+		Args:
+			new_variable: New instructions from GEPA
+		"""
+		self.variable = new_variable
+		# Agent will be re-initialized on next forward() call
+
+
+class {{ agent_name | to_pascal_case }}Pipeline:
+	"""
+	Pipeline wrapper for {{ agent_name | to_pascal_case }} agent.
+	
+	Provides SuperOptiX workflow methods:
+	  - run(): Execute the agent
+	  - evaluate(): Test on BDD scenarios
+	  - optimize_with_gepa(): Optimize with GEPA
+	"""
+	
+	def __init__(self):
+		"""Initialize the pipeline with the agent component."""
+		self.component = {{ agent_name | to_pascal_case }}Component()
+		self.playbook = self._load_playbook()
+	
+	def _load_playbook(self) -> Dict[str, Any]:
+		"""Load the original playbook for evaluation."""
+		return {
+			"metadata": {
+				"name": "{{ metadata.name }}",
+				"version": "{{ metadata.version }}",
+				"description": """{{ metadata.description | replace('"', '\\"') }}""",
+			},
+			"spec": {
+				"target_framework": "microsoft",
+				"language_model": {{ spec.language_model | tojson }},
+				"persona": {{ spec.persona | tojson if spec.persona else {} }},
+				{% if spec.feature_specifications and spec.feature_specifications.scenarios %}
+				"feature_specifications": {
+					"scenarios": {{ spec.feature_specifications.scenarios | tojson }}
+				},
+				{% endif %}
+			}
+		}
+	
+	async def run(self, **inputs: Any) -> Dict[str, Any]:
+		"""
+		Run the agent with given inputs.
+		
+		Args:
+			**inputs: Input fields
+		
+		Returns:
+			Agent response
+		"""
+		return await self.component.forward(**inputs)
+	
+	def run_sync(self, **inputs: Any) -> Dict[str, Any]:
+		"""
+		Synchronous wrapper for run().
+		
+		Args:
+			**inputs: Input fields
+		
+		Returns:
+			Agent response
+		"""
+		return asyncio.run(self.run(**inputs))
+	
+	async def evaluate(self) -> Dict[str, Any]:
+		"""
+		Evaluate agent on BDD scenarios from playbook.
+		
+		Returns:
+			Evaluation results with pass/fail counts
+		"""
+		if not self.playbook.get("spec", {}).get("feature_specifications", {}).get("scenarios"):
+			return {
+				"total_scenarios": 0,
+				"passed": 0,
+				"failed": 0,
+				"pass_rate": 0.0,
+				"message": "No BDD scenarios defined in playbook"
+			}
+		
+		scenarios = self.playbook["spec"]["feature_specifications"]["scenarios"]
+		results = []
+		passed = 0
+		failed = 0
+		
+		for scenario in scenarios:
+			scenario_input = scenario.get("input", {})
+			expected_output = scenario.get("expected_output", {})
+			
+			try:
+				# Run agent
+				actual_output = await self.run(**scenario_input)
+				
+				# Check keywords
+				response_text = str(actual_output.get("response", "")).lower()
+				expected_keywords = expected_output.get("expected_keywords", [])
+				
+				if expected_keywords:
+					keywords_found = sum(
+						1 for keyword in expected_keywords 
+						if keyword.lower() in response_text
+					)
+					keyword_match_rate = keywords_found / len(expected_keywords) if expected_keywords else 0
+					passed_scenario = keyword_match_rate >= 0.5  # 50% threshold
+				else:
+					passed_scenario = True
+				
+				if passed_scenario:
+					passed += 1
+				else:
+					failed += 1
+				
+				results.append({
+					"scenario": scenario.get("name", "Unnamed"),
+					"passed": passed_scenario,
+					"input": scenario_input,
+					"expected": expected_output,
+					"actual": actual_output,
+				})
+			
+			except Exception as e:
+				failed += 1
+				results.append({
+					"scenario": scenario.get("name", "Unnamed"),
+					"passed": False,
+					"error": str(e),
+				})
+		
+		total = passed + failed
+		pass_rate = (passed / total * 100) if total > 0 else 0
+		
+		return {
+			"total_scenarios": total,
+			"passed": passed,
+			"failed": failed,
+			"pass_rate": pass_rate,
+			"results": results,
+		}
+	
+	def evaluate_sync(self) -> Dict[str, Any]:
+		"""Synchronous wrapper for evaluate()."""
+		return asyncio.run(self.evaluate())
+	
+	def optimize_with_gepa(self, **kwargs):
+		"""
+		Optimize this component using Universal GEPA.
+		
+		This method is called by the SuperOptiX CLI during optimization.
+		"""
+		from superoptix.core.optimizer_factory import OptimizerFactory
+		
+		# Get or create GEPA optimizer
+		optimizer = OptimizerFactory.get_optimizer(
+			component=self.component,
+			optimizer_type="gepa",
+			**kwargs
+		)
+		
+		# Run optimization
+		optimized_component = optimizer.optimize(
+			component=self.component,
+			**kwargs
+		)
+		
+		return optimized_component
+
+
+# Entry point for CLI
+def main():
+	"""Main entry point for running the pipeline."""
+	import sys
+	
+	pipeline = {{ agent_name | to_pascal_case }}Pipeline()
+	
+	if len(sys.argv) > 1:
+		command = sys.argv[1]
+		
+		if command == "evaluate":
+			results = pipeline.evaluate_sync()
+			print(f"\n{'='*60}")
+			print(f"EVALUATION RESULTS: {{ metadata.name }}")
+			print(f"{'='*60}")
+			print(f"Total Scenarios: {results['total_scenarios']}")
+			print(f"Passed: {results['passed']}")
+			print(f"Failed: {results['failed']}")
+			print(f"Pass Rate: {results['pass_rate']:.1f}%")
+			print(f"{'='*60}\n")
+		
+		elif command == "run":
+			# Interactive mode
+			print(f"\n{{ metadata.name }} - Microsoft Agent Framework")
+			print("Type 'exit' to quit\n")
+			
+			while True:
+				user_input = input("You: ").strip()
+				if user_input.lower() in ['exit', 'quit']:
+					break
+				
+				{% if spec.input_fields and spec.input_fields|length > 0 %}
+				{% set first_input = spec.input_fields[0] %}
+				result = pipeline.run_sync(**{"{{ first_input.name }}": user_input})
+				{% else %}
+				result = pipeline.run_sync(query=user_input)
+				{% endif %}
+				
+				{% if spec.output_fields and spec.output_fields|length > 0 %}
+				{% set first_output = spec.output_fields[0] %}
+				print(f"Agent: {result.get('{{ first_output.name }}', '')}\n")
+				{% else %}
+				print(f"Agent: {result.get('response', '')}\n")
+				{% endif %}
+		
+		else:
+			print(f"Unknown command: {command}")
+			print("Usage: python {sys.argv[0]} [evaluate|run]")
+	
+	else:
+		print("Usage: python {sys.argv[0]} [evaluate|run]")
+
+
+if __name__ == "__main__":
+	main()
+

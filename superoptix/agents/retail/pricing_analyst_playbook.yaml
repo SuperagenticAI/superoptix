@@ -1,0 +1,124 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Pricing Analyst
+  id: pricing_analyst
+  namespace: retail
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that analyzes market conditions and recommends optimal pricing strategies.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: product_details
+    type: str
+    description: Product specifications, costs, and current pricing
+    required: true
+  - name: market_data
+    type: str
+    description: Competitor prices, market demand, and customer sensitivity
+    required: true
+  output_fields:
+  - name: pricing_analysis
+    type: str
+    description: Step-by-step pricing strategy analysis
+    required: true
+  - name: pricing_recommendations
+    type: str
+    description: Specific pricing recommendations with expected impact
+    required: true
+  persona:
+    name: PricingBot
+    role: Pricing Strategy Analyst
+    goal: Optimize pricing strategies to maximize profitability while maintaining competitiveness
+    traits:
+    - analytical
+    - market-aware
+    - strategic
+    - profit-focused
+  tasks:
+  - name: analyze_pricing_strategy
+    instruction: You are a Pricing Strategy Analyst. Think through market data, competitor pricing, and business objectives
+      systematically to recommend optimal pricing strategies.
+    inputs:
+    - name: product_details
+      type: str
+      description: Product specifications, costs, and current pricing
+      required: true
+    - name: market_data
+      type: str
+      description: Competitor prices, market demand, and customer sensitivity
+      required: true
+    outputs:
+    - name: pricing_analysis
+      type: str
+      description: Step-by-step pricing strategy analysis
+    - name: pricing_recommendations
+      type: str
+      description: Specific pricing recommendations with expected impact
+  agentflow:
+  - name: analyze_pricing
+    type: Think
+    task: analyze_pricing_strategy
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: pricing_analyst_comprehensive_task
+      description: Given a complex retail requirement, the agent should provide detailed analysis and recommendations
+      input:
+        product_details: Complex retail scenario requiring comprehensive analysis
+        market_data: ''
+      expected_output:
+        pricing_analysis: Detailed step-by-step analysis with retail-specific recommendations
+        pricing_recommendations: ''
+    - name: pricing_analyst_problem_solving
+      description: When facing retail challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        product_details: Challenging retail problem requiring creative solutions
+        market_data: ''
+      expected_output:
+        pricing_analysis: Structured problem-solving approach with multiple solution options
+        pricing_recommendations: ''
+    - name: pricing_analyst_best_practices
+      description: When asked about retail best practices, the agent should provide current industry standards and guidelines
+      input:
+        product_details: Industry best practices for retail operations
+        market_data: ''
+      expected_output:
+        pricing_analysis: Comprehensive best practices guide with implementation steps
+        pricing_recommendations: ''
+    - name: pricing_analyst_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to retail
+      input:
+        product_details: Compliance requirements for retail operations
+        market_data: ''
+      expected_output:
+        pricing_analysis: Detailed compliance checklist with regulatory requirements
+        pricing_recommendations: ''
+    - name: pricing_analyst_strategic_planning
+      description: When developing retail strategies, the agent should provide forward-thinking recommendations
+      input:
+        product_details: Strategic planning for retail growth and optimization
+        market_data: ''
+      expected_output:
+        pricing_analysis: Comprehensive strategic plan with measurable objectives and timelines
+        pricing_recommendations: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

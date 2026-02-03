@@ -1,0 +1,224 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: MIPROv2 Creative Writing Assistant
+  id: miprov2-writing-assistant
+  version: 1.0.0
+  namespace: education
+  level: oracles
+  stage: stable
+  agent_type: Autonomous
+  description: Creative writing assistant optimized with MIPROv2 for sophisticated text generation
+  tags:
+  - writing
+  - creativity
+  - miprov2
+  - optimization
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    temperature: 0.7
+    max_tokens: 32000
+    cache: true
+  input_fields:
+  - name: prompt
+    type: str
+    description: The writing prompt or topic
+    required: true
+  - name: genre
+    type: str
+    description: Genre or type of writing (story, essay, poem, etc.)
+    required: false
+  - name: word_count
+    type: int
+    description: Target word count
+    required: false
+  - name: style_requirements
+    type: str
+    description: Specific style or format requirements
+    required: false
+  output_fields:
+  - name: content
+    type: str
+    description: The generated creative content
+    required: true
+  - name: word_count
+    type: int
+    description: Actual word count of generated content
+    required: true
+  persona:
+    role: Creative Writing Coach
+    goal: Help users create engaging, well-structured, and creative written content
+    traits:
+    - creative
+    - articulate
+    - encouraging
+    - detail-oriented
+    expertise_areas:
+    - storytelling
+    - poetry
+    - essays
+    - technical writing
+    communication_preferences:
+      style: creative
+      tone: encouraging
+      verbosity: detailed
+  tasks:
+  - name: generate_creative_content
+    description: Generate creative written content based on prompts and requirements
+    instruction: 'Create compelling written content based on the given prompt and requirements.
+
+
+      Guidelines:
+
+      1. Understand the genre, tone, and style requirements
+
+      2. Create engaging opening that hooks the reader
+
+      3. Develop content with proper structure and flow
+
+      4. Use vivid descriptions and appropriate literary devices
+
+      5. Ensure coherent narrative or argument throughout
+
+      6. Provide satisfying conclusion
+
+
+      Consider:
+
+      - Target audience and purpose
+
+      - Word count requirements
+
+      - Specific style or format requests
+
+      - Theme and mood requirements
+
+
+      Format your response with:
+
+      **Content Type:** [Story/Essay/Poem/etc.]
+
+      **Theme:** [Main theme or message]
+
+
+      [Your creative content here]
+
+      '
+    inputs:
+    - name: prompt
+      type: str
+      description: The writing prompt or topic
+      required: true
+    - name: genre
+      type: str
+      description: Genre or type of writing (story, essay, poem, etc.)
+      required: false
+    - name: word_count
+      type: int
+      description: Target word count
+      required: false
+    - name: style_requirements
+      type: str
+      description: Specific style or format requirements
+      required: false
+    outputs:
+    - name: content
+      type: str
+      description: The generated creative content
+    - name: word_count
+      type: int
+      description: Actual word count of generated content
+  optimization:
+    enabled: true
+    optimizer:
+      name: MIPROv2
+      params:
+        metric: semantic_f1
+        num_candidates: 7
+        init_temperature: 1.2
+        max_steps: 8
+        verbose: false
+        timeout: 240
+    evaluation:
+      enabled: true
+      metrics:
+      - semantic_f1
+      - rouge_l
+      test_split: 0.2
+    hardware_optimization:
+      target_tier: standard
+      memory_limit_gb: 12
+  feature_specifications:
+    scenarios:
+    - name: short_story
+      description: Should generate engaging short stories with proper structure
+      input:
+        prompt: A person finds a mysterious letter in their mailbox
+        genre: mystery
+        word_count: 300
+      expected_output:
+        content: Well-structured story with mystery elements, character development, and resolution
+        word_count: 290
+      tags:
+      - fiction
+      - story
+      - mystery
+      priority: high
+    - name: persuasive_essay
+      description: Should write compelling persuasive essays with clear arguments
+      input:
+        prompt: Why renewable energy is essential for our future
+        genre: essay
+        word_count: 400
+      expected_output:
+        content: Structured essay with thesis, supporting arguments, evidence, and conclusion
+        word_count: 380
+      tags:
+      - essay
+      - persuasive
+      - environment
+      priority: high
+    - name: poem_creation
+      description: Should create poems with appropriate rhythm and imagery
+      input:
+        prompt: The changing seasons
+        genre: poem
+        style_requirements: free verse
+      expected_output:
+        content: Free verse poem with vivid imagery and emotional resonance
+      tags:
+      - poetry
+      - nature
+      - creative
+      priority: medium
+    - name: technical_explanation
+      description: Should explain complex topics in accessible language
+      input:
+        prompt: How machine learning works
+        genre: technical explanation
+        word_count: 250
+      expected_output:
+        content: Clear, accessible explanation with examples and analogies
+        word_count: 240
+      tags:
+      - technical
+      - explanation
+      - technology
+      priority: medium
+    - name: character_description
+      description: Should create vivid character descriptions
+      input:
+        prompt: A wise old librarian
+        genre: character description
+        word_count: 150
+      expected_output:
+        content: Detailed character description with physical and personality traits
+        word_count: 145
+      tags:
+      - character
+      - description
+      - creative
+      priority: medium

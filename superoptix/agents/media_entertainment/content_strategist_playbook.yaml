@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Content Strategist
+  id: content_strategist
+  namespace: media_entertainment
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that analyzes audience data and develops comprehensive content strategies for media platforms.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: audience_analytics
+    type: str
+    description: Demographic data, engagement metrics, and viewing patterns
+    required: true
+  - name: platform_context
+    type: str
+    description: Platform specifications, content formats, and competitive landscape
+    required: true
+  output_fields:
+  - name: content_analysis
+    type: str
+    description: Step-by-step audience and content performance analysis
+    required: true
+  - name: strategy_recommendations
+    type: str
+    description: Comprehensive content strategy with specific recommendations
+    required: true
+  persona:
+    name: ContentBot
+    role: Digital Content Strategist
+    goal: Create data-driven content strategies that maximize audience engagement and platform growth
+    traits:
+    - creative
+    - analytical
+    - trend-aware
+    - audience-focused
+  tasks:
+  - name: develop_content_strategy
+    instruction: You are a Digital Content Strategist. Think through audience data, platform analytics, and content performance
+      systematically to develop comprehensive content strategies that drive engagement and growth.
+    inputs:
+    - name: audience_analytics
+      type: str
+      description: Demographic data, engagement metrics, and viewing patterns
+      required: true
+    - name: platform_context
+      type: str
+      description: Platform specifications, content formats, and competitive landscape
+      required: true
+    outputs:
+    - name: content_analysis
+      type: str
+      description: Step-by-step audience and content performance analysis
+    - name: strategy_recommendations
+      type: str
+      description: Comprehensive content strategy with specific recommendations
+  agentflow:
+  - name: analyze_content_strategy
+    type: Think
+    task: develop_content_strategy
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: content_strategist_comprehensive_task
+      description: Given a complex media_entertainment requirement, the agent should provide detailed analysis and recommendations
+      input:
+        audience_analytics: Complex media_entertainment scenario requiring comprehensive analysis
+        platform_context: ''
+      expected_output:
+        content_analysis: Detailed step-by-step analysis with media_entertainment-specific recommendations
+        strategy_recommendations: ''
+    - name: content_strategist_problem_solving
+      description: When facing media_entertainment challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        audience_analytics: Challenging media_entertainment problem requiring creative solutions
+        platform_context: ''
+      expected_output:
+        content_analysis: Structured problem-solving approach with multiple solution options
+        strategy_recommendations: ''
+    - name: content_strategist_best_practices
+      description: When asked about media_entertainment best practices, the agent should provide current industry standards
+        and guidelines
+      input:
+        audience_analytics: Industry best practices for media_entertainment operations
+        platform_context: ''
+      expected_output:
+        content_analysis: Comprehensive best practices guide with implementation steps
+        strategy_recommendations: ''
+    - name: content_strategist_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to media_entertainment
+      input:
+        audience_analytics: Compliance requirements for media_entertainment operations
+        platform_context: ''
+      expected_output:
+        content_analysis: Detailed compliance checklist with regulatory requirements
+        strategy_recommendations: ''
+    - name: content_strategist_strategic_planning
+      description: When developing media_entertainment strategies, the agent should provide forward-thinking recommendations
+      input:
+        audience_analytics: Strategic planning for media_entertainment growth and optimization
+        platform_context: ''
+      expected_output:
+        content_analysis: Comprehensive strategic plan with measurable objectives and timelines
+        strategy_recommendations: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

@@ -1,0 +1,124 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Compliance Checker
+  id: compliance_checker
+  namespace: legal
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that helps identify compliance requirements and potential regulatory issues.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: business_description
+    type: str
+    description: Description of the business and its operations
+    required: true
+  - name: industry_sector
+    type: str
+    description: Industry sector and business type
+    required: true
+  output_fields:
+  - name: compliance_analysis
+    type: str
+    description: Step-by-step analysis of compliance requirements
+    required: true
+  - name: regulatory_recommendations
+    type: str
+    description: Specific compliance actions and professional consultation advice
+    required: true
+  persona:
+    name: ComplianceBot
+    role: Compliance Specialist
+    goal: Help identify compliance requirements and regulatory obligations
+    traits:
+    - systematic
+    - detail-oriented
+    - risk-aware
+    - thorough
+  tasks:
+  - name: check_compliance
+    instruction: You are a Compliance Specialist. Think through the business situation systematically to identify applicable
+      regulations, compliance requirements, and potential risk areas.
+    inputs:
+    - name: business_description
+      type: str
+      description: Description of the business and its operations
+      required: true
+    - name: industry_sector
+      type: str
+      description: Industry sector and business type
+      required: true
+    outputs:
+    - name: compliance_analysis
+      type: str
+      description: Step-by-step analysis of compliance requirements
+    - name: regulatory_recommendations
+      type: str
+      description: Specific compliance actions and professional consultation advice
+  agentflow:
+  - name: analyze_compliance
+    type: Think
+    task: check_compliance
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: compliance_checker_comprehensive_task
+      description: Given a complex legal requirement, the agent should provide detailed analysis and recommendations
+      input:
+        business_description: Complex legal scenario requiring comprehensive analysis
+        industry_sector: ''
+      expected_output:
+        compliance_analysis: Detailed step-by-step analysis with legal-specific recommendations
+        regulatory_recommendations: ''
+    - name: compliance_checker_problem_solving
+      description: When facing legal challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        business_description: Challenging legal problem requiring creative solutions
+        industry_sector: ''
+      expected_output:
+        compliance_analysis: Structured problem-solving approach with multiple solution options
+        regulatory_recommendations: ''
+    - name: compliance_checker_best_practices
+      description: When asked about legal best practices, the agent should provide current industry standards and guidelines
+      input:
+        business_description: Industry best practices for legal operations
+        industry_sector: ''
+      expected_output:
+        compliance_analysis: Comprehensive best practices guide with implementation steps
+        regulatory_recommendations: ''
+    - name: compliance_checker_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to legal
+      input:
+        business_description: Compliance requirements for legal operations
+        industry_sector: ''
+      expected_output:
+        compliance_analysis: Detailed compliance checklist with regulatory requirements
+        regulatory_recommendations: ''
+    - name: compliance_checker_strategic_planning
+      description: When developing legal strategies, the agent should provide forward-thinking recommendations
+      input:
+        business_description: Strategic planning for legal growth and optimization
+        industry_sector: ''
+      expected_output:
+        compliance_analysis: Comprehensive strategic plan with measurable objectives and timelines
+        regulatory_recommendations: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

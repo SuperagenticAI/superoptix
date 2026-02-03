@@ -1,0 +1,812 @@
+# SuperSpec DSL - Agent Playbook Definition Language
+# Version: 1.0.0
+# Description: Comprehensive DSL for defining Oracle and Genie tier agent playbooks
+# Compatible with: SuperOptiX Current Edition
+
+---
+# === SUPERSPECX DSL SPECIFICATION ===
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: "SuperSpec DSL"
+  version: "1.0.0"
+  description: "Playbook definition language for Oracle and Genie tier agents"
+  author: "SuperOptiX Team"
+  license: "MIT"
+
+# === AGENT PLAYBOOK SCHEMA ===
+schema:
+  # Root structure for all agent playbooks
+  root:
+    apiVersion: 
+      type: string
+      required: true
+      enum: ["agent/v1"]
+      description: "API version for the agent specification"
+    
+    kind:
+      type: string
+      required: true
+      enum: ["AgentSpec"]
+      description: "Type of specification - must be AgentSpec"
+    
+    metadata:
+      type: object
+      required: true
+      description: "Agent metadata and identification"
+      properties:
+        name:
+          type: string
+          required: true
+          description: "Human-readable agent name"
+          max_length: 100
+        id:
+          type: string
+          required: true
+          description: "Unique agent identifier"
+          pattern: "^[a-z0-9-_]+$"
+          max_length: 50
+        namespace:
+          type: string
+          required: false
+          description: "Logical grouping namespace"
+          enum: ["software", "education", "healthcare", "finance", "marketing", "legal", "consulting", "retail", "manufacturing", "transportation", "agriculture_food", "energy_utilities", "gaming_sports", "government_public", "hospitality_tourism", "human_resources", "media_entertainment", "real_estate", "testing"]
+        version:
+          type: string
+          required: true
+          description: "Agent specification version"
+          pattern: "^\\d+\\.\\d+\\.\\d+$"
+        stage:
+          type: string
+          required: false
+          default: "alpha"
+          enum: ["alpha", "beta", "stable"]
+          description: "Development stage"
+        level:
+          type: string
+          required: false
+          default: "oracles"
+          enum: ["oracles", "genies"]
+          description: "Agent tier level"
+        agent_type:
+          type: string
+          required: false
+          default: "Autonomous"
+          enum: ["Autonomous", "Supervised", "Interactive", "Reactive", "Deliberative", "Hybrid"]
+          description: "Agent operational mode"
+        description:
+          type: string
+          required: false
+          description: "Brief agent description"
+          max_length: 500
+        tags:
+          type: array
+          required: false
+          description: "Categorization tags"
+          items:
+            type: string
+        created_at:
+          type: string
+          required: false
+          description: "ISO timestamp of creation"
+        updated_at:
+          type: string
+          required: false
+          description: "ISO timestamp of last update"
+    
+    spec:
+      type: object
+      required: true
+      description: "Agent specification details"
+      properties:
+        # Language Model Configuration
+        language_model:
+          type: object
+          required: true
+          description: "Language model configuration"
+          properties:
+            location:
+              type: string
+              required: true
+              enum: ["local", "self-hosted", "cloud"]
+              description: "Model hosting location"
+            provider:
+              type: string
+              required: true
+              description: "Model provider"
+              oracle_providers: ["ollama", "vllm", "sglang", "mlx", "lm_studio", "openai", "anthropic", "google", "azure", "mistral", "cohere", "groq", "deepseek"]
+              genie_providers: ["ollama", "vllm", "sglang", "mlx", "lm_studio", "openai", "anthropic", "google", "azure", "mistral", "cohere", "groq", "deepseek"]
+            model:
+              type: string
+              required: true
+              description: "Specific model identifier"
+            model_type:
+              type: string
+              required: false
+              default: "chat"
+              enum: ["chat", "text", "completion"]
+              description: "Model endpoint type"
+            temperature:
+              type: number
+              required: false
+              default: 0.0
+              minimum: 0.0
+              maximum: 2.0
+              description: "Randomness control"
+            max_tokens:
+              type: integer
+              required: false
+              default: 4000
+              minimum: 1
+              maximum: 100000
+              description: "Maximum tokens to generate"
+            top_p:
+              type: number
+              required: false
+              default: 1.0
+              minimum: 0.0
+              maximum: 1.0
+              description: "Nucleus sampling parameter"
+            frequency_penalty:
+              type: number
+              required: false
+              default: 0.0
+              minimum: -2.0
+              maximum: 2.0
+              description: "Frequency penalty"
+            presence_penalty:
+              type: number
+              required: false
+              default: 0.0
+              minimum: -2.0
+              maximum: 2.0
+              description: "Presence penalty"
+            cache:
+              type: boolean
+              required: false
+              default: true
+              description: "Enable LLM call caching"
+            cache_in_memory:
+              type: boolean
+              required: false
+              default: true
+              description: "Cache in memory vs disk"
+            num_retries:
+              type: integer
+              required: false
+              default: 3
+              minimum: 0
+              maximum: 10
+              description: "API failure retry attempts"
+            modalities:
+              type: array
+              required: false
+              default: ["text"]
+              items:
+                enum: ["text", "image", "audio", "video"]
+              description: "Supported modalities"
+            api_key:
+              type: string
+              required: false
+              description: "API key for cloud providers"
+            api_base:
+              type: string
+              required: false
+              description: "Custom API base URL"
+            api_version:
+              type: string
+              required: false
+              description: "API version (Azure)"
+            model_path:
+              type: string
+              required: false
+              description: "Local model file path"
+            request_timeout:
+              type: integer
+              required: false
+              minimum: 1
+              maximum: 600
+              description: "Request timeout in seconds"
+        
+        # Tool Backend Configuration (Protocol-First vs Tool-First)
+        tool_backend:
+          type: string
+          required: false
+          default: "dspy"
+          enum: ["dspy", "agenspy"]
+          description: "Tool loading approach - dspy (tool-first, manual loading) or agenspy (protocol-first, automatic discovery)"
+          
+        # MCP Server Configuration (Protocol-First Approach)
+        mcp_servers:
+          type: array
+          required: false
+          description: "List of Model Context Protocol (MCP) server URIs for automatic tool discovery (protocol-first approach)"
+          items:
+            type: string
+            pattern: "^mcp://.*"
+          tier_restriction: "genies"
+          example: ["mcp://localhost:8080/math", "mcp://localhost:8080/github"]
+        
+        # Agent Persona Configuration
+        persona:
+          type: object
+          required: false
+          description: "Agent personality and role"
+          properties:
+            name:
+              type: string
+              required: false
+              description: "Agent's display name"
+              max_length: 50
+            role:
+              type: string
+              required: true
+              description: "Agent's professional role"
+              max_length: 100
+            goal:
+              type: string
+              required: false
+              description: "Primary objective"
+              max_length: 200
+            job_description:
+              type: string
+              required: false
+              description: "Detailed job description"
+              max_length: 1000
+            backstory:
+              type: string
+              required: false
+              description: "Professional background"
+              max_length: 1000
+            audience:
+              type: string
+              required: false
+              description: "Target audience"
+              max_length: 200
+            traits:
+              type: array
+              required: false
+              description: "Personality traits"
+              items:
+                type: string
+                enum: ["analytical", "creative", "detail-oriented", "empathetic", "formal", "friendly", "helpful", "professional", "technical", "witty"]
+            expertise_areas:
+              type: array
+              required: false
+              description: "Areas of expertise"
+              items:
+                type: string
+            communication_preferences:
+              type: object
+              required: false
+              description: "Communication style"
+              properties:
+                style:
+                  type: string
+                  required: false
+                  default: "formal"
+                  enum: ["formal", "casual", "technical", "conversational"]
+                tone:
+                  type: string
+                  required: false
+                  default: "professional"
+                  enum: ["professional", "friendly", "authoritative", "supportive"]
+                verbosity:
+                  type: string
+                  required: false
+                  default: "concise"
+                  enum: ["concise", "detailed", "adaptive"]
+                language:
+                  type: string
+                  required: false
+                  default: "en"
+                  description: "Primary language code"
+            constraints:
+              type: array
+              required: false
+              description: "Behavioral constraints"
+              items:
+                type: string
+            ethical_guidelines:
+              type: array
+              required: false
+              description: "Ethical boundaries"
+              items:
+                type: string
+        
+        # Task Definitions
+        tasks:
+          type: array
+          required: true
+          description: "Agent task definitions"
+          minimum_items: 1
+          items:
+            type: object
+            required: ["name", "instruction"]
+            properties:
+              name:
+                type: string
+                required: true
+                description: "Unique task name"
+                pattern: "^[a-z0-9_]+$"
+              description:
+                type: string
+                required: false
+                description: "Task description"
+              instruction:
+                type: string
+                required: true
+                description: "Core task instruction"
+                max_length: 2000
+              expected_output_format:
+                type: string
+                required: false
+                description: "Expected output format"
+              schema:
+                type: object
+                required: false
+                description: "Task schema configuration"
+                properties:
+                  style:
+                    type: string
+                    required: false
+                    default: "direct"
+                    enum: ["chain_of_thought", "direct", "structured"]
+                  context_fields:
+                    type: array
+                    required: false
+                    items:
+                      type: string
+                  reasoning_traces:
+                    type: boolean
+                    required: false
+                    default: false
+                  max_depth:
+                    type: integer
+                    required: false
+                    minimum: 1
+                    maximum: 10
+              inputs:
+                type: array
+                required: true
+                minimum_items: 1
+                items:
+                  type: object
+                  required: ["name", "type", "description", "required"]
+                  properties:
+                    name:
+                      type: string
+                      required: true
+                    type:
+                      type: string
+                      required: true
+                      enum: ["str", "int", "bool", "float", "list[str]", "dict[str,Any]"]
+                    description:
+                      type: string
+                      required: true
+                    required:
+                      type: boolean
+                      required: true
+                    constraints:
+                      type: string
+                      required: false
+                    examples:
+                      type: array
+                      required: false
+                      items:
+                        type: string
+                    default_value:
+                      required: false
+                    validation_regex:
+                      type: string
+                      required: false
+              outputs:
+                type: array
+                required: true
+                minimum_items: 1
+                items:
+                  type: object
+                  required: ["name", "type", "description"]
+                  properties:
+                    name:
+                      type: string
+                      required: true
+                    type:
+                      type: string
+                      required: true
+                      enum: ["str", "int", "bool", "float", "list[str]", "dict[str,Any]"]
+                    description:
+                      type: string
+                      required: true
+                    format_template:
+                      type: string
+                      required: false
+                    validation_schema:
+                      type: object
+                      required: false
+                    post_processing:
+                      type: string
+                      required: false
+              reasoning_steps:
+                type: array
+                required: false
+                items:
+                  type: string
+              training_examples:
+                type: array
+                required: false
+                items:
+                  type: object
+                  required: ["input", "output"]
+                  properties:
+                    input:
+                      type: object
+                      required: true
+                    output:
+                      type: object
+                      required: true
+                    reasoning:
+                      type: string
+                      required: false
+                    metadata:
+                      type: object
+                      required: false
+                      properties:
+                        quality_score:
+                          type: number
+                          default: 1.0
+                          minimum: 0.0
+                          maximum: 1.0
+                        source:
+                          type: string
+                          default: "user_provided"
+                        tags:
+                          type: array
+                          items:
+                            type: string
+                        difficulty:
+                          type: string
+                          enum: ["low", "medium", "high"]
+                        domain:
+                          type: string
+              assertions:
+                type: array
+                required: false
+                items:
+                  type: object
+                  required: ["condition", "error_message"]
+                  properties:
+                    type:
+                      type: string
+                      required: false
+                      default: "assertion"
+                      enum: ["assertion", "suggestion"]
+                    condition:
+                      type: string
+                      required: true
+                    error_message:
+                      type: string
+                      required: true
+                    backtrack:
+                      type: boolean
+                      required: false
+                      default: false
+        
+        # Agent Flow Configuration
+        agentflow:
+          type: array
+          required: false
+          description: "Agent execution flow"
+          items:
+            type: object
+            required: ["name", "type", "task"]
+            properties:
+              name:
+                type: string
+                required: true
+                description: "Step name"
+              type:
+                type: string
+                required: true
+                enum: ["Generate", "Think", "ActWithTools", "Search", "Compare", "Route"]
+                description: "Step type"
+                oracle_types: ["Generate", "Think", "Compare", "Route"]
+                genie_types: ["Generate", "Think", "ActWithTools", "Search", "Compare", "Route"]
+              task:
+                type: string
+                required: true
+                description: "Associated task name"
+              depends_on:
+                type: array
+                required: false
+                items:
+                  type: string
+                description: "Dependencies"
+              config:
+                type: object
+                required: false
+                description: "Step configuration"
+                properties:
+                  max_iters:
+                    type: integer
+                    required: false
+                    default: 5
+                    minimum: 1
+                    maximum: 10
+                  tools:
+                    type: array
+                    required: false
+                    items:
+                      type: string
+                    tier_restriction: "genies"
+                  retriever:
+                    type: string
+                    required: false
+                    tier_restriction: "genies"
+                  top_k:
+                    type: integer
+                    required: false
+                    default: 3
+                    minimum: 1
+                    maximum: 20
+                  reasoning_depth:
+                    type: integer
+                    required: false
+                    minimum: 1
+                    maximum: 5
+              retry_policy:
+                type: object
+                required: false
+                properties:
+                  max_retries:
+                    type: integer
+                    required: false
+                    default: 3
+                    minimum: 0
+                    maximum: 10
+                  fallback_step:
+                    type: string
+                    required: false
+                  backoff_strategy:
+                    type: string
+                    required: false
+                    default: "exponential"
+                    enum: ["exponential", "linear", "fixed"]
+
+        # External Datasets Configuration (NEW!)
+        datasets:
+          type: array
+          required: false
+          description: "External datasets for training and evaluation (CSV, JSON, Parquet, HuggingFace)"
+          tier_constraints:
+            oracle: allowed
+            genie: allowed
+          items:
+            type: object
+            required_fields: [name, source, mapping]
+            properties:
+              name:
+                type: string
+                required: true
+                description: "Dataset identifier/name"
+              source:
+                type: string
+                required: true
+                description: "File path or dataset identifier (e.g., ./data/train.csv, huggingface:imdb)"
+              format:
+                type: string
+                required: false
+                default: csv
+                enum: [csv, json, jsonl, parquet, huggingface]
+                description: "Dataset format"
+              mapping:
+                type: object
+                required: true
+                description: "Map dataset columns to agent input/output fields"
+                properties:
+                  input:
+                    type: [string, object]
+                    required: true
+                    description: "Input field mapping (column name or {field: column} dict)"
+                  output:
+                    type: [string, object]
+                    required: true
+                    description: "Output field mapping (column name or {field: column} dict)"
+                  input_field_name:
+                    type: string
+                    required: false
+                    description: "Field name for simple input mapping"
+                  output_field_name:
+                    type: string
+                    required: false
+                    description: "Field name for simple output mapping"
+              split:
+                type: string
+                required: false
+                default: train
+                enum: [train, test, validation, all]
+                description: "Dataset split to use"
+              limit:
+                type: integer
+                required: false
+                description: "Maximum number of examples to load"
+                minimum: 1
+              shuffle:
+                type: boolean
+                required: false
+                default: true
+                description: "Whether to shuffle the dataset"
+          example:
+            - name: training_data
+              source: ./data/sentiment_train.csv
+              format: csv
+              mapping:
+                input: text_column
+                output: label_column
+              limit: 5000
+            - name: hf_imdb
+              source: huggingface:imdb
+              format: huggingface
+              mapping:
+                input: text
+                output: label
+              split: train
+              limit: 10000
+
+        # CRITICAL: Feature Specifications for BDD Testing and Optimization
+        feature_specifications:
+          description: "BDD scenarios for testing, evaluation, and optimization (can be combined with datasets)"
+          type: "object"
+          required: false
+          tier_constraints:
+            oracle: allowed
+            genie: allowed
+          properties:
+            scenarios:
+              description: "Array of BDD test scenarios for agent validation and training"
+              type: "array"
+              required: true
+              min_items: 1
+              max_items: 20
+              items:
+                type: "object"
+                required: ["name", "description", "input", "expected_output"]
+                properties:
+                  name:
+                    description: "Unique identifier for the scenario"
+                    type: "string"
+                    pattern: "^[a-zA-Z][a-zA-Z0-9_]*$"
+                    min_length: 3
+                    max_length: 50
+                  description:
+                    description: "BDD-style description (Given-When-Then format recommended)"
+                    type: "string"
+                    min_length: 10
+                    max_length: 500
+                  input:
+                    description: "Input data that matches agent task inputs"
+                    type: "object"
+                    required: true
+                    # Note: Properties must match task input field names
+                  expected_output:
+                    description: "Expected output data that matches agent task outputs"
+                    type: "object"
+                    required: true
+                    # Note: Properties must match task output field names
+
+        # Evaluation configuration
+        evaluation:
+          description: "Evaluation metrics and thresholds for agent performance"
+          type: "object"
+          required: false
+          tier_constraints:
+            oracle: allowed
+            genie: allowed
+          properties:
+            builtin_metrics:
+              description: "Built-in evaluation metrics"
+              type: "array"
+              default: 
+                - name: "answer_exact_match"
+                  threshold: 1.0
+              items:
+                type: "object"
+                required: ["name", "threshold"]
+                properties:
+                  name:
+                    type: "string"
+                    enum: ["answer_exact_match", "answer_correctness", "faithfulness", "context_precision", "context_recall"]
+                  threshold:
+                    type: "number"
+                    minimum: 0.0
+                    maximum: 1.0
+            custom_metrics:
+              description: "Custom evaluation metrics"
+              type: "array"
+              items:
+                type: "object"
+                required: ["name", "function", "threshold"]
+                properties:
+                  name:
+                    type: "string"
+                  function:
+                    type: "string"
+                    description: "Python function name for custom evaluation"
+                  threshold:
+                    type: "number"
+
+        # Optimization configuration
+        optimization:
+          description: "Optimization strategy and configuration"
+          type: "object"
+          required: false
+          tier_constraints:
+            oracle: allowed
+            genie: allowed
+          properties:
+            optimizer:
+              type: object
+              required: false
+              description: "DSPy optimizer/teleprompter selection and configuration"
+              properties:
+                name:
+                  type: string
+                  required: true
+                  description: "Optimizer/teleprompter class name (e.g., GEPA, SIMBA, COPRO, KNNFewShot, BetterTogether, BootstrapFewShot, LabeledFewShot, MIPROv2, BootstrapFewShotWithRandomSearch, BootstrapFewShotWithOptuna, InferRules, AvatarOptimizer, Ensemble, GRPO, etc.)"
+                params:
+                  type: object
+                  required: false
+                  description: "Parameters to pass to the optimizer/teleprompter constructor. Keys/values are arbitrary and depend on the optimizer."
+            strategy:
+              type: "string"
+              enum: ["few_shot_bootstrapping"]
+              default: "few_shot_bootstrapping"
+              description: "Only BootstrapFewShot available in current version"
+            metric:
+              type: "string"
+              enum: ["answer_exact_match", "answer_correctness"]
+              default: "answer_correctness"
+            metric_threshold:
+              type: "number"
+              minimum: 0.0
+              maximum: 1.0
+              default: 0.7
+            few_shot_bootstrapping_config:
+              type: "object"
+              properties:
+                max_bootstrapped_demos:
+                  type: "integer"
+                  minimum: 1
+                  maximum: 10
+                  default: 4
+                max_rounds:
+                  type: "integer"
+                  minimum: 1
+                  maximum: 5
+                  default: 1
+
+        # RAG Configuration
+        rag:
+          description: "Retrieval-Augmented Generation configuration for knowledge-based agents"
+          type: "object"
+          required: false
+          tier_constraints:
+            oracle: forbidden
+            genie: allowed
+          properties:
+            vector_database:
+              type: "string"
+              enum: ["chroma", "pinecone", "weaviate"]
+              default: "chroma"
+            collection_name:
+              type: "string"
+              default: "agent_knowledge"
+            embedding_model:
+              type: "string"
+              default: "sentence-transformers/all-MiniLM-L6-v2"
+            chunk_size:
+              type: "integer"
+              default: 512
+            overlap:
+              type: "integer"
+              default: 50 

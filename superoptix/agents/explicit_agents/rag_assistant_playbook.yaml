@@ -1,0 +1,141 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: RAG Assistant
+  id: rag_assistant
+  namespace: explicit_agents
+  version: 1.0.0
+  level: genies
+  description: RAG-powered assistant demonstrating retrieval-augmented generation with explicit DSPy template
+  author: SuperOptiX
+  tags:
+  - rag
+  - retrieval
+  - genies
+  - explicit-dspy
+  - chromadb
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    temperature: 0.7
+    max_tokens: 3000
+    api_base: http://localhost:11434
+  input_fields:
+  - name: query
+    type: str
+    description: User's question
+    required: true
+  - name: context
+    type: str
+    description: Retrieved context from knowledge base
+    required: false
+  output_fields:
+  - name: response
+    type: str
+    description: Answer based on retrieved context
+    required: true
+  persona:
+    name: RAG Assistant
+    role: Knowledge-Enhanced Assistant
+    goal: Provide accurate answers using retrieved context from knowledge base
+    traits:
+    - knowledgeable
+    - accurate
+    - thorough
+    - contextual
+    communication_preferences:
+      style: professional
+      tone: informative
+      verbosity: detailed
+  tasks:
+  - name: answer_with_context
+    description: Answer questions using retrieved context from knowledge base
+    instruction: 'You are a knowledge-enhanced assistant with access to a document database.
+
+      Use the retrieved context to provide accurate, well-informed answers.
+
+      Always cite information from the context when available.
+
+      '
+    schema:
+      style: chain_of_thought
+      reasoning_traces: true
+    inputs:
+    - name: query
+      type: str
+      description: User's question
+      required: true
+    - name: context
+      type: str
+      description: Retrieved context from knowledge base
+      required: false
+    outputs:
+    - name: response
+      type: str
+      description: Answer based on retrieved context
+  agentflow:
+  - name: retrieve_and_answer
+    type: Search
+    task: answer_with_context
+  rag:
+    enabled: true
+    vector_database: chromadb
+    collection: software_docs
+    persist_directory: .superoptix/chromadb
+    embedding_model: sentence-transformers/all-MiniLM-L6-v2
+    top_k: 5
+    chunk_size: 512
+    chunk_overlap: 50
+    knowledge_base:
+    - ./docs/**/*.md
+    - ./docs/**/*.txt
+  feature_specifications:
+    scenarios:
+    - name: Context-based answer
+      description: Answer question using retrieved context
+      input:
+        query: What is DSPy?
+      expected_output:
+        response: DSPy is a framework for programming language models with declarative modules and automatic optimization.
+        expected_keywords:
+        - DSPy
+        - framework
+        - language models
+    - name: Technical documentation
+      description: Retrieve and explain technical concepts
+      input:
+        query: How does Chain of Thought work?
+      expected_output:
+        response: Chain of Thought is a reasoning technique that breaks down complex problems into intermediate steps, showing
+          the thinking process.
+        expected_keywords:
+        - reasoning
+        - steps
+        - thinking
+    - name: Code explanation
+      description: Explain code concepts from documentation
+      input:
+        query: What are DSPy signatures?
+      expected_output:
+        response: DSPy signatures define the input and output schema for language model modules, specifying what fields to
+          expect.
+        expected_keywords:
+        - input
+        - output
+        - schema
+  evaluation:
+    builtin_metrics:
+    - name: answer_relevance
+      threshold: 0.8
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_relevance
+        auto: medium
+        reflection_lm: llama3.2:1b
+        max_full_evals: 5
+    metric: answer_relevance
+    metric_threshold: 0.85

@@ -1,0 +1,119 @@
+"""
+Auto-generated Optimas-OpenAI pipeline for agent: {{ metadata.get('id', agent_name) }}
+Builds an Optimas CompoundAISystem from OpenAI Agent SDK callables via an adapter.
+"""
+
+from __future__ import annotations
+
+from typing import Dict, Any, List, Callable
+import os
+
+from optimas.arch.system import CompoundAISystem
+try:
+	from optimas.adapt.openai_sdk import create_component_from_openai
+except Exception:
+	# Fallback to SuperOptiX vendor shim if optimas adapter path is unavailable
+	from superoptix.adapters.optimas_openai_adapter import create_component_from_openai  # type: ignore
+
+try:
+	from openai import OpenAI
+except Exception:
+	OpenAI = None
+
+
+def _require_openai():
+	if OpenAI is None:
+		raise ImportError("OpenAI SDK is required for optimas-openai pipelines. Install: pip install openai")
+
+
+def _build_openai_callable(model: str, system_prompt: str, base_url: str | None = None, api_key: str | None = None) -> Callable[..., Dict[str, Any]]:
+    """Return a callable that invokes OpenAI chat.completions with named kwargs.
+
+    Inputs are packaged into a user message; returns {"response": text} by default.
+    Lazily instantiates the OpenAI client at call time to avoid requiring API key during system build.
+    """
+    client = None
+
+    def _call(**kwargs) -> Dict[str, Any]:
+        nonlocal client
+        _require_openai()
+        if client is None:
+            client = OpenAI(
+                base_url=base_url or os.getenv("OPENAI_BASE_URL"),
+                api_key=api_key or os.getenv("OPENAI_API_KEY"),
+            )
+        user = "\n".join(f"{k}: {v}" for k, v in kwargs.items() if k not in ("prompt",))
+        messages = []
+        # Allow overriding via adapter-injected _system_prompt variable
+        sys_msg = kwargs.get("_system_prompt") or system_prompt
+        if sys_msg:
+            messages.append({"role": "system", "content": sys_msg})
+        messages.append({"role": "user", "content": user})
+        resp = client.chat.completions.create(model=model or "gpt-4o-mini", messages=messages)
+        text = resp.choices[0].message.content if resp and resp.choices else ""
+        return {"response": text}
+
+    return _call
+
+
+def build_optimas_system() -> CompoundAISystem:
+	components: Dict[str, Any] = {}
+	# Jinja renders model at compile time to avoid runtime dependency on playbook
+	model_name = "{{ spec.get('language_model', {}).get('model', 'gpt-4o-mini') }}"
+	lm_base_url = "{{ spec.get('language_model', {}).get('base_url', '') }}"
+	lm_api_key = "{{ spec.get('language_model', {}).get('api_key', '') }}"
+
+{% set tasks = spec.get('tasks', []) %}
+	{% if not tasks %}
+	callable_fn = _build_openai_callable(model_name, "You are a helpful assistant.", base_url=lm_base_url or None, api_key=lm_api_key or None)
+	component = create_component_from_openai(
+		agent_callable=callable_fn,
+		input_fields=["query"],
+		output_fields=["response"],
+		description="Default OpenAI component",
+		initial_prompt="You are a helpful assistant.",
+	)
+	components["default_task"] = component
+	final_outputs: List[str] = ["response"]
+{% else %}
+{% for task in tasks %}
+	callable_fn_{{ loop.index }} = _build_openai_callable(
+		model_name,
+		"{{ (task.get('instruction') or metadata.get('description') or 'You are a helpful assistant.')|clean }}",
+		base_url=lm_base_url or None,
+		api_key=lm_api_key or None,
+	)
+	{{ task.get('name','task_' ~ loop.index)|to_snake_case }}_component = create_component_from_openai(
+		agent_callable=callable_fn_{{ loop.index }},
+		input_fields=[{% for f in task.get('inputs', []) %}"{{ f.get('name')|to_snake_case }}"{% if not loop.last %}, {% endif %}{% endfor %}],
+		output_fields=[{% for f in task.get('outputs', []) %}"{{ f.get('name')|to_snake_case }}"{% if not loop.last %}, {% endif %}{% endfor %}],
+		description="OpenAI component for {{ task.get('name','task_' ~ loop.index)|to_snake_case }}",
+		initial_prompt="{{ (task.get('instruction') or metadata.get('description') or 'You are a helpful assistant.')|clean }}",
+	)
+	components["{{ task.get('name','task_' ~ loop.index)|to_snake_case }}"] = {{ task.get('name','task_' ~ loop.index)|to_snake_case }}_component
+{% endfor %}
+{% set last_task = tasks[-1] %}
+	final_outputs: List[str] = [{% for f in last_task.get('outputs', []) %}"{{ f.get('name')|to_snake_case }}"{% if not loop.last %}, {% endif %}{% endfor %}]
+{% endif %}
+
+	def eval_func(**kwargs) -> float:
+		for k in final_outputs:
+			val = kwargs.get(k)
+			if isinstance(val, str) and val.strip():
+				return 1.0
+			if val not in (None, "", [], {}):
+				return 1.0
+		return 0.0
+
+	return CompoundAISystem(
+		components=components,
+		final_output_fields=final_outputs,
+		ground_fields=[],
+		eval_func=eval_func,
+	)
+
+
+def system_engine() -> CompoundAISystem:
+	return build_optimas_system()
+
+

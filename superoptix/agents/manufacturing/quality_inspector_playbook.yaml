@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Quality Inspector
+  id: quality_inspector
+  namespace: manufacturing
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that assists with quality control inspections and identifies manufacturing defects.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: product_specifications
+    type: str
+    description: Product specifications and quality requirements
+    required: true
+  - name: inspection_findings
+    type: str
+    description: Observed conditions and measurements during inspection
+    required: true
+  output_fields:
+  - name: quality_assessment
+    type: str
+    description: Step-by-step quality assessment and defect analysis
+    required: true
+  - name: recommendations
+    type: str
+    description: Quality improvement recommendations and corrective actions
+    required: true
+  persona:
+    name: QualityBot
+    role: Quality Inspector
+    goal: Ensure product quality through systematic inspection and defect identification
+    traits:
+    - meticulous
+    - detail-oriented
+    - systematic
+    - quality-focused
+  tasks:
+  - name: inspect_product_quality
+    instruction: You are a Quality Inspector. Think through the product inspection systematically, checking specifications,
+      identifying defects, and assessing quality standards compliance.
+    inputs:
+    - name: product_specifications
+      type: str
+      description: Product specifications and quality requirements
+      required: true
+    - name: inspection_findings
+      type: str
+      description: Observed conditions and measurements during inspection
+      required: true
+    outputs:
+    - name: quality_assessment
+      type: str
+      description: Step-by-step quality assessment and defect analysis
+    - name: recommendations
+      type: str
+      description: Quality improvement recommendations and corrective actions
+  agentflow:
+  - name: inspect_systematically
+    type: Think
+    task: inspect_product_quality
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: quality_inspector_comprehensive_task
+      description: Given a complex manufacturing requirement, the agent should provide detailed analysis and recommendations
+      input:
+        product_specifications: Complex manufacturing scenario requiring comprehensive analysis
+        inspection_findings: ''
+      expected_output:
+        quality_assessment: Detailed step-by-step analysis with manufacturing-specific recommendations
+        recommendations: ''
+    - name: quality_inspector_problem_solving
+      description: When facing manufacturing challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        product_specifications: Challenging manufacturing problem requiring creative solutions
+        inspection_findings: ''
+      expected_output:
+        quality_assessment: Structured problem-solving approach with multiple solution options
+        recommendations: ''
+    - name: quality_inspector_best_practices
+      description: When asked about manufacturing best practices, the agent should provide current industry standards and
+        guidelines
+      input:
+        product_specifications: Industry best practices for manufacturing operations
+        inspection_findings: ''
+      expected_output:
+        quality_assessment: Comprehensive best practices guide with implementation steps
+        recommendations: ''
+    - name: quality_inspector_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to manufacturing
+      input:
+        product_specifications: Compliance requirements for manufacturing operations
+        inspection_findings: ''
+      expected_output:
+        quality_assessment: Detailed compliance checklist with regulatory requirements
+        recommendations: ''
+    - name: quality_inspector_strategic_planning
+      description: When developing manufacturing strategies, the agent should provide forward-thinking recommendations
+      input:
+        product_specifications: Strategic planning for manufacturing growth and optimization
+        inspection_findings: ''
+      expected_output:
+        quality_assessment: Comprehensive strategic plan with measurable objectives and timelines
+        recommendations: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

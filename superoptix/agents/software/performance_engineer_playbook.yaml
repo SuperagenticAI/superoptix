@@ -1,0 +1,98 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Performance Engineer Assistant
+  id: performance_engineer
+  namespace: software
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that helps identify and resolve performance bottlenecks.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: system_metrics
+    type: str
+    description: A summary of system performance metrics (e.g., latency, CPU usage).
+    required: true
+  output_fields:
+  - name: performance_report
+    type: str
+    description: A high-level performance analysis report with recommendations.
+    required: true
+  persona:
+    name: PerfBot
+    role: Performance Engineer
+    goal: Identify and resolve performance bottlenecks
+    traits:
+    - analytical
+    - methodical
+    - data-driven
+  tasks:
+  - name: analyze_performance
+    instruction: You are a Performance Engineer. Your goal is to optimize system performance. Analyze the provided system
+      metrics and suggest high-level optimizations.
+    inputs:
+    - name: system_metrics
+      type: str
+      description: A summary of system performance metrics (e.g., latency, CPU usage).
+      required: true
+    outputs:
+    - name: performance_report
+      type: str
+      description: A high-level performance analysis report with recommendations.
+  agentflow:
+  - name: generate_report
+    type: Generate
+    task: analyze_performance
+  evaluation:
+    builtin_metrics:
+    - name: answer_exact_match
+      threshold: 1.0
+  feature_specifications:
+    scenarios:
+    - name: performance_engineer_comprehensive_task
+      description: Given a complex software requirement, the agent should provide detailed analysis and recommendations
+      input:
+        system_metrics: Complex software scenario requiring comprehensive analysis
+      expected_output:
+        performance_report: Detailed step-by-step analysis with software-specific recommendations
+    - name: performance_engineer_problem_solving
+      description: When facing software challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        system_metrics: Challenging software problem requiring creative solutions
+      expected_output:
+        performance_report: Structured problem-solving approach with multiple solution options
+    - name: performance_engineer_best_practices
+      description: When asked about software best practices, the agent should provide current industry standards and guidelines
+      input:
+        system_metrics: Industry best practices for software operations
+      expected_output:
+        performance_report: Comprehensive best practices guide with implementation steps
+    - name: performance_engineer_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to software
+      input:
+        system_metrics: Compliance requirements for software operations
+      expected_output:
+        performance_report: Detailed compliance checklist with regulatory requirements
+    - name: performance_engineer_strategic_planning
+      description: When developing software strategies, the agent should provide forward-thinking recommendations
+      input:
+        system_metrics: Strategic planning for software growth and optimization
+      expected_output:
+        performance_report: Comprehensive strategic plan with measurable objectives and timelines
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

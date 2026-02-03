@@ -1,0 +1,134 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: MLX Demo Assistant
+  id: mlx_demo
+  namespace: demo
+  version: 1.0.0
+  agent_type: Interactive
+  level: genies
+  description: A demo agent showcasing MLX local model capabilities with SuperOptiX.
+spec:
+  language_model:
+    location: local
+    provider: mlx
+    model: mlx-community/Llama-3.2-3B-Instruct-4bit
+    api_base: http://localhost:8000
+    temperature: 0.7
+    max_tokens: 2048
+  input_fields:
+  - name: coding_request
+    type: str
+    description: A coding question, algorithm request, or programming concept explanation.
+    required: true
+  output_fields:
+  - name: code_solution
+    type: str
+    description: A complete, well-documented code solution or explanation.
+    required: true
+  persona:
+    name: MLXBot
+    role: MLX Demo Assistant
+    goal: Demonstrate the power of local MLX models with SuperOptiX
+    traits:
+    - helpful
+    - knowledgeable
+    - precise
+    - educational
+  tasks:
+  - name: code_assistance
+    instruction: You are an MLX Demo Assistant. Your goal is to help users understand and work with code, algorithms, and
+      programming concepts. Provide clear, well-structured responses with examples.
+    inputs:
+    - name: coding_request
+      type: str
+      description: A coding question, algorithm request, or programming concept explanation.
+      required: true
+    outputs:
+    - name: code_solution
+      type: str
+      description: A complete, well-documented code solution or explanation.
+  - name: concept_explanation
+    instruction: Explain programming concepts, algorithms, or technical topics in a clear and educational manner.
+    inputs:
+    - name: concept_query
+      type: str
+      description: A request to explain a programming concept, algorithm, or technical topic.
+      required: true
+    outputs:
+    - name: explanation
+      type: str
+      description: A comprehensive explanation with examples and practical applications.
+  - name: problem_solving
+    instruction: Help solve programming problems and algorithmic challenges with step-by-step reasoning.
+    inputs:
+    - name: problem_statement
+      type: str
+      description: A programming problem or algorithmic challenge to solve.
+      required: true
+    outputs:
+    - name: solution
+      type: str
+      description: A complete solution with step-by-step reasoning and implementation.
+  agentflow:
+  - name: analyze_request
+    type: Analyze
+    task: code_assistance
+  - name: generate_response
+    type: Generate
+    task: concept_explanation
+  - name: solve_problem
+    type: Solve
+    task: problem_solving
+  evaluation:
+    builtin_metrics:
+    - name: answer_accuracy
+      threshold: 0.8
+    - name: code_quality
+      threshold: 0.7
+    - name: explanation_clarity
+      threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: fibonacci_implementation
+      description: The agent should provide a clear implementation of the Fibonacci sequence with explanations.
+      input:
+        coding_request: Write a Python function to calculate the Fibonacci sequence using recursion
+      expected_output:
+        code_solution: Should include a recursive function with base cases and clear documentation
+    - name: recursion_explanation
+      description: The agent should explain recursion clearly with examples.
+      input:
+        concept_query: Explain recursion with examples
+      expected_output:
+        explanation: Should include clear definition, examples, and practical applications
+    - name: sorting_algorithm
+      description: The agent should implement and explain a sorting algorithm.
+      input:
+        problem_statement: Implement and explain quicksort algorithm
+      expected_output:
+        solution: Should include implementation, time complexity analysis, and step-by-step explanation
+    - name: data_structure_explanation
+      description: The agent should explain data structures clearly.
+      input:
+        concept_query: Explain binary trees and their applications
+      expected_output:
+        explanation: Should include structure explanation, traversal methods, and real-world applications
+    - name: algorithm_optimization
+      description: The agent should help optimize an algorithm.
+      input:
+        problem_statement: Optimize this function for better performance
+      expected_output:
+        solution: Should include performance analysis and optimization suggestions
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 5
+        skip_perfect_score: true
+        reflection_minibatch_size: 3
+    metric: answer_exact_match
+    metric_threshold: 0.75

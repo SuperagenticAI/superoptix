@@ -1,0 +1,190 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Customer Support with Memory
+  id: customer_support_memory
+  namespace: demo
+  version: 1.0.0
+  level: genies
+  description: |
+    Customer support agent demonstrating GEPA-based memory optimization.
+    
+    Shows:
+    - Multi-turn conversations with memory
+    - Context window optimization (select relevant memories)
+    - Token budget management (4K context)
+    - Memory compression (summaries when needed)
+    
+    Before optimization: Includes all 20 memories → context overflow
+    After optimization: Selects 5-8 relevant memories → efficient context
+  author: SuperOptiX
+  tags:
+    - customer-support
+    - memory-optimization
+    - context-window
+    - demo
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    temperature: 0.7
+    max_tokens: 2000
+    api_base: http://localhost:11434
+  
+  input_fields:
+    - name: customer_query
+      type: str
+      description: Customer question or request
+      required: true
+    - name: customer_id
+      type: str
+      description: Customer identifier (for memory lookup)
+      required: false
+  
+  output_fields:
+    - name: response
+      type: str
+      description: Support response
+      required: true
+    - name: memories_used
+      type: list
+      description: Memories referenced in response
+      required: false
+  
+  persona:
+    name: Support Agent
+    role: Customer Support Specialist
+    goal: Provide helpful support using customer history
+    traits:
+      - empathetic
+      - knowledgeable
+      - efficient
+    communication_preferences:
+      style: friendly
+      tone: helpful
+      verbosity: concise
+  
+  agentflow:
+    - name: answer_with_memory
+      type: Search
+      task: support_query
+  
+  # Memory Configuration (NEW!)
+  memory:
+    enabled: true
+    short_term_capacity: 100
+    enable_embeddings: true
+    enable_context_optimization: true  # Enable GEPA optimization!
+    max_context_tokens: 2000  # Context budget
+    retention_policy: lru
+  
+  # BDD Scenarios (showing memory usage)
+  feature_specifications:
+    scenarios:
+      # Simple query (no memory needed)
+      - name: Product question
+        description: Answer about product
+        input:
+          customer_query: "What are your business hours?"
+        expected_output:
+          response: "We're open Monday-Friday 9am-5pm"
+          expected_keywords:
+            - Monday
+            - Friday
+            - 9am
+            - 5pm
+      
+      # Memory recall (recent conversation)
+      - name: Follow-up question
+        description: Reference previous conversation
+        given_memory:
+          - content: "Customer Sarah ordered laptop #12345 yesterday"
+            type: short_term
+            importance: 0.9
+            timestamp: "2025-10-20T10:00:00"
+        input:
+          customer_query: "When will my order arrive?"
+          customer_id: "sarah_123"
+        expected_output:
+          response: "Your laptop order #12345"
+          expected_keywords:
+            - laptop
+            - "12345"
+            - delivery
+      
+      # Memory recall (old conversation)
+      - name: Return policy from last month
+        description: Customer remembers interaction from last month
+        given_memory:
+          - content: "Sarah asked about return policy on 2025-09-20"
+            type: long_term
+            importance: 0.6
+            timestamp: "2025-09-20T14:00:00"
+          - content: "Return policy: 30 days with receipt"
+            type: long_term
+            importance: 0.8
+            timestamp: "2025-09-20T14:05:00"
+        input:
+          customer_query: "You told me about returns last month, what was it?"
+          customer_id: "sarah_123"
+        expected_output:
+          response: "30 days with receipt"
+          expected_keywords:
+            - 30 days
+            - receipt
+            - return
+      
+      # Context overflow scenario (tests optimization)
+      - name: Many memories
+        description: Optimize context when many memories available
+        given_memory:
+          - content: "Order #AAA placed"
+            importance: 0.3
+            timestamp: "2025-10-01T10:00:00"
+          - content: "Order #BBB placed"
+            importance: 0.4
+            timestamp: "2025-10-05T10:00:00"
+          - content: "Shipping issue with order #CCC"
+            importance: 0.9
+            timestamp: "2025-10-10T10:00:00"
+          - content: "Refund processed for #DDD"
+            importance: 0.7
+            timestamp: "2025-10-15T10:00:00"
+          - content: "Customer prefers email contact"
+            importance: 0.6
+            timestamp: "2025-10-18T10:00:00"
+          - content: "VIP customer since 2020"
+            importance: 0.8
+            timestamp: "2025-01-01T00:00:00"
+        input:
+          customer_query: "What happened with my shipping issue?"
+          customer_id: "sarah_123"
+        expected_output:
+          response: "order #CCC"
+          expected_keywords:
+            - shipping
+            - CCC
+            - issue
+  
+  # Evaluation
+  evaluation:
+    builtin_metrics:
+      - name: response_accuracy
+        threshold: 0.75
+      - name: memory_usage_efficiency
+        threshold: 0.70
+        description: Uses relevant memories without overflow
+  
+  # Optimization
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: response_accuracy
+        auto: medium
+        reflection_lm: llama3.2:1b
+        max_full_evals: 10
+    metric: response_accuracy
+    metric_threshold: 0.85
+

@@ -1,0 +1,70 @@
+# Tier: Oracle (Free)
+# Concept: "Basic Question-Answering Agent" - A template for the simplest functional agent.
+# GOAL: To define basic question-answering tasks with Chain of Thought reasoning.
+---
+apiVersion: agent/v1
+kind: AgentSpec
+
+metadata:
+  name: string                 # e.g., "faq-bot"
+  id: string                   # e.g., "faq-bot-v1-0-0"
+  namespace: string            # e.g., "customer-support"
+  version: 1.0.0
+  agent_type: Supervised|Autonomous|... # e.g., Supervised
+  level: oracles
+  description: string          # e.g., "An agent that answers frequently asked questions with basic reasoning."
+
+spec:
+  language_model:
+    provider: openai|ollama|anthropic|google|...
+    model: string              # e.g., "gpt-3.5-turbo"
+
+  persona:
+    name: string               # e.g., "OracleBot"
+    role: string               # e.g., "Helpful Question-Answering Assistant"
+    goal: string               # e.g., "To answer user questions with clear reasoning."
+    traits: [string]           # e.g., ["thoughtful", "clear", "helpful"]
+
+  tasks:
+    - name: string             # e.g., "answer_question"
+      instruction: string      # e.g., "You are a helpful assistant. Think step by step and answer the user's question."
+      inputs:
+        - name: query
+          type: str
+          description: "The question or request to be answered."
+          required: true
+      outputs:
+        - name: response
+          type: str
+          description: "The generated response with reasoning."
+
+  agentflow:
+    - name: generate_answer
+      type: Generate
+      task: answer_question # Must match a task name from the 'tasks' section.
+
+  evaluation:
+    builtin_metrics:
+      - name: response_exact_match
+        threshold: 0.8
+      - name: semantic_f1
+        threshold: 0.7
+
+  # Oracle tier uses BDD scenarios for testing
+  # The framework can use this to create a dspy.Example for evaluation.
+  feature_specifications:
+    scenarios:
+      - name: string           # e.g., "basic_question_answering"
+        description: string    # e.g., "Check if the agent can answer basic questions with reasoning."
+        input:
+          query: string        # e.g., "What is the capital of France?"
+        expected_output:
+          response: string     # e.g., "The capital of France is Paris. This is a well-known geographical fact."
+
+  optimization:
+    strategy: bootstrap_fewshot
+    metric: response_correctness
+    metric_threshold: 0.7
+    bootstrap_config:
+      max_bootstrapped_demos: 5
+      max_rounds: 1 

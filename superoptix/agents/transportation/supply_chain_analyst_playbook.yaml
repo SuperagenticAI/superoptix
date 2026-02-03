@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Supply Chain Analyst
+  id: supply_chain_analyst
+  namespace: transportation
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that analyzes supply chain operations and identifies optimization opportunities.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: supply_chain_data
+    type: str
+    description: Inventory levels, lead times, supplier performance, and logistics costs
+    required: true
+  - name: performance_metrics
+    type: str
+    description: Current KPIs, customer satisfaction, and operational targets
+    required: true
+  output_fields:
+  - name: supply_chain_analysis
+    type: str
+    description: Step-by-step supply chain performance analysis
+    required: true
+  - name: optimization_recommendations
+    type: str
+    description: Specific recommendations for supply chain improvements
+    required: true
+  persona:
+    name: SupplyChainBot
+    role: Supply Chain Operations Analyst
+    goal: Optimize supply chain efficiency, reduce costs, and improve delivery performance
+    traits:
+    - analytical
+    - strategic
+    - data-driven
+    - process-focused
+  tasks:
+  - name: analyze_supply_chain
+    instruction: You are a Supply Chain Operations Analyst. Think through supply chain data systematically to identify bottlenecks,
+      cost reduction opportunities, and process improvements across the entire logistics network.
+    inputs:
+    - name: supply_chain_data
+      type: str
+      description: Inventory levels, lead times, supplier performance, and logistics costs
+      required: true
+    - name: performance_metrics
+      type: str
+      description: Current KPIs, customer satisfaction, and operational targets
+      required: true
+    outputs:
+    - name: supply_chain_analysis
+      type: str
+      description: Step-by-step supply chain performance analysis
+    - name: optimization_recommendations
+      type: str
+      description: Specific recommendations for supply chain improvements
+  agentflow:
+  - name: analyze_systematically
+    type: Think
+    task: analyze_supply_chain
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: supply_chain_analyst_comprehensive_task
+      description: Given a complex transportation requirement, the agent should provide detailed analysis and recommendations
+      input:
+        supply_chain_data: Complex transportation scenario requiring comprehensive analysis
+        performance_metrics: ''
+      expected_output:
+        supply_chain_analysis: Detailed step-by-step analysis with transportation-specific recommendations
+        optimization_recommendations: ''
+    - name: supply_chain_analyst_problem_solving
+      description: When facing transportation challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        supply_chain_data: Challenging transportation problem requiring creative solutions
+        performance_metrics: ''
+      expected_output:
+        supply_chain_analysis: Structured problem-solving approach with multiple solution options
+        optimization_recommendations: ''
+    - name: supply_chain_analyst_best_practices
+      description: When asked about transportation best practices, the agent should provide current industry standards and
+        guidelines
+      input:
+        supply_chain_data: Industry best practices for transportation operations
+        performance_metrics: ''
+      expected_output:
+        supply_chain_analysis: Comprehensive best practices guide with implementation steps
+        optimization_recommendations: ''
+    - name: supply_chain_analyst_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to transportation
+      input:
+        supply_chain_data: Compliance requirements for transportation operations
+        performance_metrics: ''
+      expected_output:
+        supply_chain_analysis: Detailed compliance checklist with regulatory requirements
+        optimization_recommendations: ''
+    - name: supply_chain_analyst_strategic_planning
+      description: When developing transportation strategies, the agent should provide forward-thinking recommendations
+      input:
+        supply_chain_data: Strategic planning for transportation growth and optimization
+        performance_metrics: ''
+      expected_output:
+        supply_chain_analysis: Comprehensive strategic plan with measurable objectives and timelines
+        optimization_recommendations: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

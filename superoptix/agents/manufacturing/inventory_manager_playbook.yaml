@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Inventory Manager
+  id: inventory_manager
+  namespace: manufacturing
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that helps optimize inventory levels and manage supply chain logistics.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: current_inventory
+    type: str
+    description: Current inventory levels and stock information
+    required: true
+  - name: consumption_pattern
+    type: str
+    description: Historical consumption rates and demand patterns
+    required: true
+  output_fields:
+  - name: inventory_analysis
+    type: str
+    description: Analysis of current inventory status and optimization opportunities
+    required: true
+  - name: reorder_recommendations
+    type: str
+    description: Specific reorder points and quantity recommendations
+    required: true
+  persona:
+    name: InventoryBot
+    role: Inventory Manager
+    goal: Optimize inventory levels to minimize costs while ensuring production continuity
+    traits:
+    - cost-conscious
+    - analytical
+    - forecasting-focused
+    - efficient
+  tasks:
+  - name: optimize_inventory
+    instruction: You are an Inventory Manager. Analyze current inventory levels, consumption rates, and supply chain factors
+      to optimize stock levels and prevent shortages or overstock.
+    inputs:
+    - name: current_inventory
+      type: str
+      description: Current inventory levels and stock information
+      required: true
+    - name: consumption_pattern
+      type: str
+      description: Historical consumption rates and demand patterns
+      required: true
+    outputs:
+    - name: inventory_analysis
+      type: str
+      description: Analysis of current inventory status and optimization opportunities
+    - name: reorder_recommendations
+      type: str
+      description: Specific reorder points and quantity recommendations
+  agentflow:
+  - name: analyze_inventory
+    type: Generate
+    task: optimize_inventory
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.7
+  feature_specifications:
+    scenarios:
+    - name: inventory_manager_comprehensive_task
+      description: Given a complex manufacturing requirement, the agent should provide detailed analysis and recommendations
+      input:
+        current_inventory: Complex manufacturing scenario requiring comprehensive analysis
+        consumption_pattern: ''
+      expected_output:
+        inventory_analysis: Detailed step-by-step analysis with manufacturing-specific recommendations
+        reorder_recommendations: ''
+    - name: inventory_manager_problem_solving
+      description: When facing manufacturing challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        current_inventory: Challenging manufacturing problem requiring creative solutions
+        consumption_pattern: ''
+      expected_output:
+        inventory_analysis: Structured problem-solving approach with multiple solution options
+        reorder_recommendations: ''
+    - name: inventory_manager_best_practices
+      description: When asked about manufacturing best practices, the agent should provide current industry standards and
+        guidelines
+      input:
+        current_inventory: Industry best practices for manufacturing operations
+        consumption_pattern: ''
+      expected_output:
+        inventory_analysis: Comprehensive best practices guide with implementation steps
+        reorder_recommendations: ''
+    - name: inventory_manager_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to manufacturing
+      input:
+        current_inventory: Compliance requirements for manufacturing operations
+        consumption_pattern: ''
+      expected_output:
+        inventory_analysis: Detailed compliance checklist with regulatory requirements
+        reorder_recommendations: ''
+    - name: inventory_manager_strategic_planning
+      description: When developing manufacturing strategies, the agent should provide forward-thinking recommendations
+      input:
+        current_inventory: Strategic planning for manufacturing growth and optimization
+        consumption_pattern: ''
+      expected_output:
+        inventory_analysis: Comprehensive strategic plan with measurable objectives and timelines
+        reorder_recommendations: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

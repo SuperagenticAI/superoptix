@@ -1,0 +1,98 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: History Explorer
+  id: history_guide
+  namespace: education
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that makes historical events engaging and memorable for middle school students.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: topic
+    type: str
+    description: The historical event or topic to explain.
+    required: true
+  output_fields:
+  - name: explanation
+    type: str
+    description: The engaging explanation of the historical topic.
+    required: true
+  persona:
+    name: HistoryBot
+    role: History Teacher
+    goal: Make historical events engaging and memorable
+    traits:
+    - storyteller
+    - engaging
+    - knowledgeable
+  tasks:
+  - name: explain_history
+    instruction: You are a History Teacher. Your goal is to make historical events engaging and memorable. Explain the user's
+      topic through storytelling and interesting facts.
+    inputs:
+    - name: topic
+      type: str
+      description: The historical event or topic to explain.
+      required: true
+    outputs:
+    - name: explanation
+      type: str
+      description: The engaging explanation of the historical topic.
+  agentflow:
+  - name: generate_explanation
+    type: Generate
+    task: explain_history
+  evaluation:
+    builtin_metrics:
+    - name: answer_exact_match
+      threshold: 1.0
+  feature_specifications:
+    scenarios:
+    - name: history_guide_comprehensive_task
+      description: Given a complex education requirement, the agent should provide detailed analysis and recommendations
+      input:
+        topic: Complex education scenario requiring comprehensive analysis
+      expected_output:
+        explanation: Detailed step-by-step analysis with education-specific recommendations
+    - name: history_guide_problem_solving
+      description: When facing education challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        topic: Challenging education problem requiring creative solutions
+      expected_output:
+        explanation: Structured problem-solving approach with multiple solution options
+    - name: history_guide_best_practices
+      description: When asked about education best practices, the agent should provide current industry standards and guidelines
+      input:
+        topic: Industry best practices for education operations
+      expected_output:
+        explanation: Comprehensive best practices guide with implementation steps
+    - name: history_guide_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to education
+      input:
+        topic: Compliance requirements for education operations
+      expected_output:
+        explanation: Detailed compliance checklist with regulatory requirements
+    - name: history_guide_strategic_planning
+      description: When developing education strategies, the agent should provide forward-thinking recommendations
+      input:
+        topic: Strategic planning for education growth and optimization
+      expected_output:
+        explanation: Comprehensive strategic plan with measurable objectives and timelines
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

@@ -1,0 +1,217 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: BootstrapFewShot Text Classifier
+  id: bootstrap-text-classifier
+  version: 1.0.0
+  namespace: software
+  level: oracles
+  stage: stable
+  agent_type: Autonomous
+  description: Text classification agent optimized with BootstrapFewShot for rapid learning
+  tags:
+  - classification
+  - nlp
+  - bootstrap
+  - optimization
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    temperature: 0.2
+    max_tokens: 8000
+    cache: true
+  input_fields:
+  - name: text
+    type: str
+    description: The text to classify
+    required: true
+  - name: categories
+    type: list[str]
+    description: List of possible categories
+    required: true
+  output_fields:
+  - name: category
+    type: str
+    description: The predicted category
+    required: true
+  - name: confidence
+    type: str
+    description: Confidence level (High/Medium/Low)
+    required: true
+  - name: reasoning
+    type: str
+    description: Brief explanation of the classification
+    required: true
+  persona:
+    role: Text Classification Specialist
+    goal: Accurately classify text into predefined categories with high confidence
+    traits:
+    - analytical
+    - precise
+    - systematic
+    - reliable
+    expertise_areas:
+    - text analysis
+    - categorization
+    - sentiment analysis
+    communication_preferences:
+      style: technical
+      tone: professional
+      verbosity: concise
+  tasks:
+  - name: classify_text
+    description: Classify input text into predefined categories
+    instruction: 'Classify the given text into one of the specified categories.
+
+
+      Instructions:
+
+      1. Read and analyze the input text carefully
+
+      2. Consider the content, tone, and context
+
+      3. Select the most appropriate category
+
+      4. Provide confidence level for your classification
+
+      5. Give brief reasoning for your decision
+
+
+      Format your response as:
+
+      **Category:** [Selected category]
+
+      **Confidence:** [High/Medium/Low]
+
+      **Reasoning:** [Brief explanation of classification decision]
+
+      '
+    inputs:
+    - name: text
+      type: str
+      description: The text to classify
+      required: true
+    - name: categories
+      type: list[str]
+      description: List of possible categories
+      required: true
+    outputs:
+    - name: category
+      type: str
+      description: The predicted category
+    - name: confidence
+      type: str
+      description: Confidence level (High/Medium/Low)
+    - name: reasoning
+      type: str
+      description: Brief explanation of the classification
+  optimization:
+    enabled: true
+    optimizer:
+      name: BootstrapFewShot
+      params:
+        metric: answer_exact_match
+        max_bootstrapped_demos: 8
+        max_labeled_demos: 16
+        max_rounds: 2
+        max_errors: 3
+        verbose: false
+        timeout: 120
+    evaluation:
+      enabled: true
+      metrics:
+      - answer_exact_match
+      - answer_correctness
+      test_split: 0.2
+      cross_validation:
+        enabled: true
+        folds: 3
+    hardware_optimization:
+      target_tier: lightweight
+      memory_limit_gb: 8
+  feature_specifications:
+    scenarios:
+    - name: sentiment_classification
+      description: Should classify text sentiment accurately
+      input:
+        text: I absolutely love this product! It exceeded all my expectations.
+        categories:
+        - positive
+        - negative
+        - neutral
+      expected_output:
+        category: positive
+        confidence: High
+        reasoning: Text contains strong positive language and enthusiasm
+      tags:
+      - sentiment
+      - positive
+      priority: high
+    - name: topic_classification
+      description: Should classify text by topic
+      input:
+        text: The new CPU architecture delivers 15% better performance while reducing power consumption.
+        categories:
+        - technology
+        - sports
+        - politics
+        - entertainment
+      expected_output:
+        category: technology
+        confidence: High
+        reasoning: Text discusses CPU architecture and performance metrics
+      tags:
+      - topic
+      - technology
+      priority: high
+    - name: priority_classification
+      description: Should classify message priority levels
+      input:
+        text: 'URGENT: Server down, all services affected, need immediate attention!'
+        categories:
+        - low
+        - medium
+        - high
+        - critical
+      expected_output:
+        category: critical
+        confidence: High
+        reasoning: Contains urgent language and describes system-wide impact
+      tags:
+      - priority
+      - urgent
+      priority: high
+    - name: intent_classification
+      description: Should classify user intent from messages
+      input:
+        text: Can you help me cancel my subscription?
+        categories:
+        - question
+        - complaint
+        - request
+        - compliment
+      expected_output:
+        category: request
+        confidence: High
+        reasoning: User is requesting assistance with a specific action
+      tags:
+      - intent
+      - request
+      priority: medium
+    - name: spam_classification
+      description: Should identify spam messages
+      input:
+        text: Congratulations! You've won $1,000,000! Click here to claim your prize now!
+        categories:
+        - spam
+        - not_spam
+      expected_output:
+        category: spam
+        confidence: High
+        reasoning: 'Contains typical spam characteristics: fake prizes, urgency, suspicious links'
+      tags:
+      - spam
+      - detection
+      priority: high

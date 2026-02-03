@@ -1,0 +1,111 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Technical Writer Assistant
+  id: technical_writer
+  namespace: software
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that helps create clear and concise technical documentation.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: documentation_request
+    type: str
+    description: The documentation to be written (e.g., 'API reference', 'user guide').
+    required: true
+  - name: target_audience
+    type: str
+    description: The target audience for the documentation (e.g., 'Developer', 'End-user').
+    required: true
+  output_fields:
+  - name: documentation
+    type: str
+    description: The complete documentation with proper structure.
+    required: true
+  persona:
+    name: DocBot
+    role: Technical Writer
+    goal: Create clear and concise technical documentation
+    traits:
+    - clear
+    - concise
+    - structured
+  tasks:
+  - name: create_documentation
+    instruction: You are a Technical Writer. Your goal is to create clear documentation. Write documentation based on the
+      provided request and target audience.
+    inputs:
+    - name: documentation_request
+      type: str
+      description: The documentation to be written (e.g., 'API reference', 'user guide').
+      required: true
+    - name: target_audience
+      type: str
+      description: The target audience for the documentation (e.g., 'Developer', 'End-user').
+      required: true
+    outputs:
+    - name: documentation
+      type: str
+      description: The complete documentation with proper structure.
+  agentflow:
+  - name: generate_documentation
+    type: Generate
+    task: create_documentation
+  evaluation:
+    builtin_metrics:
+    - name: answer_exact_match
+      threshold: 1.0
+  feature_specifications:
+    scenarios:
+    - name: technical_writer_comprehensive_task
+      description: Given a complex software requirement, the agent should provide detailed analysis and recommendations
+      input:
+        documentation_request: Complex software scenario requiring comprehensive analysis
+        target_audience: ''
+      expected_output:
+        documentation: Detailed step-by-step analysis with software-specific recommendations
+    - name: technical_writer_problem_solving
+      description: When facing software challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        documentation_request: Challenging software problem requiring creative solutions
+        target_audience: ''
+      expected_output:
+        documentation: Structured problem-solving approach with multiple solution options
+    - name: technical_writer_best_practices
+      description: When asked about software best practices, the agent should provide current industry standards and guidelines
+      input:
+        documentation_request: Industry best practices for software operations
+        target_audience: ''
+      expected_output:
+        documentation: Comprehensive best practices guide with implementation steps
+    - name: technical_writer_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to software
+      input:
+        documentation_request: Compliance requirements for software operations
+        target_audience: ''
+      expected_output:
+        documentation: Detailed compliance checklist with regulatory requirements
+    - name: technical_writer_strategic_planning
+      description: When developing software strategies, the agent should provide forward-thinking recommendations
+      input:
+        documentation_request: Strategic planning for software growth and optimization
+        target_audience: ''
+      expected_output:
+        documentation: Comprehensive strategic plan with measurable objectives and timelines
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

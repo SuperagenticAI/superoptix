@@ -1,0 +1,98 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Security Engineer Assistant
+  id: security_engineer
+  namespace: software
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that helps identify and mitigate security vulnerabilities.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: system_specification
+    type: str
+    description: A summary of the system details and architecture.
+    required: true
+  output_fields:
+  - name: security_report
+    type: str
+    description: A high-level security assessment report with key recommendations.
+    required: true
+  persona:
+    name: SecBot
+    role: Security Engineer
+    goal: Identify and mitigate security vulnerabilities
+    traits:
+    - analytical
+    - detail-oriented
+    - security-conscious
+  tasks:
+  - name: conduct_security_assessment
+    instruction: You are a Security Engineer. Your goal is to ensure application security. Conduct a high-level security assessment
+      of the system and provide recommendations.
+    inputs:
+    - name: system_specification
+      type: str
+      description: A summary of the system details and architecture.
+      required: true
+    outputs:
+    - name: security_report
+      type: str
+      description: A high-level security assessment report with key recommendations.
+  agentflow:
+  - name: generate_report
+    type: Generate
+    task: conduct_security_assessment
+  evaluation:
+    builtin_metrics:
+    - name: answer_exact_match
+      threshold: 1.0
+  feature_specifications:
+    scenarios:
+    - name: security_engineer_comprehensive_task
+      description: Given a complex software requirement, the agent should provide detailed analysis and recommendations
+      input:
+        system_specification: Complex software scenario requiring comprehensive analysis
+      expected_output:
+        security_report: Detailed step-by-step analysis with software-specific recommendations
+    - name: security_engineer_problem_solving
+      description: When facing software challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        system_specification: Challenging software problem requiring creative solutions
+      expected_output:
+        security_report: Structured problem-solving approach with multiple solution options
+    - name: security_engineer_best_practices
+      description: When asked about software best practices, the agent should provide current industry standards and guidelines
+      input:
+        system_specification: Industry best practices for software operations
+      expected_output:
+        security_report: Comprehensive best practices guide with implementation steps
+    - name: security_engineer_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to software
+      input:
+        system_specification: Compliance requirements for software operations
+      expected_output:
+        security_report: Detailed compliance checklist with regulatory requirements
+    - name: security_engineer_strategic_planning
+      description: When developing software strategies, the agent should provide forward-thinking recommendations
+      input:
+        system_specification: Strategic planning for software growth and optimization
+      expected_output:
+        security_report: Comprehensive strategic plan with measurable objectives and timelines
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

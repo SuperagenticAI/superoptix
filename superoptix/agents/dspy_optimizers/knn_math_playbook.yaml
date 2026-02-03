@@ -1,0 +1,116 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: KNN FewShot Math Solver
+  id: knn-math-solver
+  version: 1.0.0
+  level: oracles
+  description: Mathematical problem solver using KNN FewShot optimization for k-nearest neighbor learning
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    temperature: 0.1
+    max_tokens: 32000
+  input_fields:
+  - name: problem
+    type: str
+    description: The mathematical problem to solve
+    required: true
+  output_fields:
+  - name: solution
+    type: str
+    description: Step-by-step solution
+    required: true
+  - name: answer
+    type: str
+    description: The final answer
+    required: true
+  - name: reasoning
+    type: str
+    description: Pattern-based reasoning
+    required: true
+  persona:
+    role: Mathematics Specialist
+    goal: Solve mathematical problems using nearest-neighbor learning and pattern recognition
+    traits:
+    - analytical
+    - pattern-focused
+    - precise
+    - systematic
+  tasks:
+  - name: solve_math_problem
+    description: Solve mathematical problems using k-nearest neighbor optimization
+    instruction: 'Solve the given mathematical problem by identifying similar patterns.
+
+
+      Requirements:
+
+      1. Recognize problem patterns
+
+      2. Apply similar solution methods
+
+      3. Show clear step-by-step work
+
+      4. Provide accurate final answer
+
+
+      **Solution:**
+
+      [Step-by-step work]
+
+
+      **Answer:** [Final answer]
+
+      '
+    inputs:
+    - name: problem
+      type: str
+      description: The mathematical problem to solve
+      required: true
+    outputs:
+    - name: solution
+      type: str
+      description: Step-by-step solution
+    - name: answer
+      type: str
+      description: The final answer
+    - name: reasoning
+      type: str
+      description: Pattern-based reasoning
+  optimization:
+    optimizer:
+      name: KNNFewShot
+      params:
+        k: 3
+  feature_specifications:
+    scenarios:
+    - name: quadratic_equation
+      description: Should solve quadratic equations
+      input:
+        problem: "Solve 2x\xB2 - 5x - 3 = 0"
+      expected_output:
+        answer: x = 3 or x = -1/2
+        solution: "Using quadratic formula: x = (5 \xB1 \u221A49)/4 = (5 \xB1 7)/4"
+    - name: pythagorean_theorem
+      description: Should apply Pythagorean theorem
+      input:
+        problem: Find the hypotenuse of a right triangle with legs 5 and 12
+      expected_output:
+        answer: '13'
+        solution: "Using Pythagorean theorem: c\xB2 = 5\xB2 + 12\xB2 = 169, so c = 13"
+    - name: optimization_calculus
+      description: Should solve optimization problems
+      input:
+        problem: Find the maximum area of a rectangle with perimeter 20
+      expected_output:
+        answer: '25'
+        solution: 'Square gives maximum area: side = 5, area = 25'
+    - name: arithmetic
+      description: Should solve arithmetic problems
+      input:
+        problem: What is 25 + 37?
+      expected_output:
+        answer: '62'
+        solution: 25 + 37 = 62

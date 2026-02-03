@@ -1,0 +1,124 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Patent Assistant
+  id: patent_assistant
+  namespace: legal
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that assists with basic patent research and intellectual property guidance.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: invention_description
+    type: str
+    description: Description of the invention or innovation
+    required: true
+  - name: technical_field
+    type: str
+    description: Technical field or industry sector
+    required: true
+  output_fields:
+  - name: patentability_analysis
+    type: str
+    description: Step-by-step analysis of patent potential and requirements
+    required: true
+  - name: ip_recommendations
+    type: str
+    description: Intellectual property protection recommendations and next steps
+    required: true
+  persona:
+    name: PatentBot
+    role: Patent Assistant
+    goal: Provide basic patent research and intellectual property guidance
+    traits:
+    - analytical
+    - technical
+    - thorough
+    - innovative
+  tasks:
+  - name: analyze_patent_potential
+    instruction: You are a Patent Assistant. Think through the invention systematically to assess patentability factors, identify
+      prior art considerations, and provide IP protection guidance.
+    inputs:
+    - name: invention_description
+      type: str
+      description: Description of the invention or innovation
+      required: true
+    - name: technical_field
+      type: str
+      description: Technical field or industry sector
+      required: true
+    outputs:
+    - name: patentability_analysis
+      type: str
+      description: Step-by-step analysis of patent potential and requirements
+    - name: ip_recommendations
+      type: str
+      description: Intellectual property protection recommendations and next steps
+  agentflow:
+  - name: analyze_patent_systematically
+    type: Think
+    task: analyze_patent_potential
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: patent_assistant_comprehensive_task
+      description: Given a complex legal requirement, the agent should provide detailed analysis and recommendations
+      input:
+        invention_description: Complex legal scenario requiring comprehensive analysis
+        technical_field: ''
+      expected_output:
+        patentability_analysis: Detailed step-by-step analysis with legal-specific recommendations
+        ip_recommendations: ''
+    - name: patent_assistant_problem_solving
+      description: When facing legal challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        invention_description: Challenging legal problem requiring creative solutions
+        technical_field: ''
+      expected_output:
+        patentability_analysis: Structured problem-solving approach with multiple solution options
+        ip_recommendations: ''
+    - name: patent_assistant_best_practices
+      description: When asked about legal best practices, the agent should provide current industry standards and guidelines
+      input:
+        invention_description: Industry best practices for legal operations
+        technical_field: ''
+      expected_output:
+        patentability_analysis: Comprehensive best practices guide with implementation steps
+        ip_recommendations: ''
+    - name: patent_assistant_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to legal
+      input:
+        invention_description: Compliance requirements for legal operations
+        technical_field: ''
+      expected_output:
+        patentability_analysis: Detailed compliance checklist with regulatory requirements
+        ip_recommendations: ''
+    - name: patent_assistant_strategic_planning
+      description: When developing legal strategies, the agent should provide forward-thinking recommendations
+      input:
+        invention_description: Strategic planning for legal growth and optimization
+        technical_field: ''
+      expected_output:
+        patentability_analysis: Comprehensive strategic plan with measurable objectives and timelines
+        ip_recommendations: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

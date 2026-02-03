@@ -1,0 +1,190 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Persistent Chatbot
+  id: chatbot_persistent
+  namespace: demo
+  version: 1.0.0
+  level: genies
+  description: |
+    Persistent chatbot that remembers users across conversations.
+    Demonstrates DeepAgents 0.2.0 StoreBackend for long-term memory.
+    
+    Features:
+    - Remembers user preferences across sessions
+    - Builds knowledge over time
+    - Personalizes responses based on history
+    - Uses Gemini 2.5 Flash (FREE tier)
+  author: SuperOptiX
+  tags:
+    - chatbot
+    - deepagents
+    - persistent-memory
+    - demo
+    - gemini
+spec:
+  target_framework: deepagents
+  
+  # Gemini 2.5 Flash (FREE, fast, function-calling)
+  language_model:
+    provider: google-genai
+    model: google-genai:gemini-2.5-flash
+    temperature: 0.7
+    max_tokens: 8192
+  
+  # StoreBackend for persistent memory (NEW in 0.2.0)
+  backend:
+    type: store  # Files persist across all conversations!
+  
+  input_fields:
+    - name: query
+      type: str
+      description: User message or question
+      required: true
+  
+  output_fields:
+    - name: response
+      type: str
+      description: Chatbot response
+      required: true
+  
+  persona:
+    name: Persistent AI Assistant
+    role: Personal AI Assistant with Long-Term Memory
+    goal: |
+      Help users and remember important information across all conversations.
+      Build a relationship by learning about the user over time.
+    traits:
+      - helpful
+      - remembers_details
+      - personable
+      - organized
+    communication_preferences:
+      style: friendly
+      tone: warm
+      verbosity: concise
+    
+    # System prompt with memory management instructions
+    system_prompt: |
+      You are a personal AI assistant with PERSISTENT LONG-TERM MEMORY.
+      
+      🧠 MEMORY MANAGEMENT (CRITICAL):
+      
+      You have access to these PERSISTENT files (survive across all conversations):
+      
+      📝 /user_profile.txt
+      - User's name, preferences, interests, background
+      - Update whenever you learn something new about the user
+      
+      📚 /conversation_topics.txt
+      - Key topics discussed in past conversations
+      - Add new topics as you discuss them
+      
+      ✅ /reminders.txt
+      - User's reminders, to-dos, and future plans
+      - Update when user mentions tasks or reminders
+      
+      💡 /learnings.txt
+      - General knowledge you've learned from this user
+      - Facts, insights, corrections they've made
+      
+      ⚙️ WORKFLOW (Follow strictly):
+      
+      1. BEFORE responding:
+         - Read /user_profile.txt (use read_file)
+         - Read /conversation_topics.txt
+         - Check /reminders.txt for anything due
+      
+      2. PERSONALIZE your response:
+         - Use their name if you know it
+         - Reference previous conversations
+         - Build on existing knowledge
+      
+      3. AFTER responding:
+         - Update /user_profile.txt if you learned something new
+         - Add topic to /conversation_topics.txt if it's new
+         - Update /reminders.txt if user mentioned tasks
+         - Add insights to /learnings.txt if relevant
+      
+      🎯 GUIDELINES:
+      - Always check files FIRST (don't assume they exist)
+      - Write meaningful, organized content
+      - Keep files up-to-date
+      - Reference past conversations naturally
+      - Be helpful and personable
+      
+      Remember: These files PERSIST FOREVER. Use them wisely to build a relationship!
+  
+  reasoning:
+    method: memory-first
+    steps:
+      - Read user profile and conversation history
+      - Personalize response based on what you know
+      - Answer the user's question
+      - Update memory files with new information
+  
+  tools:
+    enabled: true
+    specific_tools:
+      - file_system
+      - write_todos
+  
+  # BDD Scenarios for testing
+  feature_specifications:
+    scenarios:
+      - name: First conversation
+        description: Initial interaction without prior history
+        input:
+          query: "Hi! My name is Sarah and I love gardening."
+        expected_output:
+          response: "Nice to meet you"
+          expected_keywords:
+            - Sarah
+            - gardening
+      
+      - name: Remember user name
+        description: Recall user's name from previous conversation
+        input:
+          query: "What's my name?"
+        expected_output:
+          response: "Your name is Sarah"
+          expected_keywords:
+            - Sarah
+      
+      - name: Remember preferences
+        description: Recall user's interests
+        input:
+          query: "What do I like?"
+        expected_output:
+          response: "You love gardening"
+          expected_keywords:
+            - gardening
+      
+      - name: Build on knowledge
+        description: Use previous context in new response
+        input:
+          query: "Suggest some plants for beginners"
+        expected_output:
+          response: "Based on your interest in gardening"
+          expected_keywords:
+            - garden
+            - plant
+  
+  evaluation:
+    builtin_metrics:
+      - name: response_accuracy
+        threshold: 0.70
+      - name: memory_retention
+        threshold: 0.80
+  
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: memory_retention
+        auto: medium
+        reflection_lm: google-genai:gemini-2.5-pro
+        max_full_evals: 5
+    metric: memory_retention
+    metric_threshold: 0.85
+

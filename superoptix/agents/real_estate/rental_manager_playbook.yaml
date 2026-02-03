@@ -1,0 +1,124 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Rental Manager
+  id: rental_manager
+  namespace: real_estate
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that manages rental property operations and tenant communications.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: situation_type
+    type: str
+    description: Type of rental situation (lease renewal, maintenance request, tenant inquiry, etc.)
+    required: true
+  - name: property_details
+    type: str
+    description: Relevant property and tenant information
+    required: true
+  output_fields:
+  - name: management_response
+    type: str
+    description: Professional response or action plan for the situation
+    required: true
+  - name: follow_up_actions
+    type: str
+    description: Recommended follow-up steps and timeline
+    required: true
+  persona:
+    name: RentalBot
+    role: Rental Property Manager
+    goal: Efficiently manage rental properties and maintain positive tenant relationships
+    traits:
+    - organized
+    - responsive
+    - professional
+    - problem-solver
+  tasks:
+  - name: handle_rental_operations
+    instruction: You are a Rental Property Manager. Generate effective communications, policies, and management strategies
+      for rental property operations and tenant relations.
+    inputs:
+    - name: situation_type
+      type: str
+      description: Type of rental situation (lease renewal, maintenance request, tenant inquiry, etc.)
+      required: true
+    - name: property_details
+      type: str
+      description: Relevant property and tenant information
+      required: true
+    outputs:
+    - name: management_response
+      type: str
+      description: Professional response or action plan for the situation
+    - name: follow_up_actions
+      type: str
+      description: Recommended follow-up steps and timeline
+  agentflow:
+  - name: manage_rental
+    type: Generate
+    task: handle_rental_operations
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.7
+  feature_specifications:
+    scenarios:
+    - name: rental_manager_comprehensive_task
+      description: Given a complex real_estate requirement, the agent should provide detailed analysis and recommendations
+      input:
+        situation_type: Complex real_estate scenario requiring comprehensive analysis
+        property_details: ''
+      expected_output:
+        management_response: Detailed step-by-step analysis with real_estate-specific recommendations
+        follow_up_actions: ''
+    - name: rental_manager_problem_solving
+      description: When facing real_estate challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        situation_type: Challenging real_estate problem requiring creative solutions
+        property_details: ''
+      expected_output:
+        management_response: Structured problem-solving approach with multiple solution options
+        follow_up_actions: ''
+    - name: rental_manager_best_practices
+      description: When asked about real_estate best practices, the agent should provide current industry standards and guidelines
+      input:
+        situation_type: Industry best practices for real_estate operations
+        property_details: ''
+      expected_output:
+        management_response: Comprehensive best practices guide with implementation steps
+        follow_up_actions: ''
+    - name: rental_manager_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to real_estate
+      input:
+        situation_type: Compliance requirements for real_estate operations
+        property_details: ''
+      expected_output:
+        management_response: Detailed compliance checklist with regulatory requirements
+        follow_up_actions: ''
+    - name: rental_manager_strategic_planning
+      description: When developing real_estate strategies, the agent should provide forward-thinking recommendations
+      input:
+        situation_type: Strategic planning for real_estate growth and optimization
+        property_details: ''
+      expected_output:
+        management_response: Comprehensive strategic plan with measurable objectives and timelines
+        follow_up_actions: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

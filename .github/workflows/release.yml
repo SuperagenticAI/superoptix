@@ -1,0 +1,74 @@
+name: Release to PyPI
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install build dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build twine cython numpy
+    
+    - name: Install project dependencies
+      run: |
+        pip install --pre -e ".[dev]"
+    
+    - name: Run tests
+      run: |
+        pytest tests/ -v
+    
+    - name: Build protected package
+      run: |
+        python build_protected.py
+      env:
+        PYTHONPATH: ${{ github.workspace }}
+    
+    - name: Upload to PyPI
+      run: |
+        twine upload dist/*
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+    
+    - name: Create GitHub Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        body: |
+          ## SuperOptiX ${{ github.ref_name }}
+          
+          ### 🔒 Protected Release
+          This release includes compiled modules for enhanced security.
+          
+          ### 📦 Installation
+          ```bash
+          pip install superoptix
+          ```
+          
+          ### 🔗 Documentation
+          - [Documentation](https://docs.super-agentic.ai)
+          - [Support](https://support.super-agentic.ai)
+          
+          ### 📄 License
+          This is open source software. See LICENCE file for details.
+        draft: false
+        prerelease: false 

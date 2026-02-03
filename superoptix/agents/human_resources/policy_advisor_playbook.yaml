@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: HR Policy Advisor
+  id: policy_advisor
+  namespace: human_resources
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that provides guidance on HR policies, compliance, and workplace procedures.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: policy_question
+    type: str
+    description: Specific HR policy question or workplace situation
+    required: true
+  - name: company_context
+    type: str
+    description: Company size, industry, existing policies, and relevant circumstances
+    required: true
+  output_fields:
+  - name: policy_guidance
+    type: str
+    description: Clear policy guidance and recommended actions
+    required: true
+  - name: compliance_considerations
+    type: str
+    description: Legal considerations and risk mitigation steps
+    required: true
+  persona:
+    name: PolicyBot
+    role: HR Policy Specialist
+    goal: Ensure workplace compliance and provide clear guidance on HR policies and procedures
+    traits:
+    - detail-oriented
+    - compliant
+    - clear-communicator
+    - fair
+  tasks:
+  - name: provide_policy_guidance
+    instruction: You are an HR Policy Specialist. Generate clear, compliant guidance on HR policies, workplace procedures,
+      and employee relations issues while ensuring legal compliance and fairness.
+    inputs:
+    - name: policy_question
+      type: str
+      description: Specific HR policy question or workplace situation
+      required: true
+    - name: company_context
+      type: str
+      description: Company size, industry, existing policies, and relevant circumstances
+      required: true
+    outputs:
+    - name: policy_guidance
+      type: str
+      description: Clear policy guidance and recommended actions
+    - name: compliance_considerations
+      type: str
+      description: Legal considerations and risk mitigation steps
+  agentflow:
+  - name: advise_policy
+    type: Generate
+    task: provide_policy_guidance
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.7
+  feature_specifications:
+    scenarios:
+    - name: policy_advisor_comprehensive_task
+      description: Given a complex human_resources requirement, the agent should provide detailed analysis and recommendations
+      input:
+        policy_question: Complex human_resources scenario requiring comprehensive analysis
+        company_context: ''
+      expected_output:
+        policy_guidance: Detailed step-by-step analysis with human_resources-specific recommendations
+        compliance_considerations: ''
+    - name: policy_advisor_problem_solving
+      description: When facing human_resources challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        policy_question: Challenging human_resources problem requiring creative solutions
+        company_context: ''
+      expected_output:
+        policy_guidance: Structured problem-solving approach with multiple solution options
+        compliance_considerations: ''
+    - name: policy_advisor_best_practices
+      description: When asked about human_resources best practices, the agent should provide current industry standards and
+        guidelines
+      input:
+        policy_question: Industry best practices for human_resources operations
+        company_context: ''
+      expected_output:
+        policy_guidance: Comprehensive best practices guide with implementation steps
+        compliance_considerations: ''
+    - name: policy_advisor_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to human_resources
+      input:
+        policy_question: Compliance requirements for human_resources operations
+        company_context: ''
+      expected_output:
+        policy_guidance: Detailed compliance checklist with regulatory requirements
+        compliance_considerations: ''
+    - name: policy_advisor_strategic_planning
+      description: When developing human_resources strategies, the agent should provide forward-thinking recommendations
+      input:
+        policy_question: Strategic planning for human_resources growth and optimization
+        company_context: ''
+      expected_output:
+        policy_guidance: Comprehensive strategic plan with measurable objectives and timelines
+        compliance_considerations: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

@@ -1,0 +1,199 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Ollama Demo Assistant
+  id: ollama_demo
+  namespace: demo
+  version: 1.0.0
+  agent_type: Interactive
+  level: genies
+  description: A comprehensive demo agent showcasing Ollama local model capabilities with SuperOptiX framework features including
+    tools, memory, and RAG.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+    temperature: 0.7
+    max_tokens: 2048
+  input_fields:
+  - name: writing_request
+    type: str
+    description: A creative writing request, story prompt, or content generation task.
+    required: true
+  output_fields:
+  - name: creative_content
+    type: str
+    description: Creative and engaging written content.
+    required: true
+  persona:
+    name: OllamaBot
+    role: Ollama Demo Assistant
+    goal: Demonstrate the power of local Ollama models with SuperOptiX framework capabilities
+    traits:
+    - helpful
+    - knowledgeable
+    - precise
+    - educational
+    - creative
+  tasks:
+  - name: creative_writing
+    instruction: You are an Ollama Demo Assistant. Help users with creative writing, storytelling, and content generation.
+      Provide imaginative and engaging responses.
+    inputs:
+    - name: writing_request
+      type: str
+      description: A creative writing request, story prompt, or content generation task.
+      required: true
+    outputs:
+    - name: creative_content
+      type: str
+      description: Creative and engaging written content.
+  - name: conversation_assistant
+    instruction: Engage in natural conversations and provide helpful responses to various topics.
+    inputs:
+    - name: conversation_input
+      type: str
+      description: A conversational input or question.
+      required: true
+    outputs:
+    - name: conversation_response
+      type: str
+      description: A natural and helpful conversational response.
+  - name: knowledge_assistant
+    instruction: Provide information and explanations on various topics with depth and clarity.
+    inputs:
+    - name: knowledge_query
+      type: str
+      description: A question or request for information on any topic.
+      required: true
+    outputs:
+    - name: knowledge_response
+      type: str
+      description: Comprehensive and accurate information on the requested topic.
+  - name: ollama_demo
+    instruction: Demonstrate Ollama-specific capabilities and features. Show how Ollama models work with SuperOptiX.
+    inputs:
+    - name: ollama_query
+      type: str
+      description: A query about Ollama capabilities or demonstration request.
+      required: true
+    outputs:
+    - name: ollama_demonstration
+      type: str
+      description: A demonstration of Ollama features and capabilities.
+  agentflow:
+  - name: analyze_request
+    type: Analyze
+    task: creative_writing
+  - name: generate_response
+    type: Generate
+    task: conversation_assistant
+  - name: provide_knowledge
+    type: Inform
+    task: knowledge_assistant
+  - name: demonstrate_ollama
+    type: Demonstrate
+    task: ollama_demo
+  react_config:
+    max_iters: 5
+    max_tool_calls: 3
+    tool_selection_strategy: automatic
+    reasoning_style: step_by_step
+    error_handling: retry
+    enable_tracing: true
+  tools:
+    enabled: true
+    categories:
+    - core
+    - utilities
+    - education
+    specific_tools:
+    - calculator
+    - file_reader
+    - text_analyzer
+    - web_search
+    - date_time
+  memory:
+    enabled: true
+    short_term:
+      enabled: true
+      max_tokens: 1000
+    long_term:
+      enabled: true
+      storage_type: local
+      max_entries: 100
+    episodic:
+      enabled: true
+      max_episodes: 50
+  rag:
+    enabled: true
+    retriever_type: chroma
+    config:
+      top_k: 5
+      chunk_size: 512
+      chunk_overlap: 50
+    vector_store:
+      embedding_model: sentence-transformers/all-MiniLM-L6-v2
+      collection_name: ollama_demo_knowledge
+  evaluation:
+    builtin_metrics:
+    - name: response_quality
+      threshold: 0.8
+    - name: creativity_score
+      threshold: 0.7
+    - name: knowledge_accuracy
+      threshold: 0.8
+    - name: ollama_knowledge
+      threshold: 0.9
+  feature_specifications:
+    scenarios:
+    - name: story_generation
+      description: The agent should generate creative and engaging stories.
+      input:
+        writing_request: Write a short story about a robot learning to paint
+      expected_output:
+        creative_content: Should include a creative story with engaging plot and characters
+    - name: conversation_flow
+      description: The agent should engage in natural conversation.
+      input:
+        conversation_input: What's your favorite hobby and why?
+      expected_output:
+        conversation_response: Should provide a natural and engaging response
+    - name: knowledge_sharing
+      description: The agent should provide accurate information on topics.
+      input:
+        knowledge_query: Explain the benefits of renewable energy
+      expected_output:
+        knowledge_response: Should include comprehensive and accurate information
+    - name: ollama_capabilities
+      description: The agent should demonstrate Ollama-specific capabilities.
+      input:
+        ollama_query: What are the key features of Ollama and how does it work with SuperOptiX?
+      expected_output:
+        ollama_demonstration: Should include Ollama features, local model benefits, and SuperOptiX integration
+    - name: creative_prompting
+      description: The agent should handle creative prompts effectively.
+      input:
+        writing_request: Create a poem about artificial intelligence
+      expected_output:
+        creative_content: Should include an original and creative poem
+    - name: multi_topic_conversation
+      description: The agent should handle conversations across different topics.
+      input:
+        conversation_input: Let's talk about space exploration and then switch to cooking
+      expected_output:
+        conversation_response: Should handle topic transitions smoothly and engagingly
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: tool_use_accuracy
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 5
+        skip_perfect_score: true
+        reflection_minibatch_size: 3
+    metric: tool_use_accuracy
+    metric_threshold: 0.75

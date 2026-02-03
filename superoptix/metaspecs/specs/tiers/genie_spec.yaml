@@ -1,0 +1,194 @@
+# Tier: Genie (Free)
+# Concept: "Tool-Using Agent with Knowledge" - ReAct agents with tool integration and memory
+# GOAL: Build agents that can reason, use tools, and remember for more capable interactions
+---
+apiVersion: agent/v1
+kind: AgentSpec
+
+metadata:
+  name: string                 # e.g., "research-assistant"
+  namespace: string            # e.g., "research-and-development"
+  id: genie-agent-v1-0-0
+  version: 1.0.0
+  agent_type: Supervised|Autonomous|Interactive|Reactive # e.g., Autonomous
+  level: genies
+  description: string          # e.g., "An agent that can search, calculate, and reason with tools."
+
+spec:
+  language_model:
+    provider: openai|ollama|anthropic|google|...
+    model: string              # e.g., "gpt-3.5-turbo" or "llama3.1:8b"
+    temperature: 0.1           # Lower temperature for more consistent responses
+    max_tokens: 2000           # Reasonable token limit
+
+  persona:
+    name: string               # e.g., "GenieBot"
+    role: string               # e.g., "Helpful Assistant with Tools"
+    goal: string               # e.g., "Answer questions using tools and reasoning"
+    traits: [string]           # e.g., ["analytical", "thorough", "helpful"]
+
+  # === TASK DEFINITION ===
+  tasks:
+    - name: string             # e.g., "research_and_answer"
+      instruction: string      # e.g., "Research the topic and provide a comprehensive answer"
+      type: react              # ReAct-style task with reasoning and tool use
+      inputs:
+        - name: question
+          type: str
+          description: "User's question or request"
+          required: true
+        - name: context        # Optional additional context
+          type: str
+          description: "Additional context or constraints"
+          required: false
+      outputs:
+        - name: answer
+          type: str
+          description: "Comprehensive answer based on research and reasoning"
+
+  # === REACT AGENT CONFIGURATION ===
+  react_config:
+    max_iters: 5              # Maximum reasoning iterations
+    max_tool_calls: 3         # Reasonable limit for tools
+    tool_selection_strategy: automatic
+    reasoning_style: step_by_step
+    error_handling: retry
+    enable_tracing: true      # Enable comprehensive tracing
+
+  # === TOOL INTEGRATION ===
+  tools:
+    # Built-in tools (available out of the box)
+    builtin_tools:
+      - name: calculator
+        enabled: true
+        description: "Perform mathematical calculations"
+        config:
+          precision: 10
+      - name: file_reader
+        enabled: true
+        description: "Read and analyze files"
+        config:
+          allowed_extensions: [txt, md, json, yaml, csv]
+          max_file_size: "5MB"
+      - name: datetime
+        enabled: true
+        description: "Get current date and time information"
+      - name: text_analyzer
+        enabled: true
+        description: "Analyze text for basic statistics"
+
+    # Custom tools (user-defined) - basic support
+    custom_tools:
+      - name: string           # e.g., "simple_lookup"
+        description: string    # e.g., "Simple data lookup"
+        function_name: string  # e.g., "lookup_data"
+        parameters:
+          - name: query
+            type: str
+            description: "Query for data lookup"
+            required: true
+
+  # === RAG CONFIGURATION (Basic) ===
+  rag_config:
+    enabled: false            # Disabled by default for simplicity
+    retriever_type: chroma    # Use ChromaDB for local setup
+    config:
+      top_k: 3               # Fewer documents for processing
+      similarity_threshold: 0.7
+      
+    # Vector store configuration
+    vector_store:
+      collection_name: string # e.g., "knowledge-base"
+      embedding_model: string # e.g., "all-MiniLM-L6-v2"
+      chunk_size: 256        # Smaller chunks
+      chunk_overlap: 25      # Reduced overlap
+
+  # === STREAMING CONFIGURATION (Basic) ===
+  streaming:
+    enabled: true             # Enable basic streaming
+    stream_reasoning: true    # Stream reasoning steps
+    buffer_size: 32           # Buffer size
+
+  # === AGENTFLOW DEFINITION ===
+  agentflow:
+    - name: react_reasoning    # Main ReAct reasoning
+      type: ReAct
+      task: research_and_answer
+      
+    - name: synthesize_answer  # Final answer synthesis
+      type: Generate
+      task: research_and_answer
+      depends_on: [react_reasoning]
+
+  # === MEMORY INTEGRATION ===
+  memory:
+    enabled: true
+    types: [short_term, episodic]
+    short_term:
+      retention_policy: session
+      max_items: 20           # Memory limit
+      
+    episodic:
+      max_episodes: 5         # Episode limit
+      episode_boundary: task_completion
+
+  # === VALIDATION & TESTING ===
+  feature_specifications:
+    scenarios:
+      - name: basic_tool_usage
+        description: "Test basic tool calling capability"
+        input:
+          question: "What is 25 * 37 + 14?"
+        expected_output:
+          answer: "939"
+          
+      - name: datetime_tool
+        description: "Test datetime tool integration"
+        input:
+          question: "What is the current date and time?"
+        expected_output:
+          answer: string # Should contain current date/time
+          
+      - name: text_analysis
+        description: "Test text analysis tool"
+        input:
+          question: "Analyze this text: 'Hello world! This is a test sentence for analysis.'"
+        expected_output:
+          answer: string # Should contain text analysis statistics
+
+      - name: memory_test
+        description: "Test memory functionality"
+        input:
+          question: "Remember that my favorite color is blue. What is my favorite color?"
+        expected_output:
+          answer: string # Should remember and recall blue
+
+  # === EVALUATION METRICS ===
+  evaluation:
+    quality_threshold: 0.7    # Higher threshold for Genie tier
+    performance_target: 5     # 5 second response time target
+    accuracy_requirement: 0.75 # 75% accuracy requirement
+    
+    # Evaluation criteria
+    criteria:
+      - name: tool_usage
+        weight: 0.3
+        description: "Correct tool selection and usage"
+      - name: reasoning_quality
+        weight: 0.4
+        description: "Quality of step-by-step reasoning"
+      - name: answer_accuracy
+        weight: 0.2
+        description: "Accuracy of final answer"
+      - name: memory_usage
+        weight: 0.1
+        description: "Effective use of memory"
+
+  # === OPTIMIZATION ===
+  optimization:
+    strategy: bootstrap_fewshot
+    metric: answer_correctness
+    metric_threshold: 0.75
+    bootstrap_config:
+      max_bootstrapped_demos: 8
+      max_rounds: 1 

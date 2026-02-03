@@ -1,0 +1,150 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Research Agent (DeepAgents)
+  id: research_agent_deepagents
+  namespace: demo
+  version: 1.0.0
+  level: genies
+  description: |
+    Research assistant built with DeepAgents (LangGraph).
+    Demonstrates GEPA optimization working with non-DSPy frameworks.
+    
+    Shows:
+    - DeepAgents compilation from SuperSpec
+    - Planning and task decomposition
+    - File system usage
+    - GEPA optimization of system_prompt
+    - Standard SuperOptiX workflow (compile/evaluate/optimize/run)
+  author: SuperOptiX
+  tags:
+    - research
+    - deepagents
+    - langgraph
+    - multi-framework
+    - demo
+spec:
+  target_framework: deepagents
+  
+  # MODEL REQUIREMENTS: DeepAgents requires function-calling models
+  # ✅ Supported: Claude, GPT-4, Gemini
+  # ❌ Not supported: Ollama (LangChain limitation - bind_tools() not implemented)
+  language_model:
+    provider: google-genai
+    model: google-genai:gemini-2.5-flash
+    temperature: 0.7
+    max_tokens: 8192
+    # Alternative models:
+    # Latest Gemini (faster):
+    # model: google-genai:gemini-2.5-flash-preview
+    # 
+    # For Claude:
+    # provider: anthropic
+    # model: anthropic:claude-sonnet-4-20250514
+    # 
+    # For GPT-4:
+    # provider: openai
+    # model: openai:gpt-4-turbo
+  
+  input_fields:
+    - name: query
+      type: str
+      description: Research question or topic
+      required: true
+  
+  output_fields:
+    - name: report
+      type: str
+      description: Research report
+      required: true
+  
+  persona:
+    name: Research Agent
+    role: Expert AI Researcher
+    goal: |
+      Conduct thorough research on AI and technology topics, producing 
+      comprehensive, well-sourced reports
+    traits:
+      - analytical
+      - thorough
+      - organized
+    communication_preferences:
+      style: academic
+      tone: professional
+      verbosity: detailed
+  
+  reasoning:
+    method: planning
+    steps:
+      - Break down research into subtasks using write_todos
+      - Search for authoritative sources
+      - Save findings to research_notes.md
+      - Synthesize information
+      - Write comprehensive report
+  
+  tools:
+    enabled: true
+    specific_tools:
+      - internet_search
+      - file_system
+      - write_todos
+  
+  # BDD Scenarios for testing
+  feature_specifications:
+    scenarios:
+      - name: Simple research query
+        description: Answer basic research question
+        input:
+          query: "What is LangGraph?"
+        expected_output:
+          report: "LangGraph is a framework for building stateful multi-agent applications"
+          expected_keywords:
+            - LangGraph
+            - framework
+            - agent
+      
+      - name: Technical comparison
+        description: Compare technologies
+        input:
+          query: "Compare LangGraph vs LangChain"
+        expected_output:
+          report: "Comparison of LangGraph and LangChain"
+          expected_keywords:
+            - LangGraph
+            - LangChain
+            - comparison
+      
+      - name: Complex research
+        description: Multi-step research task
+        input:
+          query: "Research the state of AI agent frameworks in 2025"
+        expected_output:
+          report: "Comprehensive research report on AI agent frameworks"
+          expected_keywords:
+            - agent
+            - framework
+            - 2025
+            - research
+  
+  evaluation:
+    builtin_metrics:
+      - name: response_accuracy
+        threshold: 0.70
+      - name: research_quality
+        threshold: 0.75
+  
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: response_accuracy
+        auto: medium
+        reflection_lm: google-genai:gemini-2.5-pro  # More capable model for better reflection
+        max_full_evals: 5
+        # Alternative reflection models:
+        # reflection_lm: google-genai:gemini-2.5-flash  # Faster, still good
+        # reflection_lm: gpt-4o-mini  # If using OpenAI
+        # reflection_lm: anthropic:claude-sonnet-4-20250514  # If using Claude
+    metric: response_accuracy
+    metric_threshold: 0.85
+

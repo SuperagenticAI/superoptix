@@ -1,0 +1,124 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Strategy Consultant
+  id: strategy_consultant
+  namespace: consulting
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that develops strategic recommendations and business growth plans.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: business_situation
+    type: str
+    description: Current business performance, market position, and key challenges
+    required: true
+  - name: strategic_objectives
+    type: str
+    description: Growth targets, market expansion goals, and success metrics
+    required: true
+  output_fields:
+  - name: strategic_recommendations
+    type: str
+    description: Comprehensive strategic plan with specific recommendations
+    required: true
+  - name: implementation_roadmap
+    type: str
+    description: Detailed implementation timeline and success milestones
+    required: true
+  persona:
+    name: StrategyBot
+    role: Strategic Planning Consultant
+    goal: Develop comprehensive strategic plans that drive sustainable business growth
+    traits:
+    - visionary
+    - strategic
+    - analytical
+    - innovative
+  tasks:
+  - name: develop_strategic_plan
+    instruction: You are a Strategic Planning Consultant. Generate comprehensive strategic recommendations and growth plans
+      based on market analysis, competitive positioning, and business objectives.
+    inputs:
+    - name: business_situation
+      type: str
+      description: Current business performance, market position, and key challenges
+      required: true
+    - name: strategic_objectives
+      type: str
+      description: Growth targets, market expansion goals, and success metrics
+      required: true
+    outputs:
+    - name: strategic_recommendations
+      type: str
+      description: Comprehensive strategic plan with specific recommendations
+    - name: implementation_roadmap
+      type: str
+      description: Detailed implementation timeline and success milestones
+  agentflow:
+  - name: develop_strategy
+    type: Generate
+    task: develop_strategic_plan
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.7
+  feature_specifications:
+    scenarios:
+    - name: strategy_consultant_comprehensive_task
+      description: Given a complex consulting requirement, the agent should provide detailed analysis and recommendations
+      input:
+        business_situation: Complex consulting scenario requiring comprehensive analysis
+        strategic_objectives: ''
+      expected_output:
+        strategic_recommendations: Detailed step-by-step analysis with consulting-specific recommendations
+        implementation_roadmap: ''
+    - name: strategy_consultant_problem_solving
+      description: When facing consulting challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        business_situation: Challenging consulting problem requiring creative solutions
+        strategic_objectives: ''
+      expected_output:
+        strategic_recommendations: Structured problem-solving approach with multiple solution options
+        implementation_roadmap: ''
+    - name: strategy_consultant_best_practices
+      description: When asked about consulting best practices, the agent should provide current industry standards and guidelines
+      input:
+        business_situation: Industry best practices for consulting operations
+        strategic_objectives: ''
+      expected_output:
+        strategic_recommendations: Comprehensive best practices guide with implementation steps
+        implementation_roadmap: ''
+    - name: strategy_consultant_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to consulting
+      input:
+        business_situation: Compliance requirements for consulting operations
+        strategic_objectives: ''
+      expected_output:
+        strategic_recommendations: Detailed compliance checklist with regulatory requirements
+        implementation_roadmap: ''
+    - name: strategy_consultant_strategic_planning
+      description: When developing consulting strategies, the agent should provide forward-thinking recommendations
+      input:
+        business_situation: Strategic planning for consulting growth and optimization
+        strategic_objectives: ''
+      expected_output:
+        strategic_recommendations: Comprehensive strategic plan with measurable objectives and timelines
+        implementation_roadmap: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

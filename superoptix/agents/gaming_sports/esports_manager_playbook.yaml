@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Esports Team Manager
+  id: esports_manager
+  namespace: gaming_sports
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that manages esports teams and optimizes competitive gaming performance.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: team_performance
+    type: str
+    description: Player statistics, match results, and team dynamics assessment
+    required: true
+  - name: competitive_context
+    type: str
+    description: Tournament schedule, opponent analysis, and meta game changes
+    required: true
+  output_fields:
+  - name: performance_analysis
+    type: str
+    description: Step-by-step analysis of team strengths, weaknesses, and improvement areas
+    required: true
+  - name: management_strategy
+    type: str
+    description: Comprehensive team management plan and competitive strategy
+    required: true
+  persona:
+    name: EsportsBot
+    role: Professional Esports Manager
+    goal: Optimize team performance and manage all aspects of competitive esports operations
+    traits:
+    - strategic
+    - performance-focused
+    - team-oriented
+    - competitive
+  tasks:
+  - name: manage_esports_team
+    instruction: You are a Professional Esports Manager. Think through team performance data, player development needs, and
+      competitive strategies systematically to optimize esports team success.
+    inputs:
+    - name: team_performance
+      type: str
+      description: Player statistics, match results, and team dynamics assessment
+      required: true
+    - name: competitive_context
+      type: str
+      description: Tournament schedule, opponent analysis, and meta game changes
+      required: true
+    outputs:
+    - name: performance_analysis
+      type: str
+      description: Step-by-step analysis of team strengths, weaknesses, and improvement areas
+    - name: management_strategy
+      type: str
+      description: Comprehensive team management plan and competitive strategy
+  agentflow:
+  - name: manage_systematically
+    type: Think
+    task: manage_esports_team
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.8
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: esports_manager_comprehensive_task
+      description: Given a complex gaming_sports requirement, the agent should provide detailed analysis and recommendations
+      input:
+        team_performance: Complex gaming_sports scenario requiring comprehensive analysis
+        competitive_context: ''
+      expected_output:
+        performance_analysis: Detailed step-by-step analysis with gaming_sports-specific recommendations
+        management_strategy: ''
+    - name: esports_manager_problem_solving
+      description: When facing gaming_sports challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        team_performance: Challenging gaming_sports problem requiring creative solutions
+        competitive_context: ''
+      expected_output:
+        performance_analysis: Structured problem-solving approach with multiple solution options
+        management_strategy: ''
+    - name: esports_manager_best_practices
+      description: When asked about gaming_sports best practices, the agent should provide current industry standards and
+        guidelines
+      input:
+        team_performance: Industry best practices for gaming_sports operations
+        competitive_context: ''
+      expected_output:
+        performance_analysis: Comprehensive best practices guide with implementation steps
+        management_strategy: ''
+    - name: esports_manager_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to gaming_sports
+      input:
+        team_performance: Compliance requirements for gaming_sports operations
+        competitive_context: ''
+      expected_output:
+        performance_analysis: Detailed compliance checklist with regulatory requirements
+        management_strategy: ''
+    - name: esports_manager_strategic_planning
+      description: When developing gaming_sports strategies, the agent should provide forward-thinking recommendations
+      input:
+        team_performance: Strategic planning for gaming_sports growth and optimization
+        competitive_context: ''
+      expected_output:
+        performance_analysis: Comprehensive strategic plan with measurable objectives and timelines
+        management_strategy: ''

@@ -1,0 +1,124 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Process Consultant
+  id: process_consultant
+  namespace: consulting
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that designs and optimizes business processes for maximum efficiency.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: current_process
+    type: str
+    description: Existing process workflow, steps, and performance metrics
+    required: true
+  - name: improvement_goals
+    type: str
+    description: Desired outcomes, efficiency targets, and quality objectives
+    required: true
+  output_fields:
+  - name: process_redesign
+    type: str
+    description: Optimized process design with workflow improvements
+    required: true
+  - name: implementation_guide
+    type: str
+    description: Step-by-step implementation plan with timeline and resources
+    required: true
+  persona:
+    name: ProcessBot
+    role: Business Process Consultant
+    goal: Design and optimize business processes to maximize efficiency, quality, and customer satisfaction
+    traits:
+    - systematic
+    - efficiency-focused
+    - innovative
+    - customer-centric
+  tasks:
+  - name: design_process_improvement
+    instruction: You are a Business Process Consultant. Generate comprehensive process improvement recommendations including
+      workflow redesign, automation opportunities, and quality enhancements.
+    inputs:
+    - name: current_process
+      type: str
+      description: Existing process workflow, steps, and performance metrics
+      required: true
+    - name: improvement_goals
+      type: str
+      description: Desired outcomes, efficiency targets, and quality objectives
+      required: true
+    outputs:
+    - name: process_redesign
+      type: str
+      description: Optimized process design with workflow improvements
+    - name: implementation_guide
+      type: str
+      description: Step-by-step implementation plan with timeline and resources
+  agentflow:
+  - name: design_process
+    type: Generate
+    task: design_process_improvement
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.7
+  feature_specifications:
+    scenarios:
+    - name: process_consultant_comprehensive_task
+      description: Given a complex consulting requirement, the agent should provide detailed analysis and recommendations
+      input:
+        current_process: Complex consulting scenario requiring comprehensive analysis
+        improvement_goals: ''
+      expected_output:
+        process_redesign: Detailed step-by-step analysis with consulting-specific recommendations
+        implementation_guide: ''
+    - name: process_consultant_problem_solving
+      description: When facing consulting challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        current_process: Challenging consulting problem requiring creative solutions
+        improvement_goals: ''
+      expected_output:
+        process_redesign: Structured problem-solving approach with multiple solution options
+        implementation_guide: ''
+    - name: process_consultant_best_practices
+      description: When asked about consulting best practices, the agent should provide current industry standards and guidelines
+      input:
+        current_process: Industry best practices for consulting operations
+        improvement_goals: ''
+      expected_output:
+        process_redesign: Comprehensive best practices guide with implementation steps
+        implementation_guide: ''
+    - name: process_consultant_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to consulting
+      input:
+        current_process: Compliance requirements for consulting operations
+        improvement_goals: ''
+      expected_output:
+        process_redesign: Detailed compliance checklist with regulatory requirements
+        implementation_guide: ''
+    - name: process_consultant_strategic_planning
+      description: When developing consulting strategies, the agent should provide forward-thinking recommendations
+      input:
+        current_process: Strategic planning for consulting growth and optimization
+        improvement_goals: ''
+      expected_output:
+        process_redesign: Comprehensive strategic plan with measurable objectives and timelines
+        implementation_guide: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

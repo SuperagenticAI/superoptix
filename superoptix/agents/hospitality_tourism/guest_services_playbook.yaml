@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Guest Services Specialist
+  id: guest_services
+  namespace: hospitality_tourism
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that provides personalized guest services and enhances hospitality experiences.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: guest_profile
+    type: str
+    description: Guest preferences, stay purpose, special occasions, and service history
+    required: true
+  - name: service_request
+    type: str
+    description: Current guest needs, requests, or issues requiring assistance
+    required: true
+  output_fields:
+  - name: service_recommendations
+    type: str
+    description: Personalized service suggestions and experience enhancements
+    required: true
+  - name: action_plan
+    type: str
+    description: Specific steps to deliver exceptional guest service
+    required: true
+  persona:
+    name: GuestBot
+    role: Guest Services Specialist
+    goal: Create exceptional guest experiences through personalized service and proactive assistance
+    traits:
+    - hospitable
+    - knowledgeable
+    - proactive
+    - solution-oriented
+  tasks:
+  - name: enhance_guest_experience
+    instruction: You are a Guest Services Specialist. Generate personalized service recommendations and solutions that exceed
+      guest expectations and create memorable hospitality experiences.
+    inputs:
+    - name: guest_profile
+      type: str
+      description: Guest preferences, stay purpose, special occasions, and service history
+      required: true
+    - name: service_request
+      type: str
+      description: Current guest needs, requests, or issues requiring assistance
+      required: true
+    outputs:
+    - name: service_recommendations
+      type: str
+      description: Personalized service suggestions and experience enhancements
+    - name: action_plan
+      type: str
+      description: Specific steps to deliver exceptional guest service
+  agentflow:
+  - name: serve_guests
+    type: Generate
+    task: enhance_guest_experience
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.7
+  feature_specifications:
+    scenarios:
+    - name: guest_services_comprehensive_task
+      description: Given a complex hospitality_tourism requirement, the agent should provide detailed analysis and recommendations
+      input:
+        guest_profile: Complex hospitality_tourism scenario requiring comprehensive analysis
+        service_request: ''
+      expected_output:
+        service_recommendations: Detailed step-by-step analysis with hospitality_tourism-specific recommendations
+        action_plan: ''
+    - name: guest_services_problem_solving
+      description: When facing hospitality_tourism challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        guest_profile: Challenging hospitality_tourism problem requiring creative solutions
+        service_request: ''
+      expected_output:
+        service_recommendations: Structured problem-solving approach with multiple solution options
+        action_plan: ''
+    - name: guest_services_best_practices
+      description: When asked about hospitality_tourism best practices, the agent should provide current industry standards
+        and guidelines
+      input:
+        guest_profile: Industry best practices for hospitality_tourism operations
+        service_request: ''
+      expected_output:
+        service_recommendations: Comprehensive best practices guide with implementation steps
+        action_plan: ''
+    - name: guest_services_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to hospitality_tourism
+      input:
+        guest_profile: Compliance requirements for hospitality_tourism operations
+        service_request: ''
+      expected_output:
+        service_recommendations: Detailed compliance checklist with regulatory requirements
+        action_plan: ''
+    - name: guest_services_strategic_planning
+      description: When developing hospitality_tourism strategies, the agent should provide forward-thinking recommendations
+      input:
+        guest_profile: Strategic planning for hospitality_tourism growth and optimization
+        service_request: ''
+      expected_output:
+        service_recommendations: Comprehensive strategic plan with measurable objectives and timelines
+        action_plan: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

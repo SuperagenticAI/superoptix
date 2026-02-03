@@ -1,0 +1,124 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: SEO Specialist
+  id: seo_specialist
+  namespace: marketing
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that optimizes content for search engines and improves organic visibility.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: content_to_optimize
+    type: str
+    description: Content or webpage that needs SEO optimization
+    required: true
+  - name: target_keywords
+    type: str
+    description: Primary and secondary keywords to target
+    required: true
+  output_fields:
+  - name: seo_analysis
+    type: str
+    description: Step-by-step SEO analysis and optimization opportunities
+    required: true
+  - name: optimization_recommendations
+    type: str
+    description: Specific SEO improvements and technical recommendations
+    required: true
+  persona:
+    name: SEOBot
+    role: SEO Specialist
+    goal: Optimize content and websites for better search engine rankings and organic traffic
+    traits:
+    - technical
+    - analytical
+    - detail-oriented
+    - results-focused
+  tasks:
+  - name: optimize_for_seo
+    instruction: You are an SEO Specialist. Think through the content systematically to identify SEO opportunities, keyword
+      optimization, and technical improvements for better search engine rankings.
+    inputs:
+    - name: content_to_optimize
+      type: str
+      description: Content or webpage that needs SEO optimization
+      required: true
+    - name: target_keywords
+      type: str
+      description: Primary and secondary keywords to target
+      required: true
+    outputs:
+    - name: seo_analysis
+      type: str
+      description: Step-by-step SEO analysis and optimization opportunities
+    - name: optimization_recommendations
+      type: str
+      description: Specific SEO improvements and technical recommendations
+  agentflow:
+  - name: analyze_seo_systematically
+    type: Think
+    task: optimize_for_seo
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: seo_specialist_comprehensive_task
+      description: Given a complex marketing requirement, the agent should provide detailed analysis and recommendations
+      input:
+        content_to_optimize: Complex marketing scenario requiring comprehensive analysis
+        target_keywords: ''
+      expected_output:
+        seo_analysis: Detailed step-by-step analysis with marketing-specific recommendations
+        optimization_recommendations: ''
+    - name: seo_specialist_problem_solving
+      description: When facing marketing challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        content_to_optimize: Challenging marketing problem requiring creative solutions
+        target_keywords: ''
+      expected_output:
+        seo_analysis: Structured problem-solving approach with multiple solution options
+        optimization_recommendations: ''
+    - name: seo_specialist_best_practices
+      description: When asked about marketing best practices, the agent should provide current industry standards and guidelines
+      input:
+        content_to_optimize: Industry best practices for marketing operations
+        target_keywords: ''
+      expected_output:
+        seo_analysis: Comprehensive best practices guide with implementation steps
+        optimization_recommendations: ''
+    - name: seo_specialist_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to marketing
+      input:
+        content_to_optimize: Compliance requirements for marketing operations
+        target_keywords: ''
+      expected_output:
+        seo_analysis: Detailed compliance checklist with regulatory requirements
+        optimization_recommendations: ''
+    - name: seo_specialist_strategic_planning
+      description: When developing marketing strategies, the agent should provide forward-thinking recommendations
+      input:
+        content_to_optimize: Strategic planning for marketing growth and optimization
+        target_keywords: ''
+      expected_output:
+        seo_analysis: Comprehensive strategic plan with measurable objectives and timelines
+        optimization_recommendations: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

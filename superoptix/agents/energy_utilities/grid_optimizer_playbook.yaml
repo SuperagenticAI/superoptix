@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Smart Grid Optimizer
+  id: grid_optimizer
+  namespace: energy_utilities
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that optimizes electrical grid operations and manages energy distribution efficiently.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: grid_performance
+    type: str
+    description: Current load data, generation capacity, and system performance metrics
+    required: true
+  - name: demand_forecast
+    type: str
+    description: Energy demand predictions, peak usage patterns, and seasonal variations
+    required: true
+  output_fields:
+  - name: grid_analysis
+    type: str
+    description: Step-by-step analysis of grid performance and optimization opportunities
+    required: true
+  - name: optimization_strategy
+    type: str
+    description: Comprehensive plan for improving grid efficiency and reliability
+    required: true
+  persona:
+    name: GridBot
+    role: Smart Grid Operations Specialist
+    goal: Optimize electrical grid performance through systematic analysis and intelligent load management
+    traits:
+    - analytical
+    - technical
+    - efficiency-focused
+    - reliability-oriented
+  tasks:
+  - name: optimize_grid_operations
+    instruction: You are a Smart Grid Operations Specialist. Think through grid performance data, demand patterns, and system
+      constraints systematically to optimize energy distribution and grid stability.
+    inputs:
+    - name: grid_performance
+      type: str
+      description: Current load data, generation capacity, and system performance metrics
+      required: true
+    - name: demand_forecast
+      type: str
+      description: Energy demand predictions, peak usage patterns, and seasonal variations
+      required: true
+    outputs:
+    - name: grid_analysis
+      type: str
+      description: Step-by-step analysis of grid performance and optimization opportunities
+    - name: optimization_strategy
+      type: str
+      description: Comprehensive plan for improving grid efficiency and reliability
+  agentflow:
+  - name: analyze_grid_systems
+    type: Think
+    task: optimize_grid_operations
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.8
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: grid_optimizer_comprehensive_task
+      description: Given a complex energy_utilities requirement, the agent should provide detailed analysis and recommendations
+      input:
+        grid_performance: Complex energy_utilities scenario requiring comprehensive analysis
+        demand_forecast: ''
+      expected_output:
+        grid_analysis: Detailed step-by-step analysis with energy_utilities-specific recommendations
+        optimization_strategy: ''
+    - name: grid_optimizer_problem_solving
+      description: When facing energy_utilities challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        grid_performance: Challenging energy_utilities problem requiring creative solutions
+        demand_forecast: ''
+      expected_output:
+        grid_analysis: Structured problem-solving approach with multiple solution options
+        optimization_strategy: ''
+    - name: grid_optimizer_best_practices
+      description: When asked about energy_utilities best practices, the agent should provide current industry standards and
+        guidelines
+      input:
+        grid_performance: Industry best practices for energy_utilities operations
+        demand_forecast: ''
+      expected_output:
+        grid_analysis: Comprehensive best practices guide with implementation steps
+        optimization_strategy: ''
+    - name: grid_optimizer_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to energy_utilities
+      input:
+        grid_performance: Compliance requirements for energy_utilities operations
+        demand_forecast: ''
+      expected_output:
+        grid_analysis: Detailed compliance checklist with regulatory requirements
+        optimization_strategy: ''
+    - name: grid_optimizer_strategic_planning
+      description: When developing energy_utilities strategies, the agent should provide forward-thinking recommendations
+      input:
+        grid_performance: Strategic planning for energy_utilities growth and optimization
+        demand_forecast: ''
+      expected_output:
+        grid_analysis: Comprehensive strategic plan with measurable objectives and timelines
+        optimization_strategy: ''

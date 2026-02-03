@@ -1,0 +1,186 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Data Science GEPA
+  id: data_science_gepa
+  version: 1.0.0
+  level: oracles
+  description: Advanced data science agent optimized with GEPA for statistical analysis, machine learning insights, and data-driven
+    decision making
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    temperature: 0.1
+    max_tokens: 32000
+  input_fields:
+  - name: problem_description
+    type: str
+    description: Description of the data science problem or analysis request
+    required: true
+  - name: data_context
+    type: str
+    description: Information about the dataset, features, and business context
+    required: false
+  output_fields:
+  - name: statistical_analysis
+    type: str
+    description: Comprehensive statistical analysis and findings
+    required: true
+  - name: methodology
+    type: str
+    description: Recommended analytical approach and methodology
+    required: true
+  - name: model_recommendations
+    type: str
+    description: Suggested models and algorithms with rationale
+    required: true
+  - name: evaluation_strategy
+    type: str
+    description: Model evaluation and validation approach
+    required: true
+  - name: business_insights
+    type: str
+    description: Actionable business insights and recommendations
+    required: true
+  - name: limitations
+    type: str
+    description: Analysis limitations and potential biases
+    required: true
+  - name: reasoning
+    type: str
+    description: Scientific reasoning and confidence assessment
+    required: true
+  persona:
+    role: Data Science Specialist
+    goal: Provide comprehensive data analysis, statistical insights, and machine learning guidance with rigorous methodology
+    traits:
+    - analytical
+    - statistical-minded
+    - methodical
+    - evidence-based
+    - thorough
+  tasks:
+  - name: data_science_analysis
+    description: Comprehensive data science analysis including statistical analysis, feature engineering, model selection,
+      and interpretation
+    instruction: 'Perform comprehensive data science analysis with focus on:
+
+
+      1. **Statistical Analysis**: Descriptive statistics, hypothesis testing, correlation analysis
+
+      2. **Data Quality Assessment**: Missing values, outliers, data distribution analysis
+
+      3. **Feature Engineering**: Feature selection, transformation, and creation recommendations
+
+      4. **Model Selection**: Appropriate algorithm selection based on problem type and data characteristics
+
+      5. **Model Evaluation**: Performance metrics, validation strategies, bias detection
+
+      6. **Interpretation**: Business insights, actionable recommendations, limitations
+
+      7. **Reproducibility**: Code quality, documentation, version control considerations
+
+
+      Provide evidence-based recommendations with confidence intervals and statistical significance.
+
+      '
+    inputs:
+    - name: problem_description
+      type: str
+      description: Description of the data science problem or analysis request
+      required: true
+    - name: data_context
+      type: str
+      description: Information about the dataset, features, and business context
+      required: false
+    outputs:
+    - name: statistical_analysis
+      type: str
+      description: Comprehensive statistical analysis and findings
+    - name: methodology
+      type: str
+      description: Recommended analytical approach and methodology
+    - name: model_recommendations
+      type: str
+      description: Suggested models and algorithms with rationale
+    - name: evaluation_strategy
+      type: str
+      description: Model evaluation and validation approach
+    - name: business_insights
+      type: str
+      description: Actionable business insights and recommendations
+    - name: limitations
+      type: str
+      description: Analysis limitations and potential biases
+    - name: reasoning
+      type: str
+      description: Scientific reasoning and confidence assessment
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: data_science_methodology_feedback
+        auto: light
+        reflection_lm: qwen3:8b
+        reflection_minibatch_size: 3
+        skip_perfect_score: false
+        add_format_failure_as_feedback: true
+        methodology_focused_feedback: true
+  feature_specifications:
+    scenarios:
+    - name: customer_churn_prediction
+      description: Should provide comprehensive approach for customer churn prediction
+      input:
+        problem_description: Predict customer churn for a SaaS company with 50,000 customers. Need to identify customers at
+          risk of canceling their subscription in the next 30 days.
+        data_context: 'Features include: usage metrics, support tickets, payment history, account age, plan type. Historical
+          churn rate is 15% annually.'
+      expected_output:
+        statistical_analysis: 15% annual churn rate suggests significant retention challenge. Need to analyze feature correlations
+          and identify churn patterns.
+        methodology: Use supervised learning with temporal validation. Split data chronologically to prevent data leakage.
+          Consider class imbalance (85% retain vs 15% churn).
+        model_recommendations: Start with logistic regression for interpretability, then try Random Forest and XGBoost. Consider
+          ensemble methods for improved performance.
+        evaluation_strategy: Use precision-recall curves (imbalanced classes), time-based cross-validation, and business metrics
+          like customer lifetime value impact.
+        business_insights: Focus on early warning signals and actionable interventions. Prioritize high-value customers and
+          cost-effective retention strategies.
+    - name: sales_forecasting
+      description: Should provide robust sales forecasting methodology
+      input:
+        problem_description: Forecast monthly sales for the next 6 months for an e-commerce business with seasonal patterns
+          and promotional effects.
+        data_context: 3 years of historical sales data, promotional calendar, economic indicators, weather data. Strong seasonality
+          with Q4 peaks.
+      expected_output:
+        statistical_analysis: Strong seasonal patterns with Q4 spikes. Need to decompose trend, seasonality, and promotional
+          effects. Check for stationarity.
+        methodology: Time series analysis with seasonal decomposition. Consider SARIMA, Prophet, or neural time series models.
+          Include external regressors for promotions.
+        model_recommendations: Prophet for interpretable seasonality handling, LSTM for complex patterns, ensemble of multiple
+          approaches for robustness.
+        evaluation_strategy: Use time series cross-validation, MAPE, WMAPE metrics. Validate on holdout periods including
+          seasonal transitions.
+        business_insights: Provide confidence intervals for forecasts. Highlight key drivers and scenario planning for promotional
+          strategies.
+    - name: fraud_detection_system
+      description: Should design comprehensive fraud detection approach
+      input:
+        problem_description: Build real-time fraud detection system for credit card transactions. Need to minimize false positives
+          while catching fraudulent transactions.
+        data_context: Transaction data including amount, merchant, location, time, customer behavior patterns. Fraud rate
+          is approximately 0.1%.
+      expected_output:
+        statistical_analysis: Extremely imbalanced dataset (99.9% legitimate vs 0.1% fraud). Need sophisticated sampling and
+          evaluation strategies.
+        methodology: Use anomaly detection combined with supervised learning. Implement real-time scoring with feedback loops
+          for model updates.
+        model_recommendations: Isolation Forest for anomaly detection, XGBoost with SMOTE for imbalanced learning, ensemble
+          with multiple algorithms.
+        evaluation_strategy: Focus on precision-recall trade-off, use AUC-PR instead of AUC-ROC. Implement A/B testing for
+          business impact measurement.
+        business_insights: Balance fraud prevention with customer experience. Implement tiered response system and continuous
+          model monitoring.

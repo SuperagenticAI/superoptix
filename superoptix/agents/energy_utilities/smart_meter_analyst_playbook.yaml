@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Smart Meter Data Analyst
+  id: smart_meter_analyst
+  namespace: energy_utilities
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that analyzes smart meter data to identify usage patterns and optimization opportunities.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: meter_readings
+    type: str
+    description: Time-series energy consumption data and usage patterns
+    required: true
+  - name: customer_profile
+    type: str
+    description: Customer type, facility characteristics, and historical usage
+    required: true
+  output_fields:
+  - name: usage_analysis
+    type: str
+    description: Step-by-step analysis of energy consumption patterns and insights
+    required: true
+  - name: optimization_recommendations
+    type: str
+    description: Specific recommendations for energy usage optimization
+    required: true
+  persona:
+    name: MeterBot
+    role: Smart Meter Data Analyst
+    goal: Extract actionable insights from smart meter data to optimize energy usage and grid operations
+    traits:
+    - data-driven
+    - analytical
+    - pattern-focused
+    - detail-oriented
+  tasks:
+  - name: analyze_meter_data
+    instruction: You are a Smart Meter Data Analyst. Think through smart meter readings systematically to identify usage patterns,
+      anomalies, and optimization opportunities for both consumers and utilities.
+    inputs:
+    - name: meter_readings
+      type: str
+      description: Time-series energy consumption data and usage patterns
+      required: true
+    - name: customer_profile
+      type: str
+      description: Customer type, facility characteristics, and historical usage
+      required: true
+    outputs:
+    - name: usage_analysis
+      type: str
+      description: Step-by-step analysis of energy consumption patterns and insights
+    - name: optimization_recommendations
+      type: str
+      description: Specific recommendations for energy usage optimization
+  agentflow:
+  - name: analyze_meter_systematically
+    type: Think
+    task: analyze_meter_data
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.8
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: smart_meter_analyst_comprehensive_task
+      description: Given a complex energy_utilities requirement, the agent should provide detailed analysis and recommendations
+      input:
+        meter_readings: Complex energy_utilities scenario requiring comprehensive analysis
+        customer_profile: ''
+      expected_output:
+        usage_analysis: Detailed step-by-step analysis with energy_utilities-specific recommendations
+        optimization_recommendations: ''
+    - name: smart_meter_analyst_problem_solving
+      description: When facing energy_utilities challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        meter_readings: Challenging energy_utilities problem requiring creative solutions
+        customer_profile: ''
+      expected_output:
+        usage_analysis: Structured problem-solving approach with multiple solution options
+        optimization_recommendations: ''
+    - name: smart_meter_analyst_best_practices
+      description: When asked about energy_utilities best practices, the agent should provide current industry standards and
+        guidelines
+      input:
+        meter_readings: Industry best practices for energy_utilities operations
+        customer_profile: ''
+      expected_output:
+        usage_analysis: Comprehensive best practices guide with implementation steps
+        optimization_recommendations: ''
+    - name: smart_meter_analyst_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to energy_utilities
+      input:
+        meter_readings: Compliance requirements for energy_utilities operations
+        customer_profile: ''
+      expected_output:
+        usage_analysis: Detailed compliance checklist with regulatory requirements
+        optimization_recommendations: ''
+    - name: smart_meter_analyst_strategic_planning
+      description: When developing energy_utilities strategies, the agent should provide forward-thinking recommendations
+      input:
+        meter_readings: Strategic planning for energy_utilities growth and optimization
+        customer_profile: ''
+      expected_output:
+        usage_analysis: Comprehensive strategic plan with measurable objectives and timelines
+        optimization_recommendations: ''

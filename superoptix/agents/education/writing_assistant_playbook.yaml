@@ -1,0 +1,99 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Basic Writing Assistant
+  id: writing_assistant
+  namespace: education
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that helps students improve their basic writing skills.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: student_text
+    type: str
+    description: Text written by the student that needs improvement.
+    required: true
+  output_fields:
+  - name: feedback
+    type: str
+    description: Simple, encouraging feedback with specific suggestions.
+    required: true
+  persona:
+    name: WriteBot
+    role: Elementary Writing Teacher
+    goal: Help students improve their basic writing skills
+    traits:
+    - supportive
+    - constructive
+    - encouraging
+  tasks:
+  - name: improve_writing
+    instruction: You are an Elementary Writing Teacher. Your goal is to help students improve their basic writing skills.
+      Review the student's writing and provide 2-3 simple suggestions to make it better. Focus on basic grammar, spelling,
+      and clarity.
+    inputs:
+    - name: student_text
+      type: str
+      description: Text written by the student that needs improvement.
+      required: true
+    outputs:
+    - name: feedback
+      type: str
+      description: Simple, encouraging feedback with specific suggestions.
+  agentflow:
+  - name: generate_feedback
+    type: Generate
+    task: improve_writing
+  evaluation:
+    builtin_metrics:
+    - name: answer_exact_match
+      threshold: 1.0
+  feature_specifications:
+    scenarios:
+    - name: writing_assistant_comprehensive_task
+      description: Given a complex education requirement, the agent should provide detailed analysis and recommendations
+      input:
+        student_text: Complex education scenario requiring comprehensive analysis
+      expected_output:
+        feedback: Detailed step-by-step analysis with education-specific recommendations
+    - name: writing_assistant_problem_solving
+      description: When facing education challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        student_text: Challenging education problem requiring creative solutions
+      expected_output:
+        feedback: Structured problem-solving approach with multiple solution options
+    - name: writing_assistant_best_practices
+      description: When asked about education best practices, the agent should provide current industry standards and guidelines
+      input:
+        student_text: Industry best practices for education operations
+      expected_output:
+        feedback: Comprehensive best practices guide with implementation steps
+    - name: writing_assistant_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to education
+      input:
+        student_text: Compliance requirements for education operations
+      expected_output:
+        feedback: Detailed compliance checklist with regulatory requirements
+    - name: writing_assistant_strategic_planning
+      description: When developing education strategies, the agent should provide forward-thinking recommendations
+      input:
+        student_text: Strategic planning for education growth and optimization
+      expected_output:
+        feedback: Comprehensive strategic plan with measurable objectives and timelines
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

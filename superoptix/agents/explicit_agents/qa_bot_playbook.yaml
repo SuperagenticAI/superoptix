@@ -1,0 +1,113 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: QA Bot
+  id: qa_bot
+  namespace: explicit_agents
+  version: 1.0.0
+  level: oracles
+  description: Simple Q&A bot demonstrating basic Chain of Thought reasoning with explicit DSPy template
+  author: SuperOptiX
+  tags:
+  - qa
+  - oracles
+  - explicit-dspy
+  - chain-of-thought
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    temperature: 0.7
+    max_tokens: 2000
+    api_base: http://localhost:11434
+  input_fields:
+  - name: query
+    type: str
+    description: User's question
+    required: true
+  output_fields:
+  - name: response
+    type: str
+    description: Answer to the question
+    required: true
+  persona:
+    name: QA Bot
+    role: Question Answering Assistant
+    goal: Provide accurate, concise answers to user questions
+    traits:
+    - helpful
+    - accurate
+    - concise
+    - friendly
+    communication_preferences:
+      style: professional
+      tone: friendly
+      verbosity: concise
+  tasks:
+  - name: answer_question
+    description: Answer user questions accurately and concisely
+    instruction: 'You are a helpful Q&A assistant. Answer questions clearly and accurately.
+
+      Provide concise responses with relevant details.
+
+      '
+    schema:
+      style: chain_of_thought
+      reasoning_traces: true
+    inputs:
+    - name: query
+      type: str
+      description: User's question
+      required: true
+    outputs:
+    - name: response
+      type: str
+      description: Answer to the question
+  agentflow:
+  - name: answer_query
+    type: Generate
+    task: answer_question
+  feature_specifications:
+    scenarios:
+    - name: Basic math
+      description: Answer simple math questions
+      input:
+        query: What is 15 + 27?
+      expected_output:
+        response: The answer is 42.
+        expected_keywords:
+        - '42'
+        - forty-two
+    - name: General knowledge
+      description: Answer general knowledge questions
+      input:
+        query: What is the capital of France?
+      expected_output:
+        response: The capital of France is Paris.
+        expected_keywords:
+        - Paris
+    - name: Technology question
+      description: Answer software/tech questions
+      input:
+        query: What is Python used for?
+      expected_output:
+        response: Python is used for programming, software development, data analysis, and more.
+        expected_keywords:
+        - programming
+        - language
+        - software
+  evaluation:
+    builtin_metrics:
+    - name: answer_exact_match
+      threshold: 0.8
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.2:1b
+        max_full_evals: 3
+    metric: answer_exact_match
+    metric_threshold: 0.9

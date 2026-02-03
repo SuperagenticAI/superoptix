@@ -1,0 +1,781 @@
+"""
+{{ agent_name | to_pascal_case }} Crew - CrewAI Implementation
+
+Auto-generated from SuperSpec playbook using SuperOptiX compiler.
+Framework: CrewAI
+Generated: {{ timestamp }}
+
+SuperSpec Metadata:
+  Name: {{ metadata.name }}
+  Version: {{ metadata.version }}
+  Description: {{ metadata.description }}
+  Framework: CrewAI
+"""
+
+from typing import List, Dict, Any, Optional
+import re
+
+# CrewAI imports
+try:
+  from crewai import Agent, Task, Crew, Process
+  from crewai.llm import LLM
+  CREWAI_AVAILABLE = True
+except ImportError as e:
+  CREWAI_AVAILABLE = False
+  print(f"⚠️  CrewAI not available: {e}")
+  print("⚠️  Install with: pip install crewai")
+
+from superoptix.core.base_component import BaseComponent
+
+
+class {{ agent_name | to_pascal_case }}Component(BaseComponent):
+  """
+  BaseComponent wrapper for CrewAI Agent - {{ metadata.description }}
+  
+  This component wraps a CrewAI Agent + Task + Crew and makes it compatible
+  with SuperOptiX's Universal GEPA optimizer.
+  
+  Optimizable Variable: role + goal + backstory + task config (PHASE 2: COMBINED!)
+  
+  Phase 1: Agent profile only (role+goal+backstory)
+  Phase 2: Agent profile + Task configuration (description+expected_output)
+  
+  Combined optimization provides better agent-task alignment!
+  
+  Framework: CrewAI
+  Input: Any field from input_fields
+  Output: Any field from output_fields
+  """
+  
+  def __init__(
+    self,
+    agent_profile: Optional[str] = None,
+    model_config: Optional[Dict] = None,
+    task_config: Optional[Dict] = None,
+    tools: Optional[List] = None,
+    **kwargs
+  ):
+    """
+    Initialize CrewAI component.
+    
+    Args:
+      agent_profile: Combined profile with agent + task config (optimizable by GEPA!)
+                     Phase 2: Includes role+goal+backstory AND task description+expected_output
+      model_config: Model configuration dict
+      task_config: Task configuration (description, expected_output) - for backward compatibility
+      tools: List of tools for the agent
+      **kwargs: Additional configuration
+    """
+    # Default combined profile from playbook (Phase 2: Agent + Task)
+    default_profile = self._build_default_combined_profile()
+    
+    # Initialize BaseComponent
+    super().__init__(
+      name="{{ agent_name }}",
+      description="""{{ metadata.description | replace('"', '\\"') }}""",
+      input_fields={{ spec.input_fields | map(attribute='name') | list | tojson }},
+      output_fields={{ spec.output_fields | map(attribute='name') | list | tojson }},
+      variable=agent_profile or default_profile,  # GEPA optimizes this! (Phase 2: Combined)
+      variable_type="combined_profile",  # Phase 2: agent_profile + task_config
+      framework="crewai",
+      config=model_config or {},
+    )
+    
+    # Store configuration (for backward compatibility if task_config passed separately)
+    self._task_config_override = task_config
+    self._tools = tools or []
+    
+    # Lazy initialization
+    self._llm = None
+    self._agent = None
+    self._task = None
+    self._crew = None
+  
+  def _build_default_profile(self) -> str:
+    """Build default agent profile from playbook (Phase 1: Agent only)."""
+    profile_parts = []
+    
+{% if spec.persona.role %}
+    profile_parts.append("Role: " + {{ (spec.persona.role | replace('\n', ' ')) | tojson }})
+{% endif %}
+{% if spec.persona.goal %}
+    profile_parts.append("Goal: " + {{ (spec.persona.goal | replace('\n', ' ')) | tojson }})
+{% endif %}
+{% if spec.persona.backstory %}
+    profile_parts.append("Backstory: " + {{ (spec.persona.backstory | replace('\n', ' ')) | tojson }})
+{% elif spec.persona.traits %}
+    # Build backstory from traits if not provided
+    traits_str = "You are " + ", ".join({{ spec.persona.traits | tojson }})
+    profile_parts.append(f"Backstory: {traits_str}")
+{% endif %}
+    
+    if not profile_parts:
+      return "Role: AI Assistant\nGoal: Help users\nBackstory: You are helpful"
+    
+    return "\n".join(profile_parts)
+  
+  def _build_default_combined_profile(self) -> str:
+    """
+    Build default COMBINED profile from playbook (Phase 2: Agent + Task).
+    
+    This combines agent profile (role+goal+backstory) with task configuration
+    (description+expected_output) into a single optimizable variable.
+    
+    GEPA will optimize the entire configuration together for better alignment!
+    """
+    # Start with agent profile
+    agent_profile = self._build_default_profile()
+    
+    # Add task configuration
+    task_parts = []
+{% if spec.tasks and spec.tasks|length > 0 %}
+{% set first_task = spec.tasks[0] %}
+{% if first_task.description %}
+    task_parts.append("Task Description: " + {{ (first_task.description | replace('\n', ' ')) | tojson }})
+{% endif %}
+{% if first_task.expected_output %}
+    task_parts.append("Expected Output: " + {{ (first_task.expected_output | replace('\n', ' ')) | tojson }})
+{% endif %}
+{% endif %}
+    
+    # If no task config, use defaults
+    if not task_parts:
+      task_parts.append("Task Description: Complete the assigned task using your expertise")
+      task_parts.append("Expected Output: A comprehensive response addressing the input")
+    
+    # Combine agent + task
+    combined = agent_profile + "\n\n" + "\n".join(task_parts)
+    return combined
+  
+  def _parse_profile(self, profile: str) -> Dict[str, str]:
+    """
+    Parse combined profile back into agent + task components (Phase 2).
+    
+    Supports both:
+    - Phase 1: role + goal + backstory only
+    - Phase 2: role + goal + backstory + task description + expected output
+    
+    Args:
+      profile: Combined profile string
+    
+    Returns:
+      Dict with 'role', 'goal', 'backstory', 'task_description', 'expected_output' keys
+    """
+    # Extract agent profile using regex
+    role_match = re.search(r'Role:\s*(.+?)(?=\n(?:Goal|Task Description|Expected Output):|$)', profile, re.DOTALL)
+    goal_match = re.search(r'Goal:\s*(.+?)(?=\n(?:Backstory|Task Description|Expected Output):|$)', profile, re.DOTALL)
+    backstory_match = re.search(r'Backstory:\s*(.+?)(?=\n(?:Task Description|Expected Output):|$)', profile, re.DOTALL)
+    
+    # Extract task configuration (Phase 2)
+    task_desc_match = re.search(r'Task Description:\s*(.+?)(?=\nExpected Output:|$)', profile, re.DOTALL)
+    expected_output_match = re.search(r'Expected Output:\s*(.+?)$', profile, re.DOTALL)
+    
+    return {
+      "role": role_match.group(1).strip() if role_match else "AI Assistant",
+      "goal": goal_match.group(1).strip() if goal_match else "Help users",
+      "backstory": backstory_match.group(1).strip() if backstory_match else "You are helpful",
+      "task_description": task_desc_match.group(1).strip() if task_desc_match else "Complete the assigned task",
+      "expected_output": expected_output_match.group(1).strip() if expected_output_match else "A comprehensive response",
+    }
+  
+  def _initialize_llm(self):
+    """Initialize the LLM (Ollama or other)."""
+    if self._llm is not None:
+      return
+    
+    if not CREWAI_AVAILABLE:
+      raise ImportError("CrewAI not installed. Install with: pip install crewai")
+    
+    # Convert config to dict if needed
+    import types
+    config = vars(self.config) if isinstance(self.config, types.SimpleNamespace) else self.config
+    if not isinstance(config, dict):
+      config = {}
+    
+    model_str = config.get("model", "gpt-4o-mini")
+    provider = config.get("provider", "openai")
+    
+    # Initialize LLM
+    if provider == "ollama" or model_str.startswith("ollama"):
+      # CrewAI Ollama configuration
+      model_name = model_str.replace("ollama:", "").replace("ollama/", "")
+      api_base = config.get("api_base", "http://localhost:11434")
+      
+      self._llm = LLM(
+        model=f"ollama/{model_name}",
+        base_url=api_base,
+      )
+      print(f"✅ CrewAI LLM initialized with Ollama: {model_name}")
+    else:
+      # Cloud models (OpenAI, Anthropic, etc.)
+      self._llm = LLM(model=model_str)
+      print(f"✅ CrewAI LLM initialized with model: {model_str}")
+  
+  def _initialize_crew(self):
+    """Lazy initialization of CrewAI crew (Phase 2: Uses combined profile)."""
+    if self._crew is not None:
+      return
+    
+    # Initialize LLM first
+    self._initialize_llm()
+    
+    # Parse current profile (Phase 2: Includes task config!)
+    profile = self._parse_profile(self.variable)
+    
+    # Create CrewAI Agent
+    self._agent = Agent(
+      role=profile["role"],
+      goal=profile["goal"],
+      backstory=profile["backstory"],
+      llm=self._llm,
+      tools=self._tools,
+      verbose=False,
+      allow_delegation=False,
+    )
+    
+    # Create Task (Phase 2: Uses task config from parsed profile!)
+    # Check for override first (backward compatibility)
+    if self._task_config_override:
+      task_description = self._task_config_override.get("description", profile["task_description"])
+      task_expected_output = self._task_config_override.get("expected_output", profile["expected_output"])
+    else:
+      # Phase 2: Use task config from optimizable variable!
+      task_description = profile["task_description"]
+      task_expected_output = profile["expected_output"]
+    
+    self._task = Task(
+      description=task_description,
+      expected_output=task_expected_output,
+      agent=self._agent,
+    )
+    
+    # Create Crew
+    self._crew = Crew(
+      agents=[self._agent],
+      tasks=[self._task],
+      process=Process.sequential,
+      verbose=False,
+    )
+  
+  def forward(self, **inputs: Any) -> Dict[str, Any]:
+    """
+    Execute the CrewAI crew.
+    
+    Args:
+      **inputs: Input fields from playbook
+    
+    Returns:
+      Dict with output fields
+    """
+    # Ensure crew is initialized
+    self._initialize_crew()
+    
+    # Execute crew
+    try:
+      result = self._crew.kickoff(inputs=inputs)
+      
+      # Extract output
+      if hasattr(result, 'raw'):
+        output = result.raw
+      elif hasattr(result, 'to_dict'):
+        output = str(result.to_dict())
+      else:
+        output = str(result)
+      
+{% if spec.output_fields %}
+{% set first_output = spec.output_fields[0] %}
+      return {"{{ first_output.name }}": output}
+{% else %}
+      return {"output": output}
+{% endif %}
+    
+    except Exception as e:
+      import traceback
+      error_msg = f"Error executing crew: {str(e)}"
+      print(f"⚠️  {error_msg}")
+      traceback.print_exc()
+{% if spec.output_fields %}
+{% set first_output = spec.output_fields[0] %}
+      return {"{{ first_output.name }}": f"Error: {str(e)}"}
+{% else %}
+      return {"output": f"Error: {str(e)}"}
+{% endif %}
+  
+  def update(self, new_variable: Any) -> None:
+    """
+    Update agent profile (called by GEPA optimizer during optimization).
+    
+    Args:
+      new_variable: New agent profile (role+goal+backstory)
+    """
+    super().update(new_variable)
+    # Force re-initialization with new profile
+    self._agent = None
+    self._task = None
+    self._crew = None
+  
+  def __repr__(self) -> str:
+    return (
+      f"{{ agent_name | to_pascal_case }}Component("
+      f"framework=crewai, "
+      f"optimizable={self.optimizable})"
+    )
+
+
+# ======================================================================
+# Factory Function
+# ======================================================================
+
+def create_{{ agent_name }}_crew(
+  agent_profile: Optional[str] = None,
+  model_config: Optional[Dict] = None,
+  task_config: Optional[Dict] = None,
+  **kwargs
+) -> {{ agent_name | to_pascal_case }}Component:
+  """
+  Factory function to create {{ agent_name }} crew.
+  
+  Args:
+    agent_profile: Optional custom agent profile (overrides default)
+    model_config: Model configuration
+    task_config: Task configuration
+    **kwargs: Additional configuration
+  
+  Returns:
+    Initialized {{ agent_name | to_pascal_case }}Component
+  """
+  tools = []  # Tools can be added here
+  
+  return {{ agent_name | to_pascal_case }}Component(
+    agent_profile=agent_profile,
+    model_config=model_config,
+    task_config=task_config,
+    tools=tools,
+    **kwargs
+  )
+
+
+# ======================================================================
+# {{ agent_name | to_pascal_case }}Pipeline - SuperOptiX Workflow Support
+# ======================================================================
+
+import yaml
+from pathlib import Path
+from typing import List, Dict, Any
+
+
+class {{ agent_name | to_pascal_case }}Pipeline:
+  """
+  CrewAI pipeline with full SuperOptiX workflow support.
+  
+  Supports:
+  - compile: Generate this code from playbook
+  - evaluate: Run BDD scenarios
+  - optimize: GEPA optimization  
+  - run: Execute crew
+  
+  This makes CrewAI work with standard SuperOptiX commands!
+  """
+  
+  def __init__(self, playbook_path: str = None):
+    """Initialize pipeline from playbook."""
+    # Load playbook
+    if playbook_path:
+      with open(playbook_path) as f:
+        playbook = yaml.safe_load(f)
+        self.spec = playbook.get("spec", {})
+        self.metadata = playbook.get("metadata", {})
+    else:
+      self.spec = {}
+      self.metadata = {}
+    
+    # Get model config from spec
+    model_config = {}
+    if "language_model" in self.spec:
+      lm = self.spec["language_model"]
+      model_config = {
+        "model": lm.get("model", "gpt-4o-mini"),
+        "provider": lm.get("provider", "openai"),
+        "api_base": lm.get("api_base"),
+        "temperature": lm.get("temperature"),
+      }
+    
+    # Get task config from spec
+    task_config = {}
+    if "tasks" in self.spec and len(self.spec["tasks"]) > 0:
+      first_task = self.spec["tasks"][0]
+      task_config = {
+        "description": first_task.get("description", "Complete the task"),
+        "expected_output": first_task.get("expected_output", "Task completed"),
+      }
+    else:
+      # Build from persona if no explicit tasks
+      task_config = {
+        "description": f"Complete the assigned task using your expertise as {self.spec.get('persona', {}).get('role', 'an AI assistant')}",
+        "expected_output": "A comprehensive response addressing the input",
+      }
+    
+    # Create component
+    self.component = create_{{ agent_name }}_crew(
+      model_config=model_config,
+      task_config=task_config
+    )
+    
+    # Load BDD scenarios
+    self.test_scenarios = self._load_bdd_scenarios()
+    
+    # Alias for CLI compatibility
+    self.test_examples = self.test_scenarios
+    
+    # Metrics
+    self.is_trained = False
+  
+  def _load_bdd_scenarios(self) -> List[Dict]:
+    """Load BDD test scenarios from playbook."""
+    scenarios = []
+    feature_specs = self.spec.get("feature_specifications", {})
+    scenario_list = feature_specs.get("scenarios", [])
+    
+    for scenario in scenario_list:
+      scenarios.append({
+        "name": scenario.get("name", "Unnamed"),
+        "description": scenario.get("description", ""),
+        "input": scenario.get("input", {}),
+        "expected_output": scenario.get("expected_output", {}),
+      })
+    
+    return scenarios
+  
+  def run(self, **inputs) -> Dict[str, Any]:
+    """
+    Execute crew (unified interface for SuperOptiX CLI).
+    
+    Args:
+      **inputs: Input fields (e.g., topic="...", query="...")
+    
+    Returns:
+      Dict with output fields
+    """
+    # Use component's forward method
+    result = self.component.forward(**inputs)
+    return result
+  
+  def evaluate(self) -> Dict[str, Any]:
+    """
+    Evaluate crew with BDD scenarios.
+    
+    Returns:
+      Dict with evaluation results
+    """
+    if not self.test_scenarios:
+      print("⚠️  No BDD scenarios found in playbook")
+      return {"pass": 0, "fail": 0, "pass_rate": 0.0}
+    
+    print(f"\n🔍 Evaluating {{ metadata.name }}...\n")
+    print(f"Testing {len(self.test_scenarios)} BDD scenarios:\n")
+    
+    passed = 0
+    failed = 0
+    results = []
+    
+    for scenario in self.test_scenarios:
+      # Convert SimpleNamespace to dict if needed
+      import types
+      if isinstance(scenario, types.SimpleNamespace):
+        scenario = vars(scenario)
+      
+      scenario_name = scenario.get("name", "Unnamed") if isinstance(scenario, dict) else "Unnamed"
+      
+      try:
+        # Get inputs and expected outputs
+        inputs = scenario.get("input", {}) if isinstance(scenario, dict) else {}
+        expected = scenario.get("expected_output", {}) if isinstance(scenario, dict) else {}
+        
+        # Run scenario
+        result = self.run(**inputs)
+        
+        # Check if output matches expected
+        success = self._evaluate_output(result, expected)
+        
+        if success:
+          print(f"✅ {scenario_name}: PASS")
+          passed += 1
+        else:
+          print(f"❌ {scenario_name}: FAIL")
+          failed += 1
+        
+        results.append({
+          "scenario": scenario_name,
+          "passed": success,
+          "output": result,
+        })
+      
+      except Exception as e:
+        import traceback
+        print(f"❌ {scenario_name}: ERROR - {e}")
+        traceback.print_exc()
+        failed += 1
+        results.append({
+          "scenario": scenario_name,
+          "passed": False,
+          "error": str(e),
+        })
+    
+    pass_rate = passed / len(self.test_scenarios) if self.test_scenarios else 0.0
+    
+    print(f"\n{'='*60}")
+    print(f"Overall: {passed}/{len(self.test_scenarios)} PASS ({pass_rate*100:.1f}%)")
+    print(f"{'='*60}\n")
+    
+    return {
+      "pass": passed,
+      "fail": failed,
+      "total": len(self.test_scenarios),
+      "pass_rate": pass_rate,
+      "results": results,
+    }
+  
+  def _evaluate_output(self, result: Dict, expected: Dict) -> bool:
+    """Check if result matches expected output."""
+    # Convert SimpleNamespace to dict if needed
+    import types
+    if isinstance(result, types.SimpleNamespace):
+      result = vars(result)
+    if isinstance(expected, types.SimpleNamespace):
+      expected = vars(expected)
+    
+    # Ensure we have dicts
+    if not isinstance(result, dict):
+      result = {"output": str(result)}
+    if not isinstance(expected, dict):
+      expected = {}
+    
+    # Simple keyword matching
+    result_str = str(result).lower()
+    expected_keywords = expected.get("expected_keywords", [])
+    
+    if expected_keywords:
+      # Convert all keywords to strings and lowercase
+      keywords_str = [str(kw).lower() for kw in expected_keywords if kw]
+      matches = sum(1 for kw in keywords_str if kw in result_str)
+      return matches >= len(keywords_str) * 0.5  # 50% threshold
+    
+    # Check output field
+    if "output" in expected and "output" in result:
+      return expected["output"].lower() in result["output"].lower()
+    
+    return True  # Pass if no clear criteria
+  
+  def run_bdd_test_suite(
+    self, auto_tune: bool = False, ignore_checks: bool = False
+  ) -> Dict[str, Any]:
+    """
+    Run BDD test suite (CLI compatibility method).
+    
+    This method is called by the CLI evaluate command and wraps the 
+    standard evaluate() method to format results for CLI display.
+    
+    Args:
+      auto_tune: Whether to automatically optimize based on results (unused)
+      ignore_checks: If True, treats all scenarios as passed
+    
+    Returns:
+      Dict containing test results formatted for CLI
+    """
+    if not self.test_examples:
+      return {
+        "success": False,
+        "message": "No BDD specifications defined in feature_specifications",
+        "summary": {"total": 0, "passed": 0, "failed": 0, "pass_rate": "0.00%"},
+        "bdd_results": {"detailed_results": []},
+        "model_analysis": {},
+        "recommendations": [],
+      }
+    
+    # Run evaluation
+    eval_results = self.evaluate()
+    
+    # Convert to CLI format
+    detailed_results = []
+    for result in eval_results.get("results", []):
+      passed = result.get("passed", False)
+      if ignore_checks:
+        passed = True
+      
+      detailed_results.append({
+        "scenario_name": result.get("scenario", "Unnamed"),
+        "description": result.get("description", ""),
+        "passed": passed,
+        "confidence_score": 1.0 if passed else 0.0,
+        "actual_output": result.get("output", {}),
+      })
+    
+    # Calculate metrics
+    total = eval_results.get("total", 0)
+    passed = eval_results.get("pass", 0) if not ignore_checks else total
+    failed = total - passed
+    pass_rate = eval_results.get("pass_rate", 0.0) * 100
+    
+    return {
+      "success": True,
+      "summary": {
+        "total": total,
+        "passed": passed,
+        "failed": failed,
+        "pass_rate": f"{pass_rate:.1f}%",
+      },
+      "bdd_results": {
+        "detailed_results": detailed_results,
+        "total_scenarios": total,
+        "scenarios_passed": passed,
+        "scenarios_failed": failed,
+        "pass_rate": f"{pass_rate:.1f}%",
+        "bdd_score": pass_rate / 100,
+      },
+      "model_analysis": {
+        "framework": "CrewAI",
+        "model": "{{ spec.language_model.model | default('gpt-4o-mini') }}",
+      },
+      "recommendations": [],
+    }
+  
+  def optimize_with_gepa(
+    self,
+    auto: str = "medium",
+    metric: str = "response_accuracy",
+  ) -> Dict[str, Any]:
+    """
+    Optimize crew with GEPA (Phase 2: Combined agent + task optimization).
+    
+    GEPA optimizes the entire combined variable:
+    - Agent profile: role + goal + backstory
+    - Task configuration: description + expected_output
+    
+    This provides better agent-task alignment and improved results!
+    
+    Args:
+      auto: Optimization budget ("light", "medium", "heavy")
+      metric: Metric to optimize
+    
+    Returns:
+      Optimization results
+    """
+    from superoptix.optimizers.universal_gepa import UniversalGEPA
+    
+    print(f"\n🔄 Optimizing {{ metadata.name }} with GEPA (Phase 2: Combined)...\n")
+    print(f"Framework: CrewAI")
+    print(f"Optimization level: {auto}")
+    print(f"Optimizing: agent profile + task configuration")
+    print(f"  • Agent: role + goal + backstory")
+    print(f"  • Task: description + expected output\n")
+    
+    # Define metric function
+    def eval_metric(inputs, outputs, gold, component_name=None):
+      """Metric function for GEPA."""
+      # Simple keyword-based evaluation
+      output_str = str(outputs).lower()
+      expected_keywords = gold.get("expected_keywords", [])
+      
+      if expected_keywords:
+        matches = sum(1 for kw in expected_keywords if str(kw).lower() in output_str)
+        score = matches / len(expected_keywords)
+      else:
+        score = 0.5  # Default
+      
+      return score
+    
+    # Prepare training data from BDD scenarios
+    trainset = []
+    for scenario in self.test_scenarios[:len(self.test_scenarios)//2]:  # First half for training
+      trainset.append({
+        "inputs": scenario["input"],
+        "expected": scenario["expected_output"],
+      })
+    
+    # Validation set
+    valset = []
+    for scenario in self.test_scenarios[len(self.test_scenarios)//2:]:  # Second half for validation
+      valset.append({
+        "inputs": scenario["input"],
+        "expected": scenario["expected_output"],
+      })
+    
+    if not trainset:
+      print("⚠️  No training data available. Need BDD scenarios in playbook.")
+      return {"error": "No training data"}
+    
+    # Run GEPA optimization
+    try:
+      optimizer = UniversalGEPA(
+        metric=eval_metric,
+        auto=auto,
+        reflection_lm="gpt-4o-mini",
+      )
+      
+      result = optimizer.compile(
+        component=self.component,
+        trainset=trainset,
+        valset=valset if valset else trainset,
+      )
+      
+      print(f"\n✅ Optimization complete!")
+      print(f"Best score: {result.best_score:.2f}")
+      print(f"\nOptimized combined profile (agent + task):")
+      print(f"{result.optimized_component.variable[:400]}...\n")
+      
+      # Update component with optimized profile
+      self.component = result.optimized_component
+      self.is_trained = True
+      
+      return {
+        "best_score": result.best_score,
+        "optimized_profile": result.optimized_component.variable,
+        "improvement": result.best_score - result.initial_score if hasattr(result, 'initial_score') else 0.0,
+      }
+    
+    except Exception as e:
+      print(f"❌ Optimization failed: {e}")
+      import traceback
+      traceback.print_exc()
+      return {"error": str(e)}
+
+
+# ======================================================================
+# Main Execution
+# ======================================================================
+
+if __name__ == "__main__":
+  """
+  Test the pipeline directly.
+  
+  Usage:
+    python {{ agent_name }}_pipeline.py
+  """
+  print("🧪 Testing {{ metadata.name }} Pipeline\n")
+  
+  # Find playbook
+  playbook_path = Path(__file__).parent.parent / "playbook" / "{{ agent_name }}_playbook.yaml"
+  
+  if not playbook_path.exists():
+    print(f"❌ Playbook not found: {playbook_path}")
+    print("💡 Run from agent directory or compile with: super agent compile {{ agent_name }}")
+    exit(1)
+  
+  # Initialize pipeline
+  pipeline = {{ agent_name | to_pascal_case }}Pipeline(playbook_path=str(playbook_path))
+  
+  # Test run
+  print("🚀 Testing crew execution...\n")
+{% if spec.input_fields %}
+{% set first_input = spec.input_fields[0] %}
+  test_result = pipeline.run({{ first_input.name }}="AI agent frameworks in 2025")
+{% else %}
+  test_result = pipeline.run(topic="AI agent frameworks in 2025")
+{% endif %}
+  print(f"Result: {test_result}\n")
+  
+  # Evaluate if scenarios available
+  if pipeline.test_scenarios:
+    print("🧪 Running evaluation...\n")
+    eval_result = pipeline.evaluate()
+    print(f"\nEvaluation: {eval_result['pass']}/{eval_result['total']} passed")

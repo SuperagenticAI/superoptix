@@ -1,0 +1,204 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: LM Studio Demo Assistant
+  id: lmstudio_demo
+  namespace: demo
+  version: 1.0.0
+  agent_type: Interactive
+  level: genies
+  description: A comprehensive demo agent showcasing LM Studio local model capabilities with SuperOptiX framework features
+    including tools, memory, and RAG.
+spec:
+  language_model:
+    location: local
+    provider: lmstudio
+    model: llama3.2:3b
+    api_base: http://localhost:1234
+    temperature: 0.7
+    max_tokens: 2048
+  input_fields:
+  - name: reasoning_request
+    type: str
+    description: A reasoning problem, logical puzzle, or analytical question.
+    required: true
+  output_fields:
+  - name: reasoning_solution
+    type: str
+    description: A step-by-step reasoning solution with clear explanations.
+    required: true
+  persona:
+    name: LMStudioBot
+    role: LM Studio Demo Assistant
+    goal: Demonstrate the power of LM Studio local models with SuperOptiX framework capabilities
+    traits:
+    - helpful
+    - knowledgeable
+    - precise
+    - educational
+    - analytical
+  tasks:
+  - name: reasoning_assistant
+    instruction: You are an LM Studio Demo Assistant. Help users with logical reasoning, problem-solving, and analytical thinking.
+      Provide step-by-step solutions and clear explanations.
+    inputs:
+    - name: reasoning_request
+      type: str
+      description: A reasoning problem, logical puzzle, or analytical question.
+      required: true
+    outputs:
+    - name: reasoning_solution
+      type: str
+      description: A step-by-step reasoning solution with clear explanations.
+  - name: data_analysis
+    instruction: Help with data analysis, interpretation, and insights. Provide analytical perspectives on various topics
+      and data.
+    inputs:
+    - name: analysis_request
+      type: str
+      description: A data analysis request, interpretation task, or analytical question.
+      required: true
+    outputs:
+    - name: analysis_result
+      type: str
+      description: Comprehensive data analysis and insights.
+  - name: research_assistant
+    instruction: Assist with research tasks, information gathering, and knowledge synthesis.
+    inputs:
+    - name: research_query
+      type: str
+      description: A research question or information gathering request.
+      required: true
+    outputs:
+    - name: research_findings
+      type: str
+      description: Comprehensive research findings and synthesized information.
+  - name: lmstudio_demo
+    instruction: Demonstrate LM Studio-specific capabilities and features. Show how LM Studio models work with SuperOptiX.
+    inputs:
+    - name: lmstudio_query
+      type: str
+      description: A query about LM Studio capabilities or demonstration request.
+      required: true
+    outputs:
+    - name: lmstudio_demonstration
+      type: str
+      description: A demonstration of LM Studio features and capabilities.
+  agentflow:
+  - name: analyze_request
+    type: Analyze
+    task: reasoning_assistant
+  - name: generate_response
+    type: Generate
+    task: data_analysis
+  - name: research_task
+    type: Research
+    task: research_assistant
+  - name: demonstrate_lmstudio
+    type: Demonstrate
+    task: lmstudio_demo
+  react_config:
+    max_iters: 5
+    max_tool_calls: 3
+    tool_selection_strategy: automatic
+    reasoning_style: step_by_step
+    error_handling: retry
+    enable_tracing: true
+  tools:
+    enabled: true
+    categories:
+    - development
+    - core
+    - utilities
+    - finance
+    specific_tools:
+    - calculator
+    - file_reader
+    - text_analyzer
+    - code_formatter
+    - web_search
+    - data_processor
+    - json_processor
+  memory:
+    enabled: true
+    short_term:
+      enabled: true
+      max_tokens: 1000
+    long_term:
+      enabled: true
+      storage_type: local
+      max_entries: 100
+    episodic:
+      enabled: true
+      max_episodes: 50
+  rag:
+    enabled: true
+    retriever_type: chroma
+    config:
+      top_k: 5
+      chunk_size: 512
+      chunk_overlap: 50
+    vector_store:
+      embedding_model: sentence-transformers/all-MiniLM-L6-v2
+      collection_name: lmstudio_demo_knowledge
+  evaluation:
+    builtin_metrics:
+    - name: reasoning_accuracy
+      threshold: 0.8
+    - name: analysis_quality
+      threshold: 0.8
+    - name: research_depth
+      threshold: 0.8
+    - name: lmstudio_knowledge
+      threshold: 0.9
+  feature_specifications:
+    scenarios:
+    - name: logical_reasoning
+      description: The agent should solve logical reasoning problems step by step.
+      input:
+        reasoning_request: If all roses are flowers and some flowers are red, can we conclude that some roses are red?
+      expected_output:
+        reasoning_solution: Should include step-by-step logical reasoning with clear explanation
+    - name: data_interpretation
+      description: The agent should interpret and analyze data effectively.
+      input:
+        analysis_request: 'Analyze this dataset: [10, 15, 20, 25, 30] and provide insights'
+      expected_output:
+        analysis_result: Should include statistical analysis and meaningful insights
+    - name: research_synthesis
+      description: The agent should synthesize research findings effectively.
+      input:
+        research_query: Research the impact of artificial intelligence on job markets
+      expected_output:
+        research_findings: Should include comprehensive research synthesis with multiple perspectives
+    - name: lmstudio_capabilities
+      description: The agent should demonstrate LM Studio-specific capabilities.
+      input:
+        lmstudio_query: What are the key features of LM Studio and how does it work with SuperOptiX?
+      expected_output:
+        lmstudio_demonstration: Should include LM Studio features, local model benefits, and SuperOptiX integration
+    - name: problem_solving
+      description: The agent should solve complex problems with analytical thinking.
+      input:
+        reasoning_request: A train leaves station A at 2 PM traveling at 60 mph. Another train leaves station B at 3 PM traveling
+          at 80 mph. If the stations are 300 miles apart, when will they meet?
+      expected_output:
+        reasoning_solution: Should include mathematical reasoning and step-by-step solution
+    - name: critical_thinking
+      description: The agent should demonstrate critical thinking skills.
+      input:
+        analysis_request: Evaluate the pros and cons of remote work
+      expected_output:
+        analysis_result: Should include balanced analysis with multiple perspectives
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: tool_use_accuracy
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 5
+        skip_perfect_score: true
+        reflection_minibatch_size: 3
+    metric: tool_use_accuracy
+    metric_threshold: 0.75

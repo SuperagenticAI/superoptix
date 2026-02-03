@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Game Designer
+  id: game_designer
+  namespace: gaming_sports
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that creates innovative game design concepts and mechanics for digital games.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: game_requirements
+    type: str
+    description: Target platform, genre, audience, and development constraints
+    required: true
+  - name: market_analysis
+    type: str
+    description: Competitive landscape, player preferences, and market trends
+    required: true
+  output_fields:
+  - name: game_concept
+    type: str
+    description: Complete game design concept with core mechanics and features
+    required: true
+  - name: development_roadmap
+    type: str
+    description: Implementation plan and development milestones
+    required: true
+  persona:
+    name: GameBot
+    role: Game Design Specialist
+    goal: Create engaging and innovative game experiences that captivate players and drive retention
+    traits:
+    - creative
+    - player-focused
+    - innovative
+    - analytical
+  tasks:
+  - name: design_game_concept
+    instruction: You are a Game Design Specialist. Generate comprehensive game design concepts including core mechanics, player
+      progression systems, and monetization strategies that create engaging player experiences.
+    inputs:
+    - name: game_requirements
+      type: str
+      description: Target platform, genre, audience, and development constraints
+      required: true
+    - name: market_analysis
+      type: str
+      description: Competitive landscape, player preferences, and market trends
+      required: true
+    outputs:
+    - name: game_concept
+      type: str
+      description: Complete game design concept with core mechanics and features
+    - name: development_roadmap
+      type: str
+      description: Implementation plan and development milestones
+  agentflow:
+  - name: design_games
+    type: Generate
+    task: design_game_concept
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.7
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: game_designer_comprehensive_task
+      description: Given a complex gaming_sports requirement, the agent should provide detailed analysis and recommendations
+      input:
+        game_requirements: Complex gaming_sports scenario requiring comprehensive analysis
+        market_analysis: ''
+      expected_output:
+        game_concept: Detailed step-by-step analysis with gaming_sports-specific recommendations
+        development_roadmap: ''
+    - name: game_designer_problem_solving
+      description: When facing gaming_sports challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        game_requirements: Challenging gaming_sports problem requiring creative solutions
+        market_analysis: ''
+      expected_output:
+        game_concept: Structured problem-solving approach with multiple solution options
+        development_roadmap: ''
+    - name: game_designer_best_practices
+      description: When asked about gaming_sports best practices, the agent should provide current industry standards and
+        guidelines
+      input:
+        game_requirements: Industry best practices for gaming_sports operations
+        market_analysis: ''
+      expected_output:
+        game_concept: Comprehensive best practices guide with implementation steps
+        development_roadmap: ''
+    - name: game_designer_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to gaming_sports
+      input:
+        game_requirements: Compliance requirements for gaming_sports operations
+        market_analysis: ''
+      expected_output:
+        game_concept: Detailed compliance checklist with regulatory requirements
+        development_roadmap: ''
+    - name: game_designer_strategic_planning
+      description: When developing gaming_sports strategies, the agent should provide forward-thinking recommendations
+      input:
+        game_requirements: Strategic planning for gaming_sports growth and optimization
+        market_analysis: ''
+      expected_output:
+        game_concept: Comprehensive strategic plan with measurable objectives and timelines
+        development_roadmap: ''

@@ -1,0 +1,123 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Bootstrap FewShot Math Solver
+  id: bootstrap-math-solver
+  version: 1.0.0
+  level: oracles
+  description: Mathematical problem solver using BootstrapFewShot optimization for traditional few-shot learning
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    temperature: 0.1
+    max_tokens: 32000
+  input_fields:
+  - name: problem
+    type: str
+    description: The mathematical problem to solve
+    required: true
+  output_fields:
+  - name: solution
+    type: str
+    description: Step-by-step solution
+    required: true
+  - name: answer
+    type: str
+    description: The final answer
+    required: true
+  - name: reasoning
+    type: str
+    description: Mathematical reasoning
+    required: true
+  persona:
+    role: Mathematics Tutor
+    goal: Solve mathematical problems with clear explanations and accurate results
+    traits:
+    - helpful
+    - precise
+    - educational
+  tasks:
+  - name: solve_math_problem
+    description: Solve mathematical problems with clear reasoning
+    instruction: 'Solve the given mathematical problem clearly and accurately.
+
+
+      Requirements:
+
+      1. Show your work step by step
+
+      2. Explain what you''re doing at each step
+
+      3. Give a clear final answer
+
+
+      **Solution:**
+
+      [Your step-by-step work]
+
+
+      **Answer:** [Final answer]
+
+      '
+    inputs:
+    - name: problem
+      type: str
+      description: The mathematical problem to solve
+      required: true
+    outputs:
+    - name: solution
+      type: str
+      description: Step-by-step solution
+    - name: answer
+      type: str
+      description: The final answer
+    - name: reasoning
+      type: str
+      description: Mathematical reasoning
+  optimization:
+    optimizer:
+      name: BootstrapFewShot
+      params:
+        metric: answer_exact_match
+        max_bootstrapped_demos: 4
+        max_labeled_demos: 16
+        max_rounds: 1
+  feature_specifications:
+    scenarios:
+    - name: quadratic_equation
+      description: Should solve quadratic equations
+      input:
+        problem: "Solve 2x\xB2 - 5x - 3 = 0"
+      expected_output:
+        answer: x = 3 or x = -1/2
+        solution: "Using quadratic formula: x = (5 \xB1 \u221A(25 + 24))/4 = (5 \xB1 7)/4"
+    - name: right_triangle
+      description: Should solve right triangle problems
+      input:
+        problem: Find the hypotenuse of a right triangle with legs 5 and 12
+      expected_output:
+        answer: '13'
+        solution: "Using Pythagorean theorem: c\xB2 = 5\xB2 + 12\xB2 = 25 + 144 = 169, so c = 13"
+    - name: rectangle_optimization
+      description: Should solve optimization problems
+      input:
+        problem: Find the maximum area of a rectangle with perimeter 20
+      expected_output:
+        answer: '25'
+        solution: "Square maximizes area. Side length = 20/4 = 5. Area = 5\xB2 = 25"
+    - name: simple_addition
+      description: Should solve basic arithmetic
+      input:
+        problem: What is 25 + 37?
+      expected_output:
+        answer: '62'
+        solution: 25 + 37 = 62
+    - name: linear_system
+      description: Should solve systems of equations
+      input:
+        problem: 'Solve: x + 2y = 7, 3x - y = 4'
+      expected_output:
+        answer: x = 3, y = 2
+        solution: 'Substitution method: x = 7 - 2y, then 3(7-2y) - y = 4'

@@ -1,0 +1,86 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: GEPA Optimizer Demo
+  id: gepa_demo
+  version: 1.0.0
+  level: oracles
+  description: Demonstrates GEPA (Genetic-Pareto) optimizer with reflective prompt evolution
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    temperature: 0.1
+    max_tokens: 32000
+  input_fields:
+  - name: question
+    type: str
+    description: The mathematical problem to solve
+    required: true
+  output_fields:
+  - name: answer
+    type: str
+    description: The final numerical or algebraic answer
+    required: true
+  - name: reasoning
+    type: str
+    description: Step-by-step solution process
+    required: true
+  persona:
+    role: Math Problem Solver
+    goal: Solve mathematical problems using step-by-step reasoning
+    traits:
+    - analytical
+    - precise
+    - methodical
+  tasks:
+  - name: solve_math_problem
+    description: Solve mathematical problems with detailed reasoning
+    instruction: 'Solve the given mathematical problem step by step.
+
+      Show your work clearly and provide the final answer.
+
+      '
+    inputs:
+    - name: question
+      type: str
+      description: The mathematical problem to solve
+      required: true
+    outputs:
+    - name: answer
+      type: str
+      description: The final numerical or algebraic answer
+    - name: reasoning
+      type: str
+      description: Step-by-step solution process
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        reflection_minibatch_size: 3
+        skip_perfect_score: true
+        add_format_failure_as_feedback: true
+  feature_specifications:
+    scenarios:
+    - name: arithmetic_problem
+      description: Should solve basic arithmetic
+      input:
+        question: What is 15 * 23?
+      expected_output:
+        answer: '345'
+    - name: algebra_problem
+      description: Should solve algebraic equations
+      input:
+        question: 'Solve for x: 2x + 5 = 13'
+      expected_output:
+        answer: '4'
+    - name: geometry_problem
+      description: Should calculate geometric properties
+      input:
+        question: What is the area of a circle with radius 5?
+      expected_output:
+        answer: '78.54'

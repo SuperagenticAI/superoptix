@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Production Planner
+  id: production_planner
+  namespace: manufacturing
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that helps create production schedules and optimize manufacturing workflows.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: production_orders
+    type: str
+    description: List of production orders with quantities and deadlines
+    required: true
+  - name: resource_capacity
+    type: str
+    description: Available resources including machines, labor, and materials
+    required: true
+  output_fields:
+  - name: production_schedule
+    type: str
+    description: Detailed production schedule with timelines and resource allocation
+    required: true
+  - name: optimization_notes
+    type: str
+    description: Schedule optimization recommendations and potential bottlenecks
+    required: true
+  persona:
+    name: PlanBot
+    role: Production Planner
+    goal: Optimize production schedules and resource allocation for efficient manufacturing
+    traits:
+    - organized
+    - analytical
+    - efficient
+    - forward-thinking
+  tasks:
+  - name: create_production_schedule
+    instruction: You are a Production Planner. Create an optimized production schedule based on orders, capacity, and resource
+      constraints. Focus on efficiency and meeting delivery deadlines.
+    inputs:
+    - name: production_orders
+      type: str
+      description: List of production orders with quantities and deadlines
+      required: true
+    - name: resource_capacity
+      type: str
+      description: Available resources including machines, labor, and materials
+      required: true
+    outputs:
+    - name: production_schedule
+      type: str
+      description: Detailed production schedule with timelines and resource allocation
+    - name: optimization_notes
+      type: str
+      description: Schedule optimization recommendations and potential bottlenecks
+  agentflow:
+  - name: generate_schedule
+    type: Generate
+    task: create_production_schedule
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.7
+  feature_specifications:
+    scenarios:
+    - name: production_planner_comprehensive_task
+      description: Given a complex manufacturing requirement, the agent should provide detailed analysis and recommendations
+      input:
+        production_orders: Complex manufacturing scenario requiring comprehensive analysis
+        resource_capacity: ''
+      expected_output:
+        production_schedule: Detailed step-by-step analysis with manufacturing-specific recommendations
+        optimization_notes: ''
+    - name: production_planner_problem_solving
+      description: When facing manufacturing challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        production_orders: Challenging manufacturing problem requiring creative solutions
+        resource_capacity: ''
+      expected_output:
+        production_schedule: Structured problem-solving approach with multiple solution options
+        optimization_notes: ''
+    - name: production_planner_best_practices
+      description: When asked about manufacturing best practices, the agent should provide current industry standards and
+        guidelines
+      input:
+        production_orders: Industry best practices for manufacturing operations
+        resource_capacity: ''
+      expected_output:
+        production_schedule: Comprehensive best practices guide with implementation steps
+        optimization_notes: ''
+    - name: production_planner_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to manufacturing
+      input:
+        production_orders: Compliance requirements for manufacturing operations
+        resource_capacity: ''
+      expected_output:
+        production_schedule: Detailed compliance checklist with regulatory requirements
+        optimization_notes: ''
+    - name: production_planner_strategic_planning
+      description: When developing manufacturing strategies, the agent should provide forward-thinking recommendations
+      input:
+        production_orders: Strategic planning for manufacturing growth and optimization
+        resource_capacity: ''
+      expected_output:
+        production_schedule: Comprehensive strategic plan with measurable objectives and timelines
+        optimization_notes: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

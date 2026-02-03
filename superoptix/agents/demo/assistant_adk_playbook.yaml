@@ -1,0 +1,132 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: assistant_adk
+  id: assistant_adk
+  namespace: demo
+  version: 1.0.0
+  level: genies
+  description: AI assistant built with Google ADK, demonstrates Gemini integration
+  author: SuperOptiX
+  tags:
+    - assistant
+    - google-adk
+    - gemini
+    - demo
+
+spec:
+  target_framework: google-adk
+  
+  # MODEL CONFIGURATION: Google ADK (requires GOOGLE_API_KEY)
+  language_model:
+    location: cloud
+    provider: google
+    model: gemini-2.0-flash  # Free tier Gemini model
+    # Note: Requires GOOGLE_API_KEY environment variable
+    # Get free API key at: https://aistudio.google.com/apikey
+  
+  input_fields:
+    - name: query
+      type: str
+      description: User's question or request
+      required: true
+  
+  output_fields:
+    - name: response
+      type: str
+      description: Agent's response
+      required: true
+  
+  # Google ADK Agent Configuration (instruction is optimizable!)
+  persona:
+    name: AI Assistant
+    role: Helpful AI Assistant
+    goal: Provide accurate, helpful responses to user questions
+    backstory: |
+      You are a helpful AI assistant powered by Google's Gemini.
+      You provide accurate, informative, and well-structured responses.
+      You can answer questions, explain concepts, and help with various tasks.
+    traits:
+      - helpful
+      - accurate
+      - clear
+      - informative
+    communication_preferences:
+      style: professional
+      tone: friendly
+      verbosity: balanced
+  
+  reasoning:
+    method: sequential
+    steps:
+      - Understand the user's question
+      - Gather relevant information
+      - Formulate a clear response
+      - Provide helpful insights
+  
+  # BDD Scenarios for testing
+  feature_specifications:
+    scenarios:
+      - name: Simple greeting
+        description: Agent should respond to a greeting
+        input:
+          query: "Hello, how are you?"
+        expected_output:
+          response: "I am doing well"
+          expected_keywords:
+            - hello
+            - well
+            - assistant
+      
+      - name: Question answering
+        description: Agent should answer factual questions
+        input:
+          query: "What is the capital of France?"
+        expected_output:
+          response: "Paris is the capital of France"
+          expected_keywords:
+            - Paris
+            - capital
+            - France
+      
+      - name: Explanation request
+        description: Agent should explain concepts
+        input:
+          query: "Explain what AI is in simple terms"
+        expected_output:
+          response: "AI is Artificial Intelligence"
+          expected_keywords:
+            - AI
+            - Artificial Intelligence
+            - computer
+      
+      - name: Math question
+        description: Agent should handle simple math
+        input:
+          query: "What is 7 multiplied by 8?"
+        expected_output:
+          response: "56"
+          expected_keywords:
+            - 56
+            - multiply
+  
+  evaluation:
+    builtin_metrics:
+      - name: response_quality
+        threshold: 0.70
+      - name: answer_correctness
+        threshold: 0.75
+  
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: response_quality
+        auto: medium
+        reflection_lm: gpt-4o-mini
+        max_full_evals: 5
+    metric: response_quality
+    metric_threshold: 0.85
+
+
+

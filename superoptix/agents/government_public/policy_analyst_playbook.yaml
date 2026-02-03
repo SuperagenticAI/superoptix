@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Government Policy Analyst
+  id: policy_analyst
+  namespace: government_public
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that analyzes government policies and develops evidence-based policy recommendations.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: policy_proposal
+    type: str
+    description: Policy details, objectives, and proposed implementation approach
+    required: true
+  - name: stakeholder_context
+    type: str
+    description: Affected parties, budget constraints, and political considerations
+    required: true
+  output_fields:
+  - name: policy_analysis
+    type: str
+    description: Step-by-step analysis of policy impacts and feasibility assessment
+    required: true
+  - name: recommendations
+    type: str
+    description: Specific policy recommendations with implementation strategy
+    required: true
+  persona:
+    name: PolicyBot
+    role: Government Policy Analyst
+    goal: Develop evidence-based policy recommendations that serve the public interest effectively
+    traits:
+    - analytical
+    - objective
+    - research-focused
+    - public-service-oriented
+  tasks:
+  - name: analyze_policy_impact
+    instruction: You are a Government Policy Analyst. Think through policy proposals, stakeholder impacts, and implementation
+      challenges systematically to develop comprehensive policy analyses and recommendations.
+    inputs:
+    - name: policy_proposal
+      type: str
+      description: Policy details, objectives, and proposed implementation approach
+      required: true
+    - name: stakeholder_context
+      type: str
+      description: Affected parties, budget constraints, and political considerations
+      required: true
+    outputs:
+    - name: policy_analysis
+      type: str
+      description: Step-by-step analysis of policy impacts and feasibility assessment
+    - name: recommendations
+      type: str
+      description: Specific policy recommendations with implementation strategy
+  agentflow:
+  - name: analyze_systematically
+    type: Think
+    task: analyze_policy_impact
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: policy_analyst_comprehensive_task
+      description: Given a complex government_public requirement, the agent should provide detailed analysis and recommendations
+      input:
+        policy_proposal: Complex government_public scenario requiring comprehensive analysis
+        stakeholder_context: ''
+      expected_output:
+        policy_analysis: Detailed step-by-step analysis with government_public-specific recommendations
+        recommendations: ''
+    - name: policy_analyst_problem_solving
+      description: When facing government_public challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        policy_proposal: Challenging government_public problem requiring creative solutions
+        stakeholder_context: ''
+      expected_output:
+        policy_analysis: Structured problem-solving approach with multiple solution options
+        recommendations: ''
+    - name: policy_analyst_best_practices
+      description: When asked about government_public best practices, the agent should provide current industry standards
+        and guidelines
+      input:
+        policy_proposal: Industry best practices for government_public operations
+        stakeholder_context: ''
+      expected_output:
+        policy_analysis: Comprehensive best practices guide with implementation steps
+        recommendations: ''
+    - name: policy_analyst_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to government_public
+      input:
+        policy_proposal: Compliance requirements for government_public operations
+        stakeholder_context: ''
+      expected_output:
+        policy_analysis: Detailed compliance checklist with regulatory requirements
+        recommendations: ''
+    - name: policy_analyst_strategic_planning
+      description: When developing government_public strategies, the agent should provide forward-thinking recommendations
+      input:
+        policy_proposal: Strategic planning for government_public growth and optimization
+        stakeholder_context: ''
+      expected_output:
+        policy_analysis: Comprehensive strategic plan with measurable objectives and timelines
+        recommendations: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

@@ -1,0 +1,53 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: BetterTogether Optimizer Demo
+  id: bettertogether-demo
+  version: 1.0.0
+  level: oracles
+  description: Minimal agent demonstrating BetterTogether optimizer configuration
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+  input_fields:
+  - name: question
+    type: str
+    description: The question to answer
+    required: true
+  output_fields:
+  - name: answer
+    type: str
+    description: The answer to the question
+    required: true
+  persona:
+    role: Demo Agent
+    goal: Demonstrate BetterTogether optimizer support
+  tasks:
+  - name: answer_question
+    description: Answer a simple question
+    instruction: Answer the user's question clearly.
+    inputs:
+    - name: question
+      type: str
+      description: The question to answer
+      required: true
+    outputs:
+    - name: answer
+      type: str
+      description: The answer to the question
+  optimization:
+    optimizer:
+      name: BetterTogether
+      params:
+        metric: semantic_f1
+        seed: 42
+  feature_specifications:
+    scenarios:
+    - name: basic_question
+      description: Should answer a basic question
+      input:
+        question: What is the capital of Japan?
+      expected_output:
+        answer: Should mention Tokyo

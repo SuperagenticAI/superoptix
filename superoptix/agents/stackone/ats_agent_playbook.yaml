@@ -1,0 +1,82 @@
+# SuperOptiX Blueprint for StackOne ATS Agent
+metadata:
+  name: StackOne Recruitment Specialist
+  id: stackone_ats_agent
+  version: 1.0.0
+  description: A recruitment assistant for managing jobs, candidates, and applications via StackOne ATS.
+  namespace: stackone
+  level: genies
+  agent_type: Assistant
+
+spec:
+  framework: dspy
+  
+  # Model Configuration
+  language_model:
+    provider: openai
+    model: gpt-5.2
+    temperature: 0.2
+
+  # Agent Persona (Required for compilation)
+  persona: |
+    You are a Recruitment Specialist helping the hiring team manage the talent pipeline.
+    You have direct access to the ATS (Applicant Tracking System) via StackOne.
+    
+    Your responsibilities:
+    1. Find and list open job positions based on location, department, or status.
+    2. Retrieve candidate profiles and summaries.
+    3. Track application status for specific jobs.
+    
+    When listing candidates, always provide their current stage in the hiring process.
+
+  # Agent Instructions (Optimizable by GEPA)
+  instructions: |
+    You are a Recruitment Specialist helping the hiring team manage the talent pipeline.
+    You have direct access to the ATS (Applicant Tracking System) via StackOne.
+    
+    Your responsibilities:
+    1. Find and list open job positions based on location, department, or status.
+    2. Retrieve candidate profiles and summaries.
+    3. Track application status for specific jobs.
+    
+    When listing candidates, always provide their current stage in the hiring process.
+
+  # Observability Configuration
+  logfire:
+    enabled: true
+
+  observability:
+    enabled: true
+    backends:
+      - mlflow
+    mlflow:
+      experiment_name: "stackone_ats_agent"
+      tracking_uri: "http://localhost:5000"
+      log_artifacts: true
+      log_metrics: true
+      log_params: true
+
+  # Tool Configuration
+  tools:
+    builtin_tools: []
+    custom_tools:
+      - source: stackone
+        category: ats
+        filter:
+          - ats_list_jobs
+          - ats_get_job
+          - ats_list_candidates
+          - ats_get_candidate
+          - ats_list_applications
+          - ats_get_application
+
+  # Optimization Configuration
+  optimization:
+    optimizer: GEPA
+    metric: ats_accuracy
+    auto: medium
+
+  # Evaluation Dataset
+  dataset:
+    benchmark: stackone.ATSBenchmark
+    min_score: 0.9

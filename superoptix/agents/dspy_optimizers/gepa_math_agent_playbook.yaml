@@ -1,0 +1,195 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: GEPA Math Problem Solver
+  id: gepa-math-solver
+  version: 1.0.0
+  namespace: education
+  level: oracles
+  stage: stable
+  agent_type: Autonomous
+  description: Mathematical problem solver optimized with GEPA for step-by-step reasoning
+  tags:
+  - math
+  - education
+  - gepa
+  - optimization
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    temperature: 0.1
+    max_tokens: 32000
+    cache: true
+  input_fields:
+  - name: problem
+    type: str
+    description: The mathematical problem to solve
+    required: true
+  output_fields:
+  - name: solution
+    type: str
+    description: Comprehensive step-by-step solution
+    required: true
+  - name: answer
+    type: str
+    description: The final answer
+    required: true
+  persona:
+    role: Mathematics Tutor
+    goal: Solve mathematical problems with clear step-by-step reasoning and multiple solution approaches
+    traits:
+    - analytical
+    - clear
+    - methodical
+    - patient
+    expertise_areas:
+    - algebra
+    - calculus
+    - geometry
+    - statistics
+    communication_preferences:
+      style: technical
+      tone: supportive
+      verbosity: detailed
+  tasks:
+  - name: solve_math_problem
+    description: Solve mathematical problems with comprehensive step-by-step reasoning
+    instruction: 'Solve the given mathematical problem with detailed step-by-step reasoning.
+
+
+      Requirements:
+
+      1. Show your work clearly at each step
+
+      2. Explain the reasoning behind each step
+
+      3. Provide multiple solution methods when applicable
+
+      4. Verify your answer through substitution or alternative methods
+
+      5. Format your response with clear sections
+
+
+      Format your response as:
+
+      **Problem Analysis:**
+
+      [Brief analysis of the problem type and approach]
+
+
+      **Solution Method 1: [Method Name]**
+
+      Step 1: [Detailed step with explanation]
+
+      Step 2: [Detailed step with explanation]
+
+      ...
+
+
+      **Solution Method 2: [Alternative Method]** (if applicable)
+
+      [Alternative solution approach]
+
+
+      **Verification:**
+
+      [Check your answer through substitution or alternative verification]
+
+
+      **Final Answer:** [Clear, concise final answer]
+
+      '
+    inputs:
+    - name: problem
+      type: str
+      description: The mathematical problem to solve
+      required: true
+    outputs:
+    - name: solution
+      type: str
+      description: Comprehensive step-by-step solution
+    - name: answer
+      type: str
+      description: The final answer
+  optimization:
+    enabled: true
+    optimizer:
+      name: GEPA
+      params:
+        metric: advanced_math_feedback
+        auto: light
+        reflection_lm: qwen3:8b
+        reflection_minibatch_size: 3
+        skip_perfect_score: true
+        add_format_failure_as_feedback: true
+        max_full_evals: 10
+        verbose: true
+        timeout: 300
+    evaluation:
+      enabled: true
+      metrics:
+      - answer_exact_match
+      - advanced_math_feedback
+      test_split: 0.2
+    hardware_optimization:
+      target_tier: standard
+      memory_limit_gb: 16
+  feature_specifications:
+    scenarios:
+    - name: quadratic_equation
+      description: Should solve quadratic equations using multiple methods
+      input:
+        problem: "Solve: x\xB2 - 5x + 6 = 0"
+      expected_output:
+        answer: x = 2 or x = 3
+        solution: 'Factoring: (x-2)(x-3) = 0, Quadratic formula verification included'
+      tags:
+      - algebra
+      - quadratic
+      priority: high
+    - name: linear_system
+      description: Should solve systems of linear equations
+      input:
+        problem: 'Solve the system: 2x + 3y = 7, x - y = 1'
+      expected_output:
+        answer: x = 2, y = 1
+        solution: 'Multiple methods shown: substitution and elimination'
+      tags:
+      - algebra
+      - systems
+      priority: high
+    - name: derivative_calculation
+      description: Should calculate derivatives with step-by-step process
+      input:
+        problem: "Find the derivative of f(x) = 3x\xB2 + 2x - 5"
+      expected_output:
+        answer: f'(x) = 6x + 2
+        solution: Power rule applied term by term with clear explanation
+      tags:
+      - calculus
+      - derivatives
+      priority: medium
+    - name: integration_problem
+      description: Should solve integration problems with verification
+      input:
+        problem: "Evaluate \u222B(2x + 3)dx"
+      expected_output:
+        answer: "x\xB2 + 3x + C"
+        solution: Integration rules applied with verification by differentiation
+      tags:
+      - calculus
+      - integration
+      priority: medium
+    - name: word_problem
+      description: Should solve mathematical word problems
+      input:
+        problem: A train travels 120 miles in 2 hours. How fast is it going?
+      expected_output:
+        answer: 60 mph
+        solution: "Distance = rate \xD7 time, solve for rate: 120 = rate \xD7 2"
+      tags:
+      - word-problems
+      - basic
+      priority: high

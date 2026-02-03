@@ -1,0 +1,124 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Document Drafter
+  id: document_drafter
+  namespace: legal
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that helps draft basic legal documents and provides template guidance.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: document_type
+    type: str
+    description: Type of document to draft (NDA, service agreement, etc.)
+    required: true
+  - name: key_requirements
+    type: str
+    description: Specific requirements and terms to include
+    required: true
+  output_fields:
+  - name: document_draft
+    type: str
+    description: Basic document template with standard clauses
+    required: true
+  - name: customization_notes
+    type: str
+    description: Notes on areas requiring customization and legal review
+    required: true
+  persona:
+    name: DraftBot
+    role: Document Drafter
+    goal: Create basic legal document templates and provide drafting guidance
+    traits:
+    - precise
+    - structured
+    - clear
+    - professional
+  tasks:
+  - name: draft_document
+    instruction: You are a Document Drafter. Create a basic legal document template based on the specified requirements. Include
+      standard clauses and highlight areas needing customization.
+    inputs:
+    - name: document_type
+      type: str
+      description: Type of document to draft (NDA, service agreement, etc.)
+      required: true
+    - name: key_requirements
+      type: str
+      description: Specific requirements and terms to include
+      required: true
+    outputs:
+    - name: document_draft
+      type: str
+      description: Basic document template with standard clauses
+    - name: customization_notes
+      type: str
+      description: Notes on areas requiring customization and legal review
+  agentflow:
+  - name: create_draft
+    type: Generate
+    task: draft_document
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.7
+  feature_specifications:
+    scenarios:
+    - name: document_drafter_comprehensive_task
+      description: Given a complex legal requirement, the agent should provide detailed analysis and recommendations
+      input:
+        document_type: Complex legal scenario requiring comprehensive analysis
+        key_requirements: ''
+      expected_output:
+        document_draft: Detailed step-by-step analysis with legal-specific recommendations
+        customization_notes: ''
+    - name: document_drafter_problem_solving
+      description: When facing legal challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        document_type: Challenging legal problem requiring creative solutions
+        key_requirements: ''
+      expected_output:
+        document_draft: Structured problem-solving approach with multiple solution options
+        customization_notes: ''
+    - name: document_drafter_best_practices
+      description: When asked about legal best practices, the agent should provide current industry standards and guidelines
+      input:
+        document_type: Industry best practices for legal operations
+        key_requirements: ''
+      expected_output:
+        document_draft: Comprehensive best practices guide with implementation steps
+        customization_notes: ''
+    - name: document_drafter_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to legal
+      input:
+        document_type: Compliance requirements for legal operations
+        key_requirements: ''
+      expected_output:
+        document_draft: Detailed compliance checklist with regulatory requirements
+        customization_notes: ''
+    - name: document_drafter_strategic_planning
+      description: When developing legal strategies, the agent should provide forward-thinking recommendations
+      input:
+        document_type: Strategic planning for legal growth and optimization
+        key_requirements: ''
+      expected_output:
+        document_draft: Comprehensive strategic plan with measurable objectives and timelines
+        customization_notes: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Tournament Coordinator
+  id: tournament_coordinator
+  namespace: gaming_sports
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that coordinates gaming and sports tournaments from planning to execution.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: tournament_requirements
+    type: str
+    description: Tournament format, participant count, venue, and technical requirements
+    required: true
+  - name: logistical_constraints
+    type: str
+    description: Budget limitations, timeline, staffing, and equipment availability
+    required: true
+  output_fields:
+  - name: coordination_plan
+    type: str
+    description: Complete tournament management plan with schedules and logistics
+    required: true
+  - name: execution_checklist
+    type: str
+    description: Detailed checklist and timeline for tournament execution
+    required: true
+  persona:
+    name: TournamentBot
+    role: Tournament Operations Coordinator
+    goal: Execute flawless tournaments that provide exceptional competitive experiences
+    traits:
+    - organized
+    - detail-oriented
+    - competitive
+    - logistics-focused
+  tasks:
+  - name: coordinate_tournament
+    instruction: You are a Tournament Operations Coordinator. Generate comprehensive tournament coordination plans including
+      scheduling, logistics, participant management, and contingency planning.
+    inputs:
+    - name: tournament_requirements
+      type: str
+      description: Tournament format, participant count, venue, and technical requirements
+      required: true
+    - name: logistical_constraints
+      type: str
+      description: Budget limitations, timeline, staffing, and equipment availability
+      required: true
+    outputs:
+    - name: coordination_plan
+      type: str
+      description: Complete tournament management plan with schedules and logistics
+    - name: execution_checklist
+      type: str
+      description: Detailed checklist and timeline for tournament execution
+  agentflow:
+  - name: coordinate_tournaments
+    type: Generate
+    task: coordinate_tournament
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.7
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: tournament_coordinator_comprehensive_task
+      description: Given a complex gaming_sports requirement, the agent should provide detailed analysis and recommendations
+      input:
+        tournament_requirements: Complex gaming_sports scenario requiring comprehensive analysis
+        logistical_constraints: ''
+      expected_output:
+        coordination_plan: Detailed step-by-step analysis with gaming_sports-specific recommendations
+        execution_checklist: ''
+    - name: tournament_coordinator_problem_solving
+      description: When facing gaming_sports challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        tournament_requirements: Challenging gaming_sports problem requiring creative solutions
+        logistical_constraints: ''
+      expected_output:
+        coordination_plan: Structured problem-solving approach with multiple solution options
+        execution_checklist: ''
+    - name: tournament_coordinator_best_practices
+      description: When asked about gaming_sports best practices, the agent should provide current industry standards and
+        guidelines
+      input:
+        tournament_requirements: Industry best practices for gaming_sports operations
+        logistical_constraints: ''
+      expected_output:
+        coordination_plan: Comprehensive best practices guide with implementation steps
+        execution_checklist: ''
+    - name: tournament_coordinator_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to gaming_sports
+      input:
+        tournament_requirements: Compliance requirements for gaming_sports operations
+        logistical_constraints: ''
+      expected_output:
+        coordination_plan: Detailed compliance checklist with regulatory requirements
+        execution_checklist: ''
+    - name: tournament_coordinator_strategic_planning
+      description: When developing gaming_sports strategies, the agent should provide forward-thinking recommendations
+      input:
+        tournament_requirements: Strategic planning for gaming_sports growth and optimization
+        logistical_constraints: ''
+      expected_output:
+        coordination_plan: Comprehensive strategic plan with measurable objectives and timelines
+        execution_checklist: ''

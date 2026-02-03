@@ -1,0 +1,272 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: "Memory-Enhanced Developer Assistant"
+  id: "developer-with-memory"
+  namespace: "software"
+  version: "1.0.0"
+  agent_type: "Supervised"
+  level: "sage"
+  description: "An advanced developer agent with comprehensive memory capabilities for learning and context retention."
+
+spec:
+  language_model:
+    provider: ollama
+    model: "llama3.2:1b"
+    api_base: "http://localhost:11434"
+    temperature: 0.1
+    max_tokens: 4000
+
+  persona:
+    name: "MemoryBot"
+    role: "Sage Software Developer with Memory"
+    goal: "Write clean, efficient code while learning from past interactions and maintaining context"
+    traits: ["analytical", "detail-oriented", "adaptive", "memory-driven"]
+    expertise_areas: ["Python", "JavaScript", "Architecture", "Best Practices"]
+
+  tasks:
+    - name: "implement_feature"
+      instruction: "You are a Sage Software Developer with memory capabilities. Use your past experience and learned patterns to implement features. Consider previous similar implementations and user preferences."
+      inputs:
+        - name: "feature_requirement"
+          type: "str"
+          description: "A detailed description of the feature to implement."
+          required: true
+        - name: "context"
+          type: "dict"
+          description: "Additional context including project details, coding standards, etc."
+          required: false
+      outputs:
+        - name: "implementation"
+          type: "str"
+          description: "The code implementation with explanations based on learned patterns."
+        - name: "memory_insights"
+          type: "str"
+          description: "Insights about similar past implementations and lessons learned."
+
+    - name: "code_review"
+      instruction: "Review code quality and provide suggestions based on learned best practices and past code review patterns."
+      inputs:
+        - name: "code"
+          type: "str"
+          description: "Code to review."
+          required: true
+      outputs:
+        - name: "review_feedback"
+          type: "str"
+          description: "Detailed code review with suggestions."
+        - name: "pattern_analysis"
+          type: "str"
+          description: "Analysis of code patterns compared to learned best practices."
+
+  agentflow:
+    - name: "analyze_context"
+      type: "Think"
+      task: "implement_feature"
+      config:
+        reasoning_depth: 3
+        
+    - name: "retrieve_relevant_memories"
+      type: "Search"
+      task: "implement_feature"
+      config:
+        retriever: "memory_search"
+        top_k: 5
+        
+    - name: "generate_code"
+      type: "Generate"
+      task: "implement_feature"
+      depends_on: ["analyze_context", "retrieve_relevant_memories"]
+
+  # === COMPREHENSIVE MEMORY CONFIGURATION ===
+  agent_capabilities:
+    memory:
+      enabled: true
+      agent_id: "developer-with-memory"
+      
+      # Storage backend configuration
+      backend:
+        type: sqlite  # Use SQLite for reliable persistence
+        config:
+          db_path: ".superoptix/developer_memory.db"
+      
+      # Short-term memory for immediate context
+      short_term:
+        enabled: true
+        capacity: 200  # Larger capacity for development context
+        retention_policy: lru
+        max_conversation_length: 100  # Keep longer conversation history
+        default_ttl: 7200  # 2 hours default TTL
+        working_memory_enabled: true
+        
+      # Long-term memory for accumulated knowledge
+      long_term:
+        enabled: true
+        enable_embeddings: true
+        embedding_model: "all-MiniLM-L6-v2"
+        
+        # Custom categories for development knowledge
+        categories:
+          - name: "code_patterns"
+            description: "Reusable code patterns and templates"
+          - name: "best_practices"
+            description: "Coding best practices and standards"
+          - name: "user_preferences"
+            description: "User coding preferences and styles"
+          - name: "project_context"
+            description: "Project-specific knowledge and requirements"
+          - name: "debugging_solutions"
+            description: "Common bugs and their solutions"
+          - name: "architecture_decisions"
+            description: "Architectural patterns and decisions"
+        
+        # Search configuration optimized for development
+        search:
+          default_limit: 10
+          min_similarity_threshold: 0.25  # Lower threshold for broader matches
+          fallback_to_keyword: true
+          
+        # Enable intelligent indexing
+        indexing:
+          auto_categorize: true
+          auto_tag: true
+          importance_scoring: true
+          
+      # Episodic memory for tracking development sessions
+      episodic:
+        enabled: true
+        auto_start_episodes: true
+        episode_boundary: interaction
+        max_episode_duration: 14400  # 4 hours max session
+        
+        # Episode compression for long development sessions
+        compression:
+          enabled: true
+          strategy: summarization
+          trigger_size: 50  # Compress after 50 events
+          
+        # Pattern analysis for development workflows
+        pattern_analysis:
+          enabled: true
+          min_pattern_frequency: 2  # Detect patterns after 2 occurrences
+          analysis_window: 14  # Look back 2 weeks
+          
+      # Context management for hierarchical project context
+      context:
+        enabled: true
+        scopes: ["global", "session", "project", "task"]
+        default_ttl: 86400  # 24 hours
+        max_context_size: 500
+        persistence: true
+        
+      # Integration with development workflow
+      integration:
+        dspy_integration: true
+        auto_learn_from_feedback: true
+        conversation_context_injection: true
+        memory_enhanced_responses: true
+        
+      # Maintenance optimized for development use
+      maintenance:
+        auto_cleanup: true
+        cleanup_interval: 3600  # Clean up every hour
+        expired_item_cleanup: true
+        memory_optimization: true
+        
+        # Retention policies for development data
+        retention:
+          short_term_max_age: 86400  # 24 hours
+          long_term_max_items: 10000  # Keep up to 10k knowledge items
+          episodic_max_age: 2592000  # 30 days of episodes
+          
+      # Analytics for development insights
+      analytics:
+        enabled: true
+        track_usage_patterns: true
+        performance_monitoring: true
+        generate_insights: true
+        
+      # Security for code-related data
+      security:
+        encryption_at_rest: false  # Enable if handling sensitive code
+        pii_detection: true  # Detect sensitive information in code
+        access_control: false
+        audit_logging: true  # Log for debugging
+        
+      # Performance optimization for development workloads
+      performance:
+        cache_embeddings: true
+        batch_operations: true
+        connection_pooling: true
+        lazy_loading: true
+        
+        threading:
+          thread_safe: true
+          max_concurrent_operations: 5
+          
+      # Debug settings for development
+      debug:
+        verbose_logging: false
+        memory_stats_logging: true  # Log memory stats for optimization
+        trace_memory_operations: false
+        export_memory_state: false
+
+    # Tool calling for development tasks
+    tool_calling:
+      enabled: true
+      available_tools: ["code_analyzer", "syntax_checker", "documentation_generator"]
+      tool_selection_strategy: automatic
+      max_tool_calls: 5
+
+  # Evaluation with memory-aware metrics
+  evaluation:
+    builtin_metrics:
+      - name: "answer_correctness"
+        threshold: 0.8
+      - name: "semantic_f1"
+        threshold: 0.7
+
+  # System validation with memory scenarios
+  feature_specifications:
+    scenarios:
+      - name: "memory_retention_test"
+        description: "Test if agent remembers user preferences across sessions"
+        input:
+          feature_requirement: "Create a REST API endpoint using my preferred style (e.g., Flask-RESTful, class-based views)"
+          context: 
+            past_preference: "User previously preferred Flask-RESTful with class-based views for API endpoints."
+        expected_output:
+          implementation: "The implementation should use Flask and Flask-RESTful, defining a class that inherits from Resource, similar to past examples."
+          memory_insights: "Based on previous interactions, the user prefers class-based views with Flask-RESTful. Applying this pattern."
+          
+      - name: "pattern_learning_test"
+        description: "Test if agent learns from repeated similar requests"
+        input:
+          feature_requirement: "Implement another standard CRUD endpoint for a 'products' resource."
+          context:
+            past_implementations: "Agent has previously implemented CRUD endpoints for 'users' and 'orders', establishing a consistent pattern."
+        expected_output:
+          implementation: "The code should follow the established CRUD pattern, including methods for GET, POST, PUT, DELETE for the 'products' resource."
+          memory_insights: "This request is similar to the 'users' and 'orders' CRUD endpoints implemented previously. Replicating the established data access and serialization pattern."
+
+  # Optimization with memory-enhanced learning
+  optimization:
+    strategy: few_shot_bootstrapping
+    metric: answer_correctness
+    metric_threshold: 0.8
+    few_shot_bootstrapping_config:
+      max_bootstrapped_demos: 8  # More demos for memory-enhanced learning
+      max_rounds: 2
+      
+  # Runtime configuration for memory
+  runtime:
+    caching:
+      enabled: true
+      backend: memory
+      ttl: 3600
+      
+    monitoring:
+      log_level: info
+      trace_execution: false
+      metrics_collection: true
+      performance_tracking: true 

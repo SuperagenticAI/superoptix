@@ -1,0 +1,109 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Cloud Oracles Demo Assistant
+  id: cloud_demo_oracles
+  namespace: demo
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: A simple cloud-based demo agent for Oracles tier showcasing basic question-answering and reasoning capabilities
+    with SuperOptiX framework.
+spec:
+  language_model:
+    location: cloud
+    provider: openai
+    model: o3-mini
+    temperature: 1.0
+    max_tokens: 20000
+  input_fields:
+  - name: question
+    type: str
+    description: A question or request for information on any topic.
+    required: true
+  output_fields:
+  - name: answer
+    type: str
+    description: A comprehensive and accurate answer to the question.
+    required: true
+  persona:
+    name: CloudOraclesBot
+    role: Cloud Oracles Demo Assistant
+    goal: Demonstrate basic cloud-based model capabilities with SuperOptiX framework for Oracles tier
+    traits:
+    - helpful
+    - knowledgeable
+    - precise
+    - educational
+    - cloud-savvy
+  tasks:
+  - name: answer_question
+    instruction: You are a Cloud Oracles Demo Assistant. Answer questions and provide information on various topics using
+      your knowledge and reasoning capabilities. Demonstrate the power of cloud-based AI models with clear, accurate, and
+      helpful responses.
+    inputs:
+    - name: question
+      type: str
+      description: A question or request for information on any topic.
+      required: true
+    outputs:
+    - name: answer
+      type: str
+      description: A comprehensive and accurate answer to the question.
+  agentflow:
+  - name: generate_answer
+    type: Generate
+    task: answer_question
+  evaluation:
+    builtin_metrics:
+    - name: answer_exact_match
+      threshold: 1.0
+  feature_specifications:
+    scenarios:
+    - name: basic_question_answering
+      description: The agent should answer basic questions accurately.
+      input:
+        question: What is artificial intelligence and how does it work?
+      expected_output:
+        answer: Should include comprehensive explanation of AI concepts
+    - name: step_by_step_explanation
+      description: The agent should provide clear step-by-step explanations.
+      input:
+        question: Explain how machine learning algorithms work with examples
+      expected_output:
+        answer: Should include step-by-step reasoning with examples
+    - name: creative_content_generation
+      description: The agent should generate creative content effectively.
+      input:
+        question: Write a short story about a robot learning to paint
+      expected_output:
+        answer: Should include a creative and engaging story
+    - name: cloud_capabilities_demo
+      description: The agent should demonstrate cloud model capabilities.
+      input:
+        question: What are the advantages of cloud-based AI models?
+      expected_output:
+        answer: Should include comprehensive explanation of cloud AI benefits
+    - name: reasoning_demonstration
+      description: The agent should demonstrate logical reasoning capabilities.
+      input:
+        question: If all roses are flowers and some flowers are red, can we conclude that some roses are red?
+      expected_output:
+        answer: Should include logical reasoning and clear explanation
+    - name: knowledge_synthesis
+      description: The agent should synthesize information from multiple sources.
+      input:
+        question: Compare and contrast supervised and unsupervised learning
+      expected_output:
+        answer: Should include comprehensive comparison with clear distinctions
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

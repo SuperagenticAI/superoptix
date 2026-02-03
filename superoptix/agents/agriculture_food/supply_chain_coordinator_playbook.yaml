@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Food Supply Chain Coordinator
+  id: supply_chain_coordinator
+  namespace: agriculture_food
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that coordinates food supply chains and optimizes distribution networks.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: supply_network
+    type: str
+    description: Current supply chain structure, distribution centers, and transportation methods
+    required: true
+  - name: performance_metrics
+    type: str
+    description: Delivery times, costs, waste levels, and quality issues
+    required: true
+  output_fields:
+  - name: optimization_strategy
+    type: str
+    description: Comprehensive supply chain improvement recommendations
+    required: true
+  - name: implementation_plan
+    type: str
+    description: Specific steps and timeline for supply chain optimization
+    required: true
+  persona:
+    name: SupplyBot
+    role: Food Supply Chain Coordinator
+    goal: Optimize food distribution efficiency while maintaining quality and reducing waste
+    traits:
+    - logistics-focused
+    - efficiency-driven
+    - systematic
+    - cost-conscious
+  tasks:
+  - name: optimize_supply_chain
+    instruction: You are a Food Supply Chain Coordinator. Generate comprehensive supply chain optimization plans that improve
+      efficiency, reduce costs, and ensure food quality throughout the distribution network.
+    inputs:
+    - name: supply_network
+      type: str
+      description: Current supply chain structure, distribution centers, and transportation methods
+      required: true
+    - name: performance_metrics
+      type: str
+      description: Delivery times, costs, waste levels, and quality issues
+      required: true
+    outputs:
+    - name: optimization_strategy
+      type: str
+      description: Comprehensive supply chain improvement recommendations
+    - name: implementation_plan
+      type: str
+      description: Specific steps and timeline for supply chain optimization
+  agentflow:
+  - name: coordinate_supply
+    type: Generate
+    task: optimize_supply_chain
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.7
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: supply_chain_coordinator_comprehensive_task
+      description: Given a complex agriculture_food requirement, the agent should provide detailed analysis and recommendations
+      input:
+        supply_network: Complex agriculture_food scenario requiring comprehensive analysis
+        performance_metrics: ''
+      expected_output:
+        optimization_strategy: Detailed step-by-step analysis with agriculture_food-specific recommendations
+        implementation_plan: ''
+    - name: supply_chain_coordinator_problem_solving
+      description: When facing agriculture_food challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        supply_network: Challenging agriculture_food problem requiring creative solutions
+        performance_metrics: ''
+      expected_output:
+        optimization_strategy: Structured problem-solving approach with multiple solution options
+        implementation_plan: ''
+    - name: supply_chain_coordinator_best_practices
+      description: When asked about agriculture_food best practices, the agent should provide current industry standards and
+        guidelines
+      input:
+        supply_network: Industry best practices for agriculture_food operations
+        performance_metrics: ''
+      expected_output:
+        optimization_strategy: Comprehensive best practices guide with implementation steps
+        implementation_plan: ''
+    - name: supply_chain_coordinator_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to agriculture_food
+      input:
+        supply_network: Compliance requirements for agriculture_food operations
+        performance_metrics: ''
+      expected_output:
+        optimization_strategy: Detailed compliance checklist with regulatory requirements
+        implementation_plan: ''
+    - name: supply_chain_coordinator_strategic_planning
+      description: When developing agriculture_food strategies, the agent should provide forward-thinking recommendations
+      input:
+        supply_network: Strategic planning for agriculture_food growth and optimization
+        performance_metrics: ''
+      expected_output:
+        optimization_strategy: Comprehensive strategic plan with measurable objectives and timelines
+        implementation_plan: ''

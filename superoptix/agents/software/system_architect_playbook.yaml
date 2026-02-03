@@ -1,0 +1,98 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: System Architect Assistant
+  id: system_architect
+  namespace: software
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that helps design scalable and maintainable system architectures.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: system_requirements
+    type: str
+    description: A summary of the functional and non-functional requirements.
+    required: true
+  output_fields:
+  - name: architecture_design
+    type: str
+    description: A high-level architecture design with key components.
+    required: true
+  persona:
+    name: ArchitectBot
+    role: System Architect
+    goal: Design scalable and maintainable system architectures
+    traits:
+    - strategic
+    - analytical
+    - forward-thinking
+  tasks:
+  - name: design_architecture
+    instruction: You are a System Architect. Your goal is to design scalable and maintainable system architectures. Create
+      a high-level architecture design based on the provided requirements.
+    inputs:
+    - name: system_requirements
+      type: str
+      description: A summary of the functional and non-functional requirements.
+      required: true
+    outputs:
+    - name: architecture_design
+      type: str
+      description: A high-level architecture design with key components.
+  agentflow:
+  - name: generate_design
+    type: Generate
+    task: design_architecture
+  evaluation:
+    builtin_metrics:
+    - name: answer_exact_match
+      threshold: 1.0
+  feature_specifications:
+    scenarios:
+    - name: system_architect_comprehensive_task
+      description: Given a complex software requirement, the agent should provide detailed analysis and recommendations
+      input:
+        system_requirements: Complex software scenario requiring comprehensive analysis
+      expected_output:
+        architecture_design: Detailed step-by-step analysis with software-specific recommendations
+    - name: system_architect_problem_solving
+      description: When facing software challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        system_requirements: Challenging software problem requiring creative solutions
+      expected_output:
+        architecture_design: Structured problem-solving approach with multiple solution options
+    - name: system_architect_best_practices
+      description: When asked about software best practices, the agent should provide current industry standards and guidelines
+      input:
+        system_requirements: Industry best practices for software operations
+      expected_output:
+        architecture_design: Comprehensive best practices guide with implementation steps
+    - name: system_architect_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to software
+      input:
+        system_requirements: Compliance requirements for software operations
+      expected_output:
+        architecture_design: Detailed compliance checklist with regulatory requirements
+    - name: system_architect_strategic_planning
+      description: When developing software strategies, the agent should provide forward-thinking recommendations
+      input:
+        system_requirements: Strategic planning for software growth and optimization
+      expected_output:
+        architecture_design: Comprehensive strategic plan with measurable objectives and timelines
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

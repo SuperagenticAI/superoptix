@@ -1,0 +1,124 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Market Researcher
+  id: market_researcher
+  namespace: real_estate
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that analyzes real estate market trends and provides market insights.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: market_data
+    type: str
+    description: Recent sales data, price trends, and market indicators
+    required: true
+  - name: geographic_area
+    type: str
+    description: Target geographic area for analysis
+    required: true
+  output_fields:
+  - name: market_analysis
+    type: str
+    description: Step-by-step market trend analysis and insights
+    required: true
+  - name: investment_outlook
+    type: str
+    description: Market predictions and investment recommendations
+    required: true
+  persona:
+    name: MarketBot
+    role: Market Research Analyst
+    goal: Provide comprehensive real estate market analysis and trend insights
+    traits:
+    - data-driven
+    - analytical
+    - trend-aware
+    - research-focused
+  tasks:
+  - name: analyze_market_trends
+    instruction: You are a Market Research Analyst. Think through market data systematically to identify trends, price movements,
+      and investment opportunities in real estate markets.
+    inputs:
+    - name: market_data
+      type: str
+      description: Recent sales data, price trends, and market indicators
+      required: true
+    - name: geographic_area
+      type: str
+      description: Target geographic area for analysis
+      required: true
+    outputs:
+    - name: market_analysis
+      type: str
+      description: Step-by-step market trend analysis and insights
+    - name: investment_outlook
+      type: str
+      description: Market predictions and investment recommendations
+  agentflow:
+  - name: research_systematically
+    type: Think
+    task: analyze_market_trends
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: market_researcher_comprehensive_task
+      description: Given a complex real_estate requirement, the agent should provide detailed analysis and recommendations
+      input:
+        market_data: Complex real_estate scenario requiring comprehensive analysis
+        geographic_area: ''
+      expected_output:
+        market_analysis: Detailed step-by-step analysis with real_estate-specific recommendations
+        investment_outlook: ''
+    - name: market_researcher_problem_solving
+      description: When facing real_estate challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        market_data: Challenging real_estate problem requiring creative solutions
+        geographic_area: ''
+      expected_output:
+        market_analysis: Structured problem-solving approach with multiple solution options
+        investment_outlook: ''
+    - name: market_researcher_best_practices
+      description: When asked about real_estate best practices, the agent should provide current industry standards and guidelines
+      input:
+        market_data: Industry best practices for real_estate operations
+        geographic_area: ''
+      expected_output:
+        market_analysis: Comprehensive best practices guide with implementation steps
+        investment_outlook: ''
+    - name: market_researcher_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to real_estate
+      input:
+        market_data: Compliance requirements for real_estate operations
+        geographic_area: ''
+      expected_output:
+        market_analysis: Detailed compliance checklist with regulatory requirements
+        investment_outlook: ''
+    - name: market_researcher_strategic_planning
+      description: When developing real_estate strategies, the agent should provide forward-thinking recommendations
+      input:
+        market_data: Strategic planning for real_estate growth and optimization
+        geographic_area: ''
+      expected_output:
+        market_analysis: Comprehensive strategic plan with measurable objectives and timelines
+        investment_outlook: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

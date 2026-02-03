@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Benefits Advisor
+  id: benefits_advisor
+  namespace: human_resources
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that provides guidance on employee benefits, compensation, and HR policies.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: employee_situation
+    type: str
+    description: Employee's personal situation, life stage, and specific questions
+    required: true
+  - name: available_benefits
+    type: str
+    description: Company benefits package options and details
+    required: true
+  output_fields:
+  - name: benefits_explanation
+    type: str
+    description: Clear explanation of relevant benefits and options
+    required: true
+  - name: personalized_recommendations
+    type: str
+    description: Specific recommendations based on employee's situation
+    required: true
+  persona:
+    name: BenefitsBot
+    role: Employee Benefits Advisor
+    goal: Help employees understand and optimize their benefits packages
+    traits:
+    - helpful
+    - knowledgeable
+    - clear-communicator
+    - employee-focused
+  tasks:
+  - name: provide_benefits_guidance
+    instruction: You are an Employee Benefits Advisor. Generate clear, helpful explanations about benefits options, eligibility
+      requirements, and recommendations tailored to employee needs.
+    inputs:
+    - name: employee_situation
+      type: str
+      description: Employee's personal situation, life stage, and specific questions
+      required: true
+    - name: available_benefits
+      type: str
+      description: Company benefits package options and details
+      required: true
+    outputs:
+    - name: benefits_explanation
+      type: str
+      description: Clear explanation of relevant benefits and options
+    - name: personalized_recommendations
+      type: str
+      description: Specific recommendations based on employee's situation
+  agentflow:
+  - name: advise_benefits
+    type: Generate
+    task: provide_benefits_guidance
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.7
+  feature_specifications:
+    scenarios:
+    - name: benefits_advisor_comprehensive_task
+      description: Given a complex human_resources requirement, the agent should provide detailed analysis and recommendations
+      input:
+        employee_situation: Complex human_resources scenario requiring comprehensive analysis
+        available_benefits: ''
+      expected_output:
+        benefits_explanation: Detailed step-by-step analysis with human_resources-specific recommendations
+        personalized_recommendations: ''
+    - name: benefits_advisor_problem_solving
+      description: When facing human_resources challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        employee_situation: Challenging human_resources problem requiring creative solutions
+        available_benefits: ''
+      expected_output:
+        benefits_explanation: Structured problem-solving approach with multiple solution options
+        personalized_recommendations: ''
+    - name: benefits_advisor_best_practices
+      description: When asked about human_resources best practices, the agent should provide current industry standards and
+        guidelines
+      input:
+        employee_situation: Industry best practices for human_resources operations
+        available_benefits: ''
+      expected_output:
+        benefits_explanation: Comprehensive best practices guide with implementation steps
+        personalized_recommendations: ''
+    - name: benefits_advisor_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to human_resources
+      input:
+        employee_situation: Compliance requirements for human_resources operations
+        available_benefits: ''
+      expected_output:
+        benefits_explanation: Detailed compliance checklist with regulatory requirements
+        personalized_recommendations: ''
+    - name: benefits_advisor_strategic_planning
+      description: When developing human_resources strategies, the agent should provide forward-thinking recommendations
+      input:
+        employee_situation: Strategic planning for human_resources growth and optimization
+        available_benefits: ''
+      expected_output:
+        benefits_explanation: Comprehensive strategic plan with measurable objectives and timelines
+        personalized_recommendations: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Public Services Coordinator
+  id: public_services_coordinator
+  namespace: government_public
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that coordinates municipal services and optimizes public service delivery for citizens.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: service_requirements
+    type: str
+    description: Current service levels, citizen needs, and performance metrics
+    required: true
+  - name: resource_constraints
+    type: str
+    description: Budget limitations, staffing levels, and infrastructure capacity
+    required: true
+  output_fields:
+  - name: service_optimization_plan
+    type: str
+    description: Comprehensive plan for improving public service coordination and delivery
+    required: true
+  - name: implementation_strategy
+    type: str
+    description: Specific steps and timeline for service improvements
+    required: true
+  persona:
+    name: ServicesBot
+    role: Municipal Services Coordinator
+    goal: Optimize public service delivery to improve citizen satisfaction and operational efficiency
+    traits:
+    - service-oriented
+    - efficient
+    - citizen-focused
+    - collaborative
+  tasks:
+  - name: coordinate_public_services
+    instruction: You are a Municipal Services Coordinator. Generate comprehensive service coordination plans that improve
+      citizen experiences, optimize resource allocation, and enhance service delivery across municipal departments.
+    inputs:
+    - name: service_requirements
+      type: str
+      description: Current service levels, citizen needs, and performance metrics
+      required: true
+    - name: resource_constraints
+      type: str
+      description: Budget limitations, staffing levels, and infrastructure capacity
+      required: true
+    outputs:
+    - name: service_optimization_plan
+      type: str
+      description: Comprehensive plan for improving public service coordination and delivery
+    - name: implementation_strategy
+      type: str
+      description: Specific steps and timeline for service improvements
+  agentflow:
+  - name: coordinate_services
+    type: Generate
+    task: coordinate_public_services
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.7
+  feature_specifications:
+    scenarios:
+    - name: public_services_coordinator_comprehensive_task
+      description: Given a complex government_public requirement, the agent should provide detailed analysis and recommendations
+      input:
+        service_requirements: Complex government_public scenario requiring comprehensive analysis
+        resource_constraints: ''
+      expected_output:
+        service_optimization_plan: Detailed step-by-step analysis with government_public-specific recommendations
+        implementation_strategy: ''
+    - name: public_services_coordinator_problem_solving
+      description: When facing government_public challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        service_requirements: Challenging government_public problem requiring creative solutions
+        resource_constraints: ''
+      expected_output:
+        service_optimization_plan: Structured problem-solving approach with multiple solution options
+        implementation_strategy: ''
+    - name: public_services_coordinator_best_practices
+      description: When asked about government_public best practices, the agent should provide current industry standards
+        and guidelines
+      input:
+        service_requirements: Industry best practices for government_public operations
+        resource_constraints: ''
+      expected_output:
+        service_optimization_plan: Comprehensive best practices guide with implementation steps
+        implementation_strategy: ''
+    - name: public_services_coordinator_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to government_public
+      input:
+        service_requirements: Compliance requirements for government_public operations
+        resource_constraints: ''
+      expected_output:
+        service_optimization_plan: Detailed compliance checklist with regulatory requirements
+        implementation_strategy: ''
+    - name: public_services_coordinator_strategic_planning
+      description: When developing government_public strategies, the agent should provide forward-thinking recommendations
+      input:
+        service_requirements: Strategic planning for government_public growth and optimization
+        resource_constraints: ''
+      expected_output:
+        service_optimization_plan: Comprehensive strategic plan with measurable objectives and timelines
+        implementation_strategy: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

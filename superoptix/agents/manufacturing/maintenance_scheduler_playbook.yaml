@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Maintenance Scheduler
+  id: maintenance_scheduler
+  namespace: manufacturing
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that helps schedule preventive maintenance and manages equipment uptime.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: equipment_list
+    type: str
+    description: List of equipment with maintenance requirements
+    required: true
+  - name: operational_schedule
+    type: str
+    description: Production schedule and operational priorities
+    required: true
+  output_fields:
+  - name: maintenance_plan
+    type: str
+    description: Step-by-step maintenance scheduling analysis
+    required: true
+  - name: schedule_recommendations
+    type: str
+    description: Optimized maintenance schedule with minimal production impact
+    required: true
+  persona:
+    name: MaintenanceBot
+    role: Maintenance Scheduler
+    goal: Optimize equipment maintenance schedules to maximize uptime and prevent failures
+    traits:
+    - proactive
+    - systematic
+    - reliability-focused
+    - preventive
+  tasks:
+  - name: plan_maintenance_schedule
+    instruction: You are a Maintenance Scheduler. Think through equipment maintenance requirements systematically, considering
+      usage patterns, manufacturer recommendations, and operational priorities.
+    inputs:
+    - name: equipment_list
+      type: str
+      description: List of equipment with maintenance requirements
+      required: true
+    - name: operational_schedule
+      type: str
+      description: Production schedule and operational priorities
+      required: true
+    outputs:
+    - name: maintenance_plan
+      type: str
+      description: Step-by-step maintenance scheduling analysis
+    - name: schedule_recommendations
+      type: str
+      description: Optimized maintenance schedule with minimal production impact
+  agentflow:
+  - name: plan_systematically
+    type: Think
+    task: plan_maintenance_schedule
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: maintenance_scheduler_comprehensive_task
+      description: Given a complex manufacturing requirement, the agent should provide detailed analysis and recommendations
+      input:
+        equipment_list: Complex manufacturing scenario requiring comprehensive analysis
+        operational_schedule: ''
+      expected_output:
+        maintenance_plan: Detailed step-by-step analysis with manufacturing-specific recommendations
+        schedule_recommendations: ''
+    - name: maintenance_scheduler_problem_solving
+      description: When facing manufacturing challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        equipment_list: Challenging manufacturing problem requiring creative solutions
+        operational_schedule: ''
+      expected_output:
+        maintenance_plan: Structured problem-solving approach with multiple solution options
+        schedule_recommendations: ''
+    - name: maintenance_scheduler_best_practices
+      description: When asked about manufacturing best practices, the agent should provide current industry standards and
+        guidelines
+      input:
+        equipment_list: Industry best practices for manufacturing operations
+        operational_schedule: ''
+      expected_output:
+        maintenance_plan: Comprehensive best practices guide with implementation steps
+        schedule_recommendations: ''
+    - name: maintenance_scheduler_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to manufacturing
+      input:
+        equipment_list: Compliance requirements for manufacturing operations
+        operational_schedule: ''
+      expected_output:
+        maintenance_plan: Detailed compliance checklist with regulatory requirements
+        schedule_recommendations: ''
+    - name: maintenance_scheduler_strategic_planning
+      description: When developing manufacturing strategies, the agent should provide forward-thinking recommendations
+      input:
+        equipment_list: Strategic planning for manufacturing growth and optimization
+        operational_schedule: ''
+      expected_output:
+        maintenance_plan: Comprehensive strategic plan with measurable objectives and timelines
+        schedule_recommendations: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

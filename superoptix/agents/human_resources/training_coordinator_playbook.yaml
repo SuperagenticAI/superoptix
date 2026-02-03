@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Training Coordinator
+  id: training_coordinator
+  namespace: human_resources
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that analyzes training needs and develops comprehensive learning programs.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: training_needs
+    type: str
+    description: Identified skill gaps, performance issues, and learning objectives
+    required: true
+  - name: organizational_context
+    type: str
+    description: Company size, industry, budget constraints, and strategic goals
+    required: true
+  output_fields:
+  - name: training_analysis
+    type: str
+    description: Step-by-step analysis of training needs and priorities
+    required: true
+  - name: program_design
+    type: str
+    description: Comprehensive training program with curriculum and implementation plan
+    required: true
+  persona:
+    name: TrainingBot
+    role: Learning & Development Coordinator
+    goal: Design effective training programs that enhance employee skills and organizational capability
+    traits:
+    - educational
+    - systematic
+    - results-oriented
+    - collaborative
+  tasks:
+  - name: design_training_program
+    instruction: You are a Learning & Development Coordinator. Think through organizational training needs systematically
+      to design comprehensive learning programs that address skill gaps and support business objectives.
+    inputs:
+    - name: training_needs
+      type: str
+      description: Identified skill gaps, performance issues, and learning objectives
+      required: true
+    - name: organizational_context
+      type: str
+      description: Company size, industry, budget constraints, and strategic goals
+      required: true
+    outputs:
+    - name: training_analysis
+      type: str
+      description: Step-by-step analysis of training needs and priorities
+    - name: program_design
+      type: str
+      description: Comprehensive training program with curriculum and implementation plan
+  agentflow:
+  - name: design_systematically
+    type: Think
+    task: design_training_program
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: training_coordinator_comprehensive_task
+      description: Given a complex human_resources requirement, the agent should provide detailed analysis and recommendations
+      input:
+        training_needs: Complex human_resources scenario requiring comprehensive analysis
+        organizational_context: ''
+      expected_output:
+        training_analysis: Detailed step-by-step analysis with human_resources-specific recommendations
+        program_design: ''
+    - name: training_coordinator_problem_solving
+      description: When facing human_resources challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        training_needs: Challenging human_resources problem requiring creative solutions
+        organizational_context: ''
+      expected_output:
+        training_analysis: Structured problem-solving approach with multiple solution options
+        program_design: ''
+    - name: training_coordinator_best_practices
+      description: When asked about human_resources best practices, the agent should provide current industry standards and
+        guidelines
+      input:
+        training_needs: Industry best practices for human_resources operations
+        organizational_context: ''
+      expected_output:
+        training_analysis: Comprehensive best practices guide with implementation steps
+        program_design: ''
+    - name: training_coordinator_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to human_resources
+      input:
+        training_needs: Compliance requirements for human_resources operations
+        organizational_context: ''
+      expected_output:
+        training_analysis: Detailed compliance checklist with regulatory requirements
+        program_design: ''
+    - name: training_coordinator_strategic_planning
+      description: When developing human_resources strategies, the agent should provide forward-thinking recommendations
+      input:
+        training_needs: Strategic planning for human_resources growth and optimization
+        organizational_context: ''
+      expected_output:
+        training_analysis: Comprehensive strategic plan with measurable objectives and timelines
+        program_design: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

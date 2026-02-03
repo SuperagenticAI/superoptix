@@ -1,0 +1,98 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Reading Assistant
+  id: reading_coach
+  namespace: education
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that helps improve reading comprehension and fluency.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: reading_passage
+    type: str
+    description: The text passage for the student to read.
+    required: true
+  output_fields:
+  - name: comprehension_questions
+    type: str
+    description: Questions about the reading passage to test comprehension.
+    required: true
+  persona:
+    name: ReadBot
+    role: Reading Coach
+    goal: Help improve reading comprehension and fluency
+    traits:
+    - supportive
+    - encouraging
+    - patient
+  tasks:
+  - name: coach_reading
+    instruction: You are a Reading Coach. Your goal is to help improve reading comprehension and fluency. Ask questions and
+      provide explanations about the provided text.
+    inputs:
+    - name: reading_passage
+      type: str
+      description: The text passage for the student to read.
+      required: true
+    outputs:
+    - name: comprehension_questions
+      type: str
+      description: Questions about the reading passage to test comprehension.
+  agentflow:
+  - name: generate_questions
+    type: Generate
+    task: coach_reading
+  evaluation:
+    builtin_metrics:
+    - name: answer_exact_match
+      threshold: 1.0
+  feature_specifications:
+    scenarios:
+    - name: reading_coach_comprehensive_task
+      description: Given a complex education requirement, the agent should provide detailed analysis and recommendations
+      input:
+        reading_passage: Complex education scenario requiring comprehensive analysis
+      expected_output:
+        comprehension_questions: Detailed step-by-step analysis with education-specific recommendations
+    - name: reading_coach_problem_solving
+      description: When facing education challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        reading_passage: Challenging education problem requiring creative solutions
+      expected_output:
+        comprehension_questions: Structured problem-solving approach with multiple solution options
+    - name: reading_coach_best_practices
+      description: When asked about education best practices, the agent should provide current industry standards and guidelines
+      input:
+        reading_passage: Industry best practices for education operations
+      expected_output:
+        comprehension_questions: Comprehensive best practices guide with implementation steps
+    - name: reading_coach_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to education
+      input:
+        reading_passage: Compliance requirements for education operations
+      expected_output:
+        comprehension_questions: Detailed compliance checklist with regulatory requirements
+    - name: reading_coach_strategic_planning
+      description: When developing education strategies, the agent should provide forward-thinking recommendations
+      input:
+        reading_passage: Strategic planning for education growth and optimization
+      expected_output:
+        comprehension_questions: Comprehensive strategic plan with measurable objectives and timelines
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

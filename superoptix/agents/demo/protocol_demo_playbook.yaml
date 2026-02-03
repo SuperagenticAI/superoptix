@@ -1,0 +1,81 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Protocol-First Demo
+  id: protocol_demo
+  namespace: demo
+  version: 1.0.0
+  stage: stable
+  level: genies
+  agent_type: Autonomous
+  description: Demonstration of protocol-first approach with automatic MCP tool discovery
+  author: SuperOptiX
+  tags:
+  - demo
+  - protocol-first
+  - agenspy
+  - mcp
+  created_at: '2025-10-20T00:00:00Z'
+spec:
+  tool_backend: agenspy
+  mcp_servers:
+  - mcp://demo-server
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    model_type: chat
+    temperature: 0.7
+    max_tokens: 2000
+    api_base: http://localhost:11434
+  persona:
+    name: Protocol Demo Agent
+    role: Demonstration agent for protocol-first approach
+    goal: Show how protocol-first agents discover and use tools automatically
+    traits:
+    - helpful
+    - demonstrative
+    - clear
+    communication_preferences:
+      style: conversational
+      tone: friendly
+      verbosity: concise
+  input_fields:
+  - name: query
+    type: string
+    description: User query
+    required: true
+  output_fields:
+  - name: response
+    type: string
+    description: Agent response
+    required: true
+  reasoning:
+    method: react
+    max_iterations: 3
+  feature_specifications:
+    feature_name: Protocol-First Tool Discovery
+    feature_description: Demonstrate automatic tool discovery from MCP server
+    scenarios:
+    - name: Tool discovery
+      description: Agent discovers tools automatically
+      input:
+        query: What tools do you have?
+      expected_output:
+        response: Tools discovered from MCP server
+        expected_keywords:
+        - tools
+        - discovered
+    - name: Tool usage
+      description: Agent uses discovered tools
+      input:
+        query: Search for AI agents on GitHub
+      expected_output:
+        response: Search results from protocol-discovered tool
+        expected_keywords:
+        - search
+        - github
+config:
+  max_execution_time: 120
+  verbose: true
+  enable_tracing: true

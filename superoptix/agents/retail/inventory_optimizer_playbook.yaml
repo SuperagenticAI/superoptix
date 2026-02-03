@@ -1,0 +1,124 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Inventory Optimizer
+  id: inventory_optimizer
+  namespace: retail
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that analyzes inventory data and optimizes stock levels for retail operations.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: inventory_data
+    type: str
+    description: Current stock levels, sales history, and product performance data
+    required: true
+  - name: business_constraints
+    type: str
+    description: Budget limits, storage capacity, and seasonal factors
+    required: true
+  output_fields:
+  - name: inventory_analysis
+    type: str
+    description: Step-by-step inventory performance analysis
+    required: true
+  - name: optimization_recommendations
+    type: str
+    description: Specific recommendations for inventory adjustments
+    required: true
+  persona:
+    name: InventoryBot
+    role: Inventory Analyst
+    goal: Optimize inventory levels to minimize costs while maintaining service levels
+    traits:
+    - analytical
+    - data-driven
+    - cost-conscious
+    - strategic
+  tasks:
+  - name: optimize_inventory_levels
+    instruction: You are an Inventory Analyst. Think through inventory data systematically to identify optimization opportunities,
+      forecast demand, and recommend stock level adjustments.
+    inputs:
+    - name: inventory_data
+      type: str
+      description: Current stock levels, sales history, and product performance data
+      required: true
+    - name: business_constraints
+      type: str
+      description: Budget limits, storage capacity, and seasonal factors
+      required: true
+    outputs:
+    - name: inventory_analysis
+      type: str
+      description: Step-by-step inventory performance analysis
+    - name: optimization_recommendations
+      type: str
+      description: Specific recommendations for inventory adjustments
+  agentflow:
+  - name: analyze_inventory
+    type: Think
+    task: optimize_inventory_levels
+  evaluation:
+    builtin_metrics:
+    - name: answer_correctness
+      threshold: 0.8
+  feature_specifications:
+    scenarios:
+    - name: inventory_optimizer_comprehensive_task
+      description: Given a complex retail requirement, the agent should provide detailed analysis and recommendations
+      input:
+        inventory_data: Complex retail scenario requiring comprehensive analysis
+        business_constraints: ''
+      expected_output:
+        inventory_analysis: Detailed step-by-step analysis with retail-specific recommendations
+        optimization_recommendations: ''
+    - name: inventory_optimizer_problem_solving
+      description: When facing retail challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        inventory_data: Challenging retail problem requiring creative solutions
+        business_constraints: ''
+      expected_output:
+        inventory_analysis: Structured problem-solving approach with multiple solution options
+        optimization_recommendations: ''
+    - name: inventory_optimizer_best_practices
+      description: When asked about retail best practices, the agent should provide current industry standards and guidelines
+      input:
+        inventory_data: Industry best practices for retail operations
+        business_constraints: ''
+      expected_output:
+        inventory_analysis: Comprehensive best practices guide with implementation steps
+        optimization_recommendations: ''
+    - name: inventory_optimizer_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to retail
+      input:
+        inventory_data: Compliance requirements for retail operations
+        business_constraints: ''
+      expected_output:
+        inventory_analysis: Detailed compliance checklist with regulatory requirements
+        optimization_recommendations: ''
+    - name: inventory_optimizer_strategic_planning
+      description: When developing retail strategies, the agent should provide forward-thinking recommendations
+      input:
+        inventory_data: Strategic planning for retail growth and optimization
+        business_constraints: ''
+      expected_output:
+        inventory_analysis: Comprehensive strategic plan with measurable objectives and timelines
+        optimization_recommendations: ''
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

@@ -1,0 +1,110 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Elementary Science Guide
+  id: science_explorer
+  namespace: education
+  version: 1.0.0
+  agent_type: Supervised
+  level: oracles
+  description: An agent that explains basic science concepts through experiments.
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+  input_fields:
+  - name: concept
+    type: str
+    description: The science concept to explain (e.g., 'photosynthesis', 'gravity').
+    required: true
+  output_fields:
+  - name: explanation
+    type: str
+    description: The explanation of the science concept with a simple experiment.
+    required: true
+  persona:
+    name: ScienceBot
+    role: Science Teacher
+    goal: Explain basic science concepts through experiments
+    traits:
+    - curious
+    - enthusiastic
+    - experimental
+  tasks:
+  - name: explain_science_concept
+    instruction: You are a Science Teacher. Your goal is to explain basic science concepts through experiments. Explain the
+      requested science concept using simple experiments and real-world examples.
+    inputs:
+    - name: concept
+      type: str
+      description: The science concept to explain (e.g., 'photosynthesis', 'gravity').
+      required: true
+    outputs:
+    - name: explanation
+      type: str
+      description: The explanation of the science concept with a simple experiment.
+  agentflow:
+  - name: generate_explanation
+    type: Generate
+    task: explain_science_concept
+  evaluation:
+    builtin_metrics:
+    - name: answer_exact_match
+      threshold: 1.0
+  feature_specifications:
+    scenarios:
+    - name: hands_on_experiment_design
+      description: When teaching science concepts, the agent should design engaging experiments with clear learning objectives
+        and safety considerations
+      input:
+        concept: Design a simple experiment to teach 4th graders about the water cycle using household materials
+      expected_output:
+        explanation: "**Water Cycle in a Bag Experiment! \U0001F4A7**\n\n**Learning Objectives:**\n- Students will observe\
+          \ evaporation, condensation, and precipitation\n- Understand how the sun's energy drives the water cycle\n- Connect\
+          \ experiment to real-world weather patterns\n\n**Materials Needed (per student):**\n- 1 gallon-size ziplock bag\n\
+          - Blue food coloring (2-3 drops)\n- Small cup of warm water (1/4 cup)\n- Clear tape\n- Sunny window\n\n**Step-by-Step\
+          \ Procedure:**\n\n**Step 1: Create the Ocean**\n- Add warm water to ziplock bag\n- Add 2 drops blue food coloring\n\
+          - This represents our \"ocean\"\n\n**Step 2: Seal and Hang**  \n- Carefully seal bag (check for leaks!)\n- Tape\
+          \ bag to sunny window\n- Position so water collects at bottom\n\n**Step 3: Observe and Record**\n- Day 1: Draw what\
+          \ you see\n- Day 2-3: Look for water droplets on sides\n- Day 4-5: Watch droplets \"rain\" back down\n\n**Expected\
+          \ Results:**\n- Water droplets form on bag sides (condensation)\n- Droplets grow larger and fall (precipitation)\n\
+          - Water level may appear to change (evaporation)\n\n**Real-World Connections:**\n- Bag = atmosphere, Water = oceans/lakes\n\
+          - Sun provides energy for evaporation\n- Cooling creates clouds and rain\n\n**Safety Notes:**\n- Adult help needed\
+          \ with sealing bags\n- Don't drink colored water\n- Handle carefully to avoid spills"
+    - name: science_explorer_problem_solving
+      description: When facing education challenges, the agent should demonstrate systematic problem-solving approach
+      input:
+        concept: Challenging education problem requiring creative solutions
+      expected_output:
+        explanation: Structured problem-solving approach with multiple solution options
+    - name: science_explorer_best_practices
+      description: When asked about education best practices, the agent should provide current industry standards and guidelines
+      input:
+        concept: Industry best practices for education operations
+      expected_output:
+        explanation: Comprehensive best practices guide with implementation steps
+    - name: science_explorer_compliance_guidance
+      description: Given regulatory requirements, the agent should provide compliance guidance specific to education
+      input:
+        concept: Compliance requirements for education operations
+      expected_output:
+        explanation: Detailed compliance checklist with regulatory requirements
+    - name: science_explorer_strategic_planning
+      description: When developing education strategies, the agent should provide forward-thinking recommendations
+      input:
+        concept: Strategic planning for education growth and optimization
+      expected_output:
+        explanation: Comprehensive strategic plan with measurable objectives and timelines
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: answer_exact_match
+        auto: light
+        reflection_lm: llama3.1:8b
+        max_full_evals: 3
+        skip_perfect_score: true
+    metric: answer_exact_match
+    metric_threshold: 0.8

@@ -1,0 +1,398 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Code Review Assistant
+  id: code_review_assistant
+  namespace: demo
+  version: 1.0.0
+  level: genies
+  description: |
+    Intelligent code review agent for ODSC demo. Analyzes code for quality, security, 
+    performance, and best practices. Demonstrates RAG + Tools + Dataset optimization.
+    
+    Setup:
+      1. Pull this agent: super agent pull code_review_assistant
+      2. Pull dataset: super dataset pull code_review_examples
+      3. Copy knowledge base: super knowledge pull code_review (OR use package path)
+      4. Compile: super agent compile code_review_assistant
+  author: SuperOptiX
+  tags:
+    - code-review
+    - software-engineering
+    - security
+    - best-practices
+    - demo
+    - odsc
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    temperature: 0.7
+    max_tokens: 3000
+    api_base: http://localhost:11434
+  
+  input_fields:
+    - name: code
+      type: str
+      description: Code snippet to review
+      required: true
+    - name: language
+      type: str
+      description: Programming language (python, javascript, java, etc.)
+      required: false
+      default: python
+    - name: focus_area
+      type: str
+      description: Specific focus (security, performance, style, all)
+      required: false
+      default: all
+  
+  output_fields:
+    - name: review
+      type: str
+      description: Comprehensive code review with findings
+      required: true
+    - name: severity
+      type: str
+      description: Overall severity (critical, high, medium, low, info)
+      required: true
+    - name: recommendations
+      type: list
+      description: List of actionable recommendations
+      required: true
+    - name: metrics
+      type: dict
+      description: Code metrics (complexity, maintainability, etc.)
+      required: false
+  
+  persona:
+    name: Code Review Assistant
+    role: Senior Software Engineer & Security Reviewer
+    goal: |
+      Provide thorough, actionable code reviews that improve code quality, 
+      security, and maintainability
+    traits:
+      - detail-oriented
+      - security-conscious
+      - constructive
+      - knowledgeable
+      - pragmatic
+    communication_preferences:
+      style: professional
+      tone: constructive
+      verbosity: detailed
+  
+  agentflow:
+    - name: analyze_code
+      type: ActWithTools
+      task: review_code
+      description: Analyze code using tools and knowledge base
+  
+  # RAG Configuration - Searches coding standards and best practices
+  # NOTE: After pulling this agent, either:
+  #   Option 1: Copy knowledge base manually from superoptix/knowledge/code_review/
+  #   Option 2: Use absolute path to installed package (shown below as example)
+  rag:
+    enabled: true
+    vector_database: chromadb
+    collection: code_review_knowledge
+    persist_directory: .superoptix/chromadb
+    embedding_model: sentence-transformers/all-MiniLM-L6-v2
+    top_k: 5
+    chunk_size: 512
+    chunk_overlap: 50
+    knowledge_base:
+      # Option 1: Use local copy (after manual copy or setup script)
+      - ./knowledge/code_review/python/*.md
+      - ./knowledge/code_review/security/*.md
+      - ./knowledge/code_review/performance/*.md
+      - ./knowledge/code_review/best_practices/*.md
+      
+      # Option 2: Uncomment to use package installation directly
+      # Find path with: python -c "import superoptix; from pathlib import Path; print(Path(superoptix.__file__).parent / 'knowledge/code_review')"
+      # - /path/to/superoptix/knowledge/code_review/python/*.md
+      # - /path/to/superoptix/knowledge/code_review/security/*.md
+      # - /path/to/superoptix/knowledge/code_review/performance/*.md
+      # - /path/to/superoptix/knowledge/code_review/best_practices/*.md
+  
+  # MCP Tools Configuration - Analyzes code
+  tools:
+    enabled: true
+    max_iterations: 5
+    categories:
+      - code_analysis
+      - security
+      - utilities
+    specific_tools:
+      - complexity_calculator    # Calculate cyclomatic complexity
+      - security_scanner         # Check for security issues
+      - performance_analyzer     # Analyze performance patterns
+      - code_smell_detector      # Detect code smells
+      - calculator               # For metrics calculations
+  
+  # External Dataset - Real GitHub code review comments
+  # NOTE: Pull this dataset first: super dataset pull code_review_examples
+  datasets:
+    - name: github_code_reviews
+      source: ./data/code_review_examples.csv  # After: super dataset pull code_review_examples
+      format: csv
+      mapping:
+        input: code
+        output: review
+        input_field_name: code
+        output_field_name: review
+      limit: 100
+      shuffle: true
+  
+  # BDD Test Scenarios
+  feature_specifications:
+    scenarios:
+      # Security Review (RAG)
+      - name: SQL Injection Detection
+        description: Detect SQL injection vulnerability
+        input:
+          code: |
+            def get_user(username):
+                query = "SELECT * FROM users WHERE name = '" + username + "'"
+                return db.execute(query)
+          language: python
+          focus_area: security
+        expected_output:
+          review: |
+            Critical security vulnerability detected: SQL injection risk. The code concatenates 
+            user input directly into SQL query without sanitization.
+          severity: critical
+          expected_keywords:
+            - SQL injection
+            - vulnerability
+            - parameterized
+            - prepared statement
+      
+      # Complexity Analysis (Tool)
+      - name: High Complexity Function
+        description: Identify function with high cyclomatic complexity
+        input:
+          code: |
+            def process_data(x, y, z):
+                if x > 0:
+                    if y > 0:
+                        if z > 0:
+                            return x + y + z
+                        else:
+                            return x + y
+                    else:
+                        if z > 0:
+                            return x + z
+                        else:
+                            return x
+                else:
+                    if y > 0:
+                        if z > 0:
+                            return y + z
+                        else:
+                            return y
+                    else:
+                        return z if z > 0 else 0
+          language: python
+          focus_area: performance
+        expected_output:
+          review: |
+            High cyclomatic complexity detected (complexity: 8). This function has too many 
+            nested conditions making it hard to test and maintain.
+          severity: high
+          expected_keywords:
+            - complexity
+            - nested
+            - refactor
+            - simplify
+      
+      # Performance Issue (RAG + Tool)
+      - name: Inefficient Loop
+        description: Detect performance issue in loop
+        input:
+          code: |
+            def find_duplicates(items):
+                duplicates = []
+                for i in range(len(items)):
+                    for j in range(len(items)):
+                        if i != j and items[i] == items[j]:
+                            if items[i] not in duplicates:
+                                duplicates.append(items[i])
+                return duplicates
+          language: python
+          focus_area: performance
+        expected_output:
+          review: |
+            Performance issue: O(n²) time complexity with nested loops. This can be optimized 
+            to O(n) using a set or Counter.
+          severity: medium
+          expected_keywords:
+            - O(n²)
+            - nested loop
+            - set
+            - performance
+      
+      # Best Practices (RAG)
+      - name: Missing Error Handling
+        description: Identify missing error handling
+        input:
+          code: |
+            def read_config(filename):
+                file = open(filename, 'r')
+                data = json.load(file)
+                file.close()
+                return data
+          language: python
+          focus_area: all
+        expected_output:
+          review: |
+            Missing error handling for file operations. The code should use try-except blocks 
+            or context managers to handle potential IOError and JSONDecodeError.
+          severity: medium
+          expected_keywords:
+            - error handling
+            - try-except
+            - context manager
+            - with statement
+      
+      # Code Smell (Tool)
+      - name: Code Duplication
+        description: Detect duplicated code
+        input:
+          code: |
+            def calculate_price_with_tax(price):
+                tax = price * 0.1
+                total = price + tax
+                return total
+            
+            def calculate_discounted_price_with_tax(price, discount):
+                discounted_price = price - (price * discount)
+                tax = discounted_price * 0.1
+                total = discounted_price + tax
+                return total
+          language: python
+          focus_area: all
+        expected_output:
+          review: |
+            Code duplication detected. Tax calculation logic is repeated. Consider extracting 
+            a reusable function for tax calculation.
+          severity: low
+          expected_keywords:
+            - duplication
+            - DRY
+            - extract
+            - reusable
+      
+      # Security + Performance (RAG + Tool)
+      - name: Hardcoded Credentials
+        description: Detect hardcoded sensitive data
+        input:
+          code: |
+            API_KEY = "sk-1234567890abcdef"
+            DATABASE_PASSWORD = "admin123"
+            
+            def connect_to_api():
+                return requests.get("https://api.example.com", 
+                                    headers={"Authorization": f"Bearer {API_KEY}"})
+          language: python
+          focus_area: security
+        expected_output:
+          review: |
+            Critical security issue: Hardcoded credentials detected. API keys and passwords 
+            should never be committed to code. Use environment variables or secret management.
+          severity: critical
+          expected_keywords:
+            - hardcoded
+            - credentials
+            - environment variables
+            - secrets
+      
+      # Style + Best Practices (RAG)
+      - name: Poor Naming Convention
+        description: Identify poor variable naming
+        input:
+          code: |
+            def f(x, y):
+                z = x + y
+                if z > 100:
+                    a = z * 2
+                    return a
+                else:
+                    b = z / 2
+                    return b
+          language: python
+          focus_area: all
+        expected_output:
+          review: |
+            Poor naming conventions. Variable names (f, x, y, z, a, b) are not descriptive. 
+            Use meaningful names that explain the purpose.
+          severity: low
+          expected_keywords:
+            - naming
+            - descriptive
+            - readability
+            - meaningful
+      
+      # Comprehensive Review (All features)
+      - name: Multiple Issues
+        description: Code with multiple issues requiring RAG + Tools
+        input:
+          code: |
+            password = "admin123"
+            def login(user):
+                query = "SELECT * FROM users WHERE username='" + user + "'"
+                result = db.execute(query)
+                if result:
+                    if result['password'] == password:
+                        if result['active']:
+                            if result['verified']:
+                                return True
+                return False
+          language: python
+          focus_area: all
+        expected_output:
+          review: |
+            Multiple critical issues detected:
+            1. Hardcoded password (security)
+            2. SQL injection vulnerability (security)
+            3. High cyclomatic complexity (maintainability)
+            4. Plain text password comparison (security)
+          severity: critical
+          expected_keywords:
+            - SQL injection
+            - hardcoded
+            - complexity
+            - security
+  
+  # Evaluation Metrics
+  evaluation:
+    builtin_metrics:
+      - name: review_accuracy
+        threshold: 0.75
+        description: Accuracy of identifying code issues
+      - name: security_detection
+        threshold: 0.85
+        description: Accuracy of detecting security vulnerabilities
+      - name: tool_usage_accuracy
+        threshold: 0.80
+        description: Correct usage of analysis tools
+  
+  # GEPA Optimization Configuration
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        metric: review_accuracy
+        auto: medium
+        reflection_lm: llama3.2:1b
+        max_full_evals: 10
+        max_bootstrapped_demos: 4
+        max_labeled_demos: 4
+    metric: review_accuracy
+    metric_threshold: 0.85
+    strategies:
+      - analyze_with_rag_first
+      - use_tools_for_metrics
+      - combine_findings
+      - prioritize_by_severity
