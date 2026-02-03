@@ -7,7 +7,7 @@
     <a href="https://badge.fury.io/py/superoptix">
       <img src="https://badge.fury.io/py/superoptix.svg" alt="PyPI version" />
     </a>
-    <img src="https://img.shields.io/badge/version-0.2.6-orange.svg" alt="Version 0.2.6" />
+    <img src="https://img.shields.io/badge/version-0.2.7-orange.svg" alt="Version 0.2.7" />
     <img src="https://img.shields.io/badge/status-beta-yellow.svg" alt="Beta Release" />
     <a href="LICENCE">
       <img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License: Apache 2.0" />
