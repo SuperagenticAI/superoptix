@@ -18,7 +18,6 @@ Features:
 
 import base64
 import fnmatch
-import json
 import logging
 import os
 import threading
@@ -33,25 +32,22 @@ logger = logging.getLogger(__name__)
 
 # Optional imports for framework support
 try:
-    import dspy
     from dspy.adapters.types.tool import Tool as DSPyTool
     DSPY_AVAILABLE = True
 except ImportError:
     DSPY_AVAILABLE = False
 
 try:
-    from pydantic_ai import Tool as PydanticAITool, RunContext
-    PYDANTIC_AI_AVAILABLE = True
+    import importlib.util
+    PYDANTIC_AI_AVAILABLE = importlib.util.find_spec("pydantic_ai") is not None
 except ImportError:
     PYDANTIC_AI_AVAILABLE = False
 
 try:
-    from stackone_ai.models import StackOneTool, Tools as StackOneTools
     from stackone_ai import StackOneToolSet as _StackOneToolSet
     STACKONE_AVAILABLE = True
 except ImportError:
     STACKONE_AVAILABLE = False
-    _StackOneToolSet = None
 
 # Optional: LangSmith for implicit feedback
 try:

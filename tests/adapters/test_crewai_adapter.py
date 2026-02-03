@@ -29,35 +29,28 @@ def test_crewai_compilation():
 
     output_path = Path("/tmp/test_crewai_agent.py")
 
-    try:
-        generated_path = FrameworkRegistry.compile_agent(
-            framework="crewai", playbook=playbook, output_path=str(output_path)
-        )
+    generated_path = FrameworkRegistry.compile_agent(
+        framework="crewai", playbook=playbook, output_path=str(output_path)
+    )
 
-        print(f"✅ Compilation successful!")
-        print(f"📄 Generated code: {generated_path}")
+    print(f"✅ Compilation successful!")
+    print(f"📄 Generated code: {generated_path}")
 
-        # Show first 50 lines of generated code
-        with open(generated_path) as f:
-            lines = f.readlines()
+    # Show first 50 lines of generated code
+    with open(generated_path) as f:
+        lines = f.readlines()
 
-        print(f"\n📋 First 50 lines of generated code:")
-        print("-" * 80)
-        for i, line in enumerate(lines[:50], 1):
-            print(f"{i:3d} | {line}", end="")
-        print("-" * 80)
+    print(f"\n📋 First 50 lines of generated code:")
+    print("-" * 80)
+    for i, line in enumerate(lines[:50], 1):
+        print(f"{i:3d} | {line}", end="")
+    print("-" * 80)
 
-        print(f"\n✅ Total lines generated: {len(lines)}")
-        print(f"✅ File size: {Path(generated_path).stat().st_size} bytes")
+    print(f"\n✅ Total lines generated: {len(lines)}")
+    print(f"✅ File size: {Path(generated_path).stat().st_size} bytes")
 
-        return True
-
-    except Exception as e:
-        print(f"\n❌ Compilation failed: {e}")
-        import traceback
-
-        traceback.print_exc()
-        return False
+    assert Path(generated_path).exists()
+    assert len(lines) > 0
 
 
 if __name__ == "__main__":

@@ -9,6 +9,7 @@ This script tests:
 """
 
 from pathlib import Path
+import pytest
 from rich.console import Console
 
 console = Console()
@@ -25,7 +26,7 @@ def test_deepagent_compilation():
             "name": "test_deepagent",
             "version": "1.0.0",
             "description": "Test DeepAgent for compilation",
-            "framework": "deepagent",
+            "framework": "deepagents",
         },
         "spec": {
             "persona": {
@@ -33,8 +34,8 @@ def test_deepagent_compilation():
                 "goal": "Help users with research tasks using planning and subagents.",
                 "backstory": "You have access to planning tools and can delegate to specialized subagents.",
             },
-            "model": {
-                "model_name": "anthropic:claude-sonnet-4-20250514",
+            "language_model": {
+                "model": "anthropic:claude-sonnet-4-20250514",
                 "provider": "anthropic",
             },
             "input_fields": [
@@ -75,7 +76,7 @@ def test_deepagent_compilation():
         console.print("\n📦 [bold]Compiling playbook to DeepAgent code...[/]")
 
         result_path = FrameworkRegistry.compile_agent(
-            framework="deepagent", playbook=playbook, output_path=str(output_path)
+            framework="deepagents", playbook=playbook, output_path=str(output_path)
         )
 
         console.print(f"   ✅ Compiled to: {result_path}")
@@ -83,46 +84,32 @@ def test_deepagent_compilation():
         # Read generated code
         generated_code = output_path.read_text()
 
-        # Verify key components
-        checks = [
-            ("BaseComponent import", "from superoptix.core.base_component import"),
-            ("DeepAgent import", "from deepagents import create_deep_agent"),
-            ("Component class", "class TestDeepagentComponent(BaseComponent)"),
-            ("forward method", "def forward("),
-            ("update method", "def update("),
-            ("system_prompt variable", 'variable_type="system_prompt"'),
-            ("framework identifier", 'framework="deepagent"'),
-        ]
-
-        console.print("\n🔍 [bold]Verifying generated code:[/]")
-        all_passed = True
-        for check_name, check_string in checks:
-            if check_string in generated_code:
-                console.print(f"   ✅ {check_name}")
-            else:
-                console.print(f"   ❌ {check_name} - NOT FOUND")
-                all_passed = False
-
-        if all_passed:
-            console.print("\n[green]✅ All compilation checks passed![/]")
-        else:
-            console.print("\n[red]❌ Some checks failed[/]")
-            return False
-
         # Show sample of generated code
         console.print("\n📄 [bold]Generated code sample (first 50 lines):[/]")
         lines = generated_code.split("\n")[:50]
         for i, line in enumerate(lines, 1):
             console.print(f"   {i:3d} │ {line}")
 
-        return True
+        # Verify key components
+        checks = [
+            ("BaseComponent import", "from superoptix.core.base_component import"),
+            ("DeepAgent import", "from superoptix.vendor.deepagents.graph import create_deep_agent"),
+            ("Component class", "class TestDeepagentOutputComponent(BaseComponent)"),
+            ("forward method", "def forward("),
+            ("update method", "def update("),
+            ("system_prompt variable", 'variable_type="system_prompt"'),
+            ("framework identifier", 'framework="deepagents"'),
+        ]
 
-    except Exception as e:
-        console.print(f"\n[red]❌ Compilation failed: {e}[/]")
-        import traceback
+        console.print("\n🔍 [bold]Verifying generated code:[/]")
+        for check_name, check_string in checks:
+            if check_string in generated_code:
+                console.print(f"   ✅ {check_name}")
+            else:
+                console.print(f"   ❌ {check_name} - NOT FOUND")
+                raise AssertionError(f"{check_name} not found in generated code")
 
-        traceback.print_exc()
-        return False
+        console.print("\n[green]✅ All compilation checks passed![/]")
 
     finally:
         # Cleanup
@@ -145,10 +132,7 @@ def test_deepagent_component_creation():
         console.print(
             "\n[yellow]⚠️  DeepAgent library not installed. Skipping component creation test.[/]"
         )
-        console.print(
-            "   Install from: reference/deepagents-master/ or wait for PyPI release"
-        )
-        return None
+        pytest.skip("DeepAgent library not installed")
 
     # Create test playbook
     playbook = {
@@ -156,14 +140,14 @@ def test_deepagent_component_creation():
             "name": "qa_agent",
             "version": "1.0.0",
             "description": "Simple Q&A agent using DeepAgent",
-            "framework": "deepagent",
+            "framework": "deepagents",
         },
         "spec": {
             "persona": {
                 "role": "You are a helpful Q&A assistant.",
                 "goal": "Answer user questions accurately and concisely.",
             },
-            "model": {"model_name": "anthropic:claude-sonnet-4-20250514"},
+            "language_model": {"model": "anthropic:claude-sonnet-4-20250514"},
             "feature_specifications": {
                 "scenarios": [
                     {
@@ -176,48 +160,39 @@ def test_deepagent_component_creation():
         },
     }
 
-    try:
-        console.print("\n📦 [bold]Creating DeepAgent component...[/]")
+    console.print("\n📦 [bold]Creating DeepAgent component...[/]")
 
-        from superoptix.adapters.framework_registry import FrameworkRegistry
+    from superoptix.adapters.framework_registry import FrameworkRegistry
 
-        component = FrameworkRegistry.create_component(
-            framework="deepagent", playbook=playbook
+    component = FrameworkRegistry.create_component(
+        framework="deepagents", playbook=playbook
+    )
+
+    console.print(f"   ✅ Component created: {component.name}")
+
+    # Verify component properties
+    console.print("\n🔍 [bold]Component properties:[/]")
+    console.print(f"   Name: {component.name}")
+    console.print(f"   Framework: {component.framework}")
+    console.print(f"   Optimizable: {component.optimizable}")
+    console.print(f"   Variable type: {component.variable_type}")
+    console.print(f"   Input fields: {component.input_fields}")
+    console.print(f"   Output fields: {component.output_fields}")
+    console.print(f"\n   System prompt (first 200 chars):")
+    console.print(f"   {component.variable[:200]}...")
+
+    # Verify it's optimizable
+    if not component.optimizable:
+        console.print("\n[red]❌ Component is not optimizable![/]")
+        raise AssertionError("Component is not optimizable")
+
+    if component.variable_type != "system_prompt":
+        console.print(
+            f"\n[red]❌ Wrong variable type: {component.variable_type} (expected 'system_prompt')[/]\n"
         )
+        raise AssertionError(f"Wrong variable type: {component.variable_type}")
 
-        console.print(f"   ✅ Component created: {component.name}")
-
-        # Verify component properties
-        console.print("\n🔍 [bold]Component properties:[/]")
-        console.print(f"   Name: {component.name}")
-        console.print(f"   Framework: {component.framework}")
-        console.print(f"   Optimizable: {component.optimizable}")
-        console.print(f"   Variable type: {component.variable_type}")
-        console.print(f"   Input fields: {component.input_fields}")
-        console.print(f"   Output fields: {component.output_fields}")
-        console.print(f"\n   System prompt (first 200 chars):")
-        console.print(f"   {component.variable[:200]}...")
-
-        # Verify it's optimizable
-        if not component.optimizable:
-            console.print("\n[red]❌ Component is not optimizable![/]")
-            return False
-
-        if component.variable_type != "system_prompt":
-            console.print(
-                f"\n[red]❌ Wrong variable type: {component.variable_type} (expected 'system_prompt')[/]"
-            )
-            return False
-
-        console.print("\n[green]✅ Component creation successful![/]")
-        return True
-
-    except Exception as e:
-        console.print(f"\n[red]❌ Component creation failed: {e}[/]")
-        import traceback
-
-        traceback.print_exc()
-        return False
+    console.print("\n[green]✅ Component creation successful![/]")
 
 
 def test_deepagent_forward_pass():
@@ -233,10 +208,7 @@ def test_deepagent_forward_pass():
         console.print(
             "\n[yellow]⚠️  DeepAgent library not installed. Skipping forward pass test.[/]"
         )
-        console.print(
-            "   Install with: pip install deepagent (or from source if not on PyPI)"
-        )
-        return None
+        pytest.skip("DeepAgent library not installed")
 
     # Create component
     playbook = {
@@ -244,101 +216,26 @@ def test_deepagent_forward_pass():
             "name": "echo_agent",
             "version": "1.0.0",
             "description": "Echo agent for testing",
-            "framework": "deepagent",
+            "framework": "deepagents",
         },
         "spec": {
             "persona": {
                 "role": "You are a simple echo assistant. Repeat what the user says."
             },
-            "model": {"model_name": "anthropic:claude-sonnet-4-20250514"},
+            "language_model": {"model": "anthropic:claude-sonnet-4-20250514"},
         },
     }
 
-    try:
-        from superoptix.adapters.framework_registry import FrameworkRegistry
+    from superoptix.adapters.framework_registry import FrameworkRegistry
 
-        component = FrameworkRegistry.create_component(
-            framework="deepagent", playbook=playbook
-        )
-
-        console.print("\n🚀 [bold]Running forward pass...[/]")
-        console.print("   Input: 'Hello, DeepAgent!'")
-
-        result = component.forward(messages="Hello, DeepAgent!")
-
-        console.print(f"\n   ✅ Output: {result.get('response', 'N/A')}")
-        console.print("\n[green]✅ Forward pass successful![/]")
-        return True
-
-    except Exception as e:
-        console.print(f"\n[red]❌ Forward pass failed: {e}[/]")
-        import traceback
-
-        traceback.print_exc()
-        return False
-
-
-def main():
-    """Run all tests."""
-    console.print(
-        "\n[bold magenta]╔══════════════════════════════════════════════════════════╗[/]"
-    )
-    console.print(
-        "[bold magenta]║  DeepAgent Framework Adapter - Test Suite               ║[/]"
-    )
-    console.print(
-        "[bold magenta]╚══════════════════════════════════════════════════════════╝[/]"
+    component = FrameworkRegistry.create_component(
+        framework="deepagents", playbook=playbook
     )
 
-    results = {}
+    console.print("\n🚀 [bold]Running forward pass...[/]")
+    console.print("   Input: 'Hello, DeepAgent!'")
 
-    # Test 1: Compilation
-    results["compilation"] = test_deepagent_compilation()
+    result = component.forward(messages="Hello, DeepAgent!")
 
-    # Test 2: Component creation
-    component_result = test_deepagent_component_creation()
-    if component_result is not None:
-        results["component_creation"] = component_result
-
-    # Test 3: Forward pass (optional - requires DeepAgent installed)
-    forward_result = test_deepagent_forward_pass()
-    if forward_result is not None:
-        results["forward_pass"] = forward_result
-
-    # Summary
-    console.print("\n\n[bold cyan]Test Summary[/]")
-    console.print("=" * 80)
-
-    for test_name, passed in results.items():
-        status = "✅ PASSED" if passed else "❌ FAILED"
-        color = "green" if passed else "red"
-        console.print(f"   [{color}]{status}[/] - {test_name}")
-
-    total_tests = len(results)
-    passed_tests = sum(1 for p in results.values() if p)
-
-    console.print(f"\n[bold]Results: {passed_tests}/{total_tests} tests passed[/]")
-
-    # Note about skipped tests
-    if component_result is None or forward_result is None:
-        console.print(
-            "\n[yellow]Note: Some tests were skipped due to missing DeepAgent library.[/]"
-        )
-        console.print(
-            "[yellow]The core compilation functionality is working correctly![/]"
-        )
-
-    if passed_tests == total_tests:
-        console.print(
-            "\n[green bold]🎉 All tests passed! DeepAgent adapter is working![/]"
-        )
-        return 0
-    else:
-        console.print(
-            "\n[red bold]❌ Some tests failed. Check output above for details.[/]"
-        )
-        return 1
-
-
-if __name__ == "__main__":
-    exit(main())
+    console.print(f"\n   ✅ Output: {result.get('response', 'N/A')}")
+    console.print("\n[green]✅ Forward pass successful![/]")

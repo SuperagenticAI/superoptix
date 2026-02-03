@@ -6,7 +6,7 @@ Base classes for StackOne-specific benchmarks.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 import logging
 
 logger = logging.getLogger(__name__)
