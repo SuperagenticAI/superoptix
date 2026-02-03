@@ -33,18 +33,21 @@ logger = logging.getLogger(__name__)
 # Optional imports for framework support
 try:
     from dspy.adapters.types.tool import Tool as DSPyTool
+
     DSPY_AVAILABLE = True
 except ImportError:
     DSPY_AVAILABLE = False
 
 try:
     import importlib.util
+
     PYDANTIC_AI_AVAILABLE = importlib.util.find_spec("pydantic_ai") is not None
 except ImportError:
     PYDANTIC_AI_AVAILABLE = False
 
 try:
     from stackone_ai import StackOneToolSet as _StackOneToolSet
+
     STACKONE_AVAILABLE = True
 except ImportError:
     STACKONE_AVAILABLE = False
@@ -52,6 +55,7 @@ except ImportError:
 # Optional: LangSmith for implicit feedback
 try:
     from langsmith import Client as LangSmithClient
+
     LANGSMITH_AVAILABLE = True
 except ImportError:
     LANGSMITH_AVAILABLE = False
@@ -60,6 +64,7 @@ except ImportError:
 # =============================================================================
 # Feedback Models and Tool
 # =============================================================================
+
 
 class FeedbackInput(BaseModel):
     """Input schema for feedback tool."""
@@ -108,7 +113,7 @@ class FeedbackInput(BaseModel):
 class StackOneFeedbackTool:
     """
     Feedback collection tool for StackOne.
-    
+
     Allows agents to collect user feedback on tool performance.
     Always ask user permission before submitting feedback.
     """
@@ -143,25 +148,25 @@ class StackOneFeedbackTool:
     ) -> Dict[str, Any]:
         """
         Submit feedback to StackOne.
-        
+
         Args:
             feedback: User feedback text
             account_id: Account ID(s) to associate feedback with
             tool_names: List of tool names being reviewed
-            
+
         Returns:
             Response with submission status
         """
         try:
             import httpx
         except ImportError:
-            raise ImportError("httpx is required for feedback submission. Install with: pip install httpx")
+            raise ImportError(
+                "httpx is required for feedback submission. Install with: pip install httpx"
+            )
 
         # Validate input
         validated = FeedbackInput(
-            feedback=feedback,
-            account_id=account_id,
-            tool_names=tool_names
+            feedback=feedback, account_id=account_id, tool_names=tool_names
         )
 
         results = []
@@ -185,8 +190,12 @@ class StackOneFeedbackTool:
                 response.raise_for_status()
                 results.append({"account_id": acc_id, "status": "success"})
             except Exception as e:
-                errors.append({"account_id": acc_id, "status": "error", "error": str(e)})
-                results.append({"account_id": acc_id, "status": "error", "error": str(e)})
+                errors.append(
+                    {"account_id": acc_id, "status": "error", "error": str(e)}
+                )
+                results.append(
+                    {"account_id": acc_id, "status": "error", "error": str(e)}
+                )
 
         return {
             "message": f"Feedback sent to {len(validated.account_id)} account(s)",
@@ -201,10 +210,11 @@ class StackOneFeedbackTool:
 # Implicit Feedback Manager (LangSmith Integration)
 # =============================================================================
 
+
 @dataclass
 class ImplicitFeedbackConfig:
     """Configuration for implicit feedback collection."""
-    
+
     enabled: bool = True
     project_name: str = "stackone-agents"
     default_tags: List[str] = field(default_factory=list)
@@ -216,12 +226,12 @@ class ImplicitFeedbackConfig:
 class ImplicitFeedbackManager:
     """
     Manages implicit behavioral feedback to LangSmith.
-    
+
     Automatically detects patterns like:
     - Refinement needed (multiple calls within short window)
     - Tool suitability scores
     - Usage patterns
-    
+
     Usage:
         configure_implicit_feedback(
             api_key="your-langsmith-key",
@@ -243,7 +253,9 @@ class ImplicitFeedbackManager:
             if api_key:
                 try:
                     self._client = LangSmithClient(api_key=api_key)
-                    logger.info(f"🔗 LangSmith implicit feedback enabled for project: {config.project_name}")
+                    logger.info(
+                        f"🔗 LangSmith implicit feedback enabled for project: {config.project_name}"
+                    )
                 except Exception as e:
                     logger.warning(f"Failed to initialize LangSmith client: {e}")
 
@@ -259,7 +271,7 @@ class ImplicitFeedbackManager:
     ) -> "ImplicitFeedbackManager":
         """
         Configure the implicit feedback manager.
-        
+
         Args:
             api_key: LangSmith API key (or use LANGSMITH_API_KEY env var)
             project_name: LangSmith project name
@@ -267,7 +279,7 @@ class ImplicitFeedbackManager:
             session_resolver: Callable to get current session ID
             user_resolver: Callable to get current user ID
             refinement_window_seconds: Window to detect refinement patterns
-            
+
         Returns:
             Configured ImplicitFeedbackManager instance
         """
@@ -275,9 +287,12 @@ class ImplicitFeedbackManager:
             os.environ["LANGSMITH_API_KEY"] = api_key
 
         config = ImplicitFeedbackConfig(
-            enabled=os.getenv("STACKONE_IMPLICIT_FEEDBACK_ENABLED", "true").lower() == "true",
-            project_name=project_name or os.getenv("STACKONE_IMPLICIT_FEEDBACK_PROJECT", "stackone-agents"),
-            default_tags=default_tags or os.getenv("STACKONE_IMPLICIT_FEEDBACK_TAGS", "").split(","),
+            enabled=os.getenv("STACKONE_IMPLICIT_FEEDBACK_ENABLED", "true").lower()
+            == "true",
+            project_name=project_name
+            or os.getenv("STACKONE_IMPLICIT_FEEDBACK_PROJECT", "stackone-agents"),
+            default_tags=default_tags
+            or os.getenv("STACKONE_IMPLICIT_FEEDBACK_TAGS", "").split(","),
             session_resolver=session_resolver,
             user_resolver=user_resolver,
             refinement_window_seconds=refinement_window_seconds,
@@ -301,13 +316,13 @@ class ImplicitFeedbackManager:
     ) -> Dict[str, Any]:
         """
         Track a tool call and detect patterns.
-        
+
         Args:
             tool_name: Name of the tool being called
             session_id: Session identifier
             user_id: User identifier
             metadata: Additional metadata
-            
+
         Returns:
             Feedback event data
         """
@@ -329,12 +344,13 @@ class ImplicitFeedbackManager:
         # Track call timing for refinement detection
         if resolved_session not in self._session_calls:
             self._session_calls[resolved_session] = []
-        
+
         self._session_calls[resolved_session].append(now)
 
         # Detect refinement pattern (multiple calls within window)
         recent_calls = [
-            t for t in self._session_calls[resolved_session]
+            t
+            for t in self._session_calls[resolved_session]
             if now - t < self.config.refinement_window_seconds
         ]
 
@@ -351,7 +367,9 @@ class ImplicitFeedbackManager:
         if len(recent_calls) > 1:
             event["refinement_needed"] = True
             event["call_count_in_window"] = len(recent_calls)
-            logger.debug(f"🔄 Refinement pattern detected: {len(recent_calls)} calls in {self.config.refinement_window_seconds}s")
+            logger.debug(
+                f"🔄 Refinement pattern detected: {len(recent_calls)} calls in {self.config.refinement_window_seconds}s"
+            )
 
         # Send to LangSmith if available
         if self._client:
@@ -374,13 +392,13 @@ def configure_implicit_feedback(
 ) -> ImplicitFeedbackManager:
     """
     Configure implicit feedback collection.
-    
+
     Set LANGSMITH_API_KEY in your environment and the SDK will initialize
     the implicit feedback manager on first tool execution.
-    
+
     Example:
         from superoptix.adapters.stackone_adapter import configure_implicit_feedback
-        
+
         configure_implicit_feedback(
             api_key="/path/to/langsmith.key",
             project_name="stackone-agents",
@@ -400,9 +418,11 @@ def configure_implicit_feedback(
 # Hybrid Search Index (BM25 + TF-IDF)
 # =============================================================================
 
+
 @dataclass
 class ToolSearchResult:
     """Result from tool search."""
+
     name: str
     description: str
     score: float
@@ -411,10 +431,10 @@ class ToolSearchResult:
 class ToolIndex:
     """
     Hybrid BM25 + TF-IDF tool search index.
-    
+
     Provides intelligent tool discovery based on natural language queries.
     Uses a combination of BM25 (keyword matching) and TF-IDF (semantic similarity).
-    
+
     Example:
         index = ToolIndex(tools, hybrid_alpha=0.2)
         results = index.search("manage employees", limit=5)
@@ -429,7 +449,7 @@ class ToolIndex:
     ):
         """
         Initialize tool index with hybrid search.
-        
+
         Args:
             tools: List of StackOne tools to index
             hybrid_alpha: Weight for BM25 in hybrid search (0-1).
@@ -437,20 +457,23 @@ class ToolIndex:
         """
         self.tools = tools
         self.tool_map = {tool.name: tool for tool in tools}
-        self.hybrid_alpha = max(0.0, min(1.0, hybrid_alpha or self.DEFAULT_HYBRID_ALPHA))
+        self.hybrid_alpha = max(
+            0.0, min(1.0, hybrid_alpha or self.DEFAULT_HYBRID_ALPHA)
+        )
         self.tool_names: List[str] = []
-        
+
         # Build indices
         self._corpus: List[str] = []
         self._tfidf_vectors: Optional[Any] = None
         self._vectorizer: Optional[Any] = None
-        
+
         self._build_index()
 
     def _build_index(self) -> None:
         """Build search indices for all tools."""
         try:
             from sklearn.feature_extraction.text import TfidfVectorizer
+
             HAS_SKLEARN = True
         except ImportError:
             HAS_SKLEARN = False
@@ -460,20 +483,22 @@ class ToolIndex:
             # Extract category and action from tool name
             parts = tool.name.split("_")
             category = parts[0] if parts else ""
-            
+
             # Extract action types
             action_types = ["create", "update", "delete", "get", "list", "search"]
             actions = [p for p in parts if p in action_types]
-            
+
             # Build search text
-            search_text = " ".join([
-                tool.name,
-                tool.description,
-                category,
-                " ".join(parts),
-                " ".join(actions),
-            ])
-            
+            search_text = " ".join(
+                [
+                    tool.name,
+                    tool.description,
+                    category,
+                    " ".join(parts),
+                    " ".join(actions),
+                ]
+            )
+
             self._corpus.append(search_text.lower())
             self.tool_names.append(tool.name)
 
@@ -491,13 +516,13 @@ class ToolIndex:
         query_terms = set(query.lower().split())
         doc_terms = doc.lower().split()
         doc_term_set = set(doc_terms)
-        
+
         if not query_terms or not doc_terms:
             return 0.0
-        
+
         # Count matching terms
         matches = len(query_terms & doc_term_set)
-        
+
         # Normalize by query length
         return matches / len(query_terms)
 
@@ -509,12 +534,12 @@ class ToolIndex:
     ) -> List[ToolSearchResult]:
         """
         Search for relevant tools using hybrid BM25 + TF-IDF.
-        
+
         Args:
             query: Natural language query
             limit: Maximum number of results
             min_score: Minimum relevance score (0-1)
-            
+
         Returns:
             List of search results sorted by relevance
         """
@@ -534,7 +559,7 @@ class ToolIndex:
             try:
                 query_vec = self._vectorizer.transform([query_lower])
                 tfidf_scores = (self._tfidf_vectors @ query_vec.T).toarray().flatten()
-                
+
                 for idx, tool_name in enumerate(self.tool_names):
                     if tool_name in scores:
                         scores[tool_name]["tfidf"] = float(tfidf_scores[idx])
@@ -557,17 +582,19 @@ class ToolIndex:
         for tool_name, score in fused_results:
             if score < min_score:
                 continue
-            
+
             tool = self.tool_map.get(tool_name)
             if tool is None:
                 continue
-            
-            search_results.append(ToolSearchResult(
-                name=tool.name,
-                description=tool.description,
-                score=score,
-            ))
-            
+
+            search_results.append(
+                ToolSearchResult(
+                    name=tool.name,
+                    description=tool.description,
+                    score=score,
+                )
+            )
+
             if len(search_results) >= limit:
                 break
 
@@ -578,24 +605,25 @@ class ToolIndex:
 # StackOne ToolSet Wrapper
 # =============================================================================
 
+
 class StackOneToolSetWrapper:
     """
     SuperOptiX wrapper for StackOneToolSet with enhanced features.
-    
+
     Provides:
     - MCP-backed dynamic tool discovery
     - Glob pattern filtering (actions, providers)
     - Multi-account support
     - File upload detection
     - Integration with SuperOptiX optimization
-    
+
     Example:
         toolset = StackOneToolSetWrapper()
         tools = toolset.fetch_tools(
             actions=["hris_*", "!hris_delete_*"],
             account_ids=["acc-123"]
         )
-        
+
         # With optimization
         bridge = toolset.to_bridge()
         optimized = bridge.optimize(dataset, metric)
@@ -609,7 +637,7 @@ class StackOneToolSetWrapper:
     ):
         """
         Initialize StackOne toolset wrapper.
-        
+
         Args:
             api_key: API key (or use STACKONE_API_KEY env var)
             account_id: Default account ID
@@ -620,12 +648,12 @@ class StackOneToolSetWrapper:
             raise ValueError(
                 "API key must be provided via api_key parameter or STACKONE_API_KEY env var"
             )
-        
+
         self.account_id = account_id
         self.base_url = base_url
         self._account_ids: List[str] = []
         self._cached_tools: Optional[List[Any]] = None
-        
+
         # Initialize native toolset if available
         self._native_toolset: Optional[Any] = None
         if STACKONE_AVAILABLE and _StackOneToolSet:
@@ -641,10 +669,10 @@ class StackOneToolSetWrapper:
     def set_accounts(self, account_ids: List[str]) -> "StackOneToolSetWrapper":
         """
         Set account IDs for filtering tools.
-        
+
         Args:
             account_ids: List of account IDs
-            
+
         Returns:
             Self for chaining
         """
@@ -657,16 +685,16 @@ class StackOneToolSetWrapper:
         """Check if tool name matches action patterns (with exclusions)."""
         include_patterns = [a for a in actions if not a.startswith("!")]
         exclude_patterns = [a[1:] for a in actions if a.startswith("!")]
-        
+
         # Check exclusions first
         for pattern in exclude_patterns:
             if fnmatch.fnmatch(tool_name, pattern):
                 return False
-        
+
         # Check inclusions
         if not include_patterns:
             return True
-        
+
         return any(fnmatch.fnmatch(tool_name, p) for p in include_patterns)
 
     def _filter_by_provider(self, tool_name: str, providers: List[str]) -> bool:
@@ -682,20 +710,20 @@ class StackOneToolSetWrapper:
     ) -> List[Any]:
         """
         Fetch tools with optional filtering.
-        
+
         Args:
             account_ids: Filter by account IDs
             providers: Filter by provider names (e.g., ["hibob", "bamboohr"])
             actions: Filter by action patterns with glob support and exclusions
                     (e.g., ["hris_*", "!hris_delete_*"])
-                    
+
         Returns:
             List of StackOneTool instances
-            
+
         Example:
             # Get all HRIS tools except delete operations
             tools = toolset.fetch_tools(actions=["hris_*", "!hris_delete_*"])
-            
+
             # Get tools for specific provider
             tools = toolset.fetch_tools(providers=["hibob"])
         """
@@ -707,17 +735,24 @@ class StackOneToolSetWrapper:
                     providers=providers,
                     actions=[a for a in (actions or []) if not a.startswith("!")],
                 )
-                tools = tools_obj.to_list() if hasattr(tools_obj, "to_list") else list(tools_obj)
-                
+                tools = (
+                    tools_obj.to_list()
+                    if hasattr(tools_obj, "to_list")
+                    else list(tools_obj)
+                )
+
                 # Apply exclusion patterns
                 if actions:
                     exclude_patterns = [a[1:] for a in actions if a.startswith("!")]
                     if exclude_patterns:
                         tools = [
-                            t for t in tools
-                            if not any(fnmatch.fnmatch(t.name, p) for p in exclude_patterns)
+                            t
+                            for t in tools
+                            if not any(
+                                fnmatch.fnmatch(t.name, p) for p in exclude_patterns
+                            )
                         ]
-                
+
                 self._cached_tools = tools
                 return tools
             except Exception as e:
@@ -726,13 +761,15 @@ class StackOneToolSetWrapper:
         # Fallback: return cached tools with filtering
         if self._cached_tools:
             tools = self._cached_tools
-            
+
             if providers:
-                tools = [t for t in tools if self._filter_by_provider(t.name, providers)]
-            
+                tools = [
+                    t for t in tools if self._filter_by_provider(t.name, providers)
+                ]
+
             if actions:
                 tools = [t for t in tools if self._filter_by_action(t.name, actions)]
-            
+
             return tools
 
         logger.warning("No tools available. Install stackone-ai with MCP support.")
@@ -749,10 +786,10 @@ class StackOneToolSetWrapper:
     def to_bridge(self, tools: Optional[List[Any]] = None) -> "StackOneBridge":
         """
         Convert tools to a StackOneBridge for framework conversion.
-        
+
         Args:
             tools: Tools to convert (uses cached if not provided)
-            
+
         Returns:
             StackOneBridge instance
         """
@@ -762,10 +799,10 @@ class StackOneToolSetWrapper:
     def create_tool_index(self, tools: Optional[List[Any]] = None) -> ToolIndex:
         """
         Create a hybrid search index for tool discovery.
-        
+
         Args:
             tools: Tools to index (uses cached if not provided)
-            
+
         Returns:
             ToolIndex instance
         """
@@ -775,7 +812,7 @@ class StackOneToolSetWrapper:
     def get_feedback_tool(self) -> StackOneFeedbackTool:
         """
         Get the feedback collection tool.
-        
+
         Returns:
             StackOneFeedbackTool instance
         """
@@ -786,10 +823,11 @@ class StackOneToolSetWrapper:
 # File Upload Support
 # =============================================================================
 
+
 class FileUploadHandler:
     """
     Handles file uploads for StackOne tools.
-    
+
     Automatically detects binary parameters from OpenAPI specs
     and handles file encoding/upload.
     """
@@ -807,7 +845,7 @@ class FileUploadHandler:
     def is_file_parameter(param_schema: Dict[str, Any]) -> bool:
         """
         Check if a parameter represents a file upload.
-        
+
         Detects:
         - format: binary
         - type: file
@@ -817,7 +855,10 @@ class FileUploadHandler:
             return True
         if param_schema.get("type") == "file":
             return True
-        if param_schema.get("contentMediaType") in FileUploadHandler.BINARY_CONTENT_TYPES:
+        if (
+            param_schema.get("contentMediaType")
+            in FileUploadHandler.BINARY_CONTENT_TYPES
+        ):
             return True
         return False
 
@@ -825,24 +866,24 @@ class FileUploadHandler:
     def encode_file(file_path: str) -> Dict[str, Any]:
         """
         Encode a file for upload.
-        
+
         Args:
             file_path: Path to the file
-            
+
         Returns:
             Dict with base64 content and metadata
         """
         import mimetypes
-        
+
         if not os.path.exists(file_path):
             raise FileNotFoundError(f"File not found: {file_path}")
-        
+
         mime_type, _ = mimetypes.guess_type(file_path)
         mime_type = mime_type or "application/octet-stream"
-        
+
         with open(file_path, "rb") as f:
             content = base64.b64encode(f.read()).decode("utf-8")
-        
+
         return {
             "filename": os.path.basename(file_path),
             "content": content,
@@ -856,31 +897,33 @@ class FileUploadHandler:
     ) -> Dict[str, Any]:
         """
         Prepare arguments by encoding any file parameters.
-        
+
         Args:
             arguments: Tool arguments
             parameter_schemas: Parameter schemas from tool
-            
+
         Returns:
             Arguments with files encoded
         """
         prepared = dict(arguments)
-        
+
         for param_name, param_schema in parameter_schemas.items():
-            if param_name in prepared and FileUploadHandler.is_file_parameter(param_schema):
+            if param_name in prepared and FileUploadHandler.is_file_parameter(
+                param_schema
+            ):
                 value = prepared[param_name]
                 if isinstance(value, str) and os.path.exists(value):
                     prepared[param_name] = FileUploadHandler.encode_file(value)
-        
+
         return prepared
 
 
 class StackOneOptimizableComponent(BaseComponent):
     """
     Component wrapper for StackOne tools to enable GEPA optimization.
-    
+
     This component treats the tool description as the optimizable variable.
-    GEPA will mutate the description to help the LLM better understand when 
+    GEPA will mutate the description to help the LLM better understand when
     and how to use the tool.
     """
 
@@ -897,7 +940,7 @@ class StackOneOptimizableComponent(BaseComponent):
 
     def forward(self, **inputs: Any) -> Dict[str, Any]:
         """Execute the tool with the current (potentially optimized) description."""
-        # Note: In a real optimization run, 'forward' might be used to test 
+        # Note: In a real optimization run, 'forward' might be used to test
         # if the LLM picks the tool correctly based on its description.
         result = self.tool.execute(inputs)
         return {"result": result}
@@ -923,14 +966,16 @@ class StackOneBridge:
         elif isinstance(stackone_tools, list):
             self.tools = stackone_tools
         else:
-            raise ValueError("Invalid stackone_tools format. Expected Tools object or list.")
+            raise ValueError(
+                "Invalid stackone_tools format. Expected Tools object or list."
+            )
 
     def optimize(
-        self, 
-        dataset: List[Dict[str, Any]], 
+        self,
+        dataset: List[Dict[str, Any]],
         metric: Any,
         reflection_lm: str = "gpt-4o-mini",
-        max_iterations: int = 5
+        max_iterations: int = 5,
     ) -> List[Any]:
         """
         Optimize StackOne tool descriptions using GEPA.
@@ -949,25 +994,27 @@ class StackOneBridge:
         optimized_tools = []
         for tool in self.tools:
             logger.info(f"🧬 Optimizing description for tool: {tool.name}")
-            
+
             # Wrap tool in optimizable component
             component = StackOneOptimizableComponent(tool)
-            
+
             # Setup Universal GEPA
             optimizer = UniversalGEPA(
                 metric=metric,
                 reflection_lm=reflection_lm,
-                max_iterations=max_iterations
+                max_iterations=max_iterations,
             )
-            
+
             # Run optimization
             result = optimizer.optimize(component, dataset)
-            
+
             # Update tool description with optimized version
             tool.description = result.optimized_variable
             optimized_tools.append(tool)
-            
-            logger.info(f"✅ Optimized description for {tool.name}: {tool.description[:50]}...")
+
+            logger.info(
+                f"✅ Optimized description for {tool.name}: {tool.description[:50]}..."
+            )
 
         return optimized_tools
 
@@ -986,52 +1033,53 @@ class StackOneBridge:
         for tool in self.tools:
             # DSPy Tool expects a function, name, and desc
             # We use the tool.execute method as the function
-            d_tool = DSPyTool(
-                func=tool.execute,
-                name=tool.name,
-                desc=tool.description
-            )
+            d_tool = DSPyTool(func=tool.execute, name=tool.name, desc=tool.description)
             dspy_tools.append(d_tool)
-        
+
         return dspy_tools
 
-    def _create_pydantic_model_from_schema(self, tool_name: str, schema: Dict[str, Any]) -> Type[BaseModel]:
+    def _create_pydantic_model_from_schema(
+        self, tool_name: str, schema: Dict[str, Any]
+    ) -> Type[BaseModel]:
         """
         Dynamically create a Pydantic model from StackOne's JSON schema.
         """
         fields: Dict[str, Any] = {}
-        
+
         properties = schema.get("properties", {})
         required = set(schema.get("required", []))
-        
+
         type_mapping = {
             "string": str,
             "integer": int,
             "number": float,
             "boolean": bool,
             "array": list,
-            "object": dict
+            "object": dict,
         }
 
         for field_name, field_info in properties.items():
             field_type_str = field_info.get("type", "string")
             python_type = type_mapping.get(field_type_str, str)
-            
+
             description = field_info.get("description", "")
-            
+
             if field_name in required:
                 fields[field_name] = (python_type, Field(description=description))
             else:
-                fields[field_name] = (Optional[python_type], Field(default=None, description=description))
-        
+                fields[field_name] = (
+                    Optional[python_type],
+                    Field(default=None, description=description),
+                )
+
         # Create dynamic model
         model_name = f"{tool_name}Args"
-        return create_model(model_name, **fields) # type: ignore
+        return create_model(model_name, **fields)  # type: ignore
 
     def to_pydantic_ai(self) -> List[Any]:
         """
         Convert StackOne tools to Pydantic AI Tool objects.
-        
+
         This generates fully typed Pydantic tools, enabling the agent to see
         the exact schema and validate arguments before execution.
 
@@ -1039,7 +1087,9 @@ class StackOneBridge:
             List of pydantic_ai.Tool objects.
         """
         if not PYDANTIC_AI_AVAILABLE:
-            logger.warning("Pydantic AI not installed. to_pydantic_ai() will fail if called.")
+            logger.warning(
+                "Pydantic AI not installed. to_pydantic_ai() will fail if called."
+            )
             raise ImportError("pydantic-ai is not installed.")
 
         pai_tools = []
@@ -1085,15 +1135,15 @@ class StackOneBridge:
         """
         # Google's format is similar to OpenAI but stricter on types
         # Ref: https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/Tool
-        
+
         schema = tool.parameters.model_dump()
-        
+
         # Ensure strict compatibility with Google's Schema format
         # This is a simplified mapping; complex nested types might need recursion
         parameters = {
             "type": "OBJECT",
             "properties": {},
-            "required": schema.get("required", [])
+            "required": schema.get("required", []),
         }
 
         type_map = {
@@ -1102,20 +1152,20 @@ class StackOneBridge:
             "number": "NUMBER",
             "boolean": "BOOLEAN",
             "array": "ARRAY",
-            "object": "OBJECT"
+            "object": "OBJECT",
         }
 
         for prop_name, prop_info in schema.get("properties", {}).items():
             prop_type = type_map.get(prop_info.get("type", "string"), "STRING")
             parameters["properties"][prop_name] = {
                 "type": prop_type,
-                "description": prop_info.get("description", "")
+                "description": prop_info.get("description", ""),
             }
 
         return {
             "name": tool.name,
             "description": tool.description,
-            "parameters": parameters
+            "parameters": parameters,
         }
 
     def to_google_adk(self) -> List[Dict[str, Any]]:
@@ -1128,7 +1178,7 @@ class StackOneBridge:
         # In Google's SDK, a Tool is a collection of FunctionDeclarations
         # We return a list of FunctionDeclarations which can be passed to
         # genai.GenerativeModel(tools=[...])
-        
+
         return [self._to_google_function_declaration(t) for t in self.tools]
 
     def to_semantic_kernel(self) -> List[Any]:
@@ -1140,9 +1190,13 @@ class StackOneBridge:
         """
         try:
             from semantic_kernel.functions import kernel_function
-            from semantic_kernel.functions.kernel_function_from_method import KernelFunctionFromMethod
+            from semantic_kernel.functions.kernel_function_from_method import (
+                KernelFunctionFromMethod,
+            )
         except ImportError:
-            logger.warning("Semantic Kernel not installed. to_semantic_kernel() will fail.")
+            logger.warning(
+                "Semantic Kernel not installed. to_semantic_kernel() will fail."
+            )
             raise ImportError("semantic-kernel is not installed.")
 
         sk_functions = []
@@ -1158,29 +1212,29 @@ class StackOneBridge:
             def make_sk_method(current_tool, args_model):
                 # The method name and docstring are critical for SK
                 @kernel_function(
-                    name=current_tool.name,
-                    description=current_tool.description
+                    name=current_tool.name, description=current_tool.description
                 )
                 def execute_tool(**kwargs) -> str:
                     # Validate against our dynamic model
                     try:
                         validated_args = args_model(**kwargs)
-                        return str(current_tool.execute(validated_args.model_dump(exclude_none=True)))
+                        return str(
+                            current_tool.execute(
+                                validated_args.model_dump(exclude_none=True)
+                            )
+                        )
                     except Exception as e:
                         return f"Error executing tool {current_tool.name}: {str(e)}"
-                
+
                 return execute_tool
 
             # 3. Create Kernel Function
             # We use KernelFunctionFromMethod to create the function object
             method = make_sk_method(tool, ArgsModel)
-            
-            # Note: In newer SK versions, the decorator handles creation, 
+
+            # Note: In newer SK versions, the decorator handles creation,
             # but we explicitly wrap it to ensure metadata is correct
-            func = KernelFunctionFromMethod(
-                method=method,
-                plugin_name="StackOnePlugin"
-            )
+            func = KernelFunctionFromMethod(method=method, plugin_name="StackOnePlugin")
             sk_functions.append(func)
 
         return sk_functions
@@ -1188,19 +1242,23 @@ class StackOneBridge:
     def to_discovery_tools(self, framework: str = "dspy") -> List[Any]:
         """
         Create "Meta Tools" (search/execute) for dynamic tool discovery.
-        
+
         Instead of loading all tools, this returns just 'tool_search' and 'tool_execute'.
         The agent can then search for the right tool at runtime and execute it.
-        
+
         Args:
             framework: Target framework ('dspy', 'pydantic_ai', 'google', 'semantic_kernel')
-            
+
         Returns:
             List of converted meta-tools.
         """
         try:
             from stackone_ai.models import Tools
-            from stackone_ai.utility_tools import ToolIndex, create_tool_search, create_tool_execute
+            from stackone_ai.utility_tools import (
+                ToolIndex,
+                create_tool_search,
+                create_tool_execute,
+            )
         except ImportError:
             raise ImportError("stackone-ai >= 2.0 required for discovery tools.")
 
@@ -1208,16 +1266,16 @@ class StackOneBridge:
         # We need a Tools collection object for create_tool_execute
         tools_collection = Tools(self.tools)
         index = ToolIndex(self.tools)
-        
+
         search_tool = create_tool_search(index)
         execute_tool = create_tool_execute(tools_collection)
-        
+
         meta_tools = [search_tool, execute_tool]
-        
+
         # 2. Convert these meta-tools to the requested framework using our existing logic
         # We create a temporary bridge just for these 2 tools
         temp_bridge = StackOneBridge(meta_tools)
-        
+
         if framework == "dspy":
             return temp_bridge.to_dspy()
         elif framework == "pydantic_ai":

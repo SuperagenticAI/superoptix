@@ -10,9 +10,4 @@ from .hris_benchmark import HRISBenchmark
 from .ats_benchmark import ATSBenchmark
 from .crm_benchmark import CRMBenchmark
 
-__all__ = [
-    "StackOneBenchmark", 
-    "HRISBenchmark",
-    "ATSBenchmark",
-    "CRMBenchmark"
-]
+__all__ = ["StackOneBenchmark", "HRISBenchmark", "ATSBenchmark", "CRMBenchmark"]

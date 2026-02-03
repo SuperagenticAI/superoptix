@@ -11,9 +11,19 @@ import os
 # and should be hidden from end users.
 warnings.filterwarnings("ignore", category=DeprecationWarning, module="opentelemetry")
 warnings.filterwarnings("ignore", category=DeprecationWarning, module="opentelemetry.*")
-warnings.filterwarnings("ignore", message="You should use `Logger` instead", category=DeprecationWarning)
-warnings.filterwarnings("ignore", message="You should use `LoggerProvider` instead", category=DeprecationWarning)
-warnings.filterwarnings("ignore", message="You should use `ProxyLoggerProvider` instead", category=DeprecationWarning)
+warnings.filterwarnings(
+    "ignore", message="You should use `Logger` instead", category=DeprecationWarning
+)
+warnings.filterwarnings(
+    "ignore",
+    message="You should use `LoggerProvider` instead",
+    category=DeprecationWarning,
+)
+warnings.filterwarnings(
+    "ignore",
+    message="You should use `ProxyLoggerProvider` instead",
+    category=DeprecationWarning,
+)
 
 # ============================================================================
 # ULTRA-AGGRESSIVE WARNING SUPPRESSION FOR PYPI INSTALLATIONS
@@ -173,7 +183,9 @@ warnings.filterwarnings(
 warnings.filterwarnings("ignore", module="litellm", category=DeprecationWarning)
 # Final catch-all for storage3 Pydantic warnings (defense in depth)
 warnings.filterwarnings("ignore", module="storage3.*", category=DeprecationWarning)
-warnings.filterwarnings("ignore", message=r".*pydantic\.config\.Extra.*", category=DeprecationWarning)
+warnings.filterwarnings(
+    "ignore", message=r".*pydantic\.config\.Extra.*", category=DeprecationWarning
+)
 
 from superoptix.cli.commands.agent import (
     add_agent,
@@ -759,28 +771,34 @@ def check_conversational_mode():
 
 def main():
     """Main CLI entry point."""
-    
+
     # FINAL SAFETY: Ensure all warnings are suppressed (defense in depth)
     # This is a redundant check in case anything bypasses the top-level filters
     import warnings
     import os
-    
+
     # Suppress all warnings (immediate)
     warnings.simplefilter("ignore")
-    
+
     # Set environment variable as fallback
     os.environ.setdefault("PYTHONWARNINGS", "ignore")
-    
+
     # Re-apply specific Pydantic filters for clarity
     warnings.filterwarnings("ignore", message=r".*[Pp]ydantic.*", category=UserWarning)
-    warnings.filterwarnings("ignore", message=r".*[Pp]ydantic.*", category=DeprecationWarning)
+    warnings.filterwarnings(
+        "ignore", message=r".*[Pp]ydantic.*", category=DeprecationWarning
+    )
     warnings.filterwarnings("ignore", module="pydantic.*", category=UserWarning)
     warnings.filterwarnings("ignore", module="pydantic_ai.*", category=UserWarning)
     # warnings.filterwarnings("ignore", module="storage3.*", category=UserWarning)
     # warnings.filterwarnings("ignore", module="storage3.*", category=DeprecationWarning)
     # warnings.filterwarnings("ignore", message=r".*storage3.*", category=DeprecationWarning)
-    warnings.filterwarnings("ignore", message=r".*pydantic\.config\.Extra.*", category=DeprecationWarning)
-    warnings.filterwarnings("ignore", message=r".*PydanticDeprecatedSince20.*", category=DeprecationWarning)
+    warnings.filterwarnings(
+        "ignore", message=r".*pydantic\.config\.Extra.*", category=DeprecationWarning
+    )
+    warnings.filterwarnings(
+        "ignore", message=r".*PydanticDeprecatedSince20.*", category=DeprecationWarning
+    )
     # warnings.filterwarnings("ignore", module="supabase.*", category=UserWarning)
 
     # Track CLI usage (anonymous)
@@ -1048,7 +1066,15 @@ Use `super agent <command> --help` for more information on a specific command.
     compile_parser.add_argument(
         "--framework",
         "-f",
-        choices=["dspy", "microsoft", "openai", "deepagents", "crewai", "google-adk", "pydantic-ai"],
+        choices=[
+            "dspy",
+            "microsoft",
+            "openai",
+            "deepagents",
+            "crewai",
+            "google-adk",
+            "pydantic-ai",
+        ],
         default="dspy",
         help="Target agent framework (default: dspy). Compile the same agent to different frameworks.",
     )
@@ -1165,7 +1191,15 @@ Use `super agent <command> --help` for more information on a specific command.
     optimize_parser.add_argument(
         "--framework",
         "-f",
-        choices=["dspy", "microsoft", "openai", "deepagents", "crewai", "google-adk", "pydantic-ai"],
+        choices=[
+            "dspy",
+            "microsoft",
+            "openai",
+            "deepagents",
+            "crewai",
+            "google-adk",
+            "pydantic-ai",
+        ],
         default="dspy",
         help="Agent framework to optimize (default: dspy). GEPA works with all frameworks.",
     )

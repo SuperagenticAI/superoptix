@@ -88,16 +88,16 @@ def suppress_warnings():
     """Context manager to suppress all warnings during CLI operations."""
     # ULTRA-AGGRESSIVE: Suppress ALL warnings first
     import os
-    
+
     # Save original state
     old_filter = warnings.filters[:]  # Save current filters
     old_pythonwarnings = os.environ.get("PYTHONWARNINGS")
-    
+
     try:
         # Suppress all warnings immediately
         warnings.simplefilter("ignore")
         os.environ.setdefault("PYTHONWARNINGS", "ignore")
-        
+
         # Suppress specific warnings that are problematic in CLI
         warnings.filterwarnings(
             "ignore", message="unclosed database", category=ResourceWarning
@@ -109,15 +109,9 @@ def suppress_warnings():
         warnings.filterwarnings(
             "ignore", message=r".*[Pp]ydantic.*", category=DeprecationWarning
         )
-        warnings.filterwarnings(
-            "ignore", module="pydantic.*", category=UserWarning
-        )
-        warnings.filterwarnings(
-            "ignore", module="pydantic_ai.*", category=UserWarning
-        )
-        warnings.filterwarnings(
-            "ignore", module="storage3.*", category=UserWarning
-        )
+        warnings.filterwarnings("ignore", module="pydantic.*", category=UserWarning)
+        warnings.filterwarnings("ignore", module="pydantic_ai.*", category=UserWarning)
+        warnings.filterwarnings("ignore", module="storage3.*", category=UserWarning)
         warnings.filterwarnings(
             "ignore", category=FutureWarning, module="huggingface_hub"
         )
@@ -135,7 +129,7 @@ def suppress_warnings():
             "ignore", category=UserWarning, message=".*transformers.*"
         )
         warnings.filterwarnings("ignore", category=RuntimeWarning)
-        
+
         # CRITICAL: Only ONE yield statement for context manager
         yield
     finally:

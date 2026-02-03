@@ -21,27 +21,29 @@ except ImportError as e:
 
 load_dotenv()
 
+
 async def main():
     print("🚀 Initializing StackOne + Semantic Kernel Integration...")
 
     # 1. Initialize StackOne Toolset
     toolset = StackOneToolSet()
-    
+
     account_id = os.getenv("STACKONE_ACCOUNT_ID", "test_account")
     tools = toolset.fetch_tools(
-        include_tools=["hris_get_employee"],
-        account_ids=[account_id]
+        include_tools=["hris_get_employee"], account_ids=[account_id]
     )
 
     # 2. Use SuperOptiX Bridge to convert to Kernel Functions
     bridge = StackOneBridge(tools)
     sk_functions = bridge.to_semantic_kernel()
-    
-    print(f"✅ Converted {len(sk_functions)} StackOne tools to Semantic Kernel Functions.")
+
+    print(
+        f"✅ Converted {len(sk_functions)} StackOne tools to Semantic Kernel Functions."
+    )
 
     # 3. Initialize Kernel
     kernel = sk.Kernel()
-    
+
     # Add OpenAI Service (optional for this demo, but needed for real execution)
     if os.getenv("OPENAI_API_KEY"):
         service_id = "default"
@@ -56,14 +58,14 @@ async def main():
         kernel.add_function(plugin_name=plugin_name, function=func)
 
     print(f"✅ Registered plugin '{plugin_name}' with kernel.")
-    
+
     # 5. Invoke a function manually (Simulating Planner usage)
     # Get the function
     func_name = sk_functions[0].name
     sk_func = kernel.get_function(plugin_name, func_name)
-    
+
     print(f"\n🤖 Invoking function '{func_name}'...")
-    
+
     # In a real scenario with a Planner, the Planner would call this.
     # Here we invoke directly for demonstration.
     try:
@@ -73,6 +75,7 @@ async def main():
         print(f"   Result: {result}")
     except Exception as e:
         print(f"   Execution attempted (success implies integration worked): {e}")
+
 
 if __name__ == "__main__":
     asyncio.run(main())
