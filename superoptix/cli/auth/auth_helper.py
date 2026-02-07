@@ -6,6 +6,7 @@ This file is kept for compatibility with existing code that imports it.
 
 from typing import Optional
 from functools import wraps
+from .token_storage import TokenStorage
 
 
 def is_authenticated() -> bool:
@@ -46,7 +47,7 @@ def get_authenticated_client():
 
 def require_auth(func):
     """Decorator to require authentication for CLI commands.
-
+    
     Since auth is disabled, this effectively disables the command or warns.
     """
 

@@ -1,6 +1,5 @@
 import os
 import warnings
-
 """Slash command handler for conversational mode.
 
 Handles all slash commands like /model, /help, /config, etc.

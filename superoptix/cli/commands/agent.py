@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import asyncio
 import copy
 import importlib
 import importlib.util
@@ -298,6 +299,7 @@ def _compile_single_agent(agent_name: str, args, tier_level: str = None):
             "crewai": "CrewAI",
             "google-adk": "Google ADK",
             "pydantic-ai": "Pydantic AI",
+            "claude-sdk": "Claude Agent SDK",
         }.get(framework, framework.upper())
 
         # Show what's happening (concise)
@@ -438,8 +440,100 @@ def _compile_single_agent(agent_name: str, args, tier_level: str = None):
         return False
 
 
+def _run_framework_agent(args, framework: str):
+    """
+    Run an agent compiled with a non-DSPy framework.
+
+    Dynamically imports and runs the framework-specific pipeline.
+    """
+    project_root = Path.cwd()
+    with open(project_root / ".super") as f:
+        project_name = yaml.safe_load(f).get("project")
+
+    agent_dir = project_root / project_name / "agents" / args.name
+    suffix = framework.replace("-", "_")
+    pipeline_path = agent_dir / "pipelines" / f"{args.name}_{suffix}_pipeline.py"
+
+    framework_display = {
+        "claude-sdk": "Claude Agent SDK",
+        "crewai": "CrewAI",
+        "pydantic-ai": "Pydantic AI",
+        "openai": "OpenAI Agents SDK",
+        "google-adk": "Google ADK",
+        "microsoft": "Microsoft Agent Framework",
+        "deepagents": "DeepAgents (LangGraph)",
+    }.get(framework, framework.upper())
+
+    console.print(f"🚀 [bold cyan]Running agent '[yellow]{args.name}[/]' with {framework_display}...[/]")
+    console.print()
+
+    if not pipeline_path.exists():
+        console.print(
+            f"[bold red]❌ Pipeline not found:[/] {pipeline_path}\n\n"
+            f"[yellow]Compile it first with:[/]\n"
+            f"  [cyan]super agent compile {args.name} --framework {framework}[/]"
+        )
+        return
+
+    try:
+        # Dynamically import the pipeline module
+        spec = importlib.util.spec_from_file_location(
+            f"{args.name}_{suffix}_pipeline", str(pipeline_path)
+        )
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+
+        # Find the Pipeline class (e.g., DeveloperPipeline)
+        pipeline_class = None
+        for name, obj in module.__dict__.items():
+            if name.endswith("Pipeline") and isinstance(obj, type):
+                pipeline_class = obj
+                break
+
+        if not pipeline_class:
+            console.print(
+                f"[bold red]❌ No Pipeline class found in {pipeline_path}[/]"
+            )
+            return
+
+        # Instantiate and run
+        pipeline = pipeline_class()
+
+        # Check if it's an async framework
+        if hasattr(pipeline, "run") and asyncio.iscoroutinefunction(pipeline.run):
+            # Async pipeline (Claude SDK, Pydantic AI, etc.)
+            result = run_async(pipeline.run(query=args.goal))
+        elif hasattr(pipeline, "run_sync"):
+            # Sync wrapper available
+            result = pipeline.run_sync(query=args.goal)
+        elif hasattr(pipeline, "run"):
+            # Sync pipeline
+            result = pipeline.run(query=args.goal)
+        else:
+            console.print(
+                f"[bold red]❌ Pipeline class has no run() method[/]"
+            )
+            return
+
+        # Display result
+        console.print("\n[bold green]✅ Agent execution completed![/]\n")
+        console.print("[bold]Output:[/]")
+
+        if isinstance(result, dict):
+            for key, value in result.items():
+                if key not in ("tool_calls", "metadata"):
+                    console.print(f"  [cyan]{key}:[/] {value}")
+        else:
+            console.print(f"  {result}")
+
+    except Exception as e:
+        console.print(f"\n[bold red]❌ Failed to run {framework_display} pipeline:[/] {e}")
+        import traceback
+        console.print(traceback.format_exc())
+
+
 def run_agent(args):
-    """Handle running an agent pipeline by delegating to the DSPyRunner."""
+    """Handle running an agent pipeline by delegating to the appropriate runner."""
     # Get observability backend from args
     observe_backend = getattr(args, "observe", "superoptix")
     enable_external = observe_backend != "superoptix"
@@ -462,6 +556,14 @@ def run_agent(args):
         with tracer.trace_operation(
             "agent_run", f"agent.{args.name}", agent_name=args.name, query=args.goal
         ):
+            # Get framework from args
+            framework = getattr(args, "framework", "dspy")
+
+            # Handle non-DSPy frameworks
+            if framework != "dspy":
+                _run_framework_agent(args, framework)
+                return
+
             console.print(f"🚀 [bold cyan]Running agent '[yellow]{args.name}[/]'...[/]")
             console.print()
 
@@ -2177,7 +2279,7 @@ def _run_universal_gepa_optimization(args, agent_name, project_root, playbook):
     cli_max_full_evals = getattr(args, "max_full_evals", None)
     cli_max_metric_calls = getattr(args, "max_metric_calls", None)
     reflection_lm = getattr(args, "reflection_lm", None)
-
+    
     # Check if CLI provided any budget parameter
     cli_budget_provided = bool(cli_auto or cli_max_full_evals or cli_max_metric_calls)
 
@@ -2185,12 +2287,12 @@ def _run_universal_gepa_optimization(args, agent_name, project_root, playbook):
     opt_config = playbook.get("spec", {}).get("optimization", {})
     optimizer_config = opt_config.get("optimizer", {})
     params = optimizer_config.get("params", {})
-
+    
     # Use CLI values directly if provided, otherwise fallback to playbook
     auto = cli_auto
     max_full_evals = cli_max_full_evals
     max_metric_calls = cli_max_metric_calls
-
+    
     # Fallback to playbook ONLY if CLI didn't provide that specific parameter
     if not cli_auto and not cli_budget_provided:
         auto = params.get("auto")
@@ -2208,75 +2310,34 @@ def _run_universal_gepa_optimization(args, agent_name, project_root, playbook):
             console.print(
                 f"\n✅ Using max_metric_calls from playbook: {max_metric_calls}"
             )
-
-    # IMPORTANT: If CLI provided max_metric_calls or max_full_evals,
+    
+    # IMPORTANT: If CLI provided max_metric_calls or max_full_evals, 
     # we must NOT use 'auto' from playbook (they conflict in GEPA)
     if (cli_max_metric_calls or cli_max_full_evals) and auto and not cli_auto:
         playbook_auto = auto
         auto = None
-        console.print(
-            f"\n[yellow]⚠️  CLI --max-metric-calls={cli_max_metric_calls or cli_max_full_evals} overrides playbook 'auto: {playbook_auto}' setting[/]"
-        )
+        console.print(f"\n[yellow]⚠️  CLI --max-metric-calls={cli_max_metric_calls or cli_max_full_evals} overrides playbook 'auto: {playbook_auto}' setting[/]")
 
     if not reflection_lm:
         reflection_lm = params.get("reflection_lm")
         if reflection_lm:
             # Auto-detect and add ollama: prefix if needed
             if isinstance(reflection_lm, str):
-                known_providers = [
-                    "ollama",
-                    "openai",
-                    "anthropic",
-                    "google",
-                    "bedrock",
-                    "azure",
-                    "cohere",
-                    "mistral",
-                    "deepseek",
-                    "groq",
-                    "together",
-                    "fireworks",
-                    "litellm",
-                    "gateway",
-                ]
-                has_provider_prefix = any(
-                    reflection_lm.startswith(f"{p}:") for p in known_providers
-                )
-
+                known_providers = ["ollama", "openai", "anthropic", "google", "bedrock", "azure", "cohere", "mistral", "deepseek", "groq", "together", "fireworks", "litellm", "gateway"]
+                has_provider_prefix = any(reflection_lm.startswith(f"{p}:") for p in known_providers)
+                
                 # If no prefix and model contains ':' (like llama3.1:8b), assume Ollama
                 if not has_provider_prefix and ":" in reflection_lm:
-                    ollama_indicators = [
-                        ":8b",
-                        ":7b",
-                        ":13b",
-                        ":70b",
-                        "llama",
-                        "mistral",
-                        "codellama",
-                        "phi",
-                        "gemma",
-                        "qwen",
-                    ]
-                    if any(
-                        indicator in reflection_lm.lower()
-                        for indicator in ollama_indicators
-                    ):
+                    ollama_indicators = [":8b", ":7b", ":13b", ":70b", "llama", "mistral", "codellama", "phi", "gemma", "qwen"]
+                    if any(indicator in reflection_lm.lower() for indicator in ollama_indicators):
                         reflection_lm = f"ollama:{reflection_lm}"
-                        console.print(
-                            f"\n✅ Using reflection_lm from playbook: {reflection_lm} (auto-detected Ollama)"
-                        )
+                        console.print(f"\n✅ Using reflection_lm from playbook: {reflection_lm} (auto-detected Ollama)")
                     else:
-                        console.print(
-                            f"\n✅ Using reflection_lm from playbook: {reflection_lm}"
-                        )
+                        console.print(f"\n✅ Using reflection_lm from playbook: {reflection_lm}")
                 else:
-                    console.print(
-                        f"\n✅ Using reflection_lm from playbook: {reflection_lm}"
-                    )
+                    console.print(f"\n✅ Using reflection_lm from playbook: {reflection_lm}")
             else:
-                console.print(
-                    f"\n✅ Using reflection_lm from playbook: {reflection_lm}"
-                )
+                console.print(f"\n✅ Using reflection_lm from playbook: {reflection_lm}")
 
     # Validate GEPA configuration
     if not (auto or max_full_evals or max_metric_calls):
@@ -2307,22 +2368,21 @@ def _run_universal_gepa_optimization(args, agent_name, project_root, playbook):
     # Check if MCP tool optimization is enabled
     spec_data = playbook.get("spec", playbook)
     mcp_config = spec_data.get("mcp", {})
-    optimize_mcp_tools = mcp_config.get("enabled", False) and mcp_config.get(
-        "optimization", {}
-    ).get("optimize_tool_descriptions", False)
-
+    optimize_mcp_tools = (
+        mcp_config.get("enabled", False)
+        and mcp_config.get("optimization", {}).get("optimize_tool_descriptions", False)
+    )
+    
     # Check if field description optimization is enabled
     optimize_field_descriptions = opt_config.get("optimize_field_descriptions", False)
     output_fields = spec_data.get("output_fields", [])
-
+    
     # Field description optimization requires output_fields to be defined
     if optimize_field_descriptions and not output_fields:
         console.print(
             "\n[yellow]⚠️  Field description optimization enabled but no output_fields found in playbook[/]"
         )
-        console.print(
-            "   Field description optimization requires output_fields to be defined."
-        )
+        console.print("   Field description optimization requires output_fields to be defined.")
         console.print("   Disabling field description optimization...")
         optimize_field_descriptions = False
 
@@ -2458,10 +2518,8 @@ def _run_universal_gepa_optimization(args, agent_name, project_root, playbook):
             project_root=project_root,
         )
         if not mcp_result:
-            console.print(
-                "[yellow]⚠️  MCP tool optimization failed, continuing with instruction optimization...[/]"
-            )
-
+            console.print("[yellow]⚠️  MCP tool optimization failed, continuing with instruction optimization...[/]")
+    
     # Phase 1.5: Optimize field descriptions if enabled (only for Pydantic AI)
     if optimize_field_descriptions and framework == "pydantic-ai":
         console.print("\n📝 [bold cyan]Phase 1.5: Optimizing Field Descriptions[/]")
@@ -2478,14 +2536,10 @@ def _run_universal_gepa_optimization(args, agent_name, project_root, playbook):
             optimizer_kwargs=optimizer_kwargs,
         )
         if not field_result:
-            console.print(
-                "[yellow]⚠️  Field description optimization failed, continuing with instruction optimization...[/]"
-            )
-
+            console.print("[yellow]⚠️  Field description optimization failed, continuing with instruction optimization...[/]")
+    
     # Phase 2: Optimize instructions (always run)
-    console.print(
-        "\n⚡ [bold cyan]Phase 2: Running GEPA optimization for instructions...[/]"
-    )
+    console.print("\n⚡ [bold cyan]Phase 2: Running GEPA optimization for instructions...[/]")
     console.print(f"   Budget: {auto or max_full_evals or max_metric_calls}")
     console.print(f"   Training examples: {len(train_data)}")
     console.print(f"   Validation examples: {len(val_data)}")
@@ -2546,51 +2600,49 @@ def _optimize_field_descriptions(
 ) -> bool:
     """
     Optimize Pydantic model field descriptions using GEPA.
-
+    
     This optimizes Field(description=...) for output_fields to improve
     structured data extraction accuracy.
-
+    
     Returns:
         True if optimization succeeded, False otherwise
     """
     try:
         from superoptix.core.base_component import BaseComponent
-
+        
         spec_data = playbook.get("spec", playbook)
         output_fields = spec_data.get("output_fields", [])
-
+        
         if not output_fields:
-            console.print(
-                "[yellow]⚠️  No output_fields found for field description optimization[/]"
-            )
+            console.print("[yellow]⚠️  No output_fields found for field description optimization[/]")
             return False
-
+        
         # Extract current field descriptions
         field_descriptions = {}
         for field in output_fields:
             field_name = field.get("name", "")
             field_desc = field.get("description", field_name)  # Use name as fallback
             field_descriptions[field_name] = field_desc
-
+        
         if not field_descriptions:
             console.print("[yellow]⚠️  No field descriptions found to optimize[/]")
             return False
-
+        
         console.print(f"   Optimizing {len(field_descriptions)} field descriptions:")
         for field_name, desc in field_descriptions.items():
             console.print(f"     - {field_name}: {desc[:60]}...")
-
+        
         # Create a structured text representation of field descriptions
         # Format: "field_name: description\nfield_name2: description2\n..."
         # This format is easier for GEPA to optimize while preserving structure
         field_descriptions_text = "\n".join(
             [f"{field_name}: {desc}" for field_name, desc in field_descriptions.items()]
         )
-
+        
         # Create a temporary BaseComponent for field descriptions optimization
         class FieldDescriptionComponent(BaseComponent):
             """Temporary component for optimizing field descriptions."""
-
+            
             def __init__(self, field_descriptions_text: str, field_names: list):
                 super().__init__(
                     name=f"{agent_name}_field_descriptions",
@@ -2603,52 +2655,48 @@ def _optimize_field_descriptions(
                     config={},
                 )
                 self._field_names = field_names
-
+            
             def forward(self, **inputs) -> dict:
                 """Forward method required by BaseComponent.
-
+                
                 For field description optimization, we don't actually execute anything,
                 we just return empty outputs since we're optimizing the descriptions themselves.
                 """
                 # Return empty dict with all expected output fields
                 return {field: "" for field in self._field_names}
-
-        field_component = FieldDescriptionComponent(
-            field_descriptions_text, list(field_descriptions.keys())
-        )
-
+        
+        field_component = FieldDescriptionComponent(field_descriptions_text, list(field_descriptions.keys()))
+        
         # Create metric function for field description optimization
         # This metric evaluates how well the optimized descriptions help extract structured data
-        def field_metric_fn(
-            inputs: dict, outputs: dict, gold: dict, component_name: str = None
-        ) -> dict:
+        def field_metric_fn(inputs: dict, outputs: dict, gold: dict, component_name: str = None) -> dict:
             """Metric for field description optimization.
-
+            
             We evaluate by checking if the optimized descriptions help extract
             the expected output fields correctly. For now, use a simple approach
             that checks if outputs match expected outputs.
             """
             score = 0.0
             feedback = "Field description evaluation"
-
+            
             # Simple scoring: check if outputs contain expected values
             if outputs and gold:
                 matched_fields = 0
                 total_fields = len(gold)
-
+                
                 for field_name, expected_value in gold.items():
                     if field_name in outputs:
                         output_value = str(outputs[field_name]).lower()
                         expected_str = str(expected_value).lower()
                         if expected_str in output_value or output_value in expected_str:
                             matched_fields += 1
-
+                
                 if total_fields > 0:
                     score = matched_fields / total_fields
                     feedback = f"Matched {matched_fields}/{total_fields} fields"
-
+            
             return {"score": score, "feedback": feedback}
-
+        
         # Fix reflection_lm format for Ollama
         # UniversalGEPA expects "ollama:model" format and converts it to "ollama_chat/model"
         # So convert "ollama/model" to "ollama:model" if needed
@@ -2656,19 +2704,15 @@ def _optimize_field_descriptions(
         if reflection_lm and reflection_lm.startswith("ollama/"):
             # Convert "ollama/llama3.1:8b" to "ollama:llama3.1:8b" for UniversalGEPA
             fixed_reflection_lm = reflection_lm.replace("ollama/", "ollama:", 1)
-            console.print(
-                f"   [dim]Converted reflection model format: {reflection_lm} -> {fixed_reflection_lm}[/]"
-            )
-
+            console.print(f"   [dim]Converted reflection model format: {reflection_lm} -> {fixed_reflection_lm}[/]")
+        
         # Create optimizer for field descriptions
         # Get optimizer_kwargs from the parent scope (need to pass it properly)
         # Create optimizer_kwargs for field description optimization
         field_optimizer_kwargs = {
             "metric": field_metric_fn,
             "reflection_lm": fixed_reflection_lm,  # Use fixed format
-            "reflection_minibatch_size": optimizer_kwargs.get(
-                "reflection_minibatch_size", 3
-            ),
+            "reflection_minibatch_size": optimizer_kwargs.get("reflection_minibatch_size", 3),
             "skip_perfect_score": optimizer_kwargs.get("skip_perfect_score", True),
             "use_merge": optimizer_kwargs.get("use_merge", True),
             "failure_score": optimizer_kwargs.get("failure_score", 0.0),
@@ -2676,7 +2720,7 @@ def _optimize_field_descriptions(
             "track_stats": optimizer_kwargs.get("track_stats", False),
             "seed": optimizer_kwargs.get("seed", 42),
         }
-
+        
         # Use smaller budget for field description optimization (it's an addon feature)
         if auto:
             # Use lighter budget for field descriptions
@@ -2692,26 +2736,23 @@ def _optimize_field_descriptions(
             field_optimizer_kwargs["max_metric_calls"] = max(3, max_metric_calls // 3)
         elif max_full_evals:
             field_optimizer_kwargs["max_full_evals"] = max(1, max_full_evals // 2)
-
+        
         from superoptix.optimizers import UniversalGEPA
-
         field_optimizer = UniversalGEPA(**field_optimizer_kwargs)
-
+        
         # Optimize field descriptions
-        console.print(
-            f"   Budget: {field_optimizer_kwargs.get('auto') or field_optimizer_kwargs.get('max_metric_calls') or field_optimizer_kwargs.get('max_full_evals')}"
-        )
+        console.print(f"   Budget: {field_optimizer_kwargs.get('auto') or field_optimizer_kwargs.get('max_metric_calls') or field_optimizer_kwargs.get('max_full_evals')}")
         console.print(f"   This may take a few minutes...\n")
-
+        
         field_result = field_optimizer.compile(
             component=field_component,
             trainset=train_data,
             valset=val_data,
         )
-
+        
         console.print(f"\n   ✅ Field description optimization complete!")
         console.print(f"   Best score: [green]{field_result.best_score:.3f}[/]")
-
+        
         # Parse optimized structured text back to dict
         # Format: "field_name: description\nfield_name2: description2\n..."
         optimized_field_descriptions = {}
@@ -2725,61 +2766,46 @@ def _optimize_field_descriptions(
                     if len(parts) == 2:
                         field_name = parts[0].strip()
                         description = parts[1].strip()
-                        if (
-                            field_name in field_descriptions
-                        ):  # Only keep fields that existed originally
+                        if field_name in field_descriptions:  # Only keep fields that existed originally
                             optimized_field_descriptions[field_name] = description
-
+            
             # Ensure all original fields are present (fallback to original if missing)
             for field_name, original_desc in field_descriptions.items():
                 if field_name not in optimized_field_descriptions:
                     optimized_field_descriptions[field_name] = original_desc
-                    console.print(
-                        f"     [yellow]⚠️  {field_name}: Could not parse, using original[/]"
-                    )
-
-            console.print(
-                f"   Optimized {len(optimized_field_descriptions)} field descriptions"
-            )
+                    console.print(f"     [yellow]⚠️  {field_name}: Could not parse, using original[/]")
+            
+            console.print(f"   Optimized {len(optimized_field_descriptions)} field descriptions")
         except Exception as e:
-            console.print(
-                f"[yellow]⚠️  Failed to parse optimized field descriptions: {e}[/]"
-            )
+            console.print(f"[yellow]⚠️  Failed to parse optimized field descriptions: {e}[/]")
             console.print("   Using original field descriptions")
             optimized_field_descriptions = field_descriptions
-
+        
         # Save optimized field descriptions
         with open(project_root / ".super") as f:
             sys_name = yaml.safe_load(f).get("project")
-
+        
         optimized_dir = project_root / sys_name / "agents" / agent_name / "optimized"
         optimized_dir.mkdir(parents=True, exist_ok=True)
-
-        field_descriptions_file = (
-            optimized_dir / f"{agent_name}_field_descriptions_optimized.json"
-        )
+        
+        field_descriptions_file = optimized_dir / f"{agent_name}_field_descriptions_optimized.json"
         with open(field_descriptions_file, "w") as f:
-            json.dump(
-                {
-                    "optimized_field_descriptions": optimized_field_descriptions,
-                    "original_field_descriptions": field_descriptions,
-                    "best_score": field_result.best_score,
-                    "num_iterations": field_result.num_iterations,
-                },
-                f,
-                indent=2,
-            )
-
+            json.dump({
+                "optimized_field_descriptions": optimized_field_descriptions,
+                "original_field_descriptions": field_descriptions,
+                "best_score": field_result.best_score,
+                "num_iterations": field_result.num_iterations,
+            }, f, indent=2)
+        
         console.print(f"\n   💾 Saved optimized field descriptions to:")
         console.print(f"      {field_descriptions_file}")
-
+        
         return True
-
+        
     except Exception as e:
         console.print(f"[yellow]⚠️  Field description optimization failed: {e}[/]")
         if getattr(globals().get("args"), "verbose", False):
             import traceback
-
             traceback.print_exc()
         return False
 
@@ -2797,11 +2823,11 @@ def _optimize_mcp_tools(
 ) -> bool:
     """
     Optimize MCP tool descriptions using existing MCPAdapter.
-
+    
     This is Phase 1 of a two-phase optimization:
     1. Optimize tool descriptions (this function)
     2. Optimize instructions (UniversalGEPA)
-
+    
     Returns:
         True if optimization succeeded, False otherwise
     """
@@ -2812,50 +2838,46 @@ def _optimize_mcp_tools(
     except ImportError as e:
         console.print(f"[yellow]⚠️  MCPAdapter not available: {e}[/]")
         return False
-
+    
     if not MCPAdapter:
-        console.print(
-            "[yellow]⚠️  MCPAdapter not available. Install with: pip install mcp[/]"
-        )
+        console.print("[yellow]⚠️  MCPAdapter not available. Install with: pip install mcp[/]")
         return False
-
+    
     try:
         spec_data = playbook.get("spec", {})
         mcp_config = spec_data.get("mcp", {})
         mcp_optimization = mcp_config.get("optimization", {})
-
+        
         # Get MCP server configuration
         servers = mcp_config.get("servers", [])
         if not servers:
             console.print("[yellow]⚠️  No MCP servers configured for optimization[/]")
             return False
-
+        
         # Use first server for now (can extend to multiple later)
         server_config = servers[0]
         server_type = server_config.get("type", "stdio").lower()
         config = server_config.get("config", {})
         tool_names = mcp_optimization.get("tool_names", [])  # Which tools to optimize
-
+        
         if not tool_names:
-            console.print(
-                "[yellow]⚠️  No tool_names specified in mcp.optimization.tool_names[/]"
-            )
+            console.print("[yellow]⚠️  No tool_names specified in mcp.optimization.tool_names[/]")
             return False
-
+        
         # Prepare MCPAdapter server params
         server_params = None
         remote_url = None
         remote_transport = "streamable_http"
-
+        
         if server_type == "stdio":
             command = config.get("command")
             args_list = config.get("args", [])
             env = config.get("env")
-
+            
             if not command:
                 console.print("[yellow]⚠️  stdio server requires 'command' in config[/]")
                 return False
-
+            
             server_params = StdioServerParameters(
                 command=command,
                 args=args_list,
@@ -2864,14 +2886,10 @@ def _optimize_mcp_tools(
         elif server_type in ["streamable_http", "sse"]:
             remote_url = config.get("url")
             if not remote_url:
-                console.print(
-                    f"[yellow]⚠️  {server_type} server requires 'url' in config[/]"
-                )
+                console.print(f"[yellow]⚠️  {server_type} server requires 'url' in config[/]")
                 return False
-            remote_transport = (
-                "streamable_http" if server_type == "streamable_http" else "sse"
-            )
-
+            remote_transport = "streamable_http" if server_type == "streamable_http" else "sse"
+        
         # Convert training data to MCP format
         # MCPAdapter expects: user_query, tool_arguments, reference_answer
         mcp_train_data = []
@@ -2879,64 +2897,60 @@ def _optimize_mcp_tools(
             # Extract input query (first input field)
             inputs = example.get("inputs", {})
             user_query = list(inputs.values())[0] if inputs else ""
-
+            
             # Extract expected output (first output field)
             expected = example.get("outputs", {})
             reference_answer = str(list(expected.values())[0]) if expected else ""
-
-            mcp_train_data.append(
-                {
-                    "user_query": user_query,
-                    "tool_arguments": {},  # Can be extracted from scenarios if available
-                    "reference_answer": reference_answer,
-                    "additional_context": {},
-                }
-            )
-
+            
+            mcp_train_data.append({
+                "user_query": user_query,
+                "tool_arguments": {},  # Can be extracted from scenarios if available
+                "reference_answer": reference_answer,
+                "additional_context": {},
+            })
+        
         mcp_val_data = []
         for example in val_data:
             inputs = example.get("inputs", {})
             user_query = list(inputs.values())[0] if inputs else ""
             expected = example.get("outputs", {})
             reference_answer = str(list(expected.values())[0]) if expected else ""
-
-            mcp_val_data.append(
-                {
-                    "user_query": user_query,
-                    "tool_arguments": {},
-                    "reference_answer": reference_answer,
-                    "additional_context": {},
-                }
-            )
-
+            
+            mcp_val_data.append({
+                "user_query": user_query,
+                "tool_arguments": {},
+                "reference_answer": reference_answer,
+                "additional_context": {},
+            })
+        
         # Create metric function
         def mcp_metric_fn(item, output: str) -> float:
             """Simple metric: check if reference answer appears in output."""
             ref = item.get("reference_answer", "").lower()
             out = output.lower()
             return 1.0 if ref in out or out in ref else 0.0
-
+        
         # Create MCPAdapter
         adapter_kwargs = {
             "tool_names": tool_names,
             "task_model": reflection_lm,  # Use reflection model for task execution
             "metric_fn": mcp_metric_fn,
         }
-
+        
         if server_params:
             adapter_kwargs["server_params"] = server_params
         else:
             adapter_kwargs["remote_url"] = remote_url
             adapter_kwargs["remote_transport"] = remote_transport
-
+        
         adapter = MCPAdapter(**adapter_kwargs)
-
+        
         # Prepare seed candidate (initial tool descriptions)
         # For now, use default descriptions (can be improved to load from server)
         seed_candidate = {}
         for tool_name in tool_names:
             seed_candidate[f"tool_description_{tool_name}"] = f"Tool: {tool_name}"
-
+        
         # Prepare budget
         optimize_kwargs = {
             "seed_candidate": seed_candidate,
@@ -2945,7 +2959,7 @@ def _optimize_mcp_tools(
             "adapter": adapter,
             "reflection_lm": reflection_lm,
         }
-
+        
         # Convert auto budget to max_metric_calls (GEPA doesn't support 'auto' parameter)
         if auto:
             # Map auto budget levels to max_metric_calls
@@ -2962,34 +2976,31 @@ def _optimize_mcp_tools(
         else:
             # Default to light budget if nothing specified
             optimize_kwargs["max_metric_calls"] = 50
-
+        
         # Run optimization
-        console.print(
-            f"   Optimizing {len(tool_names)} tool(s): {', '.join(tool_names)}"
-        )
+        console.print(f"   Optimizing {len(tool_names)} tool(s): {', '.join(tool_names)}")
         result = gepa.optimize(**optimize_kwargs)
-
+        
         # Save optimized tool descriptions
         with open(project_root / ".super") as f:
             sys_name = yaml.safe_load(f).get("project")
-
+        
         optimized_dir = project_root / sys_name / "agents" / agent_name / "optimized"
         optimized_dir.mkdir(parents=True, exist_ok=True)
-
+        
         mcp_optimized_file = optimized_dir / f"{agent_name}_mcp_tool_descriptions.json"
         with open(mcp_optimized_file, "w") as f:
             json.dump(result.best_candidate, f, indent=2)
-
+        
         console.print(f"[green]✅ MCP tool optimization complete![/]")
         console.print(f"   Best score: {result.best_score:.3f}")
         console.print(f"   Saved to: {mcp_optimized_file}")
-
+        
         return True
-
+        
     except Exception as e:
         console.print(f"[yellow]⚠️  MCP tool optimization error: {e}[/]")
         import traceback
-
         traceback.print_exc()
         return False
 
@@ -3041,14 +3052,7 @@ def optimize_agent(args):
         agent_dir = project_root / project_name / "agents" / agent_name
 
         # Determine pipeline path based on framework
-        if framework in [
-            "microsoft",
-            "openai",
-            "crewai",
-            "google-adk",
-            "deepagents",
-            "pydantic-ai",
-        ]:
+        if framework in ["microsoft", "openai", "crewai", "google-adk", "deepagents", "pydantic-ai"]:
             # Non-DSPy frameworks use framework suffix
             pipeline_path = (
                 agent_dir
@@ -3090,14 +3094,7 @@ def optimize_agent(args):
         use_universal_gepa = (
             (auto or max_full_evals or max_metric_calls or reflection_lm)
             and framework
-            in [
-                "microsoft",
-                "openai",
-                "crewai",
-                "google-adk",
-                "deepagents",
-                "pydantic-ai",
-            ]
+            in ["microsoft", "openai", "crewai", "google-adk", "deepagents", "pydantic-ai"]
             # Note: DSPy uses its own native GEPA path below (not Universal GEPA)
         )
 

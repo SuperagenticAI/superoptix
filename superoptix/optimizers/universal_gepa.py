@@ -507,46 +507,15 @@ class UniversalGEPA:
 
                     # Detect Ollama models without prefix
                     # Check if model string lacks a known provider prefix
-                    known_providers = [
-                        "ollama",
-                        "openai",
-                        "anthropic",
-                        "google",
-                        "bedrock",
-                        "azure",
-                        "cohere",
-                        "mistral",
-                        "deepseek",
-                        "groq",
-                        "together",
-                        "fireworks",
-                        "litellm",
-                        "gateway",
-                    ]
-                    has_provider_prefix = any(
-                        model_name.startswith(f"{p}:") for p in known_providers
-                    )
-
+                    known_providers = ["ollama", "openai", "anthropic", "google", "bedrock", "azure", "cohere", "mistral", "deepseek", "groq", "together", "fireworks", "litellm", "gateway"]
+                    has_provider_prefix = any(model_name.startswith(f"{p}:") for p in known_providers)
+                    
                     # If no prefix and model contains ':' (like llama3.1:8b), assume Ollama
                     if not has_provider_prefix and ":" in model_name:
                         # Check if it looks like an Ollama model (has version suffix like :8b, :7b, etc.)
                         # or if it's a common Ollama model name
-                        ollama_indicators = [
-                            ":8b",
-                            ":7b",
-                            ":13b",
-                            ":70b",
-                            "llama",
-                            "mistral",
-                            "codellama",
-                            "phi",
-                            "gemma",
-                            "qwen",
-                        ]
-                        if any(
-                            indicator in model_name.lower()
-                            for indicator in ollama_indicators
-                        ):
+                        ollama_indicators = [":8b", ":7b", ":13b", ":70b", "llama", "mistral", "codellama", "phi", "gemma", "qwen"]
+                        if any(indicator in model_name.lower() for indicator in ollama_indicators):
                             model_name = f"ollama:{model_name}"
 
                     if model_name.startswith("ollama:"):

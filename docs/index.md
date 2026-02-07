@@ -11,7 +11,7 @@
   <a href="quick-start/" style="background: #1976d2; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 5px; display: inline-block; font-weight: bold;">🚀 Quick Start</a>
   <a href="introduction/" style="background: #424242; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 5px; display: inline-block; font-weight: bold;">📖 Learn More</a>
   <a href="guides/" style="background: #424242; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 5px; display: inline-block; font-weight: bold;">📚 Guides</a>
-  <a href="https://superagenticai.github.io/superoptix/" style="background: #424242; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 5px; display: inline-block; font-weight: bold;">🌐 Website</a>
+  <a href="https://superagenticai.github.io/superoptix-ai/" style="background: #424242; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 5px; display: inline-block; font-weight: bold;">🌐 Website</a>
 </div>
 
 ---

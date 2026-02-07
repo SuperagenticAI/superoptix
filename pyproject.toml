@@ -7,7 +7,7 @@ allow-direct-references = true
 
 [project]
 name = "superoptix"
-version = "0.2.7"
+version = "0.2.3"
 description = "Full Stack Agentic AI Optimization Framework - Universal GEPA optimizer for major frameworks"
 authors = [
     {name = "Superagentic AI", email = "hello@super-agentic.ai"},
@@ -43,7 +43,7 @@ dependencies = [
     "pyyaml",
     "numpy",
     "rich",
-    "typer-slim",
+    "typer",
     "jinja2",
     "requests",
     "transformers",
@@ -95,6 +95,11 @@ frameworks-pydantic-ai = [
     "pydantic-ai",
 ]
 
+# Claude Agent SDK
+frameworks-claude-sdk = [
+    "claude-agent-sdk",
+]
+
 # CrewAI - Conflicts with DSPy due to json-repair version
 # CrewAI 1.2.0 requires json-repair==0.25.2
 # DSPy 3.0.4b1 requires json-repair>=0.30.0
@@ -121,6 +126,7 @@ frameworks = [
     "azure-identity",
     "deepagents",  # 0.2.0+ required for backend abstraction
     "pydantic-ai",  # Pydantic AI framework
+    "claude-agent-sdk",
     # NOTE: crewai==1.2.0 excluded - conflicts with DSPy
     # For CrewAI: pip install superoptix[frameworks-crewai]
 ]
@@ -321,6 +327,7 @@ all = [
     "azure-identity",
     "deepagents",  # 0.2.0+ required for backend abstraction
     "pydantic-ai",  # Pydantic AI framework
+    "claude-agent-sdk",
     # crewai==1.2.0 - EXCLUDED (conflicts with DSPy)
     # logfire==4.15.0 - EXCLUDED (conflicts with google-adk's opentelemetry-sdk version)
     # Existing dependencies
@@ -360,6 +367,7 @@ all-with-mlx = [
     "azure-identity",
     "deepagents",  # 0.2.0+ required for backend abstraction
     "pydantic-ai",  # Pydantic AI framework
+    "claude-agent-sdk",
     # crewai==1.2.0 - EXCLUDED (conflicts with DSPy)
     # logfire==4.15.0 - EXCLUDED (conflicts with google-adk's opentelemetry-sdk version)
     # Existing dependencies
@@ -388,9 +396,9 @@ all-with-mlx = [
 
 [project.urls]
 Homepage = "https://superoptix.ai"
-Documentation = "https://superagenticai.github.io/superoptix"
-Repository = "https://github.com/SuperagenticAI/superoptix"
-"Bug Tracker" = "https://github.com/SuperagenticAI/superoptix/issues"
+Documentation = "https://superagenticai.github.io/superoptix-ai"
+Repository = "https://github.com/SuperagenticAI/superoptix-ai"
+"Bug Tracker" = "https://github.com/SuperagenticAI/superoptix-ai/issues"
 Support = "https://superoptix.ai"
 "Download" = "https://pypi.org/project/superoptix/#files"
 

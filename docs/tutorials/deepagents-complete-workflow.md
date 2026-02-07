@@ -1638,7 +1638,7 @@ By the end of this tutorial, you should be able to:
 
 ### Get Help
 
-- 📖 **Documentation:** [https://superagenticai.github.io/superoptix/](https://superagenticai.github.io/superoptix/)
+- 📖 **Documentation:** [https://superagenticai.github.io/superoptix-ai/](https://superagenticai.github.io/superoptix-ai/)
 - 📧 **Email:** hello@super-agentic.ai
 - 🌐 **Website:** [https://superoptix.ai](https://superoptix.ai)
 

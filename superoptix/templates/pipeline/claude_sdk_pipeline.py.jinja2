@@ -1,0 +1,488 @@
+"""
+{{ agent_name | to_pascal_case }} Agent - Claude Agent SDK Implementation
+
+Auto-generated from SuperSpec playbook using SuperOptiX compiler.
+Framework: Claude Agent SDK
+Generated: {{ timestamp }}
+
+SuperSpec Metadata:
+  Name: {{ metadata.name }}
+  Version: {{ metadata.version }}
+  Description: {{ metadata.description }}
+  Framework: Claude Agent SDK
+"""
+
+from typing import List, Dict, Any, Optional, Tuple
+import asyncio
+import os
+
+# Claude Agent SDK imports
+try:
+    from claude_agent_sdk import (
+        ClaudeAgentOptions,
+        ClaudeSDKClient,
+        query,
+        AssistantMessage,
+        ResultMessage,
+        TextBlock,
+        ToolUseBlock,
+        ToolResultBlock,
+        ThinkingBlock,
+    )
+    CLAUDE_SDK_AVAILABLE = True
+except ImportError as e:
+    CLAUDE_SDK_AVAILABLE = False
+    print(f"⚠️  Claude Agent SDK not available: {e}")
+    print("⚠️  Install with: pip install claude-agent-sdk")
+    print("⚠️  Editable install: pip install -e '.[frameworks-claude-sdk]'")
+
+# MCP Server support for in-process tools
+try:
+    from claude_agent_sdk import tool, create_sdk_mcp_server, SdkMcpTool
+    MCP_SDK_AVAILABLE = True
+except ImportError:
+    MCP_SDK_AVAILABLE = False
+
+from superoptix.core.base_component import BaseComponent
+
+
+class {{ agent_name | to_pascal_case }}Component(BaseComponent):
+    """
+    BaseComponent wrapper for Claude Agent SDK - {{ metadata.description }}
+
+    This component wraps a Claude Agent SDK agent and makes it compatible with
+    SuperOptiX's Universal GEPA optimizer.
+
+    Optimizable Variable: system_prompt (the agent's system instructions)
+
+    Framework: Claude Agent SDK
+    Input: {{ spec.input_fields | map(attribute='name') | list | default(['query']) }}
+    Output: {{ spec.output_fields | map(attribute='name') | list | default(['response']) }}
+    """
+
+    def __init__(
+        self,
+        system_prompt: Optional[str] = None,
+        model_config: Optional[Dict] = None,
+        playbook_path: Optional[str] = None,
+        spec_data: Optional[Dict] = None,
+        **kwargs
+    ):
+        """
+        Initialize Claude Agent SDK component.
+
+        Args:
+            system_prompt: Agent system prompt - optimizable by GEPA!
+            model_config: Model configuration dict (model, provider)
+            playbook_path: Path to playbook YAML (for MCP config access)
+            spec_data: Playbook spec data (alternative to playbook_path)
+            **kwargs: Additional configuration
+        """
+        # Build default system prompt from playbook persona
+        default_system_prompt = self._build_default_system_prompt()
+
+        # Initialize BaseComponent with system_prompt as the optimizable variable
+        super().__init__(
+            name="{{ agent_name }}",
+            description="{{ metadata.description | default('Claude Agent SDK agent') }}",
+            input_fields={{ spec.input_fields | map(attribute='name') | list | default(['query']) | tojson }},
+            output_fields={{ spec.output_fields | map(attribute='name') | list | default(['response']) | tojson }},
+            variable=system_prompt or default_system_prompt,
+            variable_type="system_prompt",
+            framework="claude-sdk",
+            config=model_config,
+        )
+
+        # Store configuration
+        self._model_config = model_config or {}
+        self._spec_data = spec_data or {}
+        self._playbook_path = playbook_path
+
+        # Load model from config or playbook
+        if not self._model_config.get("model"):
+            self._load_model_from_spec()
+
+    def _build_default_system_prompt(self) -> str:
+        """Build default system prompt from playbook persona."""
+        parts = []
+        {% if spec.persona.role %}
+        parts.append("""{{ spec.persona.role | replace('"', '\\"') | replace('\n', '\\n') }}""")
+        {% endif %}
+        {% if spec.persona.goal %}
+        parts.append("\nGoal: {{ spec.persona.goal | replace('"', '\\"') | replace('\n', '\\n') }}")
+        {% endif %}
+        {% if spec.persona.backstory %}
+        parts.append("\nBackstory: {{ spec.persona.backstory | replace('"', '\\"') | replace('\n', '\\n') }}")
+        {% endif %}
+        {% if spec.persona.instructions %}
+        parts.append("\n{{ spec.persona.instructions | replace('"', '\\"') | replace('\n', '\\n') }}")
+        {% endif %}
+        return "".join(parts) if parts else "You are a helpful AI assistant."
+
+    def _load_model_from_spec(self) -> None:
+        """Load model configuration from spec data."""
+        if self._spec_data and "language_model" in self._spec_data:
+            lm = self._spec_data["language_model"]
+            self._model_config = {
+                "model": lm.get("model", "claude-sonnet-4-5"),
+                "provider": lm.get("provider", "anthropic"),
+            }
+
+    def _validate_runtime_config(self) -> None:
+        """
+        Validate provider/model/auth configuration for Claude SDK runtime.
+
+        This pipeline does not auto-modify playbooks. If configuration is invalid,
+        users should edit the playbook and recompile.
+        """
+        provider = str(self._model_config.get("provider", "anthropic")).lower()
+        model = str(self._model_config.get("model", "claude-sonnet-4-5")).strip()
+
+        # Third-party auth toggles supported by Claude SDK
+        use_bedrock = os.getenv("CLAUDE_CODE_USE_BEDROCK") == "1"
+        use_vertex = os.getenv("CLAUDE_CODE_USE_VERTEX") == "1"
+        use_foundry = os.getenv("CLAUDE_CODE_USE_FOUNDRY") == "1"
+
+        # Advanced override for Anthropic-compatible endpoints (for example, local gateways)
+        anthropic_base_url = os.getenv("ANTHROPIC_BASE_URL", "").strip()
+        anthropic_api_key = os.getenv("ANTHROPIC_API_KEY", "").strip()
+
+        supported_providers = {
+            "anthropic",
+            "bedrock",
+            "vertex",
+            "foundry",
+            "azure",
+            "aws",
+            "gcp",
+        }
+
+        if provider not in supported_providers:
+            raise ValueError(
+                "Unsupported 'spec.language_model.provider' for Claude SDK pipeline: "
+                f"'{provider}'. Use 'anthropic' for direct Anthropic API. "
+                "Then edit your playbook and recompile."
+            )
+
+        # Direct Anthropic mode: ensure model looks like Claude model unless an explicit
+        # Anthropic-compatible base URL override is set.
+        if provider == "anthropic" and not anthropic_base_url and not model.startswith("claude-"):
+            raise ValueError(
+                "Claude SDK pipeline expects an Anthropic Claude model when "
+                "provider='anthropic'. Got model: "
+                f"'{model}'. Update 'spec.language_model.model' to a current Claude model "
+                "(for example: 'claude-opus-4-5', 'claude-sonnet-4-5', or "
+                "'claude-haiku-4-5'), "
+                "then recompile."
+            )
+
+        # Provider-specific auth validation.
+        if provider == "anthropic" and not (anthropic_api_key or anthropic_base_url):
+            raise EnvironmentError(
+                "Claude SDK authentication is not configured for provider='anthropic'. "
+                "Set ANTHROPIC_API_KEY (or ANTHROPIC_BASE_URL for an Anthropic-compatible "
+                "endpoint), then run again."
+            )
+        if provider in {"bedrock", "aws"} and not use_bedrock:
+            raise EnvironmentError(
+                "provider='bedrock' requires CLAUDE_CODE_USE_BEDROCK=1 and AWS credentials."
+            )
+        if provider in {"vertex", "gcp"} and not use_vertex:
+            raise EnvironmentError(
+                "provider='vertex' requires CLAUDE_CODE_USE_VERTEX=1 and Google Cloud credentials."
+            )
+        if provider in {"foundry", "azure"} and not use_foundry:
+            raise EnvironmentError(
+                "provider='foundry'/'azure' requires CLAUDE_CODE_USE_FOUNDRY=1 and Azure credentials."
+            )
+
+    def _create_options(self) -> "ClaudeAgentOptions":
+        """Create ClaudeAgentOptions with current system_prompt."""
+        if not CLAUDE_SDK_AVAILABLE:
+            raise ImportError("Claude Agent SDK not installed")
+        self._validate_runtime_config()
+
+        # Build MCP servers configuration
+        mcp_servers = {}
+        allowed_tools = []
+
+        {% if spec.mcp and spec.mcp.enabled %}
+        # Configure MCP servers from playbook
+        {% for server in spec.mcp.servers %}
+        {% if server.type == 'stdio' %}
+        mcp_servers["{{ server.name }}"] = {
+            "type": "stdio",
+            "command": "{{ server.config.command }}",
+            "args": {{ server.config.args | default([]) | tojson }},
+            {% if server.config.env %}
+            "env": {{ server.config.env | tojson }},
+            {% endif %}
+        }
+        {% elif server.type == 'http' %}
+        mcp_servers["{{ server.name }}"] = {
+            "type": "http",
+            "url": "{{ server.config.url }}",
+            {% if server.config.headers %}
+            "headers": {{ server.config.headers | tojson }},
+            {% endif %}
+        }
+        {% elif server.type == 'sse' %}
+        mcp_servers["{{ server.name }}"] = {
+            "type": "sse",
+            "url": "{{ server.config.url }}",
+            {% if server.config.headers %}
+            "headers": {{ server.config.headers | tojson }},
+            {% endif %}
+        }
+        {% endif %}
+        {% endfor %}
+        {% endif %}
+
+        # Get model from config
+        model = self._model_config.get("model", "claude-sonnet-4-5")
+
+        return ClaudeAgentOptions(
+            system_prompt=self.variable,  # GEPA optimizes this!
+            model=model,
+            mcp_servers=mcp_servers if mcp_servers else None,
+            allowed_tools=allowed_tools if allowed_tools else None,
+            max_turns={{ spec.language_model.max_turns | default(10) }},
+            {% if spec.language_model.max_budget_usd %}
+            max_budget_usd={{ spec.language_model.max_budget_usd }},
+            {% endif %}
+        )
+
+    async def forward(self, **inputs: Any) -> Dict[str, Any]:
+        """
+        Execute Claude Agent SDK query.
+
+        This method uses the current system_prompt (self.variable) to create
+        a Claude agent and process the input.
+
+        Args:
+            **inputs: Input fields as keyword arguments
+
+        Returns:
+            Dict with output field(s)
+        """
+        if not CLAUDE_SDK_AVAILABLE:
+            raise ImportError(
+                "Claude Agent SDK not installed. "
+                "Install with: pip install claude-agent-sdk "
+                "or pip install -e '.[frameworks-claude-sdk]'"
+            )
+
+        # Get input text from first input field
+        {% if spec.input_fields %}
+        input_text = inputs.get("{{ spec.input_fields[0].name }}", "")
+        {% else %}
+        input_text = inputs.get("query", str(inputs))
+        {% endif %}
+
+        # Create options with current system_prompt
+        options = self._create_options()
+
+        # Execute query using simple query() function
+        response_parts = []
+        tool_calls = []
+
+        async for message in query(prompt=input_text, options=options):
+            if isinstance(message, AssistantMessage):
+                for block in message.content:
+                    if isinstance(block, TextBlock):
+                        response_parts.append(block.text)
+                    elif isinstance(block, ToolUseBlock):
+                        tool_calls.append({
+                            "id": block.id,
+                            "name": block.name,
+                            "input": block.input
+                        })
+                    elif isinstance(block, ThinkingBlock):
+                        # Extended thinking (if enabled)
+                        pass
+            elif isinstance(message, ResultMessage):
+                # Query completion metadata can be handled here if needed.
+                # Do not break early; allow the async iterator to close naturally
+                # in the same task to avoid cancel-scope exit errors.
+                pass
+
+        # Combine response
+        response_text = "\n".join(response_parts)
+
+        # Return in expected output format
+        {% if spec.output_fields %}
+        return {
+            "{{ spec.output_fields[0].name }}": response_text,
+            {% if spec.output_fields | length > 1 %}
+            "tool_calls": tool_calls,
+            {% endif %}
+        }
+        {% else %}
+        return {"response": response_text}
+        {% endif %}
+
+    def update(self, new_variable: Any) -> None:
+        """
+        Update system_prompt (called by GEPA optimizer).
+
+        Args:
+            new_variable: New system prompt value
+        """
+        super().update(new_variable)
+
+
+# ======================================================================
+# Factory Functions
+# ======================================================================
+
+def create_{{ agent_name | to_snake_case }}_agent(
+    system_prompt: Optional[str] = None,
+    model_config: Optional[Dict] = None,
+    **kwargs
+) -> {{ agent_name | to_pascal_case }}Component:
+    """
+    Factory function to create {{ agent_name | to_pascal_case }} agent.
+
+    Args:
+        system_prompt: Optional custom system prompt (overrides playbook)
+        model_config: Optional model configuration
+        **kwargs: Additional configuration
+
+    Returns:
+        {{ agent_name | to_pascal_case }}Component instance
+    """
+    return {{ agent_name | to_pascal_case }}Component(
+        system_prompt=system_prompt,
+        model_config=model_config,
+        **kwargs
+    )
+
+
+# ======================================================================
+# Pipeline Class (SuperOptiX Workflow Integration)
+# ======================================================================
+
+class {{ agent_name | to_pascal_case }}Pipeline:
+    """
+    Claude Agent SDK pipeline with SuperOptiX workflow support.
+
+    Provides:
+    - run(): Execute the agent
+    - evaluate(): Run BDD scenarios
+    - optimize_with_gepa(): Run GEPA optimization
+    """
+
+    def __init__(self, playbook_path: Optional[str] = None):
+        """
+        Initialize pipeline.
+
+        Args:
+            playbook_path: Path to SuperSpec YAML playbook
+        """
+        self.playbook_path = playbook_path
+        self.component = {{ agent_name | to_pascal_case }}Component(
+            playbook_path=playbook_path
+        )
+
+    async def run(self, query: Optional[str] = None, **inputs) -> Dict[str, Any]:
+        """
+        Run the agent with the given input.
+
+        Args:
+            query: Input query (shorthand for first input field)
+            **inputs: All input fields
+
+        Returns:
+            Dict with output fields
+        """
+        if query is not None:
+            {% if spec.input_fields %}
+            inputs["{{ spec.input_fields[0].name }}"] = query
+            {% else %}
+            inputs["query"] = query
+            {% endif %}
+
+        return await self.component.forward(**inputs)
+
+    def run_sync(self, query: Optional[str] = None, **inputs) -> Dict[str, Any]:
+        """
+        Synchronous wrapper for run().
+
+        Args:
+            query: Input query
+            **inputs: All input fields
+
+        Returns:
+            Dict with output fields
+        """
+        return asyncio.run(self.run(query, **inputs))
+
+    def evaluate(self, threshold: float = 0.7) -> Dict[str, Any]:
+        """
+        Run BDD evaluation scenarios.
+
+        Args:
+            threshold: Minimum score threshold
+
+        Returns:
+            Evaluation results
+        """
+        # BDD evaluation would be implemented here
+        return {
+            "status": "not_implemented",
+            "message": "BDD evaluation requires scenario definitions"
+        }
+
+    def optimize_with_gepa(self, auto: str = "medium") -> Dict[str, Any]:
+        """
+        Run GEPA optimization on system_prompt.
+
+        Args:
+            auto: Optimization level ("light", "medium", "heavy")
+
+        Returns:
+            Optimization results
+        """
+        try:
+            from superoptix.optimizers.universal_gepa import UniversalGEPA
+
+            optimizer = UniversalGEPA(auto=auto)
+            result = optimizer.optimize(self.component)
+            return {
+                "status": "success",
+                "original_prompt": result.original_variable,
+                "optimized_prompt": result.optimized_variable,
+                "improvement": result.improvement,
+            }
+        except ImportError:
+            return {
+                "status": "error",
+                "message": "UniversalGEPA not available"
+            }
+
+
+# ======================================================================
+# CLI Entry Point
+# ======================================================================
+
+def main():
+    """CLI entry point for running the agent."""
+    import sys
+
+    pipeline = {{ agent_name | to_pascal_case }}Pipeline()
+
+    if len(sys.argv) > 1:
+        query = " ".join(sys.argv[1:])
+        result = pipeline.run_sync(query=query)
+        {% if spec.output_fields %}
+        print(result.get("{{ spec.output_fields[0].name }}", result))
+        {% else %}
+        print(result.get("response", result))
+        {% endif %}
+    else:
+        print("Usage: python {{ agent_name }}_claude_sdk_pipeline.py <query>")
+        print("Example: python {{ agent_name }}_claude_sdk_pipeline.py 'Hello, how are you?'")
+
+
+if __name__ == "__main__":
+    main()

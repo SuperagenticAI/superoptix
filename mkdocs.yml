@@ -184,6 +184,7 @@ nav:
       - '⚡ Optimas': examples/agents/optimas-examples.md
       - '⚡ Optimas Guide': guides/optimas-integration.md
       - '🌉 StackOne Integration': guides/stackone-integration.md
+      - '🤖 StackOne + Claude SDK': guides/stackone-claude-sdk.md
       - '🚥 ChromaDB': examples/agents/rag-chroma-demo.md
       - '🍀 LanceDB': examples/agents/rag-lancedb-demo.md
       - '🔰 Weaviate': examples/agents/weaviate-demo.md

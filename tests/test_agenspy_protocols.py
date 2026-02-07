@@ -150,7 +150,7 @@ class TestMCPClient:
 class TestProtocolAgent:
     """Test ProtocolAgent base class."""
 
-    class MockProtocolAgent(ProtocolAgent):
+    class TestAgent(ProtocolAgent):
         """Test agent implementation."""
 
         def forward(self, query: str):
@@ -159,7 +159,7 @@ class TestProtocolAgent:
 
     def test_agent_initialization(self):
         """Test agent initialization."""
-        agent = self.MockProtocolAgent(agent_id="test_agent")
+        agent = self.TestAgent(agent_id="test_agent")
 
         assert agent.agent_id == "test_agent"
         assert len(agent.protocols) == 0
@@ -167,7 +167,7 @@ class TestProtocolAgent:
 
     def test_add_protocol(self):
         """Test adding protocol to agent."""
-        agent = self.MockProtocolAgent(agent_id="test")
+        agent = self.TestAgent(agent_id="test")
         protocol = MCPClient(server_url="mcp://test")
         protocol.connect()
 
@@ -178,7 +178,7 @@ class TestProtocolAgent:
 
     def test_get_protocol_by_type(self):
         """Test getting protocol by type."""
-        agent = self.MockProtocolAgent(agent_id="test")
+        agent = self.TestAgent(agent_id="test")
         protocol = MCPClient(server_url="mcp://test")
         protocol.connect()
         agent.add_protocol(protocol)
@@ -194,7 +194,7 @@ class TestProtocolAgent:
 
     def test_get_agent_info(self):
         """Test getting agent info."""
-        agent = self.MockProtocolAgent(agent_id="test")
+        agent = self.TestAgent(agent_id="test")
         protocol = MCPClient(server_url="mcp://test")
         protocol.connect()
         agent.add_protocol(protocol)
@@ -207,7 +207,7 @@ class TestProtocolAgent:
 
     def test_agent_cleanup(self):
         """Test agent cleanup."""
-        agent = self.MockProtocolAgent(agent_id="test")
+        agent = self.TestAgent(agent_id="test")
         protocol = MCPClient(server_url="mcp://test")
         protocol.connect()
         agent.add_protocol(protocol)

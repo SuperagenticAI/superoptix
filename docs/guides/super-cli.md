@@ -784,8 +784,8 @@ SuperOptiX › /ask show me an example of RAG optimization
 Super CLI is in beta - we want your input!
 
 - 💬 Join our Discord: [SuperagenticAI](https://discord.gg/superagentic)
-- 🐛 Report issues: [GitHub Issues](https://github.com/SuperagenticAI/superoptix/issues)
-- 💡 Feature requests: [Discussions](https://github.com/SuperagenticAI/superoptix/discussions)
+- 🐛 Report issues: [GitHub Issues](https://github.com/SuperagenticAI/superoptix-ai/issues)
+- 💡 Feature requests: [Discussions](https://github.com/SuperagenticAI/superoptix-ai/discussions)
 
 ---
 

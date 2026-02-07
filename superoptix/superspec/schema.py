@@ -813,8 +813,8 @@ class SuperSpecXSchema:
                     "type": "boolean",
                     "default": False,
                     "description": "Enable GEPA optimization of Pydantic model field descriptions (output_fields). "
-                    "Optimizes Field(description=...) for better structured data extraction. "
-                    "Requires output_fields to be defined. Opt-in feature, defaults to False.",
+                                  "Optimizes Field(description=...) for better structured data extraction. "
+                                  "Requires output_fields to be defined. Opt-in feature, defaults to False.",
                 },
                 "optimizer": {
                     "type": "object",

@@ -498,4 +498,4 @@ super observe mcp-metrics mcp_demo
 - [MCP Protocol Specification](https://modelcontextprotocol.io/)
 - [MCP Server Development](../guides/protocol-first-agents.md)
 - [GEPA Optimization Guide](../guides/gepa-optimization.md)
-- [Community Discord](https://Documentation: https://superagenticai.github.io/superoptix/)
+- [Community Discord](https://Documentation: https://superagenticai.github.io/superoptix-ai/)

@@ -1,0 +1,44 @@
+# SuperOptiX Blueprint for StackOne HRIS Agent
+name: StackOne HRIS Specialist
+id: stackone_hris_agent
+version: 1.0.0
+description: A specialized agent for Human Resources tasks using StackOne's HRIS integration.
+framework: dspy
+tier: genies # Tool-using agent
+
+# Model Configuration
+model:
+  provider: openai
+  name: gpt-4o
+  temperature: 0.0
+
+# Agent Instructions (Optimizable by GEPA)
+instructions: |
+  You are an expert HR Specialist with access to the company's HRIS system via StackOne.
+  Your goal is to assist users with employee information, employment details, and team structure.
+  
+  Use the provided HRIS tools to retrieve accurate information. 
+  Always verify the employee ID or name before providing sensitive details.
+  If a user asks for information you cannot find, clearly state what search parameters you used.
+
+# Tool Configuration
+tools:
+  - source: stackone
+    category: hris
+    filter: 
+      - hris_get_employee
+      - hris_list_employees
+      - hris_get_employment
+      - hris_list_employments
+      - hris_get_team
+
+# Optimization Configuration
+optimization:
+  optimizer: GEPA
+  metric: hris_accuracy
+  auto: medium # Run ~10-15 optimization iterations
+
+# Evaluation Dataset (Linked to Benchmark)
+dataset:
+  benchmark: stackone.HRISBenchmark
+  min_score: 0.9

@@ -939,47 +939,17 @@ class PydanticAIFrameworkAdapter(FrameworkAdapter):
             lm = spec["language_model"]
             model_str = lm.get("model", "llama3.1:8b")
             provider = lm.get("provider", "ollama").lower()
-
+            
             # Ensure model has ollama: prefix if provider is ollama or model lacks prefix
-            known_providers = [
-                "ollama",
-                "openai",
-                "anthropic",
-                "google",
-                "bedrock",
-                "azure",
-                "cohere",
-                "mistral",
-                "deepseek",
-                "groq",
-                "together",
-                "fireworks",
-                "litellm",
-                "gateway",
-            ]
-            has_provider_prefix = any(
-                model_str.startswith(f"{p}:") for p in known_providers
-            )
-
+            known_providers = ["ollama", "openai", "anthropic", "google", "bedrock", "azure", "cohere", "mistral", "deepseek", "groq", "together", "fireworks", "litellm", "gateway"]
+            has_provider_prefix = any(model_str.startswith(f"{p}:") for p in known_providers)
+            
             if not has_provider_prefix and (provider == "ollama" or ":" in model_str):
                 # Add ollama: prefix if it looks like an Ollama model
-                ollama_indicators = [
-                    ":8b",
-                    ":7b",
-                    ":13b",
-                    ":70b",
-                    "llama",
-                    "mistral",
-                    "codellama",
-                    "phi",
-                    "gemma",
-                    "qwen",
-                ]
-                if any(
-                    indicator in model_str.lower() for indicator in ollama_indicators
-                ):
+                ollama_indicators = [":8b", ":7b", ":13b", ":70b", "llama", "mistral", "codellama", "phi", "gemma", "qwen"]
+                if any(indicator in model_str.lower() for indicator in ollama_indicators):
                     model_str = f"ollama:{model_str}"
-
+            
             model_config = {
                 "model": model_str,
                 "provider": provider,
@@ -989,14 +959,14 @@ class PydanticAIFrameworkAdapter(FrameworkAdapter):
 
         # Extract spec for MCP configuration access
         spec_data = playbook.get("spec", {})
-
+        
         # Create and return instance with model_config and spec
         # Note: Component will load spec from playbook_path if provided, but we also pass it
         # for cases where playbook_path might not be available (temp compilation)
         return component_class(
             model_config=model_config,
             spec_data=spec_data,  # Pass spec directly for MCP config access
-            **kwargs,
+            **kwargs
         )
 
     @classmethod
@@ -1014,9 +984,168 @@ class PydanticAIFrameworkAdapter(FrameworkAdapter):
                 parts.append(f"\nGoal: {persona['goal']}")
             if persona.get("backstory"):
                 parts.append(f"\nBackstory: {persona['backstory']}")
-            instructions = (
-                "\n".join(parts) if parts else "You are a helpful AI assistant."
-            )
+            instructions = "\n".join(parts) if parts else "You are a helpful AI assistant."
+        return instructions
+
+
+class ClaudeAgentSDKFrameworkAdapter(FrameworkAdapter):
+    """Adapter for Claude Agent SDK framework.
+
+    Claude Agent SDK provides powerful agentic capabilities with:
+    - In-process MCP tool servers
+    - Bidirectional sessions with ClaudeSDKClient
+    - Hook system for tool permission and control
+    - Async-first architecture
+
+    Optimizable Variable: system_prompt (the agent's system instructions)
+    """
+
+    framework_name = "claude-sdk"
+    requires_async = True  # Claude Agent SDK is async-first
+
+    @classmethod
+    def compile_from_playbook(cls, playbook: Dict[str, Any], output_path: str) -> str:
+        """Compile SuperSpec to Claude Agent SDK code."""
+        from pathlib import Path
+        from jinja2 import Environment, FileSystemLoader
+        from datetime import datetime
+
+        # Get template
+        template_dir = Path(__file__).parent.parent / "templates" / "pipeline"
+        env = Environment(
+            loader=FileSystemLoader(template_dir),
+            trim_blocks=True,
+            lstrip_blocks=True,
+        )
+
+        # Add custom filters
+        def to_pascal_case(text: str) -> str:
+            return "".join(word.capitalize() for word in text.split("_"))
+
+        def to_snake_case(text: str) -> str:
+            import re
+            text = text.strip()
+            text = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", text)
+            text = re.sub("([a-z0-9])([A-Z])", r"\1_\2", text)
+            text = re.sub(r"[^a-zA-Z0-9_]", "_", text)
+            text = text.lower()
+            text = re.sub(r"_+", "_", text)
+            text = text.strip("_")
+            if text and text[0].isdigit():
+                text = f"field_{text}"
+            return text or "field"
+
+        env.filters["to_pascal_case"] = to_pascal_case
+        env.filters["to_snake_case"] = to_snake_case
+
+        # Load template
+        template = env.get_template("claude_sdk_pipeline.py.jinja2")
+
+        # Extract agent name from output path
+        output_file = Path(output_path)
+        filename = output_file.stem
+        if "_claude_sdk_pipeline" in filename:
+            agent_name = filename.replace("_claude_sdk_pipeline", "")
+        else:
+            agent_name = filename.replace("_pipeline", "")
+
+        if not agent_name or agent_name == "pipeline":
+            metadata_name = playbook.get("metadata", {}).get("name", "agent")
+            agent_name = to_snake_case(metadata_name)
+        else:
+            agent_name = to_snake_case(agent_name)
+
+        # Prepare context
+        context = {
+            "agent_name": agent_name,
+            "metadata": playbook.get("metadata", {}),
+            "spec": playbook.get("spec", {}),
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        }
+
+        # Render template
+        code = template.render(**context)
+
+        # Write to output path
+        output_file = Path(output_path)
+        output_file.parent.mkdir(parents=True, exist_ok=True)
+        output_file.write_text(code)
+
+        return str(output_file)
+
+    @classmethod
+    def create_component(cls, playbook: Dict[str, Any], **kwargs) -> BaseComponent:
+        """Create BaseComponent wrapping Claude Agent SDK agent."""
+        import importlib.util
+        import sys
+        from pathlib import Path
+        import tempfile
+
+        # Compile to temp location
+        temp_dir = Path(tempfile.mkdtemp())
+        agent_name = playbook.get("metadata", {}).get("name", "agent")
+        output_path = temp_dir / f"{agent_name}_claude_sdk_pipeline.py"
+        cls.compile_from_playbook(playbook, str(output_path))
+
+        # Import the generated module
+        module_name = agent_name.replace("-", "_")
+        spec = importlib.util.spec_from_file_location(module_name, output_path)
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[module_name] = module
+        spec.loader.exec_module(module)
+
+        # Convert names
+        def to_snake_case(text: str) -> str:
+            import re
+            text = text.strip()
+            text = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", text)
+            text = re.sub("([a-z0-9])([A-Z])", r"\1_\2", text)
+            text = re.sub(r"[^a-zA-Z0-9_]", "_", text)
+            text = text.lower()
+            text = re.sub(r"_+", "_", text)
+            text = text.strip("_")
+            return text or "agent"
+
+        def to_pascal_case(text: str) -> str:
+            return "".join(word.capitalize() for word in text.split("_"))
+
+        agent_name_snake = to_snake_case(agent_name)
+        agent_name_pascal = to_pascal_case(agent_name_snake)
+
+        # Get the component class
+        component_class = getattr(module, f"{agent_name_pascal}Component")
+
+        # Extract model config from playbook
+        spec_data = playbook.get("spec", {})
+        model_config = {}
+        if "language_model" in spec_data:
+            lm = spec_data["language_model"]
+            model_config = {
+                "model": lm.get("model", "claude-sonnet-4-5"),
+                "provider": lm.get("provider", "anthropic"),
+            }
+
+        return component_class(
+            model_config=model_config,
+            spec_data=spec_data,
+            **kwargs
+        )
+
+    @classmethod
+    def get_optimizable_variable(cls, playbook: Dict[str, Any]) -> str:
+        """Extract Claude SDK system_prompt as the optimizable variable."""
+        persona = playbook.get("spec", {}).get("persona", {})
+        # Use instructions if available, otherwise build from role/goal/backstory
+        instructions = persona.get("instructions", "")
+        if not instructions:
+            parts = []
+            if persona.get("role"):
+                parts.append(persona["role"])
+            if persona.get("goal"):
+                parts.append(f"\nGoal: {persona['goal']}")
+            if persona.get("backstory"):
+                parts.append(f"\nBackstory: {persona['backstory']}")
+            instructions = "\n".join(parts) if parts else "You are a helpful AI assistant."
         return instructions
 
 
@@ -1039,6 +1168,7 @@ class FrameworkRegistry:
         "crewai": CrewAIFrameworkAdapter,
         "google-adk": GoogleADKFrameworkAdapter,
         "pydantic-ai": PydanticAIFrameworkAdapter,
+        "claude-sdk": ClaudeAgentSDKFrameworkAdapter,
     }
 
     @classmethod

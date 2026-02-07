@@ -1,4 +1,5 @@
 import re
+import os
 from pathlib import Path
 from typing import Any, Dict
 
@@ -490,6 +491,10 @@ class AgentCompiler:
             # Load playbook
             context = self._load_playbook_and_get_context(agent_name, tier_level)
 
+            # Framework-specific compile-time guidance
+            if framework == "claude-sdk":
+                self._show_claude_sdk_compile_guidance(context)
+
             # Get the framework adapter
             console.print(
                 f"\n[bold green]🚀 Compiling with {framework.upper()} framework...[/bold green]"
@@ -531,6 +536,107 @@ class AgentCompiler:
         except Exception as e:
             console.print(f"\n[bold red]❌ Framework compilation failed:[/] {e}")
             raise
+
+    def _show_claude_sdk_compile_guidance(self, context: Dict[str, Any]) -> None:
+        """Show compile-time checks and guidance for Claude SDK playbooks."""
+        spec = context.get("spec", {})
+        lm = spec.get("language_model", {})
+        provider = str(lm.get("provider", "anthropic")).lower()
+        model = str(lm.get("model", "claude-sonnet-4-5")).strip()
+
+        anthropic_api_key = os.getenv("ANTHROPIC_API_KEY", "").strip()
+        anthropic_base_url = os.getenv("ANTHROPIC_BASE_URL", "").strip()
+        use_bedrock = os.getenv("CLAUDE_CODE_USE_BEDROCK") == "1"
+        use_vertex = os.getenv("CLAUDE_CODE_USE_VERTEX") == "1"
+        use_foundry = os.getenv("CLAUDE_CODE_USE_FOUNDRY") == "1"
+
+        console.print("\n[bold cyan]🔎 Claude SDK Runtime Configuration Check[/]")
+        console.print(f"[dim]provider={provider} model={model}[/]")
+
+        supported_providers = {
+            "anthropic",
+            "bedrock",
+            "vertex",
+            "foundry",
+            "azure",
+            "aws",
+            "gcp",
+        }
+        if provider not in supported_providers:
+            console.print(
+                "[yellow]⚠️  Unsupported provider for Claude SDK in playbook.[/]"
+            )
+            console.print(
+                "[yellow]   Set spec.language_model.provider to anthropic|bedrock|vertex|foundry and recompile.[/]"
+            )
+
+        if provider == "anthropic" and not anthropic_base_url and not model.startswith("claude-"):
+            console.print(
+                "[yellow]⚠️  provider='anthropic' expects a Claude model name.[/]"
+            )
+            console.print(
+                "[yellow]   Update spec.language_model.model to e.g. claude-opus-4-5, claude-sonnet-4-5, or claude-haiku-4-5 "
+                "(or snapshots: claude-opus-4-5-20251101, claude-sonnet-4-5-20250929, claude-haiku-4-5-20251001).[/]"
+            )
+
+        auth_ok = False
+        if provider == "anthropic":
+            auth_ok = bool(anthropic_api_key or anthropic_base_url)
+            if not auth_ok:
+                console.print(
+                    "[yellow]⚠️  Missing auth for provider='anthropic'.[/]"
+                )
+                console.print(
+                    "[yellow]   Set ANTHROPIC_API_KEY (or ANTHROPIC_BASE_URL for a compatible endpoint) before run.[/]"
+                )
+        elif provider in {"bedrock", "aws"}:
+            auth_ok = use_bedrock
+            if not auth_ok:
+                console.print(
+                    "[yellow]⚠️  provider='bedrock' requires CLAUDE_CODE_USE_BEDROCK=1 and AWS credentials.[/]"
+                )
+        elif provider in {"vertex", "gcp"}:
+            auth_ok = use_vertex
+            if not auth_ok:
+                console.print(
+                    "[yellow]⚠️  provider='vertex' requires CLAUDE_CODE_USE_VERTEX=1 and GCP credentials.[/]"
+                )
+        elif provider in {"foundry", "azure"}:
+            auth_ok = use_foundry
+            if not auth_ok:
+                console.print(
+                    "[yellow]⚠️  provider='foundry'/'azure' requires CLAUDE_CODE_USE_FOUNDRY=1 and Azure credentials.[/]"
+                )
+
+        if auth_ok:
+            console.print("[green]✅ Claude SDK auth prerequisites detected.[/]")
+        else:
+            console.print(
+                "[cyan]ℹ️  Pipeline will compile, but run will fail until runtime auth is configured.[/]"
+            )
+
+        console.print("\n[bold cyan]📘 Claude SDK Playbook Example[/]")
+        console.print(
+            """[dim]spec:
+  language_model:
+    location: cloud
+    provider: anthropic
+    model: claude-sonnet-4-5
+    temperature: 0.2[/]"""
+        )
+        console.print(
+            "[dim]Alternative models: claude-opus-4-5, claude-haiku-4-5[/]"
+        )
+        console.print(
+            "[dim]Stable snapshots: claude-opus-4-5-20251101, claude-sonnet-4-5-20250929, claude-haiku-4-5-20251001[/]"
+        )
+
+        console.print("\n[bold cyan]🔐 API Key Setup[/]")
+        console.print("[dim]export ANTHROPIC_API_KEY='sk-ant-...'\n[/]")
+        console.print(
+            "[dim]Then run: super agent run "
+            f"{context.get('agent_name', 'your_agent')} --framework claude-sdk --goal \"...\"[/]"
+        )
 
     def _extract_tier_level(
         self, playbook_snake_case: Dict[str, Any], user_tier: str = None

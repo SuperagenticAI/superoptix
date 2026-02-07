@@ -106,7 +106,8 @@ class DSPyRunner:
         2. {agent_name}_crewai_pipeline.py (CrewAI framework)
         3. {agent_name}_microsoft_pipeline.py (Microsoft framework)
         4. {agent_name}_openai_pipeline.py (OpenAI framework)
-        5. {agent_name}_pipeline.py (default DSPy)
+        5. {agent_name}_claude_sdk_pipeline.py (Claude Agent SDK framework)
+        6. {agent_name}_pipeline.py (default DSPy)
 
         Args:
             pipelines_dir: Directory containing pipeline files
@@ -128,6 +129,7 @@ class DSPyRunner:
             "openai",
             "google_adk",
             "pydantic_ai",  # Pydantic AI framework
+            "claude_sdk",  # Claude Agent SDK framework
         ]
 
         for framework in framework_variants:
