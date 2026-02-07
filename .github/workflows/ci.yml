@@ -22,21 +22,17 @@ jobs:
       
       - name: Install dependencies
         run: |
-          # Generate lock file (uv.toml handles pre-release)
-          uv lock
-          # Install with cross-platform compatible extras
-          uv sync --extra testing --extra vectordb --extra observability --extra web --extra ml-cross-platform
-          # Install dev dependencies explicitly
-          uv pip install pytest mypy black ruff pre-commit pytest-cov pytest-asyncio pytest-mock responses
-      
-      - name: Run tests
-        run: |
-          uv run pytest tests/
-      
+          # Install locked dependencies with required extras
+          uv sync --locked --extra dev --extra testing --extra vectordb --extra observability --extra web --extra ml-cross-platform
+
       - name: Run Ruff
         run: |
           uv run ruff check .
           uv run ruff format --check .
+      
+      - name: Run tests
+        run: |
+          uv run pytest tests/
       
       - name: Run type checking
         run: |

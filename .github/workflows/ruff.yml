@@ -18,12 +18,9 @@ jobs:
       
       - name: Install dependencies
         run: |
-          uv lock
-          uv sync --extra testing
-          # Install dev dependencies explicitly
-          uv pip install ruff
+          uv sync --locked --extra dev --extra testing
       
       - name: Run Ruff
         run: |
-          # Run Ruff with checks disabled for now (info mode)
-          uv run ruff check . 
+          uv run ruff check .
+          uv run ruff format --check .
