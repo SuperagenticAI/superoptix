@@ -53,6 +53,7 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
         tools: Optional[List] = None,
         subagents: Optional[List] = None,
         model: str = "{{ spec.language_model.model | default('anthropic:claude-sonnet-4-20250514') }}",
+        model_provider: Optional[str] = "{{ spec.language_model.provider | default('') }}",
         **kwargs
     ):
         """
@@ -63,6 +64,7 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
             tools: List of tools for the agent
             subagents: List of specialized subagents
             model: Model identifier (e.g., "anthropic:claude-sonnet-4-20250514")
+            model_provider: Model provider (e.g., "anthropic", "google-genai", "openai")
             **kwargs: Additional configuration
         """
         # Default system prompt from playbook
@@ -79,6 +81,7 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
             framework="deepagents",
             config={
                 "model": model,
+                "model_provider": model_provider,
                 "tools": tools or [],
                 "subagents": subagents or [],
                 **kwargs
@@ -200,33 +203,70 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
             try:
                 # Get model configuration
                 model_str = config.get("model", "anthropic:claude-sonnet-4-20250514")
+                model_provider = config.get("model_provider")
+                model_name = model_str
+                known_providers = {
+                    "anthropic",
+                    "azure_ai",
+                    "azure_openai",
+                    "bedrock",
+                    "bedrock_converse",
+                    "cohere",
+                    "deepseek",
+                    "fireworks",
+                    "google_anthropic_vertex",
+                    "google_genai",
+                    "google-genai",
+                    "google_vertexai",
+                    "groq",
+                    "huggingface",
+                    "ibm",
+                    "mistralai",
+                    "nvidia",
+                    "ollama",
+                    "openai",
+                    "perplexity",
+                    "together",
+                    "upstage",
+                    "xai",
+                }
                 
                 # Initialize chat model based on provider
                 # Direct initialization is more reliable than init_chat_model
                 if ":" in model_str:
-                    provider, model_name = model_str.split(":", 1)
-                    
-                    if provider == "google-genai":
-                        # Google Gemini models
-                        from langchain_google_genai import ChatGoogleGenerativeAI
-                        import os
-                        model = ChatGoogleGenerativeAI(
-                            model=model_name,
-                            google_api_key=os.getenv("GOOGLE_API_KEY")
-                        )
-                    elif provider == "anthropic":
-                        # Anthropic Claude models
-                        from langchain_anthropic import ChatAnthropic
-                        model = ChatAnthropic(model_name=model_name)
-                    elif provider == "openai":
-                        # OpenAI GPT models
-                        from langchain_openai import ChatOpenAI
-                        model = ChatOpenAI(model=model_name)
-                    else:
-                        # Fall back to init_chat_model for other providers
-                        model = init_chat_model(f"{provider}/{model_name}")
+                    candidate_provider, candidate_model = model_str.split(":", 1)
+                    if candidate_provider in known_providers and not model_provider:
+                        model_provider = candidate_provider
+                        model_name = candidate_model
+
+                if model_provider == "google-genai":
+                    model_provider = "google_genai"
+
+                if model_provider == "google_genai":
+                    # Google Gemini models
+                    from langchain_google_genai import ChatGoogleGenerativeAI
+                    import os
+                    model = ChatGoogleGenerativeAI(
+                        model=model_name,
+                        google_api_key=os.getenv("GOOGLE_API_KEY")
+                    )
+                elif model_provider == "anthropic":
+                    # Anthropic Claude models
+                    from langchain_anthropic import ChatAnthropic
+                    model = ChatAnthropic(model_name=model_name)
+                elif model_provider == "openai":
+                    # OpenAI GPT models
+                    from langchain_openai import ChatOpenAI
+                    model = ChatOpenAI(model=model_name)
+                elif model_provider == "ollama":
+                    raise ValueError(
+                        "DeepAgents + Ollama is not supported currently. "
+                        "Use Claude/Gemini/OpenAI for DeepAgents, or use DSPy for Ollama."
+                    )
+                elif model_provider:
+                    model = init_chat_model(model_name, model_provider=model_provider)
                 else:
-                    # No provider specified, use init_chat_model
+                    # No provider specified, use init_chat_model and let LangChain infer.
                     model = init_chat_model(model_str)
                 
                 # Create backend (DeepAgents 0.2.0+)
@@ -295,9 +335,22 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
             # Try to construct from other input fields
 {% if spec.input_fields %}
 {% set first_input = spec.input_fields[0] %}
-            input_value = inputs.get("{{ first_input.name }}", "")
+            input_value = (
+                inputs.get("{{ first_input.name }}")
+                or inputs.get("query")
+                or inputs.get("goal")
+                or inputs.get("text")
+                or inputs.get("input")
+                or ""
+            )
 {% else %}
-            input_value = inputs.get("query") or inputs.get("text") or inputs.get("input", "")
+            input_value = (
+                inputs.get("query")
+                or inputs.get("goal")
+                or inputs.get("text")
+                or inputs.get("input")
+                or ""
+            )
 {% endif %}
 
             if isinstance(input_value, str):
@@ -307,6 +360,37 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
         elif isinstance(messages, str):
             # Convert string to message format
             messages = [{"role": "user", "content": messages}]
+
+        # Normalize and validate messages before invoking provider SDKs.
+        if not isinstance(messages, list):
+            messages = [{"role": "user", "content": str(messages)}]
+
+        normalized_messages = []
+        for msg in messages:
+            if isinstance(msg, dict):
+                content = msg.get("content")
+                if content is None:
+                    continue
+                content_str = content if isinstance(content, str) else str(content)
+                if not content_str.strip():
+                    continue
+                normalized_messages.append(
+                    {"role": msg.get("role", "user"), "content": content_str}
+                )
+            else:
+                content_str = str(msg)
+                if content_str.strip():
+                    normalized_messages.append({"role": "user", "content": content_str})
+
+        if not normalized_messages:
+            return {
+                "response": (
+                    "No input content provided. Please pass a non-empty prompt via "
+                    "'messages' or 'query' (for CLI: --goal \"...\")."
+                )
+            }
+
+        messages = normalized_messages
 
         # Ensure agent is initialized
         self._initialize_agent()
@@ -412,6 +496,7 @@ def _create_subagents() -> List[Dict[str, Any]]:
 def create_{{ agent_name }}_agent(
     system_prompt: Optional[str] = None,
     model: str = "{{ spec.language_model.model | default('anthropic:claude-sonnet-4-20250514') }}",
+    model_provider: Optional[str] = "{{ spec.language_model.provider | default('') }}",
     **kwargs
 ) -> {{ agent_name | to_pascal_case }}Component:
     """
@@ -420,6 +505,7 @@ def create_{{ agent_name }}_agent(
     Args:
         system_prompt: Optional custom system prompt (overrides default)
         model: Model identifier
+        model_provider: Model provider name
         **kwargs: Additional configuration
 
     Returns:
@@ -441,6 +527,7 @@ def create_{{ agent_name }}_agent(
         tools=tools,
         subagents=subagents,
         model=model,
+        model_provider=model_provider,
         **kwargs
     )
 
@@ -696,6 +783,7 @@ class {{ agent_name | to_pascal_case }}Pipeline:
             "model_analysis": {
                 "framework": "DeepAgents",
                 "model": "{{ spec.language_model.model }}",
+                "provider": "{{ spec.language_model.provider | default('') }}",
             },
             "recommendations": [],
         }
