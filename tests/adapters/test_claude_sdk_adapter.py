@@ -6,6 +6,7 @@ Tests the ClaudeAgentSDKFrameworkAdapter and StackOneBridge Claude SDK integrati
 """
 
 import pytest
+import types
 from unittest.mock import MagicMock, patch, AsyncMock
 from typing import Any, Dict, List
 
@@ -200,7 +201,7 @@ class TestStackOneBridgeClaudeSDK:
         """Test to_claude_sdk raises ImportError when SDK not installed."""
         with patch(
             "superoptix.adapters.stackone_adapter.STACKONE_AVAILABLE", True
-        ):
+        ), patch.dict("sys.modules", {"claude_agent_sdk": None}):
             from superoptix.adapters.stackone_adapter import StackOneBridge
 
             bridge = StackOneBridge(sample_stackone_tools)
@@ -212,21 +213,18 @@ class TestStackOneBridgeClaudeSDK:
 
     def test_to_claude_sdk_creates_mcp_server(self, sample_stackone_tools):
         """Test to_claude_sdk creates MCP server and returns tool names."""
-        mock_mcp_server = MagicMock()
-
         def mock_create_server(name, version, tools):
             return MockMcpServerConfig(name, version, tools)
+
+        mock_claude_module = types.ModuleType("claude_agent_sdk")
+        mock_claude_module.SdkMcpTool = MockSdkMcpTool
+        mock_claude_module.create_sdk_mcp_server = mock_create_server
 
         with patch(
             "superoptix.adapters.stackone_adapter.STACKONE_AVAILABLE", True
         ), patch.dict(
             "sys.modules",
-            {
-                "claude_agent_sdk": MagicMock(
-                    SdkMcpTool=MockSdkMcpTool,
-                    create_sdk_mcp_server=mock_create_server,
-                ),
-            },
+            {"claude_agent_sdk": mock_claude_module},
         ):
             from superoptix.adapters.stackone_adapter import StackOneBridge
 
@@ -258,8 +256,21 @@ class TestStackOneBridgeClaudeSDK:
 
     def test_to_discovery_tools_claude_sdk_framework(self, sample_stackone_tools):
         """Test to_discovery_tools supports claude_sdk framework."""
+        mock_stackone_models = types.ModuleType("stackone_ai.models")
+        mock_stackone_models.Tools = MagicMock()
+        mock_stackone_utils = types.ModuleType("stackone_ai.utility_tools")
+        mock_stackone_utils.ToolIndex = MagicMock()
+        mock_stackone_utils.create_tool_search = MagicMock()
+        mock_stackone_utils.create_tool_execute = MagicMock()
         with patch(
             "superoptix.adapters.stackone_adapter.STACKONE_AVAILABLE", True
+        ), patch.dict(
+            "sys.modules",
+            {
+                "stackone_ai": types.ModuleType("stackone_ai"),
+                "stackone_ai.models": mock_stackone_models,
+                "stackone_ai.utility_tools": mock_stackone_utils,
+            },
         ):
             from superoptix.adapters.stackone_adapter import StackOneBridge
 
@@ -293,23 +304,21 @@ class TestClaudeSDKToolHandler:
     @pytest.mark.asyncio
     async def test_handler_returns_correct_format(self, sample_stackone_tools):
         """Test that generated handlers return correct Claude SDK format."""
-        mock_mcp_server = MagicMock()
         captured_tools = []
 
         def mock_create_server(name, version, tools):
             captured_tools.extend(tools)
             return MockMcpServerConfig(name, version, tools)
 
+        mock_claude_module = types.ModuleType("claude_agent_sdk")
+        mock_claude_module.SdkMcpTool = MockSdkMcpTool
+        mock_claude_module.create_sdk_mcp_server = mock_create_server
+
         with patch(
             "superoptix.adapters.stackone_adapter.STACKONE_AVAILABLE", True
         ), patch.dict(
             "sys.modules",
-            {
-                "claude_agent_sdk": MagicMock(
-                    SdkMcpTool=MockSdkMcpTool,
-                    create_sdk_mcp_server=mock_create_server,
-                ),
-            },
+            {"claude_agent_sdk": mock_claude_module},
         ):
             from superoptix.adapters.stackone_adapter import StackOneBridge
 

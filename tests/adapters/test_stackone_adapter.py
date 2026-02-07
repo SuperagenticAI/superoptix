@@ -6,6 +6,7 @@ Tests the StackOneBridge adapter for converting StackOne tools to various framew
 """
 
 import pytest
+import types
 from unittest.mock import MagicMock, patch
 from typing import Any, Dict, List
 
@@ -255,10 +256,23 @@ class TestStackOneBridgeDiscoveryTools:
     def test_to_discovery_tools_crewai_framework(self, sample_stackone_tools):
         """Test discovery tools conversion for CrewAI framework."""
         # This test verifies the framework parameter routing
+        mock_stackone_models = types.ModuleType("stackone_ai.models")
+        mock_stackone_models.Tools = MagicMock()
+        mock_stackone_utils = types.ModuleType("stackone_ai.utility_tools")
+        mock_stackone_utils.ToolIndex = MagicMock()
+        mock_stackone_utils.create_tool_search = MagicMock()
+        mock_stackone_utils.create_tool_execute = MagicMock()
         with patch(
             "superoptix.adapters.stackone_adapter.STACKONE_AVAILABLE", True
         ), patch(
             "superoptix.adapters.stackone_adapter.CREWAI_AVAILABLE", True
+        ), patch.dict(
+            "sys.modules",
+            {
+                "stackone_ai": types.ModuleType("stackone_ai"),
+                "stackone_ai.models": mock_stackone_models,
+                "stackone_ai.utility_tools": mock_stackone_utils,
+            },
         ):
             from superoptix.adapters.stackone_adapter import StackOneBridge
 
@@ -285,8 +299,21 @@ class TestStackOneBridgeDiscoveryTools:
 
     def test_to_discovery_tools_invalid_framework(self, sample_stackone_tools):
         """Test discovery tools with invalid framework raises ValueError."""
+        mock_stackone_models = types.ModuleType("stackone_ai.models")
+        mock_stackone_models.Tools = MagicMock()
+        mock_stackone_utils = types.ModuleType("stackone_ai.utility_tools")
+        mock_stackone_utils.ToolIndex = MagicMock()
+        mock_stackone_utils.create_tool_search = MagicMock()
+        mock_stackone_utils.create_tool_execute = MagicMock()
         with patch(
             "superoptix.adapters.stackone_adapter.STACKONE_AVAILABLE", True
+        ), patch.dict(
+            "sys.modules",
+            {
+                "stackone_ai": types.ModuleType("stackone_ai"),
+                "stackone_ai.models": mock_stackone_models,
+                "stackone_ai.utility_tools": mock_stackone_utils,
+            },
         ):
             from superoptix.adapters.stackone_adapter import StackOneBridge
 

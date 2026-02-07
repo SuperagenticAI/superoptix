@@ -38,10 +38,18 @@ class ContextManager:
     ):
         """Initialize context manager."""
         self.agent_id = agent_id
+        resolved_backend = backend or SQLiteBackend()
         self.short_term_memory = short_term_memory or ShortTermMemory()
-        self.long_term_memory = long_term_memory or LongTermMemory()
-        self.episodic_memory = episodic_memory or EpisodicMemory()
-        self.backend = backend or SQLiteBackend()
+        # Disable embeddings by default in context manager to avoid network/model
+        # loads during lightweight context operations and tests.
+        self.long_term_memory = long_term_memory or LongTermMemory(
+            backend=resolved_backend,
+            enable_embeddings=False,
+        )
+        self.episodic_memory = episodic_memory or EpisodicMemory(
+            backend=resolved_backend
+        )
+        self.backend = resolved_backend
 
         self._lock = threading.RLock()
         self._context_stack = []

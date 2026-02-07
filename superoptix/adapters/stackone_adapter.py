@@ -7,7 +7,8 @@ Supported: DSPy, Pydantic AI, CrewAI, Claude Agent SDK, Google ADK, Semantic Ker
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Type, cast
+import importlib.util
+from typing import Any, Dict, List, Optional, Type
 
 from pydantic import BaseModel, Field, create_model
 from superoptix.core.base_component import BaseComponent
@@ -16,7 +17,6 @@ logger = logging.getLogger(__name__)
 
 # Optional imports for framework support
 try:
-    import dspy
     from dspy.adapters.types.tool import Tool as DSPyTool
     DSPY_AVAILABLE = True
 except ImportError:
@@ -28,16 +28,14 @@ try:
 except ImportError:
     PYDANTIC_AI_AVAILABLE = False
 
-try:
-    from stackone_ai.models import StackOneTool, Tools as StackOneTools
-    STACKONE_AVAILABLE = True
-except ImportError:
-    STACKONE_AVAILABLE = False
+STACKONE_AVAILABLE = importlib.util.find_spec("stackone_ai") is not None
 
 try:
     from crewai.tools.base_tool import BaseTool as CrewAIBaseTool, Tool as CrewAITool
     CREWAI_AVAILABLE = True
 except ImportError:
+    CrewAIBaseTool = None
+    CrewAITool = None
     CREWAI_AVAILABLE = False
 
 

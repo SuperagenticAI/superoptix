@@ -18,10 +18,18 @@ import re
 # CrewAI imports
 try:
   from crewai import Agent, Task, Crew, Process
-  from crewai.llm import LLM
+  try:
+    from crewai import LLM as CrewAILLM
+  except ImportError:
+    try:
+      from crewai.llm import LLM as CrewAILLM
+    except ImportError:
+      CrewAILLM = None
   CREWAI_AVAILABLE = True
-except ImportError as e:
+  CREWAI_IMPORT_ERROR = None
+except Exception as e:
   CREWAI_AVAILABLE = False
+  CREWAI_IMPORT_ERROR = e
   print(f"⚠️  CrewAI not available: {e}")
   print("⚠️  Install with: pip install crewai")
 
@@ -184,7 +192,10 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
       return
     
     if not CREWAI_AVAILABLE:
-      raise ImportError("CrewAI not installed. Install with: pip install crewai")
+      raise ImportError(
+        f"CrewAI is unavailable: {CREWAI_IMPORT_ERROR}. "
+        "Install with: pip install crewai"
+      )
     
     # Convert config to dict if needed
     import types
@@ -200,15 +211,20 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
       # CrewAI Ollama configuration
       model_name = model_str.replace("ollama:", "").replace("ollama/", "")
       api_base = config.get("api_base", "http://localhost:11434")
-      
-      self._llm = LLM(
-        model=f"ollama/{model_name}",
-        base_url=api_base,
-      )
+      if CrewAILLM is not None:
+        self._llm = CrewAILLM(
+          model=f"ollama/{model_name}",
+          base_url=api_base,
+        )
+      else:
+        self._llm = f"ollama/{model_name}"
       print(f"✅ CrewAI LLM initialized with Ollama: {model_name}")
     else:
       # Cloud models (OpenAI, Anthropic, etc.)
-      self._llm = LLM(model=model_str)
+      if CrewAILLM is not None:
+        self._llm = CrewAILLM(model=model_str)
+      else:
+        self._llm = model_str
       print(f"✅ CrewAI LLM initialized with model: {model_str}")
   
   def _initialize_crew(self):

@@ -6,7 +6,6 @@ This file is kept for compatibility with existing code that imports it.
 
 from typing import Optional
 from functools import wraps
-from .token_storage import TokenStorage
 
 
 def is_authenticated() -> bool:

@@ -8,6 +8,9 @@ target-version = "py38"
 # Exclude external dependencies and generated files
 exclude = [
     "superoptix/dspy-latest",
+    "Reference",
+    "swe",
+    ".superoptix",
     "tests",
     "docs",
     "*.md",
