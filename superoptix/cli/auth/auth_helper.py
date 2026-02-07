@@ -46,7 +46,7 @@ def get_authenticated_client():
 
 def require_auth(func):
     """Decorator to require authentication for CLI commands.
-    
+
     Since auth is disabled, this effectively disables the command or warns.
     """
 

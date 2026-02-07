@@ -23,8 +23,9 @@ load_dotenv()
 
 # Setup DSPy model
 # Note: Ensure you have OPENAI_API_KEY in your .env
-lm = dspy.LM('openai/gpt-4o-mini')
+lm = dspy.LM("openai/gpt-4o-mini")
 dspy.configure(lm=lm)
+
 
 def stackone_dspy_integration():
     print("🚀 Initializing StackOne + DSPy Integration...")
@@ -36,16 +37,15 @@ def stackone_dspy_integration():
     # Note: Replace with a valid account ID if testing for real
     account_id = os.getenv("STACKONE_ACCOUNT_ID", "test_account")
     print(f"Fetching tools for account: {account_id}")
-    
+
     tools = toolset.fetch_tools(
-        include_tools=["hris_get_employee"],
-        account_ids=[account_id]
+        include_tools=["hris_get_employee"], account_ids=[account_id]
     )
 
     # 3. Use SuperOptiX Bridge to convert to DSPy
     bridge = StackOneBridge(tools)
     dspy_tools = bridge.to_dspy()
-    
+
     print(f"✅ Converted {len(dspy_tools)} StackOne tools to DSPy format.")
 
     # 4. Use in a DSPy ReAct agent
@@ -56,8 +56,9 @@ def stackone_dspy_integration():
     # This is a simulation - in a real run, the agent would call the tool
     # result = agent(name="John Doe")
     # print(f"Result: {result}")
-    
+
     print("\nIntegration Complete! The DSPy agent is now ready to use StackOne tools.")
+
 
 if __name__ == "__main__":
     stackone_dspy_integration()

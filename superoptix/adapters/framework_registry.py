@@ -939,17 +939,47 @@ class PydanticAIFrameworkAdapter(FrameworkAdapter):
             lm = spec["language_model"]
             model_str = lm.get("model", "llama3.1:8b")
             provider = lm.get("provider", "ollama").lower()
-            
+
             # Ensure model has ollama: prefix if provider is ollama or model lacks prefix
-            known_providers = ["ollama", "openai", "anthropic", "google", "bedrock", "azure", "cohere", "mistral", "deepseek", "groq", "together", "fireworks", "litellm", "gateway"]
-            has_provider_prefix = any(model_str.startswith(f"{p}:") for p in known_providers)
-            
+            known_providers = [
+                "ollama",
+                "openai",
+                "anthropic",
+                "google",
+                "bedrock",
+                "azure",
+                "cohere",
+                "mistral",
+                "deepseek",
+                "groq",
+                "together",
+                "fireworks",
+                "litellm",
+                "gateway",
+            ]
+            has_provider_prefix = any(
+                model_str.startswith(f"{p}:") for p in known_providers
+            )
+
             if not has_provider_prefix and (provider == "ollama" or ":" in model_str):
                 # Add ollama: prefix if it looks like an Ollama model
-                ollama_indicators = [":8b", ":7b", ":13b", ":70b", "llama", "mistral", "codellama", "phi", "gemma", "qwen"]
-                if any(indicator in model_str.lower() for indicator in ollama_indicators):
+                ollama_indicators = [
+                    ":8b",
+                    ":7b",
+                    ":13b",
+                    ":70b",
+                    "llama",
+                    "mistral",
+                    "codellama",
+                    "phi",
+                    "gemma",
+                    "qwen",
+                ]
+                if any(
+                    indicator in model_str.lower() for indicator in ollama_indicators
+                ):
                     model_str = f"ollama:{model_str}"
-            
+
             model_config = {
                 "model": model_str,
                 "provider": provider,
@@ -959,14 +989,14 @@ class PydanticAIFrameworkAdapter(FrameworkAdapter):
 
         # Extract spec for MCP configuration access
         spec_data = playbook.get("spec", {})
-        
+
         # Create and return instance with model_config and spec
         # Note: Component will load spec from playbook_path if provided, but we also pass it
         # for cases where playbook_path might not be available (temp compilation)
         return component_class(
             model_config=model_config,
             spec_data=spec_data,  # Pass spec directly for MCP config access
-            **kwargs
+            **kwargs,
         )
 
     @classmethod
@@ -984,7 +1014,9 @@ class PydanticAIFrameworkAdapter(FrameworkAdapter):
                 parts.append(f"\nGoal: {persona['goal']}")
             if persona.get("backstory"):
                 parts.append(f"\nBackstory: {persona['backstory']}")
-            instructions = "\n".join(parts) if parts else "You are a helpful AI assistant."
+            instructions = (
+                "\n".join(parts) if parts else "You are a helpful AI assistant."
+            )
         return instructions
 
 
@@ -1024,6 +1056,7 @@ class ClaudeAgentSDKFrameworkAdapter(FrameworkAdapter):
 
         def to_snake_case(text: str) -> str:
             import re
+
             text = text.strip()
             text = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", text)
             text = re.sub("([a-z0-9])([A-Z])", r"\1_\2", text)
@@ -1097,6 +1130,7 @@ class ClaudeAgentSDKFrameworkAdapter(FrameworkAdapter):
         # Convert names
         def to_snake_case(text: str) -> str:
             import re
+
             text = text.strip()
             text = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", text)
             text = re.sub("([a-z0-9])([A-Z])", r"\1_\2", text)
@@ -1125,11 +1159,7 @@ class ClaudeAgentSDKFrameworkAdapter(FrameworkAdapter):
                 "provider": lm.get("provider", "anthropic"),
             }
 
-        return component_class(
-            model_config=model_config,
-            spec_data=spec_data,
-            **kwargs
-        )
+        return component_class(model_config=model_config, spec_data=spec_data, **kwargs)
 
     @classmethod
     def get_optimizable_variable(cls, playbook: Dict[str, Any]) -> str:
@@ -1145,7 +1175,9 @@ class ClaudeAgentSDKFrameworkAdapter(FrameworkAdapter):
                 parts.append(f"\nGoal: {persona['goal']}")
             if persona.get("backstory"):
                 parts.append(f"\nBackstory: {persona['backstory']}")
-            instructions = "\n".join(parts) if parts else "You are a helpful AI assistant."
+            instructions = (
+                "\n".join(parts) if parts else "You are a helpful AI assistant."
+            )
         return instructions
 
 

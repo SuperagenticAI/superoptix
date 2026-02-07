@@ -18,12 +18,15 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 
 # ULTRA-AGGRESSIVE: Suppress ALL warnings first (immediate suppression)
 import os
+
 warnings.simplefilter("ignore")
 os.environ.setdefault("PYTHONWARNINGS", "ignore")
 
 # Comprehensive Pydantic warning suppression (for clarity/documentation)
 warnings.filterwarnings("ignore", message=r".*[Pp]ydantic.*", category=UserWarning)
-warnings.filterwarnings("ignore", message=r".*[Pp]ydantic.*", category=DeprecationWarning)
+warnings.filterwarnings(
+    "ignore", message=r".*[Pp]ydantic.*", category=DeprecationWarning
+)
 warnings.filterwarnings("ignore", module="pydantic.*", category=UserWarning)
 warnings.filterwarnings("ignore", module="pydantic_ai.*", category=UserWarning)
 # warnings.filterwarnings("ignore", module="storage3.*", category=UserWarning)  # Supabase removed
@@ -440,7 +443,7 @@ def start_conversation():
     # Auth disabled for OSS version
     # from superoptix.cli.auth import is_authenticated, get_current_user
     # ... code removed ...
-    
+
     console.print()
 
     # Show essential slash commands menu

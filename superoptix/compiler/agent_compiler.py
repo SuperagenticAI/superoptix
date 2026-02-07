@@ -570,7 +570,11 @@ class AgentCompiler:
                 "[yellow]   Set spec.language_model.provider to anthropic|bedrock|vertex|foundry and recompile.[/]"
             )
 
-        if provider == "anthropic" and not anthropic_base_url and not model.startswith("claude-"):
+        if (
+            provider == "anthropic"
+            and not anthropic_base_url
+            and not model.startswith("claude-")
+        ):
             console.print(
                 "[yellow]⚠️  provider='anthropic' expects a Claude model name.[/]"
             )
@@ -583,9 +587,7 @@ class AgentCompiler:
         if provider == "anthropic":
             auth_ok = bool(anthropic_api_key or anthropic_base_url)
             if not auth_ok:
-                console.print(
-                    "[yellow]⚠️  Missing auth for provider='anthropic'.[/]"
-                )
+                console.print("[yellow]⚠️  Missing auth for provider='anthropic'.[/]")
                 console.print(
                     "[yellow]   Set ANTHROPIC_API_KEY (or ANTHROPIC_BASE_URL for a compatible endpoint) before run.[/]"
                 )
@@ -624,9 +626,7 @@ class AgentCompiler:
     model: claude-sonnet-4-5
     temperature: 0.2[/]"""
         )
-        console.print(
-            "[dim]Alternative models: claude-opus-4-5, claude-haiku-4-5[/]"
-        )
+        console.print("[dim]Alternative models: claude-opus-4-5, claude-haiku-4-5[/]")
         console.print(
             "[dim]Stable snapshots: claude-opus-4-5-20251101, claude-sonnet-4-5-20250929, claude-haiku-4-5-20251001[/]"
         )
@@ -635,7 +635,7 @@ class AgentCompiler:
         console.print("[dim]export ANTHROPIC_API_KEY='sk-ant-...'\n[/]")
         console.print(
             "[dim]Then run: super agent run "
-            f"{context.get('agent_name', 'your_agent')} --framework claude-sdk --goal \"...\"[/]"
+            f'{context.get("agent_name", "your_agent")} --framework claude-sdk --goal "..."[/]'
         )
 
     def _extract_tier_level(

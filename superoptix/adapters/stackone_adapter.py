@@ -18,12 +18,14 @@ logger = logging.getLogger(__name__)
 # Optional imports for framework support
 try:
     from dspy.adapters.types.tool import Tool as DSPyTool
+
     DSPY_AVAILABLE = True
 except ImportError:
     DSPY_AVAILABLE = False
 
 try:
     from pydantic_ai import Tool as PydanticAITool, RunContext
+
     PYDANTIC_AI_AVAILABLE = True
 except ImportError:
     PYDANTIC_AI_AVAILABLE = False
@@ -32,6 +34,7 @@ STACKONE_AVAILABLE = importlib.util.find_spec("stackone_ai") is not None
 
 try:
     from crewai.tools.base_tool import BaseTool as CrewAIBaseTool, Tool as CrewAITool
+
     CREWAI_AVAILABLE = True
 except ImportError:
     CrewAIBaseTool = None
@@ -42,9 +45,9 @@ except ImportError:
 class StackOneOptimizableComponent(BaseComponent):
     """
     Component wrapper for StackOne tools to enable GEPA optimization.
-    
+
     This component treats the tool description as the optimizable variable.
-    GEPA will mutate the description to help the LLM better understand when 
+    GEPA will mutate the description to help the LLM better understand when
     and how to use the tool.
     """
 
@@ -61,7 +64,7 @@ class StackOneOptimizableComponent(BaseComponent):
 
     def forward(self, **inputs: Any) -> Dict[str, Any]:
         """Execute the tool with the current (potentially optimized) description."""
-        # Note: In a real optimization run, 'forward' might be used to test 
+        # Note: In a real optimization run, 'forward' might be used to test
         # if the LLM picks the tool correctly based on its description.
         result = self.tool.execute(inputs)
         return {"result": result}
@@ -87,14 +90,16 @@ class StackOneBridge:
         elif isinstance(stackone_tools, list):
             self.tools = stackone_tools
         else:
-            raise ValueError("Invalid stackone_tools format. Expected Tools object or list.")
+            raise ValueError(
+                "Invalid stackone_tools format. Expected Tools object or list."
+            )
 
     def optimize(
-        self, 
-        dataset: List[Dict[str, Any]], 
+        self,
+        dataset: List[Dict[str, Any]],
         metric: Any,
         reflection_lm: str = "gpt-4o-mini",
-        max_iterations: int = 5
+        max_iterations: int = 5,
     ) -> List[Any]:
         """
         Optimize StackOne tool descriptions using GEPA.
@@ -113,25 +118,27 @@ class StackOneBridge:
         optimized_tools = []
         for tool in self.tools:
             logger.info(f"🧬 Optimizing description for tool: {tool.name}")
-            
+
             # Wrap tool in optimizable component
             component = StackOneOptimizableComponent(tool)
-            
+
             # Setup Universal GEPA
             optimizer = UniversalGEPA(
                 metric=metric,
                 reflection_lm=reflection_lm,
-                max_iterations=max_iterations
+                max_iterations=max_iterations,
             )
-            
+
             # Run optimization
             result = optimizer.optimize(component, dataset)
-            
+
             # Update tool description with optimized version
             tool.description = result.optimized_variable
             optimized_tools.append(tool)
-            
-            logger.info(f"✅ Optimized description for {tool.name}: {tool.description[:50]}...")
+
+            logger.info(
+                f"✅ Optimized description for {tool.name}: {tool.description[:50]}..."
+            )
 
         return optimized_tools
 
@@ -150,52 +157,53 @@ class StackOneBridge:
         for tool in self.tools:
             # DSPy Tool expects a function, name, and desc
             # We use the tool.execute method as the function
-            d_tool = DSPyTool(
-                func=tool.execute,
-                name=tool.name,
-                desc=tool.description
-            )
+            d_tool = DSPyTool(func=tool.execute, name=tool.name, desc=tool.description)
             dspy_tools.append(d_tool)
-        
+
         return dspy_tools
 
-    def _create_pydantic_model_from_schema(self, tool_name: str, schema: Dict[str, Any]) -> Type[BaseModel]:
+    def _create_pydantic_model_from_schema(
+        self, tool_name: str, schema: Dict[str, Any]
+    ) -> Type[BaseModel]:
         """
         Dynamically create a Pydantic model from StackOne's JSON schema.
         """
         fields: Dict[str, Any] = {}
-        
+
         properties = schema.get("properties", {})
         required = set(schema.get("required", []))
-        
+
         type_mapping = {
             "string": str,
             "integer": int,
             "number": float,
             "boolean": bool,
             "array": list,
-            "object": dict
+            "object": dict,
         }
 
         for field_name, field_info in properties.items():
             field_type_str = field_info.get("type", "string")
             python_type = type_mapping.get(field_type_str, str)
-            
+
             description = field_info.get("description", "")
-            
+
             if field_name in required:
                 fields[field_name] = (python_type, Field(description=description))
             else:
-                fields[field_name] = (Optional[python_type], Field(default=None, description=description))
-        
+                fields[field_name] = (
+                    Optional[python_type],
+                    Field(default=None, description=description),
+                )
+
         # Create dynamic model
         model_name = f"{tool_name}Args"
-        return create_model(model_name, **fields) # type: ignore
+        return create_model(model_name, **fields)  # type: ignore
 
     def to_pydantic_ai(self) -> List[Any]:
         """
         Convert StackOne tools to Pydantic AI Tool objects.
-        
+
         This generates fully typed Pydantic tools, enabling the agent to see
         the exact schema and validate arguments before execution.
 
@@ -203,7 +211,9 @@ class StackOneBridge:
             List of pydantic_ai.Tool objects.
         """
         if not PYDANTIC_AI_AVAILABLE:
-            logger.warning("Pydantic AI not installed. to_pydantic_ai() will fail if called.")
+            logger.warning(
+                "Pydantic AI not installed. to_pydantic_ai() will fail if called."
+            )
             raise ImportError("pydantic-ai is not installed.")
 
         pai_tools = []
@@ -285,7 +295,11 @@ class StackOneBridge:
                     """Execute the StackOne tool with validated arguments."""
                     try:
                         result = current_tool.execute(kwargs)
-                        return str(result) if result is not None else "Tool executed successfully"
+                        return (
+                            str(result)
+                            if result is not None
+                            else "Tool executed successfully"
+                        )
                     except Exception as e:
                         return f"Error executing tool {current_tool.name}: {str(e)}"
 
@@ -319,7 +333,9 @@ class StackOneBridge:
             List of CrewAI Tool objects with async support.
         """
         if not CREWAI_AVAILABLE:
-            logger.warning("CrewAI not installed. to_crewai_async() will fail if called.")
+            logger.warning(
+                "CrewAI not installed. to_crewai_async() will fail if called."
+            )
             raise ImportError(
                 "crewai is not installed. Please install it with `pip install crewai`."
             )
@@ -344,7 +360,11 @@ class StackOneBridge:
                         """Synchronous execution of the StackOne tool."""
                         try:
                             result = current_tool.execute(kwargs)
-                            return str(result) if result is not None else "Tool executed successfully"
+                            return (
+                                str(result)
+                                if result is not None
+                                else "Tool executed successfully"
+                            )
                         except Exception as e:
                             return f"Error executing tool {current_tool.name}: {str(e)}"
 
@@ -352,7 +372,9 @@ class StackOneBridge:
                         """Asynchronous execution of the StackOne tool."""
                         # Run sync execution in thread pool for non-blocking async
                         loop = asyncio.get_event_loop()
-                        return await loop.run_in_executor(None, lambda: self._run(**kwargs))
+                        return await loop.run_in_executor(
+                            None, lambda: self._run(**kwargs)
+                        )
 
                 return StackOneCrewAITool
 
@@ -363,7 +385,9 @@ class StackOneBridge:
 
             logger.debug(f"Converted StackOne tool '{tool.name}' to async CrewAI Tool")
 
-        logger.info(f"✅ Converted {len(crewai_tools)} StackOne tools to async CrewAI format")
+        logger.info(
+            f"✅ Converted {len(crewai_tools)} StackOne tools to async CrewAI format"
+        )
         return crewai_tools
 
     def to_claude_sdk(self) -> tuple:
@@ -412,14 +436,13 @@ class StackOneBridge:
                     """Execute StackOne tool and return Claude SDK response format."""
                     try:
                         result = current_tool.execute(args)
-                        return {
-                            "content": [{"type": "text", "text": str(result)}]
-                        }
+                        return {"content": [{"type": "text", "text": str(result)}]}
                     except Exception as e:
                         return {
                             "content": [{"type": "text", "text": f"Error: {str(e)}"}],
-                            "is_error": True
+                            "is_error": True,
                         }
+
                 return handler
 
             # 3. Create SdkMcpTool
@@ -427,26 +450,30 @@ class StackOneBridge:
                 name=tool.name,
                 description=tool.description,
                 input_schema=input_schema,
-                handler=make_handler(tool)
+                handler=make_handler(tool),
             )
             sdk_tools.append(sdk_tool)
 
             # Tool naming follows Claude SDK convention: mcp__{server}__{tool}
             tool_names.append(f"mcp__stackone__{tool.name}")
 
-            logger.debug(f"Converted StackOne tool '{tool.name}' to Claude SDK MCP tool")
+            logger.debug(
+                f"Converted StackOne tool '{tool.name}' to Claude SDK MCP tool"
+            )
 
         # 4. Bundle tools into MCP server
         mcp_server = create_sdk_mcp_server(
-            name="stackone",
-            version="1.0.0",
-            tools=sdk_tools
+            name="stackone", version="1.0.0", tools=sdk_tools
         )
 
-        logger.info(f"✅ Converted {len(sdk_tools)} StackOne tools to Claude SDK MCP format")
+        logger.info(
+            f"✅ Converted {len(sdk_tools)} StackOne tools to Claude SDK MCP format"
+        )
         return mcp_server, tool_names
 
-    def _convert_to_claude_sdk_schema(self, stackone_schema: Dict[str, Any]) -> Dict[str, type]:
+    def _convert_to_claude_sdk_schema(
+        self, stackone_schema: Dict[str, Any]
+    ) -> Dict[str, type]:
         """
         Convert StackOne JSON Schema to Claude SDK simple schema format.
 
@@ -482,15 +509,15 @@ class StackOneBridge:
         """
         # Google's format is similar to OpenAI but stricter on types
         # Ref: https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/Tool
-        
+
         schema = tool.parameters.model_dump()
-        
+
         # Ensure strict compatibility with Google's Schema format
         # This is a simplified mapping; complex nested types might need recursion
         parameters = {
             "type": "OBJECT",
             "properties": {},
-            "required": schema.get("required", [])
+            "required": schema.get("required", []),
         }
 
         type_map = {
@@ -499,20 +526,20 @@ class StackOneBridge:
             "number": "NUMBER",
             "boolean": "BOOLEAN",
             "array": "ARRAY",
-            "object": "OBJECT"
+            "object": "OBJECT",
         }
 
         for prop_name, prop_info in schema.get("properties", {}).items():
             prop_type = type_map.get(prop_info.get("type", "string"), "STRING")
             parameters["properties"][prop_name] = {
                 "type": prop_type,
-                "description": prop_info.get("description", "")
+                "description": prop_info.get("description", ""),
             }
 
         return {
             "name": tool.name,
             "description": tool.description,
-            "parameters": parameters
+            "parameters": parameters,
         }
 
     def to_google_adk(self) -> List[Dict[str, Any]]:
@@ -525,7 +552,7 @@ class StackOneBridge:
         # In Google's SDK, a Tool is a collection of FunctionDeclarations
         # We return a list of FunctionDeclarations which can be passed to
         # genai.GenerativeModel(tools=[...])
-        
+
         return [self._to_google_function_declaration(t) for t in self.tools]
 
     def to_semantic_kernel(self) -> List[Any]:
@@ -537,9 +564,13 @@ class StackOneBridge:
         """
         try:
             from semantic_kernel.functions import kernel_function
-            from semantic_kernel.functions.kernel_function_from_method import KernelFunctionFromMethod
+            from semantic_kernel.functions.kernel_function_from_method import (
+                KernelFunctionFromMethod,
+            )
         except ImportError:
-            logger.warning("Semantic Kernel not installed. to_semantic_kernel() will fail.")
+            logger.warning(
+                "Semantic Kernel not installed. to_semantic_kernel() will fail."
+            )
             raise ImportError("semantic-kernel is not installed.")
 
         sk_functions = []
@@ -555,29 +586,29 @@ class StackOneBridge:
             def make_sk_method(current_tool, args_model):
                 # The method name and docstring are critical for SK
                 @kernel_function(
-                    name=current_tool.name,
-                    description=current_tool.description
+                    name=current_tool.name, description=current_tool.description
                 )
                 def execute_tool(**kwargs) -> str:
                     # Validate against our dynamic model
                     try:
                         validated_args = args_model(**kwargs)
-                        return str(current_tool.execute(validated_args.model_dump(exclude_none=True)))
+                        return str(
+                            current_tool.execute(
+                                validated_args.model_dump(exclude_none=True)
+                            )
+                        )
                     except Exception as e:
                         return f"Error executing tool {current_tool.name}: {str(e)}"
-                
+
                 return execute_tool
 
             # 3. Create Kernel Function
             # We use KernelFunctionFromMethod to create the function object
             method = make_sk_method(tool, ArgsModel)
-            
-            # Note: In newer SK versions, the decorator handles creation, 
+
+            # Note: In newer SK versions, the decorator handles creation,
             # but we explicitly wrap it to ensure metadata is correct
-            func = KernelFunctionFromMethod(
-                method=method,
-                plugin_name="StackOnePlugin"
-            )
+            func = KernelFunctionFromMethod(method=method, plugin_name="StackOnePlugin")
             sk_functions.append(func)
 
         return sk_functions
@@ -597,7 +628,11 @@ class StackOneBridge:
         """
         try:
             from stackone_ai.models import Tools
-            from stackone_ai.utility_tools import ToolIndex, create_tool_search, create_tool_execute
+            from stackone_ai.utility_tools import (
+                ToolIndex,
+                create_tool_search,
+                create_tool_execute,
+            )
         except ImportError:
             raise ImportError("stackone-ai >= 2.0 required for discovery tools.")
 
@@ -628,4 +663,6 @@ class StackOneBridge:
         elif framework == "claude_sdk":
             return temp_bridge.to_claude_sdk()
         else:
-            raise ValueError(f"Unknown framework: {framework}. Supported: dspy, pydantic_ai, google, semantic_kernel, crewai, claude_sdk")
+            raise ValueError(
+                f"Unknown framework: {framework}. Supported: dspy, pydantic_ai, google, semantic_kernel, crewai, claude_sdk"
+            )

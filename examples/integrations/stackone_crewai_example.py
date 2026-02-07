@@ -46,7 +46,7 @@ def stackone_crewai_integration():
 
     tools = toolset.fetch_tools(
         include_tools=["hris_list_employees", "hris_get_employee"],
-        account_ids=[account_id]
+        account_ids=[account_id],
     )
     print(f"   ✅ Fetched {len(tools.to_list())} tools from StackOne")
 
@@ -137,7 +137,7 @@ def stackone_crewai_with_discovery():
     # Fetch broader set of tools
     tools = toolset.fetch_tools(
         include_tools=["hris_*", "ats_*"],  # HRIS and ATS tools
-        account_ids=[account_id]
+        account_ids=[account_id],
     )
     print(f"   ✅ Fetched {len(tools.to_list())} tools")
 

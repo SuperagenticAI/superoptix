@@ -54,7 +54,7 @@ async def stackone_claude_sdk_integration():
 
     tools = toolset.fetch_tools(
         include_tools=["hris_list_employees", "hris_get_employee"],
-        account_ids=[account_id]
+        account_ids=[account_id],
     )
     print(f"   Fetched {len(tools.to_list())} tools from StackOne")
 
@@ -119,10 +119,7 @@ async def stackone_claude_sdk_interactive():
     toolset = StackOneToolSet()
     account_id = os.getenv("STACKONE_ACCOUNT_ID", "test_account")
 
-    tools = toolset.fetch_tools(
-        include_tools=["hris_*"],
-        account_ids=[account_id]
-    )
+    tools = toolset.fetch_tools(include_tools=["hris_*"], account_ids=[account_id])
 
     # 2. Convert to Claude SDK
     bridge = StackOneBridge(tools)
@@ -184,8 +181,7 @@ async def stackone_claude_sdk_with_discovery():
 
     # Fetch broader set of tools
     tools = toolset.fetch_tools(
-        include_tools=["hris_*", "ats_*", "crm_*"],
-        account_ids=[account_id]
+        include_tools=["hris_*", "ats_*", "crm_*"], account_ids=[account_id]
     )
     print(f"   Fetched {len(tools.to_list())} tools")
 
