@@ -19,10 +19,10 @@ Choose from DSPy, OpenAI SDK, CrewAI, Google ADK, Microsoft, or DeepAgents
 !!! success "Learning Outcomes"
     By the end of this guide, you'll have:
 
-    - ✅ A fully functional AI agent in your chosen framework
-    - ✅ Automated evaluation with RSpec-style BDD scenarios
-    - ✅ GEPA optimization with proven improvements
-    - ✅ Production-ready agent deployment
+    - A fully functional AI agent in your chosen framework
+    - Automated evaluation with RSpec-style BDD scenarios
+    - GEPA optimization with proven improvements
+    - Production-ready agent deployment
 
 ## 📋 Requirements
 
@@ -101,11 +101,24 @@ Choose from DSPy, OpenAI SDK, CrewAI, Google ADK, Microsoft, or DeepAgents
     export GOOGLE_API_KEY=your-google-api-key
     ```
 
+=== "Claude Agent SDK"
+    ```bash
+    pip install superoptix[frameworks-claude-sdk]
+    ```
+    **Includes:** claude-agent-sdk
+
+    **Setup API Key:**
+    ```bash
+    export ANTHROPIC_API_KEY=your-anthropic-api-key
+    ```
+
 === "Microsoft Agent Framework"
     ```bash
     pip install superoptix[frameworks-microsoft]
     ```
     **Includes:** agent-framework, azure-identity
+    
+    **Note:** This integration is maintained as legacy support.
 
 === "DeepAgents"
     ```bash
@@ -125,7 +138,7 @@ Choose from DSPy, OpenAI SDK, CrewAI, Google ADK, Microsoft, or DeepAgents
     ```bash
     pip install superoptix[frameworks]
     ```
-    **Includes:** DSPy, OpenAI SDK, Google ADK, Microsoft, DeepAgents
+    **Includes:** DSPy, OpenAI SDK, Claude SDK, Google ADK, Microsoft, DeepAgents
     
     **Excludes:** CrewAI (due to DSPy conflict)
 
@@ -299,10 +312,10 @@ super agent evaluate sentiment_analyzer
 ### 🌟 The Universal Optimizer
 
 !!! success "Framework Support"
-    - ✅ Works on **ALL frameworks** (DSPy, OpenAI SDK, CrewAI, Google ADK, Microsoft, DeepAgents)
-    - ✅ Proven optimization results across frameworks
-    - ✅ Sample efficient: Works with minimal training scenarios
-    - ✅ Framework-agnostic: Same command for all frameworks!
+    - Works on **ALL frameworks** (DSPy, OpenAI SDK, CrewAI, Google ADK, Microsoft, DeepAgents)
+    - Proven optimization results across frameworks
+    - Sample efficient: Works with minimal training scenarios
+    - Framework-agnostic: Same command for all frameworks!
 
 ```bash
 # GEPA works on ALL frameworks! Same command!
@@ -486,20 +499,19 @@ super agent run sentiment_analyzer \
 
 ---
 
-## ✅ Summary
+## Summary
 
 !!! success "What You've Accomplished"
 
     | Skill | Status |
     |-------|--------|
-    | Install SuperOptiX | ✅ Complete |
-    | Initialize a project | ✅ Complete |
-    | Choose from multiple frameworks | ✅ Complete |
-    | Compile agents | ✅ Complete |
-    | Evaluate performance | ✅ Complete |
-    | Optimize with GEPA | ✅ Complete |
-    | Deploy to production | ✅ Complete |
+    | Install SuperOptiX | Complete |
+    | Initialize a project | Complete |
+    | Choose from multiple frameworks | Complete |
+    | Compile agents | Complete |
+    | Evaluate performance | Complete |
+    | Optimize with GEPA | Complete |
+    | Deploy to production | Complete |
 
 !!! note "Ready to Build More?"
     Check out our [Guides](../guides/index.md) for in-depth tutorials!
-

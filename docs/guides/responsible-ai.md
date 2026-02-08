@@ -63,7 +63,7 @@ spec:
 
 ### Cost Management Strategies
 
-#### 1. **Set Usage Limits**
+#### **Set Usage Limits**
 
 ```bash
 # Environment variables for cost control
@@ -75,7 +75,7 @@ export GOOGLE_USAGE_LIMIT=30       # Stop at $30
 super observability dashboard --live
 ```
 
-#### 2. **Use Local Models for Development**
+#### **Use Local Models for Development**
 
 ```yaml
 # Development configuration (FREE)
@@ -88,7 +88,7 @@ spec:
     max_tokens: 2000
 ```
 
-#### 3. **Cost-Effective Production**
+#### **Cost-Effective Production**
 
 ```yaml
 # Production configuration (cost-controlled)
@@ -132,7 +132,7 @@ export ANTHROPIC_USAGE_ALERT=20 # Alert at $20
 
 ### Sustainable AI Practices
 
-#### 1. **Use Local Models When Possible**
+#### **Use Local Models When Possible**
 
 ```yaml
 # Sustainable development workflow
@@ -145,7 +145,7 @@ spec:
     max_tokens: 2000
 ```
 
-#### 2. **Optimize Model Usage**
+#### **Optimize Model Usage**
 
 ```yaml
 # Efficient configuration
@@ -159,7 +159,7 @@ spec:
     cache: true         # Cache responses to avoid redundant calls
 ```
 
-#### 3. **Batch Processing**
+#### **Batch Processing**
 
 ```bash
 # Process multiple requests together
@@ -171,18 +171,18 @@ super agent run your_agent --schedule --off-peak-hours
 
 ### Green AI Checklist
 
-- ✅ **Use local models** for development and testing
-- ✅ **Choose efficient models** (smaller, faster)
-- ✅ **Cache responses** to avoid redundant computation
-- ✅ **Batch requests** when possible
-- ✅ **Monitor usage** and optimize patterns
-- ✅ **Consider carbon offsets** for large deployments
+- **Use local models** for development and testing
+- **Choose efficient models** (smaller, faster)
+- **Cache responses** to avoid redundant computation
+- **Batch requests** when possible
+- **Monitor usage** and optimize patterns
+- **Consider carbon offsets** for large deployments
 
 ## 🔒 Data Privacy
 
 ### Privacy-First Design
 
-#### 1. **Data Minimization**
+#### **Data Minimization**
 
 ```yaml
 # Privacy-conscious configuration
@@ -200,7 +200,7 @@ spec:
     - "Use encryption for data transmission"
 ```
 
-#### 2. **Secure Configuration**
+#### **Secure Configuration**
 
 ```bash
 # Secure environment setup
@@ -214,7 +214,7 @@ export OPENAI_API_KEY=your-key-here
 export ANTHROPIC_API_KEY=your-key-here
 ```
 
-#### 3. **Data Protection**
+#### **Data Protection**
 
 ```yaml
 # Data protection in playbook
@@ -243,7 +243,7 @@ spec:
 
 ### Bias Detection and Mitigation
 
-#### 1. **Bias Testing**
+#### **Bias Testing**
 
 ```yaml
 # Bias testing configuration
@@ -261,7 +261,7 @@ spec:
       - "output_filtering"
 ```
 
-#### 2. **Fairness Constraints**
+#### **Fairness Constraints**
 
 ```yaml
 # Fairness constraints in playbook
@@ -274,7 +274,7 @@ spec:
     - "Enable user feedback for bias reporting"
 ```
 
-#### 3. **Diverse Testing**
+#### **Diverse Testing**
 
 ```bash
 # Test with diverse datasets
@@ -301,7 +301,7 @@ spec:
 
 ### Transparent AI Systems
 
-#### 1. **Clear Disclaimers**
+#### **Clear Disclaimers**
 
 ```yaml
 # Transparency configuration
@@ -314,7 +314,7 @@ spec:
     source_attribution: true        # Attribute sources when possible
 ```
 
-#### 2. **Explainable AI**
+#### **Explainable AI**
 
 ```yaml
 # Explainability features
@@ -326,7 +326,7 @@ spec:
     alternative_suggestions: true   # Provide alternatives
 ```
 
-#### 3. **User Communication**
+#### **User Communication**
 
 ```yaml
 # Clear user communication
@@ -343,12 +343,12 @@ spec:
 
 ### Development Best Practices
 
-#### 1. **Start Local, Scale Cloud**
+#### **Start Local, Scale Cloud**
 
 ```bash
 # Development workflow
 # Step 1: Local development (FREE, PRIVATE)
-super agent compile your_agent --tier oracle
+super agent compile your_agent
 
 # Step 2: Local testing
 super agent evaluate your_agent
@@ -362,7 +362,7 @@ super agent compile your_agent
 super agent evaluate your_agent --max-examples 3
 ```
 
-#### 2. **Responsible Optimization**
+#### **Responsible Optimization**
 
 ```bash
 # Safe optimization practices
@@ -376,7 +376,7 @@ super agent optimize your_agent --max-iterations 5 --max-examples 3
 super observability dashboard --live
 ```
 
-#### 3. **Security First**
+#### **Security First**
 
 ```bash
 # Security best practices
@@ -393,7 +393,7 @@ super agent audit your_agent --security-check
 
 ### Production Best Practices
 
-#### 1. **Gradual Deployment**
+#### **Gradual Deployment**
 
 ```bash
 # Gradual deployment strategy
@@ -407,7 +407,7 @@ super agent deploy your_agent --beta --max-users 100
 super agent deploy your_agent --production
 ```
 
-#### 2. **Continuous Monitoring**
+#### **Continuous Monitoring**
 
 ```bash
 # Comprehensive monitoring
@@ -420,7 +420,7 @@ super agent monitor your_agent --alerts
 super agent audit your_agent --comprehensive
 ```
 
-#### 3. **User Feedback Integration**
+#### **User Feedback Integration**
 
 ```yaml
 # User feedback system
@@ -439,7 +439,7 @@ spec:
 
 ### Continuous Monitoring
 
-#### 1. **Performance Monitoring**
+#### **Performance Monitoring**
 
 ```bash
 # Performance monitoring
@@ -452,7 +452,7 @@ super agent monitor your_agent --metrics accuracy,latency,cost
 super agent monitor your_agent --alerts --threshold 0.8
 ```
 
-#### 2. **Ethical Monitoring**
+#### **Ethical Monitoring**
 
 ```bash
 # Ethical monitoring
@@ -465,7 +465,7 @@ super agent monitor your_agent --bias-detection
 super agent monitor your_agent --fairness-metrics
 ```
 
-#### 3. **Cost Monitoring**
+#### **Cost Monitoring**
 
 ```bash
 # Cost monitoring
@@ -480,7 +480,7 @@ super agent optimize your_agent --cost-aware
 
 ### Regular Auditing
 
-#### 1. **Comprehensive Audits**
+#### **Comprehensive Audits**
 
 ```bash
 # Regular comprehensive audits
@@ -493,7 +493,7 @@ super agent audit your_agent --security --quarterly
 super agent audit your_agent --ethical --quarterly
 ```
 
-#### 2. **Compliance Audits**
+#### **Compliance Audits**
 
 ```bash
 # Compliance checking
@@ -510,30 +510,30 @@ super agent audit your_agent --fairness-audit
 
 ### Development Phase
 
-- ✅ **Use local models** for development and testing
-- ✅ **Implement privacy controls** from the start
-- ✅ **Test for bias** with diverse datasets
-- ✅ **Set up monitoring** before deployment
-- ✅ **Document limitations** and capabilities
-- ✅ **Plan for user feedback** collection
+- **Use local models** for development and testing
+- **Implement privacy controls** from the start
+- **Test for bias** with diverse datasets
+- **Set up monitoring** before deployment
+- **Document limitations** and capabilities
+- **Plan for user feedback** collection
 
 ### Deployment Phase
 
-- ✅ **Gradual rollout** with limited users
-- ✅ **Continuous monitoring** of performance and ethics
-- ✅ **User feedback** collection and processing
-- ✅ **Regular audits** for compliance and fairness
-- ✅ **Cost monitoring** and budget controls
-- ✅ **Transparent communication** with users
+- **Gradual rollout** with limited users
+- **Continuous monitoring** of performance and ethics
+- **User feedback** collection and processing
+- **Regular audits** for compliance and fairness
+- **Cost monitoring** and budget controls
+- **Transparent communication** with users
 
 ### Maintenance Phase
 
-- ✅ **Regular updates** based on feedback
-- ✅ **Bias mitigation** improvements
-- ✅ **Performance optimization** with cost awareness
-- ✅ **Security updates** and vulnerability patches
-- ✅ **Compliance monitoring** and updates
-- ✅ **Environmental impact** assessment and optimization
+- **Regular updates** based on feedback
+- **Bias mitigation** improvements
+- **Performance optimization** with cost awareness
+- **Security updates** and vulnerability patches
+- **Compliance monitoring** and updates
+- **Environmental impact** assessment and optimization
 
 ## 🚀 Quick Reference
 
@@ -541,7 +541,7 @@ super agent audit your_agent --fairness-audit
 
 ```bash
 # Start with local development
-super agent compile your_agent --tier oracle
+super agent compile your_agent
 
 # Test locally
 super agent evaluate your_agent

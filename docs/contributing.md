@@ -16,14 +16,14 @@ SuperOptiX provides enterprise-grade AI agent development through our powerful f
 ## 🚀 Getting Started with SuperOptiX
 
 ```bash
-# 1. Install the SuperOptiX Framework
+# Install the SuperOptiX Framework
 pip install superoptix
 
-# 2. Initialize your first project
+# Initialize your first project
 super init my-project
 cd my-project
 
-# 3. Try the CLI to see available commands
+# Try the CLI to see available commands
 super --help
 ```
 

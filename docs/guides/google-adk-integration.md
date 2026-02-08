@@ -4,18 +4,20 @@
 
 SuperOptiX now supports **Google ADK (Agent Development Kit)** - Google's code-first Python toolkit optimized for Gemini models. This integration brings GEPA optimization to Google's enterprise-grade agent framework.
 
+RLM support is experimental. Unified sandbox support is coming soon.
+
 **Key Features:**
-- ✅ **Gemini 2.0 Flash** integration (Google's latest model!)
-- ✅ **GEPA optimization** of agent instructions
-- ✅ **Production deployment** (Cloud Run, Vertex AI)
-- ✅ **Built-in evaluation** framework
-- ✅ **Standard SuperOptiX workflow** (compile/evaluate/optimize/run)
+- **Gemini 2.0 Flash** integration (Google's latest model!)
+- **GEPA optimization** of agent instructions
+- **Deployment deployment** (Cloud Run, Vertex AI)
+- **Built-in evaluation** framework
+- **Standard SuperOptiX workflow** (compile/evaluate/optimize/run)
 
 ---
 
 ## Quick Start
 
-### 1. Prerequisites
+### Prerequisites
 
 **Install SuperOptiX with Google ADK:**
 
@@ -37,42 +39,42 @@ pip install superoptix[frameworks-google]
 export GOOGLE_API_KEY="your-api-key-here"
 ```
 
-### 2. Create Project
+### Create Project
 
 ```bash
 super init my_project
 cd my_project
 ```
 
-### 3. Pull Demo Agent
+### Pull Demo Agent
 
 ```bash
 super agent pull assistant_adk
 ```
 
-### 4. Compile
+### Compile
 
 ```bash
 super agent compile assistant_adk --framework google-adk
 ```
 
-### 5. Evaluate
+### Evaluate
 
 ```bash
 export GOOGLE_API_KEY="your-key"  # Required!
 super agent evaluate assistant_adk
 ```
 
-### 6. Optimize
+### Optimize
 
 ```bash
-super agent optimize assistant_adk --auto medium
+super agent optimize assistant_adk --framework google-adk --auto medium
 ```
 
-### 7. Run
+### Run
 
 ```bash
-super agent run assistant_adk --goal "What is AI?"
+super agent run assistant_adk --framework google-adk --goal "What is AI?"
 ```
 
 ---
@@ -89,7 +91,7 @@ graph LR
     D -->|run| E[runner.run]
 ```
 
-### 1. **Compile**: SuperSpec → Google ADK
+### **Compile**: SuperSpec → Google ADK
 
 **Input:** SuperSpec playbook (YAML)
 
@@ -120,7 +122,7 @@ You are powered by Google's Gemini...""",
 runner = InMemoryRunner(agent=agent, app_name="superoptix_assistant")
 ```
 
-### 2. **Evaluate**: Test on BDD Scenarios
+### **Evaluate**: Test on BDD Scenarios
 
 ```python
 # Create session
@@ -132,7 +134,7 @@ async for event in runner.run_async(user_id, session.id, content):
     response = event.content.parts[0].text
 ```
 
-### 3. **Optimize**: GEPA Optimizes Instruction
+### **Optimize**: GEPA Optimizes Instruction
 
 **Optimizable Variable:**
 
@@ -171,10 +173,10 @@ AI model with advanced reasoning capabilities. You excel at explaining
 complex topics clearly and providing actionable insights.
 ```
 
-### 4. **Run**: Execute with Optimized Instruction
+### **Run**: Execute with Optimized Instruction
 
 ```bash
-super agent run assistant_adk --goal "Explain quantum computing"
+super agent run assistant_adk --framework google-adk --goal "Explain quantum computing"
 # Uses optimized instruction → Better results!
 ```
 
@@ -196,7 +198,7 @@ GEPA optimizes the **instruction** field - the system prompt guiding agent behav
 - Similar to OpenAI SDK (proven successful)
 - Measurable improvements
 
-**Note:** Unlike CrewAI (5 variables), Google ADK has **1 optimizable variable** like OpenAI SDK.
+**Note:** Google ADK focuses optimization on the agent instruction, similar to OpenAI SDK.
 
 ---
 
@@ -218,7 +220,7 @@ spec:
   # LLM Configuration - Gemini models
   language_model:
     provider: google
-    model: gemini-2.0-flash  # Free tier!
+    model: gemini-2.0-flash  # Free access!
     # Alternative: gemini-1.5-pro, gemini-1.5-flash
   
   # Input/Output Fields
@@ -279,7 +281,7 @@ spec:
 
 | Model | Description | Best For |
 |-------|-------------|----------|
-| `gemini-2.0-flash` | Latest, fastest, FREE tier! | ✅ **Recommended** |
+| `gemini-2.0-flash` | Latest, fastest, FREE access! | **Recommended** |
 | `gemini-1.5-pro` | More capable, longer context | Complex tasks |
 | `gemini-1.5-flash` | Fast, efficient | Simple tasks |
 
@@ -294,7 +296,7 @@ Visit: https://aistudio.google.com/apikey
 export GOOGLE_API_KEY="your-api-key-here"
 ```
 
-**Option 2: Google Cloud (Production)**
+**Option 2: Google Cloud (Deployment)**
 ```bash
 # Authenticate with gcloud
 gcloud auth application-default login
@@ -335,10 +337,10 @@ super agent evaluate assistant_adk
 🔍 Evaluating assistant_adk...
 Testing 4 BDD scenarios:
 
-✅ Simple greeting: PASS
-✅ Question answering: PASS
-✅ Explanation request: PASS
-✅ Math question: PASS
+Simple greeting: PASS
+Question answering: PASS
+Explanation request: PASS
+Math question: PASS
 
 ============================================================
 Overall: 4/4 PASS (100.0%)
@@ -348,10 +350,10 @@ Overall: 4/4 PASS (100.0%)
 ### Writing Good BDD Scenarios
 
 **Best Practices:**
-- ✅ Test diverse question types
-- ✅ Include specific keywords
-- ✅ Test edge cases
-- ✅ Use realistic examples
+- Test diverse question types
+- Include specific keywords
+- Test edge cases
+- Use realistic examples
 
 **Example:**
 
@@ -387,7 +389,7 @@ scenarios:
 
 ```bash
 export GOOGLE_API_KEY="your-key"
-super agent optimize assistant_adk --auto medium
+super agent optimize assistant_adk --framework google-adk --auto medium
 ```
 
 **What Happens:**
@@ -421,25 +423,25 @@ super agent optimize assistant_adk --auto medium
 
 | Feature | DSPy | DeepAgents | OpenAI SDK | CrewAI | **Google ADK** |
 |---------|------|------------|-----------|--------|---------------|
-| **Local Models** | ✅ | ❌ | ✅ | ✅ | ❌ |
-| **Cloud Models** | ✅ | ✅ | ✅ | ✅ | ✅ Gemini |
-| **Multi-Agent** | ❌ | Sub-agents | Handoffs | ✅ | ✅ Sequential/Parallel |
+| **Local Models** | | | | | |
+| **Cloud Models** | | | | | Gemini |
+| **Multi-Agent** | | Sub-agents | Handoffs | | Sequential/Parallel |
 | **Optimizable Vars** | 10+ | 1 | 1 | 5 | **1** |
 | **Best For** | Prompts | Planning | Simple | Teams | Google Ecosystem |
-| **API Keys Needed** | No | No | No | No | ✅ Yes |
-| **Evaluation** | DSPy | Custom | Custom | Custom | ✅ Built-in |
-| **Deployment** | DIY | DIY | DIY | DIY | ✅ Cloud Run/Vertex |
+| **API Keys Needed** | No | No | No | No | Yes |
+| **Evaluation** | DSPy | Custom | Custom | Custom | Built-in |
+| **Deployment** | DIY | DIY | DIY | DIY | Cloud Run/Vertex |
 
 ### When to Use Google ADK
 
-✅ **Best for:**
+**Best for:**
 - Google Cloud deployments
 - Gemini models (state-of-the-art!)
-- Production enterprise systems
+- Deployment enterprise systems
 - Built-in evaluation needs
 - Agent-to-Agent (A2A) protocol
 
-❌ **Not ideal for:**
+**Not ideal for:**
 - Local-only development (needs API key)
 - Ollama/open-source models
 - Cost-sensitive prototyping
@@ -450,7 +452,7 @@ super agent optimize assistant_adk --auto medium
 
 ### Common Issues
 
-#### 1. Missing API Key
+#### Missing API Key
 
 **Error:** `google.auth.exceptions.DefaultCredentialsError`
 
@@ -467,7 +469,7 @@ export GOOGLE_API_KEY="your-api-key-here"
 gcloud auth application-default login
 ```
 
-#### 2. Google ADK Not Installed
+#### Google ADK Not Installed
 
 **Error:** `ImportError: No module named 'google.adk'`
 
@@ -477,16 +479,16 @@ gcloud auth application-default login
 pip install google-adk
 ```
 
-#### 3. Rate Limits
+#### Rate Limits
 
 **Error:** `Resource exhausted: Quota exceeded`
 
 **Solution:**
 - Use `--auto light` for optimization
 - Wait a few minutes between runs
-- Upgrade to paid tier for higher limits
+- Upgrade to paid plan for higher limits
 
-#### 4. Model Not Found
+#### Model Not Found
 
 **Error:** `Model 'gemini-x' not found`
 
@@ -560,14 +562,14 @@ Google ADK supports multi-agent architectures:
 
 2. **Optimize:**
    ```bash
-   super agent optimize assistant_adk --auto medium
+   super agent optimize assistant_adk --framework google-adk --auto medium
    super agent evaluate assistant_adk  # See improvement!
    ```
 
 3. **Deploy:**
    - Use Google ADK's built-in deployment tools
    - Deploy to Cloud Run or Vertex AI
-   - Production-ready!
+   - Deployment-ready!
 
 ---
 
@@ -582,5 +584,3 @@ Need help?
 ---
 
 **Happy Optimizing with Google Gemini! 🚀**
-
-

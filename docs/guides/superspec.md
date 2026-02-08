@@ -177,12 +177,12 @@ SuperSpec supports 6 major agent frameworks. Select based on your needs:
 
 | Framework | Variables | Local Models | Best For |
 |-----------|-----------|--------------|----------|
-| **DSPy** | 10+ | ✅ Ollama | Complex reasoning, research |
-| **OpenAI SDK** | 1 | ✅ Ollama | Simple & fast |
-| **CrewAI** | 5 | ✅ Ollama | Multi-agent teams |
-| **Google ADK** | 1 | ❌ Cloud only | Gemini native, free tier |
-| **Microsoft** | 1 | ✅ Ollama | Enterprise Azure |
-| **DeepAgents** | 1 | ✅ Ollama | Complex planning |
+| **DSPy** | 10+ | Ollama | Complex reasoning, research |
+| **OpenAI SDK** | 1 | Ollama | Simple & fast |
+| **CrewAI** | 5 | Ollama | Multi-agent teams |
+| **Google ADK** | 1 | Cloud only | Gemini native, free tier |
+| **Microsoft** | 1 | Ollama | Enterprise Azure |
+| **DeepAgents** | 1 | Ollama | Complex planning |
 
 ### **Learning Path: Beginner to Advanced**
 
@@ -1370,7 +1370,7 @@ super agent run my-agent --goal "Your task here"
 
 ## 🎯 **Best Practices**
 
-### **✅ DO's**
+### **DO's**
 
 1. **Start Simple**: Begin with basic Oracles tier configuration
 2. **Use Descriptive Names**: Make task and field names self-documenting
@@ -1379,7 +1379,7 @@ super agent run my-agent --goal "Your task here"
 5. **Test Thoroughly**: Write comprehensive BDD scenarios
 6. **Optimize Iteratively**: Use evaluation results to guide optimization
 
-### **❌ DON'Ts**
+### **DON'Ts**
 
 1. **Don't Over-Configure**: Start with minimal configuration
 2. **Don't Skip Validation**: Always validate before compilation

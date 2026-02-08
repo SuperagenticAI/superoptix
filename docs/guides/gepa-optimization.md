@@ -95,12 +95,12 @@ GEPA works seamlessly across all 6 supported frameworks:
 
 | Framework | Optimizable Variables | Status | Proven Results |
 |-----------|----------------------|--------|----------------|
-| **🔬 DSPy** | 10+ variables | ✅ Proven | 37.5% → 80% |
-| **🤖 OpenAI SDK** | 1 variable (instructions) | ✅ Proven | 100% pass rate |
-| **👥 CrewAI** | 5 variables (role+goal+backstory+task) | ✅ Proven | 100% pass rate |
-| **🔮 Google ADK** | 1 variable (instruction) | ✅ Available | - |
-| **🏢 Microsoft** | 1 variable (instructions) | ✅ Available | - |
-| **🌊 DeepAgents** | 1 variable (system_prompt) | ✅ Available | - |
+| **🔬 DSPy** | 10+ variables | Proven | 37.5% → 80% |
+| **🤖 OpenAI SDK** | 1 variable (instructions) | Proven | 100% pass rate |
+| **👥 CrewAI** | 5 variables (role+goal+backstory+task) | Proven | 100% pass rate |
+| **🔮 Google ADK** | 1 variable (instruction) | Available | - |
+| **🏢 Microsoft** | 1 variable (instructions) | Available | - |
+| **🌊 DeepAgents** | 1 variable (system_prompt) | Available | - |
 
 **The same `super agent optimize` command works for all frameworks!**
 
@@ -172,9 +172,9 @@ super agent optimize research_agent_deepagents --auto medium --framework deepage
 The `--reflection-lm` parameter specifies which model GEPA uses to analyze evaluation results and suggest prompt improvements. We typically recommend using a **smaller, faster model** for reflection:
 
 **Why use a smaller reflection model (e.g., llama3.1:8b)?**
-- ✅ **Speed**: GEPA runs the reflection model many times (10-50+ iterations). Smaller models make optimization 5-10x faster
-- ✅ **Resources**: Reduces memory and compute requirements significantly
-- ✅ **Good Enough**: The reflection task (analyzing results, suggesting improvements) is simpler than the agent's actual task
+- **Speed**: GEPA runs the reflection model many times (10-50+ iterations). Smaller models make optimization 5-10x faster
+- **Resources**: Reduces memory and compute requirements significantly
+- **Good Enough**: The reflection task (analyzing results, suggesting improvements) is simpler than the agent's actual task
 
 **Example:**
 ```bash
@@ -253,14 +253,14 @@ super agent optimize developer \
 $ super agent optimize developer --auto light --fresh
 
 🧹 Clearing DSPy cache (--fresh mode)...
-   ✅ Cache cleared: /Users/you/.dspy_cache
+   Cache cleared: /Users/you/.dspy_cache
    🔄 Optimization will use fresh LLM calls
    ⏱️  This will take longer but show real GEPA iterations
 
 🔄 GEPA Iteration 1/5...
    📊 Analyzing failures...
    💡 Generating improved prompts...
-   ✅ Pass rate: 45% → 60% (+15%)
+   Pass rate: 45% → 60% (+15%)
 
 🔄 GEPA Iteration 2/5...
    ...
@@ -269,17 +269,17 @@ $ super agent optimize developer --auto light --fresh
 **Demo Workflow with --fresh:**
 
 ```bash
-# 1. Baseline evaluation
+# Baseline evaluation
 super agent evaluate developer
 # → Shows 40% pass rate
 
-# 2. Optimize with --fresh (shows real progress!)
+# Optimize with --fresh (shows real progress!)
 super agent optimize developer --auto light --fresh
 # → Takes 5-10 minutes
 # → Shows detailed iteration logs
 # → Stakeholders see the optimization happening
 
-# 3. Post-optimization evaluation
+# Post-optimization evaluation
 super agent evaluate developer  # automatically loads optimized weights
 # → Shows 80% pass rate
 # → Clear improvement demonstrated!
@@ -348,7 +348,7 @@ spec:
 
 ### Best Practices
 
-#### 1. Start with Light Budget
+#### Start with Light Budget
 ```yaml
 # Begin conservatively
 auto: light  # 3-5 minutes, ~400 metric calls
@@ -358,7 +358,7 @@ auto: medium  # 8-12 minutes, ~800 metric calls
 auto: heavy   # 15-30 minutes, ~1600 metric calls
 ```
 
-#### 2. Choose Appropriate Metrics
+#### Choose Appropriate Metrics
 ```yaml
 # For math problems
 metric: advanced_math_feedback
@@ -373,7 +373,7 @@ metric: privacy_preservation_feedback
 metric: vulnerability_detection_feedback
 ```
 
-#### 3. Use Quality Training Scenarios
+#### Use Quality Training Scenarios
 ```yaml
 feature_specifications:
   scenarios:
@@ -385,7 +385,7 @@ feature_specifications:
         answer: "Complete expected response with reasoning"
 ```
 
-#### 4. Diverse Reflection Models
+#### Diverse Reflection Models
 Use different models for main processing and reflection to get diverse perspectives:
 
 ```yaml
@@ -438,8 +438,7 @@ Pass Rate: 100% (4/4 scenarios)
 **After GEPA Optimization**:
 ```
 Pass Rate: 100% (4/4 scenarios)
-Improvement: Maintained excellence ✅
-```
+Improvement: Maintained excellence ```
 
 **What GEPA Improved**:
 - Enhanced response quality and clarity
@@ -478,18 +477,18 @@ Improvement: +25 percentage points ⭐
 
 | Framework | Variables | Baseline | After GEPA | Improvement | Status |
 |-----------|-----------|----------|------------|-------------|--------|
-| **🔬 DSPy** | 10+ | 37.5% | 80.0% | +42.5 pts 🏆 | ✅ Proven |
-| **🤖 OpenAI SDK** | 1 | 100% | 100% | Maintained ✅ | ✅ Proven |
-| **👥 CrewAI** | 5 | 75% | 100% | +25 pts ⭐ | ✅ Proven |
-| **🔮 Google ADK** | 1 | - | - | Available | ✅ Available |
-| **🏢 Microsoft** | 1 | - | - | Available | ✅ Available |
-| **🌊 DeepAgents** | 1 | - | - | Available | ✅ Available |
+| **🔬 DSPy** | 10+ | 37.5% | 80.0% | +42.5 pts 🏆 | Proven |
+| **🤖 OpenAI SDK** | 1 | 100% | 100% | Maintained | Proven |
+| **👥 CrewAI** | 5 | 75% | 100% | +25 pts ⭐ | Proven |
+| **🔮 Google ADK** | 1 | - | - | Available | Available |
+| **🏢 Microsoft** | 1 | - | - | Available | Available |
+| **🌊 DeepAgents** | 1 | - | - | Available | Available |
 
 **Key Insights**:
-- ✅ GEPA works across all frameworks
-- ✅ Proven improvements on 3 frameworks (DSPy, OpenAI SDK, CrewAI)
-- ✅ Same optimization workflow for all frameworks
-- ✅ 67% of frameworks support local models (Ollama) for free optimization
+- GEPA works across all frameworks
+- Proven improvements on 3 frameworks (DSPy, OpenAI SDK, CrewAI)
+- Same optimization workflow for all frameworks
+- 67% of frameworks support local models (Ollama) for free optimization
 
 ---
 
@@ -700,11 +699,11 @@ INFO dspy.teleprompt.gepa.gepa: Iteration 2: Proposed new text for predictor
 ```
 
 **What this means**:
-- ✅ GEPA allocated 400 metric calls for optimization
-- ✅ Started with 40% baseline performance
-- ✅ Making iterative improvements
-- ✅ Achieved 100% on subset evaluation
-- ✅ Generating new prompt candidates
+- GEPA allocated 400 metric calls for optimization
+- Started with 40% baseline performance
+- Making iterative improvements
+- Achieved 100% on subset evaluation
+- Generating new prompt candidates
 
 ### GEPA Timeout Behavior
 
@@ -752,7 +751,7 @@ super agent optimize your_agent &
 
 ### Recommendations
 
-#### 1. Start Small and Scale
+#### Start Small and Scale
 ```bash
 # Begin with light budget
 super agent optimize your_agent  # auto: light
@@ -761,7 +760,7 @@ super agent optimize your_agent  # auto: light
 # Edit playbook to auto: medium, then recompile and optimize
 ```
 
-#### 2. Use Local Models for Cost Control
+#### Use Local Models for Cost Control
 ```yaml
 spec:
   language_model:
@@ -770,7 +769,7 @@ spec:
     model: llama3.1:8b  # Free local optimization
 ```
 
-#### 3. Invest in Quality Training Data
+#### Invest in Quality Training Data
 ```yaml
 feature_specifications:
   scenarios:
@@ -783,7 +782,7 @@ feature_specifications:
         reasoning: "Step-by-step explanation"
 ```
 
-#### 4. Monitor and Validate Results
+#### Monitor and Validate Results
 ```bash
 # Always measure improvement
 super agent evaluate your_agent  # Before optimization
@@ -791,7 +790,7 @@ super agent optimize your_agent
 super agent evaluate your_agent  # After optimization - compare results
 ```
 
-#### 5. Use Domain-Appropriate Metrics
+#### Use Domain-Appropriate Metrics
 ```yaml
 # Mathematics
 metric: advanced_math_feedback
@@ -805,27 +804,27 @@ metric: vulnerability_detection_feedback
 
 ### Caveats and Limitations
 
-#### 1. **Higher Resource Requirements**
+#### **Higher Resource Requirements**
 - **Memory**: Requires two models (main + reflection)
 - **Time**: Longer optimization cycles than traditional methods
 - **Compute**: More intensive than simple few-shot optimization
 
-#### 2. **Configuration Complexity**
+#### **Configuration Complexity**
 - Requires choosing appropriate reflection model
 - Need domain-specific metrics for best results
 - Budget tuning requires experience
 
-#### 3. **Not Always Superior**
+#### **Not Always Superior**
 - For simple tasks, traditional optimization may be sufficient
 - General-purpose agents may not benefit as much
 - Very large datasets might favor other approaches
 
-#### 4. **Model Dependency**
+#### **Model Dependency**
 - Quality depends heavily on reflection model capability
 - Some local models may not provide good reflection
 - Cloud models increase costs significantly
 
-#### 5. **Debugging Complexity**
+#### **Debugging Complexity**
 - More complex optimization process to debug
 - Harder to isolate issues between main and reflection models
 - Requires understanding of GEPA's iterative process
@@ -905,10 +904,10 @@ optimization:
 
 | Tier | Tool Support | GEPA Compatible | Recommended Optimizer |
 |------|--------------|-----------------|----------------------|
-| **Oracles** | No tools | ✅ Yes | GEPA (excellent) |
-| **Genies** | ReAct + Tools | ❌ No | BootstrapFewShot, SIMBA |
-| **Protocols** | Advanced tools | ❌ No | BetterTogether, MIPROv2 |
-| **Superagents** | Complex tools | ❌ No | SIMBA, MIPROv2 |
+| **Oracles** | No tools | Yes | GEPA (excellent) |
+| **Genies** | ReAct + Tools | No | BootstrapFewShot, SIMBA |
+| **Protocols** | Advanced tools | No | BetterTogether, MIPROv2 |
+| **Superagents** | Complex tools | No | SIMBA, MIPROv2 |
 
 **Summary**: Use GEPA for Oracle-tier agents (simple reasoning without tools). For Genies tier and above (with tool calling), use BootstrapFewShot, SIMBA, or BetterTogether optimizers instead.
 
@@ -939,20 +938,20 @@ optimization:
 ### Your First GEPA Optimization
 
 ```bash
-# 1. Create or pull a GEPA-ready agent
+# Create or pull a GEPA-ready agent
 super agent pull advanced_math_gepa
 
-# 2. Compile and establish baseline
+# Compile and establish baseline
 super agent compile advanced_math_gepa
 super agent evaluate advanced_math_gepa
 
-# 3. Run GEPA optimization
+# Run GEPA optimization
 super agent optimize advanced_math_gepa
 
-# 4. Validate improvements
+# Validate improvements
 super agent evaluate advanced_math_gepa
 
-# 5. Test the optimized agent
+# Test the optimized agent
 super agent run advanced_math_gepa --goal "Solve 2x² + 3x - 5 = 0"
 ```
 

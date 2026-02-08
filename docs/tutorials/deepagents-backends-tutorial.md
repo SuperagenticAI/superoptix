@@ -8,12 +8,12 @@
 
 By the end of this tutorial, you'll know how to:
 
-- ✅ Configure all 4 backend types (state, store, filesystem, composite)
-- ✅ Build a chatbot with persistent memory
-- ✅ Create a code review agent with real file access
-- ✅ Design hybrid storage strategies
-- ✅ Optimize backends for GEPA
-- ✅ Deploy production-ready agents
+- Configure all 4 backend types (state, store, filesystem, composite)
+- Build a chatbot with persistent memory
+- Create a code review agent with real file access
+- Design hybrid storage strategies
+- Optimize backends for GEPA
+- Deploy production-ready agents
 
 **Time:** 30 minutes  
 **Level:** Intermediate
@@ -130,7 +130,7 @@ super agent run my_chatbot --goal "What's my name?"
 ```
 
 **Agent's internal actions:**
-1. **Reads `/user_profile.txt`** (still there! ✅)
+1. **Reads `/user_profile.txt`** (still there! )
 2. Finds: "Name: Bob"
 3. Responds: "Your name is Bob!"
 
@@ -150,8 +150,7 @@ super agent run my_chatbot --goal "Suggest a Python project for me"
 ```bash
 # Restart everything, new terminal, next day...
 super agent run my_chatbot --goal "Who am I?"
-# Response: "You're Bob, a Python developer!" ✅
-
+# Response: "You're Bob, a Python developer!" 
 # The memory persisted!
 ```
 
@@ -436,7 +435,7 @@ super agent run researcher --goal "What did I research about LangGraph?"
 ```
 
 **Agent's actions:**
-1. Reads `/memories/research_index.txt` (STILL THERE! ✅)
+1. Reads `/memories/research_index.txt` (STILL THERE! )
 2. Sees: "LangGraph: See /memories/langgraph_research.txt"
 3. **Reads `/memories/langgraph_research.txt`** (PERSISTS!)
 4. Responds: "Based on your research from October 29th, LangGraph is..."
@@ -570,25 +569,25 @@ time super agent run research_filesystem --goal "$QUERY"
 # New conversation - which agent still has /notes.txt?
 
 super agent run research_state --goal "Show me /notes.txt"
-# ❌ File not found (ephemeral)
+# File not found (ephemeral)
 
 super agent run research_store --goal "Show me /notes.txt"
-# ✅ File found! (persistent in database)
+# File found! (persistent in database)
 
 super agent run research_filesystem --goal "Show me /notes.txt"
-# ✅ File found! (on actual filesystem)
+# File found! (on actual filesystem)
 
 cat /tmp/agent_files/notes.txt
-# ✅ Real file exists on disk
+# Real file exists on disk
 ```
 
 ### Results
 
 | Backend | Speed | Persistence | Visible in IDE | Best For |
 |---------|-------|-------------|----------------|----------|
-| state | ⚡⚡⚡ 1.2s | ❌ No | ❌ No | Speed |
-| store | ⚡⚡ 1.5s | ✅ Yes | ❌ No | Memory |
-| filesystem | ⚡⚡ 1.4s | ✅ Yes | ✅ Yes | Real files |
+| state | ⚡⚡⚡ 1.2s | No | No | Speed |
+| store | ⚡⚡ 1.5s | Yes | No | Memory |
+| filesystem | ⚡⚡ 1.4s | Yes | Yes | Real files |
 
 ---
 
@@ -728,10 +727,10 @@ spec:
 super agent run dev_assistant --goal "Review all Python files for issues"
 
 # Agent:
-# 1. Lists /project/src/*.py
-# 2. Reads each file
-# 3. Analyzes code
-# 4. Writes report to /project/code_review.md (REAL FILE)
+# Lists /project/src/*.py
+# Reads each file
+# Analyzes code
+# Writes report to /project/code_review.md (REAL FILE)
 ```
 
 **Example 2: Add Feature**
@@ -739,11 +738,11 @@ super agent run dev_assistant --goal "Review all Python files for issues"
 super agent run dev_assistant --goal "Add input validation to login function in src/auth.py"
 
 # Agent:
-# 1. Reads /project/src/auth.py
-# 2. Identifies login function
-# 3. Adds validation
-# 4. Writes back to /project/src/auth.py (MODIFIED!)
-# 5. Saves pattern to /memories/code_patterns.txt
+# Reads /project/src/auth.py
+# Identifies login function
+# Adds validation
+# Writes back to /project/src/auth.py (MODIFIED!)
+# Saves pattern to /memories/code_patterns.txt
 ```
 
 **Example 3: Recall Context**
@@ -752,30 +751,30 @@ super agent run dev_assistant --goal "Add input validation to login function in 
 super agent run dev_assistant --goal "What changes have we made to auth.py?"
 
 # Agent:
-# 1. Reads /memories/project_context.txt
-# 2. Finds record of auth.py changes
-# 3. Responds with history
+# Reads /memories/project_context.txt
+# Finds record of auth.py changes
+# Responds with history
 ```
 
 ---
 
 ## 🛡️ Security Best Practices
 
-### 1. Limit Filesystem Scope
+### Limit Filesystem Scope
 
 ```yaml
-# ❌ BAD: Too broad
+# BAD: Too broad
 backend:
   type: filesystem
   root_dir: /  # Can access ENTIRE system!
 
-# ✅ GOOD: Specific directory
+# GOOD: Specific directory
 backend:
   type: filesystem
   root_dir: /Users/local/my_project/src  # Limited scope
 ```
 
-### 2. Use Read-Only for Sensitive Data
+### Use Read-Only for Sensitive Data
 
 ```yaml
 # Composite with read-only paper access
@@ -787,7 +786,7 @@ backend:
     /output/: state       # Agent can WRITE outputs (not to real files)
 ```
 
-### 3. Validate Changes
+### Validate Changes
 
 Add validation to system prompt:
 ```yaml

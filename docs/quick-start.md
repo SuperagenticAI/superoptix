@@ -233,7 +233,7 @@ super observe dashboard
 
 ---
 
-## ✅ Summary
+## Summary
 
 !!! success "What You've Accomplished"
 

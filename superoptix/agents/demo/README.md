@@ -227,7 +227,7 @@ super agent optimize <agent_id> --auto medium
 
 ### 5. Run
 ```bash
-super agent run <agent_id> --input "your input here"
+super agent run <agent_id> --goal "your goal here"
 ```
 
 ---

@@ -73,7 +73,7 @@ rag:
 
 **Key RAG Configuration Points**:
 
-- ✅ **`enabled: true`**: Enables RAG functionality
+- **`enabled: true`**: Enables RAG functionality
 - 🗄️ **`retriever_type: lancedb`**: Uses LanceDB as vector database
 - 🔝 **`top_k: 5`**: Retrieves top 5 most similar documents
 - 📄 **`chunk_size: 512`**: Document chunk size for processing

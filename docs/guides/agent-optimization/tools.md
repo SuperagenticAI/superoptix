@@ -41,7 +41,7 @@ Tool optimization is the process of improving an agent's **tool selection**, **i
 
 ## What GEPA Optimizes in Tool Usage
 
-### 1. Tool Selection (Which Tools to Use)
+### Tool Selection (Which Tools to Use)
 
 **What It Is**: Learning which tool(s) to use for each scenario
 
@@ -83,7 +83,7 @@ Learned Strategies:
 
 ---
 
-### 2. Tool Invocation Order (Orchestration)
+### Tool Invocation Order (Orchestration)
 
 **What It Is**: Learning the optimal sequence of tool calls
 
@@ -118,7 +118,7 @@ Result: Prioritized by severity automatically
 
 ---
 
-### 3. Output Combination (Multi-Tool Integration)
+### Output Combination (Multi-Tool Integration)
 
 **What It Is**: Learning how to combine outputs from multiple tools
 
@@ -162,7 +162,7 @@ RECOMMENDATION: Fix SQL injection first (security), then refactor (maintainabili
 
 ---
 
-### 4. Error Handling and Fallbacks
+### Error Handling and Fallbacks
 
 **What It Is**: Learning how to handle tool failures gracefully
 
@@ -314,7 +314,7 @@ Performance Improvement: O(n²) → O(n) (1000x faster for large lists)"
 
 ## Best Practices
 
-### 1. Provide Diverse Tool Categories
+### Provide Diverse Tool Categories
 
 ```yaml
 tools:
@@ -330,7 +330,7 @@ tools:
 
 GEPA learns which category for which scenario.
 
-### 2. Define Tool Purposes in RSpec-Style BDD
+### Define Tool Purposes in RSpec-Style BDD
 
 ```yaml
 feature_specifications:
@@ -345,7 +345,7 @@ feature_specifications:
 
 GEPA learns: This scenario requires complexity_calculator.
 
-### 3. Show Tool Usage in Datasets
+### Show Tool Usage in Datasets
 
 ```csv
 code,review
@@ -355,7 +355,7 @@ code,review
 
 GEPA learns tool patterns from real examples.
 
-### 4. Enable Tool Reflection
+### Enable Tool Reflection
 
 ```yaml
 tools:

@@ -41,19 +41,19 @@ The `metadata` section defines the agent's identity and basic properties.
   </tr>
   <tr style="background: rgba(76, 175, 80, 0.05);">
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><code>name</code></td>
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">✅ Yes</strong></td>
+    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">Yes</strong></td>
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">string</td>
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">Human-readable agent name</td>
   </tr>
   <tr style="background: rgba(33, 150, 243, 0.05);">
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><code>id</code></td>
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">✅ Yes</strong></td>
+    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">Yes</strong></td>
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">string</td>
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">Unique identifier (a-z, 0-9, -, _)</td>
   </tr>
   <tr style="background: rgba(255, 152, 0, 0.05);">
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><code>version</code></td>
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">✅ Yes</strong></td>
+    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">Yes</strong></td>
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">string</td>
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">Semantic versioning (e.g., "1.0.0")</td>
   </tr>
@@ -415,7 +415,7 @@ spec:
 
 ---
 
-## ✅ Feature Specifications (BDD Scenarios)
+## Feature Specifications (BDD Scenarios)
 
 Define behavior-driven test scenarios (universal across all frameworks).
 

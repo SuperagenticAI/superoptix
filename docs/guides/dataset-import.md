@@ -7,11 +7,11 @@ Import external datasets for agent training and evaluation, scaling beyond YAML 
 ## 🎯 **Overview**
 
 SuperOptiX now supports importing external datasets in addition to BDD scenarios. This allows you to:
-- ✅ Use existing datasets (CSV, JSON, Parquet, HuggingFace)
-- ✅ Scale to 10,000+ examples (vs 5-10 YAML scenarios)
-- ✅ Leverage standard ML workflows
-- ✅ Access HuggingFace's 100,000+ datasets
-- ✅ Mix datasets with BDD scenarios for best results
+- Use existing datasets (CSV, JSON, Parquet, HuggingFace)
+- Scale to 10,000+ examples (vs 5-10 YAML scenarios)
+- Leverage standard ML workflows
+- Access HuggingFace's 100,000+ datasets
+- Mix datasets with BDD scenarios for best results
 
 ---
 
@@ -319,8 +319,8 @@ super agent dataset validate my_agent
 **Output**:
 ```
 Validating 1 dataset(s)...
-✅ training_data: Valid
-✅ All datasets valid!
+training_data: Valid
+All datasets valid!
 ```
 
 ---
@@ -483,7 +483,7 @@ feature_specifications:  # Edge cases
 ### **Issue: File Not Found**
 
 ```
-❌ Failed to load dataset: No such file or directory
+Failed to load dataset: No such file or directory
 ```
 
 **Fix**: Use absolute paths or check relative path from playbook location
@@ -501,7 +501,7 @@ source: ../../data/data.csv
 ### **Issue: Column Not Found**
 
 ```
-❌ Error: Column 'text_column' not found
+Error: Column 'text_column' not found
 ```
 
 **Fix**: Check your CSV/JSON column names match mapping
@@ -520,7 +520,7 @@ mapping:
 ### **Issue: Import Error**
 
 ```
-❌ Dataset import feature not available
+Dataset import feature not available
 ```
 
 **Fix**: Reinstall SuperOptiX
@@ -634,28 +634,28 @@ spec:
 ## 🎬 **Demo Workflow**
 
 ```bash
-# 1. Preview your data
+# Preview your data
 super agent dataset preview sentiment_prod
 
-# 2. Validate configuration
+# Validate configuration
 super agent dataset validate sentiment_prod
 
-# 3. See dataset stats
+# See dataset stats
 super agent dataset info sentiment_prod
 
-# 4. Compile
+# Compile
 super agent compile sentiment_prod
 # → "📊 Loaded 15,000 examples from datasets!"
 
-# 5. Evaluate
+# Evaluate
 super agent evaluate sentiment_prod
 # → Uses all 15,002 examples
 
-# 6. Optimize
+# Optimize
 super agent optimize sentiment_prod --auto medium --fresh
 # → GEPA trains on 15,000 examples (better results!)
 
-# 7. Re-evaluate
+# Re-evaluate
 super agent evaluate sentiment_prod
 # → See improvement from massive dataset!
 ```
@@ -697,7 +697,7 @@ format: jsonl
 
 ```yaml
 datasets:
-  - shuffle: true  # ✅ Prevents ordering bias
+  - shuffle: true  # Prevents ordering bias
     limit: 5000
 ```
 
@@ -766,12 +766,12 @@ mapping:
 ## 🎉 **Summary**
 
 **Dataset Import enables**:
-- ✅ Import from 5 formats (CSV, JSON, JSONL, Parquet, HuggingFace)
-- ✅ Scale to 10,000+ examples
-- ✅ Use existing datasets
-- ✅ Standard ML workflows
-- ✅ Better GEPA optimization
-- ✅ Mix with BDD scenarios
+- Import from 5 formats (CSV, JSON, JSONL, Parquet, HuggingFace)
+- Scale to 10,000+ examples
+- Use existing datasets
+- Standard ML workflows
+- Better GEPA optimization
+- Mix with BDD scenarios
 
 **Get Started**:
 ```bash

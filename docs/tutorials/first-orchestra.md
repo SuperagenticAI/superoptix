@@ -193,15 +193,15 @@ super agent compile --all
 │  📁 Output: swe/agents/developer/pipelines/developer_pipeline.py                                             │
 │                                                                                                              │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-✅ Successfully generated Oracles-tier pipeline (mixin) at: /Users/super/swe 
+Successfully generated Oracles-tier pipeline (mixin) at: /Users/super/swe 
 18-15-10-253/swe/agents/developer/pipelines/developer_pipeline.py
 
 🎯 Oracles Tier Features
-  ✅ Basic Predict and Chain of Thought modules
-  ✅ Bootstrap Few-Shot optimization
-  ✅ Basic evaluation metrics
-  ✅ Sequential task orchestration
-  ✅ Basic tracing and observability
+  Basic Predict and Chain of Thought modules
+  Bootstrap Few-Shot optimization
+  Basic evaluation metrics
+  Sequential task orchestration
+  Basic tracing and observability
 
 ╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ 🎉 COMPILATION SUCCESSFUL! Pipeline Generated                                                                │
@@ -222,15 +222,15 @@ super agent compile --all
 │  📁 Output: swe/agents/devops_engineer/pipelines/devops_engineer_pipeline.py                                 │
 │                                                                                                              │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-✅ Successfully generated Oracles-tier pipeline (mixin) at: /Users/super/swe 
+Successfully generated Oracles-tier pipeline (mixin) at: /Users/super/swe 
 18-15-10-253/swe/agents/devops_engineer/pipelines/devops_engineer_pipeline.py
 
 🎯 Oracles Tier Features
-  ✅ Basic Predict and Chain of Thought modules
-  ✅ Bootstrap Few-Shot optimization
-  ✅ Basic evaluation metrics
-  ✅ Sequential task orchestration
-  ✅ Basic tracing and observability
+  Basic Predict and Chain of Thought modules
+  Bootstrap Few-Shot optimization
+  Basic evaluation metrics
+  Sequential task orchestration
+  Basic tracing and observability
 
 ╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ 🎉 COMPILATION SUCCESSFUL! Pipeline Generated                                                                │
@@ -251,15 +251,15 @@ super agent compile --all
 │  📁 Output: swe/agents/qa_engineer/pipelines/qa_engineer_pipeline.py                                         │
 │                                                                                                              │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-✅ Successfully generated Oracles-tier pipeline (mixin) at: /Users/super/swe 
+Successfully generated Oracles-tier pipeline (mixin) at: /Users/super/swe 
 18-15-10-253/swe/agents/qa_engineer/pipelines/qa_engineer_pipeline.py
 
 🎯 Oracles Tier Features
-  ✅ Basic Predict and Chain of Thought modules
-  ✅ Bootstrap Few-Shot optimization
-  ✅ Basic evaluation metrics
-  ✅ Sequential task orchestration
-  ✅ Basic tracing and observability
+  Basic Predict and Chain of Thought modules
+  Bootstrap Few-Shot optimization
+  Basic evaluation metrics
+  Sequential task orchestration
+  Basic tracing and observability
 
 ╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ 🎉 COMPILATION SUCCESSFUL! Pipeline Generated                                                                │
@@ -271,7 +271,7 @@ super agent compile --all
 │                                                                                                              │
 │  🎉 ALL AGENTS COMPILED SUCCESSFULLY!                                                                        │
 │                                                                                                              │
-│  ✅ Successful: 3 agent(s)                                                                                   │
+│  Successful: 3 agent(s)                                                                                   │
 │  🚀 Ready for testing and customization!                                                                     │
 │                                                                                                              │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
@@ -305,7 +305,7 @@ super orchestra create sdlc
 🔎 Found 3 existing agent(s): developer, devops_engineer, qa_engineer. Adding them to the orchestra.
 📝 Loaded 3 task(s) from agent playbooks.
 
-✅ Created new orchestra definition at: swe/orchestras/sdlc_orchestra.yaml
+Created new orchestra definition at: swe/orchestras/sdlc_orchestra.yaml
 👉 Orchestra automatically configured with tasks from agent playbooks.
    Found 3 task(s): implement_feature, configure_ci_pipeline, create_test_plan
 
@@ -446,16 +446,16 @@ super orchestra run sdlc --goal "Build a complete web application for a task man
 📁 Created workspace directory: /Users/super/swe 18-15-10-253/swe/orchestra_workspaces/sdlc
 📂 Using workspace: /Users/super/swe 18-15-10-253/swe/orchestra_workspaces/sdlc
 🔐 Validating tier access for oracles tier...
-✅ Tier validation passed!
+Tier validation passed!
 🎼 Using basic orchestration mode
 🚀 Running Basic Orchestra: Sdlc Orchestra
 📋 Executing 3 tasks sequentially...
 
 🔄 Task 1/3: implement_feature
 🚀 Using pre-optimized pipeline from developer_optimized.json
-✅ Model connection successful: ollama/llama3.2:1b
+Model connection successful: ollama/llama3.2:1b
 📋 Loaded 5 BDD specifications for execution
-✅ DeveloperPipeline (Oracle tier) initialized with 5 BDD scenarios
+DeveloperPipeline (Oracle tier) initialized with 5 BDD scenarios
 
          Analysis Results
 ┏━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -536,13 +536,13 @@ super orchestra run sdlc --goal "Build a complete web application for a task man
 │ Tier           │ oracles                                                                                     │
 └────────────────┴─────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-✅ Task implement_feature completed in 11.16s
+Task implement_feature completed in 11.16s
 
 🔄 Task 2/3: configure_ci_pipeline
 📝 Using base pipeline (no optimization available)
-✅ Model connection successful: ollama/llama3.2:1b
+Model connection successful: ollama/llama3.2:1b
 📋 Loaded 5 BDD specifications for execution
-✅ DevopsEngineerPipeline (Oracle tier) initialized with 5 BDD scenarios
+DevopsEngineerPipeline (Oracle tier) initialized with 5 BDD scenarios
 
          Analysis Results
 ┏━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -565,13 +565,13 @@ super orchestra run sdlc --goal "Build a complete web application for a task man
 │ Tier            │ oracles                                                                                    │
 └─────────────────┴─────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-✅ Task configure_ci_pipeline completed in 9.05s
+Task configure_ci_pipeline completed in 9.05s
 
 🔄 Task 3/3: create_test_plan
 📝 Using base pipeline (no optimization available)
-✅ Model connection successful: ollama/llama3.2:1b
+Model connection successful: ollama/llama3.2:1b
 📋 Loaded 5 BDD specifications for execution
-✅ QaEngineerPipeline (Oracle tier) initialized with 5 BDD scenarios
+QaEngineerPipeline (Oracle tier) initialized with 5 BDD scenarios
 
          Analysis Results
 ┏━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -600,7 +600,7 @@ super orchestra run sdlc --goal "Build a complete web application for a task man
 │ Tier            │ oracles                                                                                    │
 └─────────────────┴─────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-✅ Task create_test_plan completed in 1.40s
+Task create_test_plan completed in 1.40s
 🎉 Orchestra completed successfully!
 ```
 
@@ -623,7 +623,7 @@ super orchestra run sdlc --goal "Build a complete web application for a task man
     #### **3️⃣ DevOps Engineer Agent (Third)**
     - **🎯 Task**: Deploy and configure the application
     - **📝 Output**: Deployment configuration, infrastructure setup, and monitoring
-    - **✅ Final Result**: Complete, tested, and deployed application
+    - **Final Result**: Complete, tested, and deployed application
 
 !!! info "🧠 How Multi-Agent Coordination Works"
 
@@ -633,7 +633,7 @@ super orchestra run sdlc --goal "Build a complete web application for a task man
     2. **🎯 Agent Assignment**: Each agent receives their specific responsibility
     3. **🔄 Sequential Execution**: Agents work in order, building on previous results
     4. **📊 Result Aggregation**: Orchestra combines all agent outputs
-    5. **✅ Final Delivery**: Complete solution from the entire team
+    5. **Final Delivery**: Complete solution from the entire team
 
     **💡 Benefits of Multi-Agent Teams:**
     - **🎯 Specialized Expertise**: Each agent focuses on their domain
@@ -743,8 +743,7 @@ You now have the power to create AI orchestras that can:
 - **Coordinate specialized teams** 🎼
 - **Handle complex workflows** 🔄
 - **Scale to enterprise needs** 📈
-- **Ensure quality delivery** ✅
-- **Adapt to any domain** 🎯
+- **Ensure quality delivery** - **Adapt to any domain** 🎯
 
 **Welcome to the future of multi-agent orchestration!** 🌟
 

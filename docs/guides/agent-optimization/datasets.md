@@ -45,7 +45,7 @@ Result: Agent handles real-world code variations
 
 ## What GEPA Learns from Datasets
 
-### 1. Real-World Patterns
+### Real-World Patterns
 
 **What It Is**: Learning how real issues actually manifest in code
 
@@ -86,7 +86,7 @@ code,review
 
 ---
 
-### 2. Expert Solution Phrasing
+### Expert Solution Phrasing
 
 **What It Is**: Learning how domain experts actually write recommendations
 
@@ -116,7 +116,7 @@ code,review
 
 ---
 
-### 3. Edge Case Handling
+### Edge Case Handling
 
 **What It Is**: Learning to handle unusual or complex scenarios
 
@@ -155,7 +155,7 @@ def check_user(username):
 
 ---
 
-### 4. Domain-Specific Knowledge
+### Domain-Specific Knowledge
 
 **What It Is**: Learning industry standards, best practices, conventions
 
@@ -359,7 +359,7 @@ Recommended Next Steps:
 
 ## Best Practices
 
-### 1. Combine RSpec-Style BDD Scenarios + Datasets
+### Combine RSpec-Style BDD Scenarios + Datasets
 
 ```yaml
 spec:
@@ -379,7 +379,7 @@ spec:
 
 **Why**: RSpec-style BDD defines expectations, datasets teach real-world execution
 
-### 2. Use Diverse, High-Quality Datasets
+### Use Diverse, High-Quality Datasets
 
 ```yaml
 datasets:
@@ -400,7 +400,7 @@ datasets:
     limit: 50
 ```
 
-### 3. Balance Dataset Size
+### Balance Dataset Size
 
 ```yaml
 # Development (fast iteration)
@@ -412,7 +412,7 @@ datasets:
   - limit: 500  # Large for comprehensive learning
 ```
 
-### 4. Ensure Dataset Quality
+### Ensure Dataset Quality
 
 **Good Dataset**:
 - Diverse examples

@@ -20,17 +20,17 @@ This demo showcases how to integrate **Weaviate** - a powerful vector database -
 
 ## Prerequisites
 
-### 1. Install SuperOptiX
+### Install SuperOptiX
 ```bash
 pip install superoptix
 ```
 
-### 2. Install Weaviate Dependencies
+### Install Weaviate Dependencies
 ```bash
 pip install weaviate-client
 ```
 
-### 3. Set Up Weaviate Server
+### Set Up Weaviate Server
 ```bash
 # Using Docker (recommended)
 docker run -d \
@@ -45,7 +45,7 @@ docker run -d \
   semitechnologies/weaviate:1.22.4
 ```
 
-### 4. Install and Serve Model
+### Install and Serve Model
 ```bash
 # Install a model (if not already installed)
 super model install llama3.1:8b
@@ -56,17 +56,17 @@ ollama serve
 
 ## Quick Start
 
-### 1. Pull the Demo Agent
+### Pull the Demo Agent
 ```bash
 super agent pull rag_weaviate_demo
 ```
 
-### 2. Compile the Agent
+### Compile the Agent
 ```bash
 super agent compile rag_weaviate_demo
 ```
 
-### 3. Run the Demo
+### Run the Demo
 ```bash
 super agent run rag_weaviate_demo --goal "What is the SuperOptiX framework and its key features?"
 ```

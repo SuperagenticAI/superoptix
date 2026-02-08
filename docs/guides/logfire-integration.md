@@ -6,12 +6,12 @@
 
 SuperOptiX includes **native LogFire integration** for Pydantic AI agents, allowing you to:
 
-- ✅ **Trace agent executions** with full visibility into LLM calls
-- ✅ **Monitor tool usage** (MCP tools, regular tools)
-- ✅ **Track token usage and costs** automatically
-- ✅ **View conversation history** with rich formatting
-- ✅ **Analyze performance metrics** (latency, success rates)
-- ✅ **Debug issues** with detailed span information
+- **Trace agent executions** with full visibility into LLM calls
+- **Monitor tool usage** (MCP tools, regular tools)
+- **Track token usage and costs** automatically
+- **View conversation history** with rich formatting
+- **Analyze performance metrics** (latency, success rates)
+- **Debug issues** with detailed span information
 
 The integration is **opt-in** and works gracefully when LogFire is not configured.
 
@@ -57,10 +57,10 @@ pip install "superoptix[logfire]"
 - These versions are incompatible
 
 **Safe combinations:**
-- ✅ `superoptix[frameworks-pydantic-ai,logfire]` - Works!
-- ✅ `superoptix[frameworks-openai,logfire]` - Works!
-- ✅ `superoptix[all]` - Works! (LogFire not included)
-- ❌ `superoptix[all,logfire]` - Fails! (google-adk conflict)
+- `superoptix[frameworks-pydantic-ai,logfire]` - Works!
+- `superoptix[frameworks-openai,logfire]` - Works!
+- `superoptix[all]` - Works! (LogFire not included)
+- `superoptix[all,logfire]` - Fails! (google-adk conflict)
 
 **What gets installed:**
 - `pydantic-ai==1.31.0` (from `frameworks-pydantic-ai`)
@@ -83,7 +83,7 @@ kind: AgentSpec
 metadata:
   name: ...
 spec:                    ← LogFire goes here
-  logfire:               ✅ CORRECT LOCATION
+  logfire:               CORRECT LOCATION
     enabled: true
   language_model:        ← Same level
     ...
@@ -103,7 +103,7 @@ metadata:
   version: "1.0.0"
   
 spec:
-  # ✅ LogFire configuration - place it here in the spec section
+  # LogFire configuration - place it here in the spec section
   logfire:
     enabled: true  # Default: true (auto-detects if LogFire is available)
   
@@ -128,8 +128,8 @@ spec:
 **Important Notes:**
 
 - ⚠️ **Place `logfire` configuration directly under `spec:`** (not under `optimization` or other sections)
-- ✅ If `logfire` section is omitted, it defaults to `enabled: true` (auto-detect)
-- ✅ The configuration is read when the agent is initialized
+- If `logfire` section is omitted, it defaults to `enabled: true` (auto-detect)
+- The configuration is read when the agent is initialized
 
 ### Code Configuration
 
@@ -138,10 +138,10 @@ LogFire must be configured **before** the agent is initialized:
 #### Option 1: Cloud Dashboard (Recommended for Production)
 
 ```bash
-# 1. Authenticate with LogFire (one-time setup)
+# Authenticate with LogFire (one-time setup)
 logfire auth
 
-# 2. LogFire auto-configures after auth
+# LogFire auto-configures after auth
 # No additional code needed!
 ```
 
@@ -185,29 +185,29 @@ logfire.configure(
 ### Compile and Run Example
 
 ```bash
-# 1. Initialize project
+# Initialize project
 super init my_project
 cd my_project
 
-# 2. Pull agent
+# Pull agent
 super agent pull developer
 
-# 3. Enable LogFire in playbook (edit playbook YAML)
+# Enable LogFire in playbook (edit playbook YAML)
 #    Add to spec section:
 #    spec:
 #      logfire:
 #        enabled: true
 
-# 4. Authenticate with LogFire (one-time setup)
+# Authenticate with LogFire (one-time setup)
 logfire auth
 
-# 5. Compile with Pydantic AI
+# Compile with Pydantic AI
 super agent compile developer --framework pydantic-ai
 
-# 6. Run agent (LogFire traces captured automatically)
+# Run agent (LogFire traces captured automatically)
 super agent run developer --goal "Implement a REST API endpoint"
 
-# 7. View traces at https://logfire.pydantic.dev
+# View traces at https://logfire.pydantic.dev
 ```
 
 **📋 Step-by-Step Playbook Configuration:**
@@ -251,7 +251,7 @@ spec:
 - 🔧 Tool invocations (MCP tools, etc.)
 - ⏱️ Performance metrics
 - 💰 Token usage and costs
-- ❌ Errors and exceptions
+- Errors and exceptions
 
 ### Option 2: Other OTLP-Compatible Backends
 
@@ -278,31 +278,31 @@ logfire.configure(
 
 When LogFire is enabled, the following are automatically captured:
 
-### 1. Agent Execution
+### Agent Execution
 - Agent initialization
 - Input processing
 - Output generation
 - Execution duration
 
-### 2. LLM Interactions
+### LLM Interactions
 - Model calls (requests/responses)
 - Full conversation history
 - Token usage
 - Cost calculations
 - Latency metrics
 
-### 3. Tool Usage
+### Tool Usage
 - MCP tool invocations
 - Tool parameters and results
 - Tool execution time
 - Success/failure status
 
-### 4. Structured Output
+### Structured Output
 - Validation events
 - Field extraction
 - Output formatting
 
-### 5. Errors
+### Errors
 - Exception traces
 - Error messages
 - Stack traces
@@ -361,10 +361,10 @@ logfire.configure(
 **Issue:** Traces don't show up in LogFire dashboard.
 
 **Solutions:**
-1. ✅ Verify LogFire is authenticated: `logfire auth`
-2. ✅ Check if LogFire is configured: LogFire should be configured before agent initialization
-3. ✅ Verify `logfire.enabled: true` in playbook (or omit it, defaults to true)
-4. ✅ Check network connectivity (for cloud dashboard)
+1. Verify LogFire is authenticated: `logfire auth`
+2. Check if LogFire is configured: LogFire should be configured before agent initialization
+3. Verify `logfire.enabled: true` in playbook (or omit it, defaults to true)
+4. Check network connectivity (for cloud dashboard)
 
 ### ImportError: No module named 'logfire'
 
@@ -382,10 +382,10 @@ pip install logfire==4.15.0
 **Issue:** Agent runs but LogFire doesn't capture traces.
 
 **Solutions:**
-1. ✅ Ensure LogFire is configured **before** agent initialization
-2. ✅ Check that `logfire.enabled: true` in playbook
-3. ✅ Verify agent was compiled after LogFire was configured
-4. ✅ Re-compile agent: `super agent compile developer --framework pydantic-ai`
+1. Ensure LogFire is configured **before** agent initialization
+2. Check that `logfire.enabled: true` in playbook
+3. Verify agent was compiled after LogFire was configured
+4. Re-compile agent: `super agent compile developer --framework pydantic-ai`
 
 ### Graceful Fallback
 
@@ -407,7 +407,7 @@ metadata:
   version: "1.0.0"
   
 spec:
-  # ✅ LogFire Configuration - MUST be under spec: (same level as other configs)
+  # LogFire Configuration - MUST be under spec: (same level as other configs)
   logfire:
     enabled: true  # Auto-detects if LogFire is available and configured
   
@@ -443,28 +443,28 @@ spec:
 
 **⚠️ Common Mistakes to Avoid:**
 
-❌ **Wrong - LogFire under wrong section:**
+**Wrong - LogFire under wrong section:**
 ```yaml
 spec:
   optimization:
-    logfire:  # ❌ WRONG - don't put it here
+    logfire:  # WRONG - don't put it here
       enabled: true
 ```
 
-❌ **Wrong - LogFire outside spec:**
+**Wrong - LogFire outside spec:**
 ```yaml
 metadata:
-  logfire:  # ❌ WRONG - must be under spec:
+  logfire:  # WRONG - must be under spec:
     enabled: true
 spec:
   language_model:
     ...
 ```
 
-✅ **Correct - LogFire directly under spec:**
+**Correct - LogFire directly under spec:**
 ```yaml
 spec:
-  logfire:  # ✅ CORRECT - directly under spec:
+  logfire:  # CORRECT - directly under spec:
     enabled: true
   language_model:
     ...
@@ -494,10 +494,10 @@ spec:
 
 LogFire integration in SuperOptiX provides:
 
-- ✅ **Zero-configuration** - Works out of the box when LogFire is installed
-- ✅ **Graceful fallback** - No errors if LogFire is not available
-- ✅ **Rich observability** - Full visibility into agent execution
-- ✅ **Production-ready** - Works with LogFire cloud or any OTLP backend
-- ✅ **Framework-native** - Built specifically for Pydantic AI
+- **Zero-configuration** - Works out of the box when LogFire is installed
+- **Graceful fallback** - No errors if LogFire is not available
+- **Rich observability** - Full visibility into agent execution
+- **Production-ready** - Works with LogFire cloud or any OTLP backend
+- **Framework-native** - Built specifically for Pydantic AI
 
 Enable LogFire in your playbook and start getting insights into your agent behavior! 🚀

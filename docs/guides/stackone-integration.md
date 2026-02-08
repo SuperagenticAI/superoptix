@@ -1,6 +1,6 @@
 # StackOne Integration Guide
 
-SuperOptiX serves as the **Universal Bridge** for [StackOne](https://stackone.com), allowing you to use their unified SaaS API tools with **any** major agent framework (DSPy, Pydantic AI, CrewAI, Google Vertex, Microsoft Semantic Kernel) while adding powerful capabilities like **GEPA optimization** and **pre-built benchmarks**.
+SuperOptiX serves as the **Universal Bridge** for [StackOne](https://stackone.com), allowing you to use their unified SaaS API tools with major frameworks (DSPy, Pydantic AI, CrewAI, Google ADK, OpenAI SDK, DeepAgents) while adding optimization and evaluation workflows.
 
 ---
 
@@ -8,7 +8,7 @@ SuperOptiX serves as the **Universal Bridge** for [StackOne](https://stackone.co
 
 | Feature | Description |
 | :--- | :--- |
-| **Universal Bridge** | Use StackOne tools in DSPy, Pydantic AI, CrewAI, Google Vertex, and Semantic Kernel. |
+| **Universal Bridge** | Use StackOne tools in DSPy, Pydantic AI, CrewAI, Google ADK, OpenAI SDK, and DeepAgents. |
 | **GEPA Optimization** | Automatically rewrite tool descriptions to fix LLM errors. |
 | **Vertical Benchmarks** | Pre-built evaluation suites for HRIS, ATS, and CRM tasks. |
 | **Type Safety** | Full Pydantic model generation for strict validation. |
@@ -31,11 +31,47 @@ pip install superoptix stackone-ai claude-agent-sdk
 
 ---
 
+## Current CLI Workflow (Recommended)
+
+Use one StackOne playbook and compile it into any framework:
+
+```bash
+export STACKONE_API_KEY="..."
+export STACKONE_ACCOUNT_IDS="acc_123"
+super agent pull stackone-calendly
+```
+
+```bash
+# DSPy
+super agent compile stackone-calendly --framework dspy
+super agent run stackone-calendly --framework dspy --goal "What is my Calendly username?"
+
+# Pydantic AI
+super agent compile stackone-calendly --framework pydantic-ai --cloud --provider google-genai --model gemini-2.5-flash
+super agent run stackone-calendly --framework pydantic-ai --direct --cloud --provider google-genai --model gemini-2.5-flash --goal "What is my Calendly username?"
+
+# OpenAI SDK
+super agent compile stackone-calendly --framework openai --cloud --provider google-genai --model gemini-2.5-flash
+super agent run stackone-calendly --framework openai --cloud --provider google-genai --model gemini-2.5-flash --goal "What is my Calendly username?"
+
+# Claude Agent SDK
+super agent compile stackone-calendly --framework claude-sdk
+super agent run stackone-calendly --framework claude-sdk --goal "What is my Calendly username?"
+
+# CrewAI
+super agent compile stackone-calendly --framework crewai --cloud --provider google-genai --model gemini-2.5-flash
+super agent run stackone-calendly --framework crewai --cloud --provider google-genai --model gemini-2.5-flash --goal "What is my Calendly username?"
+```
+
+For Claude-specific setup details, see [StackOne + Claude Agent SDK](stackone-claude-sdk.md).
+
+---
+
 ## 🌉 The Universal Bridge
 
 The `StackOneBridge` adapter allows you to convert StackOne tools into the native format of your chosen framework.
 
-### 1. DSPy Integration
+### DSPy Integration
 
 Perfect for programmable agents and optimization.
 
@@ -44,13 +80,13 @@ from stackone_ai import StackOneToolSet
 from superoptix.adapters import StackOneBridge
 import dspy
 
-# 1. Fetch Tools
+# Fetch Tools
 tools = StackOneToolSet().fetch_tools(actions=["hris_*"])
 
-# 2. Bridge to DSPy
+# Bridge to DSPy
 dspy_tools = StackOneBridge(tools).to_dspy()
 
-# 3. Use in Agent
+# Use in Agent
 agent = dspy.ReAct("query -> answer", tools=dspy_tools)
 ```
 
@@ -80,9 +116,9 @@ Then run:
 ```bash
 export STACKONE_API_KEY="..."
 export STACKONE_ACCOUNT_IDS="acc_123"
-super agent pull dspy-stackone
-super agent compile dspy-stackone
-super agent run dspy-stackone --goal "List employees and group by department"
+super agent pull stackone-calendly
+super agent compile stackone-calendly --framework dspy
+super agent run stackone-calendly --framework dspy --goal "List meetings and highlight conflicts"
 ```
 
 Calendly-focused demo:
@@ -90,9 +126,9 @@ Calendly-focused demo:
 ```bash
 export STACKONE_API_KEY="..."
 export STACKONE_ACCOUNT_IDS="acc_123"
-super agent pull dspy-stackone-calendly
-super agent compile dspy-stackone-calendly
-super agent run dspy-stackone-calendly --goal "Show my meetings for next week and any conflicts"
+super agent pull stackone-calendly
+super agent compile stackone-calendly --framework dspy
+super agent run stackone-calendly --framework dspy --goal "Show my meetings for next week and any conflicts"
 ```
 
 You can also enable live transient thinking logs from the shell:
@@ -101,21 +137,21 @@ You can also enable live transient thinking logs from the shell:
 export SUPEROPTIX_DSPY_THINKING_LOGS=1
 ```
 
-### 2. Pydantic AI Integration (Type-Safe)
+### Pydantic AI Integration (Type-Safe)
 
 Generates strictly typed Pydantic models for every tool, ensuring the agent follows the schema exactly.
 
 ```python
 from pydantic_ai import Agent
 
-# 1. Bridge to Pydantic AI
+# Bridge to Pydantic AI
 pai_tools = StackOneBridge(tools).to_pydantic_ai()
 
-# 2. Use in Agent (Type-safe!)
+# Use in Agent (Type-safe!)
 agent = Agent('openai:gpt-4o', tools=pai_tools)
 ```
 
-### 3. CrewAI Integration
+### CrewAI Integration
 
 Perfect for multi-agent workflows with role-based agents. Supports both sync and async tools.
 
@@ -123,13 +159,13 @@ Perfect for multi-agent workflows with role-based agents. Supports both sync and
 from crewai import Agent, Task, Crew, Process
 from crewai.llm import LLM
 
-# 1. Bridge to CrewAI (Sync)
+# Bridge to CrewAI (Sync)
 crewai_tools = StackOneBridge(tools).to_crewai()
 
 # Or for async workflows:
 # crewai_async_tools = StackOneBridge(tools).to_crewai_async()
 
-# 2. Create Agent with StackOne tools
+# Create Agent with StackOne tools
 hr_agent = Agent(
     role="HR Assistant",
     goal="Help with HR queries using HRIS tools",
@@ -138,7 +174,7 @@ hr_agent = Agent(
     tools=crewai_tools,
 )
 
-# 3. Create Task and Crew
+# Create Task and Crew
 task = Task(
     description="List all employees in engineering",
     expected_output="Employee list with names and roles",
@@ -147,41 +183,41 @@ task = Task(
 
 crew = Crew(agents=[hr_agent], tasks=[task], process=Process.sequential)
 
-# 4. Run
+# Run
 result = crew.kickoff()
 ```
 
-### 4. Google Vertex AI (Gemini)
+### Google ADK / Gemini
 
 Converts tools to Google's specific `FunctionDeclaration` format.
 
 ```python
 import google.generativeai as genai
 
-# 1. Bridge to Google ADK
+# Bridge to Google ADK
 google_tools = StackOneBridge(tools).to_google_adk()
 
-# 2. Initialize Gemini
+# Initialize Gemini
 model = genai.GenerativeModel('gemini-1.5-pro', tools=[google_tools])
 ```
 
-### 5. Microsoft Semantic Kernel
+### Microsoft Semantic Kernel
 
 Converts tools into Semantic Kernel Plugins/Functions.
 
 ```python
 import semantic_kernel as sk
 
-# 1. Bridge to Semantic Kernel
+# Bridge to Semantic Kernel
 sk_functions = StackOneBridge(tools).to_semantic_kernel()
 
-# 2. Register as Plugin
+# Register as Plugin
 kernel = sk.Kernel()
 for func in sk_functions:
     kernel.add_function(plugin_name="StackOne", function=func)
 ```
 
-### 6. Claude Agent SDK (In-Process MCP)
+### Claude Agent SDK (In-Process MCP)
 
 Uses StackOne tools as Claude SDK MCP tools with no subprocess server required.
 
@@ -243,17 +279,17 @@ StackOne provides 100+ tools. Loading them all into an LLM's context window is e
 ### Usage
 
 ```python
-# 1. Fetch a large set of tools (e.g., everything)
+# Fetch a large set of tools (e.g., everything)
 all_tools = toolset.fetch_tools(account_ids=["acc_123"])
 
-# 2. Get Discovery Tools for your framework
+# Get Discovery Tools for your framework
 # Supported: 'dspy', 'pydantic_ai', 'crewai', 'google', 'semantic_kernel'
 discovery_tools = StackOneBridge(all_tools).to_discovery_tools(framework="dspy")
 
 # For CrewAI:
 # discovery_tools = StackOneBridge(all_tools).to_discovery_tools(framework="crewai")
 
-# 3. Equip the agent (Only 2 tools injected!)
+# Equip the agent (Only 2 tools injected!)
 agent = dspy.ReAct("question -> answer", tools=discovery_tools)
 ```
 
@@ -266,10 +302,10 @@ Is the LLM struggling to use a specific HRIS tool? Use **GEPA** to automatically
 ```python
 from superoptix.benchmarks.stackone import HRISBenchmark
 
-# 1. Load Benchmark Data
+# Load Benchmark Data
 dataset = HRISBenchmark().get_dataset()
 
-# 2. Run Optimization
+# Run Optimization
 # This uses the 'StackOneOptimizableComponent' to mutate tool descriptions
 optimized_tools = bridge.optimize(
     dataset=dataset,
@@ -277,7 +313,7 @@ optimized_tools = bridge.optimize(
     max_iterations=5
 )
 
-# 3. Result: Tools now have "LLM-optimized" descriptions
+# Result: Tools now have "LLM-optimized" descriptions
 print(optimized_tools[0].description)
 ```
 
@@ -308,22 +344,25 @@ for case in dataset:
 
 ---
 
-## 📄 Production Blueprints
+## 📄 Deployment Blueprints
 
 Don't want to code? Use our pre-built YAML blueprints to deploy optimized agents instantly.
 
 | Agent ID | Description |
 | :--- | :--- |
-| `stackone_hris_agent` | HR Specialist for employee management |
-| `stackone_ats_agent` | Recruitment assistant for hiring workflows |
-| `stackone_crm_agent` | Sales assistant for CRM operations |
+| `stackone-calendly` | Calendly scheduling and identity queries via StackOne |
 
 **Run directly from CLI:**
 
 ```bash
 # Pull the blueprint
-super agent pull stackone_hris_agent
+super agent pull stackone-calendly
+
+# Compile for a framework (examples)
+super agent compile stackone-calendly --framework dspy
+super agent compile stackone-calendly --framework pydantic-ai --cloud --provider google-genai --model gemini-2.5-flash
 
 # Run the agent
-super agent run stackone_hris_agent --input "Find employee ID 123"
+super agent run stackone-calendly --framework dspy --goal "What is my Calendly username?"
+super agent run stackone-calendly --framework pydantic-ai --direct --cloud --provider google-genai --model gemini-2.5-flash --goal "What is my Calendly username?"
 ```

@@ -122,7 +122,7 @@ super spec generate genies developer --rag
 
 ```
 📁 Using SuperOptiX project structure: swe/agents/developer/playbook/developer_playbook.yaml
-✅ Generated genies agent playbook: 
+Generated genies agent playbook: 
 /Users/super/superagentic/SuperOptiX/swe/swe/agents/developer/playbook/developer_playbook.yaml
 📋 Agent: Developer (Tier: genies)
 🏷️  Namespace: software
@@ -155,7 +155,7 @@ tool_calling:
   tool_selection_strategy: auto
 ```
 
-✅ **RAG**: Retrieval-augmented generation (RAG) is available and ready to use with ChromaDB and a sentence-transformer embedding model. No ingestion is required at this step-RAG will be used automatically if needed.
+**RAG**: Retrieval-augmented generation (RAG) is available and ready to use with ChromaDB and a sentence-transformer embedding model. No ingestion is required at this step-RAG will be used automatically if needed.
 
 🛠️ **Tools**: Web search, calculator, and file operations are enabled, with auto tool selection.
 
@@ -187,15 +187,15 @@ super agent compile developer
 │                                                                                                              │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 🐍 Converted field names to snake_case for DSPy compatibility
-✅ Tool calling configuration detected for Genies tier
-✅ Memory configuration detected for Genies tier
+Tool calling configuration detected for Genies tier
+Memory configuration detected for Genies tier
 
 🤖 Generating Mixin Genies-Tier pipeline (DSPy default template)...
 🧩 Mixin Pipeline (DSPy Default): Reusable components for complex agents.
 🔧 Developer Controls: Modular mixins keep your codebase clean and customizable
 🚀 Framework: DSPy (additional frameworks & custom builders coming soon) 
 🔧 Genies-Tier Features: ReAct Agents + Tool Integration + RAG Support + Memory
-✅ Successfully generated Genies-tier pipeline (mixin) at: 
+Successfully generated Genies-tier pipeline (mixin) at: 
 /Users/super/superagentic/SuperOptiX/swe/swe/agents/developer/pipelines/developer_pipeline.py
 
 💡 Mixin pipeline features (DSPy Default):
@@ -207,12 +207,12 @@ super agent compile developer
 💡 Genies tier includes all Oracles features
 
 🎯 Genies Tier Features
-  ✅ All Oracles features plus:
-  ✅ ReAct agents with tool integration
-  ✅ RAG (Retrieval-Augmented Generation)
-  ✅ Agent memory (short-term and episodic)
-  ✅ Basic streaming responses
-  ✅ JSON/XML adapters
+  All Oracles features plus:
+  ReAct agents with tool integration
+  RAG (Retrieval-Augmented Generation)
+  Agent memory (short-term and episodic)
+  Basic streaming responses
+  JSON/XML adapters
 
 💡 Genies tier includes all Oracles features
 
@@ -289,13 +289,13 @@ super agent evaluate developer
 📁 Traces will be stored in: /Users/super/superagentic/SuperOptiX/swe/.superoptix/traces
 🚀 Configuring llama3.1:8b with ollama for genies-tier capabilities
 📝 Using ChatAdapter for optimal local model compatibility
-✅ Model connection successful: ollama/llama3.1:8b
-✅ 4 tools configured successfully
+Model connection successful: ollama/llama3.1:8b
+4 tools configured successfully
 🔍 RAG system initialized for DeveloperPipeline
-✅ ReAct agent configured with 4 tools
+ReAct agent configured with 4 tools
 📋 Loaded 5 BDD specifications for execution
-✅ DeveloperPipeline (Genie tier) initialized with ReAct and 5 BDD scenarios
-✅ Pipeline loaded
+DeveloperPipeline (Genie tier) initialized with ReAct and 5 BDD scenarios
+Pipeline loaded
 ℹ️  Using base model (no optimization found)
 
 🔍 Discovering BDD Specifications...
@@ -311,19 +311,19 @@ FFFFF
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃ Specification                ┃    Status    ┃  Score   ┃ Description                                   ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│ developer_comprehensiv...    │   ❌ FAIL    │   0.30   │ Given a complex software requirement, t...    │
-│ developer_problem_solving    │   ❌ FAIL    │   0.28   │ When facing software challenges, the ag...    │
-│ developer_best_practices     │   ❌ FAIL    │   0.25   │ When asked about software best practice...    │
-│ developer_tool_integra...    │   ❌ FAIL    │   0.28   │ When using tools, the agent should demo...    │
-│ developer_memory_utili...    │   ❌ FAIL    │   0.23   │ When leveraging memory, the agent shoul...    │
+│ developer_comprehensiv...    │   FAIL    │   0.30   │ Given a complex software requirement, t...    │
+│ developer_problem_solving    │   FAIL    │   0.28   │ When facing software challenges, the ag...    │
+│ developer_best_practices     │   FAIL    │   0.25   │ When asked about software best practice...    │
+│ developer_tool_integra...    │   FAIL    │   0.28   │ When using tools, the agent should demo...    │
+│ developer_memory_utili...    │   FAIL    │   0.23   │ When leveraging memory, the agent shoul...    │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────┴──────────────┴──────────┴───────────────────────────────────────────────────────────────┘
 
 ╭────────────────────────────────────── 🔴 Specification Results Summary ──────────────────────────────────────╮
 │                                                                                                              │
 │  📊 Total Specs:         5                🎯 Pass Rate:         0.0%                                         │
-│  ✅ Passed:              0                🤖 Model:             ollama_chat/llama3.1:8b                      │
-│  ❌ Failed:              5                💪 Capability:        0.27                                         │
-│  🏆 Quality Gate:        ❌ NEEDS WORK    🚀 Status:            ⚙️  Base Model                                │
+│  Passed:              0                🤖 Model:             ollama_chat/llama3.1:8b                      │
+│  Failed:              5                💪 Capability:        0.27                                         │
+│  🏆 Quality Gate:        NEEDS WORK    🚀 Status:            ⚙️  Base Model                                │
 │                                                                                                              │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 
@@ -406,7 +406,7 @@ Affected Specifications:
     - **🎯 Pass Rate**: 0.0% (0/5 specifications passed)
     - **🤖 Model**: Using `ollama/llama3.1:8b` (base model, no optimization)
     - **💪 Capability Score**: 0.27 (needs improvement)
-    - **🏆 Quality Gate**: ❌ NEEDS WORK
+    - **🏆 Quality Gate**: NEEDS WORK
 
 !!! info "🔍 What Happened During Evaluation"
 
@@ -468,7 +468,7 @@ Affected Specifications:
     **Quality Thresholds:**
     - 🎉 **≥ 80%**: EXCELLENT - Production ready
     - ⚠️ **60-79%**: GOOD - Minor improvements needed  
-    - ❌ **< 60%**: NEEDS WORK - Significant improvements required
+    - **< 60%**: NEEDS WORK - Significant improvements required
 
 !!! info "🔍 Why All Scenarios Failed"
 
@@ -483,10 +483,10 @@ Affected Specifications:
 
     This is **completely normal for a base model**! The evaluation shows that:
 
-    - ✅ **Your agent infrastructure is working correctly**
-    - ✅ **Tools, RAG, and memory are properly configured**
-    - ✅ **The model is generating responses** (not failing completely)
-    - ✅ **The evaluation system is working** and providing detailed feedback
+    - **Your agent infrastructure is working correctly**
+    - **Tools, RAG, and memory are properly configured**
+    - **The model is generating responses** (not failing completely)
+    - **The evaluation system is working** and providing detailed feedback
     - 🔧 **The base model needs optimization** to meet the quality standards
     - 📊 **The system provides clear recommendations** for improvement
 
@@ -533,19 +533,19 @@ super agent optimize developer
 📁 Traces will be stored in: /Users/super/superagentic/SuperOptiX/swe/.superoptix/traces
 🚀 Configuring llama3.1:8b with ollama for genies-tier capabilities
 📝 Using ChatAdapter for optimal local model compatibility
-✅ Model connection successful: ollama/llama3.1:8b
-✅ 4 tools configured successfully
+Model connection successful: ollama/llama3.1:8b
+4 tools configured successfully
 🔍 RAG system initialized for DeveloperPipeline
-✅ ReAct agent configured with 4 tools
+ReAct agent configured with 4 tools
 📋 Loaded 5 BDD specifications for execution
-✅ DeveloperPipeline (Genie tier) initialized with ReAct and 5 BDD scenarios
-✅ Found 5 scenarios for optimization
+DeveloperPipeline (Genie tier) initialized with ReAct and 5 BDD scenarios
+Found 5 scenarios for optimization
 🚀 Training ReAct agent with 5 examples...
   0%|                                                                                     | 0/5 [00:00<?, ?it/s]
 100%|█████████████████████████████████████████████████████████████████████████████| 5/5 [00:09<00:00,  1.91s/it]
 Bootstrapped 5 full traces after 4 examples for up to 1 rounds, amounting to 5 attempts.
 💾 Optimized ReAct model saved to /Users/super/superagentic/SuperOptiX/swe/swe/agents/developer/pipelines/developer_optimized.json
-✅ ReAct training completed successfully
+ReAct training completed successfully
 ╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ 🎉 OPTIMIZATION SUCCESSFUL! Agent Enhanced                                                                   │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
@@ -622,10 +622,10 @@ Bootstrapped 5 full traces after 4 examples for up to 1 rounds, amounting to 5 a
 
     SuperOptiX current version uses **BootstrapFewShot** (the basic optimizer) because:
 
-    - ✅ **Simple and Effective**: Works well for most use cases
-    - ✅ **Fast Optimization**: Quick training with minimal resources
-    - ✅ **No Complex Dependencies**: Doesn't require advanced optimization libraries
-    - ✅ **Proven Results**: Reliable improvement in agent performance
+    - **Simple and Effective**: Works well for most use cases
+    - **Fast Optimization**: Quick training with minimal resources
+    - **No Complex Dependencies**: Doesn't require advanced optimization libraries
+    - **Proven Results**: Reliable improvement in agent performance
 
     **Advanced optimizers** (like Bayesian optimization, multi-stage optimization) are available in the commercial version.
 
@@ -670,12 +670,12 @@ Loading pipeline... ━━━━━━━━━━━━━━━━━━━━
 
 Looking for pipeline at: 
 /Users/super/superagentic/SuperOptiX/swe/swe/agents/developer/pipelines/developer_pipeline.py
-✅ Model connection successful: ollama/llama3.1:8b
-✅ 4 tools configured successfully
+Model connection successful: ollama/llama3.1:8b
+4 tools configured successfully
 🔍 RAG system initialized for DeveloperPipeline
-✅ ReAct agent configured with 4 tools
+ReAct agent configured with 4 tools
 📋 Loaded 5 BDD specifications for execution
-✅ DeveloperPipeline (Genie tier) initialized with ReAct and 5 BDD scenarios
+DeveloperPipeline (Genie tier) initialized with ReAct and 5 BDD scenarios
 
 ╭────────────────────────────────────────── Agent Execution ───────────────────────────────────────────────╮
 │ 🤖 Running Developer Pipeline                                                                                │
@@ -778,9 +778,9 @@ Looking for pipeline at:
        - **Result**: Successfully analyzed text content
 
     2. **🧮 Calculator Tool** (Attempted 3 times)
-       - **Attempt 1**: `"FastAPI vs Django performance benchmark"` ❌ Invalid syntax
-       - **Attempt 2**: `"FastAPI performance / Django performance"` ❌ Invalid syntax  
-       - **Attempt 3**: `"FastAPI performance * 1000 - Django performance"` ❌ Invalid syntax
+       - **Attempt 1**: `"FastAPI vs Django performance benchmark"` Invalid syntax
+       - **Attempt 2**: `"FastAPI performance / Django performance"` Invalid syntax  
+       - **Attempt 3**: `"FastAPI performance * 1000 - Django performance"` Invalid syntax
        - **Learning**: Agent learned to provide proper mathematical expressions
 
     3. **📁 File Reader Tool** (Used successfully)
@@ -937,7 +937,7 @@ Looking for pipeline at:
 !!! info "📊 Execution Performance"
 
     - **⏱️ Total Time**: 20.92 seconds
-    - **✅ Success Rate**: 100% (completed successfully)
+    - **Success Rate**: 100% (completed successfully)
     - **🛠️ Tool Calls**: 4 different tools used
     - **🧠 Reasoning**: Multi-step problem-solving approach
     - **📝 Output Quality**: Comprehensive analysis with code examples

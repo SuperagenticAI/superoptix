@@ -182,11 +182,11 @@ spec:
 ```
 
 **Why GEPA?**
-- ✅ **Proven Results**: 37.5% → 80% improvement
-- ✅ **Sample Efficient**: Works with 3-10 scenarios
-- ✅ **Universal**: Same optimizer works across all frameworks
-- ✅ **Reflective Learning**: Self-improving prompts
-- ✅ **Domain Adaptable**: Incorporates domain-specific feedback
+- **Proven Results**: 37.5% → 80% improvement
+- **Sample Efficient**: Works with 3-10 scenarios
+- **Universal**: Same optimizer works across all frameworks
+- **Reflective Learning**: Self-improving prompts
+- **Domain Adaptable**: Incorporates domain-specific feedback
 
 ### **When to Use Alternatives**
 
@@ -325,26 +325,26 @@ optimizer = "GEPA"
 ### **Recommended Workflow** (GEPA-First)
 
 ```bash
-# 1. Initialize project
+# Initialize project
 super init my_dspy_project
 cd my_dspy_project
 
-# 2. Pull a DSPy agent
+# Pull a DSPy agent
 super agent pull sentiment_analyzer  # Pure DSPy agent
 
-# 3. Compile (pure DSPy mode)
+# Compile (pure DSPy mode)
 super agent compile sentiment_analyzer
 
-# 4. Baseline evaluation
+# Baseline evaluation
 super agent evaluate sentiment_analyzer
 
-# 5. Optimize with GEPA (recommended!)
+# Optimize with GEPA (recommended!)
 super agent optimize sentiment_analyzer --auto medium
 
-# 6. Evaluate optimized version
+# Evaluate optimized version
 super agent evaluate sentiment_analyzer  # automatically loads optimized weights
 
-# 7. Run the optimized agent
+# Run the optimized agent
 super agent run sentiment_analyzer
 ```
 
@@ -406,7 +406,7 @@ def custom_domain_feedback(example, pred, trace=None, *args, **kwargs):
 
 ## Best Practices
 
-### 1. **Start Simple, Scale Up**
+### **Start Simple, Scale Up**
 ```yaml
 # Begin with BootstrapFewShot
 optimizer:
@@ -419,7 +419,7 @@ optimizer:
     auto: light  # Start with light mode
 ```
 
-### 2. **Monitor Memory Usage**
+### **Monitor Memory Usage**
 ```bash
 # Check system memory before optimization
 htop
@@ -428,7 +428,7 @@ htop
 # SuperOptiX provides optimized defaults
 ```
 
-### 3. **Leverage BDD Scenarios**
+### **Leverage BDD Scenarios**
 ```yaml
 feature_specifications:
   scenarios:
@@ -439,7 +439,7 @@ feature_specifications:
         answer: "x = 3 or x = -1/2"
 ```
 
-### 4. **Domain-Specific Optimization**
+### **Domain-Specific Optimization**
 ```yaml
 # For mathematical problems
 optimization:
@@ -456,7 +456,7 @@ optimization:
       metric: multi_component_enterprise_feedback
 ```
 
-### 5. **Iterative Improvement**
+### **Iterative Improvement**
 ```bash
 # Test baseline performance
 super agent evaluate my_agent

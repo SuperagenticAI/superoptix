@@ -66,17 +66,17 @@ git --version  # Should show git version
 We highly recommend using `uv` for faster, more reliable installations.
 
 ```bash
-# 1. Install UV (if not already installed)
+# Install UV (if not already installed)
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# 2. Create a virtual environment
+# Create a virtual environment
 uv venv
 
-# 3. Activate the environment
+# Activate the environment
 source .venv/bin/activate  # macOS/Linux
 # .venv\Scripts\activate   # Windows
 
-# 4. Install SuperOptiX
+# Install SuperOptiX
 uv pip install superoptix
 ```
 
@@ -101,8 +101,9 @@ Customize your installation by adding only what you need:
 |-----------|----------------|----------|
 | **DSPy** ⭐ | `uv pip install superoptix[frameworks-dspy]` | DSPy + GEPA |
 | **OpenAI SDK** | `uv pip install superoptix[frameworks-openai]` | openai-agents, openai SDK |
+| **Claude SDK** | `uv pip install superoptix[frameworks-claude-sdk]` | claude-agent-sdk |
 | **Google ADK** | `uv pip install superoptix[frameworks-google]` | google-adk, google-generativeai |
-| **Microsoft** | `uv pip install superoptix[frameworks-microsoft]` | agent-framework, azure-identity |
+| **Microsoft (Legacy)** | `uv pip install superoptix[frameworks-microsoft]` | agent-framework, azure-identity |
 | **DeepAgents** | `uv pip install superoptix[frameworks-deepagents]` | deepagents |
 | **Pydantic AI** | `uv pip install superoptix[frameworks-pydantic-ai]` | Pydantic AI |
 | **CrewAI** ⚠️ | `uv pip install superoptix[frameworks-crewai]` | crewai (conflicts with DSPy) |

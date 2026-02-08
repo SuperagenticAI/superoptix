@@ -40,7 +40,7 @@ RAG (Retrieval-Augmented Generation) optimization is the process of improving **
 
 ## What GEPA Optimizes in RAG
 
-### 1. Retrieval Strategy (When to Search)
+### Retrieval Strategy (When to Search)
 
 **What It Is**: Learning when to query the knowledge base
 
@@ -82,7 +82,7 @@ Learned Strategies:
 
 ---
 
-### 2. Document Selection (Which to Retrieve)
+### Document Selection (Which to Retrieve)
 
 **What It Is**: Choosing the most relevant documents from the knowledge base
 
@@ -119,7 +119,7 @@ Retrieved: Top 5 highly relevant docs (>0.85 similarity)
 
 ---
 
-### 3. Context Integration (How to Use)
+### Context Integration (How to Use)
 
 **What It Is**: Incorporating retrieved knowledge into agent responses
 
@@ -156,7 +156,7 @@ Reference: OWASP Top 10 #1, CWE-89"
 
 ---
 
-### 4. Relevance Scoring
+### Relevance Scoring
 
 **What It Is**: Filtering and ranking retrieved documents
 
@@ -292,7 +292,7 @@ Reference: OWASP A03:2021 - Injection"
 
 ## Best Practices
 
-### 1. Organize Knowledge Base by Topic
+### Organize Knowledge Base by Topic
 
 ```yaml
 rag:
@@ -304,21 +304,21 @@ rag:
 
 GEPA learns which directory to search for which scenario.
 
-### 2. Use Descriptive Document Names
+### Use Descriptive Document Names
 
 ```
-✅ Good:
+Good:
 - sql_injection_prevention.md
 - xss_mitigation.md
 - password_hashing_best_practices.md
 
-❌ Bad:
+Bad:
 - doc1.md
 - security.md
 - notes.md
 ```
 
-### 3. Structure Documents Consistently
+### Structure Documents Consistently
 
 ```markdown
 # SQL Injection Prevention
@@ -335,7 +335,7 @@ GEPA learns which directory to search for which scenario.
 
 Consistent structure helps GEPA learn effective retrieval patterns.
 
-### 4. Combine with RSpec-Style BDD Scenarios
+### Combine with RSpec-Style BDD Scenarios
 
 ```yaml
 feature_specifications:
