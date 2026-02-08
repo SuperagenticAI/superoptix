@@ -66,11 +66,11 @@ Choose from DSPy, OpenAI SDK, CrewAI, Google ADK, Microsoft, or DeepAgents
 !!! tip "Framework-Free Core"
     SuperOptiX core is now **framework-independent**! Install only what you need.
 
-**Choose your framework(s) and install SuperOptiX:**
+**Choose your framework(s) and install SuperOptiX with `uv tool install`:**
 
 === "Core Only (Includes DSPy)"
     ```bash
-    pip install superoptix
+    uv tool install superoptix
     ```
     **Includes:** CLI tools, SuperSpec DSL, YAML processing, DSPy
     
@@ -78,7 +78,7 @@ Choose from DSPy, OpenAI SDK, CrewAI, Google ADK, Microsoft, or DeepAgents
 
 === "DSPy Framework"
     ```bash
-    pip install superoptix[frameworks-dspy]
+    uv tool install superoptix --with "superoptix[frameworks-dspy]"
     ```
     **Includes:** SuperOptiX core + DSPy + GEPA
     
@@ -86,13 +86,13 @@ Choose from DSPy, OpenAI SDK, CrewAI, Google ADK, Microsoft, or DeepAgents
 
 === "OpenAI Agents SDK"
     ```bash
-    pip install superoptix[frameworks-openai]
+    uv tool install superoptix --with "superoptix[frameworks-openai]"
     ```
     **Includes:** openai-agents, openai SDK
 
 === "Google ADK"
     ```bash
-    pip install superoptix[frameworks-google]
+    uv tool install superoptix --with "superoptix[frameworks-google]"
     ```
     **Includes:** google-adk, google-generativeai
     
@@ -103,7 +103,7 @@ Choose from DSPy, OpenAI SDK, CrewAI, Google ADK, Microsoft, or DeepAgents
 
 === "Claude Agent SDK"
     ```bash
-    pip install superoptix[frameworks-claude-sdk]
+    uv tool install superoptix --with "superoptix[frameworks-claude-sdk]"
     ```
     **Includes:** claude-agent-sdk
 
@@ -114,7 +114,7 @@ Choose from DSPy, OpenAI SDK, CrewAI, Google ADK, Microsoft, or DeepAgents
 
 === "Microsoft Agent Framework"
     ```bash
-    pip install superoptix[frameworks-microsoft]
+    uv tool install superoptix --with "superoptix[frameworks-microsoft]"
     ```
     **Includes:** agent-framework, azure-identity
     
@@ -122,13 +122,13 @@ Choose from DSPy, OpenAI SDK, CrewAI, Google ADK, Microsoft, or DeepAgents
 
 === "DeepAgents"
     ```bash
-    pip install superoptix[frameworks-deepagents]
+    uv tool install superoptix --with "superoptix[frameworks-deepagents]"
     ```
     **Includes:** deepagents
 
 === "CrewAI"
     ```bash
-    pip install superoptix[frameworks-crewai]
+    uv tool install superoptix --with "superoptix[frameworks-crewai]"
     ```
     **Includes:** crewai
     
@@ -136,7 +136,7 @@ Choose from DSPy, OpenAI SDK, CrewAI, Google ADK, Microsoft, or DeepAgents
 
 === "All DSPy-Compatible Frameworks"
     ```bash
-    pip install superoptix[frameworks]
+    uv tool install superoptix --with "superoptix[frameworks]"
     ```
     **Includes:** DSPy, OpenAI SDK, Claude SDK, Google ADK, Microsoft, DeepAgents
     
@@ -144,13 +144,13 @@ Choose from DSPy, OpenAI SDK, CrewAI, Google ADK, Microsoft, or DeepAgents
 
 === "With MCP Optimization"
     ```bash
-    pip install superoptix[frameworks,mcp]
+    uv tool install superoptix --with "superoptix[frameworks,mcp]"
     ```
     **Includes:** DSPy-compatible frameworks + MCP SDK
 
 === "Everything (DSPy path)"
     ```bash
-    pip install superoptix[all]
+    uv tool install superoptix --with "superoptix[all]"
     ```
     **Includes:** DSPy + compatible frameworks + vector DBs + observability
     

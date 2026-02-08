@@ -52,7 +52,7 @@ We recommend using `uv` for fast, reliable installation.
 
     ```bash
     curl -LsSf https://astral.sh/uv/install.sh | sh
-    uv pip install superoptix
+    uv tool install superoptix
     super --version
     ```
 

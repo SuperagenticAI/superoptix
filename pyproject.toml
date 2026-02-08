@@ -7,7 +7,7 @@ allow-direct-references = true
 
 [project]
 name = "superoptix"
-version = "0.2.3"
+version = "0.2.4"
 description = "Full Stack Agentic AI Optimization Framework - Universal GEPA optimizer for major frameworks"
 authors = [
     {name = "Superagentic AI", email = "hello@super-agentic.ai"},
