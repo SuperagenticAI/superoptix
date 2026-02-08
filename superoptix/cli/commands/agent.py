@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import asyncio
 import copy
+import inspect
 import importlib
 import importlib.util
 import json
@@ -325,6 +326,11 @@ def _compile_single_agent(agent_name: str, args, tier_level: str = None):
                     f"model={lm_model or 'unset'}[/]"
                 )
 
+        if getattr(args, "rlm", False) and framework != "dspy":
+            console.print(
+                "[yellow]⚠️  Ignoring --rlm: currently supported only for DSPy compilation.[/]"
+            )
+
         # Show what's happening (concise)
         console.print(
             Panel(
@@ -347,6 +353,7 @@ def _compile_single_agent(agent_name: str, args, tier_level: str = None):
         # Compile the agent with template selection
         use_abstracted = getattr(args, "abstracted", False)
         use_explicit = getattr(args, "explicit", True)  # DEFAULT: explicit template
+        compile_profile = "optimized" if getattr(args, "optimize", False) else "minimal"
 
         # If abstracted is requested, disable explicit
         if use_abstracted:
@@ -357,6 +364,7 @@ def _compile_single_agent(agent_name: str, args, tier_level: str = None):
             tier_level=effective_tier,
             use_abstracted=use_abstracted,
             use_explicit=use_explicit,
+            compile_profile=compile_profile,
         )
 
         # Show success
@@ -413,7 +421,17 @@ def _compile_single_agent(agent_name: str, args, tier_level: str = None):
             )
 
             # Next steps guidance (verbose only)
-            next_steps = f"""🚀 [bold bright_cyan]NEXT STEPS[/]
+            if compile_profile == "minimal":
+                next_steps = f"""🚀 [bold bright_cyan]NEXT STEPS[/]
+
+[cyan]super agent run {agent_name} --goal "goal"[/] - Execute minimal DSPy pipeline
+[cyan]super agent compile {agent_name} --rlm[/] - Recompile minimal DSPy pipeline with dspy.RLM
+[cyan]super agent compile {agent_name} --optimize[/] - Generate full optimization/evaluation pipeline
+[cyan]super agent evaluate {agent_name}[/] - Run BDD evaluation (after optimized compile)
+[cyan]super agent optimize {agent_name}[/] - Run optimizer (after optimized compile)
+"""
+            else:
+                next_steps = f"""🚀 [bold bright_cyan]NEXT STEPS[/]
 
 [cyan]super agent evaluate {agent_name}[/] - Establish baseline performance
 [cyan]super agent optimize {agent_name}[/] - Enhance performance using DSPy
@@ -432,9 +450,14 @@ def _compile_single_agent(agent_name: str, args, tier_level: str = None):
             )
 
         # Simple workflow guide (normal mode)
-        console.print(
-            f'🎯 [bold cyan]Next:[/] [cyan]super agent evaluate {agent_name}[/] or [cyan]super agent run {agent_name} --goal "your goal"[/]'
-        )
+        if compile_profile == "minimal":
+            console.print(
+                f'🎯 [bold cyan]Next:[/] [cyan]super agent run {agent_name} --goal "your goal"[/] (optional: recompile with [cyan]--rlm[/] for DSPy RLM, or [cyan]--optimize[/] for evaluate/optimize features)'
+            )
+        else:
+            console.print(
+                f'🎯 [bold cyan]Next:[/] [cyan]super agent evaluate {agent_name}[/] or [cyan]super agent run {agent_name} --goal "your goal"[/]'
+            )
 
         # Success summary
         console.print("=" * 80)
@@ -520,7 +543,40 @@ def _run_framework_agent(args, framework: str):
             return
 
         # Instantiate and run
-        pipeline = pipeline_class()
+        init_kwargs = {}
+        if framework == "pydantic-ai":
+            model_config = {}
+            if getattr(args, "provider", None):
+                model_config["provider"] = args.provider
+            if getattr(args, "model", None):
+                model_config["model"] = args.model
+            if getattr(args, "local", False):
+                model_config.setdefault("provider", "ollama")
+                model_config.setdefault("model", "llama3.1:8b")
+            if getattr(args, "gateway", False):
+                model_config["runtime_mode"] = "gateway"
+            elif getattr(args, "direct", False):
+                model_config["runtime_mode"] = "direct"
+            if getattr(args, "gateway_url", None) or getattr(
+                args, "gateway_key_env", None
+            ):
+                model_config["runtime_mode"] = "gateway"
+                model_config["gateway"] = {}
+                if getattr(args, "gateway_url", None):
+                    model_config["gateway"]["base_url"] = args.gateway_url
+                if getattr(args, "gateway_key_env", None):
+                    model_config["gateway"]["api_key_env"] = args.gateway_key_env
+
+            params = inspect.signature(pipeline_class).parameters
+            if "model_config" in params and model_config:
+                init_kwargs["model_config"] = model_config
+            if "playbook_path" in params:
+                playbook_path = (
+                    agent_dir / "playbook" / f"{args.name}_playbook.yaml"
+                )
+                init_kwargs["playbook_path"] = str(playbook_path)
+
+        pipeline = pipeline_class(**init_kwargs)
 
         # Check if it's an async framework
         if hasattr(pipeline, "run") and asyncio.iscoroutinefunction(pipeline.run):
@@ -651,7 +707,18 @@ def run_agent(args):
                 )
                 # First optimize the agent
                 optimization_result = run_async(
-                    DSPyRunner(agent_name=args.name).optimize(force=False)
+                    DSPyRunner(agent_name=args.name).optimize(
+                        force=False,
+                        runtime_mode=(
+                            "local"
+                            if getattr(args, "local", False)
+                            else (
+                                "cloud" if getattr(args, "cloud", False) else "auto"
+                            )
+                        ),
+                        provider_override=getattr(args, "provider", None),
+                        model_override=getattr(args, "model", None),
+                    )
                 )
                 if not optimization_result.get("success", False):
                     console.print(
@@ -674,6 +741,13 @@ def run_agent(args):
                     use_optimization=use_optimization,
                     runtime_optimize=runtime_optimize,
                     force_runtime=force_runtime,
+                    runtime_mode=(
+                        "local"
+                        if getattr(args, "local", False)
+                        else ("cloud" if getattr(args, "cloud", False) else "auto")
+                    ),
+                    provider_override=getattr(args, "provider", None),
+                    model_override=getattr(args, "model", None),
                 )
             )
 
@@ -1646,6 +1720,38 @@ def add_agent(args):
             # Pydantic AI MCP demo
             "pydantic-mcp": "demo/pydantic_mcp_playbook.yaml",
             "pydantic_mcp": "demo/pydantic_mcp_playbook.yaml",
+            # Pydantic AI Gateway demo
+            "pydantic-gateway-demo": "demo/pydantic-gateway-demo_playbook.yaml",
+            "pydantic_gateway_demo": "demo/pydantic-gateway-demo_playbook.yaml",
+            # Pydantic AI RLM demo
+            "pydantic-rlm": "demo/pydantic-rlm_playbook.yaml",
+            "pydantic_rlm": "demo/pydantic-rlm_playbook.yaml",
+            # DSPy RLM demo
+            "dspy-rlm": "demo/dspy-rlm_playbook.yaml",
+            "dspy_rlm": "demo/dspy-rlm_playbook.yaml",
+            # DSPy automation demo
+            "dspy-demo": "demo/dspy-demo_playbook.yaml",
+            "dspy_demo": "demo/dspy-demo_playbook.yaml",
+            # Google ADK RLM demo
+            "adk-rlm": "demo/adk-rlm_playbook.yaml",
+            "adk_rlm": "demo/adk-rlm_playbook.yaml",
+            # StackOne Calendly demo (framework-neutral id, with legacy aliases)
+            "stackone-calendly": "demo/stackone-calendly_playbook.yaml",
+            "stackone_calendly": "demo/stackone-calendly_playbook.yaml",
+            "dspy-stackone-calendly": "demo/stackone-calendly_playbook.yaml",
+            "dspy_stackone_calendly": "demo/stackone-calendly_playbook.yaml",
+            # DeepAgents StackOne demo
+            "deepagents-stackone": "demo/deepagents-stackone_playbook.yaml",
+            "deepagents_stackone": "demo/deepagents-stackone_playbook.yaml",
+            # DeepAgents RLM demo
+            "deepagents-rlm": "demo/deepagents-rlm_playbook.yaml",
+            "deepagents_rlm": "demo/deepagents-rlm_playbook.yaml",
+            # CrewAI StackOne demo
+            "crewai-stackone": "demo/crewai-stackone_playbook.yaml",
+            "crewai_stackone": "demo/crewai-stackone_playbook.yaml",
+            # CrewAI RLM demo
+            "crewai-rlm": "demo/crewai-rlm_playbook.yaml",
+            "crewai_rlm": "demo/crewai-rlm_playbook.yaml",
         }
 
         if agent_name in alias_map:
@@ -2404,6 +2510,23 @@ def _run_universal_gepa_optimization(args, agent_name, project_root, playbook):
                     f"\n✅ Using reflection_lm from playbook: {reflection_lm}"
                 )
 
+    # Fallback: derive reflection_lm from CLI provider/model if user did not pass --reflection-lm.
+    if not reflection_lm:
+        cli_model = getattr(args, "model", None)
+        cli_provider = getattr(args, "provider", None)
+        if cli_model:
+            reflection_lm = str(cli_model).strip()
+            if cli_provider and "/" not in reflection_lm:
+                provider_norm = str(cli_provider).strip().lower()
+                if provider_norm in {"google", "google-genai"}:
+                    provider_norm = "gemini"
+                elif provider_norm == "local":
+                    provider_norm = "ollama"
+                reflection_lm = f"{provider_norm}/{reflection_lm}"
+            console.print(
+                f"\n✅ Using reflection_lm from CLI model override: {reflection_lm}"
+            )
+
     # Validate GEPA configuration
     if not (auto or max_full_evals or max_metric_calls):
         console.print("\n[red]❌ GEPA requires a budget parameter:[/]")
@@ -2493,9 +2616,24 @@ def _run_universal_gepa_optimization(args, agent_name, project_root, playbook):
     # Create component using Framework Registry
     console.print(f"\n📦 Creating {framework} component...")
     try:
+        model_config_override = {}
+        if getattr(args, "provider", None):
+            model_config_override["provider"] = args.provider
+        if getattr(args, "model", None):
+            model_config_override["model"] = args.model
+        if getattr(args, "cloud", False):
+            model_config_override["runtime_mode"] = "direct"
+        elif getattr(args, "local", False):
+            model_config_override["runtime_mode"] = "local"
+
+        component_kwargs = {}
+        if model_config_override:
+            component_kwargs["model_config"] = model_config_override
+
         component = FrameworkRegistry.create_component(
             framework=framework,
             playbook=playbook,
+            **component_kwargs,
         )
         console.print(f"   ✅ Component created: {component.name}")
         console.print(f"   Framework: {component.framework}")
@@ -3166,24 +3304,53 @@ def optimize_agent(args):
         framework = getattr(args, "framework", "dspy")
         agent_dir = project_root / project_name / "agents" / agent_name
 
-        # Determine pipeline path based on framework
-        if framework in [
-            "microsoft",
-            "openai",
-            "crewai",
-            "google-adk",
-            "deepagents",
-            "pydantic-ai",
-        ]:
-            # Non-DSPy frameworks use framework suffix
-            pipeline_path = (
-                agent_dir
-                / "pipelines"
-                / f"{agent_name}_{framework.replace('-', '_')}_pipeline.py"
-            )
-        else:
-            # DSPy uses simple naming
-            pipeline_path = agent_dir / "pipelines" / f"{agent_name}_pipeline.py"
+        def _pipeline_path_for(framework_name: str) -> Path:
+            if framework_name in [
+                "microsoft",
+                "openai",
+                "crewai",
+                "google-adk",
+                "deepagents",
+                "pydantic-ai",
+                "claude-sdk",
+            ]:
+                return (
+                    agent_dir
+                    / "pipelines"
+                    / f"{agent_name}_{framework_name.replace('-', '_')}_pipeline.py"
+                )
+            return agent_dir / "pipelines" / f"{agent_name}_pipeline.py"
+
+        pipeline_path = _pipeline_path_for(framework)
+
+        # If caller left default framework=dspy but DSPy pipeline doesn't exist,
+        # try to auto-detect an existing compiled framework pipeline.
+        if framework == "dspy" and not pipeline_path.exists():
+            candidates = [
+                "pydantic-ai",
+                "crewai",
+                "openai",
+                "google-adk",
+                "microsoft",
+                "deepagents",
+                "claude-sdk",
+            ]
+            found = [fw for fw in candidates if _pipeline_path_for(fw).exists()]
+            if len(found) == 1:
+                framework = found[0]
+                pipeline_path = _pipeline_path_for(framework)
+                args.framework = framework
+                console.print(
+                    f"[dim]Auto-detected compiled framework: {framework}[/]"
+                )
+            elif len(found) > 1:
+                console.print(
+                    "[yellow]Multiple compiled framework pipelines found. "
+                    "Use --framework to choose one explicitly.[/]"
+                )
+                for fw in found:
+                    console.print(f"   - {fw}: {_pipeline_path_for(fw)}")
+                return
 
         optimized_path = agent_dir / "pipelines" / f"{agent_name}_optimized.json"
 
@@ -3544,7 +3711,19 @@ def optimize_agent(args):
         # Perform optimization
         strategy = getattr(args, "strategy", "bootstrap")
         force = getattr(args, "force", False)
-        optimization_result = run_async(runner.optimize(strategy=strategy, force=force))
+        optimization_result = run_async(
+            runner.optimize(
+                strategy=strategy,
+                force=force,
+                runtime_mode=(
+                    "local"
+                    if getattr(args, "local", False)
+                    else ("cloud" if getattr(args, "cloud", False) else "auto")
+                ),
+                provider_override=getattr(args, "provider", None),
+                model_override=getattr(args, "model", None),
+            )
+        )
 
         if optimization_result.get("success", False):
             console.print(

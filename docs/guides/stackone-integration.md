@@ -45,13 +45,60 @@ from superoptix.adapters import StackOneBridge
 import dspy
 
 # 1. Fetch Tools
-tools = StackOneToolSet().fetch_tools(include_tools=["hris_*"])
+tools = StackOneToolSet().fetch_tools(actions=["hris_*"])
 
 # 2. Bridge to DSPy
 dspy_tools = StackOneBridge(tools).to_dspy()
 
 # 3. Use in Agent
 agent = dspy.ReAct("query -> answer", tools=dspy_tools)
+```
+
+### DSPy via SuperSpec (No DSPy Coding)
+
+Use the connector through SuperSpec and let SuperOptiX wire DSPy tools automatically:
+
+```yaml
+spec:
+  target_framework: dspy
+  dspy:
+    module: react
+    tools:
+      mode: stackone_discovery
+      trace:
+        enabled: true   # optional: transient live tool logs
+      stackone:
+        enabled: true
+        api_key_env: STACKONE_API_KEY
+        account_ids_env: STACKONE_ACCOUNT_IDS
+        providers: ["bamboohr"]
+        actions: ["hris_*"]
+```
+
+Then run:
+
+```bash
+export STACKONE_API_KEY="..."
+export STACKONE_ACCOUNT_IDS="acc_123"
+super agent pull dspy-stackone
+super agent compile dspy-stackone
+super agent run dspy-stackone --goal "List employees and group by department"
+```
+
+Calendly-focused demo:
+
+```bash
+export STACKONE_API_KEY="..."
+export STACKONE_ACCOUNT_IDS="acc_123"
+super agent pull dspy-stackone-calendly
+super agent compile dspy-stackone-calendly
+super agent run dspy-stackone-calendly --goal "Show my meetings for next week and any conflicts"
+```
+
+You can also enable live transient thinking logs from the shell:
+
+```bash
+export SUPEROPTIX_DSPY_THINKING_LOGS=1
 ```
 
 ### 2. Pydantic AI Integration (Type-Safe)

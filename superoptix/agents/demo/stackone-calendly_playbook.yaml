@@ -1,0 +1,120 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: StackOne Calendly Demo
+  id: stackone-calendly
+  namespace: demo
+  version: 1.0.0
+  level: oracles
+  description: DSPy ReAct agent that uses StackOne connector tools for Calendly meeting and schedule workflows.
+  author: SuperOptiX
+  tags:
+    - dspy
+    - stackone
+    - calendly
+    - connectors
+    - tools
+    - discovery
+
+spec:
+  target_framework: dspy
+
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    temperature: 0.1
+    max_tokens: 1800
+
+  dspy:
+    module: react
+    module_params:
+      max_iterations: 3
+    tools:
+      # Modes: none | builtin | mcp | stackone | stackone_discovery
+      mode: stackone
+      trace:
+        enabled: true
+      stackone:
+        enabled: true
+        discovery_mode: false
+        api_key_env: STACKONE_API_KEY
+        # Optional CSV env var: "acc_123,acc_456"
+        account_ids_env: STACKONE_ACCOUNT_IDS
+        providers:
+          - calendly
+        actions:
+          - calendly_*
+        fallback_unfiltered: true
+    adapter:
+      mode: auto
+      strict: false
+      retry_on_parse_error: 0
+      fallback_adapter: chat
+
+  persona:
+    name: Calendly Scheduling Agent
+    role: Meeting Operations Assistant
+    goal: Resolve meeting and scheduling requests using Calendly data through StackOne tools.
+    backstory: You are an operations assistant that can query connected scheduling systems with secure connector auth.
+    traits:
+      - organized
+      - precise
+      - pragmatic
+    instructions: |
+      Use connector tools for factual schedule answers.
+      Explain timezone assumptions clearly.
+      For scheduled events, always provide an explicit date/time window.
+      First call calendly_get_current_user and use that identity in subsequent scheduling calls when required.
+      If data is missing, ask for the account or date range needed.
+
+  input_fields:
+    - name: query
+      type: str
+      description: User's scheduling question
+      required: true
+
+  output_fields:
+    - name: answer
+      type: str
+      description: Final answer based on connector tool results
+      required: true
+
+  tasks:
+    - name: handle_calendly_request
+      instruction: |
+        Use available StackOne Calendly tools to answer the request.
+        Safe call pattern:
+        1) Call calendly_get_current_user first.
+        2) For list calls, include explicit start/end ISO timestamps and timezone when fields exist.
+        3) Keep count small (for example <= 10).
+        If tools are unavailable, explain missing configuration (API key, account IDs, provider/action filters).
+      inputs:
+        - name: query
+          type: str
+          description: The user's scheduling task
+          required: true
+      outputs:
+        - name: answer
+          type: str
+          description: Tool-grounded answer
+
+  feature_specifications:
+    scenarios:
+      - name: upcoming_meetings
+        description: Agent should retrieve and summarize upcoming meetings.
+        input:
+          query: Show my upcoming meetings for 2026-02-08 to 2026-02-15 in Europe/London and highlight conflicts.
+        expected_output:
+          expected_keywords:
+            - meeting
+            - schedule
+            - conflict
+            - account
+
+# Usage:
+#   export STACKONE_API_KEY="..."
+#   export STACKONE_ACCOUNT_IDS="acc_123"
+#   super agent pull stackone-calendly
+#   super agent compile stackone-calendly
+#   super agent run stackone-calendly --goal "What meetings are scheduled tomorrow?"

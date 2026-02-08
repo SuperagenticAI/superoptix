@@ -89,6 +89,10 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 		{% if spec.persona and spec.persona.role %}
 		instruction_parts.append("You are a {{ spec.persona.role }}")
 		{% endif %}
+
+		{% if spec.persona and spec.persona.instructions %}
+		instruction_parts.append("Instructions: {{ spec.persona.instructions }}")
+		{% endif %}
 		
 		{% if spec.persona and spec.persona.goal %}
 		instruction_parts.append("Your goal is: {{ spec.persona.goal }}")
@@ -96,6 +100,10 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 		
 		{% if spec.persona and spec.persona.backstory %}
 		instruction_parts.append({{ spec.persona.backstory | tojson }})
+		{% endif %}
+
+		{% if spec.persona and spec.persona.traits %}
+		instruction_parts.append("Traits: {{ spec.persona.traits | join(', ') }}")
 		{% endif %}
 		
 		{% if spec.persona and spec.persona.reasoning and spec.persona.reasoning.steps %}

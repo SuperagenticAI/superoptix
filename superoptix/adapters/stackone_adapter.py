@@ -8,6 +8,8 @@ Supported: DSPy, Pydantic AI, CrewAI, Claude Agent SDK, Google ADK, Semantic Ker
 
 import logging
 import importlib.util
+import os
+import time
 from typing import Any, Dict, List, Optional, Type
 
 from pydantic import BaseModel, Field, create_model
@@ -31,6 +33,20 @@ except ImportError:
     PYDANTIC_AI_AVAILABLE = False
 
 STACKONE_AVAILABLE = importlib.util.find_spec("stackone_ai") is not None
+
+
+def _stackone_trace_enabled() -> bool:
+    return str(os.getenv("SUPEROPTIX_STACKONE_TRACE", "1")).strip().lower() not in {
+        "0",
+        "false",
+        "no",
+        "off",
+    }
+
+
+def _emit_stackone_trace(event: str, message: str) -> None:
+    if _stackone_trace_enabled():
+        print(f"{event}: {message}")
 
 try:
     from crewai.tools.base_tool import BaseTool as CrewAIBaseTool, Tool as CrewAITool
@@ -225,13 +241,31 @@ class StackOneBridge:
 
             # 2. Create a wrapper function that accepts this typed model
             # Pydantic AI will introspect 'args: ArgsModel' to build the tool schema
-            async def tool_wrapper(ctx: RunContext, args: ArgsModel) -> str:
-                # Convert Pydantic model back to dict for StackOne
-                return str(tool.execute(args.model_dump(exclude_none=True)))
+            def make_tool_wrapper(current_tool: Any, args_model: Type[BaseModel]):
+                async def tool_wrapper(ctx: RunContext, args: args_model) -> str:  # type: ignore[name-defined]
+                    # Convert Pydantic model back to dict for StackOne
+                    kwargs = args.model_dump(exclude_none=True)
+                    keys = ",".join(sorted(kwargs.keys())) if kwargs else "-"
+                    _emit_stackone_trace("tool:start", f"{current_tool.name} kwargs=[{keys}]")
+                    t0 = time.time()
+                    try:
+                        out = str(current_tool.execute(kwargs))
+                        latency_ms = int((time.time() - t0) * 1000)
+                        _emit_stackone_trace("tool:ok", f"{current_tool.name} ({latency_ms}ms)")
+                        return out
+                    except Exception as exc:
+                        latency_ms = int((time.time() - t0) * 1000)
+                        _emit_stackone_trace(
+                            "tool:error",
+                            f"{current_tool.name} ({latency_ms}ms) error={exc}",
+                        )
+                        raise
+
+                return tool_wrapper
 
             # 3. Create the Pydantic AI Tool
             p_tool = PydanticAITool(
-                tool_wrapper,
+                make_tool_wrapper(tool, ArgsModel),
                 name=tool.name,
                 description=tool.description,
             )

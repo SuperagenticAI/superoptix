@@ -207,6 +207,715 @@ schema:
               minimum: 1
               maximum: 600
               description: "Request timeout in seconds"
+
+        # DSPy Automation Configuration (preferred for SuperOptiX -> DSPy mapping)
+        dspy:
+          type: object
+          required: false
+          description: "DSPy automation block. SuperOptiX maps this to runnable DSPy pipelines without user coding."
+          properties:
+            module:
+              type: string
+              required: false
+              default: "chain_of_thought"
+              enum: ["predict", "chain_of_thought", "react", "rlm", "program_of_thought", "parallel"]
+              description: "DSPy module strategy for the primary program"
+            module_params:
+              type: object
+              required: false
+              description: "Optional DSPy module tuning knobs"
+              properties:
+                max_iterations:
+                  type: integer
+                  required: false
+                  minimum: 1
+                  maximum: 100
+                parallel_workers:
+                  type: integer
+                  required: false
+                  minimum: 1
+                  maximum: 32
+                temperature:
+                  type: number
+                  required: false
+                  minimum: 0
+                  maximum: 2
+                max_tokens:
+                  type: integer
+                  required: false
+                  minimum: 1
+                  maximum: 200000
+            adapter:
+              type: object
+              required: false
+              description: "DSPy adapter preference"
+              properties:
+                mode:
+                  type: string
+                  required: false
+                  default: "auto"
+                  enum: ["auto", "manual"]
+                type:
+                  type: string
+                  required: false
+                  default: "chat"
+                  enum: ["chat", "json", "xml", "twostep"]
+                native_function_calling:
+                  type: boolean
+                  required: false
+                  default: false
+                strict:
+                  type: boolean
+                  required: false
+                  default: false
+                retry_on_parse_error:
+                  type: integer
+                  required: false
+                  default: 1
+                  minimum: 0
+                  maximum: 10
+                fallback_adapter:
+                  type: string
+                  required: false
+                  default: "chat"
+                  enum: ["chat", "json", "xml", "twostep"]
+            signature:
+              type: object
+              required: false
+              description: "DSPy signature generation behavior"
+              properties:
+                output_mode:
+                  type: string
+                  required: false
+                  default: "simple"
+                  enum: ["simple", "structured"]
+                  description: "simple = raw text outputs, structured = JSON-first outputs with runtime coercion"
+            assertions:
+              type: object
+              required: false
+              description: "Post-prediction guardrails for DSPy outputs"
+              properties:
+                enabled:
+                  type: boolean
+                  required: false
+                  default: true
+                mode:
+                  type: string
+                  required: false
+                  default: "fail_fast"
+                  enum: ["fail_fast", "warn_only"]
+                  description: "fail_fast marks result invalid when assertions fail; warn_only reports but does not fail"
+                metric_weight:
+                  type: number
+                  required: false
+                  default: 0.3
+                  minimum: 0
+                  maximum: 1
+                  description: "Weight for assertion pass-rate in optimization metric blending (0=quality-only, 1=assertion-only)"
+                required_fields:
+                  type: array
+                  required: false
+                  items:
+                    type: string
+                non_empty:
+                  type: array
+                  required: false
+                  items:
+                    type: string
+                enum:
+                  type: object
+                  required: false
+                  additional_properties:
+                    type: array
+                    items:
+                      type: string
+                max_length:
+                  type: object
+                  required: false
+                  additional_properties:
+                    type: integer
+                custom_regex:
+                  type: object
+                  required: false
+                  additional_properties:
+                    type: string
+            modules:
+              type: array
+              required: false
+              description: "Per-module DSPy overrides (e.g., adapter by module name)"
+              items:
+                type: object
+                required: true
+                properties:
+                  name:
+                    type: string
+                    required: true
+                    enum: ["predict", "chain_of_thought", "react", "rlm", "program_of_thought", "parallel"]
+                  adapter:
+                    type: object
+                    required: false
+                    properties:
+                      mode:
+                        type: string
+                        required: false
+                        default: "auto"
+                        enum: ["auto", "manual"]
+                      type:
+                        type: string
+                        required: false
+                        default: "chat"
+                        enum: ["chat", "json", "xml", "twostep"]
+                      native_function_calling:
+                        type: boolean
+                        required: false
+                        default: false
+                      strict:
+                        type: boolean
+                        required: false
+                        default: false
+                      retry_on_parse_error:
+                        type: integer
+                        required: false
+                        default: 1
+                        minimum: 0
+                        maximum: 10
+                      fallback_adapter:
+                        type: string
+                        required: false
+                        default: "chat"
+                        enum: ["chat", "json", "xml", "twostep"]
+            tools:
+              type: object
+              required: false
+              description: "DSPy tool loading strategy"
+              properties:
+                mode:
+                  type: string
+                  required: false
+                  default: "builtin"
+                  enum: ["none", "builtin", "mcp", "stackone", "stackone_discovery"]
+                builtin_tools:
+                  type: array
+                  required: false
+                  items:
+                    type: string
+                mcp_servers:
+                  type: array
+                  required: false
+                  items:
+                    type: string
+                stackone:
+                  type: object
+                  required: false
+                  description: "StackOne connector tool loading configuration"
+                  properties:
+                    enabled:
+                      type: boolean
+                      required: false
+                      default: true
+                    discovery_mode:
+                      type: boolean
+                      required: false
+                      default: false
+                    api_key_env:
+                      type: string
+                      required: false
+                      default: "STACKONE_API_KEY"
+                    account_ids_env:
+                      type: string
+                      required: false
+                      description: "Optional env var containing comma-separated account IDs"
+                    account_ids:
+                      type: array
+                      required: false
+                      items:
+                        type: string
+                    providers:
+                      type: array
+                      required: false
+                      items:
+                        type: string
+                    actions:
+                      type: array
+                      required: false
+                      items:
+                        type: string
+                    fallback_unfiltered:
+                      type: boolean
+                      required: false
+                      default: true
+                      description: "Retry unfiltered tool fetch when provider/action filters return zero tools"
+                    base_url:
+                      type: string
+                      required: false
+                      description: "Optional StackOne API base URL override"
+            rlm:
+              type: object
+              required: false
+              description: "RLM module settings (used when module=rlm or enabled=true)"
+              properties:
+                enabled:
+                  type: boolean
+                  required: false
+                  default: false
+                max_iterations:
+                  type: integer
+                  required: false
+                  default: 10
+                  minimum: 1
+                  maximum: 50
+                max_llm_calls:
+                  type: integer
+                  required: false
+                  default: 5
+                  minimum: 1
+                  maximum: 100
+            gepa:
+              type: object
+              required: false
+              description: "GEPA optimizer configuration (only optimizer supported in DSPy automation mode)"
+              properties:
+                enabled:
+                  type: boolean
+                  required: false
+                  default: false
+                auto:
+                  type: string
+                  required: false
+                  enum: ["light", "medium", "heavy"]
+                task_model:
+                  type: string
+                  required: false
+                  description: "Task model used for the student program"
+                reflection_model:
+                  type: string
+                  required: false
+                  description: "Reflection model used by GEPA (mapped internally to reflection_lm)"
+                candidate_selection_strategy:
+                  type: string
+                  required: false
+                  enum: ["pareto", "best"]
+                reflection_minibatch_size:
+                  type: integer
+                  required: false
+                  minimum: 1
+                  maximum: 1000
+                max_full_evals:
+                  type: integer
+                  required: false
+                  minimum: 1
+                max_metric_calls:
+                  type: integer
+                  required: false
+                  minimum: 1
+                skip_perfect_score:
+                  type: boolean
+                  required: false
+                use_merge:
+                  type: boolean
+                  required: false
+                max_merge_invocations:
+                  type: integer
+                  required: false
+                  minimum: 0
+                track_stats:
+                  type: boolean
+                  required: false
+                seed:
+                  type: integer
+                  required: false
+                  minimum: 0
+
+        pydantic_ai:
+          type: object
+          required: false
+          description: "Pydantic AI-specific automation options"
+          properties:
+            rlm:
+              type: object
+              required: false
+              description: "Optional RLM orchestration for Pydantic AI"
+              properties:
+                enabled:
+                  type: boolean
+                  required: false
+                  default: false
+                mode:
+                  type: string
+                  required: false
+                  default: "assist"
+                  enum: ["assist", "replace"]
+                backend:
+                  type: string
+                  required: false
+                  default: "litellm"
+                environment:
+                  type: string
+                  required: false
+                  default: "python"
+                max_iterations:
+                  type: integer
+                  required: false
+                  default: 8
+                  minimum: 1
+                  maximum: 50
+                max_depth:
+                  type: integer
+                  required: false
+                  default: 1
+                  minimum: 1
+                  maximum: 4
+                verbose:
+                  type: boolean
+                  required: false
+                  default: false
+                persistent:
+                  type: boolean
+                  required: false
+                  default: false
+                task_model:
+                  type: string
+                  required: false
+                api_key_env:
+                  type: string
+                  required: false
+                api_base:
+                  type: string
+                  required: false
+                logger:
+                  type: object
+                  required: false
+                  properties:
+                    enabled:
+                      type: boolean
+                      required: false
+                      default: false
+                    log_dir:
+                      type: string
+                      required: false
+                      default: ".superoptix/logs/rlm"
+                    file_name:
+                      type: string
+                      required: false
+                      default: "pydantic_rlm"
+
+        openai_agent:
+          type: object
+          required: false
+          description: "OpenAI Agents SDK-specific automation options"
+          properties:
+            rlm:
+              type: object
+              required: false
+              description: "Optional RLM orchestration for OpenAI Agents SDK"
+              properties:
+                enabled:
+                  type: boolean
+                  required: false
+                  default: false
+                mode:
+                  type: string
+                  required: false
+                  default: "assist"
+                  enum: ["assist", "replace"]
+                backend:
+                  type: string
+                  required: false
+                  default: "litellm"
+                environment:
+                  type: string
+                  required: false
+                  default: "python"
+                max_iterations:
+                  type: integer
+                  required: false
+                  default: 8
+                  minimum: 1
+                  maximum: 50
+                max_depth:
+                  type: integer
+                  required: false
+                  default: 1
+                  minimum: 1
+                  maximum: 4
+                verbose:
+                  type: boolean
+                  required: false
+                  default: false
+                persistent:
+                  type: boolean
+                  required: false
+                  default: false
+                task_model:
+                  type: string
+                  required: false
+                api_key_env:
+                  type: string
+                  required: false
+                api_base:
+                  type: string
+                  required: false
+                logger:
+                  type: object
+                  required: false
+                  properties:
+                    enabled:
+                      type: boolean
+                      required: false
+                      default: false
+                    log_dir:
+                      type: string
+                      required: false
+                      default: ".superoptix/logs/rlm"
+                    file_name:
+                      type: string
+                      required: false
+                      default: "openai_rlm"
+
+        google_adk:
+          type: object
+          required: false
+          description: "Google ADK-specific automation options"
+          properties:
+            rlm:
+              type: object
+              required: false
+              description: "Optional RLM orchestration for Google ADK"
+              properties:
+                enabled:
+                  type: boolean
+                  required: false
+                  default: false
+                mode:
+                  type: string
+                  required: false
+                  default: "assist"
+                  enum: ["assist", "replace"]
+                backend:
+                  type: string
+                  required: false
+                  default: "litellm"
+                environment:
+                  type: string
+                  required: false
+                  default: "python"
+                max_iterations:
+                  type: integer
+                  required: false
+                  default: 8
+                  minimum: 1
+                  maximum: 50
+                max_depth:
+                  type: integer
+                  required: false
+                  default: 1
+                  minimum: 1
+                  maximum: 4
+                verbose:
+                  type: boolean
+                  required: false
+                  default: false
+                persistent:
+                  type: boolean
+                  required: false
+                  default: false
+                task_model:
+                  type: string
+                  required: false
+                api_key_env:
+                  type: string
+                  required: false
+                api_base:
+                  type: string
+                  required: false
+                logger:
+                  type: object
+                  required: false
+                  properties:
+                    enabled:
+                      type: boolean
+                      required: false
+                      default: false
+                    log_dir:
+                      type: string
+                      required: false
+                      default: ".superoptix/logs/rlm"
+                    file_name:
+                      type: string
+                      required: false
+                      default: "adk_rlm"
+
+        crewai:
+          type: object
+          required: false
+          description: "CrewAI-specific automation options"
+          properties:
+            rlm:
+              type: object
+              required: false
+              description: "Optional RLM orchestration for CrewAI"
+              properties:
+                enabled:
+                  type: boolean
+                  required: false
+                  default: false
+                mode:
+                  type: string
+                  required: false
+                  default: "assist"
+                  enum: ["assist", "replace"]
+                backend:
+                  type: string
+                  required: false
+                  default: "litellm"
+                environment:
+                  type: string
+                  required: false
+                  default: "python"
+                max_iterations:
+                  type: integer
+                  required: false
+                  default: 8
+                  minimum: 1
+                  maximum: 50
+                max_depth:
+                  type: integer
+                  required: false
+                  default: 1
+                  minimum: 1
+                  maximum: 4
+                verbose:
+                  type: boolean
+                  required: false
+                  default: false
+                persistent:
+                  type: boolean
+                  required: false
+                  default: false
+                task_model:
+                  type: string
+                  required: false
+                api_key_env:
+                  type: string
+                  required: false
+                api_base:
+                  type: string
+                  required: false
+                logger:
+                  type: object
+                  required: false
+                  properties:
+                    enabled:
+                      type: boolean
+                      required: false
+                      default: false
+                    log_dir:
+                      type: string
+                      required: false
+                      default: ".superoptix/logs/rlm"
+                    file_name:
+                      type: string
+                      required: false
+                      default: "crewai_rlm"
+
+        deepagents:
+          type: object
+          required: false
+          description: "DeepAgents-specific automation options"
+          properties:
+            rlm:
+              type: object
+              required: false
+              description: "Optional RLM orchestration for DeepAgents"
+              properties:
+                enabled:
+                  type: boolean
+                  required: false
+                  default: false
+                mode:
+                  type: string
+                  required: false
+                  default: "assist"
+                  enum: ["assist", "replace"]
+                backend:
+                  type: string
+                  required: false
+                  default: "litellm"
+                environment:
+                  type: string
+                  required: false
+                  default: "python"
+                max_iterations:
+                  type: integer
+                  required: false
+                  default: 8
+                  minimum: 1
+                  maximum: 50
+                max_depth:
+                  type: integer
+                  required: false
+                  default: 1
+                  minimum: 1
+                  maximum: 4
+                verbose:
+                  type: boolean
+                  required: false
+                  default: false
+                persistent:
+                  type: boolean
+                  required: false
+                  default: false
+                task_model:
+                  type: string
+                  required: false
+                api_key_env:
+                  type: string
+                  required: false
+                api_base:
+                  type: string
+                  required: false
+                logger:
+                  type: object
+                  required: false
+                  properties:
+                    enabled:
+                      type: boolean
+                      required: false
+                      default: false
+                    log_dir:
+                      type: string
+                      required: false
+                      default: ".superoptix/logs/rlm"
+                    file_name:
+                      type: string
+                      required: false
+                      default: "deepagents_rlm"
+
+        # DSPy RLM Configuration (legacy top-level; prefer spec.dspy.rlm)
+        rlm:
+          type: object
+          required: false
+          description: "Optional DSPy RLM configuration for minimal compile mode (not enabled by default)"
+          properties:
+            enabled:
+              type: boolean
+              required: false
+              default: false
+              description: "Enable dspy.RLM during DSPy minimal compile"
+            max_iters:
+              type: integer
+              required: false
+              default: 10
+              minimum: 1
+              maximum: 50
+              description: "Maximum RLM reasoning iterations"
+            max_llm_calls:
+              type: integer
+              required: false
+              default: 5
+              minimum: 1
+              maximum: 100
+              description: "Maximum LLM calls available to RLM helper actions"
         
         # Tool Backend Configuration (Protocol-First vs Tool-First)
         tool_backend:

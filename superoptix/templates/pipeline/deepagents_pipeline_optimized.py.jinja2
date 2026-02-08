@@ -1,0 +1,218 @@
+"""
+{{ agent_name | to_pascal_case }} Agent - DeepAgents Optimized Pipeline
+
+Auto-generated from SuperSpec playbook using SuperOptiX compiler.
+Framework: DeepAgents
+Generated: {{ timestamp }}
+"""
+
+from __future__ import annotations
+
+import asyncio
+import json
+import threading
+import time
+from pathlib import Path
+from typing import Any, Dict, Optional
+
+from langchain.chat_models import init_chat_model
+
+from superoptix.core.base_component import BaseComponent
+from superoptix.vendor.deepagents.graph import create_deep_agent
+from superoptix.runners.deepagents_runtime_helpers import (
+    build_instructions as superoptix_build_instructions,
+    resolve_model as superoptix_resolve_model,
+{% set tools_cfg = (spec.get("tools", {}) or {}) %}
+{% set dspy_tools_cfg = ((spec.get("dspy", {}) or {}).get("tools", {}) or {}) %}
+{% set stackone_cfg = spec.get("stackone") or tools_cfg.get("stackone") or dspy_tools_cfg.get("stackone") %}
+{% set stackone_mode = (spec.get("stackone_mode") or tools_cfg.get("mode") or dspy_tools_cfg.get("mode") or "") | string | lower %}
+{% set include_stackone_code = (stackone_mode in ["stackone", "stackone_discovery"]) or (stackone_cfg is mapping and (stackone_cfg | length > 0)) %}
+{% set deepagents_rlm_cfg = ((spec.get("deepagents", {}) or {}).get("rlm")) %}
+{% set include_rlm_code = (deepagents_rlm_cfg is mapping and (deepagents_rlm_cfg | length > 0)) or (spec.get("rlm") is mapping and (spec.get("rlm") | length > 0)) %}
+{% if include_stackone_code %}
+    build_stackone_tools as superoptix_build_stackone_tools,
+{% endif %}
+{% if include_rlm_code %}
+    run_with_optional_rlm as superoptix_run_with_optional_rlm,
+{% endif %}
+)
+
+COMPILED_SPEC_PATH = Path(__file__).resolve().parent / "{{ compiled_spec_filename }}"
+def _load_compiled_spec(path: Path) -> Dict[str, Any]:
+    try:
+        with path.open("r", encoding="utf-8") as _spec_file:
+            return json.load(_spec_file)
+    except FileNotFoundError as exc:
+        raise FileNotFoundError(
+            f"Compiled spec file not found at {path}. Recompile this agent to regenerate pipeline artifacts."
+        ) from exc
+    except json.JSONDecodeError as exc:
+        raise ValueError(
+            f"Compiled spec file is invalid JSON at {path}. Recompile this agent to regenerate pipeline artifacts."
+        ) from exc
+
+
+FULL_SPEC = _load_compiled_spec(COMPILED_SPEC_PATH)
+
+LANGUAGE_MODEL = dict(FULL_SPEC.get("language_model", {}) or {})
+INSTRUCTION_SPEC = {
+    "persona": dict(FULL_SPEC.get("persona", {}) or {}),
+    "tasks": list(FULL_SPEC.get("tasks", []) or []),
+}
+OPTIMIZATION_CONFIG = dict(FULL_SPEC.get("optimization", {}) or {})
+
+
+def _run_coro_sync(coro):
+    try:
+        asyncio.get_running_loop()
+    except RuntimeError:
+        return asyncio.run(coro)
+
+    state: Dict[str, Any] = {"result": None, "error": None}
+
+    def _target():
+        try:
+            state["result"] = asyncio.run(coro)
+        except Exception as exc:
+            state["error"] = exc
+
+    thread = threading.Thread(target=_target, daemon=True)
+    thread.start()
+    thread.join()
+    if state["error"] is not None:
+        raise state["error"]
+    return state["result"]
+
+
+class {{ agent_name | to_pascal_case }}Component(BaseComponent):
+    """
+    BaseComponent wrapper for DeepAgents.
+
+    Optimizable variable: system_prompt/instructions.
+    """
+
+    def __init__(
+        self,
+        instructions: Optional[str] = None,
+        model_config: Optional[Dict[str, Any]] = None,
+    ):
+        resolved_instructions = instructions or superoptix_build_instructions(
+            INSTRUCTION_SPEC
+        )
+        resolved_model = superoptix_resolve_model(
+            LANGUAGE_MODEL, model_config=model_config
+        )
+{% if include_stackone_code %}
+        tools = superoptix_build_stackone_tools(FULL_SPEC)
+{% else %}
+        tools = []
+{% endif %}
+
+        super().__init__(
+            name="{{ agent_name }}",
+            description={{ (metadata.description | default("DeepAgents agent")) | tojson }},
+            input_fields={{ (spec.input_fields | map(attribute="name") | list) | tojson }},
+            output_fields={{ (spec.output_fields | map(attribute="name") | list) | tojson }},
+            variable=resolved_instructions,
+            variable_type="system_prompt",
+            framework="deepagents",
+            config={
+                "model": resolved_model,
+                "tools_count": len(tools or []),
+            },
+        )
+
+        self._model_name = resolved_model
+        self._model = init_chat_model(resolved_model)
+        self._tools = tools
+        self._agent_graph = None
+
+    def _ensure_graph(self):
+        if self._agent_graph is None:
+            self._agent_graph = create_deep_agent(
+                model=self._model,
+                tools=self._tools or [],
+                system_prompt=self.variable,
+            )
+        return self._agent_graph
+
+    async def arun(self, prompt: str) -> str:
+        graph = self._ensure_graph()
+{% if include_rlm_code %}
+        return await superoptix_run_with_optional_rlm(
+            agent_graph=graph,
+            prompt=prompt,
+            spec_data=FULL_SPEC,
+            model_name=self._model_name,
+        )
+{% else %}
+        result = await asyncio.to_thread(
+            graph.invoke, {"messages": [{"role": "user", "content": prompt}]}
+        )
+        messages = result.get("messages", []) if isinstance(result, dict) else []
+        if messages:
+            last = messages[-1]
+            return str(getattr(last, "content", last))
+        return str(result)
+{% endif %}
+
+    def forward(self, **inputs: Any) -> Dict[str, Any]:
+{% if spec.input_fields and spec.input_fields|length > 0 %}
+        prompt = str(inputs.get("{{ spec.input_fields[0].name | to_snake_case }}", ""))
+{% else %}
+        prompt = str(inputs.get("query", ""))
+{% endif %}
+        text = _run_coro_sync(self.arun(prompt))
+{% if spec.output_fields and spec.output_fields|length > 0 %}
+        return {"{{ spec.output_fields[0].name | to_snake_case }}": text}
+{% else %}
+        return {"response": text}
+{% endif %}
+
+    def update(self, new_variable: Any) -> None:
+        super().update(new_variable)
+        self._agent_graph = None
+
+
+class {{ agent_name | to_pascal_case }}Pipeline:
+    def __init__(
+        self,
+        model_config: Optional[Dict[str, Any]] = None,
+        instructions: Optional[str] = None,
+    ):
+        self.component = {{ agent_name | to_pascal_case }}Component(
+            instructions=instructions,
+            model_config=model_config,
+        )
+        optimizer_cfg = (OPTIMIZATION_CONFIG or {}).get("optimizer", {}) or {}
+        params = optimizer_cfg.get("params", {}) if isinstance(optimizer_cfg, dict) else {}
+        if params:
+            print(
+                "🧬 Optimization config visible: "
+                f"optimizer={optimizer_cfg.get('name', 'GEPA')}, "
+                f"auto={params.get('auto', 'light')}, "
+                f"max_full_evals={params.get('max_full_evals', 'default')}"
+            )
+
+    async def run(self, query: Optional[str] = None, **inputs: Any) -> Dict[str, Any]:
+        if query is None:
+{% if spec.input_fields and spec.input_fields|length > 0 %}
+            query = str(inputs.get("{{ spec.input_fields[0].name | to_snake_case }}", ""))
+{% else %}
+            query = str(inputs.get("query", ""))
+{% endif %}
+        started = time.time()
+        preview = (query[:120] + "...") if query and len(query) > 120 else (query or "")
+        print(
+            f"🧠 DeepAgents run start | model={self.component.config.model} | "
+            f"tools={self.component.config.tools_count}"
+        )
+        print(f"📝 Prompt: {preview}")
+        output = await self.component.arun(query or "")
+        elapsed_ms = int((time.time() - started) * 1000)
+        print(f"✅ DeepAgents run done ({elapsed_ms}ms)")
+{% if spec.output_fields and spec.output_fields|length > 0 %}
+        return {"{{ spec.output_fields[0].name | to_snake_case }}": output}
+{% else %}
+        return {"response": output}
+{% endif %}

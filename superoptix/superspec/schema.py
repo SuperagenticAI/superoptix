@@ -62,6 +62,7 @@ class SuperSpecXSchema:
         "sglang",
         "mlx",
         "lm_studio",
+        "gateway",
         "openai",
         "anthropic",
         "google",
@@ -159,6 +160,17 @@ class SuperSpecXSchema:
         "KNNFewShot",
         "LabeledFewShot",
     ]
+
+    # SuperSpec DSPy automation surface (current focus)
+    VALID_DSPY_MODULES = [
+        "predict",
+        "chain_of_thought",
+        "react",
+        "rlm",
+        "program_of_thought",
+        "parallel",
+    ]
+    VALID_DSPY_AUTOMATION_OPTIMIZERS = ["GEPA"]
 
     # GEPA-specific configuration options
     VALID_GEPA_BUDGETS = ["minimal", "light", "medium", "heavy"]
@@ -353,7 +365,40 @@ class SuperSpecXSchema:
                     "enum": cls.VALID_LM_PROVIDERS,
                     "description": "Model provider",
                 },
+                "runtime_mode": {
+                    "type": "string",
+                    "enum": ["direct", "gateway"],
+                    "default": "direct",
+                    "description": "Pydantic AI runtime mode. Use 'gateway' to route via gateway endpoints.",
+                },
                 "model": {"type": "string", "description": "Specific model identifier"},
+                "gateway": {
+                    "type": "object",
+                    "description": "Optional gateway runtime configuration for Pydantic AI.",
+                    "properties": {
+                        "enabled": {"type": "boolean", "default": False},
+                        "base_url": {
+                            "type": "string",
+                            "description": "Gateway base URL.",
+                        },
+                        "api_key_env": {
+                            "type": "string",
+                            "default": "PYDANTIC_AI_GATEWAY_API_KEY",
+                            "description": "Environment variable name containing gateway API key.",
+                        },
+                        "timeout_sec": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 600,
+                            "default": 45,
+                        },
+                        "model_map": {
+                            "type": "object",
+                            "description": "Optional logical model map (e.g. task/reflection).",
+                            "additionalProperties": {"type": "string"},
+                        },
+                    },
+                },
                 "model_type": {
                     "type": "string",
                     "enum": cls.VALID_MODEL_TYPES,
@@ -702,6 +747,395 @@ class SuperSpecXSchema:
         }
 
     @classmethod
+    def get_rlm_schema(cls) -> Dict[str, Any]:
+        """Get DSPy RLM configuration schema (optional, framework-specific)."""
+        return {
+            "type": "object",
+            "description": "Optional DSPy RLM configuration for minimal compile mode",
+            "properties": {
+                "enabled": {
+                    "type": "boolean",
+                    "default": False,
+                    "description": "Enable dspy.RLM for DSPy minimal pipelines",
+                },
+                "max_iters": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 50,
+                    "default": 10,
+                    "description": "Maximum RLM reasoning iterations",
+                },
+                "max_llm_calls": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 100,
+                    "default": 5,
+                    "description": "Maximum LLM calls available to RLM helper actions",
+                },
+            },
+        }
+
+    @classmethod
+    def get_pydantic_ai_schema(cls) -> Dict[str, Any]:
+        """Get Pydantic AI framework-specific schema."""
+        return {
+            "type": "object",
+            "properties": {
+                "rlm": {
+                    "type": "object",
+                    "description": "Optional RLM orchestration for Pydantic AI runs",
+                    "properties": {
+                        "enabled": {"type": "boolean", "default": False},
+                        "mode": {
+                            "type": "string",
+                            "enum": ["assist", "replace"],
+                            "default": "assist",
+                            "description": "assist: RLM draft then Agent.run, replace: RLM only",
+                        },
+                        "backend": {
+                            "type": "string",
+                            "default": "litellm",
+                            "description": "RLM backend (e.g. litellm, gemini, openai)",
+                        },
+                        "environment": {
+                            "type": "string",
+                            "default": "python",
+                            "description": "RLM environment (python/local/swebench, etc.)",
+                        },
+                        "max_iterations": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 50,
+                            "default": 8,
+                        },
+                        "max_depth": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 4,
+                            "default": 1,
+                        },
+                        "verbose": {"type": "boolean", "default": False},
+                        "persistent": {"type": "boolean", "default": False},
+                        "task_model": {
+                            "type": "string",
+                            "description": "Optional model override for RLM backend",
+                        },
+                        "api_key_env": {
+                            "type": "string",
+                            "description": "Optional env var name for backend API key",
+                        },
+                        "api_base": {
+                            "type": "string",
+                            "description": "Optional backend base URL override",
+                        },
+                        "logger": {
+                            "type": "object",
+                            "properties": {
+                                "enabled": {"type": "boolean", "default": False},
+                                "log_dir": {
+                                    "type": "string",
+                                    "default": ".superoptix/logs/rlm",
+                                },
+                                "file_name": {
+                                    "type": "string",
+                                    "default": "pydantic_rlm",
+                                },
+                            },
+                        },
+                    },
+                }
+            },
+        }
+
+    @classmethod
+    def get_openai_agent_schema(cls) -> Dict[str, Any]:
+        """Get OpenAI Agents SDK framework-specific schema."""
+        return {
+            "type": "object",
+            "properties": {
+                "rlm": {
+                    "type": "object",
+                    "description": "Optional RLM orchestration for OpenAI Agents SDK runs",
+                    "properties": {
+                        "enabled": {"type": "boolean", "default": False},
+                        "mode": {
+                            "type": "string",
+                            "enum": ["assist", "replace"],
+                            "default": "assist",
+                            "description": "assist: RLM draft then Runner.run, replace: RLM only",
+                        },
+                        "backend": {
+                            "type": "string",
+                            "default": "litellm",
+                            "description": "RLM backend (e.g. litellm, gemini, openai)",
+                        },
+                        "environment": {
+                            "type": "string",
+                            "default": "python",
+                            "description": "RLM environment (python/local/swebench, etc.)",
+                        },
+                        "max_iterations": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 50,
+                            "default": 8,
+                        },
+                        "max_depth": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 4,
+                            "default": 1,
+                        },
+                        "verbose": {"type": "boolean", "default": False},
+                        "persistent": {"type": "boolean", "default": False},
+                        "task_model": {
+                            "type": "string",
+                            "description": "Optional model override for RLM backend",
+                        },
+                        "api_key_env": {
+                            "type": "string",
+                            "description": "Optional env var name for backend API key",
+                        },
+                        "api_base": {
+                            "type": "string",
+                            "description": "Optional backend base URL override",
+                        },
+                        "logger": {
+                            "type": "object",
+                            "properties": {
+                                "enabled": {"type": "boolean", "default": False},
+                                "log_dir": {
+                                    "type": "string",
+                                    "default": ".superoptix/logs/rlm",
+                                },
+                                "file_name": {
+                                    "type": "string",
+                                    "default": "openai_rlm",
+                                },
+                            },
+                        },
+                    },
+                }
+            },
+        }
+
+    @classmethod
+    def get_google_adk_schema(cls) -> Dict[str, Any]:
+        """Get Google ADK framework-specific schema."""
+        return {
+            "type": "object",
+            "properties": {
+                "rlm": {
+                    "type": "object",
+                    "description": "Optional RLM orchestration for Google ADK runs",
+                    "properties": {
+                        "enabled": {"type": "boolean", "default": False},
+                        "mode": {
+                            "type": "string",
+                            "enum": ["assist", "replace"],
+                            "default": "assist",
+                            "description": "assist: RLM draft then ADK run, replace: RLM only",
+                        },
+                        "backend": {
+                            "type": "string",
+                            "default": "litellm",
+                            "description": "RLM backend (e.g. litellm, gemini, openai)",
+                        },
+                        "environment": {
+                            "type": "string",
+                            "default": "python",
+                            "description": "RLM environment (python/local/swebench, etc.)",
+                        },
+                        "max_iterations": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 50,
+                            "default": 8,
+                        },
+                        "max_depth": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 4,
+                            "default": 1,
+                        },
+                        "verbose": {"type": "boolean", "default": False},
+                        "persistent": {"type": "boolean", "default": False},
+                        "task_model": {
+                            "type": "string",
+                            "description": "Optional model override for RLM backend",
+                        },
+                        "api_key_env": {
+                            "type": "string",
+                            "description": "Optional env var name for backend API key",
+                        },
+                        "api_base": {
+                            "type": "string",
+                            "description": "Optional backend base URL override",
+                        },
+                        "logger": {
+                            "type": "object",
+                            "properties": {
+                                "enabled": {"type": "boolean", "default": False},
+                                "log_dir": {
+                                    "type": "string",
+                                    "default": ".superoptix/logs/rlm",
+                                },
+                                "file_name": {
+                                    "type": "string",
+                                    "default": "adk_rlm",
+                                },
+                            },
+                        },
+                    },
+                }
+            },
+        }
+
+    @classmethod
+    def get_deepagents_schema(cls) -> Dict[str, Any]:
+        """Get DeepAgents framework-specific schema."""
+        return {
+            "type": "object",
+            "properties": {
+                "rlm": {
+                    "type": "object",
+                    "description": "Optional RLM orchestration for DeepAgents runs",
+                    "properties": {
+                        "enabled": {"type": "boolean", "default": False},
+                        "mode": {
+                            "type": "string",
+                            "enum": ["assist", "replace"],
+                            "default": "assist",
+                            "description": "assist: RLM draft then DeepAgents invoke, replace: RLM only",
+                        },
+                        "backend": {
+                            "type": "string",
+                            "default": "litellm",
+                            "description": "RLM backend (e.g. litellm, gemini, openai)",
+                        },
+                        "environment": {
+                            "type": "string",
+                            "default": "python",
+                            "description": "RLM environment (python/local/swebench, etc.)",
+                        },
+                        "max_iterations": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 50,
+                            "default": 8,
+                        },
+                        "max_depth": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 4,
+                            "default": 1,
+                        },
+                        "verbose": {"type": "boolean", "default": False},
+                        "persistent": {"type": "boolean", "default": False},
+                        "task_model": {
+                            "type": "string",
+                            "description": "Optional model override for RLM backend",
+                        },
+                        "api_key_env": {
+                            "type": "string",
+                            "description": "Optional env var name for backend API key",
+                        },
+                        "api_base": {
+                            "type": "string",
+                            "description": "Optional backend base URL override",
+                        },
+                        "logger": {
+                            "type": "object",
+                            "properties": {
+                                "enabled": {"type": "boolean", "default": False},
+                                "log_dir": {
+                                    "type": "string",
+                                    "default": ".superoptix/logs/rlm",
+                                },
+                                "file_name": {
+                                    "type": "string",
+                                    "default": "deepagents_rlm",
+                                },
+                            },
+                        },
+                    },
+                }
+            },
+        }
+
+    @classmethod
+    def get_crewai_schema(cls) -> Dict[str, Any]:
+        """Get CrewAI framework-specific schema."""
+        return {
+            "type": "object",
+            "properties": {
+                "rlm": {
+                    "type": "object",
+                    "description": "Optional RLM orchestration for CrewAI runs",
+                    "properties": {
+                        "enabled": {"type": "boolean", "default": False},
+                        "mode": {
+                            "type": "string",
+                            "enum": ["assist", "replace"],
+                            "default": "assist",
+                            "description": "assist: RLM draft then Crew.kickoff, replace: RLM only",
+                        },
+                        "backend": {
+                            "type": "string",
+                            "default": "litellm",
+                            "description": "RLM backend (e.g. litellm, gemini, openai)",
+                        },
+                        "environment": {
+                            "type": "string",
+                            "default": "python",
+                            "description": "RLM environment (python/local/swebench, etc.)",
+                        },
+                        "max_iterations": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 50,
+                            "default": 8,
+                        },
+                        "max_depth": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 4,
+                            "default": 1,
+                        },
+                        "verbose": {"type": "boolean", "default": False},
+                        "persistent": {"type": "boolean", "default": False},
+                        "task_model": {
+                            "type": "string",
+                            "description": "Optional model override for RLM backend",
+                        },
+                        "api_key_env": {
+                            "type": "string",
+                            "description": "Optional env var name for backend API key",
+                        },
+                        "api_base": {
+                            "type": "string",
+                            "description": "Optional backend base URL override",
+                        },
+                        "logger": {
+                            "type": "object",
+                            "properties": {
+                                "enabled": {"type": "boolean", "default": False},
+                                "log_dir": {
+                                    "type": "string",
+                                    "default": ".superoptix/logs/rlm",
+                                },
+                                "file_name": {
+                                    "type": "string",
+                                    "default": "crewai_rlm",
+                                },
+                            },
+                        },
+                    },
+                }
+            },
+        }
+
+    @classmethod
     def get_full_schema(cls, tier: str = "oracles") -> Dict[str, Any]:
         """Get complete schema for the specified tier."""
         schema = {
@@ -716,6 +1150,12 @@ class SuperSpecXSchema:
                     "required": ["language_model", "tasks"],
                     "properties": {
                         "language_model": cls.get_language_model_schema(),
+                        "rlm": cls.get_rlm_schema(),
+                        "pydantic_ai": cls.get_pydantic_ai_schema(),
+                        "openai_agent": cls.get_openai_agent_schema(),
+                        "google_adk": cls.get_google_adk_schema(),
+                        "deepagents": cls.get_deepagents_schema(),
+                        "crewai": cls.get_crewai_schema(),
                         "persona": cls.get_persona_schema(),
                         "tasks": {
                             "type": "array",
@@ -853,6 +1293,21 @@ class SuperSpecXSchema:
                                     "type": "string",
                                     "enum": cls.VALID_GEPA_BUDGETS,
                                     "description": "GEPA budget control (GEPA only)",
+                                },
+                                "backend": {
+                                    "type": "string",
+                                    "enum": ["universal", "pydantic_native"],
+                                    "description": "GEPA execution backend. "
+                                    "'universal' uses SuperOptiX UniversalGEPA (default). "
+                                    "'pydantic_native' attempts native Pydantic-style optimization and falls back if unavailable.",
+                                },
+                                "task_model": {
+                                    "type": "string",
+                                    "description": "Task model used for candidate generation/evaluation during GEPA runs.",
+                                },
+                                "reflection_model": {
+                                    "type": "string",
+                                    "description": "Reflection model used for critique/rewrite during GEPA runs.",
                                 },
                                 "reflection_lm": {
                                     "type": "string",

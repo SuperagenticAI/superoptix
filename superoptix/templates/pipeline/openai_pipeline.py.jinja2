@@ -86,11 +86,17 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 {% if spec.persona.role %}
 		instructions_parts.append({{ (spec.persona.role | replace('\n', ' ')) | tojson }})
 {% endif %}
+{% if spec.persona.instructions %}
+		instructions_parts.append("\\nInstructions: " + {{ (spec.persona.instructions | replace('\n', ' ')) | tojson }})
+{% endif %}
 {% if spec.persona.goal %}
 		instructions_parts.append("\\nGoal: " + {{ (spec.persona.goal | replace('\n', ' ')) | tojson }})
 {% endif %}
 {% if spec.persona.backstory %}
 		instructions_parts.append("\\nBackstory: " + {{ (spec.persona.backstory | replace('\n', ' ')) | tojson }})
+{% endif %}
+{% if spec.persona.traits %}
+		instructions_parts.append("\\nTraits: " + {{ (spec.persona.traits | join(', ') | replace('\n', ' ')) | tojson }})
 {% endif %}
 {% if spec.reasoning and spec.reasoning.method %}
 		instructions_parts.append("\\n\\nReasoning Method: " + {{ (spec.reasoning.method | replace('\n', ' ')) | tojson }})
@@ -686,5 +692,3 @@ if __name__ == "__main__":
 		print("🧪 Running evaluation...\n")
 		eval_result = pipeline.evaluate()
 		print(f"\nEvaluation: {eval_result['pass']}/{eval_result['total']} passed")
-
-
