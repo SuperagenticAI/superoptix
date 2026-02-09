@@ -96,7 +96,9 @@ def resolve_pipeline_class(module: Any, agent_name: str) -> Any:
     candidates = []
     candidates.append(f"{to_pascal_case(agent_name)}Pipeline")
     snake = to_snake_case(agent_name)
-    candidates.append("".join(part.capitalize() for part in snake.split("_")) + "Pipeline")
+    candidates.append(
+        "".join(part.capitalize() for part in snake.split("_")) + "Pipeline"
+    )
     candidates.append(f"{agent_name.title().replace('_', '').replace('-', '')}Pipeline")
 
     seen = set()
@@ -252,7 +254,9 @@ class DSPyRunner:
         with open(self.playbook_path, "r") as f:
             return yaml.safe_load(f) or {}
 
-    def _get_input_output_field_names(self, spec_data: Dict[str, Any]) -> tuple[str, list[str]]:
+    def _get_input_output_field_names(
+        self, spec_data: Dict[str, Any]
+    ) -> tuple[str, list[str]]:
         """Resolve primary input and output field names from playbook spec."""
         input_field = "query"
         output_fields = ["response"]
@@ -263,10 +267,14 @@ class DSPyRunner:
             task_inputs = first_task.get("inputs", [])
             task_outputs = first_task.get("outputs", [])
             if task_inputs and isinstance(task_inputs, list):
-                input_field = to_snake_case((task_inputs[0] or {}).get("name", input_field))
+                input_field = to_snake_case(
+                    (task_inputs[0] or {}).get("name", input_field)
+                )
             if task_outputs and isinstance(task_outputs, list):
                 names = [f.get("name") for f in task_outputs if isinstance(f, dict)]
-                output_fields = [to_snake_case(name) for name in names if name] or output_fields
+                output_fields = [
+                    to_snake_case(name) for name in names if name
+                ] or output_fields
                 return input_field, output_fields
 
         # Fallback to spec-level input_fields/output_fields
@@ -279,7 +287,9 @@ class DSPyRunner:
         spec_outputs = spec_data.get("output_fields", [])
         if spec_outputs and isinstance(spec_outputs, list):
             names = [f.get("name") for f in spec_outputs if isinstance(f, dict)]
-            output_fields = [to_snake_case(name) for name in names if name] or output_fields
+            output_fields = [
+                to_snake_case(name) for name in names if name
+            ] or output_fields
 
         return input_field, output_fields
 
@@ -338,7 +348,9 @@ class DSPyRunner:
             self._rag_enabled = False
             return False
 
-    async def _retrieve_context_text(self, spec_data: Dict[str, Any], query: str) -> str:
+    async def _retrieve_context_text(
+        self, spec_data: Dict[str, Any], query: str
+    ) -> str:
         """Retrieve context using existing RAG mixin path and return merged text."""
         if not query or not query.strip():
             return ""
@@ -398,7 +410,11 @@ class DSPyRunner:
             storage_path = backend_config.get("storage_path") or backend_config.get(
                 "path"
             )
-            return FileBackend(storage_path=storage_path) if storage_path else FileBackend()
+            return (
+                FileBackend(storage_path=storage_path)
+                if storage_path
+                else FileBackend()
+            )
 
         if backend_type == "redis" and RedisBackend is not None:
             return RedisBackend(
@@ -454,13 +470,14 @@ class DSPyRunner:
             )
 
             agent_id = str(
-                memory_cfg.get("agent_id")
-                or f"{self.system_name}:{self.agent_name}"
+                memory_cfg.get("agent_id") or f"{self.system_name}:{self.agent_name}"
             ).strip()
             short_term_capacity = int(short_cfg.get("capacity", 100))
             enable_embeddings = bool(long_cfg.get("enable_embeddings", False))
             max_context_tokens = int(
-                context_cfg.get("max_context_length", memory_cfg.get("max_context_tokens", 4096))
+                context_cfg.get(
+                    "max_context_length", memory_cfg.get("max_context_tokens", 4096)
+                )
             )
 
             self._memory = AgentMemory(
@@ -500,7 +517,9 @@ class DSPyRunner:
         except Exception:
             return None
 
-    def _retrieve_memory_context_text(self, spec_data: Dict[str, Any], query: str) -> str:
+    def _retrieve_memory_context_text(
+        self, spec_data: Dict[str, Any], query: str
+    ) -> str:
         """Recall relevant memory snippets and format as context text."""
         if not query or not query.strip():
             return ""
@@ -604,7 +623,9 @@ class DSPyRunner:
             self._memory.short_term.add_to_conversation("assistant", response_text)
 
             ttl_value = short_cfg.get("default_ttl")
-            ttl = int(ttl_value) if isinstance(ttl_value, int) and ttl_value > 0 else None
+            ttl = (
+                int(ttl_value) if isinstance(ttl_value, int) and ttl_value > 0 else None
+            )
             interaction_text = f"Q: {query}\nA: {response_text}"
             self._memory.remember(
                 content=interaction_text,
@@ -633,9 +654,7 @@ class DSPyRunner:
                 "active_episodes": episodic_stats.get("active_episodes", 0),
             }
         except Exception as e:
-            console.print(
-                f"[yellow]⚠️ Memory persistence failed ({e}). Continuing.[/]"
-            )
+            console.print(f"[yellow]⚠️ Memory persistence failed ({e}). Continuing.[/]")
             return {}
 
     def _end_memory_interaction(self, success: bool, error: str | None = None) -> None:
@@ -679,9 +698,15 @@ class DSPyRunner:
         )
         # module_params from spec.dspy are mapped into spec.reasoning at compile time.
         # Honor them here so these controls are not no-ops.
-        if "temperature" in reasoning_cfg and reasoning_cfg.get("temperature") is not None:
+        if (
+            "temperature" in reasoning_cfg
+            and reasoning_cfg.get("temperature") is not None
+        ):
             temperature = reasoning_cfg.get("temperature")
-        if "max_tokens" in reasoning_cfg and reasoning_cfg.get("max_tokens") is not None:
+        if (
+            "max_tokens" in reasoning_cfg
+            and reasoning_cfg.get("max_tokens") is not None
+        ):
             max_tokens = reasoning_cfg.get("max_tokens")
 
         local_task_default = os.getenv("SUPEROPTIX_DSPY_TASK_MODEL", "llama3.1:8b")
@@ -755,7 +780,9 @@ class DSPyRunner:
             )
 
         if provider == "ollama":
-            model_name = model if model.startswith("ollama_chat/") else f"ollama_chat/{model}"
+            model_name = (
+                model if model.startswith("ollama_chat/") else f"ollama_chat/{model}"
+            )
             return {
                 "model_name": model_name,
                 "api_key": "",
@@ -795,9 +822,13 @@ class DSPyRunner:
             "deepseek": "DEEPSEEK_API_KEY",
         }
         api_key_env = api_key_env_map.get(provider)
-        api_key = os.getenv(api_key_env) if api_key_env else os.getenv("OPENAI_API_KEY", "")
+        api_key = (
+            os.getenv(api_key_env) if api_key_env else os.getenv("OPENAI_API_KEY", "")
+        )
         if api_key_env and not api_key:
-            raise ValueError(f"Missing {api_key_env}. Set it before running this cloud pipeline.")
+            raise ValueError(
+                f"Missing {api_key_env}. Set it before running this cloud pipeline."
+            )
 
         model_name = model if "/" in model else f"{provider}/{model}"
         return {
@@ -861,14 +892,18 @@ class DSPyRunner:
         runtime_adapter_cfg: Dict[str, Any] = {}
         active_module_name: str = ""
 
-        if module is not None and hasattr(module, "get_dspy_runtime_config") and callable(
-            module.get_dspy_runtime_config
+        if (
+            module is not None
+            and hasattr(module, "get_dspy_runtime_config")
+            and callable(module.get_dspy_runtime_config)
         ):
             try:
                 runtime_cfg = module.get_dspy_runtime_config() or {}
                 if isinstance(runtime_cfg, dict):
                     runtime_adapter_cfg = runtime_cfg.get("adapter", {}) or {}
-                    active_module_name = str(runtime_cfg.get("module", "")).strip().lower()
+                    active_module_name = (
+                        str(runtime_cfg.get("module", "")).strip().lower()
+                    )
             except Exception:
                 runtime_cfg = {}
                 runtime_adapter_cfg = {}
@@ -941,9 +976,13 @@ class DSPyRunner:
             module_name = str(dspy_cfg.get("module", "")).strip().lower()
 
         tools_cfg = dspy_cfg.get("tools", {}) if isinstance(dspy_cfg, dict) else {}
-        tools_mode = str(
-            tools_cfg.get("mode", "none") if isinstance(tools_cfg, dict) else "none"
-        ).strip().lower()
+        tools_mode = (
+            str(
+                tools_cfg.get("mode", "none") if isinstance(tools_cfg, dict) else "none"
+            )
+            .strip()
+            .lower()
+        )
 
         # ReAct and tool-heavy flows are usually chat-centric.
         if module_name == "react" or tools_mode in {
@@ -1176,7 +1215,9 @@ class DSPyRunner:
             if hasattr(module, "build_program") and callable(module.build_program):
                 playbook = self._load_playbook_data()
                 spec_data = playbook.get("spec", playbook)
-                input_field, output_fields = self._get_input_output_field_names(spec_data)
+                input_field, output_fields = self._get_input_output_field_names(
+                    spec_data
+                )
                 optimization_cfg = {}
                 gepa_cfg = {}
                 playbook_gepa_cfg = (
@@ -1212,9 +1253,7 @@ class DSPyRunner:
                     optimization_result["completed_at"] = str(time.time())
                     return optimization_result
 
-                allow_local_ollama = bool(
-                    getattr(module, "ALLOW_LOCAL_OLLAMA", False)
-                )
+                allow_local_ollama = bool(getattr(module, "ALLOW_LOCAL_OLLAMA", False))
                 compiled_runtime_mode = str(
                     getattr(module, "RUNTIME_MODE", "auto") or "auto"
                 ).lower()
@@ -1337,7 +1376,9 @@ class DSPyRunner:
                 }
 
                 # Generic float metric for GEPA.
-                def gepa_metric(gold, pred, trace=None, pred_name=None, pred_trace=None):
+                def gepa_metric(
+                    gold, pred, trace=None, pred_name=None, pred_trace=None
+                ):
                     try:
                         scores = []
                         for field in output_fields:
@@ -1356,20 +1397,26 @@ class DSPyRunner:
                                     else 0.0
                                 )
                                 scores.append(float(overlap))
-                        quality_score = float(sum(scores) / len(scores)) if scores else 0.5
+                        quality_score = (
+                            float(sum(scores) / len(scores)) if scores else 0.5
+                        )
 
                         assertion_score = 1.0
                         if hasattr(module, "validate_prediction_result") and callable(
                             module.validate_prediction_result
                         ):
-                            pred_result = self._prediction_to_result(pred, output_fields)
+                            pred_result = self._prediction_to_result(
+                                pred, output_fields
+                            )
                             if hasattr(module, "postprocess_prediction") and callable(
                                 module.postprocess_prediction
                             ):
                                 pred_result = module.postprocess_prediction(
                                     pred, pred_result, output_fields
                                 )
-                            payload = module.validate_prediction_result(pred_result) or {}
+                            payload = (
+                                module.validate_prediction_result(pred_result) or {}
+                            )
                             if isinstance(payload, dict):
                                 assertion_score = float(
                                     payload.get(
@@ -1383,9 +1430,8 @@ class DSPyRunner:
 
                         # Blend quality and validity so GEPA optimizes for both.
                         blended = (
-                            (1.0 - assertion_metric_weight) * quality_score
-                            + assertion_metric_weight * assertion_score
-                        )
+                            1.0 - assertion_metric_weight
+                        ) * quality_score + assertion_metric_weight * assertion_score
                         metric_stats["count"] += 1
                         metric_stats["quality_sum"] += quality_score
                         metric_stats["assertion_sum"] += assertion_score
@@ -1424,9 +1470,7 @@ class DSPyRunner:
                     ),
                     "perfect_score": gepa_cfg.get("perfect_score", 1.0),
                     "use_merge": gepa_cfg.get("use_merge", True),
-                    "max_merge_invocations": gepa_cfg.get(
-                        "max_merge_invocations", 5
-                    ),
+                    "max_merge_invocations": gepa_cfg.get("max_merge_invocations", 5),
                     "failure_score": gepa_cfg.get("failure_score", 0.0),
                     "seed": gepa_cfg.get("seed", 0),
                 }
@@ -1448,9 +1492,7 @@ class DSPyRunner:
                     "max_full_evals" in compile_params
                     and gepa_cfg.get("max_full_evals") is not None
                 ):
-                    compile_kwargs["max_full_evals"] = gepa_cfg.get(
-                        "max_full_evals"
-                    )
+                    compile_kwargs["max_full_evals"] = gepa_cfg.get("max_full_evals")
                 if (
                     "max_metric_calls" in compile_params
                     and gepa_cfg.get("max_metric_calls") is not None
@@ -1458,7 +1500,10 @@ class DSPyRunner:
                     compile_kwargs["max_metric_calls"] = gepa_cfg.get(
                         "max_metric_calls"
                     )
-                if "track_stats" in compile_params and gepa_cfg.get("track_stats") is not None:
+                if (
+                    "track_stats" in compile_params
+                    and gepa_cfg.get("track_stats") is not None
+                ):
                     compile_kwargs["track_stats"] = gepa_cfg.get("track_stats")
 
                 optimized_program = gepa.compile(**compile_kwargs)
@@ -1475,7 +1520,9 @@ class DSPyRunner:
                 optimization_result["score"] = "optimized"
                 if metric_stats["count"] > 0:
                     avg_quality = metric_stats["quality_sum"] / metric_stats["count"]
-                    avg_assertion = metric_stats["assertion_sum"] / metric_stats["count"]
+                    avg_assertion = (
+                        metric_stats["assertion_sum"] / metric_stats["count"]
+                    )
                     avg_blended = metric_stats["blended_sum"] / metric_stats["count"]
                     optimization_result["avg_quality_score"] = round(avg_quality, 4)
                     optimization_result["avg_assertion_score"] = round(avg_assertion, 4)
@@ -1747,7 +1794,9 @@ class DSPyRunner:
                     )
                     self._configure_dspy_adapter(spec_data, module)
 
-                input_field, output_fields = self._get_input_output_field_names(spec_data)
+                input_field, output_fields = self._get_input_output_field_names(
+                    spec_data
+                )
                 program = module.build_program()
 
                 if use_optimized and hasattr(program, "load"):
@@ -1824,7 +1873,7 @@ class DSPyRunner:
                     console.print("[dim]Tool trace summary:[/]")
                     for event in trace_events[-20:]:
                         console.print(
-                            f"{event.get('time','')} {event.get('stage','')}: {event.get('detail','')}",
+                            f"{event.get('time', '')} {event.get('stage', '')}: {event.get('detail', '')}",
                             style="dim",
                             markup=False,
                         )
@@ -1846,23 +1895,27 @@ class DSPyRunner:
                     module.validate_prediction_result
                 ):
                     try:
-                        assertion_payload = module.validate_prediction_result(result) or {}
+                        assertion_payload = (
+                            module.validate_prediction_result(result) or {}
+                        )
                         if isinstance(assertion_payload, dict):
                             result = assertion_payload.get("result", result)
                     except Exception as e:
-                        console.print(
-                            f"[yellow]⚠️ Assertion validation skipped: {e}[/]"
-                        )
+                        console.print(f"[yellow]⚠️ Assertion validation skipped: {e}[/]")
                 result["is_valid"] = any(
                     (isinstance(v, str) and bool(v.strip()))
                     or (not isinstance(v, str) and v is not None)
                     for v in result.values()
                 )
                 if isinstance(assertion_payload, dict):
-                    assertion_errors = assertion_payload.get("assertion_errors", []) or []
-                    assertion_mode = str(
-                        assertion_payload.get("assertion_mode", "fail_fast")
-                    ).strip().lower()
+                    assertion_errors = (
+                        assertion_payload.get("assertion_errors", []) or []
+                    )
+                    assertion_mode = (
+                        str(assertion_payload.get("assertion_mode", "fail_fast"))
+                        .strip()
+                        .lower()
+                    )
                     assertions_passed = bool(
                         assertion_payload.get("assertions_passed", not assertion_errors)
                     )

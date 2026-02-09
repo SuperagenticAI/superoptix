@@ -231,7 +231,7 @@ class SuperSpecXValidator:
         # Validate OpenAI Agents framework block (optional)
         if "openai_agent" in spec:
             self._validate_openai_agent_config(spec["openai_agent"])
-        
+
         # Validate Google ADK framework block (optional)
         if "google_adk" in spec:
             self._validate_google_adk_config(spec["google_adk"])
@@ -239,7 +239,7 @@ class SuperSpecXValidator:
         # Validate DeepAgents framework block (optional)
         if "deepagents" in spec:
             self._validate_deepagents_config(spec["deepagents"])
-        
+
         # Validate CrewAI framework block (optional)
         if "crewai" in spec:
             self._validate_crewai_config(spec["crewai"])
@@ -302,7 +302,9 @@ class SuperSpecXValidator:
             if "api_key_env" in gateway_cfg and not isinstance(
                 gateway_cfg.get("api_key_env"), str
             ):
-                self.errors.append("language_model.gateway.api_key_env must be a string")
+                self.errors.append(
+                    "language_model.gateway.api_key_env must be a string"
+                )
 
             timeout_sec = gateway_cfg.get("timeout_sec")
             if timeout_sec is not None and (
@@ -651,8 +653,12 @@ class SuperSpecXValidator:
             if "native_function_calling" in adapter_cfg and not isinstance(
                 adapter_cfg.get("native_function_calling"), bool
             ):
-                self.errors.append(f"{prefix}.native_function_calling must be a boolean")
-            if "strict" in adapter_cfg and not isinstance(adapter_cfg.get("strict"), bool):
+                self.errors.append(
+                    f"{prefix}.native_function_calling must be a boolean"
+                )
+            if "strict" in adapter_cfg and not isinstance(
+                adapter_cfg.get("strict"), bool
+            ):
                 self.errors.append(f"{prefix}.strict must be a boolean")
             if "retry_on_parse_error" in adapter_cfg:
                 retry = adapter_cfg.get("retry_on_parse_error")
@@ -849,14 +855,12 @@ class SuperSpecXValidator:
                     self.errors.append(
                         f"dspy.tools.mode must be one of {', '.join(valid_modes)}"
                     )
-                if (
-                    "builtin_tools" in tools_cfg
-                    and not isinstance(tools_cfg.get("builtin_tools"), list)
+                if "builtin_tools" in tools_cfg and not isinstance(
+                    tools_cfg.get("builtin_tools"), list
                 ):
                     self.errors.append("dspy.tools.builtin_tools must be a list")
-                if (
-                    "mcp_servers" in tools_cfg
-                    and not isinstance(tools_cfg.get("mcp_servers"), list)
+                if "mcp_servers" in tools_cfg and not isinstance(
+                    tools_cfg.get("mcp_servers"), list
                 ):
                     self.errors.append("dspy.tools.mcp_servers must be a list")
                 stackone_cfg = tools_cfg.get("stackone")
@@ -865,9 +869,8 @@ class SuperSpecXValidator:
                         self.errors.append("dspy.tools.stackone must be an object")
                     else:
                         for list_key in ["account_ids", "providers", "actions"]:
-                            if (
-                                list_key in stackone_cfg
-                                and not isinstance(stackone_cfg.get(list_key), list)
+                            if list_key in stackone_cfg and not isinstance(
+                                stackone_cfg.get(list_key), list
                             ):
                                 self.errors.append(
                                     f"dspy.tools.stackone.{list_key} must be a list"
@@ -1050,8 +1053,10 @@ class SuperSpecXValidator:
                 self.errors.append(f"pydantic_ai.rlm.{bool_key} must be a boolean")
 
         for str_key in ("task_model", "api_key_env", "api_base"):
-            if str_key in rlm_cfg and rlm_cfg.get(str_key) is not None and not isinstance(
-                rlm_cfg.get(str_key), str
+            if (
+                str_key in rlm_cfg
+                and rlm_cfg.get(str_key) is not None
+                and not isinstance(rlm_cfg.get(str_key), str)
             ):
                 self.errors.append(f"pydantic_ai.rlm.{str_key} must be a string")
 
@@ -1063,10 +1068,14 @@ class SuperSpecXValidator:
                 if "enabled" in logger_cfg and not isinstance(
                     logger_cfg.get("enabled"), bool
                 ):
-                    self.errors.append("pydantic_ai.rlm.logger.enabled must be a boolean")
+                    self.errors.append(
+                        "pydantic_ai.rlm.logger.enabled must be a boolean"
+                    )
                 for key in ("log_dir", "file_name"):
-                    if key in logger_cfg and logger_cfg.get(key) is not None and not isinstance(
-                        logger_cfg.get(key), str
+                    if (
+                        key in logger_cfg
+                        and logger_cfg.get(key) is not None
+                        and not isinstance(logger_cfg.get(key), str)
                     ):
                         self.errors.append(
                             f"pydantic_ai.rlm.logger.{key} must be a string"
@@ -1123,8 +1132,10 @@ class SuperSpecXValidator:
                 self.errors.append(f"openai_agent.rlm.{bool_key} must be a boolean")
 
         for str_key in ("task_model", "api_key_env", "api_base"):
-            if str_key in rlm_cfg and rlm_cfg.get(str_key) is not None and not isinstance(
-                rlm_cfg.get(str_key), str
+            if (
+                str_key in rlm_cfg
+                and rlm_cfg.get(str_key) is not None
+                and not isinstance(rlm_cfg.get(str_key), str)
             ):
                 self.errors.append(f"openai_agent.rlm.{str_key} must be a string")
 
@@ -1136,10 +1147,14 @@ class SuperSpecXValidator:
                 if "enabled" in logger_cfg and not isinstance(
                     logger_cfg.get("enabled"), bool
                 ):
-                    self.errors.append("openai_agent.rlm.logger.enabled must be a boolean")
+                    self.errors.append(
+                        "openai_agent.rlm.logger.enabled must be a boolean"
+                    )
                 for key in ("log_dir", "file_name"):
-                    if key in logger_cfg and logger_cfg.get(key) is not None and not isinstance(
-                        logger_cfg.get(key), str
+                    if (
+                        key in logger_cfg
+                        and logger_cfg.get(key) is not None
+                        and not isinstance(logger_cfg.get(key), str)
                     ):
                         self.errors.append(
                             f"openai_agent.rlm.logger.{key} must be a string"
@@ -1196,8 +1211,10 @@ class SuperSpecXValidator:
                 self.errors.append(f"google_adk.rlm.{bool_key} must be a boolean")
 
         for str_key in ("task_model", "api_key_env", "api_base"):
-            if str_key in rlm_cfg and rlm_cfg.get(str_key) is not None and not isinstance(
-                rlm_cfg.get(str_key), str
+            if (
+                str_key in rlm_cfg
+                and rlm_cfg.get(str_key) is not None
+                and not isinstance(rlm_cfg.get(str_key), str)
             ):
                 self.errors.append(f"google_adk.rlm.{str_key} must be a string")
 
@@ -1209,10 +1226,14 @@ class SuperSpecXValidator:
                 if "enabled" in logger_cfg and not isinstance(
                     logger_cfg.get("enabled"), bool
                 ):
-                    self.errors.append("google_adk.rlm.logger.enabled must be a boolean")
+                    self.errors.append(
+                        "google_adk.rlm.logger.enabled must be a boolean"
+                    )
                 for key in ("log_dir", "file_name"):
-                    if key in logger_cfg and logger_cfg.get(key) is not None and not isinstance(
-                        logger_cfg.get(key), str
+                    if (
+                        key in logger_cfg
+                        and logger_cfg.get(key) is not None
+                        and not isinstance(logger_cfg.get(key), str)
                     ):
                         self.errors.append(
                             f"google_adk.rlm.logger.{key} must be a string"
@@ -1269,8 +1290,10 @@ class SuperSpecXValidator:
                 self.errors.append(f"deepagents.rlm.{bool_key} must be a boolean")
 
         for str_key in ("task_model", "api_key_env", "api_base"):
-            if str_key in rlm_cfg and rlm_cfg.get(str_key) is not None and not isinstance(
-                rlm_cfg.get(str_key), str
+            if (
+                str_key in rlm_cfg
+                and rlm_cfg.get(str_key) is not None
+                and not isinstance(rlm_cfg.get(str_key), str)
             ):
                 self.errors.append(f"deepagents.rlm.{str_key} must be a string")
 
@@ -1282,10 +1305,14 @@ class SuperSpecXValidator:
                 if "enabled" in logger_cfg and not isinstance(
                     logger_cfg.get("enabled"), bool
                 ):
-                    self.errors.append("deepagents.rlm.logger.enabled must be a boolean")
+                    self.errors.append(
+                        "deepagents.rlm.logger.enabled must be a boolean"
+                    )
                 for key in ("log_dir", "file_name"):
-                    if key in logger_cfg and logger_cfg.get(key) is not None and not isinstance(
-                        logger_cfg.get(key), str
+                    if (
+                        key in logger_cfg
+                        and logger_cfg.get(key) is not None
+                        and not isinstance(logger_cfg.get(key), str)
                     ):
                         self.errors.append(
                             f"deepagents.rlm.logger.{key} must be a string"
@@ -1342,8 +1369,10 @@ class SuperSpecXValidator:
                 self.errors.append(f"crewai.rlm.{bool_key} must be a boolean")
 
         for str_key in ("task_model", "api_key_env", "api_base"):
-            if str_key in rlm_cfg and rlm_cfg.get(str_key) is not None and not isinstance(
-                rlm_cfg.get(str_key), str
+            if (
+                str_key in rlm_cfg
+                and rlm_cfg.get(str_key) is not None
+                and not isinstance(rlm_cfg.get(str_key), str)
             ):
                 self.errors.append(f"crewai.rlm.{str_key} must be a string")
 
@@ -1357,12 +1386,12 @@ class SuperSpecXValidator:
                 ):
                     self.errors.append("crewai.rlm.logger.enabled must be a boolean")
                 for key in ("log_dir", "file_name"):
-                    if key in logger_cfg and logger_cfg.get(key) is not None and not isinstance(
-                        logger_cfg.get(key), str
+                    if (
+                        key in logger_cfg
+                        and logger_cfg.get(key) is not None
+                        and not isinstance(logger_cfg.get(key), str)
                     ):
-                        self.errors.append(
-                            f"crewai.rlm.logger.{key} must be a string"
-                        )
+                        self.errors.append(f"crewai.rlm.logger.{key} must be a string")
 
     def _validate_current_version_limitations(self, playbook_data: Dict[str, Any]):
         """Validate that no commercial features are used."""

@@ -77,7 +77,10 @@ def build_instructions(spec_data: Dict[str, Any] | None) -> str:
         if task_instruction:
             parts.append(f"Task:\n{task_instruction}")
 
-    return "\n\n".join([part for part in parts if part]).strip() or "You are a helpful AI assistant."
+    return (
+        "\n\n".join([part for part in parts if part]).strip()
+        or "You are a helpful AI assistant."
+    )
 
 
 def _to_str_list(value: Any) -> List[str]:
@@ -118,7 +121,9 @@ def build_stackone_tools(spec_data: Dict[str, Any] | None) -> List[Any]:
     if not enabled:
         return []
 
-    strict_mode = str(os.getenv("SUPEROPTIX_STACKONE_STRICT", "0")).strip().lower() not in {
+    strict_mode = str(
+        os.getenv("SUPEROPTIX_STACKONE_STRICT", "0")
+    ).strip().lower() not in {
         "0",
         "false",
         "no",
@@ -150,7 +155,11 @@ def build_stackone_tools(spec_data: Dict[str, Any] | None) -> List[Any]:
     account_ids_env = str(cfg.get("account_ids_env", "")).strip()
     if account_ids_env:
         account_ids.extend(
-            [part.strip() for part in os.getenv(account_ids_env, "").split(",") if part.strip()]
+            [
+                part.strip()
+                for part in os.getenv(account_ids_env, "").split(",")
+                if part.strip()
+            ]
         )
     account_ids = list(dict.fromkeys(account_ids))
 
@@ -291,11 +300,17 @@ def create_agent_runner(
         from google.adk import Agent
         from google.adk.runners import InMemoryRunner
     except Exception as exc:
-        raise ImportError("google-adk is required. Install with: pip install google-adk") from exc
+        raise ImportError(
+            "google-adk is required. Install with: pip install google-adk"
+        ) from exc
 
-    model = resolve_model(spec_data.get("language_model", {}) or {}, model_config=model_config)
+    model = resolve_model(
+        spec_data.get("language_model", {}) or {}, model_config=model_config
+    )
     instruction = build_instructions(spec_data)
-    description = str((spec_data.get("metadata", {}) or {}).get("description", "")).strip()
+    description = str(
+        (spec_data.get("metadata", {}) or {}).get("description", "")
+    ).strip()
     if not description:
         description = f"{agent_name} agent"
     tools = build_stackone_tools(spec_data)
@@ -370,12 +385,9 @@ def get_google_adk_rlm_config(spec_data: Dict[str, Any] | None) -> Dict[str, Any
         "api_base": str(rlm_cfg.get("api_base", "") or "").strip(),
         "logger_enabled": bool(logger_cfg.get("enabled", False)),
         "logger_dir": str(
-            logger_cfg.get("log_dir", ".superoptix/logs/rlm")
-            or ".superoptix/logs/rlm"
+            logger_cfg.get("log_dir", ".superoptix/logs/rlm") or ".superoptix/logs/rlm"
         ),
-        "logger_file_name": str(
-            logger_cfg.get("file_name", "adk_rlm") or "adk_rlm"
-        ),
+        "logger_file_name": str(logger_cfg.get("file_name", "adk_rlm") or "adk_rlm"),
     }
 
 
@@ -443,7 +455,9 @@ async def run_agent_with_optional_rlm(
         try:
             from rlm.logger.rlm_logger import RLMLogger  # type: ignore
 
-            log_dir = Path(str(cfg.get("logger_dir", ".superoptix/logs/rlm"))).as_posix()
+            log_dir = Path(
+                str(cfg.get("logger_dir", ".superoptix/logs/rlm"))
+            ).as_posix()
             logger_obj = RLMLogger(
                 log_dir=log_dir,
                 file_name=str(cfg.get("logger_file_name", "adk_rlm")),

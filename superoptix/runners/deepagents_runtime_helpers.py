@@ -136,7 +136,9 @@ def build_stackone_tools(spec_data: Dict[str, Any] | None) -> List[Any]:
     if not enabled:
         return []
 
-    strict_mode = str(os.getenv("SUPEROPTIX_STACKONE_STRICT", "0")).strip().lower() not in {
+    strict_mode = str(
+        os.getenv("SUPEROPTIX_STACKONE_STRICT", "0")
+    ).strip().lower() not in {
         "0",
         "false",
         "no",
@@ -168,7 +170,11 @@ def build_stackone_tools(spec_data: Dict[str, Any] | None) -> List[Any]:
     account_ids_env = str(cfg.get("account_ids_env", "")).strip()
     if account_ids_env:
         account_ids.extend(
-            [part.strip() for part in os.getenv(account_ids_env, "").split(",") if part.strip()]
+            [
+                part.strip()
+                for part in os.getenv(account_ids_env, "").split(",")
+                if part.strip()
+            ]
         )
     account_ids = list(dict.fromkeys(account_ids))
 
@@ -229,7 +235,9 @@ def get_deepagents_rlm_config(spec_data: Dict[str, Any] | None) -> Dict[str, Any
     else:
         legacy_rlm = spec.get("rlm")
         if isinstance(legacy_rlm, dict) and (
-            "backend" in legacy_rlm or "task_model" in legacy_rlm or "mode" in legacy_rlm
+            "backend" in legacy_rlm
+            or "task_model" in legacy_rlm
+            or "mode" in legacy_rlm
         ):
             rlm_cfg = dict(legacy_rlm)
 
@@ -253,7 +261,9 @@ def get_deepagents_rlm_config(spec_data: Dict[str, Any] | None) -> Dict[str, Any
         "logger_dir": str(
             logger_cfg.get("log_dir", ".superoptix/logs/rlm") or ".superoptix/logs/rlm"
         ),
-        "logger_file_name": str(logger_cfg.get("file_name", "deepagents_rlm") or "deepagents_rlm"),
+        "logger_file_name": str(
+            logger_cfg.get("file_name", "deepagents_rlm") or "deepagents_rlm"
+        ),
     }
 
 

@@ -48,6 +48,7 @@ def _emit_stackone_trace(event: str, message: str) -> None:
     if _stackone_trace_enabled():
         print(f"{event}: {message}")
 
+
 try:
     from crewai.tools.base_tool import BaseTool as CrewAIBaseTool, Tool as CrewAITool
 
@@ -246,12 +247,16 @@ class StackOneBridge:
                     # Convert Pydantic model back to dict for StackOne
                     kwargs = args.model_dump(exclude_none=True)
                     keys = ",".join(sorted(kwargs.keys())) if kwargs else "-"
-                    _emit_stackone_trace("tool:start", f"{current_tool.name} kwargs=[{keys}]")
+                    _emit_stackone_trace(
+                        "tool:start", f"{current_tool.name} kwargs=[{keys}]"
+                    )
                     t0 = time.time()
                     try:
                         out = str(current_tool.execute(kwargs))
                         latency_ms = int((time.time() - t0) * 1000)
-                        _emit_stackone_trace("tool:ok", f"{current_tool.name} ({latency_ms}ms)")
+                        _emit_stackone_trace(
+                            "tool:ok", f"{current_tool.name} ({latency_ms}ms)"
+                        )
                         return out
                     except Exception as exc:
                         latency_ms = int((time.time() - t0) * 1000)

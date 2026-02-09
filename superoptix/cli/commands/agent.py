@@ -571,9 +571,7 @@ def _run_framework_agent(args, framework: str):
             if "model_config" in params and model_config:
                 init_kwargs["model_config"] = model_config
             if "playbook_path" in params:
-                playbook_path = (
-                    agent_dir / "playbook" / f"{args.name}_playbook.yaml"
-                )
+                playbook_path = agent_dir / "playbook" / f"{args.name}_playbook.yaml"
                 init_kwargs["playbook_path"] = str(playbook_path)
 
         pipeline = pipeline_class(**init_kwargs)
@@ -712,9 +710,7 @@ def run_agent(args):
                         runtime_mode=(
                             "local"
                             if getattr(args, "local", False)
-                            else (
-                                "cloud" if getattr(args, "cloud", False) else "auto"
-                            )
+                            else ("cloud" if getattr(args, "cloud", False) else "auto")
                         ),
                         provider_override=getattr(args, "provider", None),
                         model_override=getattr(args, "model", None),
@@ -3340,9 +3336,7 @@ def optimize_agent(args):
                 framework = found[0]
                 pipeline_path = _pipeline_path_for(framework)
                 args.framework = framework
-                console.print(
-                    f"[dim]Auto-detected compiled framework: {framework}[/]"
-                )
+                console.print(f"[dim]Auto-detected compiled framework: {framework}[/]")
             elif len(found) > 1:
                 console.print(
                     "[yellow]Multiple compiled framework pipelines found. "

@@ -133,7 +133,9 @@ def _normalize_persona(persona: Any) -> Dict[str, Any]:
         traits = [part.strip() for part in traits.split(",") if part.strip()]
     elif not isinstance(traits, list):
         traits = []
-    normalized["traits"] = [str(trait).strip() for trait in traits if str(trait).strip()]
+    normalized["traits"] = [
+        str(trait).strip() for trait in traits if str(trait).strip()
+    ]
 
     return normalized
 
@@ -222,7 +224,9 @@ class AgentCompiler:
 
         # Resolve signature fields from SuperSpec first, then fallback to first task.
         # This keeps generated DSPy signatures aligned with the richer schema users define.
-        spec["input_fields"], spec["output_fields"] = self._resolve_signature_fields(spec)
+        spec["input_fields"], spec["output_fields"] = self._resolve_signature_fields(
+            spec
+        )
 
         return {
             "metadata": playbook_snake_case.get("metadata", {}),
@@ -414,9 +418,13 @@ class AgentCompiler:
         if isinstance(tasks, list) and tasks:
             first_task = tasks[0] if isinstance(tasks[0], dict) else {}
             if not input_fields:
-                input_fields = self._normalize_signature_fields(first_task.get("inputs"))
+                input_fields = self._normalize_signature_fields(
+                    first_task.get("inputs")
+                )
             if not output_fields:
-                output_fields = self._normalize_signature_fields(first_task.get("outputs"))
+                output_fields = self._normalize_signature_fields(
+                    first_task.get("outputs")
+                )
 
         return input_fields, output_fields
 
@@ -598,7 +606,9 @@ class AgentCompiler:
         # 6) Signature behavior (simple vs structured outputs)
         signature_cfg = dspy_cfg.get("signature")
         if isinstance(signature_cfg, dict):
-            output_mode = str(signature_cfg.get("output_mode", "simple")).strip().lower()
+            output_mode = (
+                str(signature_cfg.get("output_mode", "simple")).strip().lower()
+            )
             if output_mode not in {"simple", "structured"}:
                 output_mode = "simple"
             spec["_dspy_signature"] = {"output_mode": output_mode}
@@ -643,7 +653,9 @@ class AgentCompiler:
         template = self.template_env.get_template(template_name)
         return template.render(context)
 
-    def _write_compiled_spec_sidecar(self, pipeline_path: Path, spec: Dict[str, Any]) -> str:
+    def _write_compiled_spec_sidecar(
+        self, pipeline_path: Path, spec: Dict[str, Any]
+    ) -> str:
         """Write resolved spec next to generated pipeline and return filename."""
         sidecar = pipeline_path.with_name(f"{pipeline_path.stem}_compiled_spec.json")
         sidecar.parent.mkdir(parents=True, exist_ok=True)
@@ -702,7 +714,9 @@ class AgentCompiler:
             if is_local_mode and is_cloud_mode:
                 raise ValueError("Use only one of --local or --cloud.")
 
-            runtime_mode = "local" if is_local_mode else ("cloud" if is_cloud_mode else "auto")
+            runtime_mode = (
+                "local" if is_local_mode else ("cloud" if is_cloud_mode else "auto")
+            )
             provider_override = getattr(args, "provider", None)
             model_override = getattr(args, "model", None)
 
@@ -751,11 +765,11 @@ class AgentCompiler:
             if use_protocol_first:
                 mode_text = "Protocol-First DSPy pipeline (Agenspy + MCP discovery)"
             elif compile_profile == "optimized":
-                mode_text = (
-                    "Unified DSPy pipeline (minimal code + GEPA optimization via runner)"
-                )
+                mode_text = "Unified DSPy pipeline (minimal code + GEPA optimization via runner)"
             else:
-                mode_text = "Unified DSPy pipeline (minimal PyTorch-like Signature + Module)"
+                mode_text = (
+                    "Unified DSPy pipeline (minimal PyTorch-like Signature + Module)"
+                )
 
             console.print(f"\n[bold green]🤖 Generating {mode_text}...[/bold green]")
 
@@ -844,7 +858,9 @@ class AgentCompiler:
                         "[dim]   • Recompile with --optimize for full train/evaluate support[/]"
                     )
                 elif compile_profile == "optimized":
-                    console.print("\n[dim]💡 Optimizable minimal DSPy pipeline features:[/]")
+                    console.print(
+                        "\n[dim]💡 Optimizable minimal DSPy pipeline features:[/]"
+                    )
                     console.print(
                         "[dim]   • Pure DSPy Signature + Module + forward patterns[/]"
                     )
@@ -883,7 +899,9 @@ class AgentCompiler:
         try:
             # Load playbook
             context = self._load_playbook_and_get_context(agent_name, tier_level)
-            self._apply_framework_runtime_overrides(context, args=args, framework=framework)
+            self._apply_framework_runtime_overrides(
+                context, args=args, framework=framework
+            )
 
             # Framework-specific compile-time guidance
             if framework == "claude-sdk":

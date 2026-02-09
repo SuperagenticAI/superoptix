@@ -8,7 +8,7 @@ import os
 import re
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 
 def _normalize_provider(provider: str) -> str:
@@ -229,10 +229,14 @@ def _stackone_to_openai_function_tools(source_tools: List[Any]) -> List[Any]:
         signature, alias_map = _build_signature_from_schema(_tool_schema(tool))
         safe_name = _safe_identifier(name)
 
-        def _make_callable(bound_tool: Any, bound_name: str, bound_alias: Dict[str, str]):
+        def _make_callable(
+            bound_tool: Any, bound_name: str, bound_alias: Dict[str, str]
+        ):
             def _tool_callable(**kwargs):
                 payload = {
-                    bound_alias.get(k, k): v for k, v in (kwargs or {}).items() if v is not None
+                    bound_alias.get(k, k): v
+                    for k, v in (kwargs or {}).items()
+                    if v is not None
                 }
                 keys = ",".join(sorted(payload.keys())) if payload else "-"
                 print(f"tool:start: {bound_name} kwargs=[{keys}]")
@@ -268,7 +272,9 @@ def build_stackone_tools(spec_data: Dict[str, Any] | None) -> List[Any]:
     if not enabled:
         return []
 
-    strict_mode = str(os.getenv("SUPEROPTIX_STACKONE_STRICT", "0")).strip().lower() not in {
+    strict_mode = str(
+        os.getenv("SUPEROPTIX_STACKONE_STRICT", "0")
+    ).strip().lower() not in {
         "0",
         "false",
         "no",
@@ -300,7 +306,11 @@ def build_stackone_tools(spec_data: Dict[str, Any] | None) -> List[Any]:
     account_ids_env = str(cfg.get("account_ids_env", "")).strip()
     if account_ids_env:
         account_ids.extend(
-            [part.strip() for part in os.getenv(account_ids_env, "").split(",") if part.strip()]
+            [
+                part.strip()
+                for part in os.getenv(account_ids_env, "").split(",")
+                if part.strip()
+            ]
         )
     account_ids = list(dict.fromkeys(account_ids))
 
@@ -366,7 +376,9 @@ def get_openai_rlm_config(spec_data: Dict[str, Any] | None) -> Dict[str, Any]:
     else:
         legacy_rlm = spec.get("rlm")
         if isinstance(legacy_rlm, dict) and (
-            "backend" in legacy_rlm or "task_model" in legacy_rlm or "mode" in legacy_rlm
+            "backend" in legacy_rlm
+            or "task_model" in legacy_rlm
+            or "mode" in legacy_rlm
         ):
             rlm_cfg = dict(legacy_rlm)
 
@@ -390,7 +402,9 @@ def get_openai_rlm_config(spec_data: Dict[str, Any] | None) -> Dict[str, Any]:
         "logger_dir": str(
             logger_cfg.get("log_dir", ".superoptix/logs/rlm") or ".superoptix/logs/rlm"
         ),
-        "logger_file_name": str(logger_cfg.get("file_name", "openai_rlm") or "openai_rlm"),
+        "logger_file_name": str(
+            logger_cfg.get("file_name", "openai_rlm") or "openai_rlm"
+        ),
     }
 
 

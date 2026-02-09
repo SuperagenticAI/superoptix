@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 
 def _normalize_provider(provider: str) -> str:
@@ -29,7 +29,9 @@ def resolve_model(
     provider = _normalize_provider(
         runtime_cfg.get("provider") or lm_cfg.get("provider") or "ollama"
     )
-    model = str(runtime_cfg.get("model") or lm_cfg.get("model") or "llama3.1:8b").strip()
+    model = str(
+        runtime_cfg.get("model") or lm_cfg.get("model") or "llama3.1:8b"
+    ).strip()
     api_base = runtime_cfg.get("api_base") or lm_cfg.get("api_base")
 
     if ":" in model:
@@ -147,7 +149,9 @@ def build_stackone_tools(spec_data: Dict[str, Any] | None) -> List[Any]:
     if not enabled:
         return []
 
-    strict_mode = str(os.getenv("SUPEROPTIX_STACKONE_STRICT", "0")).strip().lower() not in {
+    strict_mode = str(
+        os.getenv("SUPEROPTIX_STACKONE_STRICT", "0")
+    ).strip().lower() not in {
         "0",
         "false",
         "no",
@@ -179,7 +183,11 @@ def build_stackone_tools(spec_data: Dict[str, Any] | None) -> List[Any]:
     account_ids_env = str(cfg.get("account_ids_env", "")).strip()
     if account_ids_env:
         account_ids.extend(
-            [part.strip() for part in os.getenv(account_ids_env, "").split(",") if part.strip()]
+            [
+                part.strip()
+                for part in os.getenv(account_ids_env, "").split(",")
+                if part.strip()
+            ]
         )
     account_ids = list(dict.fromkeys(account_ids))
 
@@ -223,10 +231,14 @@ def build_stackone_tools(spec_data: Dict[str, Any] | None) -> List[Any]:
         return []
 
 
-def create_crewai_llm(model_name: str, language_model_cfg: Dict[str, Any] | None = None) -> Any:
+def create_crewai_llm(
+    model_name: str, language_model_cfg: Dict[str, Any] | None = None
+) -> Any:
     """Create CrewAI LLM object (or model string fallback)."""
     lm_cfg = dict(language_model_cfg or {})
-    provider, model = (model_name.split(":", 1) + [""])[:2] if ":" in model_name else ("", model_name)
+    provider, model = (
+        (model_name.split(":", 1) + [""])[:2] if ":" in model_name else ("", model_name)
+    )
     provider = _normalize_provider(provider)
 
     try:
@@ -238,7 +250,11 @@ def create_crewai_llm(model_name: str, language_model_cfg: Dict[str, Any] | None
             CrewAILLM = None
 
     if provider == "ollama":
-        api_base = str(lm_cfg.get("api_base") or os.getenv("OLLAMA_BASE_URL") or "http://localhost:11434").rstrip("/")
+        api_base = str(
+            lm_cfg.get("api_base")
+            or os.getenv("OLLAMA_BASE_URL")
+            or "http://localhost:11434"
+        ).rstrip("/")
         model_for_crewai = f"ollama/{model}"
         if CrewAILLM is None:
             return model_for_crewai
@@ -304,7 +320,9 @@ def get_crewai_rlm_config(spec_data: Dict[str, Any] | None) -> Dict[str, Any]:
     else:
         legacy_rlm = spec.get("rlm")
         if isinstance(legacy_rlm, dict) and (
-            "backend" in legacy_rlm or "task_model" in legacy_rlm or "mode" in legacy_rlm
+            "backend" in legacy_rlm
+            or "task_model" in legacy_rlm
+            or "mode" in legacy_rlm
         ):
             rlm_cfg = dict(legacy_rlm)
 
@@ -328,7 +346,9 @@ def get_crewai_rlm_config(spec_data: Dict[str, Any] | None) -> Dict[str, Any]:
         "logger_dir": str(
             logger_cfg.get("log_dir", ".superoptix/logs/rlm") or ".superoptix/logs/rlm"
         ),
-        "logger_file_name": str(logger_cfg.get("file_name", "crewai_rlm") or "crewai_rlm"),
+        "logger_file_name": str(
+            logger_cfg.get("file_name", "crewai_rlm") or "crewai_rlm"
+        ),
     }
 
 

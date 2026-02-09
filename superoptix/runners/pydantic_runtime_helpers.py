@@ -47,21 +47,27 @@ def resolve_model(
     model_config: Optional[Dict[str, Any]] = None,
 ) -> str:
     cfg = dict(model_config or {})
-    model = str(cfg.get("model") or language_model.get("model") or "llama3.1:8b").strip()
+    model = str(
+        cfg.get("model") or language_model.get("model") or "llama3.1:8b"
+    ).strip()
     provider = _normalize_provider(
         cfg.get("provider") or language_model.get("provider") or "ollama"
     )
     api_base = cfg.get("api_base") or language_model.get("api_base")
-    runtime_mode = str(
-        cfg.get("runtime_mode")
-        or language_model.get("runtime_mode")
-        or (
-            "gateway"
-            if isinstance(language_model.get("gateway"), dict)
-            and language_model.get("gateway", {}).get("enabled")
-            else "direct"
+    runtime_mode = (
+        str(
+            cfg.get("runtime_mode")
+            or language_model.get("runtime_mode")
+            or (
+                "gateway"
+                if isinstance(language_model.get("gateway"), dict)
+                and language_model.get("gateway", {}).get("enabled")
+                else "direct"
+            )
         )
-    ).strip().lower()
+        .strip()
+        .lower()
+    )
 
     gateway_cfg: Dict[str, Any] = {}
     lm_gateway_cfg = language_model.get("gateway")
@@ -72,7 +78,9 @@ def resolve_model(
         gateway_cfg.update(cfg_gateway)
 
     if runtime_mode == "gateway":
-        provider = _normalize_provider(str(cfg.get("provider") or provider or "gateway"))
+        provider = _normalize_provider(
+            str(cfg.get("provider") or provider or "gateway")
+        )
         if provider in {"ollama", "local"}:
             provider = "gateway"
 
@@ -137,7 +145,10 @@ def build_instructions(spec_data: Dict[str, Any]) -> str:
         if task_instruction:
             parts.append(f"Task:\n{task_instruction}")
 
-    return "\n\n".join([p for p in parts if p]).strip() or "You are a helpful AI assistant."
+    return (
+        "\n\n".join([p for p in parts if p]).strip()
+        or "You are a helpful AI assistant."
+    )
 
 
 def create_agent(
@@ -150,10 +161,14 @@ def create_agent(
     model_config: Optional[Dict[str, Any]] = None,
 ):
     if Agent is None:
-        raise ImportError("pydantic-ai is required. Install with: pip install pydantic-ai")
+        raise ImportError(
+            "pydantic-ai is required. Install with: pip install pydantic-ai"
+        )
 
     language_model = (spec_data or {}).get("language_model", {}) or {}
-    resolved_model = model_name or resolve_model(language_model, model_config=model_config)
+    resolved_model = model_name or resolve_model(
+        language_model, model_config=model_config
+    )
     resolved_instructions = instructions or build_instructions(spec_data)
 
     kwargs: Dict[str, Any] = {
@@ -191,7 +206,9 @@ def resolve_stackone_config(spec_data: Dict[str, Any] | None) -> Dict[str, Any]:
         if not isinstance(stackone_cfg, dict):
             dspy_cfg = spec.get("dspy", {})
             dspy_tools = dspy_cfg.get("tools", {}) if isinstance(dspy_cfg, dict) else {}
-            stackone_cfg = dspy_tools.get("stackone") if isinstance(dspy_tools, dict) else {}
+            stackone_cfg = (
+                dspy_tools.get("stackone") if isinstance(dspy_tools, dict) else {}
+            )
             mode = dspy_tools.get("mode") if isinstance(dspy_tools, dict) else None
         else:
             mode = tools_cfg.get("mode")
@@ -210,18 +227,24 @@ def resolve_stackone_config(spec_data: Dict[str, Any] | None) -> Dict[str, Any]:
     return merged
 
 
-def build_stackone_tools(spec_data: Dict[str, Any] | None, framework: str = "pydantic_ai") -> list[Any]:
+def build_stackone_tools(
+    spec_data: Dict[str, Any] | None, framework: str = "pydantic_ai"
+) -> list[Any]:
     """Build framework-native StackOne tools via the StackOne SDK bridge."""
     stackone_cfg = resolve_stackone_config(spec_data)
     if not isinstance(stackone_cfg, dict):
         return []
 
     mode = str(stackone_cfg.get("mode", "stackone")).strip().lower()
-    enabled = bool(stackone_cfg.get("enabled", mode in {"stackone", "stackone_discovery"}))
+    enabled = bool(
+        stackone_cfg.get("enabled", mode in {"stackone", "stackone_discovery"})
+    )
     if not enabled:
         return []
 
-    strict_mode = str(os.getenv("SUPEROPTIX_STACKONE_STRICT", "0")).strip().lower() not in {
+    strict_mode = str(
+        os.getenv("SUPEROPTIX_STACKONE_STRICT", "0")
+    ).strip().lower() not in {
         "0",
         "false",
         "no",
@@ -253,7 +276,11 @@ def build_stackone_tools(spec_data: Dict[str, Any] | None, framework: str = "pyd
     fallback_unfiltered = bool(stackone_cfg.get("fallback_unfiltered", True))
     account_ids_env = str(stackone_cfg.get("account_ids_env", "")).strip()
     if account_ids_env:
-        env_accounts = [part.strip() for part in os.getenv(account_ids_env, "").split(",") if part.strip()]
+        env_accounts = [
+            part.strip()
+            for part in os.getenv(account_ids_env, "").split(",")
+            if part.strip()
+        ]
         account_ids.extend(env_accounts)
         account_ids = list(dict.fromkeys(account_ids))
 
@@ -262,7 +289,9 @@ def build_stackone_tools(spec_data: Dict[str, Any] | None, framework: str = "pyd
     if base_url:
         init_kwargs["base_url"] = str(base_url).strip()
 
-    discovery_mode = bool(stackone_cfg.get("discovery_mode", False)) or mode == "stackone_discovery"
+    discovery_mode = (
+        bool(stackone_cfg.get("discovery_mode", False)) or mode == "stackone_discovery"
+    )
 
     try:
         toolset = StackOneToolSet(**init_kwargs)
@@ -273,7 +302,9 @@ def build_stackone_tools(spec_data: Dict[str, Any] | None, framework: str = "pyd
         )
         fetched_count = len(fetched_tools or [])
         if fetched_count == 0 and fallback_unfiltered and (providers or actions):
-            print("⚠️ StackOne returned 0 tools with current providers/actions filters; retrying unfiltered.")
+            print(
+                "⚠️ StackOne returned 0 tools with current providers/actions filters; retrying unfiltered."
+            )
             fetched_tools = toolset.fetch_tools(
                 account_ids=account_ids or None,
                 providers=None,
@@ -331,7 +362,9 @@ def get_pydantic_rlm_config(spec_data: Dict[str, Any] | None) -> Dict[str, Any]:
     else:
         legacy_rlm = spec.get("rlm")
         if isinstance(legacy_rlm, dict) and (
-            "backend" in legacy_rlm or "task_model" in legacy_rlm or "mode" in legacy_rlm
+            "backend" in legacy_rlm
+            or "task_model" in legacy_rlm
+            or "mode" in legacy_rlm
         ):
             rlm_cfg = dict(legacy_rlm)
 
@@ -352,8 +385,12 @@ def get_pydantic_rlm_config(spec_data: Dict[str, Any] | None) -> Dict[str, Any]:
         "api_key_env": str(rlm_cfg.get("api_key_env", "") or "").strip(),
         "api_base": str(rlm_cfg.get("api_base", "") or "").strip(),
         "logger_enabled": bool(logger_cfg.get("enabled", False)),
-        "logger_dir": str(logger_cfg.get("log_dir", ".superoptix/logs/rlm") or ".superoptix/logs/rlm"),
-        "logger_file_name": str(logger_cfg.get("file_name", "pydantic_rlm") or "pydantic_rlm"),
+        "logger_dir": str(
+            logger_cfg.get("log_dir", ".superoptix/logs/rlm") or ".superoptix/logs/rlm"
+        ),
+        "logger_file_name": str(
+            logger_cfg.get("file_name", "pydantic_rlm") or "pydantic_rlm"
+        ),
     }
 
 
@@ -406,7 +443,9 @@ async def run_agent_with_optional_rlm(
         try:
             from rlm.logger.rlm_logger import RLMLogger  # type: ignore
 
-            log_dir = Path(str(cfg.get("logger_dir", ".superoptix/logs/rlm"))).as_posix()
+            log_dir = Path(
+                str(cfg.get("logger_dir", ".superoptix/logs/rlm"))
+            ).as_posix()
             logger_obj = RLMLogger(
                 log_dir=log_dir,
                 file_name=str(cfg.get("logger_file_name", "pydantic_rlm")),

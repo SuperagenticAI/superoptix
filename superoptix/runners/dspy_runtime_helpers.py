@@ -158,7 +158,9 @@ def postprocess_prediction(
     for field in output_fields or []:
         if field not in processed:
             continue
-        processed[field] = _coerce_value(processed[field], field_types.get(field, "str"))
+        processed[field] = _coerce_value(
+            processed[field], field_types.get(field, "str")
+        )
     return processed
 
 
@@ -234,14 +236,18 @@ def validate_prediction_result(
         checks_total += 1
         value = data.get(field)
         if isinstance(value, str) and isinstance(limit, int) and len(value) > limit:
-            errors.append(f"Field '{field}' exceeds max_length={limit} (got {len(value)})")
+            errors.append(
+                f"Field '{field}' exceeds max_length={limit} (got {len(value)})"
+            )
             checks_failed += 1
         elif (
             isinstance(value, (list, tuple, dict, set))
             and isinstance(limit, int)
             and len(value) > limit
         ):
-            errors.append(f"Field '{field}' exceeds max_length={limit} (got {len(value)})")
+            errors.append(
+                f"Field '{field}' exceeds max_length={limit} (got {len(value)})"
+            )
             checks_failed += 1
 
     regex_rules = cfg.get("custom_regex", {}) or {}
@@ -253,7 +259,9 @@ def validate_prediction_result(
         if isinstance(value, str):
             try:
                 if re.search(pattern, value) is None:
-                    errors.append(f"Field '{field}' did not match required regex pattern")
+                    errors.append(
+                        f"Field '{field}' did not match required regex pattern"
+                    )
                     checks_failed += 1
             except re.error:
                 errors.append(f"Invalid regex for field '{field}'")
@@ -298,13 +306,17 @@ def build_stackone_tools(dspy_tool_config: dict[str, Any] | None) -> list[Any]:
     if not isinstance(stackone_cfg, dict):
         stackone_cfg = {}
 
-    enabled = bool(stackone_cfg.get("enabled", mode in {"stackone", "stackone_discovery"}))
+    enabled = bool(
+        stackone_cfg.get("enabled", mode in {"stackone", "stackone_discovery"})
+    )
     if not enabled:
         return []
     if mode not in {"stackone", "stackone_discovery"} and not stackone_cfg:
         return []
 
-    strict_mode = str(os.getenv("SUPEROPTIX_STACKONE_STRICT", "1")).strip().lower() not in {
+    strict_mode = str(
+        os.getenv("SUPEROPTIX_STACKONE_STRICT", "1")
+    ).strip().lower() not in {
         "0",
         "false",
         "no",
@@ -343,12 +355,18 @@ def build_stackone_tools(dspy_tool_config: dict[str, Any] | None) -> list[Any]:
     fallback_unfiltered = bool(stackone_cfg.get("fallback_unfiltered", True))
     account_ids_env = str(stackone_cfg.get("account_ids_env", "")).strip()
     if account_ids_env:
-        env_accounts = [part.strip() for part in os.getenv(account_ids_env, "").split(",") if part.strip()]
+        env_accounts = [
+            part.strip()
+            for part in os.getenv(account_ids_env, "").split(",")
+            if part.strip()
+        ]
         account_ids.extend(env_accounts)
         account_ids = list(dict.fromkeys(account_ids))
 
     base_url = stackone_cfg.get("base_url")
-    discovery_mode = bool(stackone_cfg.get("discovery_mode", False)) or mode == "stackone_discovery"
+    discovery_mode = (
+        bool(stackone_cfg.get("discovery_mode", False)) or mode == "stackone_discovery"
+    )
     init_kwargs = {"api_key": api_key}
     if base_url:
         init_kwargs["base_url"] = str(base_url).strip()
@@ -378,7 +396,9 @@ def build_stackone_tools(dspy_tool_config: dict[str, Any] | None) -> list[Any]:
                 "stackone",
                 "no tools from filters; retrying without provider/action filters",
             )
-            print("⚠️ StackOne returned 0 tools with current providers/actions filters; retrying unfiltered.")
+            print(
+                "⚠️ StackOne returned 0 tools with current providers/actions filters; retrying unfiltered."
+            )
             fetched_tools = toolset.fetch_tools(
                 account_ids=account_ids or None,
                 providers=None,
@@ -408,17 +428,26 @@ def build_stackone_tools(dspy_tool_config: dict[str, Any] | None) -> list[Any]:
                     else {}
                 )
                 if name:
-                    schema_keys_by_tool[name] = set(props.keys()) if isinstance(props, dict) else set()
+                    schema_keys_by_tool[name] = (
+                        set(props.keys()) if isinstance(props, dict) else set()
+                    )
             except Exception:
                 continue
 
         bridge = StackOneBridge(fetched_tools)
-        tools = bridge.to_discovery_tools(framework="dspy") if discovery_mode else bridge.to_dspy()
+        tools = (
+            bridge.to_discovery_tools(framework="dspy")
+            if discovery_mode
+            else bridge.to_dspy()
+        )
 
         try:
             names = [getattr(t, "name", "") for t in (tools or [])]
             preview = ", ".join([n for n in names if n][:5])
-            print(f"[StackOne] Loaded {len(tools or [])} DSPy tool(s)" + (f": {preview}" if preview else ""))
+            print(
+                f"[StackOne] Loaded {len(tools or [])} DSPy tool(s)"
+                + (f": {preview}" if preview else "")
+            )
         except Exception:
             pass
 
@@ -442,7 +471,9 @@ def build_stackone_tools(dspy_tool_config: dict[str, Any] | None) -> list[Any]:
                         out.update(_extract_user_ctx(nested))
             return out
 
-        def _calendly_retry_kwargs(name: str, kwargs: dict[str, Any]) -> tuple[dict[str, Any], str]:
+        def _calendly_retry_kwargs(
+            name: str, kwargs: dict[str, Any]
+        ) -> tuple[dict[str, Any], str]:
             retry_kwargs = dict(kwargs or {})
             schema_keys = schema_keys_by_tool.get(name, set())
             now = datetime.now(timezone.utc)
@@ -458,7 +489,9 @@ def build_stackone_tools(dspy_tool_config: dict[str, Any] | None) -> list[Any]:
                 ("start_date", "end_date"),
             ]
             for a, b in key_pairs:
-                if (a in schema_keys or b in schema_keys) and (a not in retry_kwargs and b not in retry_kwargs):
+                if (a in schema_keys or b in schema_keys) and (
+                    a not in retry_kwargs and b not in retry_kwargs
+                ):
                     if a in schema_keys:
                         retry_kwargs[a] = start
                     if b in schema_keys:
@@ -478,12 +511,20 @@ def build_stackone_tools(dspy_tool_config: dict[str, Any] | None) -> list[Any]:
                 get_user_fn = raw_func_by_name.get("calendly_get_current_user")
                 if callable(get_user_fn):
                     try:
-                        current_user_cache.update(_extract_user_ctx(_run_with_timeout(get_user_fn, 10.0)))
+                        current_user_cache.update(
+                            _extract_user_ctx(_run_with_timeout(get_user_fn, 10.0))
+                        )
                     except Exception:
                         pass
-            user_uri = current_user_cache.get("uri") or current_user_cache.get("user_uri")
+            user_uri = current_user_cache.get("uri") or current_user_cache.get(
+                "user_uri"
+            )
             for user_key in ["user", "user_uri", "uri"]:
-                if user_key in schema_keys and user_key not in retry_kwargs and user_uri:
+                if (
+                    user_key in schema_keys
+                    and user_key not in retry_kwargs
+                    and user_uri
+                ):
                     retry_kwargs[user_key] = user_uri
                     break
 
@@ -500,15 +541,24 @@ def build_stackone_tools(dspy_tool_config: dict[str, Any] | None) -> list[Any]:
             def _wrapped(*args, __func=func, __name=name, **kwargs):
                 arg_keys = sorted(list(kwargs.keys()))
                 arg_preview = ",".join(arg_keys) if arg_keys else "-"
-                _emit_tool_trace("tool:start", f"{__name} kwargs=[{arg_preview}]", args=len(args), kwargs=arg_keys)
+                _emit_tool_trace(
+                    "tool:start",
+                    f"{__name} kwargs=[{arg_preview}]",
+                    args=len(args),
+                    kwargs=arg_keys,
+                )
                 t0 = time.time()
                 try:
-                    timeout_sec = float(os.getenv("SUPEROPTIX_DSPY_TOOL_TIMEOUT_SEC", "20"))
+                    timeout_sec = float(
+                        os.getenv("SUPEROPTIX_DSPY_TOOL_TIMEOUT_SEC", "20")
+                    )
                 except (TypeError, ValueError):
                     timeout_sec = 20.0
                 try:
                     out = _run_with_timeout(__func, timeout_sec, *args, **kwargs)
-                    _emit_tool_trace("tool:ok", __name, latency_ms=int((time.time() - t0) * 1000))
+                    _emit_tool_trace(
+                        "tool:ok", __name, latency_ms=int((time.time() - t0) * 1000)
+                    )
                     return out
                 except TimeoutError:
                     _emit_tool_trace(
@@ -521,11 +571,21 @@ def build_stackone_tools(dspy_tool_config: dict[str, Any] | None) -> list[Any]:
                 except Exception as exc:
                     err = str(exc).replace("\n", " ").strip()
                     if __name == "calendly_list_scheduled_events" and "400" in err:
-                        retry_kwargs, key_preview = _calendly_retry_kwargs(__name, kwargs)
-                        _emit_tool_trace("tool:retry", f"{__name} retry kwargs=[{key_preview}]")
+                        retry_kwargs, key_preview = _calendly_retry_kwargs(
+                            __name, kwargs
+                        )
+                        _emit_tool_trace(
+                            "tool:retry", f"{__name} retry kwargs=[{key_preview}]"
+                        )
                         try:
-                            out = _run_with_timeout(__func, timeout_sec, *args, **retry_kwargs)
-                            _emit_tool_trace("tool:ok", f"{__name} retry", latency_ms=int((time.time() - t0) * 1000))
+                            out = _run_with_timeout(
+                                __func, timeout_sec, *args, **retry_kwargs
+                            )
+                            _emit_tool_trace(
+                                "tool:ok",
+                                f"{__name} retry",
+                                latency_ms=int((time.time() - t0) * 1000),
+                            )
                             return out
                         except Exception as retry_exc:
                             err = str(retry_exc).replace("\n", " ").strip()

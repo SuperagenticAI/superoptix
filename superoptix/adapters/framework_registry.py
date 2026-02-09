@@ -287,6 +287,7 @@ class MicrosoftFrameworkAdapter(FrameworkAdapter):
 
         def to_pascal_case(text: str) -> str:
             import re
+
             normalized = re.sub(r"[^a-zA-Z0-9]+", "_", str(text or ""))
             return "".join(word.capitalize() for word in normalized.split("_") if word)
 
@@ -463,6 +464,7 @@ class OpenAIFrameworkAdapter(FrameworkAdapter):
 
         def to_pascal_case(text: str) -> str:
             import re
+
             normalized = re.sub(r"[^a-zA-Z0-9]+", "_", str(text or ""))
             return "".join(word.capitalize() for word in normalized.split("_") if word)
 
@@ -622,6 +624,7 @@ class DeepAgentsFrameworkAdapter(FrameworkAdapter):
 
         def to_pascal_case(text: str) -> str:
             import re
+
             normalized = re.sub(r"[^a-zA-Z0-9]+", "_", str(text or ""))
             return "".join(word.capitalize() for word in normalized.split("_") if word)
 
@@ -670,6 +673,7 @@ class CrewAIFrameworkAdapter(FrameworkAdapter):
         # Add custom filters
         def to_pascal_case(text: str) -> str:
             import re
+
             normalized = re.sub(r"[^a-zA-Z0-9]+", "_", str(text or ""))
             return "".join(word.capitalize() for word in normalized.split("_") if word)
 
@@ -788,6 +792,7 @@ class CrewAIFrameworkAdapter(FrameworkAdapter):
 
         def to_pascal_case(text: str) -> str:
             import re
+
             normalized = re.sub(r"[^a-zA-Z0-9]+", "_", str(text or ""))
             return "".join(word.capitalize() for word in normalized.split("_") if word)
 
@@ -840,6 +845,7 @@ class GoogleADKFrameworkAdapter(FrameworkAdapter):
         # Add custom filters
         def to_pascal_case(text: str) -> str:
             import re
+
             normalized = re.sub(r"[^a-zA-Z0-9]+", "_", str(text or ""))
             return "".join(word.capitalize() for word in normalized.split("_") if word)
 
@@ -952,6 +958,7 @@ class GoogleADKFrameworkAdapter(FrameworkAdapter):
 
         def to_pascal_case(text: str) -> str:
             import re
+
             normalized = re.sub(r"[^a-zA-Z0-9]+", "_", str(text or ""))
             return "".join(word.capitalize() for word in normalized.split("_") if word)
 
@@ -1000,6 +1007,7 @@ class PydanticAIFrameworkAdapter(FrameworkAdapter):
         # Add custom filters
         def to_pascal_case(text: str) -> str:
             import re
+
             normalized = re.sub(r"[^a-zA-Z0-9]+", "_", str(text or ""))
             return "".join(word.capitalize() for word in normalized.split("_") if word)
 
@@ -1116,6 +1124,7 @@ class PydanticAIFrameworkAdapter(FrameworkAdapter):
 
         def to_pascal_case(text: str) -> str:
             import re
+
             normalized = re.sub(r"[^a-zA-Z0-9]+", "_", str(text or ""))
             return "".join(word.capitalize() for word in normalized.split("_") if word)
 
@@ -1280,6 +1289,7 @@ class ClaudeAgentSDKFrameworkAdapter(FrameworkAdapter):
         # Add custom filters
         def to_pascal_case(text: str) -> str:
             import re
+
             normalized = re.sub(r"[^a-zA-Z0-9]+", "_", str(text or ""))
             return "".join(word.capitalize() for word in normalized.split("_") if word)
 
@@ -1371,6 +1381,7 @@ class ClaudeAgentSDKFrameworkAdapter(FrameworkAdapter):
 
         def to_pascal_case(text: str) -> str:
             import re
+
             normalized = re.sub(r"[^a-zA-Z0-9]+", "_", str(text or ""))
             return "".join(word.capitalize() for word in normalized.split("_") if word)
 
