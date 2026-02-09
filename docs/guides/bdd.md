@@ -69,7 +69,7 @@ SuperOptiX adapts this RSpec philosophy for AI agents!
 
 BDD transforms software development by:
 
-- ✅ **Shared Understanding**: Business and technical teams speak the same language
+- **Shared Understanding**: Business and technical teams speak the same language
 - 🎯 **Focus on Behavior**: Describes what the system should do, not how
 - 🔄 **Living Documentation**: Scenarios serve as executable specifications
 - 🧪 **Test-Driven**: Every behavior is testable and validated
@@ -250,7 +250,7 @@ Each BDD specification is evaluated using four weighted criteria:
 
 - 🎉 **≥ 80%**: EXCELLENT - Production ready
 - ⚠️ **60-79%**: GOOD - Minor improvements needed
-- ❌ **< 60%**: NEEDS WORK - Significant improvements required
+- **< 60%**: NEEDS WORK - Significant improvements required
 
 ### **Scoring System**
 
@@ -283,7 +283,7 @@ The spec runner starts with a professional session overview:
 Watch your specifications execute in real-time with spinners and status updates:
 
 ```
-✅ Pipeline loaded
+Pipeline loaded
 🔍 Discovering BDD Specifications...
 📋 Found 5 BDD specifications
 🧪 Executing BDD Specification Suite
@@ -299,9 +299,9 @@ Professional tabular output showing all specification results at a glance:
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃ Specification                  ┃   Status   ┃  Score   ┃ Description                              ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│ developer_comprehensive_task   │  ✅ PASS   │   0.87   │ Complex software requirements handl...   │
-│ developer_problem_solving      │  ❌ FAIL   │   0.45   │ Problem-solving approach demonstra...    │
-│ developer_best_practices       │  ✅ PASS   │   0.78   │ Industry standards and guidelines...     │
+│ developer_comprehensive_task   │  PASS   │   0.87   │ Complex software requirements handl...   │
+│ developer_problem_solving      │  FAIL   │   0.45   │ Problem-solving approach demonstra...    │
+│ developer_best_practices       │  PASS   │   0.78   │ Industry standards and guidelines...     │
 └────────────────────────────────┴────────────┴──────────┴──────────────────────────────────────────┘
 ```
 
@@ -313,8 +313,8 @@ Color-coded quality gates with detailed metrics:
 ╭──────────────────────────────────────── 🟡 Specification Results Summary ─────────────────────────────────────────╮
 │                                                                                                                    │
 │  📊 Total Specs:         5                🎯 Pass Rate:         60.0%                                              │
-│  ✅ Passed:              3                🤖 Model:             llama3.1:8b                                        │
-│  ❌ Failed:              2                💪 Capability:        0.68                                               │
+│  Passed:              3                🤖 Model:             llama3.1:8b                                        │
+│  Failed:              2                💪 Capability:        0.68                                               │
 │  🏆 Quality Gate:        ⚠️  GOOD         🚀 Status:            🚀 Optimized                                      │
 │                                                                                                                    │
 ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
@@ -348,7 +348,7 @@ super agent evaluate developer --verbose
 Each failing specification gets a comprehensive analysis panel:
 
 ```
-╭─────────────────────────────────────────── Spec #2: ❌ FAILED ───────────────────────────────────────────╮
+╭─────────────────────────────────────────── Spec #2: FAILED ───────────────────────────────────────────╮
 │                                                                                                          │
 │  Specification: developer_problem_solving                                                                 │
 │  Description: When facing software challenges, the agent should demonstrate systematic problem-solving   │
@@ -465,16 +465,16 @@ Progress: 🧪 Running 5 BDD specifications...
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃ Specification                              ┃   Status   ┃  Score   ┃ Description                              ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│ developer_comprehensive_task               │  ✅ PASS   │   0.87   │ Complex software requirements handl...   │
-│ developer_problem_solving                  │  ❌ FAIL   │   0.45   │ Problem-solving approach demonstra...    │
-│ developer_best_practices                   │  ✅ PASS   │   0.78   │ Industry standards and guidelines...     │
+│ developer_comprehensive_task               │  PASS   │   0.87   │ Complex software requirements handl...   │
+│ developer_problem_solving                  │  FAIL   │   0.45   │ Problem-solving approach demonstra...    │
+│ developer_best_practices                   │  PASS   │   0.78   │ Industry standards and guidelines...     │
 └────────────────────────────────────────────────┴────────────┴──────────┴──────────────────────────────────────────┘
 
 ╭──────────────────────────────────────── 🟡 Specification Results Summary ─────────────────────────────────────────╮
 │                                                                                                                    │
 │  📊 Total Specs:         5                🎯 Pass Rate:         60.0%                                              │
-│  ✅ Passed:              3                🤖 Model:             llama3.1:8b                                        │
-│  ❌ Failed:              2                💪 Capability:        0.68                                               │
+│  Passed:              3                🤖 Model:             llama3.1:8b                                        │
+│  Failed:              2                💪 Capability:        0.68                                               │
 │  🏆 Quality Gate:        ⚠️  GOOD         🚀 Status:            🚀 Optimized                                      │
 │                                                                                                                    │
 ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
@@ -504,8 +504,8 @@ super agent evaluate developer
 ╭──────────────────────────────────────── 🟢 Specification Results Summary ─────────────────────────────────────────╮
 │                                                                                                                    │
 │  📊 Total Specs:         5                🎯 Pass Rate:         80.0%                                              │
-│  ✅ Passed:              4                🤖 Model:             llama3.1:8b                                        │
-│  ❌ Failed:              1                💪 Capability:        0.82                                               │
+│  Passed:              4                🤖 Model:             llama3.1:8b                                        │
+│  Failed:              1                💪 Capability:        0.82                                               │
 │  🏆 Quality Gate:        🎉 EXCELLENT    🚀 Status:            🚀 Optimized                                      │
 │                                                                                                                    │
 ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
@@ -528,7 +528,7 @@ SuperOptiX uses **4 weighted criteria** for SuperSpec BDD evaluation:
 
 - 🎉 **≥ 80%**: EXCELLENT - Production ready
 - ⚠️ **60-79%**: GOOD - Minor improvements needed
-- ❌ **< 60%**: NEEDS WORK - Significant improvements required
+- **< 60%**: NEEDS WORK - Significant improvements required
 
 ### **Detailed Scoring**
 
@@ -554,7 +554,7 @@ SuperOptiX uses **4 weighted criteria** for SuperSpec BDD evaluation:
 
 ## 🎯 **BDD Best Practices for AI Agents**
 
-### **✅ DO's**
+### **DO's**
 
 #### **1. Write Specific, Testable Scenarios**
 ```yaml
@@ -591,7 +591,7 @@ input:
   feature_requirement: "Create a REST API for user registration with email validation, password hashing, and rate limiting"
 ```
 
-### **❌ DON'Ts**
+### **DON'Ts**
 
 #### **1. Don't Write Vague Scenarios**
 ```yaml
@@ -648,22 +648,22 @@ graph TB
 ### **Command Sequence**
 
 ```bash
-# 1. Define SuperSpec BDD scenarios in playbook
+# Define SuperSpec BDD scenarios in playbook
 vim agents/developer/playbook/developer_playbook.yaml
 
-# 2. Compile SuperSpec with BDD scenarios
+# Compile SuperSpec with BDD scenarios
 super agent compile developer
 
-# 3. Establish baseline performance
+# Establish baseline performance
 super agent evaluate developer
 
-# 4. Optimize using SuperSpec scenarios as training data
+# Optimize using SuperSpec scenarios as training data
 super agent optimize developer
 
-# 5. Measure improvement
+# Measure improvement
 super agent evaluate developer
 
-# 6. Deploy if quality gates pass
+# Deploy if quality gates pass
 super agent run developer --goal "Your production task"
 ```
 

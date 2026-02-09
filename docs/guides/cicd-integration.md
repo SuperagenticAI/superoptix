@@ -63,41 +63,41 @@ The correct CI/CD workflow follows BDD/TDD best practices:
 
 ### **Phase 1: Specification-Driven Development**
 ```bash
-# 1. Define BDD scenarios FIRST
+# Define BDD scenarios FIRST
 vim agents/<agent_name>/Playbook/developer_playbook.yaml
 # Add comprehensive feature_specifications
 
-# 2. Compile agent with scenarios
+# Compile agent with scenarios
 super agent compile developer
 
-# 3. Run baseline evaluation (should show current performance)
+# Run baseline evaluation (should show current performance)
 super agent evaluate developer
 # This gives us baseline metrics before optimization
 ```
 
 ### **Phase 2: Iterative Improvement**
 ```bash
-# 4. Analyze baseline results
+# Analyze baseline results
 # - Identify failing scenarios
 # - Understand performance gaps
 # - Plan optimization strategy
 
-# 5. Optimize based on evaluation feedback
+# Optimize based on evaluation feedback
 super agent optimize developer
 
-# 6. Re-evaluate to measure improvement
+# Re-evaluate to measure improvement
 super agent evaluate developer
 
-# 7. Iterate until quality gates pass
+# Iterate until quality gates pass
 # Repeat steps 5-6 until pass rate ≥ 80%
 ```
 
 ### **Phase 3: Production Deployment**
 ```bash
-# 8. Final validation
+# Final validation
 super agent evaluate developer --verbose
 
-# 9. Deploy only if quality gates pass
+# Deploy only if quality gates pass
 super agent run developer --goal "production task"
 ```
 
@@ -379,16 +379,16 @@ echo "Improvement: $IMPROVEMENT%"
 
 # Quality gate checks
 if [ "$PASS_RATE" -lt "$MIN_PASS_RATE" ]; then
-    echo "❌ Quality gate failed: $PASS_RATE% < $MIN_PASS_RATE%"
+    echo "Quality gate failed: $PASS_RATE% < $MIN_PASS_RATE%"
     exit 1
 fi
 
 if [ "$IMPROVEMENT" -lt "$MIN_IMPROVEMENT" ]; then
-    echo "❌ Improvement gate failed: $IMPROVEMENT% < $MIN_IMPROVEMENT%"
+    echo "Improvement gate failed: $IMPROVEMENT% < $MIN_IMPROVEMENT%"
     exit 1
 fi
 
-echo "✅ All quality gates passed!"
+echo "All quality gates passed!"
 ```
 
 ### Quality Gate Thresholds
@@ -592,7 +592,7 @@ jobs:
 
 ## 🚀 Best Practices
 
-### **✅ DO's**
+### **DO's**
 1. **Always evaluate before optimizing**
 2. **Set clear quality gates**
 3. **Measure improvement quantitatively**
@@ -601,7 +601,7 @@ jobs:
 6. **Automate everything**
 7. **Monitor trends over time**
 
-### **❌ DON'Ts**
+### **DON'Ts**
 1. **Don't optimize without baseline**
 2. **Don't skip evaluation after optimization**
 3. **Don't deploy without quality gates**

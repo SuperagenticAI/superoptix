@@ -11,8 +11,8 @@ graph TD
     A[📋 Spec: Intent & Context<br/>SuperSpec DSL] --> B[🔨 Compile: Convert to Python<br/>DSPy Pipelines]
     B --> C[🧪 Evaluate: BDD/TDD Testing<br/>Establish Baseline]
     C --> D{📊 Pass Quality Gate?}
-    D -->|✅ Yes| E[🚀 Run: Execute Agent]
-    D -->|❌ No| F[⚡ Optimize: DSPy Optimizers<br/>Learn from Scenarios]
+    D -->|Yes| E[🚀 Run: Execute Agent]
+    D -->|No| F[⚡ Optimize: DSPy Optimizers<br/>Learn from Scenarios]
     F --> B
     E --> G[🎼 Orchestra: Multi-Agent<br/>Coordination]
     G --> H[📈 Monitor: Observability<br/>Performance Tracking]
@@ -155,7 +155,7 @@ super agent compile developer
 │  📁 Output: swe/agents/developer/pipelines/developer_pipeline.py                                        │
 │                                                                                                          │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-✅ Compilation successful! Agent 'developer' is ready for evaluation.
+Compilation successful! Agent 'developer' is ready for evaluation.
 ```
 
 </details>
@@ -180,7 +180,7 @@ super agent evaluate developer
 
 - 💡 **Optimization Strategy** - Plan improvements based on failures
 
-- ✅ **Fail-Fast Feedback** - Catch issues early
+- **Fail-Fast Feedback** - Catch issues early
 
 <details>
 <summary>🧪 Evaluation Output</summary>
@@ -191,22 +191,20 @@ super agent evaluate developer
 
 🎭 Executing BDD Scenarios...
   📝 Running: basic_api_endpoint_creation
-    ✅ PASSED
+    PASSED
   📝 Running: data_structure_design
-    ✅ PASSED
+    PASSED
   📝 Running: algorithm_implementation
-    ❌ FAILED: semantic meaning differs significantly
+    FAILED: semantic meaning differs significantly
   📝 Running: robust_error_handling
-    ✅ PASSED
+    PASSED
   📝 Running: test_code_generation
-    ✅ PASSED
+    PASSED
 
 📊 BDD Test Results Summary:
 ========================================
 Total Scenarios: 5
-Passed: 4 ✅
-Failed: 1 ❌
-Pass Rate: 80.0%
+Passed: 4 Failed: 1 Pass Rate: 80.0%
 BDD Score: 0.800
 
 💡 Recommendations:
@@ -222,9 +220,9 @@ BDD Score: 0.800
 
 | Pass Rate | Status | Action Required |
 |-----------|--------|-----------------|
-| **≥ 80%** | ✅ **Production Ready** | Deploy with confidence |
+| **≥ 80%** | **Production Ready** | Deploy with confidence |
 | **60-79%** | ⚠️ **Needs Improvement** | Optimize and re-evaluate |
-| **< 60%** | ❌ **Significant Work** | Fix scenarios and recompile |
+| **< 60%** | **Significant Work** | Fix scenarios and recompile |
 
 ---
 
@@ -271,7 +269,7 @@ super agent optimize developer
 📈 Learning from scenario: robust_error_handling
 📈 Learning from scenario: test_code_generation
 
-✅ Optimization complete! Agent performance enhanced.
+Optimization complete! Agent performance enhanced.
 ```
 
 </details>
@@ -406,25 +404,25 @@ super observe traces developer
 ### **Proper BDD/TDD Development Cycle**
 
 ```bash
-# 1. Define your agent (Spec)
+# Define your agent (Spec)
 super spec generate genies developer --rag --memory --tools
 
-# 2. Compile to executable code
+# Compile to executable code
 super agent compile developer
 
-# 3. Establish baseline performance (CRITICAL)
+# Establish baseline performance (CRITICAL)
 super agent evaluate developer
 
-# 4. Optimize based on evaluation results
+# Optimize based on evaluation results
 super agent optimize developer
 
-# 5. Measure improvement
+# Measure improvement
 super agent evaluate developer
 
-# 6. Deploy when quality gates pass
+# Deploy when quality gates pass
 super agent run developer --goal "Your production task"
 
-# 7. Monitor and iterate
+# Monitor and iterate
 super observe dashboard
 ```
 
@@ -470,7 +468,7 @@ super agent run developer --goal "task" --optimize
 
 ## 🎯 **Best Practices**
 
-### **✅ DO's**
+### **DO's**
 
 - **Always evaluate before optimizing** - Establish baseline performance
 
@@ -482,7 +480,7 @@ super agent run developer --goal "task" --optimize
 
 - **Version your playbooks** - Track changes and improvements
 
-### **❌ DON'Ts**
+### **DON'Ts**
 
 - **Don't optimize without baseline** - You won't know if you improved
 
@@ -498,15 +496,15 @@ super agent run developer --goal "task" --optimize
 
 ### **Pre-Deployment**
 
-- ✅ **Quality Gates Pass** - ≥ 80% BDD pass rate
+- **Quality Gates Pass** - ≥ 80% BDD pass rate
 
-- ✅ **Optimization Complete** - Optimized weights generated
+- **Optimization Complete** - Optimized weights generated
 
-- ✅ **Monitoring Enabled** - Observability configured
+- **Monitoring Enabled** - Observability configured
 
-- ✅ **Error Handling** - Robust error management
+- **Error Handling** - Robust error management
 
-- ✅ **Performance Validated** - Latency and throughput acceptable
+- **Performance Validated** - Latency and throughput acceptable
 
 ### **Post-Deployment**
 

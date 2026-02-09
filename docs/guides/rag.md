@@ -169,11 +169,11 @@ spec:
 
 ### **MCP Benefits**
 
-- ✅ **Universal Protocol**: Works across all frameworks
-- ✅ **Rich Integrations**: Connect to filesystems, databases, APIs, Git repos
-- ✅ **Tool Discovery**: Automatic tool detection and execution
-- ✅ **Enhanced RAG**: Better context retrieval with MCP servers
-- ✅ **GEPA Optimization**: Optimize MCP-enhanced agents with GEPA
+- **Universal Protocol**: Works across all frameworks
+- **Rich Integrations**: Connect to filesystems, databases, APIs, Git repos
+- **Tool Discovery**: Automatic tool detection and execution
+- **Enhanced RAG**: Better context retrieval with MCP servers
+- **GEPA Optimization**: Optimize MCP-enhanced agents with GEPA
 
 ### **Example: MCP + RAG + Multi-Framework**
 
@@ -209,7 +209,7 @@ spec:
 
 ## 📦 Supported Vector Databases
 
-### 1. ChromaDB (Recommended for Local Development)
+### ChromaDB (Recommended for Local Development)
 
 ChromaDB is the default and recommended option for local development. It's lightweight, requires no external dependencies, and automatically downloads embedding models.
 
@@ -252,7 +252,7 @@ result = await pipeline.forward("What is ChromaDB?")
 print(result['response'])
 ```
 
-### 2. LanceDB
+### LanceDB
 
 LanceDB is a modern vector database built on Apache Arrow, offering high performance and easy integration.
 
@@ -295,7 +295,7 @@ result = await pipeline.forward("What is LanceDB?")
 print(result['response'])
 ```
 
-### 3. Weaviate
+### Weaviate
 
 Weaviate is a vector database with a rich ecosystem and cloud offerings.
 
@@ -339,7 +339,7 @@ result = await pipeline.forward("What is Weaviate?")
 print(result['response'])
 ```
 
-### 4. Qdrant
+### Qdrant
 
 Qdrant is a high-performance vector database with advanced filtering capabilities.
 
@@ -360,7 +360,7 @@ spec:
       api_key: your_api_key  # Optional
 ```
 
-### 5. Milvus
+### Milvus
 
 Milvus is a scalable vector database designed for production use.
 
@@ -477,32 +477,32 @@ spec:
 
 ## Best Practices
 
-### 1. Document Quality
+### Document Quality
 - Use high-quality, relevant documents
 - Ensure proper formatting and structure
 - Include comprehensive metadata
 - Regular updates and maintenance
 
-### 2. Chunking Strategy
+### Chunking Strategy
 - Choose appropriate chunk sizes (512-1024 characters)
 - Use overlap to maintain context
 - Consider semantic boundaries
 - Test different strategies for your use case
 
-### 3. Embedding Models
+### Embedding Models
 - Use appropriate models for your domain
 - Consider multilingual requirements
 - Balance quality vs. performance
 - Regular model updates
 
-### 4. Vector Database Selection
+### Vector Database Selection
 - **ChromaDB**: Development and prototyping
 - **LanceDB**: High-performance local applications
 - **Weaviate**: Rich ecosystem and cloud features
 - **Qdrant**: Advanced filtering requirements
 - **Milvus**: Large-scale production deployments
 
-### 5. Performance Optimization
+### Performance Optimization
 - Monitor retrieval latency
 - Optimize chunk sizes
 - Use appropriate top_k values

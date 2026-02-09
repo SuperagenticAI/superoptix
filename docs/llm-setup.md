@@ -81,7 +81,7 @@ pulling 34bb5ab01051: 100% ▕████████████████�
 verifying sha256 digest 
 writing manifest 
 success 
-✅ Model pulled successfully!
+Model pulled successfully!
 
 💡 You can now use it with SuperOptiX:
   super model dspy ollama/llama3.2:3b
@@ -114,7 +114,7 @@ ollama run llama3.2:1b
 - Custom model path: `OLLAMA_MODELS=/custom/path ollama serve`
 - GPU configuration: `OLLAMA_GPU_LAYERS=35 ollama serve`
 
-**✅ Automatic Detection**: SuperOptiX automatically detects and connects to Ollama running on the default port (11434). No additional configuration needed!
+**Automatic Detection**: SuperOptiX automatically detects and connects to Ollama running on the default port (11434). No additional configuration needed!
 
 ### 📋 Manage Ollama Models
 
@@ -129,9 +129,9 @@ super model list --backend ollama
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━┓
 ┃ Model                   ┃  Backend  ┃    Status    ┃  Size   ┃   Task    ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━┩
-│ llama3.1:8b             │ 🦙 ollama │ ✅ installed │ medium  │   chat    │
-│ llama3.2:1b             │ 🦙 ollama │ ✅ installed │  tiny   │   chat    │
-│ nomic-embed-text:latest │ 🦙 ollama │ ✅ installed │ Unknown │ embedding │
+│ llama3.1:8b             │ 🦙 ollama │ installed │ medium  │   chat    │
+│ llama3.2:1b             │ 🦙 ollama │ installed │  tiny   │   chat    │
+│ nomic-embed-text:latest │ 🦙 ollama │ installed │ Unknown │ embedding │
 └─────────────────────────┴───────────┴──────────────┴─────────┴───────────┘
 ```
 
@@ -153,9 +153,9 @@ super model list --all
 
 | Backend | Model | Status | Performance | Apple Silicon | **Recommendation** |
 |---------|-------|--------|-------------|---------------|-------------------|
-| **🦙 Ollama** | gpt-oss:20b | **✅ Works** | **19.7 t/s** | **✅ Optimized format** | **⭐ RECOMMENDED** |
-| **🍎 MLX-LM** | openai_gpt-oss-20b | **✅ Works** | 5.2 t/s | **✅ Native support** | **Apple Silicon only** |
-| **🤗 HuggingFace** | openai/gpt-oss-20b | **❌ Broken** | N/A | **❌ Mixed precision errors** | **❌ Avoid on Apple Silicon** |
+| **🦙 Ollama** | gpt-oss:20b | **Works** | **19.7 t/s** | **Optimized format** | **⭐ RECOMMENDED** |
+| **🍎 MLX-LM** | openai_gpt-oss-20b | **Works** | 5.2 t/s | **Native support** | **Apple Silicon only** |
+| **🤗 HuggingFace** | openai/gpt-oss-20b | **Broken** | N/A | **Mixed precision errors** | **Avoid on Apple Silicon** |
 
 ### 🎯 GPT-OSS Model Overview
 
@@ -167,11 +167,11 @@ super model list --all
 !!! tip "🚀 **Recommended: Use Ollama for GPT-OSS Models**"
     **For the best performance and reliability with GPT-OSS models, we recommend using Ollama:**
     
-    - **✅ Best Performance**: 19.7 t/s vs 5.2 t/s (MLX) vs N/A (HuggingFace)
-    - **✅ Cross-Platform**: Works on all platforms (Windows, macOS, Linux)
-    - **✅ Easy Setup**: Simple installation and model management
-    - **✅ Optimized Format**: GGUF format optimized for local inference
-    - **✅ No Server Required**: Direct model execution
+    - **Best Performance**: 19.7 t/s vs 5.2 t/s (MLX) vs N/A (HuggingFace)
+    - **Cross-Platform**: Works on all platforms (Windows, macOS, Linux)
+    - **Easy Setup**: Simple installation and model management
+    - **Optimized Format**: GGUF format optimized for local inference
+    - **No Server Required**: Direct model execution
     
     **Install and use GPT-OSS with Ollama:**
     ```bash
@@ -237,7 +237,7 @@ pulling 9a2b4c6d8e0f: 100% ▕████████████████�
 verifying sha256 digest 
 writing manifest 
 success 
-✅ Model pulled successfully!
+Model pulled successfully!
 
 💡 You can now use it with SuperOptiX:
   super model dspy ollama/gpt-oss:20b
@@ -278,7 +278,7 @@ Downloading model files...
   • tokenizer.json: 100% ▕██████████████████████████████████████████████▏ 1.8 MB
   • tokenizer_config.json: 100% ▕██████████████████████████████████████████████▏ 1.2 KB
 
-✅ Model downloaded successfully!
+Model downloaded successfully!
 
 💡 You can now use it with SuperOptiX:
   super model server huggingface openai/gpt-oss-20b --port 8001
@@ -296,7 +296,7 @@ Downloading model files...
 
 ### 🎯 Using GPT-OSS with SuperOptiX
 
-#### 1. **Configure Playbook for GPT-OSS**
+#### **Configure Playbook for GPT-OSS**
 
 ```yaml
 # Example playbook configuration for GPT-OSS
@@ -360,7 +360,7 @@ super model server mlx lmstudio-community/gpt-oss-20b-MLX-8bit --port 9000
 Starting MLX server for lmstudio-community/gpt-oss-20b-MLX-8bit on port 8000...
 🚀 Starting MLX server...
 python -m mlx_lm.server --model lmstudio-community/gpt-oss-20b-MLX-8bit --port 8000
-✅ MLX server is running on http://localhost:8000
+MLX server is running on http://localhost:8000
 ```
 
 **Note:** Keep the server running while using GPT-OSS models in your playbooks.
@@ -368,7 +368,7 @@ python -m mlx_lm.server --model lmstudio-community/gpt-oss-20b-MLX-8bit --port 8
 
 ```
 
-#### 2. **Test GPT-OSS Models**
+#### **Test GPT-OSS Models**
 
 ```bash
 # Test with MLX-LM backend (Apple Silicon - Native)
@@ -381,7 +381,7 @@ super model run gpt-oss:20b "Explain quantum computing with detailed reasoning" 
 super model run openai/gpt-oss-20b "Write a Python function to solve the traveling salesman problem" --backend huggingface
 ```
 
-#### 3. **Basic Usage Examples**
+#### **Basic Usage Examples**
 
 ```bash
 # MLX-LM (Apple Silicon - Native support)
@@ -554,7 +554,7 @@ super model list --backend mlx
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━┓
 ┃ Model                                    ┃ Backend ┃    Status    ┃ Size  ┃ Task ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━┩
-│ mlx-community_Llama-3.2-3B-Instruct-4bit │ 🍎 mlx  │ ✅ installed │ small │ chat │
+│ mlx-community_Llama-3.2-3B-Instruct-4bit │ 🍎 mlx  │ installed │ small │ chat │
 └──────────────────────────────────────────┴─────────┴──────────────┴───────┴──────┘
 ```
 
@@ -624,9 +624,9 @@ super model list --backend lmstudio
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━┓
 ┃ Model                          ┃   Backend   ┃    Status    ┃  Size  ┃ Task ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━┩
-│ llama-3.2-1b-instruct          │ 🎮 lmstudio │ ✅ installed │ small  │ chat │
-│ llama-3.3-70b-instruct         │ 🎮 lmstudio │ ✅ installed │ large  │ chat │
-│ llama-4-scout-17b-16e-instruct │ 🎮 lmstudio │ ✅ installed │ medium │ chat │
+│ llama-3.2-1b-instruct          │ 🎮 lmstudio │ installed │ small  │ chat │
+│ llama-3.3-70b-instruct         │ 🎮 lmstudio │ installed │ large  │ chat │
+│ llama-4-scout-17b-16e-instruct │ 🎮 lmstudio │ installed │ medium │ chat │
 └────────────────────────────────┴─────────────┴──────────────┴────────┴──────┘
 ```
 
@@ -704,8 +704,8 @@ super model list --backend huggingface
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━┓
 ┃ Model                    ┃    Backend     ┃    Status    ┃ Size  ┃ Task ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━┩
-│ microsoft/DialoGPT-small │ 🤗 huggingface │ ✅ installed │ small │ chat │
-│ microsoft/Phi-4          │ 🤗 huggingface │ ✅ installed │ small │ chat │
+│ microsoft/DialoGPT-small │ 🤗 huggingface │ installed │ small │ chat │
+│ microsoft/Phi-4          │ 🤗 huggingface │ installed │ small │ chat │
 └──────────────────────────┴────────────────┴──────────────┴───────┴──────┘
 ```
 
@@ -764,15 +764,15 @@ super model list
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━┓
 ┃ Model                                    ┃    Backend     ┃    Status    ┃  Size   ┃   Task    ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━┩
-│ llama-3.2-1b-instruct                    │  🎮 lmstudio   │ ✅ installed │  small  │   chat    │
-│ llama-3.3-70b-instruct                   │  🎮 lmstudio   │ ✅ installed │  large  │   chat    │
-│ llama-4-scout-17b-16e-instruct           │  🎮 lmstudio   │ ✅ installed │ medium  │   chat    │
-│ llama3.1:8b                              │   🦙 ollama    │ ✅ installed │ medium  │   chat    │
-│ llama3.2:1b                              │   🦙 ollama    │ ✅ installed │  tiny   │   chat    │
-│ microsoft/DialoGPT-small                 │ 🤗 huggingface │ ✅ installed │  small  │   chat    │
-│ microsoft/Phi-4                          │ 🤗 huggingface │ ✅ installed │  small  │   chat    │
-│ mlx-community_Llama-3.2-3B-Instruct-4bit │     🍎 mlx     │ ✅ installed │  small  │   chat    │
-│ nomic-embed-text:latest                  │   🦙 ollama    │ ✅ installed │ Unknown │ embedding │
+│ llama-3.2-1b-instruct                    │  🎮 lmstudio   │ installed │  small  │   chat    │
+│ llama-3.3-70b-instruct                   │  🎮 lmstudio   │ installed │  large  │   chat    │
+│ llama-4-scout-17b-16e-instruct           │  🎮 lmstudio   │ installed │ medium  │   chat    │
+│ llama3.1:8b                              │   🦙 ollama    │ installed │ medium  │   chat    │
+│ llama3.2:1b                              │   🦙 ollama    │ installed │  tiny   │   chat    │
+│ microsoft/DialoGPT-small                 │ 🤗 huggingface │ installed │  small  │   chat    │
+│ microsoft/Phi-4                          │ 🤗 huggingface │ installed │  small  │   chat    │
+│ mlx-community_Llama-3.2-3B-Instruct-4bit │     🍎 mlx     │ installed │  small  │   chat    │
+│ nomic-embed-text:latest                  │   🦙 ollama    │ installed │ Unknown │ embedding │
 └──────────────────────────────────────────┴────────────────┴──────────────┴─────────┴───────────┘
 
 🔍 Discover more models: super model discover
@@ -809,65 +809,65 @@ super model info llama-3.2-1b-instruct
 
 ### 🚀 **Beginner (Recommended)**
 ```bash
-# 1. Install Ollama
+# Install Ollama
 curl -fsSL https://ollama.ai/install.sh | sh
 
-# 2. Install SuperOptiX
+# Install SuperOptiX
 pip install superoptix
 
-# 3. Install a model
+# Install a model
 super model install llama3.2:3b
 
-# 4. Models are ready to use with SuperOptiX agents
+# Models are ready to use with SuperOptiX agents
 ```
 
 ### 🍎 **Apple Silicon User**
 ```bash
-# 1. Install MLX dependencies
+# Install MLX dependencies
 pip install mlx-lm
 
-# 2. Install SuperOptiX
+# Install SuperOptiX
 pip install superoptix
 
-# 3. Install MLX model
+# Install MLX model
 super model install -b mlx mlx-community/phi-2
 
-# 4. Start server
+# Start server
 super model server mlx phi-2 --port 8000
 
-# 5. Models are ready to use with SuperOptiX agents
+# Models are ready to use with SuperOptiX agents
 ```
 
 ### 🎮 **Windows User**
 ```bash
-# 1. Install LM Studio from https://lmstudio.ai
-# 2. Download a model in LM Studio
-# 3. Start server in LM Studio
+# Install LM Studio from https://lmstudio.ai
+# Download a model in LM Studio
+# Start server in LM Studio
 
-# 4. Install SuperOptiX
+# Install SuperOptiX
 pip install superoptix
 
-# 5. Connect to LM Studio
+# Connect to LM Studio
 super model server lmstudio your-model-name --port 1234
 
-# 6. Models are ready to use with SuperOptiX agents
+# Models are ready to use with SuperOptiX agents
 ```
 
 ### 🤗 **Advanced User**
 ```bash
-# 1. Install HuggingFace dependencies
+# Install HuggingFace dependencies
 pip install transformers torch fastapi uvicorn
 
-# 2. Install SuperOptiX
+# Install SuperOptiX
 pip install superoptix
 
-# 3. Install HuggingFace model
+# Install HuggingFace model
 super model install -b huggingface microsoft/Phi-4
 
-# 4. Start server
+# Start server
 super model server huggingface microsoft/Phi-4 --port 8001
 
-# 5. Models are ready to use with SuperOptiX agents
+# Models are ready to use with SuperOptiX agents
 ```
 
 ## 🔧 Advanced Configuration
@@ -909,8 +909,8 @@ super model server lmstudio llama-3.2-1b-instruct --port 1234
     super model list --all
     
     # Use correct model name
-    super model install llama3.2:3b  # ✅ Correct
-    super model install llama3.2     # ❌ Wrong
+    super model install llama3.2:3b  # Correct
+    super model install llama3.2     # Wrong
     ```
 
 === "Server Connection Failed"
@@ -1088,8 +1088,8 @@ super model list --backend huggingface
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━┓
 ┃ Model                    ┃    Backend     ┃    Status    ┃ Size  ┃ Task ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━┩
-│ microsoft/DialoGPT-small │ 🤗 huggingface │ ✅ installed │ small │ chat │
-│ microsoft/Phi-4          │ 🤗 huggingface │ ✅ installed │ small │ chat │
+│ microsoft/DialoGPT-small │ 🤗 huggingface │ installed │ small │ chat │
+│ microsoft/Phi-4          │ 🤗 huggingface │ installed │ small │ chat │
 └──────────────────────────┴────────────────┴──────────────┴───────┴──────┘
 ```
 

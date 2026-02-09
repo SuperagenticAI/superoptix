@@ -23,7 +23,7 @@ Agent discovery means:
 
 ## 🛠️ Three Ways to Discover & Create Agent Playbooks
 
-### 1. 🏪 **Browse Prebuilt Agents & Tools (Marketplace)**
+### 🏪 **Browse Prebuilt Agents & Tools (Marketplace)**
 
 Discover ready-to-use agents and tools from the SuperOptiX marketplace.
 
@@ -65,7 +65,7 @@ super market browse agents
 │ Software            │ Technical Writer Assistant          │ technical_writer               │ oracles │ Supervised  │ technical_writer               │
 └─────────────────────┴─────────────────────────────────────┴────────────────────────────────┴─────────┴─────────────┴────────────────────────────────┘
 
-✅ Found 119 pre-built agent(s)
+Found 119 pre-built agent(s)
 
 🚀 Next Steps:
    super agent pull <playbook_ref>           - Add an agent to your project
@@ -113,7 +113,7 @@ super market browse tools
 │ docker_helper       │ Development │ Validate Dockerfiles for best practices and optimi... │ Technology │ docker, containers, devops       │
 └─────────────────────┴─────────────┴───────────────────────────────────────────────────────┴────────────┴──────────────────────────────────┘
 
-✅ Found 16 tool(s)
+Found 16 tool(s)
 ```
 
 </details>
@@ -129,7 +129,7 @@ super market search "Software"
 ```
 🔍 Marketplace Search: 'Software'
 ════════════════════════════════════════════════════════════
-✅ Found 10 result(s)
+Found 10 result(s)
 
 🤖 Agents
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -156,7 +156,7 @@ super market search "Software"
 
 - 🔄 **Actively maintained** - Regular updates and improvements
 
-### 2. 📜 **Create Agents Using SuperSpec (CLI)**
+### 📜 **Create Agents Using SuperSpec (CLI)**
 
 Generate custom agent playbooks using the declarative SuperSpec DSL.
 
@@ -181,7 +181,7 @@ super spec generate genies assistant
 
 ```
 📁 Using SuperOptiX project structure: demo_agent_discovery/agents/developer/playbook/developer_playbook.yaml
-✅ Generated genies agent playbook: /Users/super/agentic/SuperOptiX/demo_agent_discovery/agents/developer/playbook/developer_playbook.yaml
+Generated genies agent playbook: /Users/super/agentic/SuperOptiX/demo_agent_discovery/agents/developer/playbook/developer_playbook.yaml
 📋 Agent: Developer (Tier: genies)
 🏷️  Namespace: software
 ⚡ Features: memory, tools, agentflow
@@ -199,21 +199,21 @@ super spec generate genies assistant
 
 - 🏗️ **Production-ready** - Enterprise-grade quality and structure
 
-### 3. 🎨 **Create Agents Using Studio (UI)**
+### 🎨 **Create Agents Using Studio (UI)**
 
 Use the visual SuperOptiX Agent Design Studio for interactive agent creation.
 
 ```bash
-super agent design --tier <tier> <agent_name>
+super agent design <agent_name>
 ```
 
 **Examples:**
 ```bash
 # Launch UI for Oracles-tier research agent
-super agent design --tier oracles research
+super agent design research
 
 # Launch UI for Genies-tier developer agent
-super agent design --tier genies developer
+super agent design developer
 ```
 
 <details>
@@ -230,7 +230,7 @@ super agent design --tier genies developer
 │ Starting designer... Use Ctrl+C to stop when done.                                                                                                                  │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 Waiting for designer UI to launch...
-✅ Designer UI is ready!
+Designer UI is ready!
 🌐 Visit: http://localhost:8501
 
 Designer is running. Press Ctrl+C here to stop the server.

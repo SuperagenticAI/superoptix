@@ -2,16 +2,18 @@
 
 **SuperOptiX now supports DeepAgents 0.2.0 - a LangGraph-based "agent harness" for building sophisticated, long-running agents with planning, pluggable backends, and subagent spawning!**
 
+RLM support is experimental. Unified sandbox support is coming soon.
+
 !!! tip "🚀 New to DeepAgents? Start with the Complete Tutorial!"
     **[👉 Complete End-to-End Workflow Tutorial](../tutorials/deepagents-complete-workflow.md)**
     
     Learn how to build, run, evaluate, and optimize DeepAgents from scratch in 30 minutes:
     
-    - ✅ Step-by-step with real expected outputs
-    - ✅ Works with FREE Gemini API
-    - ✅ Persistent memory, real file access, hybrid storage
-    - ✅ GEPA optimization guide
-    - ✅ Production deployment guide
+    - Step-by-step with real expected outputs
+    - Works with FREE Gemini API
+    - Persistent memory, real file access, hybrid storage
+    - GEPA optimization guide
+    - Deployment deployment guide
 
 ---
 
@@ -39,7 +41,7 @@ The biggest addition is the **backend abstraction** that lets you choose where a
 | **FilesystemBackend** | Forever | Real project files, code analysis |
 | **CompositeBackend** | Mixed | Hybrid strategies (best of all) |
 
-**Perfect for:** Complex research, code generation, chatbots, multi-step workflows, and production systems.
+**Perfect for:** Complex research, code generation, chatbots, multi-step workflows, and deployment systems.
 
 **Read more:** [LangChain Blog - Doubling Down on DeepAgents](https://blog.langchain.com/doubling-down-on-deepagents/)
 
@@ -80,22 +82,22 @@ pip install langchain-google-genai  # For Gemini
 
 ### Option A: Using Gemini (FREE & Recommended for Testing) ⭐
 
-**Why Gemini?** Free tier, fast, excellent function-calling support!
+**Why Gemini?** Free access, fast, excellent function-calling support!
 
 ```bash
-# 1. Get FREE API key from https://aistudio.google.com/app/apikey
+# Get FREE API key from https://aistudio.google.com/app/apikey
 export GOOGLE_API_KEY="your-gemini-api-key"
 
-# 2. Pull demo agent (already configured for Gemini!)
+# Pull demo agent (already configured for Gemini!)
 super agent pull research_agent_deepagents
 
-# 3. Run the full workflow
+# Run the full workflow
 super agent compile research_agent_deepagents --framework deepagents
-super agent run research_agent_deepagents --goal "What is LangGraph?"
+super agent run research_agent_deepagents --framework deepagents --goal "What is LangGraph?"
 super agent evaluate research_agent_deepagents
 super agent optimize research_agent_deepagents --auto medium --framework deepagents --reflection-lm ollama:llama3.1:8b
 
-# ✅ Done! Agent optimized with local Ollama
+# Done! Agent optimized with local Ollama
 ```
 
 **📖 Detailed Gemini Guide**: See `DEEPAGENTS_GEMINI_TEST.md` in repo root
@@ -125,14 +127,14 @@ export ANTHROPIC_API_KEY=your_key
 export OPENAI_API_KEY=your_key
 ```
 
-### 4. Run the Complete Workflow (Pulled Agent)
+### Run the Complete Workflow (Pulled Agent)
 
 ```bash
 # Compile (generate DeepAgents pipeline code)
 super agent compile research_agent_deepagents --framework deepagents
 
 # Run agent
-super agent run research_agent_deepagents --goal "What is LangGraph?"
+super agent run research_agent_deepagents --framework deepagents --goal "What is LangGraph?"
 
 # Evaluate (run BDD scenarios)
 super agent evaluate research_agent_deepagents
@@ -149,17 +151,17 @@ super agent evaluate research_agent_deepagents  # automatically loads optimized 
 
 **Expected Results:**
 - Baseline performance → After GEPA: Significant improvement (results vary by hardware and model)
-- Cost: $0.00 with FREE Gemini tier
+- Cost: $0.00 with FREE Gemini access
 - Time: 5-10 minutes
 
 !!! success "📖 Want Detailed Step-by-Step Guide?"
     **[👉 Complete End-to-End Workflow Tutorial](../tutorials/deepagents-complete-workflow.md)**
     
     This comprehensive tutorial shows you:
-    - ✅ What to expect at each step (real outputs!)
-    - ✅ How to configure all 3 backend types
-    - ✅ GEPA optimization walkthrough with examples
-    - ✅ Production deployment guide
+    - What to expect at each step (real outputs!)
+    - How to configure all 3 backend types
+    - GEPA optimization walkthrough with examples
+    - Deployment deployment guide
 
 ---
 
@@ -167,7 +169,7 @@ super agent evaluate research_agent_deepagents  # automatically loads optimized 
 
 ### What Are Backends?
 
-DeepAgents 0.2.0 introduces a **pluggable backend abstraction** that lets you choose where agent files are stored. This transforms DeepAgents from a toy framework into a **production-ready agent harness**.
+DeepAgents 0.2.0 introduces a **pluggable backend abstraction** that lets you choose where agent files are stored. This transforms DeepAgents from a toy framework into a **deployment-ready agent harness**.
 
 **Source:** [LangChain Blog - Doubling Down on DeepAgents](https://blog.langchain.com/doubling-down-on-deepagents/)
 
@@ -200,10 +202,10 @@ super agent run chatbot_persistent --goal "What do I like?"
 ```
 
 **Why It Works:** StoreBackend persists files in a database. They survive across:
-- ✅ Different conversations
-- ✅ Different days
-- ✅ Server restarts
-- ✅ All threads
+- Different conversations
+- Different days
+- Server restarts
+- All threads
 
 ---
 
@@ -219,9 +221,9 @@ super agent run code_reviewer --goal "Review src/auth.py for security issues"
 # Analyze entire project
 super agent run code_reviewer --goal "Analyze all Python files and write report to /review.md"
 # Agent:
-# 1. Runs: ls /src/
-# 2. Reads each .py file
-# 3. Writes to: /Users/local/my_project/review.md (REAL FILE!)
+# Runs: ls /src/
+# Reads each .py file
+# Writes to: /Users/local/my_project/review.md (REAL FILE!)
 
 # You can see the report in your IDE immediately!
 cat /Users/local/my_project/review.md
@@ -245,19 +247,19 @@ mkdir -p /Users/local/research/papers
 super agent run researcher_hybrid --goal "Research transformer architectures and save findings"
 
 # Agent workflow:
-# 1. Checks /memories/research_index.txt (empty first time)
-# 2. Searches internet → saves to /cache/search_results.txt
-# 3. Checks /papers/ for PDFs (if any exist)
-# 4. Writes to /memories/transformer_research.txt (PERSISTS!)
-# 5. Updates /memories/research_index.txt
+# Checks /memories/research_index.txt (empty first time)
+# Searches internet → saves to /cache/search_results.txt
+# Checks /papers/ for PDFs (if any exist)
+# Writes to /memories/transformer_research.txt (PERSISTS!)
+# Updates /memories/research_index.txt
 
 # Week later, follow-up
 super agent run researcher_hybrid --goal "What did I learn about transformers?"
 
 # Agent workflow:
-# 1. Reads /memories/transformer_research.txt (STILL THERE from last week!)
-# 2. Response: "Based on your previous research from [date]..."
-# 3. Can build upon previous knowledge!
+# Reads /memories/transformer_research.txt (STILL THERE from last week!)
+# Response: "Based on your previous research from [date]..."
+# Can build upon previous knowledge!
 
 # Access specific paper
 super agent run researcher_hybrid --goal "Summarize the paper in /papers/attention.pdf"
@@ -280,7 +282,7 @@ High-level guidance on which backend to pick:
 | **Default** | state | state | state | state | Simple agents |
 | **Persistent** | store | store | store | store | Chatbots |
 | **Local Files** | filesystem | filesystem | filesystem | filesystem | Code tools |
-| **Hybrid ⭐** | store | filesystem | state | state | Production |
+| **Hybrid ⭐** | store | filesystem | state | state | Deployment |
 
 ---
 
@@ -288,7 +290,7 @@ High-level guidance on which backend to pick:
 
 SuperOptiX includes 3 demo agents showcasing different backends:
 
-### 1. Basic Research Agent (StateBackend)
+### Basic Research Agent (StateBackend)
 
 ```bash
 super agent pull research_agent_deepagents
@@ -296,7 +298,7 @@ super agent pull research_agent_deepagents
 # Good for: Single-session research
 ```
 
-### 2. Persistent Chatbot (StoreBackend)
+### Persistent Chatbot (StoreBackend)
 
 ```bash
 super agent pull chatbot_persistent
@@ -304,7 +306,7 @@ super agent pull chatbot_persistent
 # Good for: Multi-session conversations
 ```
 
-### 3. Code Reviewer (FilesystemBackend)
+### Code Reviewer (FilesystemBackend)
 
 ```bash
 super agent pull code_reviewer
@@ -312,12 +314,12 @@ super agent pull code_reviewer
 # Good for: Project analysis
 ```
 
-### 4. Advanced Researcher (CompositeBackend)
+### Advanced Researcher (CompositeBackend)
 
 ```bash
 super agent pull researcher_hybrid
 # Uses CompositeBackend for hybrid storage
-# Good for: Complex production agents
+# Good for: Complex deployment agents
 ```
 
 **Try them all:**
@@ -339,7 +341,7 @@ done
     - **[Complete Workflow](../tutorials/deepagents-complete-workflow.md)** - All agents explained
     - **[Backend Tutorial](../tutorials/deepagents-backends-tutorial.md)** - Hands-on with each backend type
     
-    See real examples, expected outputs, and production patterns!
+    See real examples, expected outputs, and deployment patterns!
 
 ---
 
@@ -355,9 +357,9 @@ Pull the appropriate demo agent and inspect its playbook for backend configurati
 
 **Characteristics:**
 - ⚡⚡⚡ Very fast (in-memory)
-- ✅ Checkpointed within thread
-- ❌ Lost when conversation ends
-- ❌ Not shared across threads
+- Checkpointed within thread
+- Lost when conversation ends
+- Not shared across threads
 
 **Use Cases:**
 - Simple Q&A agents
@@ -377,9 +379,9 @@ Pull `chatbot_persistent` to see a persistent store-backed setup.
 
 **Characteristics:**
 - ⚡⚡ Fast (database)
-- ✅ Persistent across all threads
-- ✅ Shared between conversations
-- ✅ Survives restarts
+- Persistent across all threads
+- Shared between conversations
+- Survives restarts
 
 **Use Cases:**
 - Chatbots with memory
@@ -395,8 +397,7 @@ export GOOGLE_API_KEY="your-key"
 super agent run chatbot_persistent --goal "Hi! My name is Alice."
 # Later...
 super agent run chatbot_persistent --goal "What's my name?"
-# Response: "Your name is Alice!" ✅
-```
+# Response: "Your name is Alice!" ```
 
 ---
 
@@ -410,8 +411,8 @@ After pulling `code_reviewer`, set `backend.root_dir` in its playbook to your pr
 
 **Characteristics:**
 - ⚡⚡ Fast (filesystem speed)
-- ✅ Real files on disk
-- ✅ Changes immediately visible
+- Real files on disk
+- Changes immediately visible
 - ⚠️  Security: Can modify actual files!
 
 **Use Cases:**
@@ -443,21 +444,21 @@ super agent run code_reviewer --goal "Review src/app.py"
 
 **Storage:** Routes different paths to different backends  
 **Persistence:** Mixed strategies  
-**Best For:** Production agents with complex needs
+**Best For:** Deployment agents with complex needs
 
 Pull `researcher_hybrid` to explore hybrid storage. Edit paths in the playbook to match your environment.
 
 **Characteristics:**
-- ✅ Best of all worlds
-- ✅ Optimized for each data type
-- ✅ Maximum flexibility
+- Best of all worlds
+- Optimized for each data type
+- Maximum flexibility
 - 🔧 Requires thoughtful configuration
 
 **Use Cases:**
 - Development assistants
 - Complex research agents
 - Multi-domain agents
-- Production systems
+- Deployment systems
 
 **Example Agent:**
 ```bash
@@ -582,9 +583,9 @@ super agent evaluate research_agent_deepagents
 
 **Example Output:**
 ```
-✅ Simple research query: PASS
-✅ Technical comparison: PASS
-❌ Complex research: FAIL
+Simple research query: PASS
+Technical comparison: PASS
+Complex research: FAIL
 
 Overall: 2/3 PASS (66.7%)
 ```
@@ -620,7 +621,7 @@ super agent evaluate research_agent_deepagents
 ### Step 7: Run
 
 ```bash
-super agent run research_agent_deepagents --goal "Research AI trends in 2025"
+super agent run research_agent_deepagents --framework deepagents --goal "Research AI trends in 2025"
 ```
 
 ---
@@ -632,10 +633,10 @@ When you run `super agent compile research_agent_deepagents --framework deepagen
 High-level: SuperOptiX compiles your playbook into an executable DeepAgents pipeline and wires it to the standard run/evaluate/optimize workflow.
 
 **Key Points:**
-- ✅ Your playbook YAML controls all agent configuration
-- ✅ BDD scenarios define what success looks like
-- ✅ GEPA optimization is automatic - just run `super agent optimize`
-- ✅ The same workflow works across all frameworks (DSPy, CrewAI, etc.)
+- Your playbook YAML controls all agent configuration
+- BDD scenarios define what success looks like
+- GEPA optimization is automatic - just run `super agent optimize`
+- The same workflow works across all frameworks (DSPy, CrewAI, etc.)
 
 ---
 
@@ -648,10 +649,10 @@ High-level: SuperOptiX compiles your playbook into an executable DeepAgents pipe
 | **Planning** | Built-in `write_todos` | Manual implementation |
 | **Filesystem** | Built-in tools | Manual implementation |
 | **Subagents** | Native support | Manual composition |
-| **SuperOptiX Support** | ✅ Full workflow | ✅ Full workflow |
-| **GEPA Optimization** | ✅ system_prompt | ✅ All signatures |
+| **SuperOptiX Support** | Full workflow | Full workflow |
+| **GEPA Optimization** | system_prompt | All signatures |
 | **Model Requirements** | Function-calling only | Any LLM |
-| **Ollama Support** | ⚠️ Blocked (LangChain issue) | ✅ Full support |
+| **Ollama Support** | ⚠️ Blocked (LangChain issue) | Full support |
 
 **When to use DeepAgents:**
 - Complex research tasks
@@ -714,13 +715,13 @@ language_model:
 **Symptom:** "Failed to initialize DeepAgents"
 
 **Checklist:**
-1. ✅ API key set? (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`)
-2. ✅ Model string correct? (e.g., `anthropic:claude-sonnet-4-20250514`)
-3. ✅ LangChain dependencies installed? (`pip install langchain langchain-anthropic`)
+1. API key set? (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`)
+2. Model string correct? (e.g., `anthropic:claude-sonnet-4-20250514`)
+3. LangChain dependencies installed? (`pip install langchain langchain-anthropic`)
 
 ### No BDD Specifications Found
 
-**Symptom:** "❌ No BDD specifications found!"
+**Symptom:** "No BDD specifications found!"
 
 **Solution:** Add scenarios to playbook:
 ```yaml
@@ -806,7 +807,7 @@ Generated Python Pipeline
 
 ## 💡 Tips & Best Practices
 
-### 1. Use Detailed System Prompts
+### Use Detailed System Prompts
 DeepAgents shine with detailed instructions:
 ```yaml
 persona:
@@ -818,7 +819,7 @@ persona:
     You have 10+ years of experience in AI research
 ```
 
-### 2. Leverage Planning
+### Leverage Planning
 Always include `write_todos` in tools:
 ```yaml
 reasoning:
@@ -827,7 +828,7 @@ reasoning:
     - Execute each subtask systematically
 ```
 
-### 3. Use Filesystem for Context
+### Use Filesystem for Context
 For long outputs, instruct agent to save to files:
 ```yaml
 constraints:
@@ -835,7 +836,7 @@ constraints:
   - Keep main context clean
 ```
 
-### 4. Start Simple, Then Optimize
+### Start Simple, Then Optimize
 1. Get baseline working (compile + evaluate)
 2. Run optimization (GEPA improves the prompt)
 3. Iterate on scenarios based on failures
@@ -845,16 +846,16 @@ constraints:
 ## 🎓 Comparison with Other Frameworks
 
 ### DeepAgents + SuperOptiX Advantages
-- ✅ Built-in planning and filesystem
-- ✅ GEPA optimization works
-- ✅ Standard SuperOptiX workflow
-- ✅ Full LangGraph features (streaming, checkpointing, etc.)
+- Built-in planning and filesystem
+- GEPA optimization works
+- Standard SuperOptiX workflow
+- Full LangGraph features (streaming, checkpointing, etc.)
 
 ### DSPy + SuperOptiX Advantages
-- ✅ Works with Ollama (no function-calling requirement)
-- ✅ More optimization targets (all signatures, not just system_prompt)
-- ✅ Better for simple, focused tasks
-- ✅ Native to SuperOptiX
+- Works with Ollama (no function-calling requirement)
+- More optimization targets (all signatures, not just system_prompt)
+- Better for simple, focused tasks
+- Native to SuperOptiX
 
 ### Use Both!
 SuperOptiX lets you:
@@ -913,7 +914,7 @@ A: Coming soon! We're extending the same pattern to CrewAI, Microsoft, OpenAI SD
 
 - 🚀 **[Complete End-to-End Workflow](../tutorials/deepagents-complete-workflow.md)** ⭐ **NEW!**
   - Step-by-step tutorial with real examples
-  - From zero to production-ready agent in 30 minutes
+  - From zero to deployment-ready agent in 30 minutes
   - Includes evaluation, optimization, and deployment
   - All using FREE Gemini API!
 
@@ -953,5 +954,4 @@ super agent pull researcher_hybrid          # CompositeBackend (hybrid)
 ---
 
 *Need help? Check our [Documentation](https://superagenticai.github.io/superoptix-ai/) or email us at [hello@super-agentic.ai](mailto:hello@super-agentic.ai)!*
-
 

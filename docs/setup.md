@@ -8,7 +8,7 @@ Welcome to SuperOptiX! This guide will help you install the Full Stack Agentic A
 !!! tip "Stable Release Available!"
     SuperOptiX is now available as a stable release. We recommend using `uv` for the best experience.
     ```bash
-    uv pip install superoptix
+    uv tool install superoptix
     ```
 
 ## 📋 Prerequisites
@@ -66,18 +66,38 @@ git --version  # Should show git version
 We highly recommend using `uv` for faster, more reliable installations.
 
 ```bash
-# 1. Install UV (if not already installed)
+# Install UV (if not already installed)
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# 2. Create a virtual environment
-uv venv
+# Install SuperOptiX CLI globally (isolated tool env)
+uv tool install superoptix
 
-# 3. Activate the environment
-source .venv/bin/activate  # macOS/Linux
-# .venv\Scripts\activate   # Windows
+# Verify
+super --version
+```
 
-# 4. Install SuperOptiX
-uv pip install superoptix
+### Add Framework Dependencies with uv Tool
+
+Use `--with` to install framework dependencies in the same tool environment:
+
+```bash
+# OpenAI SDK support
+uv tool install superoptix --with "superoptix[frameworks-openai]"
+
+# Claude SDK support
+uv tool install superoptix --with "superoptix[frameworks-claude-sdk]"
+
+# Google ADK support
+uv tool install superoptix --with "superoptix[frameworks-google]"
+
+# Pydantic AI support
+uv tool install superoptix --with "superoptix[frameworks-pydantic-ai]"
+```
+
+Upgrade later:
+
+```bash
+uv tool upgrade superoptix
 ```
 
 ### Alternative: Using pip
@@ -99,13 +119,14 @@ Customize your installation by adding only what you need:
 
 | Framework | Install Command | Includes |
 |-----------|----------------|----------|
-| **DSPy** ⭐ | `uv pip install superoptix[frameworks-dspy]` | DSPy + GEPA |
-| **OpenAI SDK** | `uv pip install superoptix[frameworks-openai]` | openai-agents, openai SDK |
-| **Google ADK** | `uv pip install superoptix[frameworks-google]` | google-adk, google-generativeai |
-| **Microsoft** | `uv pip install superoptix[frameworks-microsoft]` | agent-framework, azure-identity |
-| **DeepAgents** | `uv pip install superoptix[frameworks-deepagents]` | deepagents |
-| **Pydantic AI** | `uv pip install superoptix[frameworks-pydantic-ai]` | Pydantic AI |
-| **CrewAI** ⚠️ | `uv pip install superoptix[frameworks-crewai]` | crewai (conflicts with DSPy) |
+| **DSPy** ⭐ | `uv tool install superoptix --with "superoptix[frameworks-dspy]"` | DSPy + GEPA |
+| **OpenAI SDK** | `uv tool install superoptix --with "superoptix[frameworks-openai]"` | openai-agents, openai SDK |
+| **Claude SDK** | `uv tool install superoptix --with "superoptix[frameworks-claude-sdk]"` | claude-agent-sdk |
+| **Google ADK** | `uv tool install superoptix --with "superoptix[frameworks-google]"` | google-adk, google-generativeai |
+| **Microsoft (Legacy)** | `uv tool install superoptix --with "superoptix[frameworks-microsoft]"` | agent-framework, azure-identity |
+| **DeepAgents** | `uv tool install superoptix --with "superoptix[frameworks-deepagents]"` | deepagents |
+| **Pydantic AI** | `uv tool install superoptix --with "superoptix[frameworks-pydantic-ai]"` | Pydantic AI |
+| **CrewAI** ⚠️ | `uv tool install superoptix --with "superoptix[frameworks-crewai]"` | crewai (conflicts with DSPy) |
 
 ⭐ **Recommended:** DSPy for GEPA optimization  
 ⚠️ **Note:** CrewAI and DSPy cannot be installed together in the same environment.
@@ -113,24 +134,24 @@ Customize your installation by adding only what you need:
 ### 🔌 Tool Optimization & MCP
 
 ```bash
-uv pip install superoptix[mcp]
+uv tool install superoptix --with "superoptix[mcp]"
 ```
 
 ### 🧠 Vector Databases (RAG)
 
 ```bash
 # All vector databases
-uv pip install "superoptix[vectordb]"
+uv tool install superoptix --with "superoptix[vectordb]"
 
 # Or specific ones
-uv pip install "superoptix[chromadb]"    # ChromaDB (recommended)
-uv pip install "superoptix[qdrant]"      # Qdrant (production)
+uv tool install superoptix --with "superoptix[chromadb]"    # ChromaDB (recommended)
+uv tool install superoptix --with "superoptix[qdrant]"      # Qdrant
 ```
 
 ### 🔍 Observability
 
 ```bash
-uv pip install "superoptix[observability]"
+uv tool install superoptix --with "superoptix[observability]"
 ```
 Includes MLflow, Pandas, Plotly.
 
@@ -138,10 +159,10 @@ Includes MLflow, Pandas, Plotly.
 
 ```bash
 # Apple Silicon (MLX)
-uv pip install "superoptix[mlx]"
+uv tool install superoptix --with "superoptix[mlx]"
 
 # HuggingFace
-uv pip install "superoptix[huggingface]"
+uv tool install superoptix --with "superoptix[huggingface]"
 ```
 
 ## 🔍 Verification
@@ -173,16 +194,16 @@ python --version
 
 **Package Not Found**: Update pip/uv
 ```bash
-uv pip install --upgrade superoptix
+uv tool upgrade superoptix
 ```
 
 **CrewAI Installation Conflicts**: If you encounter dependency conflicts when installing CrewAI with SuperOptiX:
 ```bash
 # The issue: CrewAI requires json-repair==0.25.2, but DSPy needs json-repair>=0.30.0
 # Solution: Install manually with --no-deps flag
-uv pip install "superoptix[optimas]"  # Install DSPy support first
-uv pip install crewai==0.157.0 --no-deps  # Install CrewAI without dependencies
-uv pip install "json-repair>=0.30.0"  # Ensure compatible version
+uv tool install superoptix --with "superoptix[frameworks-dspy]"  # Install DSPy support first
+uv tool install superoptix --with crewai==0.157.0  # Add CrewAI manually
+uv tool install superoptix --with "json-repair>=0.30.0"  # Ensure compatible version
 ```
 
 ### Still Having Issues?

@@ -4,18 +4,20 @@
 
 SuperOptiX now supports **CrewAI** - a powerful multi-agent framework with 100,000+ certified developers. This integration brings the full SuperOptiX optimization workflow to CrewAI's role-based agent design.
 
+RLM support is experimental. Unified sandbox support is coming soon.
+
 **Key Features:**
-- ✅ **Works with Ollama** (unlike DeepAgents!)
-- ✅ **GEPA optimization** of role + goal + backstory
-- ✅ **Role-based design** perfect for optimization
-- ✅ **Multi-agent native** (start with single agents, scale to teams)
-- ✅ **Standard SuperOptiX workflow** (compile/evaluate/optimize/run)
+- **Works with Ollama** (unlike DeepAgents!)
+- **GEPA optimization** of role + goal + backstory
+- **Role-based design** perfect for optimization
+- **Multi-agent native** (start with single agents, scale to teams)
+- **Standard SuperOptiX workflow** (compile/evaluate/optimize/run)
 
 ---
 
 ## Quick Start
 
-### 1. Install SuperOptiX with CrewAI
+### Install SuperOptiX with CrewAI
 
 ```bash
 pip install superoptix[frameworks-crewai]
@@ -29,42 +31,42 @@ pip install superoptix[frameworks-crewai]
 - Python 3.11+
 - Git (for DSPy dependency)
 
-### 2. Create Project
+### Create Project
 
 ```bash
 super init my_project
 cd my_project
 ```
 
-### 3. Pull Demo Agent
+### Pull Demo Agent
 
 ```bash
 super agent pull researcher_crew
 ```
 
-### 4. Compile
+### Compile
 
 ```bash
 super agent compile researcher_crew --framework crewai
 ```
 
-### 5. Evaluate
+### Evaluate
 
 ```bash
 super agent evaluate researcher_crew
 # Result: 4/4 PASS (100%)! 🎉
 ```
 
-### 6. Optimize
+### Optimize
 
 ```bash
-super agent optimize researcher_crew --auto medium
+super agent optimize researcher_crew --framework crewai --auto medium
 ```
 
-### 7. Run
+### Run
 
 ```bash
-super agent run researcher_crew --goal "AI trends in 2025"
+super agent run researcher_crew --framework crewai --goal "AI trends in 2025"
 ```
 
 ---
@@ -81,7 +83,7 @@ graph LR
     D -->|run| E[crew.kickoff]
 ```
 
-### 1. **Compile**: SuperSpec → CrewAI
+### **Compile**: SuperSpec → CrewAI
 
 **Input:** SuperSpec playbook (YAML)
 
@@ -112,7 +114,7 @@ crew = Crew(agents=[agent], tasks=[task])
 result = crew.kickoff(inputs={"topic": "AI"})
 ```
 
-### 2. **Evaluate**: Test on BDD Scenarios
+### **Evaluate**: Test on BDD Scenarios
 
 ```python
 scenarios = [
@@ -127,7 +129,7 @@ for scenario in scenarios:
     # Check keywords, validate output
 ```
 
-### 3. **Optimize**: GEPA Optimizes Agent Profile
+### **Optimize**: GEPA Optimizes Agent Profile
 
 **Combined Variable** (what GEPA optimizes):
 
@@ -151,10 +153,10 @@ Goal: Discover, analyze, and synthesize breakthrough AI developments with compre
 Backstory: You're a distinguished researcher with 10+ years of experience in AI research, known for finding authoritative sources, synthesizing complex information, and presenting clear, actionable insights that drive innovation
 ```
 
-### 4. **Run**: Execute with Optimized Profile
+### **Run**: Execute with Optimized Profile
 
 ```bash
-super agent run researcher_crew --goal "AI in 2025"
+super agent run researcher_crew --framework crewai --goal "AI in 2025"
 # Uses optimized role/goal/backstory → Better results!
 ```
 
@@ -288,9 +290,7 @@ llm = LLM(
 )
 ```
 
-**No `bind_tools()` limitations!** ✅
-
-### Recommended Ollama Models
+**No `bind_tools()` limitations!** ### Recommended Ollama Models
 
 | Model | Size | Best For |
 |-------|------|----------|
@@ -333,10 +333,10 @@ super agent evaluate researcher_crew
 🔍 Evaluating researcher_crew...
 Testing 4 BDD scenarios:
 
-✅ AI frameworks research: PASS
-✅ LangChain research: PASS
-✅ Multi-agent systems: PASS
-✅ GEPA optimization: PASS
+AI frameworks research: PASS
+LangChain research: PASS
+Multi-agent systems: PASS
+GEPA optimization: PASS
 
 ============================================================
 Overall: 4/4 PASS (100.0%)
@@ -346,10 +346,10 @@ Overall: 4/4 PASS (100.0%)
 ### Writing Good BDD Scenarios
 
 **Best Practices:**
-- ✅ Use specific, measurable keywords
-- ✅ Test diverse inputs
-- ✅ Include edge cases
-- ✅ Use realistic examples
+- Use specific, measurable keywords
+- Test diverse inputs
+- Include edge cases
+- Use realistic examples
 
 **Example:**
 
@@ -385,7 +385,7 @@ scenarios:
 ### GEPA Optimization Process
 
 ```bash
-super agent optimize researcher_crew --auto medium
+super agent optimize researcher_crew --framework crewai --auto medium
 ```
 
 **What Happens:**
@@ -453,7 +453,7 @@ You can optimize task descriptions along with agent profiles:
 
 ### Common Issues
 
-#### 1. Module 'researcher_crew_pipeline' has no attribute 'ResearcherCrewPipeline'
+#### Module 'researcher_crew_pipeline' has no attribute 'ResearcherCrewPipeline'
 
 **Cause:** Mismatch between agent `id` and class name.
 
@@ -465,7 +465,7 @@ metadata:
   id: researcher_crew
 ```
 
-#### 2. CrewAI Not Installed
+#### CrewAI Not Installed
 
 **Error:** `ImportError: No module named 'crewai'`
 
@@ -475,7 +475,7 @@ metadata:
 pip install crewai
 ```
 
-#### 3. Ollama Model Not Found
+#### Ollama Model Not Found
 
 **Error:** `Model 'gpt-oss:20b' not found`
 
@@ -485,7 +485,7 @@ pip install crewai
 ollama pull gpt-oss:20b
 ```
 
-#### 4. Low Pass Rate
+#### Low Pass Rate
 
 **Cause:** BDD scenarios too strict or agent profile unclear.
 
@@ -500,24 +500,24 @@ ollama pull gpt-oss:20b
 
 | Feature | DSPy | DeepAgents | OpenAI SDK | **CrewAI** |
 |---------|------|------------|-----------|-----------|
-| **Ollama Support** | ✅ | ❌ | ✅ | ✅ |
-| **Multi-Agent** | ❌ | Sub-agents | Handoffs | ✅ Native |
-| **Role-Based** | ❌ | ❌ | ❌ | ✅ |
-| **Collaboration** | ❌ | ❌ | ❌ | ✅ |
+| **Ollama Support** | | | | |
+| **Multi-Agent** | | Sub-agents | Handoffs | Native |
+| **Role-Based** | | | | |
+| **Collaboration** | | | | |
 | **Optimizable Vars** | 10+ | 1 | 1 | **3** |
 | **Best For** | Prompts | Planning | Simple | **Teams** |
 | **Community** | 5K | 1K | 50K+ | **100K+** |
 
 ### When to Use CrewAI
 
-✅ **Best for:**
+**Best for:**
 - Multi-agent collaboration
 - Role-based task distribution
 - Complex crew dynamics
 - Team-based workflows
-- Production systems
+- Deployment systems
 
-❌ **Not ideal for:**
+**Not ideal for:**
 - Simple single-agent tasks (use DSPy or OpenAI SDK)
 - Maximum prompt optimization (use DSPy)
 - Planning-heavy workflows (use DeepAgents)
@@ -597,7 +597,7 @@ persona:
 
 3. **Optimize:**
    ```bash
-   super agent optimize researcher_crew --auto medium
+   super agent optimize researcher_crew --framework crewai --auto medium
    super agent evaluate researcher_crew  # See improvement!
    ```
 
@@ -619,5 +619,4 @@ Need help? We're here for you:
 ---
 
 **Happy Optimizing! 🚀**
-
 

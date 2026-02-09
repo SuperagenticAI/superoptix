@@ -1,0 +1,68 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: adk-rlm
+  id: adk_rlm
+  namespace: demo
+  version: 1.0.0
+  level: oracles
+  description: Google ADK demo with optional RLM assist/replace execution
+  author: SuperOptiX
+  tags:
+    - google-adk
+    - rlm
+    - demo
+
+spec:
+  target_framework: google-adk
+
+  language_model:
+    location: cloud
+    provider: google
+    model: gemini-2.5-flash
+
+  input_fields:
+    - name: query
+      type: str
+      description: User request
+      required: true
+
+  output_fields:
+    - name: answer
+      type: str
+      description: Final response
+      required: true
+
+  persona:
+    name: ADK RLM Assistant
+    role: Senior analysis assistant
+    goal: Provide structured, accurate, and concise answers
+    backstory: >
+      You specialize in complex reasoning tasks and can break down large context
+      into concise, actionable outputs.
+    traits:
+      - analytical
+      - concise
+      - reliable
+    instructions: >
+      Prefer short, structured answers. If assumptions are needed, state them explicitly.
+
+  tasks:
+    - name: analyze_request
+      instruction: Analyze the request and provide the best possible answer.
+
+  google_adk:
+    rlm:
+      enabled: true
+      mode: assist
+      backend: litellm
+      environment: python
+      max_iterations: 6
+      max_depth: 1
+      verbose: false
+      persistent: false
+      task_model: gemini-2.5-flash
+      logger:
+        enabled: false
+        log_dir: .superoptix/logs/rlm
+        file_name: adk_rlm

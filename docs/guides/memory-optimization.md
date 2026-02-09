@@ -502,7 +502,7 @@ spec:
 
 ### Components
 
-#### 1. ContextWindowOptimizer
+#### ContextWindowOptimizer
 
 Main GEPA-based optimizer that orchestrates memory selection:
 
@@ -530,7 +530,7 @@ class ContextWindowOptimizer:
 		...
 ```
 
-#### 2. MemoryRanker
+#### MemoryRanker
 
 Multi-factor ranking with task-specific weights:
 
@@ -553,7 +553,7 @@ class MemoryRanker:
 		...
 ```
 
-#### 3. MemorySummarizer
+#### MemorySummarizer
 
 Compresses memories when budget is tight:
 
@@ -653,7 +653,7 @@ super agent run customer_support_memory --verbose \
    3. Contact preference (score: 0.68)
    ...
 
-✅ Response generated with optimized context!
+Response generated with optimized context!
 ```
 
 ---

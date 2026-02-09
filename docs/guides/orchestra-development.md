@@ -79,7 +79,7 @@ your-project/
 
 ## 🚀 Creating Your First Orchestra
 
-### 1. Create an Orchestra
+### Create an Orchestra
 
 ```bash
 # Create an orchestra with existing agents
@@ -92,7 +92,7 @@ super orchestra create sdlc
 # - Creates workspace directory
 ```
 
-### 2. Orchestra Configuration
+### Orchestra Configuration
 
 The generated orchestra file (`sdlc_orchestra.yaml`):
 
@@ -155,7 +155,7 @@ tasks:
     timeout_seconds: 600
 ```
 
-### 3. Run the Orchestra
+### Run the Orchestra
 
 ```bash
 # Run with a specific goal
@@ -327,7 +327,7 @@ super orchestra run data_analysis --goal "Analyze customer satisfaction survey d
 
 ## 🔧 Customizing Orchestras
 
-### 1. Modify Task Descriptions
+### Modify Task Descriptions
 
 Make task descriptions more specific to your goal:
 
@@ -344,7 +344,7 @@ tasks:
       Use modern security best practices and provide clear documentation.
 ```
 
-### 2. Adjust Task Priorities
+### Adjust Task Priorities
 
 Set task priorities to control execution order:
 
@@ -361,7 +361,7 @@ tasks:
     description: "Add optional UI enhancements"
 ```
 
-### 3. Configure Timeouts
+### Configure Timeouts
 
 Set appropriate timeouts for different task types:
 
@@ -442,7 +442,7 @@ ls -la orchestra_workspaces/your_orchestra/
 
 ## 🎯 Best Practices
 
-### 1. Agent Preparation
+### Agent Preparation
 
 Before running orchestras, ensure your agents are optimized:
 
@@ -466,7 +466,7 @@ super agent evaluate devops_engineer
 super agent evaluate qa_engineer
 ```
 
-### 2. Goal Definition
+### Goal Definition
 
 Write clear, specific goals for better orchestration results:
 
@@ -478,7 +478,7 @@ super orchestra run sdlc --goal "Build a secure user authentication system with 
 super orchestra run sdlc --goal "Make a login system"
 ```
 
-### 3. Task Dependencies
+### Task Dependencies
 
 Design logical task dependencies:
 
@@ -499,7 +499,7 @@ tasks:
     context: ["design_architecture"]  # Depends on architecture
 ```
 
-### 4. Error Handling
+### Error Handling
 
 Monitor orchestra execution and handle failures:
 

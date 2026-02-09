@@ -2,7 +2,9 @@
 
 **SuperOptiX now supports OpenAI Agents SDK - a lightweight, provider-agnostic framework that works PERFECTLY with Ollama!**
 
-✅ **Works great with FREE Ollama (No API Keys Needed!)**
+**Works great with FREE Ollama (No API Keys Needed!)**
+
+RLM support is experimental. Unified sandbox support is coming soon.
 
 > **Hands-on demo:** Clone the MIT-licensed companion repo [`superoptix-lite-openai`](https://github.com/SuperagenticAI/superoptix-lite-openai) to try the OpenAI Agents SDK with SuperOptiX Lite right away. The Code Reviewer example in that project mirrors this guide step by step.
 
@@ -17,7 +19,7 @@ OpenAI Agents SDK is a lightweight yet powerful framework for building multi-age
 - 🛡️ **Guardrails**: Input/output validation
 - 💾 **Sessions**: Automatic conversation history
 - 📊 **Tracing**: Built-in execution tracking
-- ✅ **Works with Ollama!**: Unlike DeepAgents, no function-calling limitations
+- **Works with Ollama!**: Unlike DeepAgents, no function-calling limitations
 
 Perfect for simple to moderate complexity tasks with local models!
 
@@ -42,16 +44,16 @@ pip install superoptix[frameworks-openai]
 
 ## 🚀 Quick Start
 
-### 1. Pull the Demo Agent
+### Pull the Demo Agent
 
 ```bash
 cd your_project
 super agent pull assistant_openai
 ```
 
-### 2. Configure Model
+### Configure Model
 
-**✅ Uses Ollama by Default!** (FREE, no API keys needed!)
+**Uses Ollama by Default!** (FREE, no API keys needed!)
 
 The `assistant_openai` agent now defaults to Ollama `llama3.1:8b`:
 
@@ -68,7 +70,7 @@ language_model:
 ```bash
 brew install ollama  # macOS
 ollama pull llama3.1:8b
-super agent run assistant_openai --goal "Hello!"
+super agent run assistant_openai --framework openai --goal "Hello!"
 ```
 
 **Also Works With Cloud Models** (requires API key):
@@ -88,7 +90,7 @@ language_model:
   # Set: export ANTHROPIC_API_KEY="sk-ant-..."
 ```
 
-### 3. Run the Workflow
+### Run the Workflow
 
 ```bash
 # Compile
@@ -101,7 +103,7 @@ super agent evaluate assistant_openai
 super agent optimize assistant_openai --auto medium --framework openai --reflection-lm ollama:llama3.1:8b
 
 # Run
-super agent run assistant_openai --goal "What is Python?"
+super agent run assistant_openai --framework openai --goal "What is Python?"
 ```
 
 ---
@@ -129,11 +131,11 @@ python optimize_cloud.py    # GEPA optimization with cloud models
 ```
 
 **Features:**
-- ✅ Auto-detects cloud provider from API key
-- ✅ Uses latest models (gpt-5, claude-sonnet-4.5, gemini-pro-2.5)
-- ✅ Separate scripts for local vs cloud (no complex switching)
-- ✅ Includes cost warnings (optimization uses APIs)
-- ✅ .env file support for API keys
+- Auto-detects cloud provider from API key
+- Uses latest models (gpt-5, claude-sonnet-4.5, gemini-pro-2.5)
+- Separate scripts for local vs cloud (no complex switching)
+- Includes cost warnings (optimization uses APIs)
+- .env file support for API keys
 
 See the [repo README](https://github.com/SuperagenticAI/superoptix-lite-openai) for complete documentation.
 
@@ -251,11 +253,11 @@ super agent evaluate assistant_openai
 🔍 Evaluating assistant_openai...
 Testing 4 BDD scenarios:
 
-✅ OpenAI Agents SDK initialized with Ollama: gpt-oss:20b
-✅ Simple greeting: PASS
-✅ Question answering: PASS
-✅ Explanation request: PASS
-✅ Math question: PASS
+OpenAI Agents SDK initialized with Ollama: gpt-oss:20b
+Simple greeting: PASS
+Question answering: PASS
+Explanation request: PASS
+Math question: PASS
 
 Overall: 4/4 PASS (100.0%)
 ```
@@ -286,7 +288,7 @@ See if GEPA improved the pass rate!
 ### Step 7: Run
 
 ```bash
-super agent run assistant_openai --goal "Explain quantum computing"
+super agent run assistant_openai --framework openai --goal "Explain quantum computing"
 ```
 
 ---
@@ -373,7 +375,7 @@ class AssistantOpenAiPipeline:
 
 | Feature | DSPy | DeepAgents | OpenAI SDK |
 |---------|------|------------|------------|
-| **Ollama Support** | ✅ Full | ❌ Blocked | ✅ Perfect |
+| **Ollama Support** | Full | Blocked | Perfect |
 | **Baseline Performance** | Good | N/A | Excellent |
 | **API Complexity** | Medium | High | Low |
 | **Planning** | Manual | Built-in | Manual |
@@ -383,14 +385,14 @@ class AssistantOpenAiPipeline:
 
 ### When to Use OpenAI SDK
 
-✅ **Perfect for:**
+**Perfect for:**
 - Simple to moderate complexity tasks
 - Local development with Ollama
 - Quick prototyping
 - Clean, minimal agent design
 - When you want high baseline performance
 
-❌ **Not ideal for:**
+**Not ideal for:**
 - Complex multi-step planning (use DeepAgents)
 - Maximum prompt optimization (use DSPy)
 - Need filesystem context management (use DeepAgents)
@@ -505,9 +507,9 @@ guardrails:
 **Symptom:** Agent returns empty response
 
 **Checklist:**
-1. ✅ Ollama running? (`curl http://localhost:11434/api/tags`)
-2. ✅ Model downloaded? (`ollama list`)
-3. ✅ Correct model string? (`ollama:gpt-oss:20b`)
+1. Ollama running? (`curl http://localhost:11434/api/tags`)
+2. Model downloaded? (`ollama list`)
+3. Correct model string? (`ollama:gpt-oss:20b`)
 
 ### Low Pass Rate
 
@@ -644,10 +646,10 @@ language_model:
 ```
 
 **Advantages:**
-- ✅ Free inference
-- ✅ Privacy (data stays local)
-- ✅ Fast development iteration
-- ✅ Good baseline performance
+- Free inference
+- Privacy (data stays local)
+- Fast development iteration
+- Good baseline performance
 
 **Supported Ollama Models:**
 - `ollama:llama3.1:8b` (default, fast and efficient)
@@ -671,22 +673,22 @@ Set API key: `export OPENAI_API_KEY=your_key`
 ## 🎓 Comparison with Other Frameworks
 
 ### OpenAI SDK Advantages
-- ✅ **Ollama compatibility** (unlike DeepAgents)
-- ✅ **Good baseline performance**
-- ✅ **Simple, clean API**
-- ✅ **Built-in tracing and sessions**
-- ✅ **Fast compilation and execution**
+- **Ollama compatibility** (unlike DeepAgents)
+- **Good baseline performance**
+- **Simple, clean API**
+- **Built-in tracing and sessions**
+- **Fast compilation and execution**
 
 ### DSPy Advantages
-- ✅ **Maximum optimization** (all signatures)
-- ✅ **More optimization targets**
-- ✅ **Better for focused tasks**
+- **Maximum optimization** (all signatures)
+- **More optimization targets**
+- **Better for focused tasks**
 
 ### DeepAgents Advantages
-- ✅ **Built-in planning** (write_todos)
-- ✅ **Filesystem context** management
-- ✅ **Subagent spawning**
-- ❌ **Requires Claude/GPT-4** (no Ollama)
+- **Built-in planning** (write_todos)
+- **Filesystem context** management
+- **Subagent spawning**
+- **Requires Claude/GPT-4** (no Ollama)
 
 ### Use Them Together!
 
@@ -759,9 +761,9 @@ spec:
 
 | Framework | Local Models (Ollama) | Cloud Models | Optimization Targets |
 |-----------|----------------------|--------------|---------------------|
-| **OpenAI SDK** | ✅ Full support | ✅ Yes | Instructions only |
-| **DSPy** | ✅ Full support | ✅ Yes | Multiple signatures |
-| **DeepAgents** | ❌ Limited* | ✅ Yes | System prompt |
+| **OpenAI SDK** | Full support | Yes | Instructions only |
+| **DSPy** | Full support | Yes | Multiple signatures |
+| **DeepAgents** | Limited* | Yes | System prompt |
 
 *DeepAgents has LangChain function-calling limitations with local models
 
@@ -878,12 +880,12 @@ SuperOptiX allows you to write your agent specification once and compile to any 
 
 ```bash
 # Same playbook, different frameworks
-super agent compile my_agent --framework dspy
 super agent compile my_agent --framework openai
+super agent compile my_agent --framework crewai
 super agent compile my_agent --framework deepagents
 
 # GEPA optimization works across all frameworks
-super agent optimize my_agent --auto medium
+super agent optimize my_agent --framework <framework> --auto medium
 ```
 
 ### When to Use Each Framework
@@ -910,13 +912,13 @@ super agent optimize my_agent --auto medium
 
 ## 💡 Tips & Best Practices
 
-### 1. Start with OpenAI SDK for Prototyping
+### Start with OpenAI SDK for Prototyping
 - Fast compilation
 - Simple design
 - Works with Ollama
 - High baseline performance
 
-### 2. Use Clear Instructions
+### Use Clear Instructions
 ```yaml
 persona:
   role: Expert Assistant
@@ -924,7 +926,7 @@ persona:
   # Be specific about what the agent should do
 ```
 
-### 3. Realistic BDD Scenarios
+### Realistic BDD Scenarios
 ```yaml
 scenarios:
   - name: Specific test case
@@ -936,7 +938,7 @@ scenarios:
         - keyword2
 ```
 
-### 4. Iterate and Optimize
+### Iterate and Optimize
 1. Get baseline working
 2. Add more scenarios
 3. Run GEPA optimization
@@ -982,12 +984,12 @@ A: Performance varies by use case, model, and hardware. OpenAI SDK typically has
 ## 🌐 Multi-Framework Summary
 
 **SuperOptiX supports 6 agent frameworks:**
-1. ✅ DSPy (maximum optimization, Ollama compatible)
-2. ✅ OpenAI SDK (simple API, excellent Ollama support)
-3. ✅ CrewAI (multi-agent teams, role-based collaboration)
-4. ✅ Google ADK (Gemini integration)
-5. ✅ Microsoft (Azure OpenAI, enterprise)
-6. ✅ DeepAgents (complex planning, Claude/GPT-4)
+1. DSPy (maximum optimization, Ollama compatible)
+2. OpenAI SDK (simple API, excellent Ollama support)
+3. CrewAI (multi-agent teams, role-based collaboration)
+4. Google ADK (Gemini integration)
+5. Microsoft (Azure OpenAI, enterprise)
+6. DeepAgents (complex planning, Claude/GPT-4)
 
 **All frameworks share:**
 - Same SuperSpec YAML format
@@ -1008,7 +1010,7 @@ Ready to try OpenAI SDK with SuperOptiX?
 super agent pull assistant_openai
 
 # Start with Ollama (free, local)
-super agent run assistant_openai --goal "Hello!"
+super agent run assistant_openai --framework openai --goal "Hello!"
 ```
 
 ---
@@ -1021,11 +1023,11 @@ Want to build your own custom agent with native OpenAI SDK patterns and optimize
 
 This comprehensive step-by-step tutorial teaches you how to:
 
-✅ Write agents using **official OpenAI Agents SDK patterns** (Agent, Runner, OpenAIChatCompletionsModel)
-✅ Integrate your native SDK code with **SuperOptiX** for GEPA compatibility
-✅ Define **BDD test scenarios** for measurable evaluation metrics
-✅ Run **GEPA optimization** to automatically improve agent prompts
-✅ Implement **automatic optimization loading** for production deployment
+Write agents using **official OpenAI Agents SDK patterns** (Agent, Runner, OpenAIChatCompletionsModel)
+Integrate your native SDK code with **SuperOptiX** for GEPA compatibility
+Define **BDD test scenarios** for measurable evaluation metrics
+Run **GEPA optimization** to automatically improve agent prompts
+Implement **automatic optimization loading** for deployment deployment
 
 **Example project:** Code Reviewer Agent that detects security vulnerabilities
 **Hands-on repo:** [`superoptix-lite-openai`](https://github.com/SuperagenticAI/superoptix-lite-openai) — clone it to follow the tutorial with a fully wired SuperOptiX Lite playground.
@@ -1033,5 +1035,3 @@ This comprehensive step-by-step tutorial teaches you how to:
 **Time:** 30-45 minutes | **Difficulty:** Intermediate | **Prerequisites:** Python, Ollama, Git access to the repo above
 
 👉 **[Start the tutorial now](../tutorials/openai-sdk-gepa-optimization.md)**
-
-

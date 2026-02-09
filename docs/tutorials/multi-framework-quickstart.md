@@ -19,10 +19,10 @@ Choose from DSPy, OpenAI SDK, CrewAI, Google ADK, Microsoft, or DeepAgents
 !!! success "Learning Outcomes"
     By the end of this guide, you'll have:
 
-    - ✅ A fully functional AI agent in your chosen framework
-    - ✅ Automated evaluation with RSpec-style BDD scenarios
-    - ✅ GEPA optimization with proven improvements
-    - ✅ Production-ready agent deployment
+    - A fully functional AI agent in your chosen framework
+    - Automated evaluation with RSpec-style BDD scenarios
+    - GEPA optimization with proven improvements
+    - Production-ready agent deployment
 
 ## 📋 Requirements
 
@@ -66,11 +66,11 @@ Choose from DSPy, OpenAI SDK, CrewAI, Google ADK, Microsoft, or DeepAgents
 !!! tip "Framework-Free Core"
     SuperOptiX core is now **framework-independent**! Install only what you need.
 
-**Choose your framework(s) and install SuperOptiX:**
+**Choose your framework(s) and install SuperOptiX with `uv tool install`:**
 
 === "Core Only (Includes DSPy)"
     ```bash
-    pip install superoptix
+    uv tool install superoptix
     ```
     **Includes:** CLI tools, SuperSpec DSL, YAML processing, DSPy
     
@@ -78,7 +78,7 @@ Choose from DSPy, OpenAI SDK, CrewAI, Google ADK, Microsoft, or DeepAgents
 
 === "DSPy Framework"
     ```bash
-    pip install superoptix[frameworks-dspy]
+    uv tool install superoptix --with "superoptix[frameworks-dspy]"
     ```
     **Includes:** SuperOptiX core + DSPy + GEPA
     
@@ -86,13 +86,13 @@ Choose from DSPy, OpenAI SDK, CrewAI, Google ADK, Microsoft, or DeepAgents
 
 === "OpenAI Agents SDK"
     ```bash
-    pip install superoptix[frameworks-openai]
+    uv tool install superoptix --with "superoptix[frameworks-openai]"
     ```
     **Includes:** openai-agents, openai SDK
 
 === "Google ADK"
     ```bash
-    pip install superoptix[frameworks-google]
+    uv tool install superoptix --with "superoptix[frameworks-google]"
     ```
     **Includes:** google-adk, google-generativeai
     
@@ -101,21 +101,34 @@ Choose from DSPy, OpenAI SDK, CrewAI, Google ADK, Microsoft, or DeepAgents
     export GOOGLE_API_KEY=your-google-api-key
     ```
 
+=== "Claude Agent SDK"
+    ```bash
+    uv tool install superoptix --with "superoptix[frameworks-claude-sdk]"
+    ```
+    **Includes:** claude-agent-sdk
+
+    **Setup API Key:**
+    ```bash
+    export ANTHROPIC_API_KEY=your-anthropic-api-key
+    ```
+
 === "Microsoft Agent Framework"
     ```bash
-    pip install superoptix[frameworks-microsoft]
+    uv tool install superoptix --with "superoptix[frameworks-microsoft]"
     ```
     **Includes:** agent-framework, azure-identity
+    
+    **Note:** This integration is maintained as legacy support.
 
 === "DeepAgents"
     ```bash
-    pip install superoptix[frameworks-deepagents]
+    uv tool install superoptix --with "superoptix[frameworks-deepagents]"
     ```
     **Includes:** deepagents
 
 === "CrewAI"
     ```bash
-    pip install superoptix[frameworks-crewai]
+    uv tool install superoptix --with "superoptix[frameworks-crewai]"
     ```
     **Includes:** crewai
     
@@ -123,21 +136,21 @@ Choose from DSPy, OpenAI SDK, CrewAI, Google ADK, Microsoft, or DeepAgents
 
 === "All DSPy-Compatible Frameworks"
     ```bash
-    pip install superoptix[frameworks]
+    uv tool install superoptix --with "superoptix[frameworks]"
     ```
-    **Includes:** DSPy, OpenAI SDK, Google ADK, Microsoft, DeepAgents
+    **Includes:** DSPy, OpenAI SDK, Claude SDK, Google ADK, Microsoft, DeepAgents
     
     **Excludes:** CrewAI (due to DSPy conflict)
 
 === "With MCP Optimization"
     ```bash
-    pip install superoptix[frameworks,mcp]
+    uv tool install superoptix --with "superoptix[frameworks,mcp]"
     ```
     **Includes:** DSPy-compatible frameworks + MCP SDK
 
 === "Everything (DSPy path)"
     ```bash
-    pip install superoptix[all]
+    uv tool install superoptix --with "superoptix[all]"
     ```
     **Includes:** DSPy + compatible frameworks + vector DBs + observability
     
@@ -299,10 +312,10 @@ super agent evaluate sentiment_analyzer
 ### 🌟 The Universal Optimizer
 
 !!! success "Framework Support"
-    - ✅ Works on **ALL frameworks** (DSPy, OpenAI SDK, CrewAI, Google ADK, Microsoft, DeepAgents)
-    - ✅ Proven optimization results across frameworks
-    - ✅ Sample efficient: Works with minimal training scenarios
-    - ✅ Framework-agnostic: Same command for all frameworks!
+    - Works on **ALL frameworks** (DSPy, OpenAI SDK, CrewAI, Google ADK, Microsoft, DeepAgents)
+    - Proven optimization results across frameworks
+    - Sample efficient: Works with minimal training scenarios
+    - Framework-agnostic: Same command for all frameworks!
 
 ```bash
 # GEPA works on ALL frameworks! Same command!
@@ -486,20 +499,19 @@ super agent run sentiment_analyzer \
 
 ---
 
-## ✅ Summary
+## Summary
 
 !!! success "What You've Accomplished"
 
     | Skill | Status |
     |-------|--------|
-    | Install SuperOptiX | ✅ Complete |
-    | Initialize a project | ✅ Complete |
-    | Choose from multiple frameworks | ✅ Complete |
-    | Compile agents | ✅ Complete |
-    | Evaluate performance | ✅ Complete |
-    | Optimize with GEPA | ✅ Complete |
-    | Deploy to production | ✅ Complete |
+    | Install SuperOptiX | Complete |
+    | Initialize a project | Complete |
+    | Choose from multiple frameworks | Complete |
+    | Compile agents | Complete |
+    | Evaluate performance | Complete |
+    | Optimize with GEPA | Complete |
+    | Deploy to production | Complete |
 
 !!! note "Ready to Build More?"
     Check out our [Guides](../guides/index.md) for in-depth tutorials!
-

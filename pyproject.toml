@@ -7,7 +7,7 @@ allow-direct-references = true
 
 [project]
 name = "superoptix"
-version = "0.2.3"
+version = "0.2.4"
 description = "Full Stack Agentic AI Optimization Framework - Universal GEPA optimizer for major frameworks"
 authors = [
     {name = "Superagentic AI", email = "hello@super-agentic.ai"},
@@ -146,6 +146,11 @@ logfire = [
 # ============================================================================
 # EXISTING OPTIONAL DEPENDENCIES
 # ============================================================================
+
+# Connector integrations
+connectors-stackone = [
+    "stackone-ai[mcp]",
+]
 
 # Note: CrewAI has known dependency conflicts with dspy due to json-repair version requirements.
 # See optimas-crewai section below for manual installation instructions.
@@ -526,6 +531,7 @@ markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: marks tests as integration tests",
     "unit: marks tests as unit tests",
+    "asyncio: marks async tests",
 ]
 
 [tool.coverage.run]

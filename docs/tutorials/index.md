@@ -9,13 +9,13 @@ Welcome to the SuperOptiX tutorials! These step-by-step guides will take you fro
 
 ## 🚀 Getting Started Tutorials
 
-### 1. 🎯 [Create Your First Genies Agent](genies-agent)
+### 🎯 [Quick Start Workflow](../quick-start)
 
-**Perfect for beginners!** Build your first Genies-tier AI agent with tools and RAG capabilities.
+**Perfect for beginners.** Build your first agent and run compile/evaluate/optimize.
 
 **What you'll learn:**
 - Initialize a SuperOptiX project
-- Generate a Genies-tier developer agent with RAG & tools
+- Pull and compile an agent
 - Compile and understand the agent pipeline
 - Set up for evaluation and optimization
 
@@ -23,9 +23,9 @@ Welcome to the SuperOptiX tutorials! These step-by-step guides will take you fro
 **Difficulty:** Beginner  
 **Prerequisites:** None
 
-### 2. 🔧 [OpenAI SDK + GEPA Optimization](openai-sdk-gepa-optimization)
+### 🔧 [OpenAI SDK + GEPA Optimization](openai-sdk-gepa-optimization)
 
-**Build custom agents with native OpenAI SDK!** Create a production-ready code reviewer using official OpenAI Agents SDK patterns and optimize it with GEPA.
+**Build custom agents with native OpenAI SDK.** Create a code reviewer using official OpenAI Agents SDK patterns and optimize it with GEPA.
 
 **What you'll learn:**
 - Write agents using official OpenAI SDK patterns
@@ -38,7 +38,7 @@ Welcome to the SuperOptiX tutorials! These step-by-step guides will take you fro
 **Difficulty:** Intermediate
 **Prerequisites:** Basic Python, Ollama installed
 
-### 3. 🎭 [Multi-Agent Orchestra](first-orchestra)
+### 🎭 [Multi-Agent Orchestra](first-orchestra)
 
 **Advanced tutorial** - Coordinate multiple agents to solve complex problems.
 
@@ -46,7 +46,7 @@ Welcome to the SuperOptiX tutorials! These step-by-step guides will take you fro
 - Design multi-agent workflows
 - Implement agent communication
 - Handle complex orchestration scenarios
-- Deploy production-ready systems
+- Deploy real-world systems
 
 **Time:** 30-45 minutes
 **Difficulty:** Advanced
@@ -64,13 +64,13 @@ Before starting the tutorials, ensure you have:
 ## 🛠️ What You'll Build
 
 ### Tutorial 1: Genies Agent
-- A Genies-tier developer agent
+- A developer agent
 - Tool calling capabilities (web search, calculator, file operations)
 - RAG system integration
 - Memory and observability features
 
 ### Tutorial 2: OpenAI SDK Code Reviewer
-- Production-ready code reviewer agent
+- Code reviewer agent
 - Native OpenAI Agents SDK implementation
 - GEPA-optimized prompts (75% → 100% pass rate)
 - BDD test scenarios for validation
@@ -96,4 +96,4 @@ After completing the tutorials, explore:
 
 ---
 
-Ready to build your first AI agent? Start with the [Genies Agent Tutorial](genies-agent) 🚀 
+Ready to build your first AI agent? Start with the [Quick Start](../quick-start) 🚀

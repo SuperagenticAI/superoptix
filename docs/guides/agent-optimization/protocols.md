@@ -55,7 +55,7 @@ Protocol optimization is the process of improving how agents use **standardized 
 
 ## What GEPA Optimizes in MCP
 
-### 1. Protocol Tool Selection
+### Protocol Tool Selection
 
 **What It Is**: Learning when to use MCP tools vs. built-in tools
 
@@ -101,7 +101,7 @@ Learned Strategies:
 
 ---
 
-### 2. Protocol Invocation Patterns
+### Protocol Invocation Patterns
 
 **What It Is**: Learning how to structure and sequence protocol calls
 
@@ -132,7 +132,7 @@ Learned Patterns:
 
 ---
 
-### 3. Multi-Protocol Orchestration
+### Multi-Protocol Orchestration
 
 **What It Is**: Learning to coordinate multiple MCP servers
 
@@ -164,7 +164,7 @@ Result: Comprehensive review with version control context
 
 ---
 
-### 4. Error Handling and Fallbacks
+### Error Handling and Fallbacks
 
 **What It Is**: Learning how to handle protocol failures
 
@@ -289,7 +289,7 @@ Tool Selection: mcp-server-filesystem
 
 ## Best Practices
 
-### 1. Configure Both MCP and Built-in Tools
+### Configure Both MCP and Built-in Tools
 
 ```yaml
 tools:
@@ -311,7 +311,7 @@ tools:
 
 GEPA learns when to use each type.
 
-### 2. Define Protocol-Aware RSpec-Style BDD Scenarios
+### Define Protocol-Aware RSpec-Style BDD Scenarios
 
 ```yaml
 feature_specifications:
@@ -324,7 +324,7 @@ feature_specifications:
         result: Must use MCP github tool (not built-in)
 ```
 
-### 3. Enable Error Recovery
+### Enable Error Recovery
 
 ```yaml
 tools:
@@ -335,7 +335,7 @@ tools:
 
 GEPA optimizes retry and fallback strategies.
 
-### 4. Monitor Protocol Performance
+### Monitor Protocol Performance
 
 ```yaml
 observability:
@@ -478,7 +478,7 @@ GEPA learns which server for which operation.
 
 ## What GEPA Optimizes
 
-### 1. Tool Source Selection (MCP vs. Built-in)
+### Tool Source Selection (MCP vs. Built-in)
 
 **What GEPA Learns**:
 - When MCP tools provide value over built-in
@@ -506,7 +506,7 @@ Learned Decision Tree:
 
 ---
 
-### 2. Protocol Call Optimization
+### Protocol Call Optimization
 
 **What GEPA Learns**:
 - Optimal parameter structuring
@@ -535,7 +535,7 @@ Result: 5x faster for multi-call scenarios
 
 ---
 
-### 3. Error Handling Patterns
+### Error Handling Patterns
 
 **What GEPA Learns**:
 - MCP-specific error types

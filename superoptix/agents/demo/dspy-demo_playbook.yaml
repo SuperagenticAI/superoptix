@@ -1,0 +1,207 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: DSPy Automation Demo Agent
+  id: dspy-demo
+  namespace: demo
+  version: 1.0.0
+  level: oracles
+  description: End-to-end DSPy automation demo covering module selection, per-module adapter overrides, tools, RLM config, and GEPA.
+  author: SuperOptiX
+  tags:
+    - dspy
+    - automation
+    - adapters
+    - tools
+    - rlm
+    - gepa
+    - demo
+
+spec:
+  target_framework: dspy
+
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    temperature: 0.2
+    max_tokens: 1800
+
+  # SuperSpec -> DSPy automation block
+  dspy:
+    # Default program module for this demo run.
+    module: react
+    module_params:
+      max_iterations: 4
+      parallel_workers: 2
+
+    # Global adapter defaults (runner chooses via mode=auto heuristics).
+    adapter:
+      mode: auto
+      strict: false
+      retry_on_parse_error: 1
+      fallback_adapter: chat
+      native_function_calling: false
+
+    # Signature output behavior: keep simple by default, opt into structured when needed.
+    signature:
+      output_mode: structured
+
+    # Assertion guardrails applied post-prediction by SuperOptiX runner.
+    assertions:
+      enabled: true
+      mode: warn_only
+      metric_weight: 0.35
+      required_fields:
+        - plan
+        - risks
+      non_empty:
+        - plan
+        - risks
+      max_length:
+        plan: 4000
+
+    # Per-module overrides (demonstrates fine-grained adapter control).
+    modules:
+      - name: react
+        adapter:
+          mode: manual
+          type: chat
+          native_function_calling: true
+      - name: chain_of_thought
+        adapter:
+          mode: manual
+          type: json
+          strict: true
+          retry_on_parse_error: 2
+          fallback_adapter: chat
+
+    # Builtin tool loading path.
+    tools:
+      mode: builtin
+      builtin_tools:
+        - calculator
+        - text_analyzer
+        - json_processor
+
+    # RLM settings are configured here but not active unless module=rlm.
+    rlm:
+      enabled: false
+      max_iterations: 8
+      max_llm_calls: 6
+
+    # GEPA automation settings used when compiling/running with --optimize.
+    gepa:
+      enabled: true
+      auto: light
+      task_model: ollama/llama3.1:8b
+      reflection_lm: ollama/llama3.1:8b
+      candidate_selection_strategy: pareto
+      reflection_minibatch_size: 3
+      skip_perfect_score: true
+      use_merge: true
+      max_merge_invocations: 3
+      max_full_evals: 8
+      track_stats: true
+      seed: 7
+
+  persona:
+    name: DSPy Workflow Architect
+    role: AI Systems Engineer
+    goal: Produce reliable, structured, and tool-assisted outputs while clearly reasoning through tradeoffs.
+    backstory: You design production AI workflows that balance readability, debuggability, and execution quality.
+    traits:
+      - analytical
+      - practical
+      - systematic
+      - concise
+    instructions: |
+      Use tools only when they materially improve accuracy.
+      Keep outputs structured and directly actionable.
+      If assumptions are made, state them clearly.
+
+  # Unified RAG config (runner-managed, no template bloat).
+  rag:
+    enabled: true
+    retriever_type: chroma
+    top_k: 3
+    vector_store:
+      collection_name: dspy_demo_docs
+      persist_directory: .superoptix/chromadb
+
+  input_fields:
+    - name: request
+      type: str
+      description: User request requiring analysis and an action plan
+      required: true
+
+  output_fields:
+    - name: plan
+      type: str
+      description: Structured plan with rationale and execution steps
+      required: true
+    - name: risks
+      type: list[str]
+      description: Key risks, caveats, and mitigations as a JSON array
+      required: true
+    - name: confidence
+      type: dict[str, float]
+      description: Confidence scores by category as a JSON object
+      required: true
+
+  tasks:
+    - name: design_solution
+      instruction: |
+        Analyze the request and produce:
+        1) A concise implementation plan,
+        2) A risk register with mitigations,
+        3) Optional calculations or parsing via tools if useful.
+      inputs:
+        - name: request
+          type: str
+          description: Problem statement and context
+          required: true
+      outputs:
+        - name: plan
+          type: str
+          description: Implementation plan with steps
+        - name: risks
+          type: list[str]
+          description: Risks and mitigations as list
+        - name: confidence
+          type: dict[str, float]
+          description: Confidence scores by category
+
+  constraints:
+    - Do not invent unavailable system capabilities
+    - Keep recommendations actionable and testable
+    - State assumptions explicitly
+
+  feature_specifications:
+    scenarios:
+      - name: architecture_request
+        description: Agent should provide a practical rollout plan and explicit risks.
+        input:
+          request: |
+            Build a migration plan from a monolith to services in 3 phases, with low operational risk.
+        expected_output:
+          expected_keywords:
+            - phase
+            - rollout
+            - risk
+            - mitigation
+            - observability
+
+# Usage:
+#   super agent pull dspy-demo
+#   super agent compile dspy-demo
+#   super agent run dspy-demo --goal "Design a migration strategy"
+#
+# Switch modules in this file to test adapter overrides:
+#   dspy.module: chain_of_thought | react | rlm | predict | program_of_thought | parallel
+#
+# Optional cloud run:
+#   super agent compile dspy-demo --cloud --provider google-genai --model gemini-2.5-flash
+#
+# Local explicit:
+#   super agent compile dspy-demo --local --provider ollama --model llama3.1:8b

@@ -95,7 +95,7 @@ super init mlflow_demo
 cd mlflow_demo
 
 # Pull and compile agent
-super agent pull developer --tier genies
+super agent pull developer
 super agent compile developer
 
 # Run with MLFlow tracking

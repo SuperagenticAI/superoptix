@@ -83,7 +83,7 @@ tools:
 
 **Key Tools Configuration Points**:
 
-- ✅ **`enabled: true`**: Enables tool functionality
+- **`enabled: true`**: Enables tool functionality
 - 📂 **`categories`**: Tool categories to include
 - 🔧 **`specific_tools`**: Individual tools to enable
 - 🏷️ **Tool Categories**: development, core, utilities, education, finance, health, marketing, research

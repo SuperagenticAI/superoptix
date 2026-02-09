@@ -82,7 +82,7 @@ evals/      knowledge/  optimizers/ servers/    tools/
 
 - **👥 `teams/`** - Multi-agent team configurations.
 
-- **✅ `evals/`** - Evaluation scenarios and test cases.
+- **`evals/`** - Evaluation scenarios and test cases.
 
 - **📚 `knowledge/`** - Knowledge bases and data sources.
 
@@ -121,13 +121,13 @@ pip install "superoptix[observability]"
 
 **To use CrewAI with SuperOptiX, install it manually:**
 ```bash
-# 1. Install SuperOptiX with DSPy support
+# Install SuperOptiX with DSPy support
 pip install "superoptix[optimas]"
 
-# 2. Install CrewAI without dependencies
+# Install CrewAI without dependencies
 pip install crewai==0.157.0 --no-deps
 
-# 3. Ensure compatible json-repair version
+# Ensure compatible json-repair version
 pip install "json-repair>=0.30.0"
 ```
 

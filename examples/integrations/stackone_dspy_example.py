@@ -38,9 +38,7 @@ def stackone_dspy_integration():
     account_id = os.getenv("STACKONE_ACCOUNT_ID", "test_account")
     print(f"Fetching tools for account: {account_id}")
 
-    tools = toolset.fetch_tools(
-        include_tools=["hris_get_employee"], account_ids=[account_id]
-    )
+    tools = toolset.fetch_tools(actions=["hris_get_employee"], account_ids=[account_id])
 
     # 3. Use SuperOptiX Bridge to convert to DSPy
     bridge = StackOneBridge(tools)

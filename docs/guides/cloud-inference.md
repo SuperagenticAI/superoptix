@@ -340,7 +340,7 @@ spec:
 
 ## 🎯 **Best Practices for Cloud Inference**
 
-### **✅ DO's**
+### **DO's**
 
 #### **1. Start Small and Scale Up**
 
@@ -393,15 +393,15 @@ super agent inspect your_agent --show-usage
 export OPENAI_USAGE_ALERT=5   # Alert at $5
 ```
 
-### **❌ DON'Ts**
+### **DON'Ts**
 
 #### **1. Don't Skip Cost Monitoring**
 
 ```bash
-# ❌ Bad: No monitoring
+# Bad: No monitoring
 super agent optimize expensive_agent
 
-# ✅ Good: Monitor first
+# Good: Monitor first
 super agent inspect expensive_agent --show-usage
 super agent optimize expensive_agent --max-iterations 5
 ```
@@ -409,13 +409,13 @@ super agent optimize expensive_agent --max-iterations 5
 #### **2. Don't Use Expensive Models for Development**
 
 ```yaml
-# ❌ Bad: Expensive for development
+# Bad: Expensive for development
 spec:
   language_model:
     provider: openai
     model: gpt-4o  # Expensive
 
-# ✅ Good: Cost-effective for development
+# Good: Cost-effective for development
 spec:
   language_model:
     provider: openai
@@ -425,13 +425,13 @@ spec:
 #### **3. Don't Ignore Rate Limits**
 
 ```yaml
-# ❌ Bad: No rate limiting
+# Bad: No rate limiting
 spec:
   language_model:
     provider: openai
     model: gpt-4o
 
-# ✅ Good: Proper rate limiting
+# Good: Proper rate limiting
 spec:
   language_model:
     provider: openai
@@ -529,17 +529,17 @@ super agent inspect your_agent --show-traces
 ### **Cost-Effective Workflow**
 
 ```bash
-# 1. Development (Cheap)
+# Development (Cheap)
 super spec generate oracle dev_agent
 # Use gpt-4o-mini or gemini-pro
 
-# 2. Testing (Balanced)
+# Testing (Balanced)
 # Switch to gpt-4o or claude-3-sonnet
 
-# 3. Production (Best)
+# Production (Best)
 # Use gpt-4o or claude-3-opus with caching
 
-# 4. Monitor (Always)
+# Monitor (Always)
 super observability dashboard
 ```
 

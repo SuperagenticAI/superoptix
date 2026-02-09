@@ -5,11 +5,11 @@
 SuperOptiX supports **combined agent + task optimization** for CrewAI. GEPA optimizes both the agent profile AND task configuration together for maximum agent-task alignment.
 
 **Key Features:**
-- ✅ Combined optimization: agent profile + task configuration
-- ✅ Better agent-task alignment
-- ✅ Improved performance over agent-only optimization
-- ✅ Automatic parsing and extraction
-- ✅ Single optimization variable for holistic improvement
+- Combined optimization: agent profile + task configuration
+- Better agent-task alignment
+- Improved performance over agent-only optimization
+- Automatic parsing and extraction
+- Single optimization variable for holistic improvement
 
 ---
 
@@ -35,12 +35,12 @@ pip install superoptix[frameworks-crewai]
 
 GEPA optimizes a **single combined variable** containing:
 
-#### 1. Agent Profile
+#### Agent Profile
 - **role**: Agent's identity and expertise
 - **goal**: Agent's primary objective
 - **backstory**: Agent's background and capabilities
 
-#### 2. Task Configuration
+#### Task Configuration
 - **task description**: What the agent should accomplish
 - **expected output**: What the agent should produce
 
@@ -94,9 +94,9 @@ Expected Output: A publication-ready article containing:
 |--------|-----------|------------------------|
 | **Variables** | role + goal + backstory | role + goal + backstory + task + output |
 | **Optimization** | Agent profile only | Agent + Task together |
-| **Alignment** | Manual | **Automatic** ✅ |
-| **Improvement** | +10-15% | **+20-30%** ✅ |
-| **Quality** | Good | **Excellent** ✅ |
+| **Alignment** | Manual | **Automatic** |
+| **Improvement** | +10-15% | **+20-30%** |
+| **Quality** | Good | **Excellent** |
 
 ### Benefits
 
@@ -314,7 +314,7 @@ Average Quality: 9.5/10           ← +2.3 points
 
 ## Best Practices
 
-### 1. Define Clear Tasks
+### Define Clear Tasks
 
 ```yaml
 # Good: Specific task
@@ -330,7 +330,7 @@ tasks:
     expected_output: Text
 ```
 
-### 2. Match Agent to Task
+### Match Agent to Task
 
 ```yaml
 # Agent expertise should match task requirements
@@ -343,7 +343,7 @@ tasks:
     description: Write technical documentation  # ← Matches agent
 ```
 
-### 3. Use BDD Scenarios
+### Use BDD Scenarios
 
 ```yaml
 feature_specifications:
@@ -355,7 +355,7 @@ feature_specifications:
         article: "Actual format you need"
 ```
 
-### 4. Start Simple, Optimize
+### Start Simple, Optimize
 
 ```yaml
 # Start with basic task

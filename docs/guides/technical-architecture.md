@@ -6,9 +6,9 @@ SuperOptiX is a comprehensive AI agent development framework built on top of DSP
 
 ## Core Architecture Components
 
-### 1. **Tier System** 🏗️
+### **Tier System** 🏗️
 
-SuperOptiX implements a hierarchical tier system that defines agent capabilities and limitations:
+SuperOptiX implements a framework architecture that defines agent capabilities and limitations:
 
 ```mermaid
 graph TD
@@ -92,7 +92,7 @@ graph TD
 
 - Advanced evaluation metrics
 
-### 2. **SuperSpec DSL** 📝
+### **SuperSpec DSL** 📝
 
 SuperSpec is a Domain-Specific Language for defining agent playbooks with validation and compliance:
 
@@ -133,7 +133,7 @@ spec:
 
 - **Parsing & Analysis**: Tools for analyzing playbook collections
 
-### 3. **DSPy Integration** 🔗
+### **DSPy Integration** 🔗
 
 SuperOptiX leverages DSPy as its core reasoning engine:
 
@@ -157,7 +157,7 @@ graph LR
 
 - **Evaluators**: SemanticF1, custom evaluation metrics
 
-### 4. **RAG (Retrieval-Augmented Generation) System** 🔍
+### **RAG (Retrieval-Augmented Generation) System** 🔍
 
 SuperOptiX implements a comprehensive RAG system supporting multiple vector databases:
 
@@ -208,7 +208,7 @@ graph TD
 
 - Configurable retrieval parameters (top_k, similarity thresholds)
 
-### 5. **Memory System** 🧠
+### **Memory System** 🧠
 
 SuperOptiX implements a multi-layered memory system:
 
@@ -254,7 +254,7 @@ graph TD
 
 - Vector store for semantic memory
 
-### 6. **Tool System** 🛠️
+### **Tool System** 🛠️
 
 SuperOptiX provides a comprehensive tool ecosystem:
 
@@ -301,7 +301,7 @@ graph TD
 
 - Custom tool factory for extensibility
 
-### 7. **Observability & Tracing** 📊
+### **Observability & Tracing** 📊
 
 SuperOptiX implements comprehensive observability:
 
@@ -342,7 +342,7 @@ graph TD
 
 - **External Integration**: Support for external observability systems
 
-### 8. **Model Management** 🤖
+### **Model Management** 🤖
 
 SuperOptiX provides comprehensive model management:
 
@@ -390,7 +390,7 @@ graph TD
 
 - Model switching and fallback
 
-### 9. **CLI Interface** 💻
+### **CLI Interface** 💻
 
 SuperOptiX provides a comprehensive CLI for all operations:
 
@@ -484,7 +484,7 @@ sequenceDiagram
 
 ## Performance Optimization
 
-### 1. **Model Optimization**
+### **Model Optimization**
 
 - Tier-specific model selection
 
@@ -494,7 +494,7 @@ sequenceDiagram
 
 - Caching and connection pooling
 
-### 2. **RAG Optimization**
+### **RAG Optimization**
 
 - Efficient chunking strategies
 
@@ -504,7 +504,7 @@ sequenceDiagram
 
 - Query caching and result ranking
 
-### 3. **Memory Optimization**
+### **Memory Optimization**
 
 - Memory hierarchy management
 
@@ -514,7 +514,7 @@ sequenceDiagram
 
 - Garbage collection strategies
 
-### 4. **Tool Optimization**
+### **Tool Optimization**
 
 - Tool caching and reuse
 
@@ -526,7 +526,7 @@ sequenceDiagram
 
 ## Security & Compliance
 
-### 1. **Data Security**
+### **Data Security**
 
 - Local model execution for sensitive data
 
@@ -536,7 +536,7 @@ sequenceDiagram
 
 - Data anonymization in observability
 
-### 2. **Access Control**
+### **Access Control**
 
 - Tier-based feature restrictions
 
@@ -546,7 +546,7 @@ sequenceDiagram
 
 - Resource usage quotas
 
-### 3. **Compliance**
+### **Compliance**
 
 - GDPR compliance for data handling
 
@@ -558,7 +558,7 @@ sequenceDiagram
 
 ## Deployment Architecture
 
-### 1. **Local Development**
+### **Local Development**
 ```bash
 # Single machine setup
 super init my_project
@@ -566,7 +566,7 @@ super model install llama3.1:8b -b ollama
 super agent run my_agent
 ```
 
-### 2. **Production Deployment**
+### **Production Deployment**
 ```mermaid
 graph TD
     A[Load Balancer] --> B1[Agent Instance 1]
@@ -582,7 +582,7 @@ graph TD
     C --> F[Observability Platform]
 ```
 
-### 3. **Scalability Features**
+### **Scalability Features**
 
 - Horizontal scaling of agent instances
 
@@ -594,7 +594,7 @@ graph TD
 
 ## Integration Points
 
-### 1. **External Systems**
+### **External Systems**
 
 - Vector databases (ChromaDB, Pinecone, etc.)
 
@@ -604,7 +604,7 @@ graph TD
 
 - CI/CD pipelines (GitHub Actions, GitLab CI)
 
-### 2. **API Integration**
+### **API Integration**
 
 - RESTful API endpoints
 
@@ -614,7 +614,7 @@ graph TD
 
 - SDK for multiple languages
 
-### 3. **Framework Integration**
+### **Framework Integration**
 
 - DSPy ecosystem compatibility
 
@@ -626,7 +626,7 @@ graph TD
 
 ## Development Workflow
 
-### 1. **Agent Development**
+### **Agent Development**
 ```mermaid
 graph LR
     A[Define Requirements] --> B[Create Playbook]
@@ -638,7 +638,7 @@ graph LR
     G --> D
 ```
 
-### 2. **Testing Strategy**
+### **Testing Strategy**
 
 - Unit tests for individual components
 
@@ -650,7 +650,7 @@ graph LR
 
 - Security testing
 
-### 3. **Quality Assurance**
+### **Quality Assurance**
 
 - Automated playbook validation
 
@@ -662,7 +662,7 @@ graph LR
 
 ## Future Roadmap
 
-### 1. **Planned Features**
+### **Planned Features**
 
 - Advanced optimization algorithms
 
@@ -674,7 +674,7 @@ graph LR
 
 - Enterprise security features
 
-### 2. **Performance Improvements**
+### **Performance Improvements**
 
 - Model serving optimization
 
@@ -684,7 +684,7 @@ graph LR
 
 - Tool execution optimization
 
-### 3. **Ecosystem Expansion**
+### **Ecosystem Expansion**
 
 - Additional vector databases
 

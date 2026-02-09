@@ -27,7 +27,7 @@ Both MLFlow and LangFuse provide excellent observability capabilities for SuperO
 
 ## 🧪 MLFlow - Best for ML Workflows
 
-### ✅ Strengths
+### Strengths
 
 - **ML Experiment Tracking**: Designed specifically for machine learning experiments
 - **Artifact Management**: Excellent versioning of code, models, and data
@@ -37,7 +37,7 @@ Both MLFlow and LangFuse provide excellent observability capabilities for SuperO
 - **Production ML**: Model deployment and lifecycle management
 - **Traditional ML**: Perfect for scikit-learn, TensorFlow, PyTorch workflows
 
-### ❌ Limitations
+### Limitations
 
 - **LLM-specific features**: Limited built-in support for LLM observability
 - **Token tracking**: Requires manual implementation
@@ -56,7 +56,7 @@ Both MLFlow and LangFuse provide excellent observability capabilities for SuperO
 
 ## 🔍 LangFuse - Best for LLM Applications
 
-### ✅ Strengths
+### Strengths
 
 - **LLM Observability**: Specialized for language model applications
 - **Real-time Tracing**: Detailed token usage and cost tracking
@@ -66,7 +66,7 @@ Both MLFlow and LangFuse provide excellent observability capabilities for SuperO
 - **Cost Optimization**: Automatic cost tracking and alerts
 - **Prompt Engineering**: Specialized tools for prompt optimization
 
-### ❌ Limitations
+### Limitations
 
 - **Traditional ML**: Limited support for non-LLM workflows
 - **Artifact Storage**: Basic artifact management
@@ -184,21 +184,21 @@ with langfuse.start_as_current_span(name="llm_call") as span:
 
 ### Choose MLFlow if:
 
-✅ **You're doing traditional ML** (scikit-learn, TensorFlow, PyTorch)
-✅ **You need model versioning** and deployment tracking
-✅ **You want experiment reproducibility** and artifact management
-✅ **You're building ML pipelines** with multiple steps
-✅ **You need team collaboration** on experiments
-✅ **You're deploying models** to production
+**You're doing traditional ML** (scikit-learn, TensorFlow, PyTorch)
+**You need model versioning** and deployment tracking
+**You want experiment reproducibility** and artifact management
+**You're building ML pipelines** with multiple steps
+**You need team collaboration** on experiments
+**You're deploying models** to production
 
 ### Choose LangFuse if:
 
-✅ **You're building LLM applications** (GPT, Claude, etc.)
-✅ **You need real-time cost tracking** and optimization
-✅ **You want user feedback** collection and scoring
-✅ **You're doing prompt engineering** and A/B testing
-✅ **You need token usage monitoring** and optimization
-✅ **You're debugging LLM responses** in production
+**You're building LLM applications** (GPT, Claude, etc.)
+**You need real-time cost tracking** and optimization
+**You want user feedback** collection and scoring
+**You're doing prompt engineering** and A/B testing
+**You need token usage monitoring** and optimization
+**You're debugging LLM responses** in production
 
 ## 🔄 Migration Guide
 

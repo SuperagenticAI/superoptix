@@ -37,9 +37,9 @@ Choose [1-3]: 1
 ```
 
 **We recommend Ollama** for:
-- ✅ Privacy (data stays local)
-- ✅ No API costs (free)
-- ✅ Offline capability
+- Privacy (data stays local)
+- No API costs (free)
+- Offline capability
 
 ### After Setup
 
@@ -119,8 +119,8 @@ SuperOptiX> /model list
 Available AI Models
 
 🏠 LOCAL MODELS (via Ollama):
-✅ llama3.1:8b (current)
-✅ qwen2.5:14b
+llama3.1:8b (current)
+qwen2.5:14b
 
 ☁️  CLOUD MODELS:
 OpenAI: gpt-4o, gpt-4o-mini
@@ -147,7 +147,7 @@ Agents
 Found 2 agent(s):
 
   • code_reviewer
-    ✅ Compiled
+    Compiled
   • customer_support
     ⚠️  Not compiled
 
@@ -184,7 +184,7 @@ Current Model Configuration
 • Provider: ollama
 • Model: llama3.1:8b
 • API Base: http://localhost:11434
-• Status: ✅ Connected
+• Status: Connected
 ```
 
 ### Switching Models
@@ -193,7 +193,7 @@ Current Model Configuration
 # Switch to different Ollama model
 SuperOptiX> /model set qwen2.5:14b
 
-✅ Switched to: qwen2.5:14b
+Switched to: qwen2.5:14b
 
 # Switch to OpenAI (requires API key)
 SuperOptiX> /model set gpt-4o
@@ -212,8 +212,8 @@ Available AI Models
 🏠 LOCAL MODELS (via Ollama):
 
 Installed:
-  ✅ llama3.1:8b (current)
-  ✅ qwen2.5:14b
+  llama3.1:8b (current)
+  qwen2.5:14b
 
 Available to install:
   • deepseek-coder:33b (19GB) - Best for coding

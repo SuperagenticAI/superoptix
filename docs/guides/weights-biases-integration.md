@@ -5,24 +5,24 @@
 SuperOptiX provides **native integration** with Weights & Biases (W&B) for experiment tracking, model monitoring, and team collaboration. This integration allows you to track agent performance, GEPA optimization runs, and multi-framework comparisons in your existing W&B workflows.
 
 **Key Features**:
-- ✅ **Agent-specific metrics** (GEPA optimization, protocol usage)
-- ✅ **Multi-framework tracking** (DSPy, OpenAI SDK, CrewAI, etc.)
-- ✅ **Team collaboration** (shared experiments, dashboards)
-- ✅ **Model versioning** (track agent improvements over time)
-- ✅ **Hyperparameter optimization** (GEPA parameter tuning)
+- **Agent-specific metrics** (GEPA optimization, protocol usage)
+- **Multi-framework tracking** (DSPy, OpenAI SDK, CrewAI, etc.)
+- **Team collaboration** (shared experiments, dashboards)
+- **Model versioning** (track agent improvements over time)
+- **Hyperparameter optimization** (GEPA parameter tuning)
 
 ---
 
 ## ⚡ Quick Start
 
-### 1. Install W&B
+### Install W&B
 
 ```bash
 pip install wandb
 wandb login
 ```
 
-### 2. Run Agent with W&B
+### Run Agent with W&B
 
 ```bash
 # Track agent execution
@@ -35,7 +35,7 @@ super agent optimize my_agent --auto medium --observe wandb
 super agent evaluate my_agent --observe wandb
 ```
 
-### 3. View in W&B Dashboard
+### View in W&B Dashboard
 
 Visit: https://wandb.ai/your-username/superoptix
 
@@ -109,7 +109,7 @@ obs = get_observability(
 
 ## 📈 Dashboard Setup
 
-### 1. Create Custom Dashboard
+### Create Custom Dashboard
 
 In W&B, create a new dashboard with these panels:
 
@@ -134,7 +134,7 @@ In W&B, create a new dashboard with these panels:
 # Chart: Bar chart by framework
 ```
 
-### 2. Automated Reports
+### Automated Reports
 
 ```python
 # Generate weekly performance report
@@ -145,7 +145,7 @@ super agent report my_agent --format wandb --period weekly
 
 ## 🚀 Advanced Features
 
-### 1. Hyperparameter Optimization
+### Hyperparameter Optimization
 
 ```bash
 # Track GEPA parameter tuning
@@ -174,7 +174,7 @@ parameters:
     values: ["light", "medium", "intensive"]
 ```
 
-### 2. Model Versioning
+### Model Versioning
 
 ```python
 # Track model improvements
@@ -185,7 +185,7 @@ super agent run my_agent \
   --tags ["production", "document-processing"]
 ```
 
-### 3. Team Collaboration
+### Team Collaboration
 
 ```bash
 # Share experiments with team
@@ -235,23 +235,23 @@ super agent run my_agent --observe wandb --verbose
 
 ## 📊 Example Workflows
 
-### 1. Agent Development Workflow
+### Agent Development Workflow
 
 ```bash
-# 1. Initial development
+# Initial development
 super agent run my_agent --observe wandb --tags ["development"]
 
-# 2. Optimization
+# Optimization
 super agent optimize my_agent --observe wandb --tags ["optimization"]
 
-# 3. Evaluation
+# Evaluation
 super agent evaluate my_agent --observe wandb --tags ["evaluation"]
 
-# 4. Production deployment
+# Production deployment
 super agent run my_agent --observe wandb --tags ["production"]
 ```
 
-### 2. Multi-Framework Comparison
+### Multi-Framework Comparison
 
 ```bash
 # Compare frameworks
@@ -260,7 +260,7 @@ super agent run assistant_openai --observe wandb --tags ["openai", "comparison"]
 super agent run researcher_crew --observe wandb --tags ["crewai", "comparison"]
 ```
 
-### 3. A/B Testing
+### A/B Testing
 
 ```bash
 # Test different configurations
@@ -279,7 +279,7 @@ super agent run my_agent \
 
 ## 🎯 Best Practices
 
-### 1. Project Organization
+### Project Organization
 
 ```
 📁 W&B Projects Structure:
@@ -289,7 +289,7 @@ super agent run my_agent \
 └── superoptix-production/      # Production monitoring
 ```
 
-### 2. Tagging Strategy
+### Tagging Strategy
 
 ```bash
 # Use consistent tags
@@ -298,7 +298,7 @@ super agent run my_agent \
 --tags ["comparison", "framework:openai", "metric:accuracy"]
 ```
 
-### 3. Metric Naming
+### Metric Naming
 
 ```python
 # Use hierarchical naming
