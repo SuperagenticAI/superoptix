@@ -926,6 +926,18 @@ wheels = [
 ]
 
 [[package]]
+name = "bm25s"
+version = "0.3.0a4"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f7/6d/958bd908955fa0914c43faaa5570b108f3a5bab40f2b90d292dfdb927280/bm25s-0.3.0a4.tar.gz", hash = "sha256:f7df93676c6914269792fbae812a774ed64e0211f6787b673a3a9ec5ea8943bd", size = 74003, upload-time = "2025-12-01T22:27:17.379Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/47/b6/514138341d3bb5574ce2d718ecfa357268e29d09bcae59f61178a9b0b39b/bm25s-0.3.0a4-py3-none-any.whl", hash = "sha256:dc5b7b3da1341717e1e86fa73d4975b6ab89936c9b33f996f3fab7629a1d2c96", size = 69103, upload-time = "2025-12-01T22:27:16.121Z" },
+]
+
+[[package]]
 name = "boto3"
 version = "1.42.39"
 source = { registry = "https://pypi.org/simple" }
@@ -7687,6 +7699,28 @@ wheels = [
 ]
 
 [[package]]
+name = "stackone-ai"
+version = "2.3.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "bm25s" },
+    { name = "httpx" },
+    { name = "langchain-core" },
+    { name = "numpy" },
+    { name = "pydantic" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/36/06/cc058d329e44a73fa7aa25f03e42aa0ee15d5f22aca534f21f7eb8cf63a7/stackone_ai-2.3.1.tar.gz", hash = "sha256:d25b521ad6cee7f8107c9beef9a05a67bc39b07646d4ac4f4665fea1dbe3d601", size = 537863, upload-time = "2026-01-29T16:59:20.683Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/97/5a/31ef092360e9175e86909df86d1f889f5e7f80df04ceb3e855ed81fa563f/stackone_ai-2.3.1-py3-none-any.whl", hash = "sha256:bd6ffc937f894045d410353eaec456e1a40001dc6e9b28904bd770869061b60d", size = 30818, upload-time = "2026-01-29T16:59:19.7Z" },
+]
+
+[package.optional-dependencies]
+mcp = [
+    { name = "mcp" },
+]
+
+[[package]]
 name = "starlette"
 version = "0.50.0"
 source = { registry = "https://pypi.org/simple" }
@@ -7730,7 +7764,7 @@ wheels = [
 
 [[package]]
 name = "superoptix"
-version = "0.2.3"
+version = "0.2.4"
 source = { editable = "." }
 dependencies = [
     { name = "accelerate" },
@@ -7821,6 +7855,9 @@ all-with-mlx = [
 chromadb = [
     { name = "chromadb" },
     { name = "sentence-transformers" },
+]
+connectors-stackone = [
+    { name = "stackone-ai", extra = ["mcp"] },
 ]
 dev = [
     { name = "black" },
@@ -8084,6 +8121,7 @@ requires-dist = [
     { name = "sentence-transformers", marker = "extra == 'qdrant'" },
     { name = "sentence-transformers", marker = "extra == 'vectordb'" },
     { name = "sentence-transformers", marker = "extra == 'weaviate'" },
+    { name = "stackone-ai", extras = ["mcp"], marker = "extra == 'connectors-stackone'" },
     { name = "streamlit", marker = "extra == 'all'" },
     { name = "streamlit", marker = "extra == 'all-with-mlx'" },
     { name = "streamlit", marker = "extra == 'ui'" },
@@ -8107,7 +8145,7 @@ requires-dist = [
     { name = "weaviate-client", marker = "extra == 'vectordb'" },
     { name = "weaviate-client", marker = "extra == 'weaviate'" },
 ]
-provides-extras = ["frameworks-dspy", "frameworks-openai", "frameworks-google", "frameworks-microsoft", "frameworks-deepagents", "frameworks-pydantic-ai", "frameworks-claude-sdk", "frameworks", "mcp", "logfire", "dev", "ui", "chromadb", "lancedb", "faiss", "weaviate", "qdrant", "milvus", "vectordb", "mlx", "ml-cross-platform", "huggingface", "redis", "observability", "web", "data", "cloud", "testing", "docs", "all", "all-with-mlx"]
+provides-extras = ["frameworks-dspy", "frameworks-openai", "frameworks-google", "frameworks-microsoft", "frameworks-deepagents", "frameworks-pydantic-ai", "frameworks-claude-sdk", "frameworks", "mcp", "logfire", "connectors-stackone", "dev", "ui", "chromadb", "lancedb", "faiss", "weaviate", "qdrant", "milvus", "vectordb", "mlx", "ml-cross-platform", "huggingface", "redis", "observability", "web", "data", "cloud", "testing", "docs", "all", "all-with-mlx"]
 
 [[package]]
 name = "sympy"
