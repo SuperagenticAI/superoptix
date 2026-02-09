@@ -1,0 +1,152 @@
+"""
+{{ agent_name | to_pascal_case }} Agent - CrewAI Minimal Pipeline
+
+Auto-generated from SuperSpec playbook using SuperOptiX compiler.
+Framework: CrewAI
+Generated: {{ timestamp }}
+"""
+
+from __future__ import annotations
+
+import json
+import time
+from pathlib import Path
+from typing import Any, Dict, Optional
+
+from crewai import Agent, Crew, Process, Task
+
+from superoptix.runners.crewai_runtime_helpers import (
+    build_instructions as superoptix_build_instructions,
+    build_task_description as superoptix_build_task_description,
+    create_crewai_llm as superoptix_create_crewai_llm,
+    extract_crewai_output as superoptix_extract_crewai_output,
+    resolve_model as superoptix_resolve_model,
+{% set tools_cfg = (spec.get("tools", {}) or {}) %}
+{% set dspy_tools_cfg = ((spec.get("dspy", {}) or {}).get("tools", {}) or {}) %}
+{% set stackone_cfg = spec.get("stackone") or tools_cfg.get("stackone") or dspy_tools_cfg.get("stackone") %}
+{% set stackone_mode = (spec.get("stackone_mode") or tools_cfg.get("mode") or dspy_tools_cfg.get("mode") or "") | string | lower %}
+{% set include_stackone_code = (stackone_mode in ["stackone", "stackone_discovery"]) or (stackone_cfg is mapping and (stackone_cfg | length > 0)) %}
+{% set crewai_rlm_cfg = ((spec.get("crewai", {}) or {}).get("rlm")) %}
+{% set include_rlm_code = (crewai_rlm_cfg is mapping and (crewai_rlm_cfg | length > 0)) or (spec.get("rlm") is mapping and (spec.get("rlm") | length > 0)) %}
+{% if include_stackone_code %}
+    build_stackone_tools as superoptix_build_stackone_tools,
+{% endif %}
+{% if include_rlm_code %}
+    run_with_optional_rlm as superoptix_run_with_optional_rlm,
+{% endif %}
+)
+
+COMPILED_SPEC_PATH = Path(__file__).resolve().parent / "{{ compiled_spec_filename }}"
+def _load_compiled_spec(path: Path) -> Dict[str, Any]:
+    try:
+        with path.open("r", encoding="utf-8") as _spec_file:
+            return json.load(_spec_file)
+    except FileNotFoundError as exc:
+        raise FileNotFoundError(
+            f"Compiled spec file not found at {path}. Recompile this agent to regenerate pipeline artifacts."
+        ) from exc
+    except json.JSONDecodeError as exc:
+        raise ValueError(
+            f"Compiled spec file is invalid JSON at {path}. Recompile this agent to regenerate pipeline artifacts."
+        ) from exc
+
+
+FULL_SPEC = _load_compiled_spec(COMPILED_SPEC_PATH)
+
+LANGUAGE_MODEL = dict(FULL_SPEC.get("language_model", {}) or {})
+INSTRUCTION_SPEC = {
+    "persona": dict(FULL_SPEC.get("persona", {}) or {}),
+    "tasks": list(FULL_SPEC.get("tasks", []) or []),
+}
+
+
+class {{ agent_name | to_pascal_case }}Pipeline:
+    """CrewAI native minimal pipeline."""
+
+    def __init__(
+        self,
+        model_name: Optional[str] = None,
+        instructions: Optional[str] = None,
+        model_config: Optional[Dict[str, Any]] = None,
+    ):
+        self._resolved_model = model_name or superoptix_resolve_model(
+            LANGUAGE_MODEL, model_config=model_config
+        )
+        self._resolved_instructions = instructions or superoptix_build_instructions(
+            INSTRUCTION_SPEC
+        )
+        self._task_description = superoptix_build_task_description(INSTRUCTION_SPEC)
+
+        self._llm = superoptix_create_crewai_llm(self._resolved_model, LANGUAGE_MODEL)
+{% if include_stackone_code %}
+        self._tools = superoptix_build_stackone_tools(FULL_SPEC)
+{% else %}
+        self._tools = []
+{% endif %}
+
+        persona = INSTRUCTION_SPEC.get("persona", {}) or {}
+        role = str(persona.get("role") or "AI Assistant").strip() or "AI Assistant"
+        goal = str(persona.get("goal") or self._resolved_instructions).strip() or self._resolved_instructions
+        backstory = str(persona.get("backstory") or self._resolved_instructions).strip() or self._resolved_instructions
+
+        self._agent = Agent(
+            role=role,
+            goal=goal,
+            backstory=backstory,
+            tools=self._tools,
+            llm=self._llm,
+            verbose=False,
+            allow_delegation=False,
+        )
+        self._task = Task(
+            description=self._task_description,
+            expected_output="A concise, accurate answer.",
+            agent=self._agent,
+        )
+        self._crew = Crew(
+            agents=[self._agent],
+            tasks=[self._task],
+            process=Process.sequential,
+            verbose=False,
+        )
+        if self._tools:
+            print(f"✅ StackOne tools registered: {len(self._tools)}")
+        else:
+            print("ℹ️  No StackOne tools configured")
+
+    def run(self, query: Optional[str] = None, **inputs: Any) -> Dict[str, Any]:
+        if query is None:
+{% if spec.input_fields and spec.input_fields|length > 0 %}
+            query = str(inputs.get("{{ spec.input_fields[0].name | to_snake_case }}", ""))
+{% else %}
+            query = str(inputs.get("query", ""))
+{% endif %}
+
+        started = time.time()
+        preview = (query[:120] + "...") if query and len(query) > 120 else (query or "")
+        print(
+            f"🧠 CrewAI run start | model={self._resolved_model} | tools={len(self._tools)}"
+        )
+        print(f"📝 Prompt: {preview}")
+
+{% if include_rlm_code %}
+        output = superoptix_run_with_optional_rlm(
+            crew=self._crew,
+            prompt=query or "",
+            spec_data=FULL_SPEC,
+            model_name=self._resolved_model,
+            task_description=self._task_description,
+        )
+{% else %}
+        result = self._crew.kickoff(inputs={"query": query or ""})
+        output = superoptix_extract_crewai_output(result)
+{% endif %}
+
+        elapsed_ms = int((time.time() - started) * 1000)
+        print(f"✅ CrewAI run done ({elapsed_ms}ms)")
+
+{% if spec.output_fields and spec.output_fields|length > 0 %}
+        return {"{{ spec.output_fields[0].name | to_snake_case }}": output}
+{% else %}
+        return {"output": output}
+{% endif %}

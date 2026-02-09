@@ -12,10 +12,10 @@ This comprehensive tutorial demonstrates how to create production-ready AI agent
 
 Looking for a complete, runnable example? Check out the open source companion repository [`superoptix-lite-openai`](https://github.com/SuperagenticAI/superoptix-lite-openai). It ships with:
 
-- ✅ A production-ready Code Reviewer agent following this tutorial end-to-end
-- ✅ GEPA optimization workflow powered by the lightweight `superoptix_lite` package
-- ✅ Playbook-driven Agent Spec scenarios for SQL injection, memory leaks, error handling, and performance tuning
-- ✅ Automation scripts for baseline evaluation, optimization, and regression testing
+- A production-ready Code Reviewer agent following this tutorial end-to-end
+- GEPA optimization workflow powered by the lightweight `superoptix_lite` package
+- Playbook-driven Agent Spec scenarios for SQL injection, memory leaks, error handling, and performance tuning
+- Automation scripts for baseline evaluation, optimization, and regression testing
 
 We'll reference this repository throughout the tutorial so you can clone, copy, or adapt the same patterns instantly.
 
@@ -25,12 +25,12 @@ We'll reference this repository throughout the tutorial so you can clone, copy, 
 
 By the end of this tutorial, you'll know how to:
 
-- ✅ Write agents using **official OpenAI Agents SDK patterns**
-- ✅ Integrate native SDK agents with **SuperOptiX** for optimization
-- ✅ Define **BDD test scenarios** for measurable metrics
-- ✅ Run **GEPA optimization** to improve agent performance
-- ✅ Implement **automatic optimization loading**
-- ✅ Work with **local Ollama models** (no API keys required)
+- Write agents using **official OpenAI Agents SDK patterns**
+- Integrate native SDK agents with **SuperOptiX** for optimization
+- Define **BDD test scenarios** for measurable metrics
+- Run **GEPA optimization** to improve agent performance
+- Implement **automatic optimization loading**
+- Work with **local Ollama models** (no API keys required)
 
 ---
 
@@ -49,14 +49,14 @@ By the end of this tutorial, you'll know how to:
 ### Required Software
 
 ```bash
-# 1. Python 3.11 or higher
+# Python 3.11 or higher
 python3 --version
 
-# 2. Ollama with models
+# Ollama with models
 ollama pull gpt-oss:20b      # Primary model (20B parameters)
 ollama pull llama3.1:8b       # Reflection model (8B parameters)
 
-# 3. SuperOptiX with OpenAI SDK support
+# SuperOptiX with OpenAI SDK support
 pip install "superoptix[frameworks-openai]"
 ```
 
@@ -64,9 +64,9 @@ pip install "superoptix[frameworks-openai]"
 
 - **Primary model (gpt-oss:20b)**: Handles the actual agent task (code review). Larger models provide better analysis and more detailed feedback.
 - **Reflection model (llama3.1:8b)**: Used by GEPA during optimization to analyze results and suggest prompt improvements. This runs many times during optimization, so a smaller model:
-  - ✅ Significantly speeds up optimization (5-10x faster)
-  - ✅ Reduces memory usage and resource consumption
-  - ✅ Provides "good enough" reflections for prompt improvement
+  - Significantly speeds up optimization (5-10x faster)
+  - Reduces memory usage and resource consumption
+  - Provides "good enough" reflections for prompt improvement
 
 The reflection task (analyzing evaluation results) is simpler than the agent's task, so a smaller model works well. You can use a larger reflection model if you prefer, but optimization will take longer:
 
@@ -378,7 +378,7 @@ class CodeReviewerAgent:
             model=self.model,
         )
 
-        print(f"✅ Code Reviewer Agent initialized with Ollama: {model}")
+        print(f"Code Reviewer Agent initialized with Ollama: {model}")
 
     async def review_code(self, code: str, language: str = "unknown") -> str:
         """
@@ -593,7 +593,7 @@ class CodeReviewerPipeline:
                     best_score = opt_data.get("best_score", 0.0)
 
                 if optimized_instructions:
-                    print(f"✅ Loaded optimized instructions (score: {best_score:.2%})")
+                    print(f"Loaded optimized instructions (score: {best_score:.2%})")
                     self.is_trained = True
 
         except Exception as e:
@@ -648,10 +648,10 @@ class CodeReviewerPipeline:
                 success = self._evaluate_output(result, expected)
 
                 if success:
-                    print(f"✅ {scenario_name}: PASS")
+                    print(f"{scenario_name}: PASS")
                     passed += 1
                 else:
-                    print(f"❌ {scenario_name}: FAIL")
+                    print(f"{scenario_name}: FAIL")
                     failed += 1
 
                 results.append({
@@ -661,7 +661,7 @@ class CodeReviewerPipeline:
                 })
 
             except Exception as e:
-                print(f"❌ {scenario_name}: ERROR - {e}")
+                print(f"{scenario_name}: ERROR - {e}")
                 failed += 1
                 results.append({
                     "scenario": scenario_name,
@@ -783,7 +783,7 @@ def main():
 
     # Show failed scenarios
     if results['failed'] > 0:
-        print(f"\n❌ Failed Scenarios:")
+        print(f"\nFailed Scenarios:")
         for r in results['results']:
             if not r['passed']:
                 print(f"   - {r['scenario']}")
@@ -810,11 +810,11 @@ python test_baseline.py
 🔍 Evaluating code_reviewer...
 Testing 4 BDD scenarios:
 
-✅ Code Reviewer Agent initialized with Ollama: gpt-oss:20b
-✅ SQL Injection Detection: PASS
-✅ Memory Leak Detection: PASS
-✅ Error Handling Review: PASS
-✅ Code Optimization Suggestion: PASS
+Code Reviewer Agent initialized with Ollama: gpt-oss:20b
+SQL Injection Detection: PASS
+Memory Leak Detection: PASS
+Error Handling Review: PASS
+Code Optimization Suggestion: PASS
 
 ============================================================
 Overall: 4/4 PASS (100.0%)
@@ -870,10 +870,10 @@ def main():
         if not result['passed']:
             scenario_name = result['scenario']
             failures.append(scenario_name)
-            print(f"   ❌ {scenario_name}")
+            print(f"   {scenario_name}")
 
     if not failures:
-        print("   ✅ No failures - agent performing well!")
+        print("   No failures - agent performing well!")
 
     # Generate improved instructions
     print("\n🔧 Step 3: Generating Improved Instructions...")
@@ -905,7 +905,7 @@ Your review MUST include these specific terms when issues are present to ensure
 comprehensive code quality analysis.
 """
 
-    print(f"✅ Created optimized instructions")
+    print(f"Created optimized instructions")
     print(f"   Length: {len(current_instructions)} → {len(improved_instructions)} chars")
     print(f"   Added: {len(improved_instructions) - len(current_instructions)} chars of guidance\n")
 
@@ -958,7 +958,7 @@ comprehensive code quality analysis.
         with open(optimized_file, 'w') as f:
             json.dump(optimized_data, f, indent=2)
 
-        print(f"   ✅ Saved to: {optimized_file}")
+        print(f"   Saved to: {optimized_file}")
         print(f"\n🎉 Optimization Complete!")
         print(f"   Best Score: {improved_score:.2%}")
         print(f"   Baseline → Optimized: {baseline_score:.2%} → {improved_score:.2%}")
@@ -987,10 +987,10 @@ python run_optimization.py
 📈 Baseline Score: 75.00% (3/4 tests)
 
 🔍 Step 2: Analyzing Failures...
-   ❌ Memory Leak Detection
+   Memory Leak Detection
 
 🔧 Step 3: Generating Improved Instructions...
-✅ Created optimized instructions
+Created optimized instructions
    Length: 915 → 1,890 chars
    Added: 975 chars of guidance
 
@@ -1000,7 +1000,7 @@ python run_optimization.py
    Improvement: +25.00%
 
 💾 Step 5: Saving Optimized Instructions...
-   ✅ Saved to: agents/code_reviewer/optimized/code_reviewer_openai_optimized.json
+   Saved to: agents/code_reviewer/optimized/code_reviewer_openai_optimized.json
 
 🎉 Optimization Complete!
    Best Score: 100.00%
@@ -1009,7 +1009,7 @@ python run_optimization.py
 
 ---
 
-## ✅ Step 6: Verify Automatic Loading
+## Step 6: Verify Automatic Loading
 
 Create `test_optimized.py`:
 
@@ -1026,7 +1026,7 @@ from agents.code_reviewer.pipelines.code_reviewer_openai_pipeline import CodeRev
 
 async def main():
     print("="*80)
-    print("✅ Testing Automatic Optimization Loading")
+    print("Testing Automatic Optimization Loading")
     print("="*80)
     print()
 
@@ -1038,7 +1038,7 @@ async def main():
     # Check if optimized
     print(f"📊 Optimization Status:")
     if pipeline.is_trained:
-        print(f"   ✅ Using GEPA-optimized instructions!")
+        print(f"   Using GEPA-optimized instructions!")
     else:
         print(f"   ⚠️  Using baseline instructions")
 
@@ -1075,7 +1075,7 @@ def get_user(username):
     print(f"🔍 Keyword Detection:")
     print(f"   Expected: {keywords}")
     print(f"   Found: {found}")
-    print(f"   Status: {'✅ PASS' if len(found) >= 2 else '❌ FAIL'}")
+    print(f"   Status: {'PASS' if len(found) >= 2 else 'FAIL'}")
 
     print("\n" + "="*80)
 
@@ -1091,14 +1091,14 @@ python test_optimized.py
 
 **Expected Output:**
 ```
-✅ Testing Automatic Optimization Loading
+Testing Automatic Optimization Loading
 ================================================================================
 
 📦 Loading Code Reviewer Pipeline...
-✅ Loaded optimized instructions (score: 100.00%)
+Loaded optimized instructions (score: 100.00%)
 
 📊 Optimization Status:
-   ✅ Using GEPA-optimized instructions!
+   Using GEPA-optimized instructions!
 
 🧪 Testing Code Review:
 ────────────────────────────────────────────────────────────────────────────────
@@ -1122,7 +1122,7 @@ Recommendations:
 🔍 Keyword Detection:
    Expected: ['sql injection', 'vulnerability', 'parameterized']
    Found: ['sql injection', 'vulnerability', 'parameterized']
-   Status: ✅ PASS
+   Status: PASS
 
 ================================================================================
 ```
@@ -1137,8 +1137,8 @@ Recommendations:
 |--------|----------|------------|-------------|
 | **Test Pass Rate** | 75-100% | 100% | ↗ Maintained/Improved |
 | **Instruction Length** | 915 chars | 1,890 chars | +106% |
-| **Detection Coverage** | Basic | Comprehensive | ✅ Enhanced |
-| **Keyword Precision** | Generic | Specific | ✅ Improved |
+| **Detection Coverage** | Basic | Comprehensive | Enhanced |
+| **Keyword Precision** | Generic | Specific | Improved |
 
 ### What GEPA Added
 
@@ -1152,9 +1152,9 @@ GEPA optimization added explicit requirements for:
 
 ## 🎓 Key Learnings
 
-### 1. Native OpenAI SDK Patterns
+### Native OpenAI SDK Patterns
 
-✅ **Use Official Patterns**:
+**Use Official Patterns**:
 ```python
 from agents import Agent, Runner, OpenAIChatCompletionsModel
 
@@ -1165,9 +1165,9 @@ agent = Agent(name="My Agent", instructions=..., model=...)
 result = await Runner.run(agent, input=...)
 ```
 
-### 2. SuperOptiX Integration
+### SuperOptiX Integration
 
-✅ **Wrap in BaseComponent**:
+**Wrap in BaseComponent**:
 ```python
 class MyComponent(BaseComponent):
     def __init__(self, instructions=None):
@@ -1177,9 +1177,9 @@ class MyComponent(BaseComponent):
         )
 ```
 
-### 3. BDD Testing
+### BDD Testing
 
-✅ **Define Testable Scenarios**:
+**Define Testable Scenarios**:
 ```yaml
 scenarios:
   - name: Test Case Name
@@ -1191,9 +1191,9 @@ scenarios:
         - keyword2
 ```
 
-### 4. Automatic Optimization
+### Automatic Optimization
 
-✅ **Load Optimized Weights**:
+**Load Optimized Weights**:
 ```python
 # Check for optimized file
 if optimized_file.exists():
@@ -1210,7 +1210,7 @@ component = MyComponent(instructions=optimized_instructions)
 
 ### Common Issues
 
-#### 1. Ollama Connection Errors
+#### Ollama Connection Errors
 
 **Problem**: `Connection refused` or timeout errors
 
@@ -1226,7 +1226,7 @@ curl http://localhost:11434/api/tags
 ollama serve
 ```
 
-#### 2. Module Import Errors
+#### Module Import Errors
 
 **Problem**: `ModuleNotFoundError: No module named 'agents'`
 
@@ -1239,7 +1239,7 @@ pip install "superoptix[frameworks-openai]"
 python -c "from agents import Agent; print('OK')"
 ```
 
-#### 3. Low Pass Rate After Optimization
+#### Low Pass Rate After Optimization
 
 **Problem**: Optimization doesn't improve performance
 
@@ -1249,7 +1249,7 @@ python -c "from agents import Agent; print('OK')"
 - Try different reflection models
 - Increase optimization budget (auto: 'heavy')
 
-#### 4. OPENAI_API_KEY Warnings
+#### OPENAI_API_KEY Warnings
 
 **Problem**: `OPENAI_API_KEY is not set` warnings
 
@@ -1304,14 +1304,14 @@ optimizer:
 This tutorial mirrors the lightweight framework distributed with [`superoptix-lite-openai`](https://github.com/SuperagenticAI/superoptix-lite-openai):
 
 **Included**
-- ✅ `BaseComponent` scaffolding for GEPA-compatible variables
-- ✅ Minimal config loader for auto-loading optimized instructions
-- ✅ OpenAI Agents SDK integration wired for Ollama endpoints
+- `BaseComponent` scaffolding for GEPA-compatible variables
+- Minimal config loader for auto-loading optimized instructions
+- OpenAI Agents SDK integration wired for Ollama endpoints
 
 **Not Included (Full SuperOptiX)**
-- ❌ UniversalGEPA optimizer and multi-framework compilers
-- ❌ Advanced RAG optimization, memory systems, or Orchestra tooling
-- ❌ CLI workflows (`super` command) and observability integrations
+- UniversalGEPA optimizer and multi-framework compilers
+- Advanced RAG optimization, memory systems, or Orchestra tooling
+- CLI workflows (`super` command) and observability integrations
 
 Need the full stack? Install the production framework with:
 
@@ -1348,11 +1348,11 @@ python optimize_cloud.py    # GEPA optimization with cloud models
 ```
 
 **Features:**
-- ✅ Auto-detects cloud provider from API key
-- ✅ Uses latest models (gpt-5, claude-sonnet-4.5, gemini-pro-2.5)
-- ✅ Separate scripts for local vs cloud (no complex switching)
-- ✅ Includes cost warnings (optimization uses APIs)
-- ✅ .env file support for API keys
+- Auto-detects cloud provider from API key
+- Uses latest models (gpt-5, claude-sonnet-4.5, gemini-pro-2.5)
+- Separate scripts for local vs cloud (no complex switching)
+- Includes cost warnings (optimization uses APIs)
+- .env file support for API keys
 
 ### .env File Method
 
@@ -1403,10 +1403,10 @@ See the [repo README](https://github.com/SuperagenticAI/superoptix-lite-openai) 
 ## 🎉 Congratulations!
 
 You've successfully:
-- ✅ Built a native OpenAI SDK agent
-- ✅ Integrated it with SuperOptiX
-- ✅ Achieved 100% test pass rate with GEPA
-- ✅ Implemented automatic optimization loading
+- Built a native OpenAI SDK agent
+- Integrated it with SuperOptiX
+- Achieved 100% test pass rate with GEPA
+- Implemented automatic optimization loading
 
 Your agent is now production-ready and self-optimizing! 🚀
 

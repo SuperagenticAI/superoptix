@@ -1,0 +1,112 @@
+"""
+{{ agent_name | to_pascal_case }} Agent - Google ADK Native Minimal Pipeline
+
+Auto-generated from SuperSpec playbook using SuperOptiX compiler.
+Framework: Google ADK
+Generated: {{ timestamp }}
+"""
+
+from __future__ import annotations
+
+import json
+import time
+from pathlib import Path
+from typing import Any, Dict, Optional
+
+from superoptix.runners.google_adk_runtime_helpers import (
+    create_agent_runner as superoptix_create_agent_runner,
+    get_google_adk_rlm_config as superoptix_get_google_adk_rlm_config,
+    run_agent_with_optional_rlm as superoptix_run_agent_with_optional_rlm,
+)
+
+COMPILED_SPEC_PATH = Path(__file__).resolve().parent / "{{ compiled_spec_filename }}"
+def _load_compiled_spec(path: Path) -> Dict[str, Any]:
+    try:
+        with path.open("r", encoding="utf-8") as _spec_file:
+            return json.load(_spec_file)
+    except FileNotFoundError as exc:
+        raise FileNotFoundError(
+            f"Compiled spec file not found at {path}. Recompile this agent to regenerate pipeline artifacts."
+        ) from exc
+    except json.JSONDecodeError as exc:
+        raise ValueError(
+            f"Compiled spec file is invalid JSON at {path}. Recompile this agent to regenerate pipeline artifacts."
+        ) from exc
+
+
+FULL_SPEC = _load_compiled_spec(COMPILED_SPEC_PATH)
+
+
+class {{ agent_name | to_pascal_case }}Pipeline:
+    """
+    Native Google ADK pipeline.
+
+    Generated code intentionally mirrors ADK usage:
+    - construct Agent + Runner
+    - run query via runner
+    SuperOptiX handles model/tool mapping in runtime helpers.
+    """
+
+    def __init__(self, model_config: Optional[Dict[str, Any]] = None):
+        self.agent, self.runner, self.runtime = superoptix_create_agent_runner(
+            spec_data=FULL_SPEC,
+            agent_name={{ agent_name | tojson }},
+            model_config=model_config,
+        )
+        self.rlm_config = superoptix_get_google_adk_rlm_config(FULL_SPEC)
+        if self.rlm_config.get("enabled", False):
+            print(
+                "✅ RLM configured "
+                f"(mode={self.rlm_config.get('mode', 'assist')}, "
+                f"backend={self.rlm_config.get('backend', 'litellm')})"
+            )
+
+    async def run(self, query: Optional[str] = None, **inputs: Any) -> Dict[str, Any]:
+        if query is None:
+{% if spec.input_fields and spec.input_fields|length > 0 %}
+            query = str(inputs.get("{{ spec.input_fields[0].name | to_snake_case }}", ""))
+{% else %}
+            query = str(inputs.get("query", ""))
+{% endif %}
+
+        prompt = query or ""
+        started = time.time()
+        print(
+            "🧠 ADK run start | "
+            f"model={self.runtime.get('model')} | tools={self.runtime.get('tool_count', 0)}"
+        )
+        answer = await superoptix_run_agent_with_optional_rlm(
+            agent=self.agent,
+            runner=self.runner,
+            prompt=prompt,
+            spec_data=FULL_SPEC,
+            model_name=str(self.runtime.get("model", "")),
+            app_name=str(self.runtime.get("app_name", "superoptix_agent")),
+            logfire_enabled=bool((FULL_SPEC.get("logfire", {}) or {}).get("enabled", True)),
+        )
+        elapsed_ms = int((time.time() - started) * 1000)
+        print(f"✅ ADK run done ({elapsed_ms}ms)")
+
+{% if spec.output_fields and spec.output_fields|length > 0 %}
+        out: Dict[str, Any] = {
+            "{{ spec.output_fields[0].name | to_snake_case }}": answer
+        }
+{% if spec.output_fields|length > 1 %}
+{% for field in spec.output_fields[1:] %}
+        out["{{ field.name | to_snake_case }}"] = ""
+{% endfor %}
+{% endif %}
+        return out
+{% else %}
+        return {"response": answer}
+{% endif %}
+
+    def run_sync(self, query: Optional[str] = None, **inputs: Any) -> Dict[str, Any]:
+        import asyncio
+
+        return asyncio.run(self.run(query=query, **inputs))
+
+
+if __name__ == "__main__":
+    pipeline = {{ agent_name | to_pascal_case }}Pipeline()
+    print(pipeline.run_sync(query="Hello"))

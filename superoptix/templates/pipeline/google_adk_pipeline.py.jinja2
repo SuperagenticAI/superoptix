@@ -15,6 +15,8 @@ SuperSpec Metadata:
 from typing import List, Dict, Any, Optional
 import asyncio
 import uuid
+import json
+from pathlib import Path
 
 # Google ADK imports
 try:
@@ -29,6 +31,27 @@ except ImportError as e:
   print("⚠️  Set GOOGLE_API_KEY environment variable")
 
 from superoptix.core.base_component import BaseComponent
+from superoptix.runners.google_adk_runtime_helpers import (
+  get_google_adk_rlm_config as superoptix_get_google_adk_rlm_config,
+  run_agent_with_optional_rlm as superoptix_run_agent_with_optional_rlm,
+)
+
+COMPILED_SPEC_PATH = Path(__file__).resolve().parent / "{{ compiled_spec_filename }}"
+def _load_compiled_spec(path: Path) -> Dict[str, Any]:
+  try:
+    with path.open("r", encoding="utf-8") as _spec_file:
+      return json.load(_spec_file)
+  except FileNotFoundError as exc:
+    raise FileNotFoundError(
+      f"Compiled spec file not found at {path}. Recompile this agent to regenerate pipeline artifacts."
+    ) from exc
+  except json.JSONDecodeError as exc:
+    raise ValueError(
+      f"Compiled spec file is invalid JSON at {path}. Recompile this agent to regenerate pipeline artifacts."
+    ) from exc
+
+
+FULL_SPEC = _load_compiled_spec(COMPILED_SPEC_PATH)
 
 
 class {{ agent_name | to_pascal_case }}Component(BaseComponent):
@@ -83,6 +106,13 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
     
     self._agent = None
     self._runner = None
+    self._rlm_config = superoptix_get_google_adk_rlm_config(FULL_SPEC)
+    if self._rlm_config.get("enabled", False):
+      print(
+        "✅ RLM configured "
+        f"(mode={self._rlm_config.get('mode', 'assist')}, "
+        f"backend={self._rlm_config.get('backend', 'litellm')})"
+      )
   
   def _build_default_instruction(self) -> str:
     """Build default instruction from playbook."""
@@ -91,11 +121,17 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 {% if spec.persona.role %}
     instruction_parts.append("You are a " + {{ (spec.persona.role | replace('\n', ' ')) | tojson }})
 {% endif %}
+{% if spec.persona.instructions %}
+    instruction_parts.append("Instructions: " + {{ (spec.persona.instructions | replace('\n', ' ')) | tojson }})
+{% endif %}
 {% if spec.persona.goal %}
     instruction_parts.append("Your goal is: " + {{ (spec.persona.goal | replace('\n', ' ')) | tojson }})
 {% endif %}
 {% if spec.persona.backstory %}
     instruction_parts.append({{ (spec.persona.backstory | replace('\n', ' ')) | tojson }})
+{% endif %}
+{% if spec.persona.traits %}
+    instruction_parts.append("Traits: " + {{ (spec.persona.traits | join(', ') | replace('\n', ' ')) | tojson }})
 {% endif %}
 {% if spec.reasoning and spec.reasoning.steps %}
     instruction_parts.append("Your approach:")
@@ -177,25 +213,24 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
       user_id = "superoptix_user"
       session_id = str(uuid.uuid4())
       
-      # Create session and run (async)
-      # Handle event loop properly
+      # Execute with helper-managed optional RLM routing.
       import inspect
-      if inspect.iscoroutinefunction(self._run_agent_async):
+      if inspect.iscoroutinefunction(self._run_with_optional_rlm_async):
         try:
           loop = asyncio.get_event_loop()
           if loop.is_running():
             # If loop is running, create a task
             import concurrent.futures
             with concurrent.futures.ThreadPoolExecutor() as executor:
-              future = executor.submit(asyncio.run, self._run_agent_async(user_id, session_id, user_message))
+              future = executor.submit(asyncio.run, self._run_with_optional_rlm_async(user_id, session_id, user_message))
               response_text = future.result()
           else:
-            response_text = loop.run_until_complete(self._run_agent_async(user_id, session_id, user_message))
+            response_text = loop.run_until_complete(self._run_with_optional_rlm_async(user_id, session_id, user_message))
         except RuntimeError:
           # No event loop, create one
-          response_text = asyncio.run(self._run_agent_async(user_id, session_id, user_message))
+          response_text = asyncio.run(self._run_with_optional_rlm_async(user_id, session_id, user_message))
       else:
-        response_text = self._run_agent_async(user_id, session_id, user_message)
+        response_text = self._run_with_optional_rlm_async(user_id, session_id, user_message)
       
 {% if spec.output_fields %}
 {% set first_output = spec.output_fields[0] %}
@@ -253,6 +288,30 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
             response_parts.append(part.text)
     
     return ''.join(response_parts) if response_parts else "No response generated"
+  
+  async def _run_with_optional_rlm_async(self, user_id: str, session_id: str, user_message: str) -> str:
+    """
+    Execute with optional RLM wrapper.
+    Keeps optimized pipeline aligned with minimal-mode RLM behavior.
+    """
+    del session_id  # Session IDs are managed by runner/session service
+    # Convert config to dict if needed
+    import types as python_types
+    config = vars(self.config) if isinstance(self.config, python_types.SimpleNamespace) else self.config
+    if not isinstance(config, dict):
+      config = {}
+    model_str = str(config.get("model", "gemini-2.0-flash"))
+    app_name = f"superoptix_{{ agent_name }}"
+    return await superoptix_run_agent_with_optional_rlm(
+      agent=self._agent,
+      runner=self._runner,
+      prompt=user_message,
+      spec_data=FULL_SPEC,
+      model_name=model_str,
+      app_name=app_name,
+      user_id=user_id,
+      logfire_enabled=bool((FULL_SPEC.get("logfire", {}) or {}).get("enabled", True)),
+    )
   
   def update(self, new_variable: Any) -> None:
     """

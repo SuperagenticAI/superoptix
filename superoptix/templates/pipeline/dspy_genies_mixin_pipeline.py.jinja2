@@ -55,18 +55,39 @@ logging.getLogger("dspy.predict.predict").setLevel(logging.ERROR)
 
 class {{ agent_name | to_pascal_case }}ReActSignature(dspy.Signature):
     """
-    {{ spec.persona.role | default('AI Assistant') }}: {{ spec.persona.goal | default('Help users with their tasks') }}
-    
     Think step-by-step and use available tools to provide comprehensive answers.
     
     Role: {{ spec.persona.role | default('Helper') }}
-    {%- if spec.persona.traits %}
+    {% if spec.persona.instructions %}
+    Instructions: {{ spec.persona.instructions }}
+    {% endif %}
+    {% if spec.persona.goal %}
+    Goal: {{ spec.persona.goal }}
+    {% endif %}
+    {% if spec.persona.backstory %}
+    Backstory: {{ spec.persona.backstory }}
+    {% endif %}
+    {% if spec.persona.traits %}
     Traits: {{ spec.persona.traits | join(', ') }}
-    {%- endif %}
-    {%- if spec.tasks and spec.tasks[0] and spec.tasks[0].instruction %}
-    
-    Instruction: {{ spec.tasks[0].instruction | clean }}
-    {%- endif %}
+    {% endif %}
+    {% if spec.reasoning and spec.reasoning.method %}
+    Reasoning Method: {{ spec.reasoning.method }}
+    {% endif %}
+    {% if spec.reasoning and spec.reasoning.steps %}
+    Reasoning Steps:
+    {% for step in spec.reasoning.steps %}
+    - {{ step }}
+    {% endfor %}
+    {% endif %}
+    {% if spec.tasks and spec.tasks[0] and spec.tasks[0].instruction %}
+    Task Instruction: {{ spec.tasks[0].instruction | clean }}
+    {% endif %}
+    {% if spec.constraints %}
+    Constraints:
+    {% for constraint in spec.constraints %}
+    - {{ constraint }}
+    {% endfor %}
+    {% endif %}
     """
     # Input Fields
     {% if spec.tasks and spec.tasks[0] and spec.tasks[0].inputs -%}

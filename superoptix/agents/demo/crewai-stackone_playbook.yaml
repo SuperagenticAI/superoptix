@@ -1,0 +1,101 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: CrewAI StackOne Calendly Demo
+  id: crewai-stackone
+  namespace: demo
+  version: 1.0.0
+  level: oracles
+  description: CrewAI demo using StackOne connector tools for Calendly workflows.
+  author: SuperOptiX
+  tags:
+    - crewai
+    - stackone
+    - calendly
+    - connectors
+    - tools
+
+spec:
+  target_framework: crewai
+
+  language_model:
+    provider: google-genai
+    model: google-genai:gemini-2.5-flash
+    temperature: 0.1
+    max_tokens: 2200
+
+  persona:
+    name: calendly_connector_agent
+    role: Calendly Operations Assistant
+    goal: Answer scheduling questions using StackOne Calendly connector tools.
+    backstory: >
+      You operate on connected SaaS data and must use tools for factual answers.
+      Keep responses concise and include date/time assumptions.
+    traits:
+      - precise
+      - practical
+      - structured
+    instructions: |
+      Always use tools for schedule data.
+      Start with calendly_get_current_user to establish account identity.
+      For event listing, use explicit date windows and timezone.
+      If a tool fails, explain what argument or configuration is missing.
+
+  input_fields:
+    - name: query
+      type: str
+      description: User scheduling request
+      required: true
+
+  output_fields:
+    - name: answer
+      type: str
+      description: Tool-grounded scheduling response
+      required: true
+
+  tasks:
+    - name: calendly_query
+      instruction: |
+        Use available StackOne Calendly tools to answer the user query.
+        Keep results short and actionable.
+      inputs:
+        - name: query
+          type: str
+          description: Scheduling request
+          required: true
+      outputs:
+        - name: answer
+          type: str
+          description: Final answer
+
+  tools:
+    enabled: true
+    mode: stackone
+    stackone:
+      enabled: true
+      discovery_mode: false
+      api_key_env: STACKONE_API_KEY
+      account_ids_env: STACKONE_ACCOUNT_IDS
+      providers:
+        - calendly
+      actions:
+        - calendly_*
+      fallback_unfiltered: true
+
+  feature_specifications:
+    scenarios:
+      - name: user_identity_lookup
+        description: Retrieve user identity from Calendly.
+        input:
+          query: What is my Calendly username?
+        expected_output:
+          expected_keywords:
+            - calendly
+            - username
+
+# Quick Start:
+#   export STACKONE_API_KEY="..."
+#   export STACKONE_ACCOUNT_IDS="acc_123"
+#   super agent pull crewai-stackone
+#   super agent compile crewai-stackone --framework crewai --cloud --provider google-genai --model gemini-2.5-flash
+#   super agent run crewai-stackone --cloud --provider google-genai --model gemini-2.5-flash --goal "What is my Calendly username?"

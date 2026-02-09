@@ -86,7 +86,7 @@ The marketplace covers **18 major industries** with specialized agents:
 
 ## 🚀 Getting Started with the Marketplace
 
-### 1. **Marketplace Dashboard**
+### **Marketplace Dashboard**
 
 Start with the main marketplace overview:
 
@@ -100,7 +100,7 @@ super marketplace
 - ⭐ **Featured Items**: Popular agents and tools
 - 🚀 **Quick Actions**: Common marketplace commands
 
-### 2. **Browse Agents by Industry**
+### **Browse Agents by Industry**
 
 ```bash
 # Browse all agents
@@ -112,11 +112,11 @@ super marketplace browse agents --industry finance
 super marketplace browse agents --industry healthcare
 
 # Filter by tier
-super marketplace browse agents --tier oracles
-super marketplace browse agents --tier genies
+super marketplace browse agents --framework dspy
+super marketplace browse agents --framework crewai
 ```
 
-### 3. **Browse Tools by Category**
+### **Browse Tools by Category**
 
 ```bash
 # Browse all tools
@@ -128,7 +128,7 @@ super marketplace browse tools --category development
 super marketplace browse tools --category finance
 ```
 
-### 4. **Universal Search**
+### **Universal Search**
 
 Search across all agents and tools:
 
@@ -255,14 +255,14 @@ super marketplace browse categories
 
 ## 🎨 Customization Workflow
 
-### 1. **Discover & Explore**
+### **Discover & Explore**
 ```bash
 # Find relevant agents and tools
 super marketplace search "your domain"
 super marketplace browse agents --industry your_industry
 ```
 
-### 2. **Install & Examine**
+### **Install & Examine**
 ```bash
 # Install components
 super marketplace install agent relevant_agent
@@ -272,7 +272,7 @@ super marketplace install tool relevant_tool
 cat agents/relevant_agent/relevant_agent_playbook.yaml
 ```
 
-### 3. **Customize & Context-Engineer**
+### **Customize & Context-Engineer**
 ```bash
 # Modify the playbook for your needs
 # - Update persona and goals
@@ -281,7 +281,7 @@ cat agents/relevant_agent/relevant_agent_playbook.yaml
 # - Set up your domain context
 ```
 
-### 4. **Test & Optimize**
+### **Test & Optimize**
 ```bash
 # Compile and test your customized agent
 super agent compile relevant_agent
@@ -295,11 +295,11 @@ super agent optimize relevant_agent
 
 ### What's Available Now
 
-✅ **Local Marketplace**: Pre-built agents and tools in the SuperOptiX package
-✅ **Industry Coverage**: 18 industries with specialized agents
-✅ **Tool Categories**: 17 categories with 29+ tools
-✅ **Search & Browse**: Universal search and filtering
-✅ **Quick Installation**: One-command agent installation
+**Local Marketplace**: Pre-built agents and tools in the SuperOptiX package
+**Industry Coverage**: 18 industries with specialized agents
+**Tool Categories**: 17 categories with 29+ tools
+**Search & Browse**: Universal search and filtering
+**Quick Installation**: One-command agent installation
 
 ### What's Coming Soon
 
@@ -313,27 +313,27 @@ super agent optimize relevant_agent
 
 ## 🎯 Best Practices
 
-### 1. **Start with Exploration**
+### **Start with Exploration**
 ```bash
 # Don't jump straight to installation
 super marketplace browse agents --industry your_industry
 super marketplace search "your specific need"
 ```
 
-### 2. **Examine Before Installing**
+### **Examine Before Installing**
 ```bash
 # Check details first
 super marketplace show agent_name
 super marketplace show tool_name
 ```
 
-### 3. **Customize for Your Needs**
+### **Customize for Your Needs**
 - **Never use agents as-is** - Always customize for your domain
 - **Context-engineer your playbooks** - Add your specific requirements
 - **Test thoroughly** - Validate with your use cases
 - **Iterate and improve** - Refine based on performance
 
-### 4. **Combine Components**
+### **Combine Components**
 ```bash
 # Install multiple related components
 super marketplace install agent developer

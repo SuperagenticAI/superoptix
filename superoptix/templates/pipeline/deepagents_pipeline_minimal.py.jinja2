@@ -1,0 +1,134 @@
+"""
+{{ agent_name | to_pascal_case }} Agent - DeepAgents Minimal Pipeline
+
+Auto-generated from SuperSpec playbook using SuperOptiX compiler.
+Framework: DeepAgents
+Generated: {{ timestamp }}
+"""
+
+from __future__ import annotations
+
+import asyncio
+import json
+import time
+from pathlib import Path
+from typing import Any, Dict, Optional
+
+from langchain.chat_models import init_chat_model
+
+from superoptix.vendor.deepagents.graph import create_deep_agent
+from superoptix.runners.deepagents_runtime_helpers import (
+    build_instructions as superoptix_build_instructions,
+    resolve_model as superoptix_resolve_model,
+{% set tools_cfg = (spec.get("tools", {}) or {}) %}
+{% set dspy_tools_cfg = ((spec.get("dspy", {}) or {}).get("tools", {}) or {}) %}
+{% set stackone_cfg = spec.get("stackone") or tools_cfg.get("stackone") or dspy_tools_cfg.get("stackone") %}
+{% set stackone_mode = (spec.get("stackone_mode") or tools_cfg.get("mode") or dspy_tools_cfg.get("mode") or "") | string | lower %}
+{% set include_stackone_code = (stackone_mode in ["stackone", "stackone_discovery"]) or (stackone_cfg is mapping and (stackone_cfg | length > 0)) %}
+{% set deepagents_rlm_cfg = ((spec.get("deepagents", {}) or {}).get("rlm")) %}
+{% set include_rlm_code = (deepagents_rlm_cfg is mapping and (deepagents_rlm_cfg | length > 0)) or (spec.get("rlm") is mapping and (spec.get("rlm") | length > 0)) %}
+{% if include_stackone_code %}
+    build_stackone_tools as superoptix_build_stackone_tools,
+{% endif %}
+{% if include_rlm_code %}
+    run_with_optional_rlm as superoptix_run_with_optional_rlm,
+{% endif %}
+)
+
+COMPILED_SPEC_PATH = Path(__file__).resolve().parent / "{{ compiled_spec_filename }}"
+def _load_compiled_spec(path: Path) -> Dict[str, Any]:
+    try:
+        with path.open("r", encoding="utf-8") as _spec_file:
+            return json.load(_spec_file)
+    except FileNotFoundError as exc:
+        raise FileNotFoundError(
+            f"Compiled spec file not found at {path}. Recompile this agent to regenerate pipeline artifacts."
+        ) from exc
+    except json.JSONDecodeError as exc:
+        raise ValueError(
+            f"Compiled spec file is invalid JSON at {path}. Recompile this agent to regenerate pipeline artifacts."
+        ) from exc
+
+
+FULL_SPEC = _load_compiled_spec(COMPILED_SPEC_PATH)
+
+LANGUAGE_MODEL = dict(FULL_SPEC.get("language_model", {}) or {})
+INSTRUCTION_SPEC = {
+    "persona": dict(FULL_SPEC.get("persona", {}) or {}),
+    "tasks": list(FULL_SPEC.get("tasks", []) or []),
+}
+
+
+class {{ agent_name | to_pascal_case }}Pipeline:
+    """
+    DeepAgents native minimal pipeline.
+    """
+
+    def __init__(
+        self,
+        model_name: Optional[str] = None,
+        instructions: Optional[str] = None,
+        model_config: Optional[Dict[str, Any]] = None,
+    ):
+        self._resolved_model = model_name or superoptix_resolve_model(
+            LANGUAGE_MODEL, model_config=model_config
+        )
+        self._resolved_instructions = instructions or superoptix_build_instructions(
+            INSTRUCTION_SPEC
+        )
+        self._model = init_chat_model(self._resolved_model)
+{% if include_stackone_code %}
+        self._tools = superoptix_build_stackone_tools(FULL_SPEC)
+{% else %}
+        self._tools = []
+{% endif %}
+        self._agent = create_deep_agent(
+            model=self._model,
+            tools=self._tools or [],
+            system_prompt=self._resolved_instructions,
+        )
+        if self._tools:
+            print(f"✅ StackOne tools registered: {len(self._tools)}")
+        else:
+            print("ℹ️  No StackOne tools configured")
+
+    async def run(self, query: Optional[str] = None, **inputs: Any) -> Dict[str, Any]:
+        if query is None:
+{% if spec.input_fields and spec.input_fields|length > 0 %}
+            query = str(inputs.get("{{ spec.input_fields[0].name | to_snake_case }}", ""))
+{% else %}
+            query = str(inputs.get("query", ""))
+{% endif %}
+        prompt = query or ""
+        started = time.time()
+        preview = (prompt[:120] + "...") if len(prompt) > 120 else prompt
+        print(
+            f"🧠 DeepAgents run start | model={self._resolved_model} | tools={len(self._tools)}"
+        )
+        print(f"📝 Prompt: {preview}")
+{% if include_rlm_code %}
+        output = await superoptix_run_with_optional_rlm(
+            agent_graph=self._agent,
+            prompt=prompt,
+            spec_data=FULL_SPEC,
+            model_name=self._resolved_model,
+        )
+{% else %}
+        result = await asyncio.to_thread(
+            self._agent.invoke, {"messages": [{"role": "user", "content": prompt}]}
+        )
+        messages = result.get("messages", []) if isinstance(result, dict) else []
+        if messages:
+            last = messages[-1]
+            output = str(getattr(last, "content", last))
+        else:
+            output = str(result)
+{% endif %}
+        elapsed_ms = int((time.time() - started) * 1000)
+        print(f"✅ DeepAgents run done ({elapsed_ms}ms)")
+
+{% if spec.output_fields and spec.output_fields|length > 0 %}
+        return {"{{ spec.output_fields[0].name | to_snake_case }}": output}
+{% else %}
+        return {"response": output}
+{% endif %}

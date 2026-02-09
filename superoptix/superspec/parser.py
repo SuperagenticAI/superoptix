@@ -65,6 +65,13 @@ class AgentSpec:
     metadata: AgentMetadata
     language_model: Dict[str, Any]
     tasks: List[TaskDefinition]
+    dspy: Optional[Dict[str, Any]] = None
+    pydantic_ai: Optional[Dict[str, Any]] = None
+    openai_agent: Optional[Dict[str, Any]] = None
+    google_adk: Optional[Dict[str, Any]] = None
+    deepagents: Optional[Dict[str, Any]] = None
+    crewai: Optional[Dict[str, Any]] = None
+    rlm: Optional[Dict[str, Any]] = None
     persona: Optional[Dict[str, Any]] = None
     agentflow: Optional[List[AgentFlowStep]] = None
     retrieval: Optional[Dict[str, Any]] = None
@@ -183,6 +190,13 @@ class SuperSpecXParser:
                 metadata=metadata,
                 language_model=spec_dict.get("language_model", {}),
                 tasks=tasks,
+                dspy=spec_dict.get("dspy"),
+                pydantic_ai=spec_dict.get("pydantic_ai"),
+                openai_agent=spec_dict.get("openai_agent"),
+                google_adk=spec_dict.get("google_adk"),
+                deepagents=spec_dict.get("deepagents"),
+                crewai=spec_dict.get("crewai"),
+                rlm=spec_dict.get("rlm"),
                 persona=spec_dict.get("persona"),
                 agentflow=agentflow if agentflow else None,
                 retrieval=spec_dict.get("retrieval"),
@@ -288,9 +302,16 @@ class SuperSpecXParser:
         # Feature usage statistics
         feature_usage = {}
         features_to_check = [
+            "dspy",
+            "pydantic_ai",
+            "openai_agent",
+            "google_adk",
+            "deepagents",
+            "crewai",
             "memory",
             "tool_calling",
             "retrieval",
+            "rlm",
             "agentflow",
             "optimization",
         ]
@@ -374,6 +395,13 @@ class SuperSpecXParser:
 
             # Add other optional sections
             optional_fields = [
+                "dspy",
+                "pydantic_ai",
+                "openai_agent",
+                "google_adk",
+                "deepagents",
+                "crewai",
+                "rlm",
                 "retrieval",
                 "memory",
                 "tool_calling",
@@ -414,15 +442,8 @@ class SuperSpecXParser:
         issues = []
         tier = spec.metadata.level
 
-        # Features that require Genies tier
-        genies_features = ["memory", "tool_calling", "retrieval"]
-
-        if tier == "oracles":
-            for feature in genies_features:
-                if getattr(spec, feature) is not None:
-                    issues.append(
-                        f"Feature '{feature}' requires Genies tier but agent is Oracles tier"
-                    )
+        # Unified OSS flow supports memory/tool_calling/retrieval for DSPy across tiers.
+        # Keep this method for legacy metadata checks only.
 
         # Check agentflow step types
         if spec.agentflow:
@@ -481,11 +502,22 @@ class SuperSpecXParser:
         params = optimizer_config.get("params", {})
 
         if optimizer_name == "GEPA":
-            # Check required GEPA parameters
-            if "metric" not in params:
-                issues.append("GEPA optimizer requires 'metric' parameter")
-            if "reflection_lm" not in params:
-                issues.append("GEPA optimizer requires 'reflection_lm' parameter")
+            # GEPA supports sensible defaults in runner/template.
+            # Keep validation lightweight: only validate obviously conflicting budgets.
+            if (
+                params.get("auto") is not None
+                and params.get("max_full_evals") is not None
+            ):
+                issues.append(
+                    "GEPA params: use either 'auto' or 'max_full_evals', not both."
+                )
+            if (
+                params.get("auto") is not None
+                and params.get("max_metric_calls") is not None
+            ):
+                issues.append(
+                    "GEPA params: use either 'auto' or 'max_metric_calls', not both."
+                )
 
         elif optimizer_name == "SIMBA":
             # SIMBA parameter validation

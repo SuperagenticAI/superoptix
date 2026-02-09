@@ -1,0 +1,106 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Pydantic RLM Demo
+  id: pydantic-rlm
+  namespace: demo
+  version: 1.0.0
+  level: oracles
+  description: Minimal Pydantic AI demo with optional RLM orchestration and Logfire tracing.
+  author: SuperOptiX
+  tags:
+    - pydantic-ai
+    - rlm
+    - reasoning
+    - demo
+
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    temperature: 0.1
+    max_tokens: 1800
+    api_base: http://localhost:11434
+
+  persona:
+    name: reasoning_assistant
+    role: Senior Systems Reasoning Assistant
+    goal: Produce grounded, concise plans and analyses with clear assumptions.
+    backstory: >
+      You are a practical engineering assistant. You reason in steps, call out risks,
+      and keep outputs implementation-friendly.
+    traits:
+      - analytical
+      - detail-oriented
+      - practical
+
+  input_fields:
+    - name: query
+      type: string
+      description: User request to analyze or plan.
+      required: true
+
+  output_fields:
+    - name: answer
+      type: string
+      description: Final concise answer.
+      required: true
+
+  tasks:
+    - name: reason_and_answer
+      instruction: >
+        Analyze the user request, identify key constraints and assumptions,
+        then provide a concise actionable answer.
+      inputs:
+        - name: query
+          type: str
+          description: User request
+          required: true
+      outputs:
+        - name: answer
+          type: str
+          description: Final response
+
+  # Pydantic AI framework-specific RLM configuration.
+  pydantic_ai:
+    rlm:
+      enabled: true
+      mode: assist
+      backend: litellm
+      environment: python
+      max_iterations: 8
+      max_depth: 1
+      verbose: false
+      persistent: false
+      # Optional cloud override for RLM backend:
+      # task_model: google-gla:gemini-2.5-flash
+      # api_key_env: GOOGLE_API_KEY
+      logger:
+        enabled: true
+        log_dir: .superoptix/logs/rlm
+        file_name: pydantic_rlm_demo
+
+  logfire:
+    enabled: true
+
+  feature_specifications:
+    scenarios:
+      - name: migration_strategy_summary
+        description: Agent should produce a concise migration strategy summary.
+        input:
+          query: Design a low-risk migration strategy from monolith to microservices.
+        expected_output:
+          answer: phased rollout strangler pattern observability rollback testing
+
+      - name: assumption_disclosure
+        description: Agent should call out assumptions when context is incomplete.
+        input:
+          query: Give me the best architecture for my product.
+        expected_output:
+          answer: assumptions constraints tradeoffs
+
+# Quick Start:
+#   super agent pull pydantic-rlm
+#   super agent compile pydantic-rlm --framework pydantic-ai
+#   super agent run pydantic-rlm --goal "Design a migration strategy for a legacy platform"

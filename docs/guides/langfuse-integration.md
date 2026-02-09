@@ -72,17 +72,17 @@ super init langfuse_demo
 cd langfuse_demo
 
 # Pull developer agent with Genies tier
-super agent pull developer --tier genies
+super agent pull developer
 ```
 
 Expected output:
 ```
 🚀 Enhancing agent 'developer' for Genies tier...
-  ✅ Model configured for Genies tier: llama3.1:8b
-  ✅ ReAct configuration added
-  ✅ Default toolset added (calculator, text_analyzer, file_reader)
-  ✅ Memory system configured
-  ✅ Preserving optimization and testing sections
+  Model configured for Genies tier: llama3.1:8b
+  ReAct configuration added
+  Default toolset added (calculator, text_analyzer, file_reader)
+  Memory system configured
+  Preserving optimization and testing sections
 ================================================================================
 
 🤖 Adding agent 'developer'...
@@ -133,7 +133,7 @@ Expected output:
 │  📁 Output: langfuse_demo/agents/developer/pipelines/developer_pipeline.py                               │
 │                                                                                                          │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-✅ Successfully generated Genies-tier pipeline (mixin) at: 
+Successfully generated Genies-tier pipeline (mixin) at: 
 /Users/local/superagentic/SuperOptiX/langfuse_demo/langfuse_demo/agents/developer/pipelines/developer_pipeline.py
 ```
 
@@ -177,7 +177,7 @@ def test_langfuse_integration():
             }
         ) as trace:
             
-            print(f"✅ Created trace: {langfuse.get_current_trace_id()}")
+            print(f"Created trace: {langfuse.get_current_trace_id()}")
             
             # Create a generation span for model call
             with langfuse.start_as_current_generation(
@@ -193,7 +193,7 @@ def test_langfuse_integration():
                 }
             ) as generation:
                 
-                print(f"✅ Created generation span: {langfuse.get_current_observation_id()}")
+                print(f"Created generation span: {langfuse.get_current_observation_id()}")
                 
                 # Simulate model response
                 response = "def factorial(n):\n    if n <= 1:\n        return 1\n    return n * factorial(n-1)"
@@ -220,7 +220,7 @@ def test_langfuse_integration():
                     comment="Fast execution time"
                 )
                 
-                print("✅ Logged scores")
+                print("Logged scores")
             
             # Score the overall trace
             langfuse.score_current_trace(
@@ -229,7 +229,7 @@ def test_langfuse_integration():
                 comment="High quality agent execution"
             )
             
-            print("✅ Completed trace successfully")
+            print("Completed trace successfully")
         
         # Force flush to ensure data is sent
         langfuse.flush()
@@ -239,7 +239,7 @@ def test_langfuse_integration():
         return True
         
     except Exception as e:
-        print(f"❌ Error testing LangFuse: {e}")
+        print(f"Error testing LangFuse: {e}")
         return False
 
 def check_langfuse_connection():
@@ -248,13 +248,13 @@ def check_langfuse_connection():
         import requests
         response = requests.get("http://localhost:3000/api/public/health")
         if response.status_code == 200:
-            print("✅ LangFuse server is running and accessible")
+            print("LangFuse server is running and accessible")
             return True
         else:
-            print(f"❌ LangFuse server returned status code: {response.status_code}")
+            print(f"LangFuse server returned status code: {response.status_code}")
             return False
     except Exception as e:
-        print(f"❌ Cannot connect to LangFuse server: {e}")
+        print(f"Cannot connect to LangFuse server: {e}")
         return False
 
 if __name__ == "__main__":
@@ -269,9 +269,9 @@ if __name__ == "__main__":
             print(f"\n🎉 Test completed successfully!")
             print(f"🌐 View results at: http://localhost:3000")
         else:
-            print(f"\n❌ Test failed")
+            print(f"\nTest failed")
     else:
-        print("\n❌ LangFuse server is not accessible.")
+        print("\nLangFuse server is not accessible.")
         print("   Make sure Docker is running and LangFuse is started:")
         print("   docker compose up -d")
 ```
@@ -287,12 +287,12 @@ Expected output:
 ```
 🧪 SuperOptiX LangFuse Integration Test
 ==================================================
-✅ LangFuse server is running and accessible
+LangFuse server is running and accessible
 🧪 Testing LangFuse integration with local instance
-✅ Created trace: 5ec5a318e2d5fe2069d826866ce8624e
-✅ Created generation span: fcb95e33f3176269
-✅ Logged scores
-✅ Completed trace successfully
+Created trace: 5ec5a318e2d5fe2069d826866ce8624e
+Created generation span: fcb95e33f3176269
+Logged scores
+Completed trace successfully
 📊 Trace data sent to LangFuse successfully
 
 🎉 Test completed successfully!
@@ -312,11 +312,11 @@ Expected output:
 🔍 Tracing enabled for agent developer_20250714_212620
 📁 Traces will be stored in: /Users/local/superagentic/SuperOptiX/langfuse_demo/.superoptix/traces
 🚀 Configuring llama3.1:8b with ollama for genies-tier capabilities
-✅ Model connection successful: ollama/llama3.1:8b
-✅ 3 tools configured successfully
-✅ ReAct agent configured with 3 tools
+Model connection successful: ollama/llama3.1:8b
+3 tools configured successfully
+ReAct agent configured with 3 tools
 📋 Loaded 5 BDD specifications for execution
-✅ DeveloperPipeline (Genie tier) initialized with ReAct and 5 BDD scenarios
+DeveloperPipeline (Genie tier) initialized with ReAct and 5 BDD scenarios
 
 ╭──────────────────────────────────────────── Agent Execution ─────────────────────────────────────────────╮
 │ 🤖 Running Developer Pipeline                                                                            │
@@ -373,14 +373,14 @@ Expected output:
 │ Check DSPy: No                                                                                           │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 📁 Checking for trace files...
-✅ Found 6 potential trace files:
+Found 6 potential trace files:
    📄 .superoptix/traces (224 bytes)
    📄 .superoptix/traces/developer_20250714_212748.jsonl (8684 bytes)
    📄 .superoptix/traces/developer_20250714_212620.jsonl (11356 bytes)
    📄 .superoptix/traces/developer_20250714_212830.jsonl (7719 bytes)
    📄 .superoptix/traces/developer.jsonl (9340 bytes)
    📄 .superoptix/traces/developer_20250714_212809.jsonl (8297 bytes)
-✅ SuperOptiX trace directory found: .superoptix/traces
+SuperOptiX trace directory found: .superoptix/traces
    📊 Found 5 trace files
 ```
 
@@ -433,11 +433,11 @@ def check_langfuse_status():
                            shell=True, capture_output=True, text=True)
     
     if "langfuse" in result.stdout:
-        print("✅ LangFuse containers are running:")
+        print("LangFuse containers are running:")
         print(result.stdout)
         return True
     else:
-        print("❌ LangFuse containers are not running")
+        print("LangFuse containers are not running")
         print("Starting LangFuse...")
         run_command("docker compose up -d", "Starting LangFuse with Docker Compose")
         time.sleep(10)  # Wait for services to start
@@ -450,7 +450,7 @@ def demo_langfuse_integration():
     
     # Step 1: Check LangFuse status
     if not check_langfuse_status():
-        print("❌ Failed to start LangFuse")
+        print("Failed to start LangFuse")
         return False
     
     # Step 2: Run the LangFuse test script
@@ -459,7 +459,7 @@ def demo_langfuse_integration():
                          "Running LangFuse API integration test")
     
     if not success:
-        print("❌ LangFuse API test failed")
+        print("LangFuse API test failed")
         return False
     
     # Step 3: Run SuperOptiX agent with LangFuse observability
@@ -476,7 +476,7 @@ def demo_langfuse_integration():
                              f"Running agent with goal {i}")
         
         if not success:
-            print(f"❌ Agent execution {i} failed")
+            print(f"Agent execution {i} failed")
             continue
         
         # Wait a bit between runs
@@ -497,7 +497,7 @@ def demo_langfuse_integration():
     # Step 5: Show LangFuse UI information
     print("\n🌐 Step 4: LangFuse UI Access")
     print("=" * 50)
-    print("✅ LangFuse is running locally!")
+    print("LangFuse is running locally!")
     print("🌐 Access the LangFuse UI at: http://localhost:3000")
     print("📊 View traces, spans, and generations in real-time")
     print("📈 Monitor agent performance and quality metrics")
@@ -556,7 +556,7 @@ def main():
     success = demo_langfuse_integration()
     
     if success:
-        print("\n✅ Demo completed successfully!")
+        print("\nDemo completed successfully!")
         create_demo_summary()
         
         print("\n🎯 What's Next?")
@@ -568,7 +568,7 @@ def main():
         print("5. 👥 Set up team collaboration features")
         
     else:
-        print("\n❌ Demo encountered issues")
+        print("\nDemo encountered issues")
         print("Check the output above for error details")
     
     print("\n" + "=" * 60)
@@ -622,12 +622,12 @@ python demo_langfuse_superoptix.py
 ```
 🧪 SuperOptiX LangFuse Integration Test
 ==================================================
-✅ LangFuse server is running and accessible
+LangFuse server is running and accessible
 🧪 Testing LangFuse integration with local instance
-✅ Created trace: 5ec5a318e2d5fe2069d826866ce8624e
-✅ Created generation span: fcb95e33f3176269
-✅ Logged scores
-✅ Completed trace successfully
+Created trace: 5ec5a318e2d5fe2069d826866ce8624e
+Created generation span: fcb95e33f3176269
+Logged scores
+Completed trace successfully
 📊 Trace data sent to LangFuse successfully
 
 🎉 Test completed successfully!

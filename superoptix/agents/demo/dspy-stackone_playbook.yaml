@@ -1,0 +1,113 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: DSPy StackOne Connector Demo
+  id: dspy-stackone
+  namespace: demo
+  version: 1.0.0
+  level: oracles
+  description: DSPy ReAct agent that loads StackOne connector tools at runtime for SaaS access without manual auth wiring.
+  author: SuperOptiX
+  tags:
+    - dspy
+    - stackone
+    - connectors
+    - tools
+    - discovery
+
+spec:
+  target_framework: dspy
+
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    temperature: 0.1
+    max_tokens: 1800
+
+  dspy:
+    module: react
+    module_params:
+      max_iterations: 5
+    tools:
+      # Modes: none | builtin | mcp | stackone | stackone_discovery
+      mode: stackone_discovery
+      stackone:
+        enabled: true
+        discovery_mode: true
+        api_key_env: STACKONE_API_KEY
+        # Optional CSV env var: "acc_123,acc_456"
+        account_ids_env: STACKONE_ACCOUNT_IDS
+        # Optional explicit filters (uncomment as needed):
+        # account_ids:
+        #   - acc_123
+        # providers:
+        #   - bamboohr
+        # actions:
+        #   - hris_*
+    adapter:
+      mode: auto
+      strict: false
+      retry_on_parse_error: 1
+      fallback_adapter: chat
+
+  persona:
+    name: StackOne Operations Agent
+    role: SaaS Operations Assistant
+    goal: Resolve operational SaaS requests by selecting and executing the right StackOne connector tools.
+    backstory: You are an automation specialist that safely calls enterprise SaaS APIs through StackOne.
+    traits:
+      - reliable
+      - precise
+      - pragmatic
+    instructions: |
+      Prefer connector tools for factual answers.
+      If a tool fails, explain what failed and what input/account is required.
+      Keep responses concise and actionable.
+
+  input_fields:
+    - name: query
+      type: str
+      description: User's SaaS operations request
+      required: true
+
+  output_fields:
+    - name: answer
+      type: str
+      description: Final answer based on StackOne tool results
+      required: true
+
+  tasks:
+    - name: handle_stackone_request
+      instruction: |
+        Use available StackOne tools to answer the request.
+        If tools are unavailable, explain missing configuration (API key, account IDs, filters).
+      inputs:
+        - name: query
+          type: str
+          description: The user's task
+          required: true
+      outputs:
+        - name: answer
+          type: str
+          description: Tool-grounded answer
+
+  feature_specifications:
+    scenarios:
+      - name: list_employees_sample
+        description: Agent should try connector tools for HRIS employee lookup/list workflows.
+        input:
+          query: List employees and summarize active headcount by department.
+        expected_output:
+          expected_keywords:
+            - employee
+            - department
+            - tool
+            - account
+
+# Usage:
+#   export STACKONE_API_KEY="..."
+#   export STACKONE_ACCOUNT_IDS="acc_123"
+#   super agent pull dspy-stackone
+#   super agent compile dspy-stackone
+#   super agent run dspy-stackone --goal "List employees and group by department"

@@ -77,7 +77,7 @@ memory:
 
 **Key Memory Configuration Points**:
 
-- ✅ **`enabled: true`**: Enables memory functionality
+- **`enabled: true`**: Enables memory functionality
 - ⚡ **`short_term`**: Immediate context retention (1000 tokens)
 - 💾 **`long_term`**: Persistent knowledge storage (100 entries)
 - 📚 **`episodic`**: Conversation episode memory (50 episodes)

@@ -1,0 +1,93 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Pydantic Gateway Demo
+  id: pydantic-gateway-demo
+  namespace: demo
+  version: 1.0.0
+  level: oracles
+  description: Minimal Pydantic AI demo that routes model calls via gateway runtime mode.
+  author: SuperOptiX
+  tags:
+    - pydantic-ai
+    - gateway
+    - cloud
+    - demo
+
+spec:
+  language_model:
+    location: cloud
+    provider: gateway
+    runtime_mode: gateway
+    model: gpt-4o-mini
+    temperature: 0.1
+    max_tokens: 1200
+    gateway:
+      enabled: true
+      base_url: https://your-gateway.example.com
+      api_key_env: PYDANTIC_AI_GATEWAY_API_KEY
+      timeout_sec: 45
+      model_map:
+        task: gpt-4o-mini
+        reflection: gpt-4o-mini
+
+  persona:
+    name: gateway_assistant
+    role: Cloud Gateway Assistant
+    goal: Answer user requests with concise, practical responses through gateway-routed model calls.
+    backstory: >
+      You are a production-style assistant configured to run through an API gateway.
+      Keep responses clear, useful, and short unless asked for detail.
+    traits:
+      - practical
+      - concise
+      - reliable
+
+  input_fields:
+    - name: query
+      type: string
+      description: User query.
+      required: true
+
+  output_fields:
+    - name: response
+      type: string
+      description: Assistant response.
+      required: true
+
+  tasks:
+    - name: answer_query
+      instruction: >
+        Respond to the user clearly and concisely. If assumptions are needed,
+        state them explicitly.
+      inputs:
+        - name: query
+          type: str
+          description: User request
+          required: true
+      outputs:
+        - name: response
+          type: str
+          description: Final answer
+
+  feature_specifications:
+    scenarios:
+      - name: concise_response
+        description: Agent should provide a concise response to a simple request.
+        input:
+          query: Summarize what API gateway mode means in two sentences.
+        expected_output:
+          response: concise summary gateway mode routes model calls through centralized endpoint
+
+      - name: assumption_disclosure
+        description: Agent should disclose assumptions when data is missing.
+        input:
+          query: Is my gateway deployment healthy?
+        expected_output:
+          response: assumption
+
+# Quick Start:
+#   super agent pull pydantic-gateway-demo
+#   export PYDANTIC_AI_GATEWAY_API_KEY=your_key
+#   super agent compile pydantic-gateway-demo --framework pydantic-ai --gateway --gateway-url https://your-gateway.example.com
+#   super agent run pydantic-gateway-demo --framework pydantic-ai --gateway --gateway-url https://your-gateway.example.com --goal "What is gateway mode?"

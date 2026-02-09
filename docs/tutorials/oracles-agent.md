@@ -162,7 +162,7 @@ super agent compile developer
 🔧 Developer Controls: Modular mixins keep your codebase clean and customizable
 🚀 Framework: DSPy (additional frameworks & custom builders coming soon) 
 🔧 Oracles-Tier Features: Basic Chain of Thought + Sequential Orchestra
-✅ Successfully generated Oracles-tier pipeline (mixin) at: /Users/super/swe 
+Successfully generated Oracles-tier pipeline (mixin) at: /Users/super/swe 
 18-15-10-253/swe/agents/developer/pipelines/developer_pipeline.py
 
 💡 Mixin pipeline features (DSPy Default):
@@ -172,11 +172,11 @@ super agent compile developer
    • Built on DSPy - support for additional frameworks is on our roadmap
 
 🎯 Oracles Tier Features
-  ✅ Basic Predict and Chain of Thought modules
-  ✅ Bootstrap Few-Shot optimization
-  ✅ Basic evaluation metrics
-  ✅ Sequential task orchestration
-  ✅ Basic tracing and observability
+  Basic Predict and Chain of Thought modules
+  Bootstrap Few-Shot optimization
+  Basic evaluation metrics
+  Sequential task orchestration
+  Basic tracing and observability
 
 ℹ️  Advanced features available in commercial version
 ╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
@@ -251,12 +251,12 @@ super agent evaluate developer
 📁 Traces will be stored in: /Users/super/swe 18-15-10-253/.superoptix/traces
 🚀 Configuring llama3.2:1b with ollama for oracles-tier capabilities
 📝 Using ChatAdapter for optimal local model compatibility
-✅ Model connection successful: ollama/llama3.2:1b
+Model connection successful: ollama/llama3.2:1b
 📋 Loaded 5 BDD specifications for execution
-✅ DeveloperPipeline (Oracle tier) initialized with 5 BDD scenarios
-✅ Pipeline loaded
-❌ Failed to load optimized model: 'predictor.predict'
-✅ Optimized weights applied
+DeveloperPipeline (Oracle tier) initialized with 5 BDD scenarios
+Pipeline loaded
+Failed to load optimized model: 'predictor.predict'
+Optimized weights applied
 
 🔍 Discovering BDD Specifications...
 📋 Found 5 BDD specifications
@@ -264,11 +264,11 @@ super agent evaluate developer
 🧪 Executing BDD Specification Suite
 ────────────────────────────────────────────────────────────
 Progress: 🧪 Running 5 BDD specifications...
-⠋ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 0/5❌ developer_comprehensive_task
-❌ developer_problem_solving
-❌ developer_best_practices
-❌ developer_compliance_guidance
-❌ developer_strategic_planning
+⠋ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 0/5developer_comprehensive_task
+developer_problem_solving
+developer_best_practices
+developer_compliance_guidance
+developer_strategic_planning
 
 Test Results:
 FFFFF
@@ -276,19 +276,19 @@ FFFFF
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃ Specification                ┃    Status    ┃  Score   ┃ Description                                   ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│ developer_comprehensiv...    │   ❌ FAIL    │   0.29   │ Given a complex software requirement, t...    │
-│ developer_problem_solving    │   ❌ FAIL    │   0.23   │ When facing software challenges, the ag...    │
-│ developer_best_practices     │   ❌ FAIL    │   0.31   │ When asked about software best practice...    │
-│ developer_compliance_g...    │   ❌ FAIL    │   0.21   │ Given regulatory requirements, the agen...    │
-│ developer_strategic_pl...    │   ❌ FAIL    │   0.27   │ When developing software strategies, th...    │
+│ developer_comprehensiv...    │   FAIL    │   0.29   │ Given a complex software requirement, t...    │
+│ developer_problem_solving    │   FAIL    │   0.23   │ When facing software challenges, the ag...    │
+│ developer_best_practices     │   FAIL    │   0.31   │ When asked about software best practice...    │
+│ developer_compliance_g...    │   FAIL    │   0.21   │ Given regulatory requirements, the agen...    │
+│ developer_strategic_pl...    │   FAIL    │   0.27   │ When developing software strategies, th...    │
 └──────────────────────────────┴──────────────┴──────────┴───────────────────────────────────────────────────────────────┘
 
 ╭────────────────────────────────────── 🔴 Specification Results Summary ──────────────────────────────────────╮
 │                                                                                                              │
 │  📊 Total Specs:         5                🎯 Pass Rate:         0.0%                                         │
-│  ✅ Passed:              0                🤖 Model:             ollama_chat/llama3.2:1b                      │
-│  ❌ Failed:              5                💪 Capability:        0.26                                         │
-│  🏆 Quality Gate:        ❌ NEEDS WORK    🚀 Status:            🚀 Optimized                                 │
+│  Passed:              0                🤖 Model:             ollama_chat/llama3.2:1b                      │
+│  Failed:              5                💪 Capability:        0.26                                         │
+│  🏆 Quality Gate:        NEEDS WORK    🚀 Status:            🚀 Optimized                                 │
 │                                                                                                              │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 
@@ -371,7 +371,7 @@ Affected Specifications:
     - **🎯 Pass Rate**: 0.0% (0/5 specifications passed)
     - **🤖 Model**: Using `ollama/llama3.2:1b` (Oracle tier model)
     - **💪 Capability Score**: 0.26 (needs improvement)
-    - **🏆 Quality Gate**: ❌ NEEDS WORK
+    - **🏆 Quality Gate**: NEEDS WORK
     - **🚀 Status**: 🚀 Optimized (optimization was already applied)
 
 !!! info "🔍 What Happened During Evaluation"
@@ -429,7 +429,7 @@ Affected Specifications:
     **Quality Thresholds:**
     - 🎉 **≥ 80%**: EXCELLENT - Production ready
     - ⚠️ **60-79%**: GOOD - Minor improvements needed  
-    - ❌ **< 60%**: NEEDS WORK - Significant improvements required
+    - **< 60%**: NEEDS WORK - Significant improvements required
 
 !!! info "🔍 Why Scenarios May Fail"
 
@@ -441,9 +441,9 @@ Affected Specifications:
     4. **This is Normal**: Oracle tier is designed for simpler, reasoning-focused tasks
 
     **What This Means:**
-    - ✅ **Your agent infrastructure is working correctly**
-    - ✅ **The evaluation system is providing accurate feedback**
-    - ✅ **Oracle tier is performing as expected for its capabilities**
+    - **Your agent infrastructure is working correctly**
+    - **The evaluation system is providing accurate feedback**
+    - **Oracle tier is performing as expected for its capabilities**
     - 🔧 **Optimization can still improve performance significantly**
 
 ---
@@ -594,9 +594,9 @@ Loading pipeline... ━━━━━━━━━━━━━━━━━━━━
 
 Looking for pipeline at: /Users/super/swe 
 18-15-10-253/swe/agents/developer/pipelines/developer_pipeline.py
-✅ Model connection successful: ollama/llama3.2:1b
+Model connection successful: ollama/llama3.2:1b
 📋 Loaded 5 BDD specifications for execution
-✅ DeveloperPipeline (Oracle tier) initialized with 5 BDD scenarios
+DeveloperPipeline (Oracle tier) initialized with 5 BDD scenarios
 Loading pipeline... ━━━━━━━━━━━━━━━━╺━━━━━━━━━━━━━━━━━━━━━━━  40% -:--:--
 📦 Loading pre-optimized model from developer_optimized.json
 ⚠️ Failed to load pre-optimized model: 'predictor.predict'. Using base model.
@@ -644,7 +644,7 @@ Pre-Optimized Pipeline: ⚠️ Available but not used
 Runtime Optimization: ⚪ NO
 💡 Use 'super agent run developer --goal "goal"' to use pre-optimization
 
-Validation Status: ✅ PASSED
+Validation Status: PASSED
 Validation Warnings: []
 
 🎉 Agent execution completed successfully!
@@ -729,7 +729,7 @@ Validation Warnings: []
     - **🤖 Model**: `ollama/llama3.2:1b` (Oracle tier)
     - **📊 Token Usage**: 1,227 total tokens (572 prompt + 655 completion)
     - **⚡ Execution Time**: ~1 second
-    - **✅ Validation Status**: PASSED
+    - **Validation Status**: PASSED
     - **🔍 Tracing**: Enabled and stored in `.superoptix/traces`
 
     #### 🎯 **Key Insights**

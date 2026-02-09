@@ -1,0 +1,248 @@
+"""
+{{ agent_name | to_pascal_case }} Agent - Pydantic AI Native Minimal Pipeline
+
+Auto-generated from SuperSpec playbook using SuperOptiX compiler.
+Framework: Pydantic AI
+Generated: {{ timestamp }}
+"""
+
+from __future__ import annotations
+
+import json
+import os
+import time
+import inspect
+from pathlib import Path
+from typing import Any, Dict, Optional
+
+from pydantic import BaseModel, Field
+
+try:
+    from pydantic_ai import Agent
+    from pydantic_ai.settings import ModelSettings
+except ImportError as e:
+    raise ImportError("pydantic-ai is required. Install with: pip install pydantic-ai") from e
+
+from superoptix.runners.pydantic_runtime_helpers import (
+    build_stackone_tools as superoptix_build_stackone_tools,
+    build_instructions as superoptix_build_instructions,
+    get_pydantic_rlm_config as superoptix_get_pydantic_rlm_config,
+    run_agent_with_optional_rlm as superoptix_run_agent_with_optional_rlm,
+    resolve_model as superoptix_resolve_model,
+)
+
+COMPILED_SPEC_PATH = Path(__file__).resolve().parent / "{{ compiled_spec_filename }}"
+def _load_compiled_spec(path: Path) -> Dict[str, Any]:
+    try:
+        with path.open("r", encoding="utf-8") as _spec_file:
+            return json.load(_spec_file)
+    except FileNotFoundError as exc:
+        raise FileNotFoundError(
+            f"Compiled spec file not found at {path}. Recompile this agent to regenerate pipeline artifacts."
+        ) from exc
+    except json.JSONDecodeError as exc:
+        raise ValueError(
+            f"Compiled spec file is invalid JSON at {path}. Recompile this agent to regenerate pipeline artifacts."
+        ) from exc
+
+
+FULL_SPEC = _load_compiled_spec(COMPILED_SPEC_PATH)
+
+INSTRUCTION_SPEC = {
+    "persona": dict(FULL_SPEC.get("persona", {}) or {}),
+    "tasks": list(FULL_SPEC.get("tasks", []) or []),
+}
+LANGUAGE_MODEL = dict(FULL_SPEC.get("language_model", {}) or {})
+
+
+{% if spec.output_fields and spec.output_mode == "structured" %}
+class {{ agent_name | to_pascal_case }}Output(BaseModel):
+{% for field in spec.output_fields %}
+{%- set t = (field.type | default('string') | string | lower | trim) -%}
+{%- if t in ['string', 'str', 'text'] -%}
+{%- set py = 'str' -%}
+{%- elif t in ['integer', 'int', 'number'] -%}
+{%- set py = 'int' -%}
+{%- elif t in ['float', 'double'] -%}
+{%- set py = 'float' -%}
+{%- elif t in ['boolean', 'bool'] -%}
+{%- set py = 'bool' -%}
+{%- elif t in ['list', 'array'] -%}
+{%- set py = 'list[str]' -%}
+{%- elif t in ['dict', 'object', 'map'] -%}
+{%- set py = 'dict[str, Any]' -%}
+{%- else -%}
+{%- set py = 'str' -%}
+{%- endif %}
+    {{ field.name | to_snake_case }}: {{ py }} = Field(
+        description={{ field.description | default(field.name) | tojson }}
+    )
+{% endfor %}
+{% endif %}
+
+
+class {{ agent_name | to_pascal_case }}Pipeline:
+    """
+    Native Pydantic AI pipeline.
+
+    Style intentionally follows Pydantic AI docs:
+    - create Agent(model=..., instructions=..., output_type=...)
+    - run with await agent.run(prompt)
+    """
+
+    def __init__(
+        self,
+        model_name: Optional[str] = None,
+        instructions: Optional[str] = None,
+        model_config: Optional[Dict[str, Any]] = None,
+    ):
+        resolved_model = model_name or superoptix_resolve_model(
+            LANGUAGE_MODEL, model_config=model_config
+        )
+        lm_cfg = dict(LANGUAGE_MODEL or {})
+        run_cfg = dict(model_config or {})
+        temperature = run_cfg.get("temperature", lm_cfg.get("temperature", 0.1))
+        max_tokens = run_cfg.get("max_tokens", lm_cfg.get("max_tokens", 1800))
+        top_p = run_cfg.get("top_p", lm_cfg.get("top_p", 1.0))
+        resolved_instructions = instructions or superoptix_build_instructions(
+            INSTRUCTION_SPEC
+        )
+        self._resolved_model = resolved_model
+        self._resolved_instructions = resolved_instructions
+        self._rlm_config = superoptix_get_pydantic_rlm_config(FULL_SPEC)
+        self._model_settings = ModelSettings(
+            temperature=temperature,
+            max_tokens=max_tokens,
+            top_p=top_p,
+        )
+        agent_kwargs: Dict[str, Any] = {
+            "model": resolved_model,
+            "instructions": resolved_instructions,
+            "name": {{ metadata.name | default(agent_name) | tojson }},
+            "model_settings": self._model_settings,
+        }
+        try:
+            retries = int(os.getenv("SUPEROPTIX_PYDANTIC_RETRIES", "3"))
+        except Exception:
+            retries = 3
+        init_params = inspect.signature(Agent.__init__).parameters
+        if "retries" in init_params:
+            agent_kwargs["retries"] = retries
+        if "output_retries" in init_params:
+            agent_kwargs["output_retries"] = retries
+{% if spec.output_fields and spec.output_mode == "structured" %}
+        agent_kwargs["output_type"] = {{ agent_name | to_pascal_case }}Output
+{% endif %}
+        stackone_tools = superoptix_build_stackone_tools(FULL_SPEC, framework="pydantic_ai")
+        if stackone_tools:
+            agent_kwargs["tools"] = stackone_tools
+            print(f"✅ StackOne tools registered: {len(stackone_tools)}")
+        else:
+            print("ℹ️  No StackOne tools configured")
+        self.agent = Agent(**agent_kwargs)
+        self._tool_count = len(stackone_tools or [])
+        if self._rlm_config.get("enabled", False):
+            print(
+                "✅ RLM configured "
+                f"(mode={self._rlm_config.get('mode', 'assist')}, "
+                f"backend={self._rlm_config.get('backend', 'litellm')})"
+            )
+
+    async def run(self, query: Optional[str] = None, **inputs: Any) -> Dict[str, Any]:
+        if query is None:
+{% if spec.input_fields and spec.input_fields|length > 0 %}
+            query = str(inputs.get("{{ spec.input_fields[0].name | to_snake_case }}", ""))
+{% else %}
+            query = str(inputs.get("query", ""))
+{% endif %}
+        prompt = query or ""
+        started = time.time()
+        preview = (prompt[:120] + "...") if len(prompt) > 120 else prompt
+        print(f"🧠 Pydantic AI run start | model={self._resolved_model} | tools={self._tool_count}")
+        print(f"📝 Prompt: {preview}")
+        try:
+            result = await superoptix_run_agent_with_optional_rlm(
+                agent=self.agent,
+                prompt=prompt,
+                spec_data=FULL_SPEC,
+                model_name=self._resolved_model,
+                logfire_enabled=bool((FULL_SPEC.get("logfire", {}) or {}).get("enabled", True)),
+            )
+        except Exception as exc:
+            err = str(exc)
+            if "output validation" in err.lower():
+                print("⚠️ Structured output validation failed. Retrying once in plain-text mode.")
+                try:
+                    fallback_agent_kwargs: Dict[str, Any] = {
+                        "model": self._resolved_model,
+                        "instructions": self._resolved_instructions,
+                        "name": {{ metadata.name | default(agent_name) | tojson }},
+                        "model_settings": self._model_settings,
+                    }
+                    init_params = inspect.signature(Agent.__init__).parameters
+                    if "retries" in init_params:
+                        fallback_agent_kwargs["retries"] = 0
+                    if "output_retries" in init_params:
+                        fallback_agent_kwargs["output_retries"] = 0
+                    fallback_agent = Agent(**fallback_agent_kwargs)
+                    result = await superoptix_run_agent_with_optional_rlm(
+                        agent=fallback_agent,
+                        prompt=prompt,
+                        spec_data=FULL_SPEC,
+                        model_name=self._resolved_model,
+                        logfire_enabled=bool((FULL_SPEC.get("logfire", {}) or {}).get("enabled", True)),
+                    )
+                except Exception as fallback_exc:
+                    fb_err = str(fallback_exc)
+                    print(f"⚠️ Fallback run also failed: {fb_err}")
+{% if spec.output_fields and spec.output_fields|length > 0 %}
+                    return {"{{ spec.output_fields[0].name | to_snake_case }}": f"Unable to complete request due to model validation error: {fb_err}"}
+{% else %}
+                    return {"response": f"Unable to complete request due to model validation error: {fb_err}"}
+{% endif %}
+            else:
+                raise
+        elapsed_ms = int((time.time() - started) * 1000)
+        print(f"✅ Pydantic AI run done ({elapsed_ms}ms)")
+        try:
+            if isinstance(result, str):
+                output = result
+            elif hasattr(result, "messages"):
+                tool_calls = [
+                    msg for msg in result.messages
+                    if hasattr(msg, "tool_calls") and getattr(msg, "tool_calls")
+                ]
+                if tool_calls:
+                    print(f"🔧 Tool calls: {len(tool_calls)}")
+        except Exception:
+            pass
+
+        if not isinstance(result, str):
+            output = result.output
+
+        if isinstance(output, BaseModel):
+            return output.model_dump()
+
+        text = str(output)
+{% if spec.output_fields and spec.output_fields|length > 0 %}
+        out: Dict[str, Any] = {"{{ spec.output_fields[0].name | to_snake_case }}": text}
+{% if spec.output_fields|length > 1 %}
+{% for field in spec.output_fields[1:] %}
+        out["{{ field.name | to_snake_case }}"] = ""
+{% endfor %}
+{% endif %}
+        return out
+{% else %}
+        return {"response": text}
+{% endif %}
+
+
+if __name__ == "__main__":
+    async def _main() -> None:
+        pipeline = {{ agent_name | to_pascal_case }}Pipeline()
+        result = await pipeline.run(query="Hello")
+        print(result)
+
+    import asyncio
+
+    asyncio.run(_main())

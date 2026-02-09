@@ -394,38 +394,38 @@ If you follow the SuperOptiX way, you get:
 ### Rails Workflow
 
 ```bash
-# 1. Generate scaffold
+# Generate scaffold
 rails generate scaffold Post title:string body:text
 
-# 2. Run migration
+# Run migration
 rails db:migrate
 
-# 3. Run tests
+# Run tests
 rails test
 
-# 4. Start server
+# Start server
 rails server
 
-# 5. Deploy
+# Deploy
 git push heroku main
 ```
 
 ### SuperOptiX Workflow
 
 ```bash
-# 1. Generate scaffold
+# Generate scaffold
 super spec generate blog_writer --template genie
 
-# 2. Run optimization (like migration)
+# Run optimization (like migration)
 super agent optimize blog_writer
 
-# 3. Run tests
+# Run tests
 super agent evaluate blog_writer
 
-# 4. Run agent
+# Run agent
 super agent run blog_writer
 
-# 5. Deploy (orchestrate)
+# Deploy (orchestrate)
 super orchestra run blog_orchestra
 ```
 
@@ -460,11 +460,11 @@ super orchestra run blog_orchestra
 ### If You Know Rails
 
 You already understand:
-- ✅ Convention over configuration
-- ✅ Generator commands
-- ✅ Migration workflows
-- ✅ Spec-driven testing (RSpec)
-- ✅ Project structure patterns
+- Convention over configuration
+- Generator commands
+- Migration workflows
+- Spec-driven testing (RSpec)
+- Project structure patterns
 
 You'll learn:
 - Agent specifications (like model specs)
@@ -797,7 +797,7 @@ You can change them, but defaults work great.
 
 ## For Rails Devs: Why You'll Love SuperOptiX
 
-### 1. Familiar Mental Model
+### Familiar Mental Model
 
 You already understand:
 - Convention over configuration
@@ -805,20 +805,20 @@ You already understand:
 - Spec-driven development
 - Migration/evolution systems
 
-### 2. Same Developer Experience
+### Same Developer Experience
 
 - Clean CLI commands
 - Predictable project structure
 - Fast iteration cycles
 - Test-first development
 
-### 3. Productivity Benefits
+### Productivity Benefits
 
 Rails reduced boilerplate and let you focus on business logic.
 
 SuperOptiX does the same for AI agents: less manual prompt engineering, more focus on agent intelligence.
 
-### 4. Same Philosophy
+### Same Philosophy
 
 - Optimize for developer happiness
 - Convention over configuration
@@ -883,7 +883,7 @@ super orchestra run support_team
 **Start here:**
 1. [Quick Start](../quick-start.md) - Familiar workflow
 2. [SuperSpec DSL](superspec.md) - Like Rails DSL
-3. [Agent Tiers](tiers.md) - Like Rails MVC layers
+3. [Multi-Framework Guide](multi-framework.md) - Framework strategy and tradeoffs
 4. [GEPA Optimization](gepa-optimization.md) - Like migrations
 
 **Then explore:**
@@ -974,4 +974,3 @@ You'll love SuperOptiX for the same reasons:
 - [SuperSpec DSL Reference](superspec-dsl-reference.md)
 - [GEPA Optimization](gepa-optimization.md)
 - [Multi-Framework Support](multi-framework.md)
-

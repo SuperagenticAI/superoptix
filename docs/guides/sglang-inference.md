@@ -26,7 +26,7 @@
 <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
   <tr>
     <td style="padding: 20px; width: 50%; vertical-align: top; border: 2px solid rgba(76, 175, 80, 0.3); background: rgba(76, 175, 80, 0.05);">
-      <h3 style="color: #4CAF50;">✅ Unique Features</h3>
+      <h3 style="color: #4CAF50;">Unique Features</h3>
       <ul>
         <li>Structured output generation (JSON, regex)</li>
         <li>RadixAttention for cache reuse</li>
@@ -162,7 +162,7 @@ spec:
   <tr style="background: rgba(76, 175, 80, 0.05);">
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong>Throughput</strong></td>
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">Excellent</td>
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">Excellent ✅</strong></td>
+    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">Excellent </strong></td>
   </tr>
   <tr style="background: rgba(33, 150, 243, 0.05);">
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong>Structured Output</strong></td>
@@ -177,11 +177,11 @@ spec:
   <tr style="background: rgba(156, 39, 176, 0.05);">
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong>Multi-Modal</strong></td>
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">Limited</td>
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #9C27B0;">Vision + Language ✅</strong></td>
+    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #9C27B0;">Vision + Language </strong></td>
   </tr>
   <tr style="background: rgba(76, 175, 80, 0.05);">
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong>Maturity</strong></td>
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">Production ✅</strong></td>
+    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">Production </strong></td>
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">Emerging ⚡</td>
   </tr>
 </table>

@@ -1,8 +1,22 @@
 # Multi-Framework Support Guide
 
-**SuperOptiX: The World's First Universal Agent Optimization Framework**
+**SuperOptiX Universal Framework Workflow**
 
-Build agents in any of 7 major frameworks, then optimize them all with the same powerful GEPA engine.
+Build once from SuperSpec YAML, compile to your target framework, and run either:
+- minimal pipeline (default)
+- optimized pipeline (`--optimize`)
+
+RLM support is available as an experimental feature. Unified sandbox support is coming soon.
+
+---
+
+## Feature Highlights
+
+- 🧪 **RLM (Experimental)**: Available now across active framework integrations where configured. Unified sandbox support is coming soon.
+- 🗂️ **Connector Integration (StackOne)**: Compile one connector-enabled SuperSpec into multiple frameworks.
+- 🧬 **GEPA Optimization Path**: Keep minimal runtime pipelines by default; enable optimization lifecycle with `--optimize`.
+- 🧩 **Framework-Native Templates**: Generated pipelines stay close to each framework's native style.
+- 📊 **Coverage View**: See the [Framework Feature Matrix](framework-feature-matrix.md) for current capability status.
 
 ---
 
@@ -22,10 +36,13 @@ pip install superoptix
 # OpenAI Agents SDK
 pip install superoptix[frameworks-openai]
 
+# Claude Agent SDK
+pip install superoptix[frameworks-claude-sdk]
+
 # Google ADK
 pip install superoptix[frameworks-google]
 
-# Microsoft Agent Framework
+# Microsoft Agent Framework (legacy support)
 pip install superoptix[frameworks-microsoft]
 
 # DeepAgents
@@ -45,13 +62,21 @@ pip install superoptix[frameworks]
 
 ## Overview
 
-SuperOptiX is the **only framework** that allows you to:
+SuperOptiX lets you:
 
-- ✅ Build agents in **7 major frameworks** (DSPy, OpenAI SDK, CrewAI, Google ADK, Microsoft, DeepAgents, Pydantic AI)
-- ✅ Optimize with **one universal optimizer** (GEPA)
-- ✅ Use **the same workflow** regardless of framework
-- ✅ Switch frameworks without rewriting code
-- ✅ Compare frameworks side-by-side
+- Build agents in major frameworks (DSPy, OpenAI SDK, Claude SDK, CrewAI, Google ADK, DeepAgents, Pydantic AI, Microsoft legacy)
+- Optimize with one universal optimizer (GEPA)
+- Use the same compile/run workflow across frameworks
+- Switch frameworks without rewriting code
+- Compare framework behavior side by side
+
+### Generated Artifacts (Current Behavior)
+
+Each compile writes:
+- framework pipeline file, e.g. `my_agent_openai_pipeline.py`
+- sidecar compiled spec file, e.g. `my_agent_openai_pipeline_compiled_spec.json`
+
+The pipeline reads the sidecar at runtime. If missing/corrupt, runtime now gives a clear "recompile agent" error.
 
 ---
 
@@ -59,15 +84,16 @@ SuperOptiX is the **only framework** that allows you to:
 
 ### Framework Comparison
 
-| Framework | Status | Optimizable Variables | Local Models | Best For |
-|-----------|--------|----------------------|--------------|----------|
-| **DSPy** | ✅ Production | 10+ variables | ✅ Ollama | Complex reasoning, research |
-| **OpenAI SDK** | ✅ Production | 1 (instructions) | ✅ Ollama | Simple & fast agents |
-| **CrewAI** | ✅ Production | 5 (role+goal+backstory+task) | ✅ Ollama | Multi-agent teams |
-| **Google ADK** | ✅ Production | 1 (instruction) | ☁️ Gemini | Google ecosystem, free tier |
-| **Microsoft** | ✅ Production | 1 (instructions) | ✅ Ollama | Enterprise Azure, .NET |
-| **DeepAgents** | ✅ Production | 1 (system_prompt) | ✅ Ollama | Complex planning, LangGraph |
-| **Pydantic AI** | ✅ Production | 1 (instructions) + MCP tools | ✅ Ollama | Type-safe outputs, MCP tools |
+| Framework | Optimization Scope | Local Models | Best For |
+|-----------|--------------------|--------------|----------|
+| **DSPy** | Signatures, modules, prompts, and evaluation hooks | Ollama | Complex reasoning, research |
+| **OpenAI SDK** | Agent instructions | Ollama | Simple and fast agents |
+| **Claude SDK** | Agent system prompt | Cloud only | Anthropic-native agent workflows |
+| **CrewAI** | Persona and task instructions | Ollama | Multi-agent teams |
+| **Google ADK** | Agent instruction | Cloud only | Google ecosystem, Gemini |
+| **Microsoft (Legacy)** | Agent instructions | Ollama | Existing Microsoft-framework projects |
+| **DeepAgents** | System prompt | Cloud only | Complex planning, LangGraph |
+| **Pydantic AI** | Instructions, output shaping, MCP/tool flow | Ollama | Type-safe outputs and tool use |
 
 ---
 
@@ -76,35 +102,41 @@ SuperOptiX is the **only framework** that allows you to:
 The same workflow works for **ALL frameworks**:
 
 ```bash
-# 1. Create agent (SuperSpec YAML)
-# 2. Compile to your chosen framework
-super agent compile my_agent --framework [dspy|openai|crewai|google-adk|microsoft|deepagents]
+# 1) Compile minimal pipeline (default)
+super agent compile my_agent --framework <framework>
 
-# 3. Evaluate
-super agent evaluate my_agent
+# 2) Run minimal pipeline
+super agent run my_agent --framework <framework> --goal "your goal"
 
-# 4. Optimize with GEPA (works on ALL frameworks!)
-super agent optimize my_agent --auto medium --framework <framework> --reflection-lm ollama:llama3.1:8b
+# 3) Compile optimized pipeline (optional)
+super agent compile my_agent --framework <framework> --optimize
 
-# 💡 Why --reflection-lm ollama:llama3.1:8b?
-# The reflection model runs many times during optimization to analyze results
-# and suggest improvements. Using a smaller, faster model (8b vs 20b/70b):
-# ✅ Speeds up optimization 5-10x
-# ✅ Reduces memory/resource usage
-# ✅ Provides good enough reflections (simpler task than the actual agent)
-
-# 5. Re-evaluate
-super agent evaluate my_agent  # automatically loads optimized weights
-
-# 6. Run in production
-super agent run my_agent
+# 4) Run optimization loop (GEPA-backed)
+super agent optimize my_agent --framework <framework> --auto light
 ```
+
+Cloud/local routing (common pattern):
+
+```bash
+# Cloud Google
+super agent compile my_agent --framework <framework> --cloud --provider google-genai --model gemini-2.5-flash
+super agent run my_agent --framework <framework> --cloud --provider google-genai --model gemini-2.5-flash --goal "your goal"
+
+# Local Ollama
+super agent compile my_agent --framework <framework> --local --provider ollama --model llama3.1:8b
+super agent run my_agent --framework <framework> --local --provider ollama --model llama3.1:8b --goal "your goal"
+```
+
+Notes:
+- `google-adk` and `deepagents` currently require cloud function-calling models.
+- `claude-sdk` requires Anthropic credentials and Claude models.
+- for non-DSPy frameworks, always pass `--framework <framework>` on `super agent optimize` to avoid defaulting to DSPy assets.
 
 ---
 
 ## Framework-Specific Guides
 
-### 1. DSPy (Stanford Research Framework)
+### DSPy (Stanford Research Framework)
 
 **Best for**: Complex reasoning, research, maximum optimization flexibility
 
@@ -158,7 +190,7 @@ spec:
 
 ---
 
-### 2. OpenAI Agents SDK (Simple & Fast)
+### OpenAI Agents SDK (Simple & Fast)
 
 **Best for**: Simple agents, fast prototyping, 100% local & free with Ollama
 
@@ -217,7 +249,7 @@ spec:
 
 ---
 
-### 3. CrewAI (Multi-Agent Teams)
+### CrewAI (Multi-Agent Teams)
 
 **Best for**: Multi-agent collaboration, role-based agents
 
@@ -287,9 +319,9 @@ GEPA can optimize:
 
 ---
 
-### 4. Google ADK (Gemini Native)
+### Google ADK (Gemini Native)
 
-**Best for**: Google ecosystem, Gemini integration, free tier
+**Best for**: Google ecosystem, Gemini integration, free access
 
 #### Quick Start
 
@@ -320,7 +352,7 @@ spec:
   target_framework: google-adk
   language_model:
     provider: google
-    model: gemini-2.0-flash  # Free tier!
+    model: gemini-2.0-flash  # Free access!
   persona:
     instructions: |
       You are a helpful AI assistant powered by Google's Gemini.
@@ -332,7 +364,7 @@ spec:
 
 ---
 
-### 5. Microsoft Agent Framework (Enterprise)
+### Microsoft Agent Framework (Enterprise)
 
 **Best for**: Azure integration, .NET support, enterprise workflows
 
@@ -384,7 +416,7 @@ spec:
 
 ---
 
-### 6. DeepAgents (LangGraph Planning)
+### DeepAgents (LangGraph Planning)
 
 **Best for**: Complex planning, multi-step reasoning, advanced workflows
 
@@ -450,7 +482,7 @@ spec:
 
 **Choose Google ADK if**:
 - You're in the Google ecosystem
-- You want Gemini 2.0 Flash (free tier!)
+- You want Gemini 2.0 Flash (free access!)
 - You need session management
 - You want Google-native features
 

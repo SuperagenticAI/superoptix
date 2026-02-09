@@ -75,13 +75,13 @@ Integrate with external observability platforms:
 Each demo follows this pattern:
 
 ```bash
-# 1. Install model
+# Install model
 super model install <model_name>
 
-# 2. Start server (if needed)
+# Start server (if needed)
 super model server <backend> <model_name>
 
-# 3. Pull and run demo
+# Pull and run demo
 super agent pull <demo_name>
 super agent compile <demo_name>
 super agent run <demo_name> --goal "Your question here"

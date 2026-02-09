@@ -106,12 +106,19 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 {% if spec.persona.role %}
     profile_parts.append("Role: " + {{ (spec.persona.role | replace('\n', ' ')) | tojson }})
 {% endif %}
+{% if spec.persona.instructions %}
+    profile_parts.append("Instructions: " + {{ (spec.persona.instructions | replace('\n', ' ')) | tojson }})
+{% endif %}
 {% if spec.persona.goal %}
     profile_parts.append("Goal: " + {{ (spec.persona.goal | replace('\n', ' ')) | tojson }})
 {% endif %}
 {% if spec.persona.backstory %}
     profile_parts.append("Backstory: " + {{ (spec.persona.backstory | replace('\n', ' ')) | tojson }})
-{% elif spec.persona.traits %}
+{% endif %}
+{% if spec.persona.traits %}
+    profile_parts.append("Traits: " + {{ (spec.persona.traits | join(', ') | replace('\n', ' ')) | tojson }})
+{% endif %}
+{% if not spec.persona.backstory and spec.persona.traits %}
     # Build backstory from traits if not provided
     traits_str = "You are " + ", ".join({{ spec.persona.traits | tojson }})
     profile_parts.append(f"Backstory: {traits_str}")

@@ -94,7 +94,7 @@ Data processing and analysis:
 
 ## 🎨 Create Custom DSPy Tools
 
-### 1. Basic Tool Structure
+### Basic Tool Structure
 
 All SuperOptiX tools follow a consistent pattern:
 
@@ -124,7 +124,7 @@ class MyCustomTool:
         """
         try:
             # Tool logic here
-            result = f"✅ Tool executed successfully: {input_param}"
+            result = f"Tool executed successfully: {input_param}"
             
             # Return formatted result
             return f"""🛠️ Custom Tool Result:
@@ -134,10 +134,10 @@ class MyCustomTool:
 Configuration: {self.config_param}
 """
         except Exception as e:
-            return f"❌ Tool execution error: {str(e)}"
+            return f"Tool execution error: {str(e)}"
 ```
 
-### 2. Tool Categories and Organization
+### Tool Categories and Organization
 
 In your SuperOptiX project, custom tools are organized in the `tools/` directory. This follows the standard SuperOptiX project structure:
 
@@ -189,7 +189,7 @@ tools/
     └── custom_calculator.py
 ```
 
-### 3. Creating a New Tool Category
+### Creating a New Tool Category
 
 To create a new tool category in your SuperOptiX project:
 
@@ -238,7 +238,7 @@ Total ROI: {roi:.2f}%
 Annual ROI: {annual_roi:.2f}%
 """
         except Exception as e:
-            return f"❌ ROI calculation error: {str(e)}"
+            return f"ROI calculation error: {str(e)}"
 ```
 
 3. **Register tools in the category's `__init__.py`**:
@@ -295,7 +295,7 @@ __all__ = [
 ]
 ```
 
-### 4. Tool Integration with DSPy
+### Tool Integration with DSPy
 
 Tools are integrated into DSPy pipelines through the `ToolsMixin`. In your SuperOptiX project:
 
@@ -318,7 +318,7 @@ class FinancialAdvisorPipeline(ToolsMixin):
         from dspy.adapters import Tool
         self.tools.append(Tool(investment_tool.calculate_roi, name="calculate_roi"))
         
-        print(f"✅ Added {len(self.tools)} tools to FinancialAdvisorPipeline")
+        print(f"Added {len(self.tools)} tools to FinancialAdvisorPipeline")
 ```
 
 #### Alternative: Using Tool Registry
@@ -347,10 +347,10 @@ class FinancialAdvisorPipeline(ToolsMixin):
                     from dspy.adapters import Tool
                     self.tools.append(Tool(method, name=f"{tool_name}_{method_name}"))
         
-        print(f"✅ Added {len(self.tools)} tools from project registry")
+        print(f"Added {len(self.tools)} tools from project registry")
 ```
 
-### 5. Tool Configuration in SuperSpec DSL
+### Tool Configuration in SuperSpec DSL
 
 Define tools in your agent playbook. You can reference both builtin tools and your custom project tools:
 
@@ -388,7 +388,7 @@ spec:
                   
                   return f"📈 ROI: {roi:.2f}% (Annual: {annual_roi:.2f}%)"
               except Exception as e:
-                  return f"❌ ROI calculation error: {str(e)}"
+                  return f"ROI calculation error: {str(e)}"
 ```
 
 #### Project Tool References
@@ -429,14 +429,14 @@ spec:
                   category = "Underweight" if bmi < 18.5 else "Normal" if bmi < 25 else "Overweight" if bmi < 30 else "Obese"
                   return f"🏥 BMI: {bmi:.1f} ({category})"
               except Exception as e:
-                  return f"❌ BMI calculation error: {str(e)}"
+                  return f"BMI calculation error: {str(e)}"
 ```
 
 ---
 
 ## 🔧 Tool Development Best Practices
 
-### 1. Error Handling and Safety
+### Error Handling and Safety
 
 ```python
 def safe_tool_execution(self, input_data: str) -> str:
@@ -444,24 +444,24 @@ def safe_tool_execution(self, input_data: str) -> str:
     try:
         # Validate input
         if not input_data or not input_data.strip():
-            return "❌ Error: Input data is required"
+            return "Error: Input data is required"
         
         # Perform operation
         result = self._process_data(input_data)
         
         # Validate output
         if not result:
-            return "❌ Error: No result generated"
+            return "Error: No result generated"
             
-        return f"✅ Success: {result}"
+        return f"Success: {result}"
         
     except ValueError as e:
-        return f"❌ Validation error: {str(e)}"
+        return f"Validation error: {str(e)}"
     except Exception as e:
-        return f"❌ Unexpected error: {str(e)}"
+        return f"Unexpected error: {str(e)}"
 ```
 
-### 2. Input Validation
+### Input Validation
 
 ```python
 def validate_input(self, **kwargs) -> bool:
@@ -479,7 +479,7 @@ def validate_input(self, **kwargs) -> bool:
     return True
 ```
 
-### 3. Output Formatting
+### Output Formatting
 
 ```python
 def format_output(self, result: str, metadata: dict = None) -> str:
@@ -497,7 +497,7 @@ def format_output(self, result: str, metadata: dict = None) -> str:
     return output
 ```
 
-### 4. Performance Considerations
+### Performance Considerations
 
 ```python
 def optimized_tool(self, large_data: str) -> str:
@@ -518,7 +518,7 @@ def optimized_tool(self, large_data: str) -> str:
 
 ## 🧪 Testing Your Tools
 
-### 1. Unit Testing
+### Unit Testing
 
 ```python
 # tests/tools/test_finance_tools.py
@@ -536,7 +536,7 @@ def test_investment_analyzer():
     
     # Test error handling
     result = tool.calculate_roi(0, 1500, 2)
-    assert "❌" in result
+    assert "" in result
     assert "error" in result.lower()
 
 def test_invalid_inputs():
@@ -544,14 +544,14 @@ def test_invalid_inputs():
     
     # Test with negative values
     result = tool.calculate_roi(-1000, 1500, 2)
-    assert "❌" in result
+    assert "" in result
     
     # Test with zero years
     result = tool.calculate_roi(1000, 1500, 0)
-    assert "❌" in result
+    assert "" in result
 ```
 
-### 2. Integration Testing
+### Integration Testing
 
 ```python
 # tests/integration/test_tool_integration.py
@@ -610,7 +610,7 @@ def test_tool_execution():
 
 ## 🚀 Advanced Tool Features
 
-### 1. Async Tools
+### Async Tools
 
 ```python
 import asyncio
@@ -625,12 +625,12 @@ class AsyncTool:
             async with aiohttp.ClientSession() as session:
                 async with session.get(url) as response:
                     data = await response.text()
-                    return f"✅ Fetched {len(data)} characters from {url}"
+                    return f"Fetched {len(data)} characters from {url}"
         except Exception as e:
-            return f"❌ Fetch error: {str(e)}"
+            return f"Fetch error: {str(e)}"
 ```
 
-### 2. Tool with Memory
+### Tool with Memory
 
 ```python
 class MemoryAwareTool:
@@ -654,7 +654,7 @@ History: {len(self.history)} operations
 """
 ```
 
-### 3. Tool with Configuration
+### Tool with Configuration
 
 ```python
 class ConfigurableTool:
@@ -701,7 +701,7 @@ Total ROI: {roi:.2f}%
 Annual ROI: {annual_roi:.2f}%
 """
         except Exception as e:
-            return f"❌ ROI calculation error: {str(e)}"
+            return f"ROI calculation error: {str(e)}"
 ```
 
 ### Healthcare Tools
@@ -732,7 +732,7 @@ BMI: {bmi:.1f}
 Category: {category}
 """
         except Exception as e:
-            return f"❌ BMI calculation error: {str(e)}"
+            return f"BMI calculation error: {str(e)}"
 ```
 
 ---

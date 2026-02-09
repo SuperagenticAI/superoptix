@@ -35,27 +35,27 @@ super agent pull optimas_dspy        # DSPy
 ### Full Flow Example
 
 ```bash
-# 1. Compile
+# Compile
 super agent compile optimas_openai --target optimas-openai
 
-# 2. Evaluate
+# Evaluate
 super agent evaluate optimas_openai --engine optimas --target optimas-openai
 
-# 3. Optimize
+# Optimize
 SUPEROPTIX_OPRO_MAX_TOKENS=256 \
 SUPEROPTIX_OPRO_NUM_CANDIDATES=3 \
 SUPEROPTIX_OPRO_MAX_WORKERS=3 \
 super agent optimize optimas_openai --engine optimas --target optimas-openai --optimizer opro
 
-# 4. Run
+# Run
 super agent run optimas_openai --engine optimas --target optimas-openai --goal "Write a Python function to add two numbers"
 ```
 
 ## 🎯 Target-Specific Examples
 
-### 1. OpenAI SDK Target (Recommended)
+### OpenAI SDK Target (Recommended)
 
-**Status**: ✅ **Fully Working** - Most reliable target
+**Status**: **Fully Working** - Most reliable target
 
 #### Quick Demo
 ```bash
@@ -85,9 +85,9 @@ super agent run optimas_openai --engine optimas --target optimas-openai --goal "
 - Works perfectly with all optimizers
 - Most stable target for production use
 
-### 2. CrewAI Target
+### CrewAI Target
 
-**Status**: ✅ **Fully Working** - Excellent for multi-agent workflows
+**Status**: **Fully Working** - Excellent for multi-agent workflows
 
 #### Quick Demo
 ```bash
@@ -125,7 +125,7 @@ pip install json-repair>=0.30.0
 - No threading issues
 - Great for team-based tasks
 
-### 3. AutoGen Target
+### AutoGen Target
 
 **Status**: ⚠️ **Mostly Working** - Optimization can be slow
 
@@ -173,9 +173,9 @@ language_model:
 - Great for conversational agents
 - Handles complex interactions well
 
-### 4. DSPy Target
+### DSPy Target
 
-**Status**: ✅ **Fully Working** - All optimizers now working properly
+**Status**: **Fully Working** - All optimizers now working properly
 
 #### Quick Demo
 ```bash
@@ -269,22 +269,22 @@ super agent optimize <agent> --engine optimas --target <target>
 
 ## 🚨 Known Limitations
 
-### 1. DSPy Optimization Issues
+### DSPy Optimization Issues
 - **Problem**: LiteLLM threading conflicts during optimization
 - **Impact**: Cannot use DSPy target for production optimization
 - **Workaround**: Use OpenAI SDK or CrewAI targets instead
 
-### 2. AutoGen Optimization Speed
+### AutoGen Optimization Speed
 - **Problem**: Optimization can be slow (120s+ timeout)
 - **Impact**: Slower development iteration
 - **Workaround**: Increase timeout or use faster models
 
-### 3. CrewAI Dependencies
+### CrewAI Dependencies
 - **Problem**: Manual installation required due to conflicts
 - **Impact**: Additional setup steps
 - **Workaround**: Follow manual installation instructions
 
-### 4. LiteLLM Version Compatibility
+### LiteLLM Version Compatibility
 - **Problem**: DSPy 3.0.0 + LiteLLM threading issues
 - **Impact**: DSPy target optimization fails
 - **Workaround**: Use other targets or wait for LiteLLM fixes

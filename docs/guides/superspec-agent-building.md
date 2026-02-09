@@ -50,12 +50,12 @@ SuperSpec follows a **declarative approach** where you specify **what** the agen
 
 | Framework | Variables | Local Models | Best For |
 |-----------|-----------|--------------|----------|
-| **🔬 DSPy** | 10+ | ✅ Ollama | Complex reasoning, research |
-| **🤖 OpenAI SDK** | 1 | ✅ Ollama | Simple & fast |
-| **👥 CrewAI** | 5 | ✅ Ollama | Multi-agent teams |
-| **🔮 Google ADK** | 1 | ❌ Cloud only | Gemini native, free tier |
-| **🏢 Microsoft** | 1 | ✅ Ollama | Enterprise Azure |
-| **🌊 DeepAgents** | 1 | ✅ Ollama | Complex planning |
+| **🔬 DSPy** | 10+ | Ollama | Complex reasoning, research |
+| **🤖 OpenAI SDK** | 1 | Ollama | Simple & fast |
+| **👥 CrewAI** | 5 | Ollama | Multi-agent teams |
+| **🔮 Google ADK** | 1 | Cloud only | Gemini native, free tier |
+| **🏢 Microsoft** | 1 | Ollama | Enterprise Azure |
+| **🌊 DeepAgents** | 1 | Ollama | Complex planning |
 
 ## 🏗️ **Agent Building Components**
 
@@ -753,7 +753,7 @@ spec:
 
 ## 🎉 **Conclusion**
 
-Agent building with SuperSpec combines the power of DSPy with the simplicity of YAML configuration. By following the declarative approach and leveraging the tiered architecture, you can create sophisticated AI agents that are both powerful and maintainable.
+Agent building with SuperSpec combines the power of DSPy with the simplicity of YAML configuration. By following the declarative approach and leveraging the framework architecture, you can create sophisticated AI agents that are both powerful and maintainable.
 
 The key to successful agent building is to:
 1. **Start simple** with basic configurations

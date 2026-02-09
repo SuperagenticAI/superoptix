@@ -1081,6 +1081,67 @@ Use `super agent <command> --help` for more information on a specific command.
         "--all", action="store_true", help="Compile all agents in the project."
     )
     compile_parser.add_argument(
+        "--optimize",
+        action="store_true",
+        help="Generate the full optimization/evaluation pipeline (default compile generates a minimal PyTorch-like DSPy pipeline).",
+    )
+    compile_parser.add_argument(
+        "--rlm",
+        action="store_true",
+        help="DSPy only: opt into dspy.RLM in minimal mode (default remains ChainOfThought/ReAct).",
+    )
+    compile_parser.add_argument(
+        "--local-ollama",
+        dest="local_ollama",
+        action="store_true",
+        help="Generate Ollama runtime code path (default behavior is already Ollama-first; this flag is kept for explicitness).",
+    )
+    compile_parser.add_argument(
+        "--local-models",
+        dest="local_ollama",
+        action="store_true",
+        help="Deprecated alias for --local-ollama.",
+    )
+    compile_mode_group = compile_parser.add_mutually_exclusive_group()
+    compile_mode_group.add_argument(
+        "--local",
+        action="store_true",
+        help="Compile for local runtime mode (default provider: ollama).",
+    )
+    compile_mode_group.add_argument(
+        "--cloud",
+        action="store_true",
+        help="Compile for cloud runtime mode (provider/model required via playbook or flags).",
+    )
+    compile_runtime_group = compile_parser.add_mutually_exclusive_group()
+    compile_runtime_group.add_argument(
+        "--direct",
+        action="store_true",
+        help="Pydantic AI: use direct provider runtime mode.",
+    )
+    compile_runtime_group.add_argument(
+        "--gateway",
+        action="store_true",
+        help="Pydantic AI: use gateway runtime mode.",
+    )
+    compile_parser.add_argument(
+        "--provider",
+        help="Override model provider at compile time (e.g. ollama, openai, google-genai, anthropic, vllm, mlx, lmstudio).",
+    )
+    compile_parser.add_argument(
+        "--model",
+        help="Override model id at compile time (e.g. llama3.1:8b, gpt-4o-mini, gemini-2.5-flash-lite).",
+    )
+    compile_parser.add_argument(
+        "--gateway-url",
+        help="Pydantic AI gateway base URL (used when --gateway is enabled).",
+    )
+    compile_parser.add_argument(
+        "--gateway-key-env",
+        default="PYDANTIC_AI_GATEWAY_API_KEY",
+        help="Env var name containing gateway API key (default: PYDANTIC_AI_GATEWAY_API_KEY).",
+    )
+    compile_parser.add_argument(
         "--explicit",
         action="store_true",
         default=True,
@@ -1201,6 +1262,25 @@ Use `super agent <command> --help` for more information on a specific command.
             "optimas-autogen",
         ],
         help="Optimas pipeline target to use when --engine=optimas",
+    )
+    optimize_mode_group = optimize_parser.add_mutually_exclusive_group()
+    optimize_mode_group.add_argument(
+        "--local",
+        action="store_true",
+        help="Optimize in local mode (default provider: ollama unless overridden).",
+    )
+    optimize_mode_group.add_argument(
+        "--cloud",
+        action="store_true",
+        help="Optimize in cloud mode (rejects local-only providers like ollama).",
+    )
+    optimize_parser.add_argument(
+        "--provider",
+        help="Provider override for optimization/runtime (e.g. ollama, openai, google-genai, anthropic).",
+    )
+    optimize_parser.add_argument(
+        "--model",
+        help="Model override for optimization task model (e.g. llama3.1:8b, gemini-2.5-flash-lite).",
     )
     optimize_parser.add_argument(
         "--optimizer",
@@ -1377,6 +1457,45 @@ Use `super agent <command> --help` for more information on a specific command.
             "optimas-autogen",
         ],
         help="Optimas pipeline target to use when --engine=optimas",
+    )
+    run_mode_group = run_parser.add_mutually_exclusive_group()
+    run_mode_group.add_argument(
+        "--local",
+        action="store_true",
+        help="Run in local mode (no cloud fallback).",
+    )
+    run_mode_group.add_argument(
+        "--cloud",
+        action="store_true",
+        help="Run in cloud mode (requires cloud-capable provider/model).",
+    )
+    run_runtime_group = run_parser.add_mutually_exclusive_group()
+    run_runtime_group.add_argument(
+        "--direct",
+        action="store_true",
+        help="Pydantic AI: use direct provider runtime mode.",
+    )
+    run_runtime_group.add_argument(
+        "--gateway",
+        action="store_true",
+        help="Pydantic AI: use gateway runtime mode.",
+    )
+    run_parser.add_argument(
+        "--provider",
+        help="Runtime provider override for DSPy (e.g. ollama, openai, google-genai).",
+    )
+    run_parser.add_argument(
+        "--model",
+        help="Runtime model override for DSPy.",
+    )
+    run_parser.add_argument(
+        "--gateway-url",
+        help="Pydantic AI gateway base URL (used when --gateway is enabled).",
+    )
+    run_parser.add_argument(
+        "--gateway-key-env",
+        default="PYDANTIC_AI_GATEWAY_API_KEY",
+        help="Env var name containing gateway API key (default: PYDANTIC_AI_GATEWAY_API_KEY).",
     )
     run_parser.add_argument(
         "-v",

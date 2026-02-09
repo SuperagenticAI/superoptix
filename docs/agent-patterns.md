@@ -43,7 +43,7 @@ graph TD
 
 ---
 
-**Status**: ✅ Open Source  
+**Status**: Open Source  
 **Complexity**: Low  
 **Best For**: Simple automation, Q&A systems
 
@@ -97,7 +97,7 @@ spec:
 
 ## 🧞‍♂️ Genies Tier - Intermediate
 
-**Status**: ✅ Open Source  
+**Status**: Open Source  
 **Complexity**: Medium  
 **Best For**: Customer service, content creation, complex problem-solving
 

@@ -91,8 +91,16 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
         # Default instructions from playbook
         default_instructions = """{{ spec.persona.role | default('You are a helpful AI assistant.') }}
 
+{% if spec.persona.instructions -%}
+Instructions: {{ spec.persona.instructions }}
+{%- endif %}
+
 {% if spec.persona.goal -%}
 Goal: {{ spec.persona.goal }}
+{%- endif %}
+
+{% if spec.persona.backstory -%}
+Backstory: {{ spec.persona.backstory }}
 {%- endif %}
 
 {% if spec.persona.traits -%}
@@ -136,7 +144,7 @@ Task: {{ spec.tasks[0].instruction }}
             name="{{ agent_name }}",
             instructions=self.variable,  # Optimized instructions
             model=self.config.model,
-            tools=self.config.tools if self.config.tools else None,
+            tools=self.config.tools or [],
         )
 
     def forward(self, **inputs: Any) -> Dict[str, Any]:

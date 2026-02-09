@@ -26,11 +26,11 @@
 
 By the end of this tutorial, you'll have:
 
-- ✅ A fully functional DeepAgents research assistant
-- ✅ Real Gemini API integration (FREE tier)
-- ✅ Automated evaluation with BDD scenarios
-- ✅ GEPA-optimized system prompts (+20-30% improvement)
-- ✅ Production-ready agent deployment
+- A fully functional DeepAgents research assistant
+- Real Gemini API integration (FREE tier)
+- Automated evaluation with BDD scenarios
+- GEPA-optimized system prompts (+20-30% improvement)
+- Production-ready agent deployment
 
 ### What is DeepAgents?
 
@@ -48,13 +48,13 @@ DeepAgents 0.2.0 is LangChain's framework for building **"deep agents"** - sophi
 
 ## 📋 Prerequisites
 
-### 1. System Requirements
+### System Requirements
 
 - **Python 3.11+** (required)
 - **SuperOptiX installed** (see below)
 - **Internet connection** (for Gemini API)
 
-### 2. Install SuperOptiX
+### Install SuperOptiX
 
 ```bash
 # Install SuperOptiX with DeepAgents support
@@ -71,13 +71,13 @@ pip install langchain-google-genai
 - GEPA optimizer
 - Google Gemini integration for LangChain
 
-### 3. Get FREE Gemini API Key
+### Get FREE Gemini API Key
 
 **Why Gemini?**
-- ✅ FREE tier with generous quotas
-- ✅ Function-calling support (required for DeepAgents)
-- ✅ Fast (1-3 second responses)
-- ✅ GPT-4 class quality
+- FREE tier with generous quotas
+- Function-calling support (required for DeepAgents)
+- Fast (1-3 second responses)
+- GPT-4 class quality
 
 **Steps:**
 1. Go to [Google AI Studio](https://aistudio.google.com/app/apikey)
@@ -89,9 +89,9 @@ pip install langchain-google-genai
 - 15 requests per minute
 - 1,500 requests per day  
 - 1M tokens per minute
-- ✅ **More than enough for development and testing!**
+- **More than enough for development and testing!**
 
-### 4. Set Environment Variable
+### Set Environment Variable
 
 === "Fish Shell"
     ```bash
@@ -126,24 +126,24 @@ pip install langchain-google-genai
     echo $GOOGLE_API_KEY
     ```
 
-### 5. Verify Installation
+### Verify Installation
 
 ```bash
 # Check SuperOptiX
 super --version
 
 # Check DeepAgents backends
-python -c "from superoptix.vendor.deepagents.backends import StateBackend, StoreBackend, FilesystemBackend, CompositeBackend; print('✅ All backends available!')"
+python -c "from superoptix.vendor.deepagents.backends import StateBackend, StoreBackend, FilesystemBackend, CompositeBackend; print('All backends available!')"
 
 # Check Gemini integration
-python -c "from langchain_google_genai import ChatGoogleGenerativeAI; print('✅ Gemini integration ready!')"
+python -c "from langchain_google_genai import ChatGoogleGenerativeAI; print('Gemini integration ready!')"
 ```
 
 **Expected Output:**
 ```
 SuperOptiX version 0.1.4
-✅ All backends available!
-✅ Gemini integration ready!
+All backends available!
+Gemini integration ready!
 ```
 
 ---
@@ -191,7 +191,7 @@ my_deepagents_project/
     └── tools/
 ```
 
-**✅ Checkpoint:** You should have a `.super` file in your directory. All `super` commands must run from this directory.
+**Checkpoint:** You should have a `.super` file in your directory. All `super` commands must run from this directory.
 
 ---
 
@@ -225,7 +225,7 @@ my_deepagents_project/agents/research_agent_deepagents/
 └── pipelines/                                   # Will be created on compile
 ```
 
-**✅ Checkpoint:** Check that the playbook file exists:
+**Checkpoint:** Check that the playbook file exists:
 ```bash
 cat my_deepagents_project/agents/research_agent_deepagents/playbook/research_agent_deepagents_playbook.yaml | head -20
 ```
@@ -284,7 +284,7 @@ spec:
         reflection_lm: google-genai:gemini-2.5-pro  # FREE Gemini Pro for reflection!
 ```
 
-**✅ Checkpoint:** Note the `target_framework: deepagents` - this tells SuperOptiX to compile for DeepAgents.
+**Checkpoint:** Note the `target_framework: deepagents` - this tells SuperOptiX to compile for DeepAgents.
 
 ---
 
@@ -312,8 +312,8 @@ super agent compile research_agent_deepagents --framework deepagents
 ╰──────────────────────────────────────────────────────────────────────────────╯
 
 🐍 Converted field names to snake_case for DSPy compatibility
-✅ Tools configuration detected for Genies tier
-✅ Successfully compiled with DEEPAGENTS framework
+Tools configuration detected for Genies tier
+Successfully compiled with DEEPAGENTS framework
 ╭──────────────────────────────────────────────────────────────────────────────╮
 │ 🎉 COMPILATION SUCCESSFUL! Pipeline Generated                                │
 ╰──────────────────────────────────────────────────────────────────────────────╯
@@ -325,7 +325,7 @@ super agent compile research_agent_deepagents --framework deepagents
 - Contains `ResearchAgentDeepAgentsPipeline` (executable pipeline)
 - Includes `_create_backend()` method for backend support
 
-**✅ Checkpoint:** Verify the pipeline file exists:
+**Checkpoint:** Verify the pipeline file exists:
 ```bash
 ls -lh my_deepagents_project/agents/research_agent_deepagents/pipelines/
 # Should show: research_agent_deepagents_deepagents_pipeline.py (~28KB)
@@ -360,7 +360,7 @@ pipelines/research_agent_deepagents_deepagents_pipeline.py
 │                                                                              │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 
-✅ DeepAgents agent initialized with model: google-genai:gemini-2.5-flash
+DeepAgents agent initialized with model: google-genai:gemini-2.5-flash
 
                                 Analysis Results                                
 ┏━━━━━━━━━━┳━━━━━━━┓
@@ -372,7 +372,7 @@ pipelines/research_agent_deepagents_deepagents_pipeline.py
 Pre-Optimized Pipeline: ⚪ NO
 Runtime Optimization: ⚪ NO
 
-Validation Status: ✅ PASSED
+Validation Status: PASSED
 ```
 
 **🎉 Success!** You just ran your first DeepAgents agent with real Gemini API!
@@ -383,7 +383,7 @@ Validation Status: ✅ PASSED
 3. Got response: "4"
 4. All using your FREE API quota!
 
-**✅ Checkpoint:** Try a more complex query:
+**Checkpoint:** Try a more complex query:
 ```bash
 super agent run research_agent_deepagents --goal "What is LangGraph? Answer in exactly 2 sentences."
 ```
@@ -432,10 +432,10 @@ super agent evaluate research_agent_deepagents
 
 Testing 3 BDD scenarios:
 
-✅ DeepAgents agent initialized with model: google-genai:gemini-2.5-flash
-✅ Simple research query: PASS
-❌ Technical comparison: FAIL
-❌ Complex research: FAIL
+DeepAgents agent initialized with model: google-genai:gemini-2.5-flash
+Simple research query: PASS
+Technical comparison: FAIL
+Complex research: FAIL
 
 ============================================================
 Overall: 1/3 PASS (33.3%)
@@ -444,9 +444,9 @@ Overall: 1/3 PASS (33.3%)
 ╭────────────────────── 🔴 Specification Results Summary ──────────────────────╮
 │                                                                              │
 │  📊 Total Specs:         3                🎯 Pass Rate:         33.3%        │
-│  ✅ Passed:              1                                                   │
-│  ❌ Failed:              2                                                   │
-│  🏆 Quality Gate:        ❌ NEEDS WORK                                       │
+│  Passed:              1                                                   │
+│  Failed:              2                                                   │
+│  🏆 Quality Gate:        NEEDS WORK                                       │
 │                                                                              │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ```
@@ -457,7 +457,7 @@ Overall: 1/3 PASS (33.3%)
 - Complex research needs improvement
 - **Perfect candidate for GEPA optimization!**
 
-**✅ Checkpoint:** Note your baseline score - we'll compare after optimization.
+**Checkpoint:** Note your baseline score - we'll compare after optimization.
 
 ---
 
@@ -492,19 +492,19 @@ super agent optimize research_agent_deepagents \
    Train: 2, Val: 1
 
 📦 Creating deepagents component...
-   ✅ Component created: research_agent_deep_agents
+   Component created: research_agent_deep_agents
    Framework: deepagents
    Optimizable: True
 
 🚀 Initializing Universal GEPA optimizer...
-   ✅ Optimizer created
+   Optimizer created
    Budget: medium
    Reflection LM: google-genai:gemini-2.5-pro
 
 ⚡ Running GEPA optimization...
    This may take 5-10 minutes...
 
-✅ DeepAgents agent initialized with model: google-genai:gemini-2.5-flash
+DeepAgents agent initialized with model: google-genai:gemini-2.5-flash
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Iteration 0: Base program full valset score: 0.33
@@ -517,9 +517,9 @@ Proposing improvements...
 Iteration 1: Testing 3 candidates...
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-✅ Candidate 1: Score 0.50 (+51% improvement!)
-✅ Candidate 2: Score 0.67 (+103% improvement!)
-✅ Candidate 3: Score 0.50 (+51% improvement!)
+Candidate 1: Score 0.50 (+51% improvement!)
+Candidate 2: Score 0.67 (+103% improvement!)
+Candidate 3: Score 0.50 (+51% improvement!)
 
 🎯 Best candidate: #2 with score 0.67
 
@@ -527,9 +527,9 @@ Iteration 1: Testing 3 candidates...
 Iteration 2: Testing 3 candidates...
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-✅ Candidate 1: Score 0.83 (+152% improvement!)
-✅ Candidate 2: Score 0.67 (+103% improvement!)
-✅ Candidate 3: Score 0.67 (+103% improvement!)
+Candidate 1: Score 0.83 (+152% improvement!)
+Candidate 2: Score 0.67 (+103% improvement!)
+Candidate 3: Score 0.67 (+103% improvement!)
 
 🎯 New best! Score: 0.83 (was 0.33)
 
@@ -537,14 +537,14 @@ Iteration 2: Testing 3 candidates...
 Iteration 3: Testing 3 candidates...
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-✅ Candidate 1: Score 0.83 (+152% improvement!)
-✅ Candidate 2: Score 1.00 (+203% improvement! 🎉)
-✅ Candidate 3: Score 0.83 (+152% improvement!)
+Candidate 1: Score 0.83 (+152% improvement!)
+Candidate 2: Score 1.00 (+203% improvement! 🎉)
+Candidate 3: Score 0.83 (+152% improvement!)
 
 🎯 New best! Score: 1.00 (PERFECT!)
 
 ╭──────────────────────────────────────────────────────────────────────────────╮
-│ ✅ OPTIMIZATION COMPLETE!                                                    │
+│ OPTIMIZATION COMPLETE!                                                    │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 
 📊 Results:
@@ -577,7 +577,7 @@ Iteration 3: Testing 3 candidates...
 - ~6 reflection calls (Gemini 2.5 Pro)
 - Total: ~16 calls (well within free tier: 15/min, 1500/day)
 
-**✅ Checkpoint:** Optimization should complete in 5-10 minutes. Be patient!
+**Checkpoint:** Optimization should complete in 5-10 minutes. Be patient!
 
 ---
 
@@ -651,11 +651,11 @@ system_prompt: |
 ```
 
 **Key Improvements:**
-- ✅ More specific instructions
-- ✅ Better structure and organization
-- ✅ Explicit quality standards
-- ✅ Clearer methodology steps
-- ✅ Emphasis on citations and sources
+- More specific instructions
+- Better structure and organization
+- Explicit quality standards
+- Clearer methodology steps
+- Emphasis on citations and sources
 
 ---
 
@@ -690,10 +690,10 @@ Response │ LangGraph and LangChain serve different but complementary purposes:
 ```
 
 **Notice the improvement:**
-- ✅ Better structured response
-- ✅ More comprehensive coverage
-- ✅ Clear key differences listed
-- ✅ Proper source citations
+- Better structured response
+- More comprehensive coverage
+- Clear key differences listed
+- Proper source citations
 
 ---
 
@@ -720,10 +720,10 @@ Optimization: 🚀 Optimized Model
 
 Testing 3 BDD scenarios:
 
-✅ DeepAgents agent initialized with model: google-genai:gemini-2.5-flash
-✅ Simple research query: PASS
-✅ Technical comparison: PASS
-✅ Complex research: PASS
+DeepAgents agent initialized with model: google-genai:gemini-2.5-flash
+Simple research query: PASS
+Technical comparison: PASS
+Complex research: PASS
 
 ============================================================
 Overall: 3/3 PASS (100.0%)
@@ -732,9 +732,9 @@ Overall: 3/3 PASS (100.0%)
 ╭────────────────────── 🟢 Specification Results Summary ──────────────────────╮
 │                                                                              │
 │  📊 Total Specs:         3                🎯 Pass Rate:         100.0%       │
-│  ✅ Passed:              3                                                   │
-│  ❌ Failed:              0                                                   │
-│  🏆 Quality Gate:        ✅ EXCELLENT                                        │
+│  Passed:              3                                                   │
+│  Failed:              0                                                   │
+│  🏆 Quality Gate:        EXCELLENT                                        │
 │                                                                              │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 
@@ -749,11 +749,11 @@ Overall: 3/3 PASS (100.0%)
 - **Improvement:** Noticeable enhancement (results vary by hardware and model)
 
 **All scenarios now passing:**
-- ✅ Simple research query
-- ✅ Technical comparison
-- ✅ Complex research
+- Simple research query
+- Technical comparison
+- Complex research
 
-**✅ Checkpoint:** This demonstrates GEPA's power - it automatically improved the agent's performance significantly!
+**Checkpoint:** This demonstrates GEPA's power - it automatically improved the agent's performance significantly!
 
 ---
 
@@ -782,7 +782,7 @@ super agent run my_agent --goal "Save 'Hello' to /note.txt"
 
 # New conversation (different thread)
 super agent run my_agent --goal "Read /note.txt"
-# ❌ File not found (ephemeral storage)
+# File not found (ephemeral storage)
 ```
 
 **Best For:**
@@ -831,7 +831,7 @@ super agent run chatbot_persistent --goal "What's my name?"
 ```
 
 **Agent's Actions:**
-1. **Reads `/user_profile.txt`** (still there! ✅)
+1. **Reads `/user_profile.txt`** (still there! )
 2. Finds: "Name: Alice"
 3. Responds: **"Your name is Alice!"**
 
@@ -840,8 +840,7 @@ super agent run chatbot_persistent --goal "What's my name?"
 super agent run chatbot_persistent --goal "What hobbies do I have?"
 ```
 
-**Response:** "You love gardening!" ✅
-
+**Response:** "You love gardening!" 
 **🎉 The agent remembers across ALL conversations!**
 
 **Best For:**
@@ -936,25 +935,25 @@ spec:
 ├──────────────────────────────────────────┤
 │                                          │
 │  /memories/                              │
-│  ├─ research_notes.txt → Database ✅     │
-│  ├─ findings.txt → Database ✅           │
-│  └─ index.txt → Database ✅              │
+│  ├─ research_notes.txt → Database │
+│  ├─ findings.txt → Database │
+│  └─ index.txt → Database │
 │      (PERSISTS FOREVER)                  │
 │                                          │
 │  /papers/                                │
-│  ├─ transformer.pdf → Real File ✅       │
-│  ├─ bert.pdf → Real File ✅              │
-│  └─ gpt3.pdf → Real File ✅              │
+│  ├─ transformer.pdf → Real File │
+│  ├─ bert.pdf → Real File │
+│  └─ gpt3.pdf → Real File │
 │      (ACTUAL FILES on your disk)         │
 │                                          │
 │  /cache/                                 │
-│  ├─ search.txt → Ephemeral ❌            │
-│  └─ temp.txt → Ephemeral ❌              │
+│  ├─ search.txt → Ephemeral │
+│  └─ temp.txt → Ephemeral │
 │      (CLEARED each conversation)         │
 │                                          │
 │  / (root)                                │
-│  ├─ draft.txt → Ephemeral ❌             │
-│  └─ workspace.txt → Ephemeral ❌         │
+│  ├─ draft.txt → Ephemeral │
+│  └─ workspace.txt → Ephemeral │
 │      (SCRATCH SPACE)                     │
 │                                          │
 └──────────────────────────────────────────┘
@@ -1010,31 +1009,31 @@ super agent run researcher_hybrid --goal "What did I research about transformers
 ### Commands Reference
 
 ```bash
-# 1. Initialize
+# Initialize
 super init my_project && cd my_project
 
-# 2. Pull agent
+# Pull agent
 super agent pull research_agent_deepagents
 
-# 3. Compile
+# Compile
 super agent compile research_agent_deepagents --framework deepagents
 
-# 4. Run
+# Run
 super agent run research_agent_deepagents --goal "Your query here"
 
-# 5. Evaluate (baseline)
+# Evaluate (baseline)
 super agent evaluate research_agent_deepagents
 
-# 6. Optimize (uses your Gemini key from fish config)
+# Optimize (uses your Gemini key from fish config)
 super agent optimize research_agent_deepagents \
   --framework deepagents \
   --auto medium \
   --reflection-lm google-genai:gemini-2.5-pro
 
-# 7. Evaluate (optimized)
+# Evaluate (optimized)
 super agent evaluate research_agent_deepagents  # automatically loads optimized weights
 
-# 8. Run optimized
+# Run optimized
 super agent run research_agent_deepagents --goal "Complex query here"
 ```
 
@@ -1042,9 +1041,9 @@ super agent run research_agent_deepagents --goal "Complex query here"
 
 | Step | Baseline | After GEPA |
 |------|----------|------------|
-| **Simple queries** | ✅ Good | ✅ Excellent |
-| **Technical comparisons** | ❌ Poor | ✅ Good |
-| **Complex research** | ❌ Poor | ✅ Good |
+| **Simple queries** | Good | Excellent |
+| **Technical comparisons** | Poor | Good |
+| **Complex research** | Poor | Good |
 | **Overall** | Baseline | Significantly Improved (results vary by hardware/model) |
 
 ### API Costs
@@ -1191,7 +1190,7 @@ super agent run researcher_hybrid --goal "What did I learn about transformers?"
 
 **Error:**
 ```
-❌ GOOGLE_API_KEY not set
+GOOGLE_API_KEY not set
 ```
 
 **Solution:**
@@ -1244,7 +1243,7 @@ super agent optimize my_agent --auto light --reflection-lm google-genai:gemini-2
 
 **Error:**
 ```
-❌ Pipeline not found for agent 'my_agent'
+Pipeline not found for agent 'my_agent'
 ```
 
 **Solution:**
@@ -1306,14 +1305,14 @@ ls /Users/local/my_project
 
 When using `FilesystemBackend`, the agent can read and **modify** actual files!
 
-**✅ Safe Configuration:**
+**Safe Configuration:**
 ```yaml
 backend:
   type: filesystem
   root_dir: /tmp/agent_sandbox  # Isolated directory
 ```
 
-**❌ Unsafe Configuration:**
+**Unsafe Configuration:**
 ```yaml
 backend:
   type: filesystem
@@ -1363,7 +1362,7 @@ backend:
 
 ## 📈 Performance Optimization Tips
 
-### 1. Choose Right Model for Each Task
+### Choose Right Model for Each Task
 
 ```yaml
 # For agent execution (runs many times)
@@ -1377,7 +1376,7 @@ optimization:
       reflection_lm: gemini-2.5-pro  # Better reasoning
 ```
 
-### 2. Optimize BDD Scenarios
+### Optimize BDD Scenarios
 
 Start with 3-5 good scenarios:
 ```yaml
@@ -1396,7 +1395,7 @@ feature_specifications:
       ...
 ```
 
-### 3. Use Appropriate GEPA Budget
+### Use Appropriate GEPA Budget
 
 ```bash
 # Quick test (5 min, ~15 API calls)
@@ -1409,7 +1408,7 @@ super agent optimize my_agent --auto medium
 super agent optimize my_agent --auto heavy
 ```
 
-### 4. Optimize Backend Strategy
+### Optimize Backend Strategy
 
 ```yaml
 # Fast but ephemeral
@@ -1486,24 +1485,24 @@ spec:
 ### Production Deployment Steps
 
 ```bash
-# 1. Develop and test locally
+# Develop and test locally
 super agent compile production_agent --framework deepagents
 super agent evaluate production_agent
 
-# 2. Optimize for production
+# Optimize for production
 super agent optimize production_agent \
   --framework deepagents \
   --auto heavy \
   --reflection-lm google-genai:gemini-2.5-pro
 
-# 3. Validate optimized version
+# Validate optimized version
 super agent evaluate production_agent  # automatically loads optimized weights
 # Check performance metrics (varies by hardware/model)
 
-# 4. Test with real data
+# Test with real data
 super agent run production_agent --goal "Production query"
 
-# 5. Deploy
+# Deploy
 # Copy optimized prompt to production config
 # Set up monitoring and logging
 # Deploy with proper API key management
@@ -1600,16 +1599,16 @@ super agent pull researcher_hybrid
 
 By the end of this tutorial, you should be able to:
 
-- ✅ Initialize a SuperOptiX project
-- ✅ Pull and compile DeepAgents agents
-- ✅ Run agents with real Gemini API calls
-- ✅ Evaluate agent performance with BDD scenarios
-- ✅ Optimize agents with GEPA (achieving 2-3x improvement)
-- ✅ Configure all 4 backend types
-- ✅ Build persistent chatbots
-- ✅ Create code review agents
-- ✅ Design hybrid storage strategies
-- ✅ Deploy production-ready agents
+- Initialize a SuperOptiX project
+- Pull and compile DeepAgents agents
+- Run agents with real Gemini API calls
+- Evaluate agent performance with BDD scenarios
+- Optimize agents with GEPA (achieving 2-3x improvement)
+- Configure all 4 backend types
+- Build persistent chatbots
+- Create code review agents
+- Design hybrid storage strategies
+- Deploy production-ready agents
 
 **If you've done all this:** 🎊 **Congratulations! You're a DeepAgents expert!**
 

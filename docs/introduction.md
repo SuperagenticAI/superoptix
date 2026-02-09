@@ -21,9 +21,15 @@ title: Introduction - SuperOptiX AI
 
 SuperOptiX is the **world's first universal agent optimization framework** that brings end-to-end optimization to AI agents across **6 major frameworks**. Build, evaluate, and optimize agents from any framework with a unified workflow powered by GEPA (Genetic-Pareto Algorithm).
 
-Unlike most frameworks that bolt on evals and monitoring as an afterthought, SuperOptiX makes **evaluation, optimization, and guardrails core to the development lifecycle**. Whether you're using DSPy, OpenAI SDK, CrewAI, Google ADK, Microsoft, or DeepAgents, SuperOptiX gives you the power to optimize and deploy production-grade agents.
+Unlike most frameworks that bolt on evals and monitoring as an afterthought, SuperOptiX makes evaluation, optimization, and guardrails core to the development lifecycle. Whether you're using DSPy, OpenAI SDK, CrewAI, Google ADK, Microsoft, or DeepAgents, SuperOptiX helps you ship reliable agents.
 
 SuperOptiX brings together declarative agent specification, universal GEPA optimization, built-in evaluation, multi-framework support, and multi-agent orchestration, all grounded in the principles of test-driven development and context engineering.
+
+## What's New
+
+- 🧪 **RLM Support (Experimental)**: Available for early adoption and testing. Unified sandbox support is coming soon. See [RLM guide](../guides/rlm-experimental/).
+- 🗂️ **Connector Integrations**: StackOne connector support for cross-framework tool-driven agents. See [StackOne integration](../guides/stackone-integration/).
+- ⚙️ **Minimal + Optimize Flow**: Default compile generates minimal framework-native pipelines, with expanded optimization flow enabled via `--optimize`.
 
 ## Core Philosophy
 
@@ -32,7 +38,7 @@ Unlike frameworks that lock you into a single approach, SuperOptiX gives you **f
 !!! abstract "Key Principle"
     Declarative by Design. Universally Optimized. Framework-Agnostic.
 
-With its native DSL (SuperSpec), GEPA optimization engine, support for 6 major frameworks, structured agent tiers (Oracles, Genies, Protocols, Superagents, Sovereigns), and full-stack abstractions, SuperOptiX empowers you to build reliable, adaptive, and intelligent agentic systems without vendor lock-in.
+With its native DSL (SuperSpec), GEPA optimization engine, support for major frameworks, and full-stack abstractions, SuperOptiX empowers you to build reliable, adaptive, and intelligent agentic systems without vendor lock-in.
 
 ---
 
@@ -162,8 +168,8 @@ SuperOptiX provides **end-to-end optimization across every layer of the agentic 
       <p>Systematic approach to delivering optimal information and tools to agents. Includes RAG, MCP protocol, and memory optimization.</p>
     </td>
     <td style="padding: 20px; width: 50%; vertical-align: top; border: 2px solid rgba(76, 175, 80, 0.3); background: rgba(76, 175, 80, 0.05);">
-      <h3 style="color: #4CAF50;">🏗️ Multi-Tier Architecture</h3>
-      <p>Progressive complexity from Oracles to Sovereigns with built-in safety. Free tiers (Oracle & Genie) and commercial tiers for enterprise.</p>
+      <h3 style="color: #4CAF50;">🏗️ Framework Architecture</h3>
+      <p>Progressive capabilities with built-in safety, evaluation, and optimization workflows.</p>
     </td>
   </tr>
 </table>
@@ -179,27 +185,27 @@ SuperOptiX provides **end-to-end optimization across every layer of the agentic 
   <tr style="background: rgba(76, 175, 80, 0.05);">
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong>🎯 Evaluation-First</strong></td>
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">Add evaluation as an afterthought</td>
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">Evaluation built into core development cycle ✅</strong></td>
+    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">Evaluation built into core development cycle</strong></td>
   </tr>
   <tr style="background: rgba(33, 150, 243, 0.05);">
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong>✅ RSpec-Style BDD Development</strong></td>
+    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong>RSpec-Style BDD Development</strong></td>
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">Manual prompt engineering</td>
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #2196F3;">Behavior-driven specifications with automated testing ✅</strong></td>
+    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #2196F3;">Behavior-driven specifications with automated testing</strong></td>
   </tr>
   <tr style="background: rgba(255, 152, 0, 0.05);">
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong>🧬 Universal GEPA Optimizer</strong></td>
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">Manual optimization or framework-specific tools</td>
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #FF9800;">One optimizer for all frameworks (37.5% → 80% improvement) ✅</strong></td>
+    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #FF9800;">One optimizer for all frameworks</strong></td>
   </tr>
   <tr style="background: rgba(156, 39, 176, 0.05);">
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong>🔬 Multi-Framework Freedom</strong></td>
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">Locked into one approach</td>
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #9C27B0;">Choose from 6 frameworks, optimize with one tool ✅</strong></td>
+    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #9C27B0;">Choose from multiple frameworks, optimize with one tool</strong></td>
   </tr>
   <tr style="background: rgba(76, 175, 80, 0.05);">
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong>🚀 Production-Ready</strong></td>
+    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong>🚀 Deployment-Ready</strong></td>
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">Basic deployment capabilities</td>
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">Built-in observability, guardrails, and enterprise features ✅</strong></td>
+    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">Built-in observability, guardrails, and enterprise features</strong></td>
   </tr>
 </table>
 
@@ -220,21 +226,21 @@ SuperOptiX is the **world's first framework-agnostic agent optimizer**. Build ag
   <tr style="background: rgba(76, 175, 80, 0.05);">
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong>🔬 DSPy</strong></td>
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">10+</td>
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">✅ Ollama</td>
+    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">Ollama</td>
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">Complex reasoning, research</td>
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">Proven: 37.5% → 80%</strong></td>
   </tr>
   <tr style="background: rgba(33, 150, 243, 0.05);">
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong>🤖 OpenAI SDK</strong></td>
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">1</td>
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">✅ Ollama</td>
+    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">Ollama</td>
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">Simple & fast</td>
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #2196F3;">Proven: 100% pass rate</strong></td>
   </tr>
   <tr style="background: rgba(255, 152, 0, 0.05);">
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong>👥 CrewAI</strong></td>
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">5</td>
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">✅ Ollama</td>
+    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">Ollama</td>
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">Multi-agent teams</td>
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #FF9800;">Proven: 100% pass rate</strong></td>
   </tr>
@@ -242,20 +248,20 @@ SuperOptiX is the **world's first framework-agnostic agent optimizer**. Build ag
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong>🔮 Google ADK</strong></td>
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">1</td>
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">☁️ Cloud</td>
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">Gemini native, free tier</td>
+    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">Gemini native, free access</td>
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">Ready</td>
   </tr>
   <tr style="background: rgba(128, 128, 128, 0.08);">
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong>🏢 Microsoft</strong></td>
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">1</td>
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">✅ Ollama</td>
+    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">Ollama</td>
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">Enterprise Azure</td>
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">Ready</td>
   </tr>
   <tr style="background: rgba(128, 128, 128, 0.05);">
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong>🌊 DeepAgents</strong></td>
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">1</td>
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">✅ Ollama</td>
+    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">Ollama</td>
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">Complex planning</td>
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">Ready</td>
   </tr>
@@ -282,7 +288,7 @@ SuperOptiX provides a consistent workflow across all frameworks:
 2. **Compile**: Generate framework-specific code
 3. **Evaluate**: Test with RSpec-style BDD scenarios
 4. **Optimize**: Improve with GEPA
-5. **Deploy**: Run in production
+5. **Deploy**: Run
 
 ```bash
 # Initialize project
@@ -301,7 +307,7 @@ super agent evaluate sentiment_analyzer
 # Optimize with GEPA
 super agent optimize sentiment_analyzer --auto medium
 
-# Run in production
+# Run
 super agent run sentiment_analyzer
 ```
 
@@ -339,7 +345,7 @@ GEPA has delivered dramatic improvements across all tested frameworks:
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong>🤖 OpenAI SDK</strong></td>
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">100%</td>
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">100%</strong></td>
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #2196F3;">Maintained ✅</strong></td>
+    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #2196F3;">Maintained</strong></td>
   </tr>
   <tr style="background: rgba(255, 152, 0, 0.05);">
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong>👥 CrewAI</strong></td>
@@ -398,54 +404,17 @@ Ready to build your first optimized agent?
   </tr>
 </table>
 
-## 🏗️ Progressive Tier System
+## 🏗️ Capability Coverage
 
-SuperOptiX offers a progressive architecture from simple to enterprise complexity:
+SuperOptiX focuses on practical capability coverage:
 
-<table style="width: 100%; border-collapse: collapse; margin: 20px 0; text-align: center;">
-  <tr style="background: rgba(33, 150, 243, 0.15); font-weight: bold;">
-    <td style="padding: 15px; border: 2px solid rgba(128, 128, 128, 0.3);">Tier</td>
-    <td style="padding: 15px; border: 2px solid rgba(128, 128, 128, 0.3);">Description</td>
-    <td style="padding: 15px; border: 2px solid rgba(128, 128, 128, 0.3);">Cost</td>
-    <td style="padding: 15px; border: 2px solid rgba(128, 128, 128, 0.3);">Status</td>
-  </tr>
-  <tr style="background: rgba(76, 175, 80, 0.08);">
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">🧙‍♂️ Oracles</strong></td>
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">Simple Q&A agents</td>
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">🆓 Free</strong></td>
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">✅ Available</strong></td>
-  </tr>
-  <tr style="background: rgba(76, 175, 80, 0.05);">
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">🧞‍♂️ Genies</strong></td>
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">Multi-step reasoning with tools & RAG</td>
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">🆓 Free</strong></td>
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">✅ Available</strong></td>
-  </tr>
-  <tr style="background: rgba(255, 152, 0, 0.08);">
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #FF9800;">🎭 Protocols</strong></td>
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">MCP & A2A support, advanced workflows</td>
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #FF9800;">💼 Commercial</strong></td>
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #FF9800;">🔒 Available</strong></td>
-  </tr>
-  <tr style="background: rgba(255, 152, 0, 0.05);">
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #FF9800;">🤖 Superagents</strong></td>
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">Multi-agent coordination systems</td>
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #FF9800;">💼 Commercial</strong></td>
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">In Progress</td>
-  </tr>
-  <tr style="background: rgba(156, 39, 176, 0.08);">
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #9C27B0;">👑 Sovereigns</strong></td>
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">Autonomous AI for large-scale operations</td>
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #9C27B0;">💼 Commercial</strong></td>
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">Coming Soon</td>
-  </tr>
-</table>
-
-!!! info "Free Tiers Available"
-    Oracle and Genie tiers are completely free to try, no credit card required!
+- Framework support (DSPy, OpenAI SDK, CrewAI, Google ADK, Microsoft, DeepAgents, Pydantic AI)
+- SuperSpec-based agent definitions
+- Built-in evaluation and optimization loops
+- Observability and orchestration support
 
 <div align="center" style="margin: 30px 0;">
-  <a href="../guides/tiers/" style="background: #4CAF50; color: white; padding: 14px 28px; text-decoration: none; border-radius: 4px; margin: 5px; display: inline-block; font-weight: bold;">🎭 View Full Tier Details</a>
+  <a href="../guides/multi-framework/" style="background: #4CAF50; color: white; padding: 14px 28px; text-decoration: none; border-radius: 4px; margin: 5px; display: inline-block; font-weight: bold;">🌐 View Framework Details</a>
 </div>
 
 ## Community and Support
@@ -485,11 +454,11 @@ SuperOptiX offers a progressive architecture from simple to enterprise complexit
 
 <div align="center" style="margin: 40px 0;">
   <h2>🚀 Ready to Build Optimized AI Agents?</h2>
-  <p style="font-size: 1.2em; margin: 20px 0;">Start with our free Oracle & Genie tiers today!</p>
+  <p style="font-size: 1.2em; margin: 20px 0;">Start with quick start and build your first agent today.</p>
 </div>
 
 <div align="center" style="margin: 30px 0;">
   <a href="../quick-start/" style="background: #4CAF50; color: white; padding: 16px 32px; text-decoration: none; border-radius: 4px; margin: 10px; display: inline-block; font-weight: bold; font-size: 1.1em;">🚀 Start Free</a>
-  <a href="../tutorials/oracles-agent/" style="background: #2196F3; color: white; padding: 16px 32px; text-decoration: none; border-radius: 4px; margin: 10px; display: inline-block; font-weight: bold; font-size: 1.1em;">🤖 Create First Agent</a>
-  <a href="../guides/tiers/" style="background: #FF9800; color: white; padding: 16px 32px; text-decoration: none; border-radius: 4px; margin: 10px; display: inline-block; font-weight: bold; font-size: 1.1em;">🎭 View All Tiers</a>
+  <a href="../quick-start/" style="background: #2196F3; color: white; padding: 16px 32px; text-decoration: none; border-radius: 4px; margin: 10px; display: inline-block; font-weight: bold; font-size: 1.1em;">🤖 Create First Agent</a>
+  <a href="../guides/multi-framework/" style="background: #FF9800; color: white; padding: 16px 32px; text-decoration: none; border-radius: 4px; margin: 10px; display: inline-block; font-weight: bold; font-size: 1.1em;">🌐 Framework Guide</a>
 </div>

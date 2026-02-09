@@ -7,15 +7,15 @@ SuperOptiX provides **GEPA-based context window optimization** for memory system
 **Key Innovation**: GEPA learns to select only the most relevant memories within your token budget.
 
 **Impact**:
-- ✅ **Token usage**: 60% reduction (5000 → 2000 tokens)
-- ✅ **Memory relevance**: 55% improvement (30% → 85%)
-- ✅ **Task success rate**: 30-50% boost
+- **Token usage**: 60% reduction (5000 → 2000 tokens)
+- **Memory relevance**: 55% improvement (30% → 85%)
+- **Task success rate**: 30-50% boost
 
 ---
 
 ## ⚡ Quick Start
 
-### 1. Enable in Playbook
+### Enable in Playbook
 
 ```yaml
 spec:
@@ -25,7 +25,7 @@ spec:
     max_context_tokens: 2000          # Set token budget
 ```
 
-### 2. Use in Agent
+### Use in Agent
 
 ```bash
 # Pull demo agent
@@ -59,12 +59,10 @@ Unoptimized Context (ALL 20 memories):
 16. Shipping issue with #12345 (Oct 18) - 300 tokens ← RELEVANT!
 17-20. More irrelevant data - 800 tokens
 
-Total: 5000+ tokens → Context overflow! ❌
-Relevant: 300 / 5000 = 6% ❌
-```
+Total: 5000+ tokens → Context overflow! Relevant: 300 / 5000 = 6% ```
 
 **Problems**:
-- ❌ Context overflowHuman: Can you also now ensure you add the entry to navigation
+- Context overflowHuman: Can you also now ensure you add the entry to navigation
 
 <function_calls>
 <invoke name="search_replace">

@@ -20,24 +20,24 @@ This demo showcases how to integrate **Milvus** - a cloud-native vector database
 
 ## Prerequisites
 
-### 1. Install SuperOptiX
+### Install SuperOptiX
 ```bash
 pip install superoptix
 ```
 
-### 2. Install Milvus Dependencies
+### Install Milvus Dependencies
 ```bash
 pip install pymilvus
 ```
 
-### 3. Set Up Milvus Server
+### Set Up Milvus Server
 ```bash
 # Using Docker Compose (recommended)
 wget https://github.com/milvus-io/milvus/releases/download/v2.5.12/milvus-standalone-docker-compose.yml
 docker-compose up -d
 ```
 
-### 4. Install and Serve Model
+### Install and Serve Model
 ```bash
 # Install a model (if not already installed)
 super model install llama3.1:8b
@@ -48,17 +48,17 @@ ollama serve
 
 ## Quick Start
 
-### 1. Pull the Demo Agent
+### Pull the Demo Agent
 ```bash
 super agent pull rag_milvus_demo
 ```
 
-### 2. Compile the Agent
+### Compile the Agent
 ```bash
 super agent compile rag_milvus_demo
 ```
 
-### 3. Run the Demo
+### Run the Demo
 ```bash
 super agent run rag_milvus_demo --goal "What are the key features of Milvus and how does it work with SuperOptiX?"
 ```

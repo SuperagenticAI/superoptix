@@ -24,7 +24,7 @@ super init my_project
 cd my_project
 
 # Pull a pre-built agent (Genies tier for full observability features)
-super agent pull developer --tier genies
+super agent pull developer
 
 # Compile the agent to generate the pipeline
 super agent compile developer
@@ -113,7 +113,7 @@ super observe traces <agent_id> --export json --output traces.json
 **Output Example:**
 ```
 🔍 Loading traces for agent: developer_20250714_200501
-✅ Loaded 11 trace events
+Loaded 11 trace events
               Traces for Agent: developer_20250714_200501               
 ┏━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━┓
 ┃ Time     ┃ Component ┃ Event                   ┃ Status  ┃ Duration  ┃
@@ -299,7 +299,7 @@ cd swe
 
 ```bash
 # Pull a pre-built developer agent with Genies tier
-super agent pull developer --tier genies
+super agent pull developer
 ```
 
 **Result**: Successfully added the Developer Assistant agent with:
@@ -334,8 +334,7 @@ super agent run developer --goal "Write a simple Python function to calculate th
 - **Model**: `llama3.1:8b` (Ollama backend)
 - **Tools**: 3 tools configured (calculator, text_analyzer, file_reader)
 - **Execution Time**: 10.27 seconds
-- **Status**: Success ✅
-
+- **Status**: Success 
 ### 📊 Trace Analysis Results
 
 #### Trace File Generation
@@ -367,18 +366,18 @@ The agent execution automatically generated trace files in `.superoptix/traces/`
 
 ### 🎯 Key Findings
 
-#### 1. Automatic Tracing
+#### Automatic Tracing
 - **Tracing is automatic**: No manual configuration required
 - **Comprehensive coverage**: Captures model, tools, execution, and performance data
 - **Structured format**: JSONL format for easy parsing and analysis
 
-#### 2. Rich Trace Data
+#### Rich Trace Data
 - **Event hierarchy**: Parent-child relationships between events
 - **Timing information**: Precise duration measurements
 - **Component separation**: Clear separation of pipeline, execution, and tool events
 - **Status tracking**: Success, error, warning, and info statuses
 
-#### 3. Tool Usage Analysis
+#### Tool Usage Analysis
 - **Tools used**: Calculator tool attempted (with syntax error)
 - **Tool integration**: Seamless integration with ReAct framework
 - **Error handling**: Graceful handling of tool execution errors
@@ -537,7 +536,7 @@ The observability system tracks:
 
 ## 🎯 Best Practices
 
-### 1. Enable Tracing for All Agents
+### Enable Tracing for All Agents
 
 Always run agents with tracing enabled to capture comprehensive execution data:
 
@@ -546,7 +545,7 @@ Always run agents with tracing enabled to capture comprehensive execution data:
 super agent run <agent_id> --goal "your goal"
 ```
 
-### 2. Regular Performance Analysis
+### Regular Performance Analysis
 
 Schedule regular performance analysis to identify optimization opportunities:
 
@@ -558,7 +557,7 @@ super observe analyze <agent_id> --days 7
 super observe analyze <agent_id> --days 30
 ```
 
-### 3. Monitor Tool Usage
+### Monitor Tool Usage
 
 Track tool usage patterns to optimize agent capabilities:
 
@@ -567,7 +566,7 @@ Track tool usage patterns to optimize agent capabilities:
 super observe traces <agent_id> --show-tools --detailed
 ```
 
-### 4. Debug Production Issues
+### Debug Production Issues
 
 Use the debugging system to troubleshoot production problems:
 
@@ -576,7 +575,7 @@ Use the debugging system to troubleshoot production problems:
 super observe debug agent <agent_id> --break-on-error
 ```
 
-### 5. Export Trace Data
+### Export Trace Data
 
 Export trace data for external analysis and reporting:
 

@@ -69,7 +69,7 @@ This extends optimization beyond prompts to hyperparameters, model selection/rou
 
 ## 🚀 Quick Start
 
-### 1. Install SuperOptiX with Optimas Support
+### Install SuperOptiX with Optimas Support
 
 ```bash
 # Install with Optimas support
@@ -88,7 +88,7 @@ pip install "superoptix[optimas,optimas-autogen]"
 pip install "superoptix[optimas,optimas-dspy]"
 ```
 
-### 2. Install Additional Dependencies
+### Install Additional Dependencies
 
 ```bash
 # Required for DSPy 3.0.0 streaming support
@@ -99,7 +99,7 @@ pip install crewai
 pip install json-repair>=0.30.0
 ```
 
-### 3. Quick Demo
+### Quick Demo
 
 ```bash
 # Initialize project
@@ -123,10 +123,10 @@ super agent compile optimas_dspy --target optimas-dspy
 
 | Target | Compile | Evaluate | Optimize | Run | Status | Notes |
 |--------|---------|----------|----------|-----|--------|-------|
-| **OpenAI SDK** | ✅ | ✅ | ✅ | ✅ | **Fully Working** | Most reliable, no threading issues |
-| **CrewAI** | ✅ | ✅ | ✅ | ✅ | **Fully Working** | Requires manual dependency installation |
-| **AutoGen** | ✅ | ✅ | ⚠️ | ✅ | **Mostly Working** | Optimization works but can be slow |
-| **DSPy** | ✅ | ✅ | ✅ | ✅ | **Fully Working** | All optimizers now working properly |
+| **OpenAI SDK** | | | | | **Fully Working** | Most reliable, no threading issues |
+| **CrewAI** | | | | | **Fully Working** | Requires manual dependency installation |
+| **AutoGen** | | | ⚠️ | | **Mostly Working** | Optimization works but can be slow |
+| **DSPy** | | | | | **Fully Working** | All optimizers now working properly |
 
 ## 🔧 Environment Variables
 
@@ -226,7 +226,7 @@ tasks:
         type: str
 ```
 
-**✅ Why OpenAI SDK is recommended:**
+**Why OpenAI SDK is recommended:**
 - Most reliable and stable
 - No threading issues
 - Fast optimization and execution
@@ -327,7 +327,7 @@ tasks:
         type: str
 ```
 
-**✅ DSPy Features:**
+**DSPy Features:**
 - All optimizers (OPRO, MIPRO, COPRO) now working properly
 - Excellent for research and production optimization
 - Fast optimization and execution
@@ -338,79 +338,79 @@ tasks:
 ### OpenAI SDK Workflow (Recommended)
 
 ```bash
-# 1. Compile
+# Compile
 super agent compile optimas_openai --target optimas-openai
 
-# 2. Evaluate
+# Evaluate
 super agent evaluate optimas_openai --engine optimas --target optimas-openai
 
-# 3. Optimize with environment variables
+# Optimize with environment variables
 SUPEROPTIX_OPRO_MAX_TOKENS=256 \
 SUPEROPTIX_OPRO_NUM_CANDIDATES=3 \
 SUPEROPTIX_OPRO_MAX_WORKERS=3 \
 SUPEROPTIX_OPRO_TEMPERATURE=0.8 \
 super agent optimize optimas_openai --engine optimas --target optimas-openai --optimizer opro
 
-# 4. Run
+# Run
 super agent run optimas_openai --engine optimas --target optimas-openai --goal "Write a Python function to add two numbers"
 ```
 
 ### CrewAI Workflow
 
 ```bash
-# 1. Compile
+# Compile
 super agent compile optimas_crewai --target optimas-crewai
 
-# 2. Evaluate
+# Evaluate
 super agent evaluate optimas_crewai --engine optimas --target optimas-crewai
 
-# 3. Optimize
+# Optimize
 SUPEROPTIX_OPRO_MAX_TOKENS=256 \
 SUPEROPTIX_OPRO_NUM_CANDIDATES=3 \
 SUPEROPTIX_OPRO_MAX_WORKERS=3 \
 super agent optimize optimas_crewai --engine optimas --target optimas-crewai --optimizer opro
 
-# 4. Run
+# Run
 super agent run optimas_crewai --engine optimas --target optimas-crewai --goal "Write a Python function to calculate factorial"
 ```
 
 ### AutoGen Workflow
 
 ```bash
-# 1. Compile
+# Compile
 super agent compile optimas_autogen --target optimas-autogen
 
-# 2. Evaluate
+# Evaluate
 super agent evaluate optimas_autogen --engine optimas --target optimas-autogen
 
-# 3. Optimize (can be slow)
+# Optimize (can be slow)
 SUPEROPTIX_OPRO_MAX_TOKENS=256 \
 SUPEROPTIX_OPRO_NUM_CANDIDATES=3 \
 SUPEROPTIX_OPRO_MAX_WORKERS=3 \
 SUPEROPTIX_OPRO_COMPILE_TIMEOUT=180 \
 super agent optimize optimas_autogen --engine optimas --target optimas-autogen --optimizer opro
 
-# 4. Run
+# Run
 super agent run optimas_autogen --engine optimas --target optimas-autogen --goal "Write a Python function to reverse a string"
 ```
 
 ### DSPy Workflow
 
 ```bash
-# 1. Compile
+# Compile
 super agent compile optimas_dspy --target optimas-dspy
 
-# 2. Evaluate
+# Evaluate
 super agent evaluate optimas_dspy --engine optimas --target optimas-dspy
 
-# 3. Optimize
+# Optimize
 SUPEROPTIX_OPRO_MAX_TOKENS=256 \
 SUPEROPTIX_OPRO_NUM_CANDIDATES=3 \
 SUPEROPTIX_OPRO_MAX_WORKERS=3 \
 SUPEROPTIX_OPRO_TEMPERATURE=0.8 \
 super agent optimize optimas_dspy --engine optimas --target optimas-dspy --optimizer opro
 
-# 4. Run
+# Run
 super agent run optimas_dspy --engine optimas --target optimas-dspy --goal "Write a Python function to calculate fibonacci numbers"
 ```
 
@@ -418,14 +418,14 @@ super agent run optimas_dspy --engine optimas --target optimas-dspy --goal "Writ
 
 ### Common Issues
 
-#### 1. DSPy Optimization Performance
+#### DSPy Optimization Performance
 
 **For Best Results:**
 - Use appropriate optimization parameters for your use case
 - Monitor optimization progress and adjust parameters as needed
 - Consider using MIPRO or COPRO optimizers for specific DSPy workflows
 
-#### 2. CrewAI Dependency Conflicts
+#### CrewAI Dependency Conflicts
 
 **Symptoms:**
 ```
@@ -438,7 +438,7 @@ pip install crewai --no-deps
 pip install json-repair>=0.30.0
 ```
 
-#### 3. AutoGen Model Info Errors
+#### AutoGen Model Info Errors
 
 **Symptoms:**
 ```
@@ -449,7 +449,7 @@ model_info is required when model name is not a valid OpenAI model
 - Add detailed `model_info` section in playbook
 - Use OpenAI-compatible model names
 
-#### 4. Optimization Timeouts
+#### Optimization Timeouts
 
 **Symptoms:**
 ```
@@ -482,22 +482,22 @@ SUPEROPTIX_OPRO_COMPILE_TIMEOUT=300
 
 ## 📚 Best Practices
 
-### 1. Target Selection
+### Target Selection
 - **Production**: Use OpenAI SDK target (most reliable)
 - **Multi-agent**: Use CrewAI or AutoGen targets
 - **Research & Optimization**: Use DSPy target (fully supported)
 
-### 2. Environment Variables
+### Environment Variables
 - Set all relevant variables before running commands
 - Use inline variable setting for reproducibility
 - Monitor timeout values for large models
 
-### 3. Model Configuration
+### Model Configuration
 - Use local models (Ollama) for development
 - Ensure proper `model_info` for non-OpenAI models
 - Test with smaller models first
 
-### 4. Optimization Strategy
+### Optimization Strategy
 - Start with OPRO (most reliable)
 - Use MIPRO/COPRO only with DSPy targets
 - Monitor optimization progress and adjust parameters

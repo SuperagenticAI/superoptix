@@ -2,6 +2,8 @@
 
 This guide covers common issues and their solutions when working with SuperOptiX.
 
+For fast error-to-fix mapping, use [Troubleshooting by Symptom](guides/troubleshooting-by-symptom.md).
+
 ## 🚨 Dependency Conflicts
 
 ### CrewAI Installation Conflicts
@@ -26,13 +28,13 @@ This is a **known dependency conflict** between CrewAI and DSPy due to incompati
 Install CrewAI manually after installing SuperOptiX with DSPy support:
 
 ```bash
-# 1. Install SuperOptiX with DSPy support (this gets compatible json-repair)
+# Install SuperOptiX with DSPy support (this gets compatible json-repair)
 pip install "superoptix[optimas]"
 
-# 2. Install CrewAI without dependencies to avoid conflicts
+# Install CrewAI without dependencies to avoid conflicts
 pip install crewai==0.157.0 --no-deps
 
-# 3. Ensure compatible json-repair version
+# Ensure compatible json-repair version
 pip install "json-repair>=0.30.0"
 ```
 

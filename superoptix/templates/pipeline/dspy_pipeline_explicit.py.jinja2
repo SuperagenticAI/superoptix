@@ -55,20 +55,43 @@ except ImportError:
 
 class {{ agent_name | to_pascal_case }}Signature(dspy.Signature):
     """
-    {{ spec.persona.role | default('AI Assistant') }}
-
-    {% if spec.persona.goal -%}
+    Role: {{ spec.persona.role | default('AI Assistant') }}
+    {% if spec.persona.instructions %}
+    Instructions: {{ spec.persona.instructions }}
+    {% endif %}
+    {% if spec.persona.goal %}
     Goal: {{ spec.persona.goal }}
-    {%- endif %}
-    {% if spec.persona.backstory -%}
+    {% endif %}
+    {% if spec.persona.backstory %}
     Backstory: {{ spec.persona.backstory }}
-    {%- endif %}
+    {% endif %}
+    {% if spec.persona.traits %}
+    Traits: {{ spec.persona.traits | join(', ') }}
+    {% endif %}
+    {% if spec.reasoning and spec.reasoning.method %}
+    Reasoning Method: {{ spec.reasoning.method }}
+    {% endif %}
+    {% if spec.reasoning and spec.reasoning.steps %}
+    Reasoning Steps:
+    {% for step in spec.reasoning.steps %}
+    - {{ step }}
+    {% endfor %}
+    {% endif %}
+    {% if spec.tasks and spec.tasks[0] and spec.tasks[0].instruction %}
+    Task Instruction: {{ spec.tasks[0].instruction | clean }}
+    {% endif %}
+    {% if spec.constraints %}
+    Constraints:
+    {% for constraint in spec.constraints %}
+    - {{ constraint }}
+    {% endfor %}
+    {% endif %}
     """
 
     # Input Fields
 {% if spec.input_fields %}
 {% for field in spec.input_fields %}
-    {{ field.name | to_snake_case }}: str = dspy.InputField(desc="{{ field.description | default('Input field') }}")
+    {{ field.name | to_snake_case }}: {{ field.dspy_type | default('str') }} = dspy.InputField(desc={{ field.description | default('Input field') | tojson }})
 {% endfor %}
 {% else %}
     query: str = dspy.InputField(desc="User query or question")
@@ -77,7 +100,7 @@ class {{ agent_name | to_pascal_case }}Signature(dspy.Signature):
     # Output Fields
 {% if spec.output_fields %}
 {% for field in spec.output_fields %}
-    {{ field.name | to_snake_case }}: str = dspy.OutputField(desc="{{ field.description | default('Output field') }}")
+    {{ field.name | to_snake_case }}: {{ field.dspy_type | default('str') }} = dspy.OutputField(desc={{ field.description | default('Output field') | tojson }})
 {% endfor %}
 {% else %}
     response: str = dspy.OutputField(desc="Generated response")

@@ -97,11 +97,17 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 {% if spec.persona.role %}
         prompt_parts.append({{ (spec.persona.role | replace('\n', ' ')) | tojson }})
 {% endif %}
+{% if spec.persona.instructions %}
+        prompt_parts.append("\\nInstructions: " + {{ (spec.persona.instructions | replace('\n', ' ')) | tojson }})
+{% endif %}
 {% if spec.persona.goal %}
         prompt_parts.append("\\nGoal: " + {{ (spec.persona.goal | replace('\n', ' ')) | tojson }})
 {% endif %}
 {% if spec.persona.backstory %}
         prompt_parts.append("\\nBackstory: " + {{ (spec.persona.backstory | replace('\n', ' ')) | tojson }})
+{% endif %}
+{% if spec.persona.traits %}
+        prompt_parts.append("\\nTraits: " + {{ (spec.persona.traits | join(', ') | replace('\n', ' ')) | tojson }})
 {% endif %}
 {% if spec.reasoning and spec.reasoning.method %}
         prompt_parts.append("\\n\\nReasoning Method: " + {{ (spec.reasoning.method | replace('\n', ' ')) | tojson }})

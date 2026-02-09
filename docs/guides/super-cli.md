@@ -78,7 +78,7 @@ SuperOptiX › build a developer agent
 🔧 Preparing the perfect command...
   ✓ Generated 1 command(s)
 🚀 Launching your request...
-✅ Agent created successfully!
+Agent created successfully!
 ```
 
 ```bash
@@ -90,7 +90,7 @@ SuperOptiX › evaluate my customer support agent
 ⚙️ Tuning parameters...
   ✓ Generated 1 command(s)
 ⚡ Running the command...
-✅ Evaluation complete!
+Evaluation complete!
 ```
 
 ```bash
@@ -102,7 +102,7 @@ SuperOptiX › optimize the code review agent with GEPA
 🗺️ Charting the course...
   ✓ Generated 1 command(s)
 🧠 AI at work...
-✅ Optimization complete!
+Optimization complete!
 ```
 
 ### Supported Intents
@@ -265,12 +265,10 @@ SuperOptiX › /mcp status
 ```
 🔧 MCP Client Status
 
-Status: Ready ✅
-
+Status: Ready 
 Active Servers:
   • filesystem - Local file access
-    Status: Connected ✅
-    Tools: 3 available
+    Status: Connected     Tools: 3 available
 
 Available Tools:
   • read_file(path) - Read file contents
@@ -343,7 +341,7 @@ SuperOptiX › /mcp tools
 
 🚀 Launching your request...
 
-✅ Success!
+Success!
 ```
 
 **Smooth, continuous animations until each step completes!**
@@ -385,7 +383,7 @@ SuperOptiX › /config
 # Switch model anytime
 SuperOptiX › /model set gpt-4o-mini
 
-✅ Switched to: gpt-4o-mini
+Switched to: gpt-4o-mini
    Provider: openai
 ```
 
@@ -430,17 +428,17 @@ SuperOptiX › /ask how does GEPA optimization work?
 SuperOptiX › build a customer support agent for e-commerce
 
 ✨ Working on it...
-✅ Agent created successfully!
+Agent created successfully!
 
 SuperOptiX › compile it
 
 🔧 Assembling the pieces...
-✅ Compiled!
+Compiled!
 
 SuperOptiX › evaluate the agent
 
 🚀 Launching evaluation...
-✅ Evaluation complete!
+Evaluation complete!
 Score: 85%
 ```
 
@@ -450,13 +448,13 @@ Score: 85%
 SuperOptiX › optimize customer_support with GEPA at high level
 
 🧠 AI at work...
-✅ Optimization complete!
+Optimization complete!
 Best score: 92%
 
 SuperOptiX › evaluate it again
 
 ⚡ Running the command...
-✅ Evaluation complete!
+Evaluation complete!
 Score: 92% (improved 7%!)
 ```
 
@@ -466,17 +464,17 @@ Score: 92% (improved 7%!)
 SuperOptiX › create a software development team
 
 💡 Got an idea...
-✅ Created developer, qa_engineer, devops_engineer
+Created developer, qa_engineer, devops_engineer
 
 SuperOptiX › compile all of them
 
 🔨 Building it now...
-✅ All agents compiled!
+All agents compiled!
 
 SuperOptiX › create an orchestra for them
 
 🎵 Orchestrating the plan...
-✅ Orchestra created!
+Orchestra created!
 ```
 
 ---
@@ -560,8 +558,8 @@ SuperOptiX › create an orchestra for them
 ### Clean Output
 
 **Focus on results, not technical details:**
-- ✅ Success indicators
-- ❌ Clear error messages
+- Success indicators
+- Clear error messages
 - 📊 Relevant information only
 - No command clutter
 
@@ -579,15 +577,15 @@ SuperOptiX › create an orchestra for them
 **Example:**
 ```bash
 SuperOptiX › build a developer agent
-✅ Created!
+Created!
 
 SuperOptiX › compile it
 # Knows "it" refers to developer agent
-✅ Compiled!
+Compiled!
 
 SuperOptiX › evaluate
 # Knows which agent to evaluate
-✅ Evaluated!
+Evaluated!
 ```
 
 ### Hybrid Knowledge Access
@@ -723,19 +721,19 @@ SuperOptiX › /mcp enable filesystem
 
 ```bash
 SuperOptiX › build a developer agent
-✅ Created!
+Created!
 
 SuperOptiX › compile it
-✅ Compiled!
+Compiled!
 
 SuperOptiX › evaluate the agent
-✅ Evaluated! Score: 78%
+Evaluated! Score: 78%
 
 SuperOptiX › optimize with GEPA
-✅ Optimized! Score: 91%
+Optimized! Score: 91%
 
 SuperOptiX › evaluate again
-✅ Evaluated! Score: 91%
+Evaluated! Score: 91%
 ```
 
 ### Agent Discovery
@@ -758,8 +756,7 @@ SuperOptiX › /ask tell me about the developer agent
 
 ```bash
 SuperOptiX › /mcp status
-🔧 MCP Client Ready ✅
-
+🔧 MCP Client Ready 
 SuperOptiX › /ask show me an example of RAG optimization
 📚 Reading from docs/guides/rag.md...
 (Uses MCP filesystem access)

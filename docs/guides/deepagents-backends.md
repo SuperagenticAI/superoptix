@@ -21,10 +21,10 @@
 
 DeepAgents 0.2.0 introduces a **pluggable backend abstraction** that transforms how agents store and access files. Instead of being limited to ephemeral virtual filesystems, you can now:
 
-✅ **Persist memory** across conversations (StoreBackend)  
-✅ **Access real files** on your local filesystem (FilesystemBackend)  
-✅ **Hybrid strategies** with different storage for different paths (CompositeBackend)  
-✅ **Custom backends** for databases, S3, remote VMs, etc.
+**Persist memory** across conversations (StoreBackend)  
+**Access real files** on your local filesystem (FilesystemBackend)  
+**Hybrid strategies** with different storage for different paths (CompositeBackend)  
+**Custom backends** for databases, S3, remote VMs, etc.
 
 **Source:** [LangChain Blog - Doubling Down on DeepAgents](https://blog.langchain.com/doubling-down-on-deepagents/)
 
@@ -33,14 +33,12 @@ DeepAgents 0.2.0 introduces a **pluggable backend abstraction** that transforms 
 **Before 0.2.0:**
 ```
 Agent writes to /notes.txt → Stored in LangGraph state
-New conversation starts → /notes.txt is gone ❌
-```
+New conversation starts → /notes.txt is gone ```
 
 **After 0.2.0:**
 ```
 Agent writes to /memories/notes.txt → Stored in persistent database
-New conversation starts → /memories/notes.txt still there! ✅
-```
+New conversation starts → /memories/notes.txt still there! ```
 
 ---
 
@@ -88,7 +86,7 @@ Now everything the agent writes persists across conversations!
 
 ## 📦 Backend Types
 
-### 1. StateBackend (Default)
+### StateBackend (Default)
 
 **Storage:** LangGraph state (ephemeral, per-thread)  
 **Persistence:** Within conversation only  
@@ -101,10 +99,10 @@ backend:
 ```
 
 **Behavior:**
-- ✅ Fast (in-memory)
-- ✅ Checkpointed within thread
-- ❌ Lost when thread ends
-- ❌ Not shared across threads
+- Fast (in-memory)
+- Checkpointed within thread
+- Lost when thread ends
+- Not shared across threads
 
 **Use Cases:**
 - Simple Q&A agents
@@ -114,7 +112,7 @@ backend:
 
 ---
 
-### 2. StoreBackend (Persistent)
+### StoreBackend (Persistent)
 
 **Storage:** LangGraph store (persistent database)  
 **Persistence:** Across all conversations  
@@ -127,9 +125,9 @@ backend:
 ```
 
 **Behavior:**
-- ✅ Persistent across threads
-- ✅ Shared between conversations
-- ✅ Survives restarts
+- Persistent across threads
+- Shared between conversations
+- Survives restarts
 - ⚡ Slightly slower (database)
 
 **Use Cases:**
@@ -140,7 +138,7 @@ backend:
 
 ---
 
-### 3. FilesystemBackend (Local Files)
+### FilesystemBackend (Local Files)
 
 **Storage:** Actual local filesystem  
 **Persistence:** Real files on disk  
@@ -154,9 +152,9 @@ backend:
 ```
 
 **Behavior:**
-- ✅ Access real project files
-- ✅ Changes immediately visible
-- ✅ Works with other tools (git, IDE, etc.)
+- Access real project files
+- Changes immediately visible
+- Works with other tools (git, IDE, etc.)
 - ⚠️  Security: Agent can modify actual files!
 
 **Use Cases:**
@@ -167,7 +165,7 @@ backend:
 
 ---
 
-### 4. CompositeBackend (Hybrid)
+### CompositeBackend (Hybrid)
 
 **Storage:** Route different paths to different backends  
 **Persistence:** Mixed strategies  
@@ -185,9 +183,9 @@ backend:
 ```
 
 **Behavior:**
-- ✅ Best of all worlds
-- ✅ Optimized for each data type
-- ✅ Flexible and powerful
+- Best of all worlds
+- Optimized for each data type
+- Flexible and powerful
 - 🔧 Requires more configuration
 
 **Use Cases:**
@@ -323,9 +321,9 @@ super agent run code_review_agent --goal "Review src/auth.py for security issues
 super agent run code_review_agent --goal "Analyze the entire codebase and write a report to /code_review_report.md"
 
 # Agent:
-# 1. Lists files with ls /src/
-# 2. Reads each file
-# 3. Writes report to actual file: /Users/local/my_project/code_review_report.md
+# Lists files with ls /src/
+# Reads each file
+# Writes report to actual file: /Users/local/my_project/code_review_report.md
 ```
 
 **Why It Works:**
@@ -425,19 +423,19 @@ export GOOGLE_API_KEY="your-key"
 super agent run advanced_research_agent --goal "Research transformer architectures. Save key findings."
 
 # Agent workflow:
-# 1. Checks /memories/transformer_research.txt (not found)
-# 2. Searches for information
-# 3. Saves results to /cache/search_results.txt
-# 4. Writes summary to /memories/transformer_research.txt (persisted!)
-# 5. May read from /papers/attention_is_all_you_need.pdf
+# Checks /memories/transformer_research.txt (not found)
+# Searches for information
+# Saves results to /cache/search_results.txt
+# Writes summary to /memories/transformer_research.txt (persisted!)
+# May read from /papers/attention_is_all_you_need.pdf
 
 # Week later, follow-up research
 super agent run advanced_research_agent --goal "What did I learn about transformers?"
 
 # Agent workflow:
-# 1. Reads /memories/transformer_research.txt (found - from last week!)
-# 2. Response: "Based on your previous research, transformers..."
-# 3. Can build upon previous knowledge
+# Reads /memories/transformer_research.txt (found - from last week!)
+# Response: "Based on your previous research, transformers..."
+# Can build upon previous knowledge
 
 # Analyze specific paper
 super agent run advanced_research_agent --goal "Summarize the paper in /papers/bert.pdf"
@@ -590,9 +588,9 @@ spec:
 
 | Backend | Persistence | Speed | Shared | Use Case |
 |---------|-------------|-------|--------|----------|
-| **state** | Thread only | ⚡⚡⚡ Very Fast | ❌ No | Scratch space |
-| **store** | Forever | ⚡⚡ Fast | ✅ Yes | Long-term memory |
-| **filesystem** | Forever | ⚡⚡ Fast | ✅ Yes | Real files |
+| **state** | Thread only | ⚡⚡⚡ Very Fast | No | Scratch space |
+| **store** | Forever | ⚡⚡ Fast | Yes | Long-term memory |
+| **filesystem** | Forever | ⚡⚡ Fast | Yes | Real files |
 | **composite** | Mixed | ⚡⚡ Fast | Mixed | Best of all |
 
 ---
@@ -613,7 +611,7 @@ cd /Users/local/superagentic/SuperOptiX
 pip install -e .
 
 # Verify backends are available
-python -c "from superoptix.vendor.deepagents.backends import state; print('✅ Backends available')"
+python -c "from superoptix.vendor.deepagents.backends import state; print('Backends available')"
 ```
 
 ---
@@ -665,7 +663,7 @@ PermissionError: /etc/password
 
 ## 📊 Performance Tips
 
-### 1. Choose the Right Backend
+### Choose the Right Backend
 
 ```yaml
 # Fast scratch space
@@ -681,7 +679,7 @@ backend:
   type: filesystem
 ```
 
-### 2. Use Composite for Optimal Performance
+### Use Composite for Optimal Performance
 
 ```yaml
 # Optimize for each data type
@@ -693,7 +691,7 @@ backend:
     /big_files/: filesystem  # Offload large files
 ```
 
-### 3. Limit Filesystem Scope
+### Limit Filesystem Scope
 
 ```yaml
 # Good: Specific directory
@@ -711,7 +709,7 @@ backend:
 
 ## 🎯 Best Practices
 
-### ✅ Do
+### Do
 
 1. **Use StateBackend** for temporary, single-conversation agents
 2. **Use StoreBackend** for chatbots and learning agents
@@ -720,7 +718,7 @@ backend:
 5. **Document storage strategy** in system prompt
 6. **Test with small `root_dir`** first
 
-### ❌ Don't
+### Don't
 
 1. **Don't use FilesystemBackend on root** (`/`)
 2. **Don't store sensitive data** without encryption

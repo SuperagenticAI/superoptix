@@ -541,14 +541,14 @@ super spec validate my-agent_playbook.yaml --verbose
 ### **2. Follow Tier Constraints**
 
 ```yaml
-# ✅ Correct - Oracles tier without advanced features
+# Correct - Oracles tier without advanced features
 metadata:
   level: oracles
 spec:
   # No memory, tools, or RAG configuration
   tasks: [...]
 
-# ✅ Correct - Genies tier with advanced features
+# Correct - Genies tier with advanced features
 metadata:
   level: genies
 spec:
@@ -613,4 +613,4 @@ feature_specifications:
 
 ---
 
-💡 **Pro Tip**: Use the `super spec schema --tier genies` command to explore all available configuration options for each tier! 
+💡 **Pro Tip**: Use the `super spec schema` command to explore all available configuration options for each tier! 

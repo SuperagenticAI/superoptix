@@ -5,17 +5,17 @@
 This demo shows how to use **Weights & Biases (W&B)** with SuperOptiX to track agent experiments, GEPA optimization runs, and multi-framework comparisons.
 
 **What you'll learn**:
-- ✅ Set up W&B integration
-- ✅ Track agent execution metrics
-- ✅ Monitor GEPA optimization
-- ✅ Compare different frameworks
-- ✅ Create custom dashboards
+- Set up W&B integration
+- Track agent execution metrics
+- Monitor GEPA optimization
+- Compare different frameworks
+- Create custom dashboards
 
 ---
 
 ## 🚀 Quick Demo
 
-### 1. Setup W&B
+### Setup W&B
 
 ```bash
 # Install W&B
@@ -26,7 +26,7 @@ wandb login
 # Enter your API key from: https://wandb.ai/authorize
 ```
 
-### 2. Run Agent with W&B Tracking
+### Run Agent with W&B Tracking
 
 ```bash
 # Initialize project
@@ -44,7 +44,7 @@ super agent run assistant_openai \
   --tags ["demo", "openai-sdk"]
 ```
 
-### 3. View Results in W&B
+### View Results in W&B
 
 Visit: https://wandb.ai/your-username/superoptix
 
@@ -341,7 +341,7 @@ wandb status
 
 ## 🎯 Best Practices Demo
 
-### 1. Consistent Tagging
+### Consistent Tagging
 
 ```bash
 # Use hierarchical tags
@@ -350,7 +350,7 @@ super agent run my_agent \
   --tags ["framework:dspy", "tier:genies", "stage:production", "version:v2.1"]
 ```
 
-### 2. Project Organization
+### Project Organization
 
 ```bash
 # Organize by project type
@@ -359,7 +359,7 @@ super agent run my_agent --observe wandb --project "superoptix-production"
 super agent run my_agent --observe wandb --project "superoptix-research"
 ```
 
-### 3. Metric Naming
+### Metric Naming
 
 ```python
 # Use consistent metric names

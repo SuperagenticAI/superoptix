@@ -1,14 +1,16 @@
 # 🐍 Pydantic AI Integration
 
-**SuperOptiX now supports Pydantic AI - a modern agent framework with native MCP support!**
+**SuperOptiX supports Pydantic AI with framework-native minimal pipelines and optional optimization workflows.**
 
-✅ **Works great with Ollama 8b models (No API Keys Needed for Local Models!)**
+**Works with local and cloud models**
 
-✅ **Native MCP (Model Context Protocol) Support** - Built-in tool integration
+**Native MCP (Model Context Protocol) Support** - Built-in tool integration
 
-✅ **Plain Text Output Mode** - Natural responses without JSON formatting issues
+**Plain Text Output Mode** - Natural responses without JSON formatting issues
 
-✅ **Model Settings** - Full control over generation parameters
+**Model Settings** - Full control over generation parameters
+
+**RLM (Experimental)** - Available for testing; unified sandbox support is coming soon.
 
 ---
 
@@ -23,7 +25,7 @@ Pydantic AI is a modern, type-safe framework for building AI agents with:
 - 📊 **Model Settings**: Fine-grained control (max_tokens, top_p, etc.)
 - 🔌 **MCP Native**: Direct integration with MCP servers for tool discovery
 
-Perfect for production applications requiring type safety and reliable tool integration!
+Perfect for deployment applications requiring type safety and reliable tool integration!
 
 ---
 
@@ -45,29 +47,32 @@ pip install superoptix[frameworks-pydantic-ai]
 
 ## 🚀 Quick Start
 
-### 1. Initialize Project
+### Initialize Project
 
 ```bash
 super init my_project
 cd my_project
 ```
 
-### 2. Pull Demo Agent
+### Pull Demo Agent
 
 ```bash
 super agent pull developer
 ```
 
-This pulls the `developer` agent playbook into your project. The agent comes pre-configured with:
-- Ollama model setup (default: `llama3.1:8b`)
-- BDD test scenarios
-- Optimization configuration
+This pulls the `developer` agent playbook into your project.
 
-### 3. Configure Model
+### Configure Model
 
-**✅ Uses Ollama by Default!** (FREE, no API keys needed!)
+### Runtime Modes (Important)
 
-The `developer` agent defaults to Ollama `llama3.1:8b`:
+Pydantic AI in SuperOptiX can run in:
+- `direct` mode: provider API directly (recommended for most users)
+- `gateway` mode: requires gateway configuration and `PYDANTIC_AI_GATEWAY_API_KEY`
+
+If your playbook/runtime is gateway-mode and the key is missing, run will fail early by design.
+
+### Example Config (Local Ollama)
 
 ```yaml
 spec:
@@ -77,59 +82,35 @@ spec:
     api_base: http://localhost:11434
 ```
 
-**Just install Ollama and run:**
+Run:
 ```bash
 brew install ollama  # macOS
 ollama pull llama3.1:8b
 super agent compile developer --framework pydantic-ai
-super agent run developer --goal "Implement a user registration API endpoint with email validation"
+super agent run developer --framework pydantic-ai --direct --goal "Implement a user registration API endpoint with email validation"
 ```
 
-**Also Works With Cloud Models** (requires API key):
+### Example Config (Cloud Google, requires key)
 ```yaml
-# OpenAI GPT-4
+# Google Gemini
 spec:
   language_model:
-    provider: openai
-    model: gpt-4o  # Pydantic AI auto-detects provider
-    # Set: export OPENAI_API_KEY="sk-..."
-
-# Anthropic Claude
-spec:
-  language_model:
-    provider: anthropic
-    model: claude-3-5-sonnet
-    # Set: export ANTHROPIC_API_KEY="sk-ant-..."
+    provider: google-genai
+    model: gemini-2.5-flash
+    # Set: export GOOGLE_API_KEY="..."
 ```
 
-### 4. Run the Workflow
+### Run the Workflow
 
 ```bash
-# Compile
-super agent compile developer --framework pydantic-ai
+super agent compile developer --framework pydantic-ai --cloud --provider google-genai --model gemini-2.5-flash
 
-# Evaluate
-super agent evaluate developer
+# Run (direct mode)
+super agent run developer --framework pydantic-ai --direct --cloud --provider google-genai --model gemini-2.5-flash --goal "Your task here"
 
-# Optimize with GEPA (OPTIONAL)
-# ⚠️ WARNING: Only run if you have:
-#   - High-end GPU or cloud GPU access
-#   - Understanding of cost implications (many LLM API calls)
-#   - Use local Ollama (ollama/llama3.1:8b) to avoid API charges
-# ⚠️ WARNING: Requires high-end GPU and makes many LLM API calls
-# Use local Ollama (ollama/llama3.1:8b) to avoid API costs
-
-# Ultra fast: only 3 metric calls (~30 seconds - 1 minute)
-super agent optimize developer --framework pydantic-ai --max-metric-calls 3 --reflection-lm ollama/llama3.1:8b
-
-# Super light for quick test (~1-2 minutes, ~10 API calls)
-super agent optimize developer --framework pydantic-ai --max-metric-calls 10 --reflection-lm ollama/llama3.1:8b
-
-# Or use light mode for better results (~5-10 minutes, ~50-100 API calls)
-super agent optimize developer --framework pydantic-ai --auto light --reflection-lm ollama/llama3.1:8b
-
-# Run
-super agent run developer --goal "Your task here"
+# Optional optimize loop
+super agent compile developer --framework pydantic-ai --optimize
+super agent optimize developer --framework pydantic-ai --auto light
 ```
 
 ---
@@ -283,7 +264,7 @@ spec:
 
 ### Supported MCP Server Types
 
-#### 1. Local stdio Server
+#### Local stdio Server
 
 Runs MCP server as a subprocess:
 
@@ -302,7 +283,7 @@ spec:
           timeout: 30  # Optional timeout in seconds
 ```
 
-#### 2. Remote Streamable HTTP Server
+#### Remote Streamable HTTP Server
 
 Connects to a remote MCP server over HTTP:
 
@@ -318,7 +299,7 @@ spec:
         tool_prefix: "weather_"
 ```
 
-#### 3. Remote SSE Server (Deprecated)
+#### Remote SSE Server (Deprecated)
 
 Connects to a remote MCP server using Server-Sent Events:
 
@@ -486,7 +467,7 @@ super agent optimize developer \
 ```
 🔧 Phase 1: Optimizing MCP Tool Descriptions
    Optimizing 3 tool(s): fs_read_file, fs_write_file, fs_list_files
-   ✅ MCP tool optimization complete!
+   MCP tool optimization complete!
    Best score: 0.850
    Saved to: .../developer_mcp_tool_descriptions.json
 
@@ -494,7 +475,7 @@ super agent optimize developer \
    Budget: light
    Training examples: 5
    Validation examples: 0
-   ✅ Optimization complete!
+   Optimization complete!
    Best score: 0.920
    Saved to: .../developer_pydantic_ai_optimized.json
 ```
@@ -583,10 +564,10 @@ spec:
 
 #### Benefits of Two-Phase Optimization
 
-✅ **Better Tool Usage**: Optimized descriptions help the model choose the right tool at the right time  
-✅ **Better Instructions**: Optimized prompts improve overall agent behavior  
-✅ **Compound Effect**: Both optimizations work together for maximum performance  
-✅ **Automatic**: Pipeline automatically applies both optimizations when available
+**Better Tool Usage**: Optimized descriptions help the model choose the right tool at the right time  
+**Better Instructions**: Optimized prompts improve overall agent behavior  
+**Compound Effect**: Both optimizations work together for maximum performance  
+**Automatic**: Pipeline automatically applies both optimizations when available
 
 #### Troubleshooting
 
@@ -594,10 +575,10 @@ spec:
 
 **Solution**: Use actual MCP server tool names **without** prefix:
 ```yaml
-# ❌ Wrong - uses prefixed names
+# Wrong - uses prefixed names
 tool_names: ["fs_read_file", "fs_write_file"]
 
-# ✅ Correct - uses actual server tool names
+# Correct - uses actual server tool names
 tool_names: ["read_file", "write_file", "list_directory"]
 ```
 
@@ -623,11 +604,11 @@ The optimizer queries the MCP server directly, which returns unprefixed tool nam
 ## 🎬 MCP Demo Tutorial
 
 For a complete step-by-step demo of MCP with Pydantic AI, including:
-- ✅ Quick start with `pydantic-mcp` demo agent
-- ✅ Setting up filesystem MCP server
-- ✅ Testing file operations (read, write, list)
-- ✅ Verified working examples with `llama3.1:8b`
-- ✅ Troubleshooting common issues
+- Quick start with `pydantic-mcp` demo agent
+- Setting up filesystem MCP server
+- Testing file operations (read, write, list)
+- Verified working examples with `llama3.1:8b`
+- Troubleshooting common issues
 
 See: [**Pydantic AI MCP Demo Guide**](pydantic-ai-mcp-demo.md)
 
@@ -646,9 +627,9 @@ super agent run pydantic-mcp --goal "List all files in /private/tmp"  # Use /pri
 > ⚠️ **IMPORTANT: Resource Requirements**
 > 
 > **GEPA optimization is resource-intensive and should only be run when:**
-> - ✅ You have a **high-end GPU** (or cloud GPU access)
-> - ✅ You understand the **cost implications** (many LLM API calls)
-> - ✅ You have adequate **time budget** (5-60 minutes depending on settings)
+> - You have a **high-end GPU** (or cloud GPU access)
+> - You understand the **cost implications** (many LLM API calls)
+> - You have adequate **time budget** (5-60 minutes depending on settings)
 > 
 > **Resource Usage:**
 > - Makes **many LLM API calls** (reflection + evaluation)
@@ -693,7 +674,7 @@ When writing code:
 3. Include proper error handling
 4. Write comprehensive tests
 
-Goal: Write clean, efficient code that meets requirements and is production-ready.
+Goal: Write clean, efficient code that meets requirements and is deployment-ready.
 
 Backstory: I am an experienced developer with expertise in multiple programming languages and frameworks."
 ```
@@ -711,10 +692,10 @@ GEPA typically expands the instructions to be more explicit and structured, whic
 > - **Heavy**: ~300-600 API calls (~$20-100+ with cloud models)
 > 
 > **Recommendations:**
-> - ✅ Use **local Ollama models** (`ollama/llama3.1:8b`) to avoid API costs
-> - ✅ Only optimize when you have **high-end GPU** or cloud GPU access
-> - ✅ Start with `--max-metric-calls 20` to test
-> - ❌ Avoid cloud models (GPT-4, Claude) unless you understand the costs
+> - Use **local Ollama models** (`ollama/llama3.1:8b`) to avoid API costs
+> - Only optimize when you have **high-end GPU** or cloud GPU access
+> - Start with `--max-metric-calls 20` to test
+> - Avoid cloud models (GPT-4, Claude) unless you understand the costs
 
 #### Quick Test (Super Light) ⚡
 
@@ -787,9 +768,9 @@ The generated pipeline automatically loads optimized instructions if available.
 > ⚠️ **IMPORTANT: Resource Requirements**
 > 
 > Field description optimization is resource-intensive and should only be run when:
-> - ✅ You have a **high-end GPU** (or cloud GPU access)
-> - ✅ You understand the **cost implications** (additional LLM API calls)
-> - ✅ You plan to use **structured output mode** (required for optimized descriptions to take effect)
+> - You have a **high-end GPU** (or cloud GPU access)
+> - You understand the **cost implications** (additional LLM API calls)
+> - You plan to use **structured output mode** (required for optimized descriptions to take effect)
 
 ### What Gets Optimized
 
@@ -828,7 +809,7 @@ spec:
     "implementation": "The code implementation of the feature"
   },
   "optimized_descriptions": {
-    "implementation": "Complete, production-ready code implementation with proper imports, error handling, and documentation. Include full function/class definitions, not pseudocode or descriptions."
+    "implementation": "Complete, deployment-ready code implementation with proper imports, error handling, and documentation. Include full function/class definitions, not pseudocode or descriptions."
   },
   "score": 0.95,
   "iterations": 3
@@ -889,7 +870,7 @@ super agent optimize developer \
    Optimizing 1 field descriptions:
      - implementation: The code implementation of the feature
    
-   ✅ Field description optimization complete!
+   Field description optimization complete!
    Best score: 0.95
    Saved to: .../developer_field_descriptions_optimized.json
 
@@ -911,7 +892,7 @@ Optimized field descriptions are saved to:
     "implementation": "The code implementation of the feature"
   },
   "optimized_descriptions": {
-    "implementation": "Complete, production-ready code implementation..."
+    "implementation": "Complete, deployment-ready code implementation..."
   },
   "score": 0.95,
   "iterations": 3
@@ -929,24 +910,24 @@ The generated pipeline automatically loads and applies optimized descriptions wh
 
 ### Benefits
 
-✅ **Better Structured Output**: More explicit field descriptions improve the model's understanding  
-✅ **Improved Accuracy**: Optimized descriptions lead to better structured data extraction  
-✅ **Type Safety**: Works seamlessly with Pydantic's BaseModel validation  
-✅ **Automatic**: Pipeline automatically applies optimized descriptions when available
+**Better Structured Output**: More explicit field descriptions improve the model's understanding  
+**Improved Accuracy**: Optimized descriptions lead to better structured data extraction  
+**Type Safety**: Works seamlessly with Pydantic's BaseModel validation  
+**Automatic**: Pipeline automatically applies optimized descriptions when available
 
 ### When to Use
 
 **Use field description optimization when:**
-- ✅ You're using structured output mode
-- ✅ Your structured outputs aren't accurate enough
-- ✅ You have well-defined BDD test scenarios
-- ✅ You have adequate GPU/compute resources
+- You're using structured output mode
+- Your structured outputs aren't accurate enough
+- You have well-defined BDD test scenarios
+- You have adequate GPU/compute resources
 
 **Skip field description optimization when:**
-- ❌ You're using plain text output mode (descriptions won't be used)
-- ❌ Your structured outputs already work well
-- ❌ You don't have resources for additional optimization
-- ❌ `output_fields` aren't defined in your playbook
+- You're using plain text output mode (descriptions won't be used)
+- Your structured outputs already work well
+- You don't have resources for additional optimization
+- `output_fields` aren't defined in your playbook
 
 ---
 
@@ -957,10 +938,10 @@ Pydantic AI supports **structured output** using Pydantic BaseModel for type-saf
 ### What is Structured Output?
 
 **Structured Output** uses Pydantic BaseModel to enforce type-safe responses:
-- ✅ **Type Validation**: Responses are validated against the BaseModel schema
-- ✅ **Field Descriptions**: Each field has a description that guides the model
-- ✅ **Type Safety**: Python type hints ensure correct data types
-- ✅ **Automatic Parsing**: Responses are automatically parsed into BaseModel instances
+- **Type Validation**: Responses are validated against the BaseModel schema
+- **Field Descriptions**: Each field has a description that guides the model
+- **Type Safety**: Python type hints ensure correct data types
+- **Automatic Parsing**: Responses are automatically parsed into BaseModel instances
 
 **Default Mode (Plain Text):**
 - Agent returns plain text strings
@@ -1040,7 +1021,7 @@ When structured output is enabled:
 # BaseModel created from output_fields
 class DeveloperOutput(BaseModel):
     implementation: str = Field(
-        description="Complete, production-ready code implementation..."  # Optimized description if available
+        description="Complete, deployment-ready code implementation..."  # Optimized description if available
     )
 
 # Agent configured with structured output
@@ -1056,14 +1037,14 @@ agent = Agent(
 When running an agent with structured output, you'll see:
 
 ```
-✅ Using structured output mode (BaseModel)
+Using structured output mode (BaseModel)
    Output Model: DeveloperOutput
-   ✅ Using optimized field descriptions
+   Using optimized field descriptions
 ```
 
 **Response Output:**
 ```
-✅ Structured Output Received!
+Structured Output Received!
    Type: DeveloperOutput
    Model: DeveloperOutput
    📊 Pydantic v2 model validated successfully
@@ -1075,27 +1056,27 @@ When running an agent with structured output, you'll see:
 
 ### Benefits
 
-✅ **Type Safety**: Responses are validated against Pydantic models  
-✅ **Better Structure**: Enforces consistent output format  
-✅ **Optimized Descriptions**: Uses GEPA-optimized field descriptions  
-✅ **Validation**: Automatic validation ensures correct data types  
-✅ **Integration**: Works seamlessly with Pydantic AI's native structured output
+**Type Safety**: Responses are validated against Pydantic models  
+**Better Structure**: Enforces consistent output format  
+**Optimized Descriptions**: Uses GEPA-optimized field descriptions  
+**Validation**: Automatic validation ensures correct data types  
+**Integration**: Works seamlessly with Pydantic AI's native structured output
 
 ### When to Use Structured Output
 
 **Use structured output when:**
-- ✅ You need type-safe, validated responses
-- ✅ You're using larger models (70b+)
-- ✅ You have well-defined output schemas
-- ✅ You've optimized field descriptions
-- ✅ You need consistent data structure
+- You need type-safe, validated responses
+- You're using larger models (70b+)
+- You have well-defined output schemas
+- You've optimized field descriptions
+- You need consistent data structure
 
 **Use plain text output when:**
-- ✅ You're using smaller models (8b)
-- ✅ You want maximum compatibility
-- ✅ Output format is flexible
-- ✅ You don't need structured validation
-- ✅ **Default mode** - works great for most use cases
+- You're using smaller models (8b)
+- You want maximum compatibility
+- Output format is flexible
+- You don't need structured validation
+- **Default mode** - works great for most use cases
 
 ### Switching Between Modes
 
@@ -1136,21 +1117,21 @@ Pydantic AI achieves good baseline performance with local Ollama models. Results
 ### Framework Comparison
 
 **Pydantic AI strengths:**
-- ✅ Type-safe structured outputs (validated by Pydantic)
-- ✅ Native MCP support (no extra configuration)
-- ✅ Modern async/await API
-- ✅ Clean, simple architecture
-- ✅ Works seamlessly with Ollama
+- Type-safe structured outputs (validated by Pydantic)
+- Native MCP support (no extra configuration)
+- Modern async/await API
+- Clean, simple architecture
+- Works seamlessly with Ollama
 
 **DSPy strengths:**
-- ✅ More optimization targets (all signatures)
-- ✅ Better for focused, well-defined tasks
-- ✅ Greater improvement potential through optimization
+- More optimization targets (all signatures)
+- Better for focused, well-defined tasks
+- Greater improvement potential through optimization
 
 **OpenAI SDK strengths:**
-- ✅ Built-in multi-agent handoffs
-- ✅ Session management
-- ✅ Guardrails support
+- Built-in multi-agent handoffs
+- Session management
+- Guardrails support
 
 ---
 
@@ -1357,7 +1338,7 @@ pip install pydantic-ai==1.31.0
    
    **Cloud models are costly:**
    ```bash
-   # ❌ NOT RECOMMENDED - Expensive!
+   # NOT RECOMMENDED - Expensive!
    super agent optimize developer --framework pydantic-ai --auto light --reflection-lm openai/gpt-4o
    # This can cost $5-20+ per optimization run!
    ```
@@ -1447,10 +1428,10 @@ return {"implementation": response_text}
 ```
 
 **Why Plain Text Mode?**
-- ✅ Works reliably with 8b models
-- ✅ No JSON formatting issues
-- ✅ Natural, readable responses
-- ✅ Better for code generation and documentation tasks
+- Works reliably with 8b models
+- No JSON formatting issues
+- Natural, readable responses
+- Better for code generation and documentation tasks
 
 ### MCP Server Integration
 
@@ -1492,7 +1473,6 @@ SuperOptiX allows you to write your agent specification once and compile to any 
 ```bash
 # Same playbook, different frameworks
 super agent compile my_agent --framework pydantic-ai
-super agent compile my_agent --framework dspy
 super agent compile my_agent --framework openai
 super agent compile my_agent --framework deepagents
 
@@ -1505,23 +1485,23 @@ super agent optimize my_agent --framework pydantic-ai --auto light  # Recommende
 ### When to Use Pydantic AI
 
 **Choose Pydantic AI when:**
-- ✅ You need type-safe structured outputs
-- ✅ You want native MCP tool integration
-- ✅ You prefer modern async/await APIs
-- ✅ You're building production applications
-- ✅ You need validated, reliable responses
+- You need type-safe structured outputs
+- You want native MCP tool integration
+- You prefer modern async/await APIs
+- You're building deployment applications
+- You need validated, reliable responses
 
 **Choose DSPy when:**
-- ✅ You need maximum optimization flexibility
-- ✅ You want to optimize multiple components
-- ✅ You have well-defined, focused tasks
-- ✅ You want proven optimization improvements
+- You need maximum optimization flexibility
+- You want to optimize multiple components
+- You have well-defined, focused tasks
+- You want proven optimization improvements
 
 **Choose OpenAI SDK when:**
-- ✅ You need multi-agent handoffs
-- ✅ You want built-in session management
-- ✅ You need guardrails support
-- ✅ You prefer simple, straightforward API
+- You need multi-agent handoffs
+- You want built-in session management
+- You need guardrails support
+- You prefer simple, straightforward API
 
 ---
 
@@ -1559,7 +1539,7 @@ super agent optimize my_agent --framework pydantic-ai --auto light  # Recommende
 | **Light** | `--max-metric-calls 20` | ~2-3 min | ~20 calls | Quick test, verify it works |
 | **Light** | `--auto light` | ~5-10 min | ~50-100 calls | ⭐ **Recommended** - Balanced speed/quality |
 | **Medium** | `--auto medium` | ~15-30 min | ~150-300 calls | Better results, more iterations |
-| **Heavy** | `--auto heavy` | ~30-60 min | ~300-600 calls | Maximum quality, production ready |
+| **Heavy** | `--auto heavy` | ~30-60 min | ~300-600 calls | Maximum quality, deployment ready |
 
 > ⚠️ **Cost Estimates** (with cloud models like GPT-4o):
 > - Super Light: ~$0.10-2.00
@@ -1575,9 +1555,9 @@ super agent optimize my_agent --framework pydantic-ai --auto light  # Recommende
 
 SuperOptiX includes **native LogFire integration** for Pydantic AI agents, providing comprehensive observability for your agents. See the **[LogFire Integration Guide](logfire-integration.md)** for:
 
-- ✅ Tracing agent executions
-- ✅ Monitoring LLM calls and tool usage
-- ✅ Tracking token usage and costs
-- ✅ Viewing traces in LogFire dashboard or local backends (Jaeger)
+- Tracing agent executions
+- Monitoring LLM calls and tool usage
+- Tracking token usage and costs
+- Viewing traces in LogFire dashboard or local backends (Jaeger)
 
 Happy building! 🚀

@@ -102,12 +102,12 @@ super agent evaluate <agent_name>
 
 | Framework | Agent | Baseline | After GEPA | Improvement | Status |
 |-----------|-------|----------|------------|-------------|--------|
-| **🔬 DSPy** | Sentiment Analyzer | 37.5% | 80.0% | +42.5 pts 🏆 | ✅ Proven |
-| **🤖 OpenAI SDK** | AI Assistant | 100% | 100% | Maintained ✅ | ✅ Proven |
-| **👥 CrewAI** | Research Crew | 75% | 100% | +25 pts ⭐ | ✅ Proven |
-| **🔮 Google ADK** | Assistant | - | - | Available | ✅ Available |
-| **🏢 Microsoft** | Assistant | - | - | Available | ✅ Available |
-| **🌊 DeepAgents** | Research Agent | - | - | Available | ✅ Available |
+| **🔬 DSPy** | Sentiment Analyzer | 37.5% | 80.0% | +42.5 pts 🏆 | Proven |
+| **🤖 OpenAI SDK** | AI Assistant | 100% | 100% | Maintained | Proven |
+| **👥 CrewAI** | Research Crew | 75% | 100% | +25 pts ⭐ | Proven |
+| **🔮 Google ADK** | Assistant | - | - | Available | Available |
+| **🏢 Microsoft** | Assistant | - | - | Available | Available |
+| **🌊 DeepAgents** | Research Agent | - | - | Available | Available |
 
 ### **Universal Evaluation Commands**
 
@@ -179,41 +179,41 @@ The correct workflow follows BDD/TDD best practices:
 
 #### **Phase 1: Specification-Driven Development**
 ```bash
-# 1. Define BDD scenarios FIRST
+# Define BDD scenarios FIRST
 vim agents/<agent_name>/Playbook/developer_playbook.yaml
 # Add comprehensive feature_specifications
 
-# 2. Compile agent with scenarios
+# Compile agent with scenarios
 super agent compile developer
 
-# 3. Run baseline evaluation (should show current performance)
+# Run baseline evaluation (should show current performance)
 super agent evaluate developer
 # This gives us baseline metrics before optimization
 ```
 
 #### **Phase 2: Iterative Improvement**
 ```bash
-# 4. Analyze baseline results
+# Analyze baseline results
 # - Identify failing scenarios
 # - Understand performance gaps
 # - Plan optimization strategy
 
-# 5. Optimize based on evaluation feedback
+# Optimize based on evaluation feedback
 super agent optimize developer
 
-# 6. Re-evaluate to measure improvement
+# Re-evaluate to measure improvement
 super agent evaluate developer
 
-# 7. Iterate until quality gates pass
+# Iterate until quality gates pass
 # Repeat steps 5-6 until pass rate ≥ 80%
 ```
 
 #### **Phase 3: Production Deployment**
 ```bash
-# 8. Final validation
+# Final validation
 super agent evaluate developer --verbose
 
-# 9. Deploy only if quality gates pass
+# Deploy only if quality gates pass
 super agent run developer --goal "production task"
 ```
 
@@ -506,28 +506,28 @@ echo "Improvement: $IMPROVEMENT%"
 
 # Quality gate checks
 if [ "$PASS_RATE" -lt "$MIN_PASS_RATE" ]; then
-    echo "❌ Quality gate failed: $PASS_RATE% < $MIN_PASS_RATE%"
+    echo "Quality gate failed: $PASS_RATE% < $MIN_PASS_RATE%"
     exit 1
 fi
 
 if [ "$IMPROVEMENT" -lt "$MIN_IMPROVEMENT" ]; then
-    echo "❌ Improvement gate failed: $IMPROVEMENT% < $MIN_IMPROVEMENT%"
+    echo "Improvement gate failed: $IMPROVEMENT% < $MIN_IMPROVEMENT%"
     exit 1
 fi
 
-echo "✅ All quality gates passed!"
+echo "All quality gates passed!"
 ```
 
 ## Best Practices
 
-### **✅ DO's**
+### **DO's**
 1. **Always evaluate before optimizing**
 2. **Set clear quality gates**
 3. **Measure improvement quantitatively**
 4. **Iterate based on evaluation feedback**
 5. **Use scenarios as both training data and test cases**
 
-### **❌ DON'Ts**
+### **DON'Ts**
 1. **Don't optimize without baseline**
 2. **Don't skip evaluation after optimization**
 3. **Don't deploy without quality gates**
@@ -539,7 +539,7 @@ echo "✅ All quality gates passed!"
 
 #### **No BDD Specifications Found**
 ```
-❌ No BDD specifications found!
+No BDD specifications found!
 
 💡 Solution:
 1. Edit your agent playbook YAML file
@@ -549,7 +549,7 @@ echo "✅ All quality gates passed!"
 
 #### **Low Pass Rates**
 ```
-❌ NEEDS WORK - 30% pass rate
+NEEDS WORK - 30% pass rate
 
 💡 Solutions:
 • Run optimization: super agent optimize developer

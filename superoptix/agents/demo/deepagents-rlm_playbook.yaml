@@ -1,0 +1,99 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: DeepAgents RLM Demo
+  id: deepagents-rlm
+  namespace: demo
+  version: 1.0.0
+  level: oracles
+  description: DeepAgents demo with optional RLM assist/replace execution.
+  author: SuperOptiX
+  tags:
+    - deepagents
+    - rlm
+    - reasoning
+    - demo
+
+spec:
+  target_framework: deepagents
+
+  language_model:
+    provider: google-genai
+    model: google-genai:gemini-2.5-flash
+    temperature: 0.1
+    max_tokens: 2200
+
+  persona:
+    name: deep_reasoning_assistant
+    role: Senior Systems Analyst
+    goal: Produce concise, structured, and accurate reasoning outputs.
+    backstory: >
+      You are an engineering-focused assistant for complex planning and analysis.
+      You expose assumptions, risks, and concrete next steps.
+    traits:
+      - analytical
+      - concise
+      - reliable
+    instructions: |
+      Keep answers structured and implementation-oriented.
+      If assumptions are required, state them explicitly.
+
+  input_fields:
+    - name: query
+      type: str
+      description: User request to analyze
+      required: true
+
+  output_fields:
+    - name: answer
+      type: str
+      description: Final response
+      required: true
+
+  tasks:
+    - name: analyze_request
+      instruction: Analyze the request and provide the best actionable answer.
+      inputs:
+        - name: query
+          type: str
+          description: User request
+          required: true
+      outputs:
+        - name: answer
+          type: str
+          description: Final response
+
+  deepagents:
+    rlm:
+      enabled: true
+      mode: assist
+      backend: litellm
+      environment: python
+      max_iterations: 6
+      max_depth: 1
+      verbose: false
+      persistent: false
+      # Optional:
+      # task_model: google-gla:gemini-2.5-flash
+      # api_key_env: GOOGLE_API_KEY
+      logger:
+        enabled: false
+        log_dir: .superoptix/logs/rlm
+        file_name: deepagents_rlm_demo
+
+  feature_specifications:
+    scenarios:
+      - name: migration_plan
+        description: Produce a concise migration plan.
+        input:
+          query: Create a low-risk migration strategy from monolith to microservices.
+        expected_output:
+          expected_keywords:
+            - assumptions
+            - risks
+            - rollout
+
+# Quick Start:
+#   super agent pull deepagents-rlm
+#   super agent compile deepagents-rlm --framework deepagents --cloud --provider google-genai --model gemini-2.5-flash
+#   super agent run deepagents-rlm --cloud --provider google-genai --model gemini-2.5-flash --goal "Design a migration strategy for a legacy platform"

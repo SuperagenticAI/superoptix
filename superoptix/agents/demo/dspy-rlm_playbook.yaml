@@ -1,0 +1,132 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: DSPy RLM Demo Agent
+  id: dspy-rlm
+  namespace: testing
+  version: 1.0.0
+  level: oracles
+  description: Minimal DSPy agent demonstrating opt-in RLM execution on long log context input.
+  author: SuperOptiX
+  tags:
+    - dspy
+    - rlm
+    - long-context
+    - logs
+    - demo
+
+spec:
+  target_framework: dspy
+
+  language_model:
+    location: cloud
+    provider: google-genai
+    model: gemini-2.5-flash
+    temperature: 0.1
+    max_tokens: 4000
+
+  # SuperSpec-native RLM config (optional, explicit opt-in)
+  rlm:
+    enabled: true
+    max_iters: 10
+    max_llm_calls: 6
+
+  reasoning:
+    method: rlm
+    steps:
+      - Inspect long context logs for anomalies
+      - Correlate timestamps, service names, and error chains
+      - Produce concise diagnosis and next actions
+
+  persona:
+    name: Log Investigator
+    role: Reliability Engineer
+    goal: Diagnose production issues from long operational logs with precise recommendations.
+    backstory: You are a senior SRE focused on incident triage, root-cause analysis, and fast recovery.
+    traits:
+      - analytical
+      - detail-oriented
+      - systematic
+      - concise
+    instructions: |
+      Treat the input as real production telemetry.
+      Prioritize signal over noise, identify probable root cause, and propose concrete remediation steps.
+
+  input_fields:
+    - name: log_text
+      type: str
+      description: Long operational log stream from distributed services
+      required: true
+
+  output_fields:
+    - name: incident_summary
+      type: str
+      description: Concise diagnosis with root-cause hypothesis and remediation plan
+      required: true
+
+  tasks:
+    - name: analyze_long_logs
+      instruction: |
+        Analyze the long log context and return:
+        1) high-confidence root-cause hypothesis,
+        2) evidence snippets,
+        3) immediate remediation actions,
+        4) follow-up verification checks.
+      inputs:
+        - name: log_text
+          type: str
+          description: Long multi-service logs including errors, retries, and degraded behavior
+          required: true
+      outputs:
+        - name: incident_summary
+          type: str
+          description: Structured incident diagnosis and action plan
+
+  constraints:
+    - Do not fabricate unseen evidence
+    - Quote only relevant log lines
+    - Keep final response concise and actionable
+
+  feature_specifications:
+    scenarios:
+      - name: long_context_incident_diagnosis
+        description: Agent should identify a cascading timeout caused by dependency latency and retry storms.
+        input:
+          log_text: |
+            2026-01-12T10:00:01Z gateway INFO request_id=ab12 path=/checkout status=202 upstream=order-api latency_ms=92
+            2026-01-12T10:00:03Z order-api INFO request_id=ab12 calling payment-service timeout_ms=2500 attempt=1
+            2026-01-12T10:00:06Z payment-service WARN request_id=ab12 db_pool_wait_ms=1800 pool_size=40 active=40
+            2026-01-12T10:00:07Z payment-service ERROR request_id=ab12 db_timeout op=insert_payment timeout_ms=1500
+            2026-01-12T10:00:07Z order-api WARN request_id=ab12 payment call failed retrying attempt=2 backoff_ms=200
+            2026-01-12T10:00:08Z gateway WARN request_id=ab12 downstream_timeout service=order-api timeout_ms=3000
+            2026-01-12T10:00:09Z order-api INFO request_id=cd34 calling payment-service timeout_ms=2500 attempt=1
+            2026-01-12T10:00:10Z payment-service WARN request_id=cd34 db_pool_wait_ms=1950 pool_size=40 active=40
+            2026-01-12T10:00:12Z payment-service ERROR request_id=cd34 db_timeout op=insert_payment timeout_ms=1500
+            2026-01-12T10:00:12Z order-api WARN request_id=cd34 retrying attempt=2 backoff_ms=200
+            2026-01-12T10:00:13Z order-api WARN request_id=cd34 retrying attempt=3 backoff_ms=400
+            2026-01-12T10:00:14Z gateway ERROR request_id=cd34 status=504 error=upstream timeout
+            2026-01-12T10:00:15Z payment-service WARN saturation cpu=78 mem=72 db_conn_errors=87
+            2026-01-12T10:00:16Z order-api WARN circuit_breaker state=open dependency=payment-service
+            2026-01-12T10:00:17Z gateway WARN elevated_5xx_rate route=/checkout rate=12.4%
+            2026-01-12T10:00:18Z scheduler INFO retry_queue_depth=930 worker_pool=24
+            2026-01-12T10:00:19Z payment-service ERROR db_timeout op=insert_payment timeout_ms=1500 request_id=ef56
+            2026-01-12T10:00:20Z order-api ERROR request_id=ef56 checkout_failed reason=payment_unavailable
+            2026-01-12T10:00:21Z gateway ERROR request_id=ef56 status=504 error=upstream timeout
+            2026-01-12T10:00:23Z db-primary WARN lock_wait_ms_p95=1420 slow_queries=318
+            2026-01-12T10:00:24Z db-primary ERROR replication_lag_ms=4800
+            2026-01-12T10:00:25Z payment-service WARN fallback_mode=enabled reason=db_timeout
+            2026-01-12T10:00:26Z gateway WARN checkout_degraded mode=partial
+        expected_output:
+          expected_keywords:
+            - db_timeout
+            - retry storm
+            - circuit_breaker
+            - remediation
+            - verification
+
+# Usage:
+#   super agent pull dspy-rlm
+#   super agent compile dspy-rlm            # minimal DSPy with RLM (from spec.rlm)
+#   export GOOGLE_API_KEY="your-key"        # required for default cloud model
+#   super agent run dspy-rlm --goal "Analyze this incident log"
+#   super agent compile dspy-rlm --local-ollama   # optional: generate Ollama runtime path

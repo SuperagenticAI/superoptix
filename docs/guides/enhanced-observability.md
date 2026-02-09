@@ -15,7 +15,7 @@ SuperOptiX provides **comprehensive observability** with support for multiple ba
 
 ## ⚡ Quick Start
 
-### 1. Run Agent with Observability
+### Run Agent with Observability
 
 ```bash
 # Use default (local storage)
@@ -31,7 +31,7 @@ super agent run my_agent --goal "Analyze data" --observe wandb
 super agent run my_agent --goal "Analyze data" --observe all
 ```
 
-### 2. View Dashboard
+### View Dashboard
 
 ```bash
 # Start local dashboard
@@ -47,11 +47,11 @@ python -c "from superoptix.observability.simple_dashboard import start_dashboard
 ### SuperOptiX (Local-First)
 
 **Pros**:
-- ✅ No setup required
-- ✅ Works offline
-- ✅ Fast queries
-- ✅ Privacy-friendly
-- ✅ Built-in dashboard
+- No setup required
+- Works offline
+- Fast queries
+- Privacy-friendly
+- Built-in dashboard
 
 **Best For**:
 - Development
@@ -62,10 +62,10 @@ python -c "from superoptix.observability.simple_dashboard import start_dashboard
 ### MLFlow
 
 **Pros**:
-- ✅ Industry standard
-- ✅ Excellent artifact management
-- ✅ Model registry
-- ✅ Experiment comparison
+- Industry standard
+- Excellent artifact management
+- Model registry
+- Experiment comparison
 
 **Best For**:
 - ML experiments
@@ -82,10 +82,10 @@ mlflow ui  # View at http://localhost:5000
 ### LangFuse
 
 **Pros**:
-- ✅ LLM-specific features
-- ✅ Automatic token tracking
-- ✅ Built-in cost calculation
-- ✅ User feedback collection
+- LLM-specific features
+- Automatic token tracking
+- Built-in cost calculation
+- User feedback collection
 
 **Best For**:
 - LLM applications
@@ -104,10 +104,10 @@ export LANGFUSE_SECRET_KEY="..."
 ### Weights & Biases
 
 **Pros**:
-- ✅ Beautiful visualizations
-- ✅ Experiment tracking
-- ✅ Team collaboration
-- ✅ Hyperparameter tuning
+- Beautiful visualizations
+- Experiment tracking
+- Team collaboration
+- Hyperparameter tuning
 
 **Best For**:
 - Research projects
@@ -125,7 +125,7 @@ wandb login
 
 ## 🌟 Agent-Specific Metrics
 
-### 1. GEPA Optimization Tracking
+### GEPA Optimization Tracking
 
 SuperOptiX automatically tracks GEPA optimization runs:
 
@@ -151,7 +151,7 @@ obs.log_optimization(
 # - Duration: 120s
 ```
 
-### 2. Protocol Usage Monitoring
+### Protocol Usage Monitoring
 
 Track MCP server usage and tool discovery:
 
@@ -175,7 +175,7 @@ obs.log_protocol(
 # - Avg latency: 250ms
 ```
 
-### 3. Multi-Framework Comparison
+### Multi-Framework Comparison
 
 Compare agent performance across frameworks:
 
@@ -197,7 +197,7 @@ obs.log_framework_comparison(
 # - Performance comparison chart
 ```
 
-### 4. Cost Tracking
+### Cost Tracking
 
 Track LLM costs per agent and provider:
 
@@ -310,22 +310,22 @@ python -m superoptix.observability.simple_dashboard
 ### Complete Optimization & Monitoring Workflow
 
 ```bash
-# 1. Create agent with observability
+# Create agent with observability
 super agent compile my_agent
 
-# 2. Run baseline (with observability)
+# Run baseline (with observability)
 super agent run my_agent --goal "Test query" --observe mlflow
 
-# 3. Evaluate
+# Evaluate
 super agent evaluate my_agent
 
-# 4. Optimize with GEPA (auto-tracked)
+# Optimize with GEPA (auto-tracked)
 super agent optimize my_agent --auto medium
 
-# 5. Run optimized (compare metrics)
+# Run optimized (compare metrics)
 super agent run my_agent --goal "Test query" --observe mlflow
 
-# 6. View results
+# View results
 mlflow ui  # See before/after comparison
 ```
 
@@ -333,7 +333,7 @@ mlflow ui  # See before/after comparison
 
 ## 🎯 Best Practices
 
-### 1. Choose the Right Backend
+### Choose the Right Backend
 
 ```bash
 # Development: Use local
@@ -349,7 +349,7 @@ super agent run my_agent --goal "..." --observe wandb
 super agent run my_agent --goal "..." --observe all
 ```
 
-### 2. Track Optimization History
+### Track Optimization History
 
 ```python
 # Before each optimization
@@ -362,7 +362,7 @@ obs.log_agent_run(agent_name, framework, accuracy=baseline_score)
 obs.log_agent_run(agent_name, framework, accuracy=optimized_score)
 ```
 
-### 3. Monitor Protocol Usage
+### Monitor Protocol Usage
 
 ```python
 # Log protocol connections
@@ -480,25 +480,25 @@ See complete examples in:
 ### Unique Agent-Specific Metrics
 
 No other platform tracks:
-- ✅ GEPA optimization iterations and improvements
-- ✅ Protocol usage (MCP servers, tools discovered)
-- ✅ Multi-framework performance comparison
-- ✅ Agent-specific cost breakdown
+- GEPA optimization iterations and improvements
+- Protocol usage (MCP servers, tools discovered)
+- Multi-framework performance comparison
+- Agent-specific cost breakdown
 
 ### Local-First Architecture
 
-- ✅ Works without internet
-- ✅ No cloud dependency
-- ✅ Privacy-friendly
-- ✅ Fast queries
-- ✅ Export when ready
+- Works without internet
+- No cloud dependency
+- Privacy-friendly
+- Fast queries
+- Export when ready
 
 ### User Choice
 
-- ✅ Pick any backend
-- ✅ Mix backends
-- ✅ No vendor lock-in
-- ✅ Enterprise-approved tools
+- Pick any backend
+- Mix backends
+- No vendor lock-in
+- Enterprise-approved tools
 
 ---
 

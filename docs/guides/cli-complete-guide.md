@@ -205,10 +205,10 @@ super agent optimize my_agent \
 super agent run my_agent
 
 # Run with specific input
-super agent run my_agent --input "Analyze this text"
+super agent run my_agent --goal "Analyze this text"
 
 # Run with input from file
-super agent run my_agent --input-file ./input.txt
+super agent run my_agent --goal "$(cat ./input.txt)"
 
 # Run optimized version
 super agent run my_agent  # automatically loads optimized weights
@@ -220,7 +220,7 @@ super agent run my_agent --framework openai
 super agent run my_agent --batch ./inputs.jsonl
 
 # Run with output to file
-super agent run my_agent --input "text" --output results.json
+super agent run my_agent --goal "text" --output results.json
 ```
 
 ### `super agent design` - Design Agent (Studio)
@@ -229,10 +229,10 @@ super agent run my_agent --input "text" --output results.json
 # Launch Studio UI for agent design
 super agent design
 
-# Design with specific tier
-super agent design --tier oracles    # Simple Q&A
-super agent design --tier genies     # With tools & RAG
-super agent design --tier protocols  # MCP/A2A support
+# Design options
+super agent design --mode visual     # Visual builder
+super agent design --mode code       # Code editor
+super agent design                   # Default interactive mode
 
 # Design in specific mode
 super agent design --mode visual     # Visual builder
@@ -255,8 +255,8 @@ super spec generate my_agent --template sentiment_analysis
 # Generate with RAG
 super spec generate my_agent "Q&A agent" --rag
 
-# Generate with specific tier
-super spec generate my_agent "Research agent" --tier genies
+# Generate with defaults
+super spec generate my_agent "Research agent"
 
 # Interactive generation
 super spec generate
@@ -347,7 +347,7 @@ super orchestra list
 super orchestra run my_orchestra
 
 # Run with specific input
-super orchestra run my_orchestra --input "Complex task"
+super orchestra run my_orchestra --goal "Complex task"
 
 # Evaluate orchestra
 super orchestra evaluate my_orchestra
@@ -517,45 +517,45 @@ super agent run my_agent --explain
 ### Workflow 1: Quick Start (New Agent)
 
 ```bash
-# 1. Initialize project
+# Initialize project
 super init my_project && cd my_project
 
-# 2. Pull demo agent
+# Pull demo agent
 super agent pull sentiment_analyzer
 
-# 3. Compile
+# Compile
 super agent compile sentiment_analyzer
 
-# 4. Evaluate baseline
+# Evaluate baseline
 super agent evaluate sentiment_analyzer
 
-# 5. Optimize
+# Optimize
 super agent optimize sentiment_analyzer --auto medium
 
-# 6. Evaluate optimized
+# Evaluate optimized
 super agent evaluate sentiment_analyzer  # automatically loads optimized weights
 
-# 7. Run
+# Run
 super agent run sentiment_analyzer
 ```
 
 ### Workflow 2: Custom Agent Development
 
 ```bash
-# 1. Generate from description
+# Generate from description
 super spec generate my_agent "Analyze customer reviews"
 
-# 2. Edit playbook (manual)
+# Edit playbook (manual)
 vim agents/my_agent/playbook/my_agent_playbook.yaml
 
-# 3. Compile and test
+# Compile and test
 super agent compile my_agent
 super agent evaluate my_agent
 
-# 4. Optimize
+# Optimize
 super agent optimize my_agent --auto medium
 
-# 5. Deploy
+# Deploy
 super agent run my_agent
 ```
 
@@ -573,23 +573,23 @@ done
 ### Workflow 4: Dataset Import & Training
 
 ```bash
-# 1. Prepare dataset
+# Prepare dataset
 cat > data/train.csv << EOF
 text,label
 "Great product!",positive
 "Poor quality",negative
 EOF
 
-# 2. Configure in playbook
+# Configure in playbook
 # (add datasets: section)
 
-# 3. Preview
+# Preview
 super agent dataset preview my_agent
 
-# 4. Compile with dataset
+# Compile with dataset
 super agent compile my_agent
 
-# 5. Train with large dataset
+# Train with large dataset
 super agent optimize my_agent --auto medium
 ```
 
@@ -748,6 +748,4 @@ super docs
 
 ---
 
-**Status**: Complete CLI Reference ✅  
-**Commands**: All major commands documented ✅  
-**Examples**: Practical workflows included ✅
+**Status**: Complete CLI Reference **Commands**: All major commands documented **Examples**: Practical workflows included 

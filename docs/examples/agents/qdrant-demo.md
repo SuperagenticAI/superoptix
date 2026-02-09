@@ -20,17 +20,17 @@ This demo showcases how to integrate **Qdrant** - a blazingly fast vector databa
 
 ## Prerequisites
 
-### 1. Install SuperOptiX
+### Install SuperOptiX
 ```bash
 pip install superoptix
 ```
 
-### 2. Install Qdrant Dependencies
+### Install Qdrant Dependencies
 ```bash
 pip install qdrant-client
 ```
 
-### 3. Set Up Qdrant Server
+### Set Up Qdrant Server
 ```bash
 # Using Docker (recommended)
 docker run -d \
@@ -41,7 +41,7 @@ docker run -d \
   qdrant/qdrant:latest
 ```
 
-### 4. Install and Serve Model
+### Install and Serve Model
 ```bash
 # Install a model (if not already installed)
 super model install llama3.1:8b
@@ -52,17 +52,17 @@ ollama serve
 
 ## Quick Start
 
-### 1. Pull the Demo Agent
+### Pull the Demo Agent
 ```bash
 super agent pull rag_qdrant_demo
 ```
 
-### 2. Compile the Agent
+### Compile the Agent
 ```bash
 super agent compile rag_qdrant_demo
 ```
 
-### 3. Run the Demo
+### Run the Demo
 ```bash
 super agent run rag_qdrant_demo --goal "What are the key features of Qdrant and how does it work with SuperOptiX?"
 ```

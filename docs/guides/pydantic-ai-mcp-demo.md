@@ -3,10 +3,10 @@
 **Step-by-step guide to using MCP (Model Context Protocol) with Pydantic AI in SuperOptiX.**
 
 This demo shows how to:
-1. ✅ Set up a simple MCP server
-2. ✅ Configure MCP in your playbook
-3. ✅ Compile and run a Pydantic AI agent with MCP tools
-4. ✅ Optimize MCP tool descriptions with GEPA
+1. Set up a simple MCP server
+2. Configure MCP in your playbook
+3. Compile and run a Pydantic AI agent with MCP tools
+4. Optimize MCP tool descriptions with GEPA
 
 **Tested and Working with `llama3.1:8b` on local Ollama!** 🎉
 
@@ -52,11 +52,11 @@ super agent run pydantic-mcp --goal "List all files in /private/tmp"
 
 **Expected Output:**
 ```
-✅ Using model: llama3.1:8b
+Using model: llama3.1:8b
 🛠️  Initialized MCP stdio server: filesystem
-✅ Initialized 1 MCP server(s)
+Initialized 1 MCP server(s)
 🚀 Running agent with input: List all files in /tmp
-✅ Model response received
+Model response received
 
 ┏━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃ Aspect   ┃ Value                                        ┃
@@ -133,7 +133,7 @@ super agent compile pydantic-mcp --framework pydantic-ai
 ```
 🔨 Compiling agent 'pydantic-mcp'...
 🚀 Compiling with PYDANTIC-AI framework...
-✅ Successfully compiled with PYDANTIC-AI framework
+Successfully compiled with PYDANTIC-AI framework
 🎉 COMPILATION SUCCESSFUL! Pipeline Generated
 ```
 
@@ -466,7 +466,7 @@ spec:
 
 ## Testing the Demo
 
-### 1. Compile
+### Compile
 
 ```bash
 super agent compile developer_mcp --framework pydantic-ai
@@ -474,9 +474,9 @@ super agent compile developer_mcp --framework pydantic-ai
 
 **Verify MCP initialization:**
 - Look for: `🛠️  Initialized MCP stdio server: filesystem`
-- Look for: `✅ Initialized 1 MCP server(s)`
+- Look for: `Initialized 1 MCP server(s)`
 
-### 2. Run with File Operations
+### Run with File Operations
 
 ```bash
 # Create a test file first
@@ -492,13 +492,13 @@ super agent run developer_mcp \
 - Reads the file
 - Returns the database port
 
-### 3. Evaluate
+### Evaluate
 
 ```bash
 super agent evaluate developer_mcp
 ```
 
-### 4. Optimize (if enabled)
+### Optimize (if enabled)
 
 > ⚠️ **Resource Warning:** MCP tool optimization runs **two phases** (tools + instructions), effectively doubling resource usage. Only run if you have adequate GPU/compute resources.
 
@@ -549,9 +549,7 @@ super agent optimize developer_mcp \
    ```
 
 3. **Check playbook filename:**
-   - Use underscores: `pydantic_mcp_playbook.yaml` ✅
-   - Not hyphens: `pydantic-mcp_playbook.yaml` ❌
-
+   - Use underscores: `pydantic_mcp_playbook.yaml`    - Not hyphens: `pydantic-mcp_playbook.yaml` 
 4. **Verify MCP config is correct:**
    ```yaml
    mcp:
@@ -577,7 +575,7 @@ super agent optimize developer_mcp \
    Look for these messages during run:
    ```
    🛠️  Initialized MCP stdio server: filesystem
-   ✅ Initialized 1 MCP server(s)
+   Initialized 1 MCP server(s)
    ```
 
 2. **Use explicit paths:**
@@ -632,10 +630,10 @@ The Pydantic AI template now uses plain text output mode, which works better wit
 
 **Solution:** Use actual MCP server tool names **without** the prefix:
 ```yaml
-# ❌ Wrong - using prefixed names
+# Wrong - using prefixed names
 tool_names: ["fs_read_file", "fs_write_file", "fs_list_files"]
 
-# ✅ Correct - using actual server tool names
+# Correct - using actual server tool names
 tool_names: ["read_file", "write_file", "list_directory"]
 ```
 
@@ -647,10 +645,10 @@ tool_names: ["read_file", "write_file", "list_directory"]
 
 **Solution:** Use forward slash instead of colon for the reflection LM:
 ```bash
-# ❌ Wrong
+# Wrong
 --reflection-lm ollama:llama3.1:8b
 
-# ✅ Correct
+# Correct
 --reflection-lm ollama/llama3.1:8b
 ```
 
@@ -663,16 +661,16 @@ These commands were tested and work with `llama3.1:8b`:
 ```bash
 # List directory contents (use /private/tmp on macOS, /tmp on Linux)
 super agent run pydantic-mcp --goal "List all files in /private/tmp"
-# ✅ Returns actual file list from filesystem
+# Returns actual file list from filesystem
 
 # Read a file
 echo "Test content" > /private/tmp/test.txt
 super agent run pydantic-mcp --goal "Read the file at /private/tmp/test.txt"
-# ✅ Returns: "Test content"
+# Returns: "Test content"
 
 # Write a file
 super agent run pydantic-mcp --goal "Create a file /private/tmp/hello.txt with content: Hello World"
-# ✅ Creates the file
+# Creates the file
 cat /private/tmp/hello.txt  # Verify: "Hello World"
 ```
 
@@ -680,10 +678,10 @@ cat /private/tmp/hello.txt  # Verify: "Hello World"
 
 ## What's Next?
 
-- ✅ **Multiple MCP Servers**: Connect multiple servers for diverse tools
-- ✅ **Remote Servers**: Use HTTP/SSE servers for remote tools
-- ✅ **Custom Servers**: Build your own MCP servers in Python
-- ✅ **Optimization**: Optimize tool descriptions with GEPA
+- **Multiple MCP Servers**: Connect multiple servers for diverse tools
+- **Remote Servers**: Use HTTP/SSE servers for remote tools
+- **Custom Servers**: Build your own MCP servers in Python
+- **Optimization**: Optimize tool descriptions with GEPA
 
 ---
 
@@ -691,12 +689,12 @@ cat /private/tmp/hello.txt  # Verify: "Hello World"
 
 | Feature | Status | Notes |
 |---------|--------|-------|
-| MCP with Pydantic AI | ✅ Working | Full integration |
-| Local 8b models | ✅ Working | `llama3.1:8b` tested |
-| Filesystem operations | ✅ Working | Read, write, list |
-| Plain text output | ✅ Working | No JSON metadata |
-| Tool optimization | ✅ Working | GEPA support (use unprefixed tool names) |
-| Instruction optimization | ✅ Working | Two-phase optimization |
+| MCP with Pydantic AI | Working | Full integration |
+| Local 8b models | Working | `llama3.1:8b` tested |
+| Filesystem operations | Working | Read, write, list |
+| Plain text output | Working | No JSON metadata |
+| Tool optimization | Working | GEPA support (use unprefixed tool names) |
+| Instruction optimization | Working | Two-phase optimization |
 
 ---
 

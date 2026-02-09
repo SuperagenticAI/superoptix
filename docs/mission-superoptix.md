@@ -14,7 +14,7 @@ SuperOptiX is more than just another AI framework - it's the embodiment of our c
 
 ## 🚀 SuperOptiX Features
 
-SuperOptiX is built on a tiered architecture that progressively implements our foundational pillars, with the first two tiers - **Oracles** and **Genies** - now available as core components.
+SuperOptiX is built on a framework architecture that progressively implements our foundational pillars, with the first two capabilities now available as core components.
 
 ### 💎 SuperSpec DSL
 - **Declarative Agent Specification** - Define agents using our intuitive domain-specific language
@@ -60,7 +60,7 @@ SuperOptiX is built on a tiered architecture that progressively implements our f
 
 ## 🏛️ How SuperOptiX Embodies Our Pillars
 
-SuperOptiX implements our foundational pillars through a tiered architecture, with **Oracles** and **Genies** tiers currently available, embodying **Context Engineering** and **Agent Engineering** principles respectively.
+SuperOptiX implements our foundational pillars through a framework architecture, with **Oracles** and **Genies** current capabilities, embodying **Context Engineering** and **Agent Engineering** principles respectively.
 
 ### ⚙️ Agent Engineering
 SuperOptiX provides comprehensive agent engineering capabilities that align with our Agent Engineering pillar:

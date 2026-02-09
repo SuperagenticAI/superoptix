@@ -40,7 +40,7 @@ Memory optimization is the process of improving **which memories** an agent incl
 
 ## What GEPA Optimizes in Memory
 
-### 1. Context Selection (Which Memories to Include)
+### Context Selection (Which Memories to Include)
 
 **What It Is**: Learning which memories are relevant for each query
 
@@ -90,7 +90,7 @@ Result:
 
 ---
 
-### 2. Relevance Scoring (How to Score Memories)
+### Relevance Scoring (How to Score Memories)
 
 **What It Is**: Calculating how relevant each memory is to current query
 
@@ -146,7 +146,7 @@ Learned Weights (Conversation Task):
 
 ---
 
-### 3. Token Budget Management
+### Token Budget Management
 
 **What It Is**: Fitting memories within context window constraints
 
@@ -181,7 +181,7 @@ Learned Strategy:
 
 ---
 
-### 4. Summarization Strategies
+### Summarization Strategies
 
 **What It Is**: Learning when and how to compress memories
 
@@ -325,7 +325,7 @@ Would you like me to check current tracking status or escalate for faster delive
 
 ## Best Practices
 
-### 1. Enable Context Optimization
+### Enable Context Optimization
 
 ```yaml
 memory:
@@ -334,7 +334,7 @@ memory:
   max_context_tokens: 2000
 ```
 
-### 2. Set Appropriate Token Budgets
+### Set Appropriate Token Budgets
 
 ```yaml
 memory:
@@ -343,7 +343,7 @@ memory:
   max_context_tokens: 1000   # For simple Q&A agents
 ```
 
-### 3. Use Memory Importance Levels
+### Use Memory Importance Levels
 
 ```python
 # In code
@@ -362,7 +362,7 @@ memory.remember(
 
 GEPA learns to prioritize high-importance memories.
 
-### 4. Define Memory-Aware RSpec-Style BDD Scenarios
+### Define Memory-Aware RSpec-Style BDD Scenarios
 
 ```yaml
 feature_specifications:

@@ -2,6 +2,8 @@
 
 SuperOptiX provides first-class support for Claude Agent SDK, enabling GEPA-optimizable agents powered by Anthropic's Claude with in-process MCP tool support.
 
+RLM support is experimental. Unified sandbox support is coming soon.
+
 ---
 
 ## Key Features
@@ -31,10 +33,10 @@ pip install superoptix claude-agent-sdk stackone-ai
 
 ## Quick Start
 
-### 1. Create a Playbook
+### Create a Playbook
 
 ```yaml
-# my_agent.yaml
+# agents/my_claude_agent_playbook.yaml
 metadata:
   name: my_claude_agent
   version: "1.0.0"
@@ -59,17 +61,20 @@ spec:
       type: string
 ```
 
-### 2. Compile and Run
+### Compile and Run
 
 ```bash
+# Pull or create the agent project structure first
+super agent pull my_claude_agent
+
 # Compile to Claude SDK
-super agent compile my_agent.yaml --framework claude-sdk
+super agent compile my_claude_agent --framework claude-sdk
 
 # Run the agent
-python my_claude_agent_claude_sdk_pipeline.py "Explain async/await in Python"
+super agent run my_claude_agent --framework claude-sdk --goal "Explain async/await in Python"
 ```
 
-### 3. Use Programmatically
+### Use Programmatically
 
 ```python
 import asyncio
@@ -96,18 +101,18 @@ from stackone_ai import StackOneToolSet
 from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient, query
 from superoptix.adapters import StackOneBridge
 
-# 1. Fetch StackOne tools
+# Fetch StackOne tools
 toolset = StackOneToolSet()
 tools = toolset.fetch_tools(
     include_tools=["hris_get_employee", "hris_list_employees"],
     account_ids=["your_account_id"]
 )
 
-# 2. Convert to Claude SDK MCP server
+# Convert to Claude SDK MCP server
 bridge = StackOneBridge(tools)
 mcp_server, tool_names = bridge.to_claude_sdk()
 
-# 3. Create Claude Agent with tools
+# Create Claude Agent with tools
 options = ClaudeAgentOptions(
     system_prompt="You are an HR assistant with HRIS access.",
     mcp_servers={"stackone": mcp_server},
@@ -115,7 +120,7 @@ options = ClaudeAgentOptions(
     model="claude-sonnet-4-5",
 )
 
-# 4. Execute query
+# Execute query
 async for message in query(prompt="Find employee John Doe", options=options):
     # Process messages
     pass

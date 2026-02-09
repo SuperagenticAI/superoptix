@@ -4,7 +4,7 @@ This guide documents a complete, real-world workflow for integrating MLFlow with
 
 ---
 
-## 1. Install MLFlow
+## Install MLFlow
 
 ```bash
 pip install mlflow
@@ -19,7 +19,7 @@ Successfully installed cachetools-5.5.2
 
 ---
 
-## 2. Start the MLFlow Server
+## Start the MLFlow Server
 
 ```bash
 mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./mlflow_artifacts
@@ -47,7 +47,7 @@ mlflow server --host 0.0.0.0 --port 5001 --backend-store-uri sqlite:///mlflow.db
 
 ---
 
-## 3. Initialize a SuperOptiX Project
+## Initialize a SuperOptiX Project
 
 ```bash
 super init mlflow_demo
@@ -62,10 +62,10 @@ cd mlflow_demo
 
 ---
 
-## 4. Pull and Compile a Developer Agent
+## Pull and Compile a Developer Agent
 
 ```bash
-super agent pull developer --tier genies
+super agent pull developer
 super agent compile developer
 ```
 
@@ -79,7 +79,7 @@ super agent compile developer
 
 ---
 
-## 5. Add MLFlow Observability to the Playbook
+## Add MLFlow Observability to the Playbook
 
 Edit `mlflow_demo/mlflow_demo/agents/developer/playbook/developer_playbook.yaml` and add:
 
@@ -103,7 +103,7 @@ observability:
 
 ---
 
-## 6. Run the Agent
+## Run the Agent
 
 ```bash
 super agent run developer --goal "Write a Python function to calculate the factorial of a number with proper error handling"
@@ -118,7 +118,7 @@ super agent run developer --goal "Write a Python function to calculate the facto
 
 ---
 
-## 7. Check Trace Files
+## Check Trace Files
 
 ```bash
 ls -la .superoptix/traces/
@@ -132,7 +132,7 @@ ls -la .superoptix/traces/
 
 ---
 
-## 8. View Traces with SuperOptiX CLI
+## View Traces with SuperOptiX CLI
 
 ```bash
 super observe list
@@ -145,14 +145,14 @@ super observe traces developer_20250714_204941 --detailed
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━┓
 ┃ Agent ID                  ┃ Trace Count ┃ Last Activity       ┃
 ... (truncated)
-✅ Loaded 23 trace events
+Loaded 23 trace events
 📊 TRACE ANALYSIS SUMMARY
 ... (truncated)
 ```
 
 ---
 
-## 9. Test MLFlow Logging with Python
+## Test MLFlow Logging with Python
 
 Create `test_mlflow_integration.py`:
 
@@ -180,14 +180,14 @@ python test_mlflow_integration.py
 **Output:**
 ```
 🧪 SuperOptiX MLFlow Integration Test
-✅ MLFlow server is running and accessible
+MLFlow server is running and accessible
 ... (truncated)
-✅ Successfully logged data to MLFlow run: ...
+Successfully logged data to MLFlow run: ...
 ```
 
 ---
 
-## 10. Run the Full Demo Script
+## Run the Full Demo Script
 
 Create and run `demo_mlflow_superoptix.py` (see project for full code):
 
@@ -198,10 +198,10 @@ python demo_mlflow_superoptix.py
 **Output:**
 ```
 🧪 SuperOptiX + MLFlow Integration Demo
-✅ MLFlow server is accessible
+MLFlow server is accessible
 🎯 Demo 1/3: Write a Python function to calculate the sum of two numbers
 🤖 Running agent with goal: ...
-✅ Agent execution completed in ...ms
+Agent execution completed in ...ms
 ... (truncated)
 🎉 Demo completed successfully!
 📋 MLFlow UI: http://localhost:5001
@@ -209,7 +209,7 @@ python demo_mlflow_superoptix.py
 
 ---
 
-## 11. Access the MLFlow UI
+## Access the MLFlow UI
 
 Open your browser to:
 ```
@@ -220,7 +220,7 @@ You’ll see all experiments, runs, metrics, parameters, and artifacts.
 
 ---
 
-## 12. Troubleshooting
+## Troubleshooting
 
 - **Port in use:** Use a different port (e.g., 5001)
 - **No runs in MLFlow UI:** Check playbook config and server status
@@ -228,7 +228,7 @@ You’ll see all experiments, runs, metrics, parameters, and artifacts.
 
 ---
 
-## 13. Summary
+## Summary
 
 You now have:
 - End-to-end MLFlow integration with SuperOptiX
@@ -290,7 +290,7 @@ Both MLFlow and LangFuse provide excellent observability for SuperOptiX agents, 
 
 ---
 
-## 14. Understanding Local Files and Artifacts
+## Understanding Local Files and Artifacts
 
 ### Project Structure After MLFlow Integration
 

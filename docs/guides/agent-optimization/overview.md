@@ -15,7 +15,7 @@ Traditional AI optimization focuses exclusively on prompt engineering:
 <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
 	<tr style="background: rgba(255, 0, 0, 0.1);">
 		<td style="padding: 15px; border: 2px solid rgba(255, 0, 0, 0.3);">
-			<h4 style="color: #CC0000; margin-top: 0;">❌ Traditional Approach</h4>
+			<h4 style="color: #CC0000; margin-top: 0;">Traditional Approach</h4>
 			<p><strong>What Gets Optimized:</strong></p>
 			<ul>
 				<li>Prompt instructions only</li>
@@ -309,7 +309,7 @@ Each layer optimization compounds with others:
 
 ## Getting Started
 
-### 1. Understand Each Layer
+### Understand Each Layer
 
 Read through each layer's guide to understand what GEPA optimizes:
 
@@ -320,11 +320,11 @@ Read through each layer's guide to understand what GEPA optimizes:
 - [🔌 Protocol Optimization](protocols.md)
 - [📊 Dataset-Driven Optimization](datasets.md)
 
-### 2. See the Full-Stack Example
+### See the Full-Stack Example
 
 Check out the comprehensive [🎯 Full-Stack Example](full-stack-example.md) showing all layers working together.
 
-### 3. Apply to Your Agents
+### Apply to Your Agents
 
 Enable optimization layers in your playbook:
 
@@ -366,7 +366,7 @@ spec:
         auto: medium
 ```
 
-### 4. Run Optimization
+### Run Optimization
 
 ```bash
 super agent compile your_agent

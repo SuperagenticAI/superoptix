@@ -1,0 +1,302 @@
+"""
+{{ agent_name | to_pascal_case }} Agent - Native DSPy Program
+
+Auto-generated from SuperSpec playbook using SuperOptiX compiler.
+Framework: DSPy (Minimal Native Profile)
+Generated: {{ timestamp | default("N/A", true) }}
+
+This file intentionally contains DSPy-native program code:
+- Signature
+- Explicit LM setup (dspy.LM + dspy.configure)
+- Module with forward()
+- build_program() factory
+
+SuperOptiX runner handles playbook loading/execution orchestration.
+"""
+{% set dspy_tools_cfg = ((spec.get('dspy', {}) or {}).get('tools', {}) or {}) %}
+{% set stackone_mode = (dspy_tools_cfg.get('mode', '') | string | lower) %}
+{% set stackone_cfg = dspy_tools_cfg.get('stackone') %}
+{% set include_stackone_code = (stackone_mode in ['stackone', 'stackone_discovery']) or (stackone_cfg is mapping and (stackone_cfg | length > 0)) %}
+
+import inspect
+import json
+from pathlib import Path
+
+import dspy
+from superoptix.runners.dspy_runtime_helpers import (
+    build_builtin_tools as _runtime_build_builtin_tools,
+    postprocess_prediction as _runtime_postprocess_prediction,
+    validate_prediction_result as _runtime_validate_prediction_result,
+{% if include_stackone_code %}
+    build_stackone_tools as _runtime_build_stackone_tools,
+{% endif %}
+)
+
+# Compile-time runtime policy flag injected by SuperOptiX compiler.
+ALLOW_LOCAL_OLLAMA = {{ "True" if include_local_ollama_code else "False" }}
+RUNTIME_MODE = "{{ runtime_mode | default('auto') }}"
+{% if provider_override %}
+PROVIDER_OVERRIDE = "{{ provider_override }}"
+{% else %}
+PROVIDER_OVERRIDE = None
+{% endif %}
+{% if model_override %}
+MODEL_OVERRIDE = "{{ model_override }}"
+{% else %}
+MODEL_OVERRIDE = None
+{% endif %}
+
+{% set opt_params = spec.get('optimization', {}).get('optimizer', {}).get('params', {}) %}
+# Visible optimization knobs for this pipeline (used by SuperOptiX runner).
+GEPA_CONFIG = {
+    "enabled": True,
+    "auto": "{{ opt_params.get('auto', 'light') }}",
+    "task_model": "{{ opt_params.get('task_model', 'llama3.1:8b') }}",
+    "teacher_model": "{{ opt_params.get('teacher_model', 'llama3.1:8b') }}",
+    "reflection_lm": "{{ opt_params.get('reflection_lm', '') }}",
+    "candidate_selection_strategy": "{{ opt_params.get('candidate_selection_strategy', 'pareto') }}",
+    "skip_perfect_score": {{ opt_params.get('skip_perfect_score', True) }},
+    "reflection_minibatch_size": {{ opt_params.get('reflection_minibatch_size', 3) }},
+    "perfect_score": {{ opt_params.get('perfect_score', 1.0) }},
+    "failure_score": {{ opt_params.get('failure_score', 0.0) }},
+    "use_merge": {{ opt_params.get('use_merge', True) }},
+    "max_merge_invocations": {{ opt_params.get('max_merge_invocations', 5) }},
+    "seed": {{ opt_params.get('seed', 0) }},
+    "max_full_evals": {{ opt_params.get('max_full_evals', 'None') }},
+    "max_metric_calls": {{ opt_params.get('max_metric_calls', 'None') }},
+    "track_stats": {{ opt_params.get('track_stats', False) }},
+}
+
+# Minimal evaluation config (runner uses playbook scenarios as source of truth).
+EVAL_CONFIG = {
+    "scenario_source": "playbook.feature_specifications.scenarios",
+    "metric": "keyword_overlap",
+}
+COMPILED_SPEC_PATH = Path(__file__).resolve().parent / "{{ compiled_spec_filename }}"
+def _load_compiled_spec(path: Path):
+    try:
+        with path.open("r", encoding="utf-8") as _spec_file:
+            return json.load(_spec_file)
+    except FileNotFoundError as exc:
+        raise FileNotFoundError(
+            f"Compiled spec file not found at {path}. Recompile this agent to regenerate pipeline artifacts."
+        ) from exc
+    except json.JSONDecodeError as exc:
+        raise ValueError(
+            f"Compiled spec file is invalid JSON at {path}. Recompile this agent to regenerate pipeline artifacts."
+        ) from exc
+
+
+_COMPILED_SPEC = _load_compiled_spec(COMPILED_SPEC_PATH)
+
+DSPY_ADAPTER_CONFIG = dict(_COMPILED_SPEC.get("_dspy_adapter", {}) or {})
+DSPY_TOOL_CONFIG = dict((_COMPILED_SPEC.get("dspy", {}) or {}).get("tools", {}) or {})
+DSPY_TOOL_NAMES = list(((_COMPILED_SPEC.get("tool_calling", {}) or {}).get("available_tools", [])) or [])
+DSPY_MODULE_NAME = str(((_COMPILED_SPEC.get("reasoning", {}) or {}).get("method")) or "chain_of_thought")
+DSPY_SIGNATURE_CONFIG = dict(_COMPILED_SPEC.get("_dspy_signature", {"output_mode": "simple"}) or {"output_mode": "simple"})
+DSPY_ASSERTIONS_CONFIG = dict(
+    _COMPILED_SPEC.get("_dspy_assertions", {"enabled": False, "mode": "fail_fast", "metric_weight": 0.3})
+    or {"enabled": False, "mode": "fail_fast", "metric_weight": 0.3}
+)
+OUTPUT_FIELD_TYPES = {
+    str(field.get("name", "output")): str(field.get("dspy_type", "str"))
+    for field in list(_COMPILED_SPEC.get("output_fields", []) or [])
+    if isinstance(field, dict) and field.get("name")
+}
+
+
+def setup_lm(model_name, api_key, temperature, max_tokens):
+    """
+    Canonical DSPy setup pattern:
+        lm = dspy.LM(...)
+        dspy.configure(lm=lm)
+    """
+    lm = dspy.LM(
+        model=model_name,
+        api_key=api_key,
+        temperature=temperature,
+        max_tokens=max_tokens,
+    )
+    dspy.configure(lm=lm)
+    return lm
+
+
+def get_optimization_config():
+    """Expose subtle optimization/eval settings so users can inspect pipeline behavior."""
+    return {"gepa": GEPA_CONFIG, "eval": EVAL_CONFIG}
+
+
+def get_dspy_runtime_config():
+    """Expose DSPy runtime config for SuperOptiX runner (adapter/tools)."""
+    return {
+        "module": DSPY_MODULE_NAME,
+        "adapter": DSPY_ADAPTER_CONFIG,
+        "signature": DSPY_SIGNATURE_CONFIG,
+        "assertions": DSPY_ASSERTIONS_CONFIG,
+        "tools": {"mode": DSPY_TOOL_CONFIG.get("mode", "builtin"), "names": DSPY_TOOL_NAMES},
+    }
+
+
+def postprocess_prediction(prediction, result, output_fields):
+    """Pipeline hook delegates structured coercion to shared SuperOptiX runtime."""
+    return _runtime_postprocess_prediction(
+        prediction,
+        result,
+        output_fields,
+        signature_config=DSPY_SIGNATURE_CONFIG,
+        output_field_types=OUTPUT_FIELD_TYPES,
+    )
+
+
+def validate_prediction_result(result):
+    """Pipeline hook delegates assertions to shared SuperOptiX runtime."""
+    return _runtime_validate_prediction_result(
+        result,
+        assertions_config=DSPY_ASSERTIONS_CONFIG,
+    )
+
+
+def build_builtin_tools(tool_names):
+    """Build DSPy-compatible built-in tools via shared SuperOptiX runtime."""
+    return _runtime_build_builtin_tools(tool_names)
+
+
+{% if include_stackone_code %}
+def build_stackone_tools(dspy_tool_config):
+    """Build DSPy-compatible StackOne tools via shared SuperOptiX runtime."""
+    return _runtime_build_stackone_tools(dspy_tool_config)
+{% endif %}
+
+
+class {{ agent_name | to_pascal_case }}Signature(dspy.Signature):
+    """
+    Role: {{ spec.persona.role | default('AI Assistant') }}
+    {% if spec.persona.instructions %}
+    Instructions: {{ spec.persona.instructions }}
+    {% endif %}
+    {% if spec.persona.goal %}
+    Goal: {{ spec.persona.goal }}
+    {% endif %}
+    {% if spec.persona.backstory %}
+    Backstory: {{ spec.persona.backstory }}
+    {% endif %}
+    {% if spec.persona.traits %}
+    Traits: {{ spec.persona.traits | join(', ') }}
+    {% endif %}
+    {% if spec.reasoning and spec.reasoning.method %}
+    Reasoning Method: {{ spec.reasoning.method }}
+    {% endif %}
+    {% if spec.reasoning and spec.reasoning.steps %}
+    Reasoning Steps:
+    {% for step in spec.reasoning.steps %}
+    - {{ step }}
+    {% endfor %}
+    {% endif %}
+    {% if spec.tasks and spec.tasks[0] and spec.tasks[0].instruction %}
+    Task Instruction: {{ spec.tasks[0].instruction | clean }}
+    {% endif %}
+    {% if (spec.get('_dspy_signature', {}) or {}).get('output_mode') == 'structured' %}
+    Output Mode: structured
+    Return strictly valid JSON-compatible values for output fields.
+    {% endif %}
+    {% if spec.constraints %}
+    Constraints:
+    {% for constraint in spec.constraints %}
+    - {{ constraint }}
+    {% endfor %}
+    {% endif %}
+    """
+
+{% if spec.input_fields %}
+{% for field in spec.input_fields %}
+    {{ field.name | to_snake_case }}: {{ field.dspy_type | default('str') }} = dspy.InputField(desc={{ field.description | default('Input field') | tojson }})
+{% endfor %}
+{% else %}
+    query: str = dspy.InputField(desc="User query")
+{% endif %}
+
+{% if spec.output_fields %}
+{% for field in spec.output_fields %}
+    {{ field.name | to_snake_case }}: {{ field.dspy_type | default('str') }} = dspy.OutputField(desc={{ field.description | default('Output field') | tojson }})
+{% endfor %}
+{% else %}
+    response: str = dspy.OutputField(desc="Generated response")
+{% endif %}
+
+
+class {{ agent_name | to_pascal_case }}Module(dspy.Module):
+    """DSPy-native program module."""
+
+    def __init__(self):
+        super().__init__()
+{% set method = (spec.reasoning.method if spec.reasoning and spec.reasoning.method else 'chain_of_thought') %}
+{% if method == 'react' %}
+        tools = []
+        tools.extend(build_builtin_tools(DSPY_TOOL_NAMES))
+{% if include_stackone_code %}
+        tools.extend(build_stackone_tools(DSPY_TOOL_CONFIG))
+{% endif %}
+        self.program = dspy.ReAct(
+            {{ agent_name | to_pascal_case }}Signature,
+            tools=tools,
+            max_iters={{ spec.reasoning.max_iterations | default(5) }},
+        )
+{% elif method == 'predict' %}
+        self.program = dspy.Predict({{ agent_name | to_pascal_case }}Signature)
+{% elif method == 'program_of_thought' %}
+        self.program = dspy.ProgramOfThought(
+            {{ agent_name | to_pascal_case }}Signature,
+            max_iters={{ spec.reasoning.max_iterations | default(3) }},
+        )
+{% elif method == 'parallel' %}
+        # Parallel here means concurrent sampling of multiple equivalent workers.
+        self.parallel_workers = {{ spec.reasoning.parallel_workers | default(2) }}
+        self.worker_modules = [
+            dspy.ChainOfThought({{ agent_name | to_pascal_case }}Signature)
+            for _ in range(self.parallel_workers)
+        ]
+        self.program = dspy.Parallel(num_threads=self.parallel_workers)
+{% elif (spec.reasoning and spec.reasoning.method == 'rlm') or (spec.rlm and spec.rlm.enabled) %}
+        if hasattr(dspy, "RLM"):
+            sig = inspect.signature(dspy.RLM.__init__)
+            params = sig.parameters
+            rlm_kwargs = {}
+
+            if "tools" in params:
+                rlm_kwargs["tools"] = None
+            if "max_iterations" in params:
+                rlm_kwargs["max_iterations"] = {{ spec.rlm.max_iters | default(spec.reasoning.max_iterations | default(10)) }}
+            elif "max_iters" in params:
+                rlm_kwargs["max_iters"] = {{ spec.rlm.max_iters | default(spec.reasoning.max_iterations | default(10)) }}
+            if "max_llm_calls" in params:
+                rlm_kwargs["max_llm_calls"] = {{ spec.rlm.max_llm_calls | default(5) }}
+
+            self.program = dspy.RLM({{ agent_name | to_pascal_case }}Signature, **rlm_kwargs)
+        else:
+            self.program = dspy.ChainOfThought({{ agent_name | to_pascal_case }}Signature)
+{% else %}
+        self.program = dspy.ChainOfThought({{ agent_name | to_pascal_case }}Signature)
+{% endif %}
+
+    def forward(self, {% if spec.input_fields %}{% for field in spec.input_fields %}{{ field.name | to_snake_case }}: {{ field.dspy_type | default('str') }}{% if not field.required %}={{ field.default_repr if field.has_default else "None" }}{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}{% else %}query: str{% endif %}):
+{% if method == 'parallel' %}
+        inputs = {
+{% if spec.input_fields %}
+{% for field in spec.input_fields %}
+            "{{ field.name | to_snake_case }}": {{ field.name | to_snake_case }},
+{% endfor %}
+{% else %}
+            "query": query,
+{% endif %}
+        }
+        exec_pairs = [(worker, inputs) for worker in self.worker_modules]
+        results = self.program(exec_pairs)
+        return results[0] if results else dspy.Prediction()
+{% else %}
+        return self.program({% if spec.input_fields %}{% for field in spec.input_fields %}{{ field.name | to_snake_case }}={{ field.name | to_snake_case }}{% if not loop.last %}, {% endif %}{% endfor %}{% else %}query=query{% endif %})
+{% endif %}
+
+
+def build_program() -> dspy.Module:
+    """Factory used by SuperOptiX runner to execute this DSPy program."""
+    return {{ agent_name | to_pascal_case }}Module()

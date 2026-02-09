@@ -14,6 +14,8 @@ SuperSpec Metadata:
 
 from typing import List, Dict, Any, Optional, Union
 import asyncio
+import os
+import inspect
 
 # Pydantic imports (required for BaseModel and Field)
 try:
@@ -56,6 +58,11 @@ MCP_AVAILABLE = False
 {% endif %}
 
 from superoptix.core.base_component import BaseComponent
+from superoptix.runners.pydantic_runtime_helpers import (
+	build_stackone_tools as superoptix_build_stackone_tools,
+	get_pydantic_rlm_config as superoptix_get_pydantic_rlm_config,
+	run_agent_with_optional_rlm as superoptix_run_agent_with_optional_rlm,
+)
 
 
 # ======================================================================
@@ -279,6 +286,12 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 		# Check LogFire configuration (defaults to enabled if LogFire is available)
 		logfire_config = self.spec.get("logfire", {})
 		self.logfire_enabled = logfire_config.get("enabled", True)  # Default to True (auto-detect)
+		self.rlm_config = superoptix_get_pydantic_rlm_config(self.spec)
+		if self.rlm_config.get("enabled", False):
+			print(
+				f"✅ RLM configured (mode={self.rlm_config.get('mode')}, "
+				f"backend={self.rlm_config.get('backend')})"
+			)
 		
 		if self.output_mode == "structured":
 			if not output_fields_spec:
@@ -299,11 +312,17 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 {% if spec.persona.role %}
 		instructions_parts.append({{ (spec.persona.role | replace('\n', ' ')) | tojson }})
 {% endif %}
+{% if spec.persona.instructions %}
+		instructions_parts.append("\\nInstructions: " + {{ (spec.persona.instructions | replace('\n', ' ')) | tojson }})
+{% endif %}
 {% if spec.persona.goal %}
 		instructions_parts.append("\\nGoal: " + {{ (spec.persona.goal | replace('\n', ' ')) | tojson }})
 {% endif %}
 {% if spec.persona.backstory %}
 		instructions_parts.append("\\nBackstory: " + {{ (spec.persona.backstory | replace('\n', ' ')) | tojson }})
+{% endif %}
+{% if spec.persona.traits %}
+		instructions_parts.append("\\nTraits: " + {{ (spec.persona.traits | join(', ') | replace('\n', ' ')) | tojson }})
 {% endif %}
 {% if spec.reasoning and spec.reasoning.method %}
 		instructions_parts.append("\\n\\nReasoning Method: " + {{ (spec.reasoning.method | replace('\n', ' ')) | tojson }})
@@ -404,21 +423,23 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 			print(f"✅ Using model: {model_str}")
 		provider = config.get("provider", "").lower()
 		api_base = config.get("api_base")
+
+		# Normalize provider aliases from CLI/runtime.
+		if provider in {"google-genai", "google_generative_ai"}:
+			provider = "google-gla"
+		elif provider == "local":
+			provider = "ollama"
 		
 		# Check if model string already has a provider prefix
 		# Known provider prefixes: ollama:, openai:, anthropic:, google:, etc.
-		known_providers = ["ollama", "openai", "anthropic", "google", "bedrock", "azure", "cohere", "mistral", "deepseek", "groq", "together", "fireworks", "litellm", "gateway"]
+		known_providers = ["ollama", "openai", "anthropic", "google", "google-gla", "google-genai", "bedrock", "azure", "cohere", "mistral", "deepseek", "groq", "together", "fireworks", "litellm", "gateway"]
 		has_provider_prefix = any(model_str.startswith(f"{p}:") for p in known_providers)
 		
-		# If no provider prefix, infer from provider field or api_base
+		# If no provider prefix, apply provider from config (runner/CLI source of truth).
 		if not has_provider_prefix:
-			# Check if this is an Ollama model (local)
-			if provider == "ollama" or (api_base and ("localhost" in api_base or "127.0.0.1" in api_base or "ollama" in api_base.lower())):
-				# Add ollama: prefix for local Ollama models
-				# Important: Always add prefix for Ollama, even if model name contains colons (e.g., "gpt-oss:120b")
-				model_str = f"ollama:{model_str}"
-			# For cloud models without prefix, infer_model() will try to auto-detect based on model name
-			# (e.g., "gpt-4o" -> "openai:gpt-4o", "claude-3-5-sonnet" -> "anthropic:claude-3-5-sonnet")
+			if provider:
+				model_str = f"{provider}:{model_str}"
+			# If provider is empty, infer_model() may auto-detect by model name.
 		
 		# For Ollama models, set OLLAMA_BASE_URL if api_base is provided
 		if model_str.startswith("ollama:") or provider == "ollama":
@@ -527,6 +548,23 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 		# Add model settings if available
 		if model_settings:
 			agent_kwargs["model_settings"] = model_settings
+		try:
+			retries = int(os.getenv("SUPEROPTIX_PYDANTIC_RETRIES", "3"))
+		except Exception:
+			retries = 3
+		init_params = inspect.signature(Agent.__init__).parameters
+		if "retries" in init_params:
+			agent_kwargs["retries"] = retries
+		if "output_retries" in init_params:
+			agent_kwargs["output_retries"] = retries
+
+		# Add StackOne SDK tools when configured in SuperSpec
+		stackone_tools = superoptix_build_stackone_tools(self.spec, framework="pydantic_ai")
+		if stackone_tools and len(stackone_tools) > 0:
+			agent_kwargs["tools"] = stackone_tools
+			print(f"✅ StackOne tools registered: {len(stackone_tools)} tool(s)")
+		else:
+			print("ℹ️  No StackOne tools configured")
 		
 		# Add MCP toolsets if available
 		mcp_servers = self._initialize_mcp_servers()
@@ -880,7 +918,17 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 			else:
 				print("⚠️  No toolsets found on agent - tools may not be available")
 			
-			result = await self._agent.run(input_text)
+			result = await superoptix_run_agent_with_optional_rlm(
+				agent=self._agent,
+				prompt=input_text,
+				spec_data=self.spec,
+				model_name=str(
+					(getattr(self.config, "model", None) if hasattr(self.config, "model") else None)
+					or (self.spec.get("language_model", {}) if isinstance(self.spec, dict) else {}).get("model")
+					or "unknown"
+				),
+				logfire_enabled=bool(self.logfire_enabled),
+			)
 			print(f"✅ Model response received")
 			
 			# Debug: Check if tools were actually called
@@ -907,7 +955,15 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 				print(f"   Has output attribute: {result.output is not None}")
 			
 			# Extract response based on output mode
-			if self.output_mode == "structured" and hasattr(result, 'data') and result.data:
+			if isinstance(result, str):
+				response_text = result
+{% if spec.output_fields %}
+{% set first_output = spec.output_fields[0] %}
+				return {"{{ first_output.name }}": response_text}
+{% else %}
+				return {"response": response_text}
+{% endif %}
+			elif self.output_mode == "structured" and hasattr(result, 'data') and result.data:
 				# Structured output mode - result.data is a BaseModel instance
 				structured_data = result.data
 				
@@ -1069,7 +1125,7 @@ def create_{{ agent_name }}_agent(
 
 import yaml
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 
 class {{ agent_name | to_pascal_case }}Pipeline:
@@ -1085,7 +1141,7 @@ class {{ agent_name | to_pascal_case }}Pipeline:
 	This makes Pydantic AI work with standard SuperOptiX commands!
 	"""
 	
-	def __init__(self, playbook_path: str = None):
+	def __init__(self, playbook_path: str = None, model_config: Optional[Dict[str, Any]] = None):
 		"""Initialize pipeline from playbook."""
 		# Auto-locate playbook if not provided
 		if not playbook_path:
@@ -1108,7 +1164,7 @@ class {{ agent_name | to_pascal_case }}Pipeline:
 			self.metadata = {}
 
 		# Get model config from spec - default to llama3.1:8b for local machines
-		model_config = {}
+		spec_model_config = {}
 		if "language_model" in self.spec:
 			lm = self.spec["language_model"]
 			model_from_spec = lm.get("model")
@@ -1117,7 +1173,7 @@ class {{ agent_name | to_pascal_case }}Pipeline:
 				model_from_spec = "llama3.1:8b"
 				print(f"⚠️  No model specified in playbook, using default: {model_from_spec}")
 			
-			model_config = {
+			spec_model_config = {
 				"model": model_from_spec,
 				"provider": lm.get("provider", "ollama"),
 				"api_base": lm.get("api_base"),
@@ -1125,6 +1181,19 @@ class {{ agent_name | to_pascal_case }}Pipeline:
 				"max_tokens": lm.get("max_tokens", 4000),  # Default to 4000 for detailed responses
 				"top_p": lm.get("top_p"),
 			}
+
+		# Merge runtime overrides (CLI --provider/--model) on top of playbook config.
+		effective_model_config: Dict[str, Any] = dict(spec_model_config)
+		if isinstance(model_config, dict) and model_config:
+			for key, value in model_config.items():
+				if key == "gateway" and isinstance(value, dict):
+					gw = effective_model_config.get("gateway", {})
+					if not isinstance(gw, dict):
+						gw = {}
+					gw.update(value)
+					effective_model_config["gateway"] = gw
+				else:
+					effective_model_config[key] = value
 
 		# Check for optimized weights
 		optimized_instructions = None
@@ -1172,7 +1241,7 @@ class {{ agent_name | to_pascal_case }}Pipeline:
 		# Pass spec_data to component so it has access to MCP config without needing to reload
 		self.component = create_{{ agent_name }}_agent(
 			instructions=optimized_instructions,
-			model_config=model_config,
+			model_config=effective_model_config,
 			playbook_path=playbook_path,  # Pass playbook path for MCP config access
 			spec_data=self.spec,  # Also pass spec_data directly for immediate access
 			optimized_field_descriptions=optimized_field_descriptions  # Pass optimized field descriptions
@@ -1442,6 +1511,37 @@ class {{ agent_name | to_pascal_case }}Pipeline:
 	def run_bdd_test_suite(self, auto_tune: bool = False, ignore_checks: bool = False):
 		"""Run BDD/feature specs (CLI expects this method)."""
 		return self.evaluate(ignore_checks=ignore_checks)
+
+	def _optimize_with_pydantic_native(
+		self,
+		trainset: List[Dict[str, Any]],
+		valset: List[Dict[str, Any]],
+		auto: str,
+		metric: str,
+		opt_params: Dict[str, Any],
+		task_model: Optional[str],
+		reflection_model: Optional[str],
+	) -> Dict[str, Any]:
+		"""
+		Attempt native Pydantic-style GEPA optimization when available.
+
+		Current behavior:
+		- Detects whether local environment exposes a stable native optimization API.
+		- If unavailable, returns an error payload so caller can fall back to UniversalGEPA.
+		"""
+		try:
+			import pydantic_evals  # noqa: F401
+		except Exception as e:
+			return {"error": f"pydantic_evals unavailable: {e}"}
+
+		# pydantic_evals presence alone is not enough; API differs by release.
+		# Keep this path explicit but safe until a stable native GEPA API is guaranteed.
+		return {
+			"error": (
+				"Native Pydantic GEPA API not detected in current environment. "
+				"Falling back to UniversalGEPA."
+			)
+		}
 	
 	def optimize_with_gepa(
 		self,
@@ -1460,9 +1560,32 @@ class {{ agent_name | to_pascal_case }}Pipeline:
 		"""
 		from superoptix.optimizers.universal_gepa import UniversalGEPA
 		
+		opt_params = {}
+		if "optimization" in self.spec and "optimizer" in self.spec["optimization"]:
+			opt_params = self.spec["optimization"]["optimizer"].get("params", {}) or {}
+
+		backend = str(opt_params.get("backend", "universal")).strip().lower()
+
+		# Support both old and new naming:
+		# - task_model (preferred) == task/refinement model
+		# - reflection_model (preferred) == reflection/critic model
+		task_model = (
+			opt_params.get("task_model")
+			or opt_params.get("task_lm")
+			or self.spec.get("language_model", {}).get("model")
+		)
+		reflection_model = (
+			opt_params.get("reflection_model")
+			or opt_params.get("reflection_lm")
+			or task_model
+		)
+
 		print(f"\n🔄 Optimizing {{ metadata.name }} with GEPA...\n")
 		print(f"Framework: Pydantic AI")
+		print(f"GEPA backend: {backend}")
 		print(f"Optimization level: {auto}")
+		print(f"Task model: {task_model}")
+		print(f"Reflection model: {reflection_model}")
 		print(f"Optimizing: instructions\n")
 		
 		# Define metric function
@@ -1543,27 +1666,43 @@ class {{ agent_name | to_pascal_case }}Pipeline:
 		if not trainset:
 			print("⚠️  No training data available. Need BDD scenarios in playbook.")
 			return {"error": "No training data"}
-		
-		# Get reflection LM from playbook config or use default
-		reflection_lm = "ollama:llama3.1:8b"  # Default
-		if "optimization" in self.spec and "optimizer" in self.spec["optimization"]:
-			opt_params = self.spec["optimization"]["optimizer"].get("params", {})
-			reflection_lm_config = opt_params.get("reflection_lm")
-			if reflection_lm_config:
-				# Handle model string with or without prefix
-				reflection_lm = reflection_lm_config
-				if not any(reflection_lm.startswith(f"{p}:") for p in ["ollama", "openai", "anthropic", "google"]):
-					# No prefix - check if it's Ollama based on provider
-					lm_provider = self.spec.get("language_model", {}).get("provider", "").lower()
-					if lm_provider == "ollama":
-						reflection_lm = f"ollama:{reflection_lm}"
+
+		# For optimization runs, allow task model override from optimization params.
+		# This mirrors task/reflection model split terminology used by GEPA docs.
+		try:
+			if task_model:
+				if isinstance(self.component.config, dict):
+					self.component.config["model"] = task_model
+				else:
+					setattr(self.component.config, "model", task_model)
+				# Force model re-init with updated model config during optimization.
+				self.component._agent = None
+		except Exception:
+			pass
+
+		# Try native backend first if requested.
+		if backend in {"pydantic_native", "native", "pydantic"}:
+			native_result = self._optimize_with_pydantic_native(
+				trainset=trainset,
+				valset=valset if valset else trainset,
+				auto=auto,
+				metric=metric,
+				opt_params=opt_params,
+				task_model=task_model,
+				reflection_model=reflection_model,
+			)
+			if native_result and not native_result.get("error"):
+				return native_result
+			if native_result and native_result.get("error"):
+				print(f"⚠️  {native_result.get('error')}")
+				print("↪️  Continuing with UniversalGEPA backend...")
 		
 		# Run GEPA optimization
 		try:
 			optimizer = UniversalGEPA(
 				metric=eval_metric,
 				auto=auto,
-				reflection_lm=reflection_lm,
+				reflection_lm=reflection_model,
 				skip_perfect_score=self.spec.get("optimization", {}).get("optimizer", {}).get("params", {}).get("skip_perfect_score", True),
 			)
 			
@@ -1633,4 +1772,3 @@ if __name__ == "__main__":
 	# asyncio.run(pipeline.run(query="Hello!"))  # Execute
 	# pipeline.evaluate()  # Run BDD tests
 	# pipeline.optimize_with_gepa(auto="medium")  # GEPA optimization
-

@@ -26,7 +26,7 @@
 <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
   <tr>
     <td style="padding: 20px; width: 50%; vertical-align: top; border: 2px solid rgba(76, 175, 80, 0.3); background: rgba(76, 175, 80, 0.05);">
-      <h3 style="color: #4CAF50;">✅ Advantages</h3>
+      <h3 style="color: #4CAF50;">Advantages</h3>
       <ul>
         <li>3-10x faster than HuggingFace</li>
         <li>Up to 24x higher throughput</li>
@@ -128,8 +128,8 @@ spec:
   <tr style="background: rgba(76, 175, 80, 0.05);">
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">vLLM</strong></td>
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">24x ⭐</strong></td>
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">Low ✅</strong></td>
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">Fast ✅</strong></td>
+    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">Low </strong></td>
+    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">Fast </strong></td>
   </tr>
   <tr style="background: rgba(255, 152, 0, 0.05);">
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">HuggingFace</td>

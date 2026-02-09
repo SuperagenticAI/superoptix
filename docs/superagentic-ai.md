@@ -153,8 +153,8 @@ SuperOptiX is structured in tiers that progressively embody our foundational pil
 
 | Tier | Description | Superagentic AI Pillars | Status |
 |------|-------------|-------------------------|---------|
-| **🔮 Oracles** | High-level reasoning and decision-making agents with advanced context understanding | **Context Engineering** + **Agent Engineering** | ✅ **Available** |
-| **🧞 Genies** | Task-oriented agents with specialized capabilities and tool integration | **Agent Engineering** | ✅ **Open Source** |
+| **🔮 Oracles** | High-level reasoning and decision-making agents with advanced context understanding | **Context Engineering** + **Agent Engineering** | **Available** |
+| **🧞 Genies** | Task-oriented agents with specialized capabilities and tool integration | **Agent Engineering** | **Open Source** |
 | **🔗 Protocols** | Multi-agent communication and orchestration layer | **Agent Experience** | 🔄 **Coming Soon** |
 | **🤝 SuperAgents** | Advanced human-AI collaboration with human-in-the-loop capabilities | **Agentic Co-Intelligence** | 🔄 **Coming Soon** |
 | **🔮 Quantum Agents** | Next-generation agents leveraging quantum computing capabilities | **Quantum AI** | 🔮 **Future** |
@@ -233,7 +233,7 @@ We envision a world where AI agents are:
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">Deployed at scale in real-world applications</td>
   </tr>
   <tr style="background: rgba(76, 175, 80, 0.05);">
-    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">✅ Ethical</strong></td>
+    <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">Ethical</strong></td>
     <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">Operating with transparency and accountability</td>
   </tr>
 </table>

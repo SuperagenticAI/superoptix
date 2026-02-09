@@ -137,18 +137,18 @@ super agent evaluate code_review_assistant
 ```
 Testing 8 RSpec-style BDD scenarios:
 
-❌ SQL Injection Detection: FAIL
+SQL Injection Detection: FAIL
    Expected: Specific vulnerability with solution
    Got: "Check your SQL queries"
 
-❌ Hardcoded Credentials: FAIL
+Hardcoded Credentials: FAIL
    Expected: Identify hardcoded secret with env var solution
    Got: Generic "use better practices"
 
-✅ Complexity Analysis: PASS
+Complexity Analysis: PASS
    (Agent happened to mention complexity)
 
-❌ Security Comprehensive: FAIL
+Security Comprehensive: FAIL
    Expected: All 3 security issues identified
    Got: Only 1 issue found
 
@@ -377,30 +377,30 @@ super agent evaluate code_review_assistant  # automatically loads optimized weig
 ```
 Testing 8 RSpec-style BDD scenarios:
 
-✅ SQL Injection Detection: PASS
+SQL Injection Detection: PASS
    ✓ Identified SQL injection with specific attack example
    ✓ Provided parameterized query solution
    ✓ Cited OWASP Top 10 #1
 
-✅ Hardcoded Credentials: PASS
+Hardcoded Credentials: PASS
    ✓ Found hardcoded password
    ✓ Recommended environment variables
    ✓ Cited CWE-798
 
-✅ Complexity Analysis: PASS
+Complexity Analysis: PASS
    ✓ Used complexity_calculator tool
    ✓ Reported complexity 5/4 threshold
    ✓ Suggested early returns pattern
 
-✅ Security Comprehensive: PASS
+Security Comprehensive: PASS
    ✓ Found all 3 security issues
    ✓ Prioritized by severity
    ✓ Cited OWASP standards
 
-✅ Performance Issues: PASS
-✅ Memory Reference: PASS
-✅ Multi-Issue Handling: PASS
-✅ Professional Format: PASS
+Performance Issues: PASS
+Memory Reference: PASS
+Multi-Issue Handling: PASS
+Professional Format: PASS
 
 Overall: 8/8 PASS (100%)
 Improvement: +87.5% (12.5% → 100%)
@@ -439,7 +439,7 @@ OVERALL SEVERITY: 🔴 CRITICAL
    - Security breach if code deployed to production
    - Violates security compliance standards
    
-   ✅ Solution:
+   Solution:
    ```python
    import os
    password = os.environ.get('DB_PASSWORD')
@@ -464,7 +464,7 @@ OVERALL SEVERITY: 🔴 CRITICAL
    Result: SELECT * FROM users WHERE username='admin' OR '1'='1'
    Impact: Returns ALL users, authentication bypass
    
-   ✅ Solution:
+   Solution:
    ```python
    def authenticate_user(username):
        query = "SELECT * FROM users WHERE username = ?"
@@ -489,7 +489,7 @@ OVERALL SEVERITY: 🔴 CRITICAL
    - Timing attack vulnerability (password length leak)
    - Complete compromise if database breached
    
-   ✅ Solution:
+   Solution:
    ```python
    import bcrypt
    
@@ -523,7 +523,7 @@ OVERALL SEVERITY: 🔴 CRITICAL
    - Difficult to maintain
    - Error-prone modifications
    
-   ✅ Solution (Early Returns Pattern):
+   Solution (Early Returns Pattern):
    ```python
    def authenticate_user(username):
        query = "SELECT * FROM users WHERE username = ?"
@@ -589,9 +589,9 @@ BEFORE NEXT RELEASE:
 4. Refactor complexity (Lines 7-12) - Maintainability
 
 STANDARDS COMPLIANCE CHECK:
-❌ OWASP Top 10 #1: Injection - VIOLATED
-❌ OWASP ASVS 2.4.1: Password Hashing - VIOLATED
-❌ OWASP ASVS 2.7.1: Hardcoded Credentials - VIOLATED
+OWASP Top 10 #1: Injection - VIOLATED
+OWASP ASVS 2.4.1: Password Hashing - VIOLATED
+OWASP ASVS 2.7.1: Hardcoded Credentials - VIOLATED
 ⚠️  Clean Code: Complexity Threshold - EXCEEDED
 
 RISK LEVEL: 🔴 DEPLOY BLOCKED (3 critical security issues)
@@ -718,10 +718,10 @@ Team Standards:
 **Optimizing ONLY Prompts**:
 ```
 Result: Better instructions, but...
-- ❌ Still retrieves wrong knowledge docs
-- ❌ Still doesn't use tools correctly
-- ❌ Still includes irrelevant memories
-- ❌ Still uses generic phrasing
+- Still retrieves wrong knowledge docs
+- Still doesn't use tools correctly
+- Still includes irrelevant memories
+- Still uses generic phrasing
 
 Final Accuracy: ~45%
 ```
@@ -729,10 +729,10 @@ Final Accuracy: ~45%
 **Optimizing ALL Layers**:
 ```
 Result: Better instructions AND
-- ✅ Retrieves perfect security docs
-- ✅ Uses tools strategically
-- ✅ Recalls relevant past findings
-- ✅ Uses expert-level phrasing from dataset
+- Retrieves perfect security docs
+- Uses tools strategically
+- Recalls relevant past findings
+- Uses expert-level phrasing from dataset
 
 Final Accuracy: 100%
 ```
@@ -746,19 +746,19 @@ Final Accuracy: 100%
 ### End-to-End Optimization Process
 
 ```bash
-# 1. Initialize project
+# Initialize project
 super init code_review_project
 cd code_review_project
 
-# 2. Create knowledge base
+# Create knowledge base
 mkdir -p knowledge/security knowledge/performance knowledge/best_practices
 # ... add your documentation files
 
-# 3. Prepare dataset (optional but recommended)
+# Prepare dataset (optional but recommended)
 # Download or create real code review examples
 cp your_real_reviews.csv data/code_reviews.csv
 
-# 4. Create agent playbook
+# Create agent playbook
 cat > agents/code_reviewer/playbook.yaml << 'EOF'
 spec:
   persona:
@@ -785,29 +785,29 @@ spec:
     optimizer: {name: GEPA, params: {auto: medium}}
 EOF
 
-# 5. Compile
+# Compile
 super agent compile code_reviewer
 # → Generates pipeline with all layers enabled
 
-# 6. Baseline evaluation
+# Baseline evaluation
 super agent evaluate code_reviewer
 # → Shows baseline: 12.5% accuracy
 
-# 7. Optimize ALL layers
+# Optimize ALL layers
 super agent optimize code_reviewer --auto medium --fresh
 # → GEPA optimizes: prompts + RAG + tools + memory + dataset learning
 # → Takes 10-15 minutes
 # → Shows progress for each layer
 
-# 8. Re-evaluate
+# Re-evaluate
 super agent evaluate code_reviewer  # automatically loads optimized weights
 # → Shows improvement: 100% accuracy (+87.5%)
 
-# 9. Test on real code
+# Test on real code
 super agent run code_reviewer --code "$(cat suspicious_code.py)"
 # → Professional, comprehensive security audit
 
-# 10. Deploy
+# Deploy
 super agent run code_reviewer --interactive
 # → Production-ready code review agent!
 ```
@@ -818,31 +818,26 @@ super agent run code_reviewer --interactive
 
 ### Quality Indicators
 
-**1. Comprehensive Coverage** ✅
-- Detects all vulnerability types (SQL, XSS, secrets, etc.)
+**1. Comprehensive Coverage** - Detects all vulnerability types (SQL, XSS, secrets, etc.)
 - Analyzes performance and code quality
 - Handles edge cases and complex patterns
 
-**2. Actionable Output** ✅
-- Specific issue identification
+**2. Actionable Output** - Specific issue identification
 - Executable code solutions
 - Clear priority ordering
 - Standards compliance
 
-**3. Professional Quality** ✅
-- Expert-level phrasing (learned from dataset)
+**3. Professional Quality** - Expert-level phrasing (learned from dataset)
 - Proper citations (OWASP, CWE, Clean Code)
 - Severity classification
 - Risk assessment
 
-**4. Efficient Operation** ✅
-- Strategic knowledge retrieval (95% relevance)
+**4. Efficient Operation** - Strategic knowledge retrieval (95% relevance)
 - Correct tool usage (100% accuracy)
 - Optimized memory selection (60% fewer tokens)
 - Fast response time (<3 seconds)
 
-**5. Robust Performance** ✅
-- Handles unseen code variations (dataset generalization)
+**5. Robust Performance** - Handles unseen code variations (dataset generalization)
 - References past findings (memory consistency)
 - Graceful error handling (tool/protocol failures)
 
@@ -856,28 +851,28 @@ Which layers does your agent need?
 
 ```yaml
 Customer Support:
-  - Prompts: ✅ (response quality)
-  - RAG: ✅ (product knowledge)
+  - Prompts: (response quality)
+  - RAG: (product knowledge)
   - Tools: ⚠️ (maybe ticketing system)
-  - Memory: ✅✅ (conversation history)
-  - Protocols: ❌ (not needed)
-  - Datasets: ✅ (real support tickets)
+  - Memory: (conversation history)
+  - Protocols: (not needed)
+  - Datasets: (real support tickets)
 
 Research Agent:
-  - Prompts: ✅ (research methodology)
-  - RAG: ✅✅ (academic papers)
-  - Tools: ✅ (search, citations)
+  - Prompts: (research methodology)
+  - RAG: (academic papers)
+  - Tools: (search, citations)
   - Memory: ⚠️ (maybe past searches)
-  - Protocols: ✅ (MCP for data sources)
-  - Datasets: ✅ (research examples)
+  - Protocols: (MCP for data sources)
+  - Datasets: (research examples)
 
 Code Generator:
-  - Prompts: ✅ (coding standards)
-  - RAG: ✅ (API docs, patterns)
-  - Tools: ✅ (syntax validators)
+  - Prompts: (coding standards)
+  - RAG: (API docs, patterns)
+  - Tools: (syntax validators)
   - Memory: ⚠️ (maybe past code)
   - Protocols: ⚠️ (maybe MCP filesystem)
-  - Datasets: ✅✅ (code examples)
+  - Datasets: (code examples)
 ```
 
 ### Step 2: Enable Your Layers
@@ -923,16 +918,16 @@ GEPA automatically optimizes all enabled layers!
 
 | Optimization Approach | Accuracy | Quality | Production-Ready |
 |----------------------|----------|---------|------------------|
-| **Prompts Only** | 45% | Basic | ❌ No |
+| **Prompts Only** | 45% | Basic | No |
 | **Prompts + RAG** | 65% | Better | ⚠️ Maybe |
 | **Prompts + RAG + Tools** | 75% | Good | ⚠️ Close |
-| **Full-Stack (All 6 Layers)** | 100% | Expert | ✅ Yes |
+| **Full-Stack (All 6 Layers)** | 100% | Expert | Yes |
 
 ---
 
 ## Next Steps
 
-### 1. Explore Individual Layers
+### Explore Individual Layers
 
 Deep-dive into specific layers:
 - [💬 Prompt Optimization](prompts.md)
@@ -942,7 +937,7 @@ Deep-dive into specific layers:
 - [🔌 Protocol Optimization](protocols.md)
 - [📊 Dataset Optimization](datasets.md)
 
-### 2. Try the Workflow
+### Try the Workflow
 
 ```bash
 # Create an agent with multiple layers
@@ -950,12 +945,12 @@ Deep-dive into specific layers:
 # See the compound effect!
 ```
 
-### 3. Learn GEPA Internals
+### Learn GEPA Internals
 
 - [GEPA Optimizer Guide](../gepa-optimization.md)
 - [GEPA + --fresh Flag](../gepa-optimization.md#using-the-fresh-flag)
 
-### 4. Scale with Datasets
+### Scale with Datasets
 
 - [Dataset Import Guide](../dataset-import.md)
 - Browse HuggingFace: https://huggingface.co/datasets

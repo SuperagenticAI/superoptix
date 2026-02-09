@@ -8,7 +8,7 @@ SuperOptiX provides a **universal memory management system** that works across a
 
 The memory system consists of four main components working together, **regardless of framework**:
 
-### 1. Memory Backends
+### Memory Backends
 Provides flexible storage options:
 - **FileBackend**: JSON/pickle file-based storage with TTL support
 - **SQLiteBackend**: Relational database storage with automatic cleanup
@@ -20,7 +20,7 @@ Key Features:
 - Pluggable architecture for easy extension
 - Support for both JSON and binary serialization
 
-### 2. Short-Term Memory
+### Short-Term Memory
 Manages temporary, session-based information:
 - **LRU Cache**: Automatic eviction of least recently used items
 - **Conversation History**: Tracks dialogue between user and agent
@@ -33,7 +33,7 @@ Use Cases:
 - User preferences for current session
 - Quick access to frequently used information
 
-### 3. Long-Term Memory
+### Long-Term Memory
 Persistent knowledge storage with semantic search:
 - **Knowledge Categories**: Organized storage (facts, procedures, experiences, etc.)
 - **Semantic Search**: Optional sentence-transformer embeddings for similarity search
@@ -46,7 +46,7 @@ Use Cases:
 - Domain knowledge
 - Historical insights and patterns
 
-### 4. Episodic Memory
+### Episodic Memory
 Tracks experiences and temporal sequences:
 - **Episode Management**: Start, track, and end interaction episodes
 - **Event Logging**: Detailed event tracking within episodes
@@ -59,7 +59,7 @@ Use Cases:
 - Learning from past experiences
 - Debugging and monitoring
 
-### 5. Context Manager
+### Context Manager
 Manages hierarchical context across different scopes:
 - **Context Scopes**: Global, session, task, and local contexts
 - **Context Stack**: Hierarchical context management
@@ -201,37 +201,37 @@ spec:
 
 ## Key Features
 
-### 1. Multi-Backend Support
+### Multi-Backend Support
 - File-based storage for simplicity
 - SQLite for structured data and queries
 - Redis for high-performance scenarios
 - Easy to extend with new backends
 
-### 2. Semantic Search
+### Semantic Search
 - Optional sentence-transformer integration
 - Similarity-based knowledge retrieval
 - Automatic embedding generation
 - Fallback to keyword search
 
-### 3. Automatic Context Management
+### Automatic Context Management
 - Hierarchical context scopes
 - Intelligent context merging
 - Automatic persistence
 - TTL-based expiration
 
-### 4. Interaction Tracking
+### Interaction Tracking
 - Episode-based interaction management
 - Detailed event logging
 - Pattern recognition
 - Performance analytics
 
-### 5. Learning Capabilities
+### Learning Capabilities
 - Insight extraction from interactions
 - Pattern recognition and storage
 - Feedback integration
 - Continuous improvement
 
-### 6. Production Ready
+### Production Ready
 - Thread-safe operations
 - Automatic cleanup and maintenance
 - Comprehensive error handling
@@ -456,34 +456,34 @@ memory:
 
 ## Best Practices
 
-### 1. Memory Configuration by Use Case
+### Memory Configuration by Use Case
 
 - **Development Agents**: Enable all memory types with longer retention
 - **Customer Service**: Focus on conversation history and user preferences  
 - **Data Analysis**: Emphasize pattern recognition and episodic learning
 - **Simple Tasks**: Disable memory for lightweight operation
 
-### 2. Performance Optimization
+### Performance Optimization
 
 - Use Redis backend for high-throughput scenarios
 - Enable embedding caching for semantic search heavy workloads
 - Configure appropriate retention policies to manage storage
 - Use batch operations for bulk memory updates
 
-### 3. Security Considerations
+### Security Considerations
 
 - Enable PII detection for customer-facing agents
 - Use encryption for sensitive data
 - Configure appropriate retention policies for compliance
 - Enable audit logging for regulated environments
 
-### 4. Memory Design
+### Memory Design
 - Use short-term memory for session-specific data
 - Use long-term memory for persistent knowledge
 - Use episodic memory for interaction tracking
 - Use context for hierarchical state management
 
-### 5. Data Management
+### Data Management
 - Validate data before storage
 - Use appropriate categories and tags
 - Implement data versioning

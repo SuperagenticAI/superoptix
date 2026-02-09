@@ -100,7 +100,7 @@ super init langfuse_demo
 cd langfuse_demo
 
 # Pull and compile agent
-super agent pull developer --tier genies
+super agent pull developer
 super agent compile developer
 
 # Run with LangFuse tracking

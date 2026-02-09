@@ -10,7 +10,7 @@ Prompt optimization is the process of improving an agent's core instructions, pe
 
 ## What GEPA Optimizes in Prompts
 
-### 1. Persona and Role Definition
+### Persona and Role Definition
 
 **What It Is**: The agent's identity, role, and behavioral guidelines
 
@@ -51,7 +51,7 @@ traits: [detail-oriented, security-conscious, constructive, pragmatic]
 
 ---
 
-### 2. Task Instructions
+### Task Instructions
 
 **What It Is**: Core instructions for each agent task
 
@@ -103,7 +103,7 @@ instruction: |
 
 ---
 
-### 3. Reasoning Patterns
+### Reasoning Patterns
 
 **What It Is**: Chain-of-thought, step-by-step thinking process
 
@@ -145,7 +145,7 @@ Agent follows explicit reasoning steps:
 
 ---
 
-### 4. Response Formatting
+### Response Formatting
 
 **What It Is**: How the agent structures its output
 
@@ -308,7 +308,7 @@ Reference: OWASP Top 10 2024 - Injection Attacks (#1)
 
 ## Best Practices
 
-### 1. Start with Clear Base Prompts
+### Start with Clear Base Prompts
 
 ```yaml
 # Good starting point
@@ -321,7 +321,7 @@ tasks:
   - instruction: [Step-by-step process, not vague request]
 ```
 
-### 2. Define Expected Output Format
+### Define Expected Output Format
 
 ```yaml
 output_fields:
@@ -335,7 +335,7 @@ output_fields:
 
 GEPA will learn to match this structure consistently.
 
-### 3. Provide RSpec-Style BDD Scenarios
+### Provide RSpec-Style BDD Scenarios
 
 ```yaml
 feature_specifications:
@@ -351,7 +351,7 @@ feature_specifications:
 
 GEPA optimizes prompts to match these specifications.
 
-### 4. Use Datasets for Real-World Patterns
+### Use Datasets for Real-World Patterns
 
 ```yaml
 datasets:
@@ -440,19 +440,19 @@ GEPA learns effective phrasing from real examples.
 Prompts are automatically optimized when you run GEPA:
 
 ```bash
-# 1. Create agent with good base prompts
+# Create agent with good base prompts
 super spec generate code_reviewer --template genie
 
-# 2. Compile
+# Compile
 super agent compile code_reviewer
 
-# 3. Evaluate baseline
+# Evaluate baseline
 super agent evaluate code_reviewer
 
-# 4. Optimize prompts (and other enabled layers)
+# Optimize prompts (and other enabled layers)
 super agent optimize code_reviewer --auto medium
 
-# 5. See improvement
+# See improvement
 super agent evaluate code_reviewer  # automatically loads optimized weights
 ```
 

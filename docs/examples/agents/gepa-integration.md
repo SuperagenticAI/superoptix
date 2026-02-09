@@ -197,11 +197,11 @@ INFO dspy.teleprompt.gepa.gepa: Iteration 2: Proposed new text for predictor
 ```
 
 This indicates:
-- ✅ GEPA started with appropriate budget
-- ✅ Baseline performance measured (40%)
-- ✅ Iterative improvements occurring
-- ✅ Score improvements achieved (100%)
-- ✅ New prompts being generated
+- GEPA started with appropriate budget
+- Baseline performance measured (40%)
+- Iterative improvements occurring
+- Score improvements achieved (100%)
+- New prompts being generated
 
 ### Understanding Timeout Behavior
 
@@ -260,7 +260,7 @@ GEPA optimization resulted in:
 
 ## Best Practices
 
-### 1. Choose Appropriate Metrics
+### Choose Appropriate Metrics
 
 Match metrics to your domain:
 
@@ -275,7 +275,7 @@ metric: multi_component_enterprise_feedback
 metric: vulnerability_detection_feedback
 ```
 
-### 2. Start Conservative
+### Start Conservative
 
 Begin with light budgets:
 
@@ -286,7 +286,7 @@ optimization:
     # Increase to medium/heavy if justified
 ```
 
-### 3. Quality Training Data
+### Quality Training Data
 
 Provide comprehensive scenarios:
 
@@ -301,7 +301,7 @@ feature_specifications:
         answer: "Complete expected response"
 ```
 
-### 4. Monitor Progress
+### Monitor Progress
 
 Watch for improvement indicators:
 
@@ -309,7 +309,7 @@ Watch for improvement indicators:
 - Quality of generated prompts
 - Performance on evaluation scenarios
 
-### 5. Validate Results
+### Validate Results
 
 Always measure GEPA effectiveness:
 

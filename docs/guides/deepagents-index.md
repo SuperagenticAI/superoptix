@@ -8,7 +8,7 @@
 
 **New to DeepAgents?** Start here:
 
-### 1. **[Complete End-to-End Workflow](../tutorials/deepagents-complete-workflow.md)** ⭐ RECOMMENDED
+### **[Complete End-to-End Workflow](../tutorials/deepagents-complete-workflow.md)** ⭐ RECOMMENDED
 
 **What you'll learn:**
 - Set up Gemini API (FREE)
@@ -26,7 +26,7 @@
 
 ## 📚 Core Guides
 
-### 2. **[DeepAgents Integration Guide](deepagents-integration.md)**
+### **[DeepAgents Integration Guide](deepagents-integration.md)**
 
 **Complete reference for DeepAgents in SuperOptiX**
 
@@ -45,7 +45,7 @@
 
 ---
 
-### 3. **[Backend Configuration Reference](deepagents-backends.md)**
+### **[Backend Configuration Reference](deepagents-backends.md)**
 
 **Deep dive into DeepAgents 0.2.0 backends**
 
@@ -66,7 +66,7 @@
 
 ## 🎓 Hands-On Tutorials
 
-### 4. **[Backend Tutorial](../tutorials/deepagents-backends-tutorial.md)**
+### **[Backend Tutorial](../tutorials/deepagents-backends-tutorial.md)**
 
 **6 practical tutorials with working examples**
 
@@ -85,7 +85,7 @@
 
 ## 🔧 Setup & Configuration
 
-### 5. **[Gemini Configuration Guide](../../GEMINI_CONFIGURATION_GUIDE.md)**
+### **[Gemini Configuration Guide](../../GEMINI_CONFIGURATION_GUIDE.md)**
 
 **Complete Gemini 2.5 model configuration guide**
 
@@ -101,7 +101,7 @@
 
 ---
 
-### 6. **[Gemini Testing Guide](../../DEEPAGENTS_GEMINI_TEST.md)**
+### **[Gemini Testing Guide](../../DEEPAGENTS_GEMINI_TEST.md)**
 
 **Step-by-step Gemini testing workflow**
 
@@ -119,7 +119,7 @@
 
 ## 📖 Reference Materials
 
-### 7. **[Quick Reference Card](../../DEEPAGENTS_QUICK_REFERENCE.md)**
+### **[Quick Reference Card](../../DEEPAGENTS_QUICK_REFERENCE.md)**
 
 **One-page cheat sheet** (print and keep handy!)
 
@@ -135,7 +135,7 @@
 
 ## 🔍 Technical Deep Dives
 
-### 8. **[Integration Summary](../../DEEPAGENTS_0.2.0_COMPLETE.md)**
+### **[Integration Summary](../../DEEPAGENTS_0.2.0_COMPLETE.md)**
 
 **What's new in 0.2.0 integration**
 
@@ -148,7 +148,7 @@
 
 ---
 
-### 9. **[Technical Analysis](../../DEEPAGENTS_ANALYSIS.md)**
+### **[Technical Analysis](../../DEEPAGENTS_ANALYSIS.md)**
 
 **Why Ollama doesn't work with DeepAgents**
 
@@ -162,7 +162,7 @@
 
 ---
 
-### 10. **[Bug Fixes Summary](../../DEEPAGENTS_FIXES_SUMMARY.md)**
+### **[Bug Fixes Summary](../../DEEPAGENTS_FIXES_SUMMARY.md)**
 
 **All bugs that were fixed**
 
@@ -260,22 +260,22 @@ super agent pull researcher_hybrid
 All demo agents are production-ready and fully documented:
 
 ```bash
-# 1. Basic Research (StateBackend)
+# Basic Research (StateBackend)
 super agent pull research_agent_deepagents
 # Uses: Default ephemeral storage
 # Best for: Single-session research
 
-# 2. Persistent Chatbot (StoreBackend)
+# Persistent Chatbot (StoreBackend)
 super agent pull chatbot_persistent
 # Uses: Persistent database storage
 # Best for: Multi-session conversations
 
-# 3. Code Reviewer (FilesystemBackend)
+# Code Reviewer (FilesystemBackend)
 super agent pull code_reviewer
 # Uses: Real filesystem access
 # Best for: Project analysis
 
-# 4. Hybrid Researcher (CompositeBackend)
+# Hybrid Researcher (CompositeBackend)
 super agent pull researcher_hybrid
 # Uses: Hybrid storage strategy
 # Best for: Production systems

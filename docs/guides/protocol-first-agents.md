@@ -33,22 +33,22 @@ agent = MyAgent(mcp_servers=['mcp://localhost:8080'])
 
 ## ✨ Key Benefits
 
-### 1. Zero Configuration
+### Zero Configuration
 - No manual tool loading
 - No tool registry management
 - Tools appear automatically when servers add them
 
-### 2. Dynamic Discovery
+### Dynamic Discovery
 - New tools available instantly
 - No agent recompilation needed
 - Protocol handles versioning
 
-### 3. Protocol-Level Optimization
+### Protocol-Level Optimization
 - GEPA can optimize at protocol level
 - Session management built-in
 - Future-ready for Agent2Agent protocol
 
-### 4. Better Maintainability
+### Better Maintainability
 - Less code to maintain
 - No tool version conflicts
 - Protocol handles compatibility
@@ -105,7 +105,7 @@ super agent compile my_protocol_agent
 🛠️  Auto Tool Discovery: No manual tool loading or registration
 🎯 Key Differentiator: Protocol-level optimization + session management
 📡 MCP Servers: 2 configured (mcp://localhost:8080/math, mcp://localhost:8080/github)
-✅ Successfully generated Genies-tier pipeline (protocol-first/agenspy)
+Successfully generated Genies-tier pipeline (protocol-first/agenspy)
 ```
 
 ### Step 3: Run the Agent
@@ -258,21 +258,21 @@ spec:
 
 ## 🎯 Best Practices
 
-### 1. MCP Server URIs
+### MCP Server URIs
 ```yaml
-# ✅ Good: Descriptive server names
+# Good: Descriptive server names
 mcp_servers:
   - "mcp://localhost:8080/math"
   - "mcp://localhost:8080/github"
 
-# ❌ Avoid: Generic names
+# Avoid: Generic names
 mcp_servers:
   - "mcp://localhost:8080"
 ```
 
-### 2. Tier Selection
+### Tier Selection
 ```yaml
-# ✅ Protocol-first requires genies tier
+# Protocol-first requires genies tier
 metadata:
   level: "genies"
 
@@ -280,17 +280,17 @@ spec:
   tool_backend: "agenspy"
 ```
 
-### 3. Reasoning Method
+### Reasoning Method
 ```yaml
-# ✅ Use ReAct for tool-using agents
+# Use ReAct for tool-using agents
 reasoning:
   method: "react"
   max_iterations: 5
 ```
 
-### 4. Error Handling
+### Error Handling
 ```yaml
-# ✅ Configure retries and timeouts
+# Configure retries and timeouts
 config:
   protocol_timeout: 30
   max_tool_retries: 3

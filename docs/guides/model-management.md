@@ -476,10 +476,10 @@ super model vllm quantize llama-2-7b --quantization awq --bits 4
 pip install vllm
 
 # Verify installation
-python -c "import vllm; print('✅ vLLM installed')"
+python -c "import vllm; print('vLLM installed')"
 
 # Check GPU support
-python -c "from vllm import LLM; print('✅ GPU support available')"
+python -c "from vllm import LLM; print('GPU support available')"
 ```
 
 **Option 2: Install with SuperOptiX vLLM dependency**
@@ -488,7 +488,7 @@ python -c "from vllm import LLM; print('✅ GPU support available')"
 pip install superoptix[vllm]
 
 # Verify installation
-python -c "import vllm; print('✅ vLLM installed via SuperOptiX')"
+python -c "import vllm; print('vLLM installed via SuperOptiX')"
 ```
 
 **Note:** 
@@ -678,10 +678,10 @@ super model sglang benchmark llama-2-7b --num-requests 100 --request-rate 10
 pip install sglang
 
 # Verify installation
-python -c "import sglang; print('✅ SGLang installed')"
+python -c "import sglang; print('SGLang installed')"
 
 # Check GPU support
-python -c "from sglang import SGLang; print('✅ GPU support available')"
+python -c "from sglang import SGLang; print('GPU support available')"
 ```
 
 **Option 2: Install with SuperOptiX SGLang dependency**
@@ -690,7 +690,7 @@ python -c "from sglang import SGLang; print('✅ GPU support available')"
 pip install superoptix[sglang]
 
 # Verify installation
-python -c "import sglang; print('✅ SGLang installed via SuperOptiX')"
+python -c "import sglang; print('SGLang installed via SuperOptiX')"
 ```
 
 **Note:** 
@@ -975,28 +975,28 @@ super model run model "prompt" --max-tokens 100 --temperature 0.7
 ### Complete Workflow
 
 ```bash
-# 1. Discover models
+# Discover models
 super model discover
 
-# 2. Install model
+# Install model
 super model install llama3.2:3b --backend ollama
 
-# 3. Run model
+# Run model
 super model run llama3.2:3b "Write a Python function to sort a list"
 
-# 4. Try different model
+# Try different model
 super model run microsoft/phi-1_5 "Write a JavaScript function to validate email"
 
-# 5. Interactive session
+# Interactive session
 super model run llama3.2:3b "Write a blog post about AI trends"
 
-# 6. Try MLX model
+# Try MLX model
 super model run mlx-community/phi-2 "Write a short story about a robot"
 
-# 7. Advanced usage
+# Advanced usage
 super model run microsoft/phi-1_5 "Analyze this text: [your text here]"
 
-# 8. Educational
+# Educational
 super model run llama3.2:3b "Explain machine learning in simple terms"
 ``` 
 
@@ -1005,10 +1005,10 @@ super model run llama3.2:3b "Explain machine learning in simple terms"
 **1. Verify Dependencies:**
 ```bash
 # Check MLX-LM installation
-python -c "import mlx_lm; print('✅ MLX-LM installed')"
+python -c "import mlx_lm; print('MLX-LM installed')"
 
 # Check LM-Eval installation (for evaluation)
-python -c "import lm_eval; print('✅ LM-Eval installed')"
+python -c "import lm_eval; print('LM-Eval installed')"
 ```
 
 **2. Test Command Structure:**
