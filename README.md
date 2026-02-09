@@ -1,6 +1,6 @@
 <div align="center">
   <a href="https://superagenticai.github.io/superoptix-ai/">
-    <img src="https://raw.githubusercontent.com/SuperagenticAI/superoptix-ai/main/docs/logo.png" alt="SuperOptiX Logo" width="260" />
+    <img src="https://raw.githubusercontent.com/SuperagenticAI/superoptix/main/docs/logo.png" alt="SuperOptiX Logo" width="260" />
   </a>
   <h1>SuperOptiX AI</h1>
   <h3><strong>Full Stack Agentic AI Optimization Framework</strong></h3>
