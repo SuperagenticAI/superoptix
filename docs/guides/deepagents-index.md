@@ -293,7 +293,7 @@ super agent pull researcher_hybrid
 
 ### Still Stuck?
 
-- 📖 **Documentation:** [https://superagenticai.github.io/superoptix-ai/](https://superagenticai.github.io/superoptix-ai/)
+- 📖 **Documentation:** [https://superagenticai.github.io/superoptix/](https://superagenticai.github.io/superoptix/)
 - 📧 **Email:** hello@super-agentic.ai
 - 🌐 **Website:** [https://superoptix.ai](https://superoptix.ai)
 

@@ -209,4 +209,4 @@ uv tool install superoptix --with "json-repair>=0.30.0"  # Ensure compatible ver
 ### Still Having Issues?
 
 - 📖 Check our [Troubleshooting Guide](troubleshooting.md)
-- 🐛 Report issues on [GitHub](https://github.com/SuperagenticAI/superoptix-ai/issues)
+- 🐛 Report issues on [GitHub](https://github.com/SuperagenticAI/superoptix/issues)

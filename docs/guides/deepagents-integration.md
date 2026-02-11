@@ -953,5 +953,5 @@ super agent pull researcher_hybrid          # CompositeBackend (hybrid)
 
 ---
 
-*Need help? Check our [Documentation](https://superagenticai.github.io/superoptix-ai/) or email us at [hello@super-agentic.ai](mailto:hello@super-agentic.ai)!*
+*Need help? Check our [Documentation](https://superagenticai.github.io/superoptix/) or email us at [hello@super-agentic.ai](mailto:hello@super-agentic.ai)!*
 
