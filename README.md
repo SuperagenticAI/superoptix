@@ -1,5 +1,5 @@
 <div align="center">
-  <a href="https://superagenticai.github.io/superoptix-ai/">
+  <a href="https://superagenticai.github.io/superoptix/">
     <img src="https://raw.githubusercontent.com/SuperagenticAI/superoptix/main/docs/logo.png" alt="SuperOptiX Logo" width="260" />
   </a>
   <h1>SuperOptiX AI</h1>
@@ -116,12 +116,12 @@ super agent optimize developer --framework dspy --auto light
 
 ## Documentation
 
-- Docs home: https://superagenticai.github.io/superoptix-ai/
-- Golden workflow: https://superagenticai.github.io/superoptix-ai/guides/golden-workflow/
-- Framework feature matrix: https://superagenticai.github.io/superoptix-ai/guides/framework-feature-matrix/
-- StackOne integration: https://superagenticai.github.io/superoptix-ai/guides/stackone-integration/
-- RLM (experimental): https://superagenticai.github.io/superoptix-ai/guides/rlm-experimental/
-- Troubleshooting by symptom: https://superagenticai.github.io/superoptix-ai/guides/troubleshooting-by-symptom/
+- Docs home: https://superagenticai.github.io/superoptix/
+- Golden workflow: https://superagenticai.github.io/superoptix/guides/golden-workflow/
+- Framework feature matrix: https://superagenticai.github.io/superoptix/guides/framework-feature-matrix/
+- StackOne integration: https://superagenticai.github.io/superoptix/guides/stackone-integration/
+- RLM (experimental): https://superagenticai.github.io/superoptix/guides/rlm-experimental/
+- Troubleshooting by symptom: https://superagenticai.github.io/superoptix/guides/troubleshooting-by-symptom/
 
 ---
 
@@ -138,7 +138,7 @@ git clone https://github.com/SuperagenticAI/superoptix-lite-openai.git
 ## Support
 
 - Website: https://superoptix.ai
-- GitHub: https://github.com/SuperagenticAI/superoptix-ai
+- GitHub: https://github.com/SuperagenticAI/superoptix
 - PyPI: https://pypi.org/project/superoptix/
 
 ---

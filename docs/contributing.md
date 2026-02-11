@@ -174,7 +174,7 @@ Help improve our documentation:
 
 ### **📢 Getting Help**
 - **Website**: [super-agentic.ai](https://super-agentic.ai) - Visit our website for support
-- **GitHub Discussions**: [Join discussions](https://github.com/SuperagenticAI/superoptix-ai/discussions)
+- **GitHub Discussions**: [Join discussions](https://github.com/SuperagenticAI/superoptix/discussions)
 - **Email Support**: support@super-agentic.ai
 
 ### **📋 Feedback Standards**
