@@ -1,0 +1,8236 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="AI Agent Development Framework: Evaluation-First and Optimization-Core.">
+      
+      
+        <meta name="author" content="SuperagenticAI">
+      
+      
+        <link rel="canonical" href="https://docs.super-agentic.ai/guides/deepagents-integration/">
+      
+      
+        <link rel="prev" href="../microsoft-framework-integration/">
+      
+      
+        <link rel="next" href="../superspec/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>🌊 DeepAgents - SUPEROPTIX AI</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CFira+Code:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"Fira Code"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css?v=24.0">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="grey" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#deepagents-framework-integration" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SUPEROPTIX AI" class="md-header__button md-logo" aria-label="SUPEROPTIX AI" data-md-component="logo">
+      
+  <img src="../../logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SUPEROPTIX AI
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              🌊 DeepAgents
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="grey" data-md-color-accent="purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="grey" data-md-color-accent="purple"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SUPEROPTIX AI" class="md-nav__button md-logo" aria-label="SUPEROPTIX AI" data-md-component="logo">
+      
+  <img src="../../logo.png" alt="logo">
+
+    </a>
+    SUPEROPTIX AI
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🏠 Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🚀 Get Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🚀 Get Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../introduction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📖 Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🚀 Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../golden-workflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ⭐ Golden Workflow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/multi-framework-quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🌐 Multi-Framework Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ⚙️ Setup & Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting-by-symptom/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🛠️ Troubleshooting by Symptom
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../llm-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧠 LLM Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../environment-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🏗️ Environment Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../project-structure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📁 Project Structure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10" id="__nav_2_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎓 Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🎓 Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📚 Tutorials Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/openai-sdk-gepa-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔧 OpenAI SDK + GEPA Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔬 Frameworks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🔬 Frameworks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📚 Frameworks Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../multi-framework/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🌐 Comparison
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../framework-feature-matrix/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📊 Feature Matrix
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../openai-sdk-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🤖 OpenAI SDK
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../claude-sdk-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧠 Claude Agent SDK
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pydantic-ai-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🐍 Pydantic AI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pydantic-ai-mcp-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🐍 Pydantic AI MCP Demo
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../crewai-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    👥 CrewAI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../crewai-task-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ⚡ CrewAI Advanced
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../google-adk-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔮 Google ADK
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../microsoft-framework-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🏢 Microsoft (Legacy)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🌊 DeepAgents
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🌊 DeepAgents
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+  
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-deepagents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎯 What is DeepAgents?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎯 What is DeepAgents?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-capabilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Capabilities
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-in-020-pluggable-backends" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NEW in 0.2.0: Pluggable Backends
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📦 Installation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🚀 Quick Start
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🚀 Quick Start">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-a-using-gemini-free-recommended-for-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option A: Using Gemini (FREE &amp; Recommended for Testing) ⭐
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-b-using-claude-or-gpt-4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option B: Using Claude or GPT-4
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#set-api-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Set API Key
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run-the-complete-workflow-pulled-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run the Complete Workflow (Pulled Agent)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#backend-configuration-new-in-020" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🗄️ Backend Configuration (NEW in 0.2.0)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🗄️ Backend Configuration (NEW in 0.2.0)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-are-backends" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Are Backends?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quick-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick Comparison
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-1-persistent-chatbot-storebackend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 1: Persistent Chatbot (StoreBackend)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-2-code-review-agent-filesystembackend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 2: Code Review Agent (FilesystemBackend)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-3-research-agent-compositebackend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 3: Research Agent (CompositeBackend)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backend-configuration-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backend Configuration Matrix
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#demo-agents-with-backends" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📚 Demo Agents with Backends
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📚 Demo Agents with Backends">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-research-agent-statebackend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Research Agent (StateBackend)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#persistent-chatbot-storebackend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Persistent Chatbot (StoreBackend)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#code-reviewer-filesystembackend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Code Reviewer (FilesystemBackend)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-researcher-compositebackend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Advanced Researcher (CompositeBackend)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#complete-backend-configuration-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 Complete Backend Configuration Reference
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📋 Complete Backend Configuration Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#backend-type-state-default" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backend Type: state (Default)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backend-type-store-persistent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backend Type: store (Persistent)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backend-type-composite-hybrid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backend Type: composite (Hybrid)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backend-configuration-in-playbooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backend Configuration in Playbooks
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#creating-your-own-deepagents-playbook" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 Creating Your Own DeepAgents Playbook
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📋 Creating Your Own DeepAgents Playbook">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#complete-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔄 Complete Workflow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔄 Complete Workflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-initialize-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Initialize Project
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-create-or-pull-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Create or Pull Agent
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-compile" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Compile
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-evaluate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Evaluate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-optimize-with-gepa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Optimize with GEPA
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-6-re-evaluate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: Re-evaluate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-7-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: Run
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-it-works-under-the-hood" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔧 How It Works Under the Hood
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deepagents-vs-dspy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📊 DeepAgents vs DSPy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-use-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎓 Example Use Cases
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎓 Example Use Cases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#research-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Research Agent
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#code-assistant" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Code Assistant
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-analyst" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data Analyst
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ⚙️ Advanced Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="⚙️ Advanced Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#custom-subagents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom Subagents
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom Tools
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🐛 Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🐛 Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#notimplementederror-in-bind_tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NotImplementedError in bind_tools()
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agent-initialization-failed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agent Initialization Failed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#no-bdd-specifications-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        No BDD Specifications Found
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gepa-optimization-details" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎯 GEPA Optimization Details
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎯 GEPA Optimization Details">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-gets-optimized" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Gets Optimized
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#optimization-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optimization Example
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🏗️ Architecture
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#additional-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📚 Additional Resources
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tips-best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        💡 Tips &amp; Best Practices
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="💡 Tips &amp; Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#use-detailed-system-prompts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use Detailed System Prompts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leverage-planning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Leverage Planning
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-filesystem-for-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use Filesystem for Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#start-simple-then-optimize" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Start Simple, Then Optimize
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#comparison-with-other-frameworks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎓 Comparison with Other Frameworks
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎓 Comparison with Other Frameworks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#deepagents-superoptix-advantages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DeepAgents + SuperOptiX Advantages
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dspy-superoptix-advantages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DSPy + SuperOptiX Advantages
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-both" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use Both!
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🚀 Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#faq" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ❓ FAQ
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#success-stories" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎉 Success Stories
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#additional-resources_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📚 Additional Resources
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📚 Additional Resources">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#start-here-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎯 Start Here (Recommended)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backend-configuration-new-in-020_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backend Configuration (NEW in 0.2.0)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#model-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#technical-details" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Technical Details
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#demo-agents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Demo Agents
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#external-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        External Resources
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📝 SuperSpec
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    📝 SuperSpec
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superspec/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📝 SuperSpec Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superspec-dsl-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📗 DSL Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superspec-dsl-examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📙 DSL Examples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superspec-agent-building/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🏗️ Agent Building
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superspec-configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ⚙️ Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superspec-context-engineering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧠 Context Engineering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🛠️ Build
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🛠️ Build
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../agent-patterns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎨 Agent Patterns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agent-discovery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔍 Agent Discovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agent-development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🤖 Agent Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tool-development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔧 Tool Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../technical-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🏛️ Technical Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Evaluate
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Evaluate
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../evaluation-testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Evaluation & Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../bdd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎭 RSpec-Style BDD Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎯 Agent Optimization
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🎯 Agent Optimization
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agent-optimization/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📖 Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agent-optimization/prompts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    💬 Prompt Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agent-optimization/rag/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔍 RAG Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agent-optimization/tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🛠️ Tool Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agent-optimization/memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧠 Memory Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agent-optimization/protocols/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔌 Protocol Optimization (MCP)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agent-optimization/datasets/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📊 Dataset-Driven Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agent-optimization/full-stack-example/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎯 Full-Stack Example
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ⚡ Optimize
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    ⚡ Optimize
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../gepa-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧬 GEPA Optimizer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rlm-experimental/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧪 RLM (Experimental)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📈 Optimization Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dspy-optimizers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔬 DSPy Optimizers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/openai-sdk-gepa-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔧 OpenAI SDK + GEPA Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/rag-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔍 RAG Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/mcp-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔌 MCP Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../memory-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    💡 Memory Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎼 Orchestrate
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🎼 Orchestrate
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../orchestra-development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎼 Orchestra Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/first-orchestra/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎼 Multi-Agent Orchestra
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📊 Monitor
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    📊 Monitor
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../observability/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📊 Observability Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mlflow-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧿 MLFlow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../langfuse-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧬 LangFuse
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../logfire-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔥 LogFire
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../weights-biases-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📈 Weights & Biases
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../observability-comparison/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ⚖️ Comparison
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../enhanced-observability/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🚀 Enhanced
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🗄️ Context
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🗄️ Context
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mcp-rag-complete-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔍 RAG & MCP Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rag/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📚 RAG Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../protocol-first-agents/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔌 MCP Protocol
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dataset-import/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📊 Dataset Import
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧠 Memory Systems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔌 Integrations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🔌 Integrations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/optimas-examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ⚡ Optimas
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../optimas-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ⚡ Optimas Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stackone-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🗂️ StackOne Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stackone-claude-sdk/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🗂️ StackOne + Claude SDK
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/rag-chroma-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🚥 ChromaDB
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/rag-lancedb-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🍀 LanceDB
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/weaviate-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔰 Weaviate
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/qdrant-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔸 Qdrant
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/milvus-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    👁️ Milvus
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/tools-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🛠️ Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/memory-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧠 Memory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/observability-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📊 Observability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/mlflow-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧿 MLFlow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/langfuse-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧬 LangFuse
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/gepa-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🚀 GEPA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_13" >
+        
+          
+          <label class="md-nav__link" for="__nav_13" id="__nav_13_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    💻 CLI
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_13_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_13">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    💻 CLI
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli-complete-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📘 CLI Complete Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/cli.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📖 CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_14" >
+        
+          
+          <label class="md-nav__link" for="__nav_14" id="__nav_14_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ✨ Super CLI (Beta)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_14_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_14">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    ✨ Super CLI (Beta)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../super-cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    💬 Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../conversational-interface/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔧 Technical Details
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_15" >
+        
+          
+          <label class="md-nav__link" for="__nav_15" id="__nav_15_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🤖 Models
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_15_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_15">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🤖 Models
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../model-management/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧠 Model Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../model-intelligence/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    💡 Model Intelligence
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_15_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_15_3" id="__nav_15_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    💻 Local Inference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_15_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_15_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    💻 Local Inference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/mlx-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    💻 MLX (Apple Silicon)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/ollama-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🐼 Ollama
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/huggingface-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🤗 HuggingFace
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/lmstudio-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎛️ LM Studio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_15_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_15_4" id="__nav_15_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ☁️ Cloud
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_15_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_15_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    ☁️ Cloud
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cloud-inference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ☁️ Cloud Inference (OpenAI, Anthropic, Google)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../vllm-inference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🚀 vLLM (High-Performance Serving)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sglang-inference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ⚡ SGLang (Structured Generation)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_16" >
+        
+          
+          <label class="md-nav__link" for="__nav_16" id="__nav_16_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📚 Examples
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_16_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_16">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    📚 Examples
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📚 Examples Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/optimas-examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ⚡ Optimas
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/rag-chroma-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🚥 ChromaDB
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/rag-lancedb-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🍀 LanceDB
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/weaviate-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔰 Weaviate
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/qdrant-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔸 Qdrant
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/milvus-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    👁️ Milvus
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/tools-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🛠️ Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/memory-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧠 Memory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/observability-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📊 Observability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/mlflow-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧿 MLFlow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/langfuse-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧬 LangFuse
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/weights-biases-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📈 Weights & Biases
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/gepa-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🚀 GEPA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_17" >
+        
+          
+          <label class="md-nav__link" for="__nav_17" id="__nav_17_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎯 Techniques
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_17_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_17">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🎯 Techniques
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../techniques/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎯 Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧠 Memory Systems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../memory-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    💡 Memory Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rag/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📚 RAG Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📈 Optimization Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../evaluation-testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Evaluation & Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../observability/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📊 Observability Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../bdd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎭 RSpec-Style BDD Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cicd-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔄 CI/CD Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rails-analogy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🚂 Rails Analogy (For Rails Devs)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_18" >
+        
+          
+          <label class="md-nav__link" for="__nav_18" id="__nav_18_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🛍️ Marketplace
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_18_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_18">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🛍️ Marketplace
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../marketplace/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🛍️ Marketplace Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_19" >
+        
+          
+          <label class="md-nav__link" for="__nav_19" id="__nav_19_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Responsible AI
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_19_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_19">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Responsible AI
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../responsible-ai/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Responsible AI Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_20" >
+        
+          
+          <label class="md-nav__link" for="__nav_20" id="__nav_20_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🏢 Company
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_20_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_20">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🏢 Company
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superagentic-ai/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🌟 Superagentic AI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_21" >
+        
+          
+          <label class="md-nav__link" for="__nav_21" id="__nav_21_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📖 Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_21_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_21">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    📖 Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📚 Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_21_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_21_2" id="__nav_21_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔧 API Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_21_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_21_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🔧 API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/api/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/api/superspec.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📝 SuperSpec API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/api/gepa.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧬 GEPA API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/api/dspy-optimizers.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔬 DSPy Optimizers API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/api/runners.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🏃 Runners API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/api/memory.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧠 Memory API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/api/models.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🤖 Models API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/api/tools.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔧 Tools API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/api/observability.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📊 Observability API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/api/cli.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    💻 CLI API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/api/core.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔧 Core API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ❓ FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🐛 Debugging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-deepagents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎯 What is DeepAgents?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎯 What is DeepAgents?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-capabilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Capabilities
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-in-020-pluggable-backends" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NEW in 0.2.0: Pluggable Backends
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📦 Installation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🚀 Quick Start
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🚀 Quick Start">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-a-using-gemini-free-recommended-for-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option A: Using Gemini (FREE &amp; Recommended for Testing) ⭐
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-b-using-claude-or-gpt-4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option B: Using Claude or GPT-4
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#set-api-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Set API Key
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run-the-complete-workflow-pulled-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run the Complete Workflow (Pulled Agent)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#backend-configuration-new-in-020" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🗄️ Backend Configuration (NEW in 0.2.0)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🗄️ Backend Configuration (NEW in 0.2.0)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-are-backends" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Are Backends?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quick-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick Comparison
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-1-persistent-chatbot-storebackend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 1: Persistent Chatbot (StoreBackend)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-2-code-review-agent-filesystembackend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 2: Code Review Agent (FilesystemBackend)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-3-research-agent-compositebackend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 3: Research Agent (CompositeBackend)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backend-configuration-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backend Configuration Matrix
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#demo-agents-with-backends" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📚 Demo Agents with Backends
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📚 Demo Agents with Backends">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-research-agent-statebackend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Research Agent (StateBackend)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#persistent-chatbot-storebackend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Persistent Chatbot (StoreBackend)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#code-reviewer-filesystembackend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Code Reviewer (FilesystemBackend)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-researcher-compositebackend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Advanced Researcher (CompositeBackend)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#complete-backend-configuration-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 Complete Backend Configuration Reference
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📋 Complete Backend Configuration Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#backend-type-state-default" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backend Type: state (Default)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backend-type-store-persistent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backend Type: store (Persistent)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backend-type-composite-hybrid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backend Type: composite (Hybrid)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backend-configuration-in-playbooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backend Configuration in Playbooks
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#creating-your-own-deepagents-playbook" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 Creating Your Own DeepAgents Playbook
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📋 Creating Your Own DeepAgents Playbook">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#complete-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔄 Complete Workflow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔄 Complete Workflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-initialize-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Initialize Project
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-create-or-pull-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Create or Pull Agent
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-compile" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Compile
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-evaluate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Evaluate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-optimize-with-gepa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Optimize with GEPA
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-6-re-evaluate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: Re-evaluate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-7-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: Run
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-it-works-under-the-hood" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔧 How It Works Under the Hood
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deepagents-vs-dspy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📊 DeepAgents vs DSPy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-use-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎓 Example Use Cases
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎓 Example Use Cases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#research-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Research Agent
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#code-assistant" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Code Assistant
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-analyst" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data Analyst
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ⚙️ Advanced Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="⚙️ Advanced Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#custom-subagents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom Subagents
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom Tools
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🐛 Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🐛 Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#notimplementederror-in-bind_tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NotImplementedError in bind_tools()
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agent-initialization-failed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agent Initialization Failed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#no-bdd-specifications-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        No BDD Specifications Found
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gepa-optimization-details" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎯 GEPA Optimization Details
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎯 GEPA Optimization Details">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-gets-optimized" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Gets Optimized
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#optimization-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optimization Example
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🏗️ Architecture
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#additional-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📚 Additional Resources
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tips-best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        💡 Tips &amp; Best Practices
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="💡 Tips &amp; Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#use-detailed-system-prompts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use Detailed System Prompts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leverage-planning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Leverage Planning
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-filesystem-for-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use Filesystem for Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#start-simple-then-optimize" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Start Simple, Then Optimize
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#comparison-with-other-frameworks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎓 Comparison with Other Frameworks
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎓 Comparison with Other Frameworks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#deepagents-superoptix-advantages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DeepAgents + SuperOptiX Advantages
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dspy-superoptix-advantages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DSPy + SuperOptiX Advantages
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-both" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use Both!
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🚀 Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#faq" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ❓ FAQ
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#success-stories" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎉 Success Stories
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#additional-resources_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📚 Additional Resources
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📚 Additional Resources">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#start-here-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎯 Start Here (Recommended)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backend-configuration-new-in-020_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backend Configuration (NEW in 0.2.0)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#model-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#technical-details" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Technical Details
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#demo-agents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Demo Agents
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#external-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        External Resources
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+        
+  
+  
+    <li class="md-path__item">
+      <a href="../.." class="md-path__link">
+        
+  <span class="md-ellipsis">
+    🏠 Home
+  </span>
+
+      </a>
+    </li>
+  
+
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    🔬 Frameworks
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="deepagents-framework-integration">🧠 DeepAgents Framework Integration</h1>
+<p><strong>SuperOptiX now supports DeepAgents 0.2.0 - a LangGraph-based "agent harness" for building sophisticated, long-running agents with planning, pluggable backends, and subagent spawning!</strong></p>
+<p>RLM support is experimental. Unified sandbox support is coming soon.</p>
+<div class="admonition tip">
+<p class="admonition-title">🚀 New to DeepAgents? Start with the Complete Tutorial!</p>
+<p><strong><a href="../../tutorials/deepagents-complete-workflow/">👉 Complete End-to-End Workflow Tutorial</a></strong></p>
+<p>Learn how to build, run, evaluate, and optimize DeepAgents from scratch in 30 minutes:</p>
+<ul>
+<li>Step-by-step with real expected outputs</li>
+<li>Works with FREE Gemini API</li>
+<li>Persistent memory, real file access, hybrid storage</li>
+<li>GEPA optimization guide</li>
+<li>Deployment deployment guide</li>
+</ul>
+</div>
+<hr />
+<h2 id="what-is-deepagents">🎯 What is DeepAgents?</h2>
+<p>DeepAgents is LangChain's premier framework for creating <strong>"deep agents"</strong> - sophisticated agents that go beyond simple tool-calling loops. As <a href="https://blog.langchain.com/doubling-down-on-deepagents/">LangChain states</a>, deep agents are "able to do complex, open ended tasks over longer time horizons."</p>
+<h3 id="core-capabilities">Core Capabilities</h3>
+<ul>
+<li>📋 <strong>Planning Tools</strong>: Break down complex tasks with <code>write_todos</code></li>
+<li>📁 <strong>Filesystem Access</strong>: <code>read_file</code>, <code>write_file</code>, <code>ls</code>, <code>edit_file</code>, <code>grep_search</code>, <code>glob_search</code></li>
+<li>👥 <strong>Subagent Spawning</strong>: Delegate specialized tasks to focused subagents</li>
+<li>🗄️ <strong>Pluggable Backends</strong> (NEW 0.2.0): Choose where files are stored</li>
+<li>⚡ <strong>Auto-Optimization</strong> (NEW 0.2.0): Large result eviction, conversation summarization</li>
+<li>🔧 <strong>Error Recovery</strong> (NEW 0.2.0): Automatic tool call repair</li>
+</ul>
+<h3 id="new-in-020-pluggable-backends">NEW in 0.2.0: Pluggable Backends</h3>
+<p>The biggest addition is the <strong>backend abstraction</strong> that lets you choose where agent files are stored:</p>
+<table>
+<thead>
+<tr>
+<th>Backend</th>
+<th>Persistence</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>StateBackend</strong></td>
+<td>Thread only</td>
+<td>Scratch space (default)</td>
+</tr>
+<tr>
+<td><strong>StoreBackend</strong></td>
+<td>Forever</td>
+<td>Long-term memory, chatbots</td>
+</tr>
+<tr>
+<td><strong>FilesystemBackend</strong></td>
+<td>Forever</td>
+<td>Real project files, code analysis</td>
+</tr>
+<tr>
+<td><strong>CompositeBackend</strong></td>
+<td>Mixed</td>
+<td>Hybrid strategies (best of all)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Perfect for:</strong> Complex research, code generation, chatbots, multi-step workflows, and deployment systems.</p>
+<p><strong>Read more:</strong> <a href="https://blog.langchain.com/doubling-down-on-deepagents/">LangChain Blog - Doubling Down on DeepAgents</a></p>
+<hr />
+<h2 id="installation">📦 Installation</h2>
+<div class="language-bash highlight"><pre><span></span><code><span class="c1"># Install SuperOptiX with DeepAgents support</span>
+pip<span class="w"> </span>install<span class="w"> </span>superoptix<span class="o">[</span>frameworks-deepagents<span class="o">]</span>
+
+<span class="c1"># REQUIRED: Install Gemini integration (or your preferred LLM provider)</span>
+pip<span class="w"> </span>install<span class="w"> </span>langchain-google-genai<span class="w">  </span><span class="c1"># For Gemini</span>
+<span class="c1"># pip install langchain-anthropic   # For Claude</span>
+<span class="c1"># pip install langchain-openai      # For GPT-4</span>
+</code></pre></div>
+<p><strong>Includes:</strong>
+- <strong>deepagents 0.2.0+</strong> with pluggable backends
+- SuperOptiX core with GEPA
+- LangChain integration (provider-specific packages need to be installed separately)
+- LangChain, LangGraph integration</p>
+<p><strong>Requirements:</strong>
+- Python 3.11+
+- Git (for DSPy dependency)
+- API keys for function-calling models (Gemini, Claude, or GPT-4)</p>
+<p><strong>New in 0.2.0:</strong>
+- ✨ Pluggable backend abstraction
+- 💾 Persistent memory support
+- 📁 Real filesystem access
+- ⚡ Auto-optimization features</p>
+<hr />
+<h2 id="quick-start">🚀 Quick Start</h2>
+<h3 id="option-a-using-gemini-free-recommended-for-testing">Option A: Using Gemini (FREE &amp; Recommended for Testing) ⭐</h3>
+<p><strong>Why Gemini?</strong> Free access, fast, excellent function-calling support!</p>
+<div class="language-bash highlight"><pre><span></span><code><span class="c1"># Get FREE API key from https://aistudio.google.com/app/apikey</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">GOOGLE_API_KEY</span><span class="o">=</span><span class="s2">&quot;your-gemini-api-key&quot;</span>
+
+<span class="c1"># Pull demo agent (already configured for Gemini!)</span>
+super<span class="w"> </span>agent<span class="w"> </span>pull<span class="w"> </span>research_agent_deepagents
+
+<span class="c1"># Run the full workflow</span>
+super<span class="w"> </span>agent<span class="w"> </span>compile<span class="w"> </span>research_agent_deepagents<span class="w"> </span>--framework<span class="w"> </span>deepagents
+super<span class="w"> </span>agent<span class="w"> </span>run<span class="w"> </span>research_agent_deepagents<span class="w"> </span>--framework<span class="w"> </span>deepagents<span class="w"> </span>--goal<span class="w"> </span><span class="s2">&quot;What is LangGraph?&quot;</span>
+super<span class="w"> </span>agent<span class="w"> </span>evaluate<span class="w"> </span>research_agent_deepagents
+super<span class="w"> </span>agent<span class="w"> </span>optimize<span class="w"> </span>research_agent_deepagents<span class="w"> </span>--auto<span class="w"> </span>medium<span class="w"> </span>--framework<span class="w"> </span>deepagents<span class="w"> </span>--reflection-lm<span class="w"> </span>ollama:llama3.1:8b
+
+<span class="c1"># Done! Agent optimized with local Ollama</span>
+</code></pre></div>
+<p><strong>📖 Detailed Gemini Guide</strong>: See <code>DEEPAGENTS_GEMINI_TEST.md</code> in repo root</p>
+<hr />
+<h3 id="option-b-using-claude-or-gpt-4">Option B: Using Claude or GPT-4</h3>
+<p>DeepAgents requires function-calling models. To switch providers, pull the same demo agent and update the model in the generated playbook if needed. Refer to provider docs for the latest model names:</p>
+<ul>
+<li><strong>Gemini:</strong> <a href="https://ai.google.dev/models">https://ai.google.dev/models</a></li>
+<li><strong>Claude:</strong> <a href="https://docs.anthropic.com/en/docs/models-overview">https://docs.anthropic.com/en/docs/models-overview</a></li>
+<li><strong>OpenAI:</strong> <a href="https://platform.openai.com/docs/models">https://platform.openai.com/docs/models</a></li>
+</ul>
+<p>Note: Ollama models are not supported by DeepAgents today (LangChain limitation). Use the DSPy framework for Ollama.</p>
+<h3 id="set-api-key">Set API Key</h3>
+<div class="language-bash highlight"><pre><span></span><code><span class="c1"># For Gemini (FREE)</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">GOOGLE_API_KEY</span><span class="o">=</span>your_key
+
+<span class="c1"># For Claude</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">ANTHROPIC_API_KEY</span><span class="o">=</span>your_key
+
+<span class="c1"># For OpenAI</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">OPENAI_API_KEY</span><span class="o">=</span>your_key
+</code></pre></div>
+<h3 id="run-the-complete-workflow-pulled-agent">Run the Complete Workflow (Pulled Agent)</h3>
+<div class="language-bash highlight"><pre><span></span><code><span class="c1"># Compile (generate DeepAgents pipeline code)</span>
+super<span class="w"> </span>agent<span class="w"> </span>compile<span class="w"> </span>research_agent_deepagents<span class="w"> </span>--framework<span class="w"> </span>deepagents
+
+<span class="c1"># Run agent</span>
+super<span class="w"> </span>agent<span class="w"> </span>run<span class="w"> </span>research_agent_deepagents<span class="w"> </span>--framework<span class="w"> </span>deepagents<span class="w"> </span>--goal<span class="w"> </span><span class="s2">&quot;What is LangGraph?&quot;</span>
+
+<span class="c1"># Evaluate (run BDD scenarios)</span>
+super<span class="w"> </span>agent<span class="w"> </span>evaluate<span class="w"> </span>research_agent_deepagents
+
+<span class="c1"># Optimize with GEPA (optimize system prompt)</span>
+super<span class="w"> </span>agent<span class="w"> </span>optimize<span class="w"> </span>research_agent_deepagents<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--framework<span class="w"> </span>deepagents<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--auto<span class="w"> </span>medium<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--reflection-lm<span class="w"> </span>google-genai:gemini-2.5-pro
+
+<span class="c1"># Test optimized version</span>
+super<span class="w"> </span>agent<span class="w"> </span>evaluate<span class="w"> </span>research_agent_deepagents<span class="w">  </span><span class="c1"># automatically loads optimized weights</span>
+</code></pre></div>
+<p><strong>Expected Results:</strong>
+- Baseline performance → After GEPA: Significant improvement (results vary by hardware and model)
+- Cost: $0.00 with FREE Gemini access
+- Time: 5-10 minutes</p>
+<div class="admonition success">
+<p class="admonition-title">📖 Want Detailed Step-by-Step Guide?</p>
+<p><strong><a href="../../tutorials/deepagents-complete-workflow/">👉 Complete End-to-End Workflow Tutorial</a></strong></p>
+<p>This comprehensive tutorial shows you:
+- What to expect at each step (real outputs!)
+- How to configure all 3 backend types
+- GEPA optimization walkthrough with examples
+- Deployment deployment guide</p>
+</div>
+<hr />
+<h2 id="backend-configuration-new-in-020">🗄️ Backend Configuration (NEW in 0.2.0)</h2>
+<h3 id="what-are-backends">What Are Backends?</h3>
+<p>DeepAgents 0.2.0 introduces a <strong>pluggable backend abstraction</strong> that lets you choose where agent files are stored. This transforms DeepAgents from a toy framework into a <strong>deployment-ready agent harness</strong>.</p>
+<p><strong>Source:</strong> <a href="https://blog.langchain.com/doubling-down-on-deepagents/">LangChain Blog - Doubling Down on DeepAgents</a></p>
+<h3 id="quick-comparison">Quick Comparison</h3>
+<table>
+<thead>
+<tr>
+<th>Backend</th>
+<th>When to Use</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>StateBackend</strong></td>
+<td>Temporary scratch space</td>
+<td>Draft generation, Q&amp;A</td>
+</tr>
+<tr>
+<td><strong>StoreBackend</strong></td>
+<td>Persistent chatbots</td>
+<td>Customer support, personal assistants</td>
+</tr>
+<tr>
+<td><strong>FilesystemBackend</strong></td>
+<td>Real file access</td>
+<td>Code review, project analysis</td>
+</tr>
+<tr>
+<td><strong>CompositeBackend</strong></td>
+<td>Complex agents</td>
+<td>Research assistant, dev tools</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="example-1-persistent-chatbot-storebackend">Example 1: Persistent Chatbot (StoreBackend)</h3>
+<p>Use the prebuilt agent and run it (persistent memory out of the box):
+<div class="language-bash highlight"><pre><span></span><code><span class="c1"># First conversation</span>
+super<span class="w"> </span>agent<span class="w"> </span>run<span class="w"> </span>chatbot_persistent<span class="w"> </span>--goal<span class="w"> </span><span class="s2">&quot;Hi! I&#39;m Sarah and I love gardening.&quot;</span>
+<span class="c1"># Agent saves: &quot;Name: Sarah, Interest: gardening&quot; to /user_profile.txt</span>
+
+<span class="c1"># Days later, new conversation</span>
+super<span class="w"> </span>agent<span class="w"> </span>run<span class="w"> </span>chatbot_persistent<span class="w"> </span>--goal<span class="w"> </span><span class="s2">&quot;What&#39;s my name?&quot;</span>
+<span class="c1"># Agent reads /user_profile.txt → &quot;Your name is Sarah!&quot;</span>
+
+<span class="c1"># Weeks later</span>
+super<span class="w"> </span>agent<span class="w"> </span>run<span class="w"> </span>chatbot_persistent<span class="w"> </span>--goal<span class="w"> </span><span class="s2">&quot;What do I like?&quot;</span>
+<span class="c1"># Agent reads /user_profile.txt → &quot;You love gardening!&quot;</span>
+</code></pre></div></p>
+<p><strong>Why It Works:</strong> StoreBackend persists files in a database. They survive across:
+- Different conversations
+- Different days
+- Server restarts
+- All threads</p>
+<hr />
+<h3 id="example-2-code-review-agent-filesystembackend">Example 2: Code Review Agent (FilesystemBackend)</h3>
+<p>Pull and run against real files (set <code>root_dir</code> in the playbook after pulling):
+<div class="language-bash highlight"><pre><span></span><code><span class="c1"># Review a specific file</span>
+super<span class="w"> </span>agent<span class="w"> </span>run<span class="w"> </span>code_reviewer<span class="w"> </span>--goal<span class="w"> </span><span class="s2">&quot;Review src/auth.py for security issues&quot;</span>
+<span class="c1"># Agent reads ACTUAL file: /Users/local/my_project/src/auth.py</span>
+<span class="c1"># Response: &quot;Found 3 security issues in src/auth.py...&quot;</span>
+
+<span class="c1"># Analyze entire project</span>
+super<span class="w"> </span>agent<span class="w"> </span>run<span class="w"> </span>code_reviewer<span class="w"> </span>--goal<span class="w"> </span><span class="s2">&quot;Analyze all Python files and write report to /review.md&quot;</span>
+<span class="c1"># Agent:</span>
+<span class="c1"># Runs: ls /src/</span>
+<span class="c1"># Reads each .py file</span>
+<span class="c1"># Writes to: /Users/local/my_project/review.md (REAL FILE!)</span>
+
+<span class="c1"># You can see the report in your IDE immediately!</span>
+cat<span class="w"> </span>/Users/local/my_project/review.md
+</code></pre></div></p>
+<p><strong>Why It Works:</strong> FilesystemBackend gives agent real filesystem access.
+Changes are immediately visible in your IDE, terminal, git, etc.</p>
+<p><strong>⚠️ Security:</strong> Agent can modify actual files! Use with trusted agents only.</p>
+<hr />
+<h3 id="example-3-research-agent-compositebackend">Example 3: Research Agent (CompositeBackend)</h3>
+<p>Pull and run the hybrid storage demo (edit <code>root_dir</code> after pulling):
+<div class="language-bash highlight"><pre><span></span><code><span class="c1"># Setup: Create papers directory</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span>/Users/local/research/papers
+
+<span class="c1"># First research session</span>
+super<span class="w"> </span>agent<span class="w"> </span>run<span class="w"> </span>researcher_hybrid<span class="w"> </span>--goal<span class="w"> </span><span class="s2">&quot;Research transformer architectures and save findings&quot;</span>
+
+<span class="c1"># Agent workflow:</span>
+<span class="c1"># Checks /memories/research_index.txt (empty first time)</span>
+<span class="c1"># Searches internet → saves to /cache/search_results.txt</span>
+<span class="c1"># Checks /papers/ for PDFs (if any exist)</span>
+<span class="c1"># Writes to /memories/transformer_research.txt (PERSISTS!)</span>
+<span class="c1"># Updates /memories/research_index.txt</span>
+
+<span class="c1"># Week later, follow-up</span>
+super<span class="w"> </span>agent<span class="w"> </span>run<span class="w"> </span>researcher_hybrid<span class="w"> </span>--goal<span class="w"> </span><span class="s2">&quot;What did I learn about transformers?&quot;</span>
+
+<span class="c1"># Agent workflow:</span>
+<span class="c1"># Reads /memories/transformer_research.txt (STILL THERE from last week!)</span>
+<span class="c1"># Response: &quot;Based on your previous research from [date]...&quot;</span>
+<span class="c1"># Can build upon previous knowledge!</span>
+
+<span class="c1"># Access specific paper</span>
+super<span class="w"> </span>agent<span class="w"> </span>run<span class="w"> </span>researcher_hybrid<span class="w"> </span>--goal<span class="w"> </span><span class="s2">&quot;Summarize the paper in /papers/attention.pdf&quot;</span>
+<span class="c1"># Reads actual file: /Users/local/research/papers/attention.pdf</span>
+</code></pre></div></p>
+<p><strong>Why It Works:</strong> Each storage type is optimized:
+- <code>/memories/</code> = Persistent (store)
+- <code>/papers/</code> = Real files (filesystem)
+- <code>/cache/</code> = Fast &amp; temporary (state)</p>
+<hr />
+<h3 id="backend-configuration-matrix">Backend Configuration Matrix</h3>
+<p>High-level guidance on which backend to pick:</p>
+<table>
+<thead>
+<tr>
+<th>Configuration</th>
+<th>/memories/</th>
+<th>/papers/</th>
+<th>/cache/</th>
+<th>/</th>
+<th>Best For</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Default</strong></td>
+<td>state</td>
+<td>state</td>
+<td>state</td>
+<td>state</td>
+<td>Simple agents</td>
+</tr>
+<tr>
+<td><strong>Persistent</strong></td>
+<td>store</td>
+<td>store</td>
+<td>store</td>
+<td>store</td>
+<td>Chatbots</td>
+</tr>
+<tr>
+<td><strong>Local Files</strong></td>
+<td>filesystem</td>
+<td>filesystem</td>
+<td>filesystem</td>
+<td>filesystem</td>
+<td>Code tools</td>
+</tr>
+<tr>
+<td><strong>Hybrid ⭐</strong></td>
+<td>store</td>
+<td>filesystem</td>
+<td>state</td>
+<td>state</td>
+<td>Deployment</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="demo-agents-with-backends">📚 Demo Agents with Backends</h2>
+<p>SuperOptiX includes 3 demo agents showcasing different backends:</p>
+<h3 id="basic-research-agent-statebackend">Basic Research Agent (StateBackend)</h3>
+<div class="language-bash highlight"><pre><span></span><code>super<span class="w"> </span>agent<span class="w"> </span>pull<span class="w"> </span>research_agent_deepagents
+<span class="c1"># Uses default StateBackend (ephemeral)</span>
+<span class="c1"># Good for: Single-session research</span>
+</code></pre></div>
+<h3 id="persistent-chatbot-storebackend">Persistent Chatbot (StoreBackend)</h3>
+<div class="language-bash highlight"><pre><span></span><code>super<span class="w"> </span>agent<span class="w"> </span>pull<span class="w"> </span>chatbot_persistent
+<span class="c1"># Uses StoreBackend for memory</span>
+<span class="c1"># Good for: Multi-session conversations</span>
+</code></pre></div>
+<h3 id="code-reviewer-filesystembackend">Code Reviewer (FilesystemBackend)</h3>
+<div class="language-bash highlight"><pre><span></span><code>super<span class="w"> </span>agent<span class="w"> </span>pull<span class="w"> </span>code_reviewer
+<span class="c1"># Uses FilesystemBackend for real files</span>
+<span class="c1"># Good for: Project analysis</span>
+</code></pre></div>
+<h3 id="advanced-researcher-compositebackend">Advanced Researcher (CompositeBackend)</h3>
+<div class="language-bash highlight"><pre><span></span><code>super<span class="w"> </span>agent<span class="w"> </span>pull<span class="w"> </span>researcher_hybrid
+<span class="c1"># Uses CompositeBackend for hybrid storage</span>
+<span class="c1"># Good for: Complex deployment agents</span>
+</code></pre></div>
+<p><strong>Try them all:</strong>
+<div class="language-bash highlight"><pre><span></span><code><span class="c1"># Set API key</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">GOOGLE_API_KEY</span><span class="o">=</span><span class="s2">&quot;your-key&quot;</span>
+
+<span class="c1"># Pull and test each one</span>
+<span class="k">for</span><span class="w"> </span>agent<span class="w"> </span><span class="k">in</span><span class="w"> </span>research_agent_deepagents<span class="w"> </span>chatbot_persistent<span class="w"> </span>code_reviewer<span class="w"> </span>researcher_hybrid<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">  </span>super<span class="w"> </span>agent<span class="w"> </span>pull<span class="w"> </span><span class="nv">$agent</span>
+<span class="w">  </span>super<span class="w"> </span>agent<span class="w"> </span>compile<span class="w"> </span><span class="nv">$agent</span><span class="w"> </span>--framework<span class="w"> </span>deepagents
+<span class="w">  </span>super<span class="w"> </span>agent<span class="w"> </span>run<span class="w"> </span><span class="nv">$agent</span><span class="w"> </span>--goal<span class="w"> </span><span class="s2">&quot;Test query&quot;</span>
+<span class="k">done</span>
+</code></pre></div></p>
+<div class="admonition info">
+<p class="admonition-title">📖 Detailed Tutorials for Each Agent</p>
+<p>Each demo agent has step-by-step tutorials:</p>
+<ul>
+<li><strong><a href="../../tutorials/deepagents-complete-workflow/">Complete Workflow</a></strong> - All agents explained</li>
+<li><strong><a href="../../tutorials/deepagents-backends-tutorial/">Backend Tutorial</a></strong> - Hands-on with each backend type</li>
+</ul>
+<p>See real examples, expected outputs, and deployment patterns!</p>
+</div>
+<hr />
+<h2 id="complete-backend-configuration-reference">📋 Complete Backend Configuration Reference</h2>
+<h3 id="backend-type-state-default">Backend Type: state (Default)</h3>
+<p><strong>Storage:</strong> LangGraph state (ephemeral)<br />
+<strong>Persistence:</strong> Current conversation only<br />
+<strong>Best For:</strong> Temporary scratch space</p>
+<p>Pull the appropriate demo agent and inspect its playbook for backend configuration. No need to copy YAML from docs.</p>
+<p><strong>Characteristics:</strong>
+- ⚡⚡⚡ Very fast (in-memory)
+- Checkpointed within thread
+- Lost when conversation ends
+- Not shared across threads</p>
+<p><strong>Use Cases:</strong>
+- Simple Q&amp;A agents
+- Temporary calculations
+- Draft generation
+- Single-session tasks</p>
+<hr />
+<h3 id="backend-type-store-persistent">Backend Type: store (Persistent)</h3>
+<p><strong>Storage:</strong> LangGraph store (persistent database)<br />
+<strong>Persistence:</strong> Forever, across all conversations<br />
+<strong>Best For:</strong> Chatbots, learning agents</p>
+<p>Pull <code>chatbot_persistent</code> to see a persistent store-backed setup.</p>
+<p><strong>Characteristics:</strong>
+- ⚡⚡ Fast (database)
+- Persistent across all threads
+- Shared between conversations
+- Survives restarts</p>
+<p><strong>Use Cases:</strong>
+- Chatbots with memory
+- Personal assistants
+- Learning agents
+- Knowledge accumulation</p>
+<p><strong>Example Agent:</strong>
+<div class="language-bash highlight"><pre><span></span><code>super<span class="w"> </span>agent<span class="w"> </span>pull<span class="w"> </span>chatbot_persistent
+super<span class="w"> </span>agent<span class="w"> </span>compile<span class="w"> </span>chatbot_persistent<span class="w"> </span>--framework<span class="w"> </span>deepagents
+<span class="nb">export</span><span class="w"> </span><span class="nv">GOOGLE_API_KEY</span><span class="o">=</span><span class="s2">&quot;your-key&quot;</span>
+super<span class="w"> </span>agent<span class="w"> </span>run<span class="w"> </span>chatbot_persistent<span class="w"> </span>--goal<span class="w"> </span><span class="s2">&quot;Hi! My name is Alice.&quot;</span>
+<span class="c1"># Later...</span>
+super<span class="w"> </span>agent<span class="w"> </span>run<span class="w"> </span>chatbot_persistent<span class="w"> </span>--goal<span class="w"> </span><span class="s2">&quot;What&#39;s my name?&quot;</span>
+<span class="c1"># Response: &quot;Your name is Alice!&quot; ```</span>
+
+---
+
+<span class="c1">### Backend Type: filesystem</span>
+
+**Storage:**<span class="w"> </span>Actual<span class="w"> </span><span class="nb">local</span><span class="w"> </span>filesystem<span class="w">  </span>
+**Persistence:**<span class="w"> </span>Real<span class="w"> </span>files<span class="w"> </span>on<span class="w"> </span>disk<span class="w">  </span>
+**Best<span class="w"> </span>For:**<span class="w"> </span>Code<span class="w"> </span>analysis,<span class="w"> </span>file<span class="w"> </span>editing
+
+After<span class="w"> </span>pulling<span class="w"> </span><span class="sb">`</span>code_reviewer<span class="sb">`</span>,<span class="w"> </span><span class="nb">set</span><span class="w"> </span><span class="sb">`</span>backend.root_dir<span class="sb">`</span><span class="w"> </span><span class="k">in</span><span class="w"> </span>its<span class="w"> </span>playbook<span class="w"> </span>to<span class="w"> </span>your<span class="w"> </span>project<span class="w"> </span>path.
+
+**Characteristics:**
+-<span class="w"> </span>⚡⚡<span class="w"> </span>Fast<span class="w"> </span><span class="o">(</span>filesystem<span class="w"> </span>speed<span class="o">)</span>
+-<span class="w"> </span>Real<span class="w"> </span>files<span class="w"> </span>on<span class="w"> </span>disk
+-<span class="w"> </span>Changes<span class="w"> </span>immediately<span class="w"> </span>visible
+-<span class="w"> </span>⚠️<span class="w">  </span>Security:<span class="w"> </span>Can<span class="w"> </span>modify<span class="w"> </span>actual<span class="w"> </span>files!
+
+**Use<span class="w"> </span>Cases:**
+-<span class="w"> </span>Code<span class="w"> </span>review<span class="w"> </span>agents
+-<span class="w"> </span>Documentation<span class="w"> </span>generators
+-<span class="w"> </span>File<span class="w"> </span>refactoring
+-<span class="w"> </span>Project<span class="w"> </span>analysis
+
+**Example<span class="w"> </span>Agent:**
+<span class="sb">```</span>bash
+super<span class="w"> </span>agent<span class="w"> </span>pull<span class="w"> </span>code_reviewer
+<span class="c1"># Edit playbook to set your root_dir</span>
+super<span class="w"> </span>agent<span class="w"> </span>compile<span class="w"> </span>code_reviewer<span class="w"> </span>--framework<span class="w"> </span>deepagents
+<span class="nb">export</span><span class="w"> </span><span class="nv">GOOGLE_API_KEY</span><span class="o">=</span><span class="s2">&quot;your-key&quot;</span>
+super<span class="w"> </span>agent<span class="w"> </span>run<span class="w"> </span>code_reviewer<span class="w"> </span>--goal<span class="w"> </span><span class="s2">&quot;Review src/app.py&quot;</span>
+<span class="c1"># Reads actual file from your project!</span>
+</code></pre></div></p>
+<p><strong>⚠️ Security Warning:</strong>
+- Agent can read ANY file in <code>root_dir</code>
+- Agent can MODIFY or DELETE files
+- Use a limited <code>root_dir</code> scope
+- Don't point to system directories (/, /etc, etc.)
+- Consider read-only permissions for sensitive projects</p>
+<hr />
+<h3 id="backend-type-composite-hybrid">Backend Type: composite (Hybrid)</h3>
+<p><strong>Storage:</strong> Routes different paths to different backends<br />
+<strong>Persistence:</strong> Mixed strategies<br />
+<strong>Best For:</strong> Deployment agents with complex needs</p>
+<p>Pull <code>researcher_hybrid</code> to explore hybrid storage. Edit paths in the playbook to match your environment.</p>
+<p><strong>Characteristics:</strong>
+- Best of all worlds
+- Optimized for each data type
+- Maximum flexibility
+- 🔧 Requires thoughtful configuration</p>
+<p><strong>Use Cases:</strong>
+- Development assistants
+- Complex research agents
+- Multi-domain agents
+- Deployment systems</p>
+<p><strong>Example Agent:</strong>
+<div class="language-bash highlight"><pre><span></span><code>super<span class="w"> </span>agent<span class="w"> </span>pull<span class="w"> </span>researcher_hybrid
+<span class="c1"># Edit playbook to set your root_dir</span>
+super<span class="w"> </span>agent<span class="w"> </span>compile<span class="w"> </span>researcher_hybrid<span class="w"> </span>--framework<span class="w"> </span>deepagents
+<span class="nb">export</span><span class="w"> </span><span class="nv">GOOGLE_API_KEY</span><span class="o">=</span><span class="s2">&quot;your-key&quot;</span>
+super<span class="w"> </span>agent<span class="w"> </span>run<span class="w"> </span>researcher_hybrid<span class="w"> </span>--goal<span class="w"> </span><span class="s2">&quot;Research AI and save findings&quot;</span>
+
+<span class="c1"># Files go to optimal locations:</span>
+<span class="c1"># /memories/research_findings.txt → Database (persists)</span>
+<span class="c1"># /papers/reference.pdf → Real filesystem (your files)</span>
+<span class="c1"># /cache/search.txt → Ephemeral (fast)</span>
+<span class="c1"># /draft.txt → Scratch space (fast)</span>
+</code></pre></div></p>
+<hr />
+<h3 id="backend-configuration-in-playbooks">Backend Configuration in Playbooks</h3>
+<p><strong>Complete Syntax:</strong></p>
+<div class="language-yaml highlight"><pre><span></span><code><span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">backend</span><span class="p">:</span>
+<span class="w">    </span><span class="c1"># Backend type (required)</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">state | store | filesystem | composite</span>
+
+<span class="w">    </span><span class="c1"># For filesystem backend (required if type=filesystem)</span>
+<span class="w">    </span><span class="nt">root_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/path/to/directory</span>
+
+<span class="w">    </span><span class="c1"># For composite backend only</span>
+<span class="w">    </span><span class="nt">default</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">state | store | filesystem</span><span class="w">  </span><span class="c1"># Default backend</span>
+<span class="w">    </span><span class="nt">routes</span><span class="p">:</span><span class="w">                              </span><span class="c1"># Path routing</span>
+<span class="w">      </span><span class="nt">/path1/</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">store</span>
+<span class="w">      </span><span class="nt">/path2/</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">filesystem</span>
+<span class="w">      </span><span class="nt">/path3/</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">state</span>
+</code></pre></div>
+<p><strong>Examples:</strong></p>
+<div class="language-yaml highlight"><pre><span></span><code><span class="c1"># Simple: State (default)</span>
+<span class="nt">backend</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">state</span>
+
+<span class="c1"># Simple: Store (persistent)</span>
+<span class="nt">backend</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">store</span>
+
+<span class="c1"># Simple: Filesystem (real files)</span>
+<span class="nt">backend</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">filesystem</span>
+<span class="w">  </span><span class="nt">root_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/Users/local/my_project</span>
+
+<span class="c1"># Advanced: Composite (hybrid)</span>
+<span class="nt">backend</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">composite</span>
+<span class="w">  </span><span class="nt">default</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">state</span>
+<span class="w">  </span><span class="nt">routes</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">/memories/</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">store</span>
+<span class="w">    </span><span class="nt">/project/</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">filesystem</span>
+<span class="w">  </span><span class="nt">root_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/Users/local/workspace</span>
+</code></pre></div>
+<hr />
+<h2 id="creating-your-own-deepagents-playbook">📋 Creating Your Own DeepAgents Playbook</h2>
+<h3 id="basic-structure">Basic Structure</h3>
+<p>Start from a pulled demo agent and modify its playbook to fit your needs instead of copying YAML from docs.</p>
+<hr />
+<h2 id="complete-workflow">🔄 Complete Workflow</h2>
+<h3 id="step-1-initialize-project">Step 1: Initialize Project</h3>
+<div class="language-bash highlight"><pre><span></span><code>super<span class="w"> </span>init<span class="w"> </span>my_project
+<span class="nb">cd</span><span class="w"> </span>my_project
+</code></pre></div>
+<h3 id="step-2-create-or-pull-agent">Step 2: Create or Pull Agent</h3>
+<div class="language-bash highlight"><pre><span></span><code><span class="c1"># Option A: Pull prebuilt agent</span>
+super<span class="w"> </span>agent<span class="w"> </span>pull<span class="w"> </span>research_agent_deepagents
+
+<span class="c1"># Option B: Create custom playbook</span>
+<span class="c1"># (Create your_agent_playbook.yaml in agents/your_agent/playbook/)</span>
+</code></pre></div>
+<h3 id="step-3-compile">Step 3: Compile</h3>
+<div class="language-bash highlight"><pre><span></span><code>super<span class="w"> </span>agent<span class="w"> </span>compile<span class="w"> </span>research_agent_deepagents<span class="w"> </span>--framework<span class="w"> </span>deepagents
+</code></pre></div>
+<p><strong>What happens:</strong>
+- Reads playbook YAML
+- Generates Python pipeline using <code>deepagents_pipeline.py.jinja2</code> template
+- Creates <code>BaseComponent</code> wrapper for GEPA optimization
+- Adds BDD test loading
+- Creates evaluation methods</p>
+<p><strong>Output:</strong> <code>agents/research_agent_deepagents/pipelines/research_agent_deepagents_deepagents_pipeline.py</code></p>
+<h3 id="step-4-evaluate">Step 4: Evaluate</h3>
+<div class="language-bash highlight"><pre><span></span><code>super<span class="w"> </span>agent<span class="w"> </span>evaluate<span class="w"> </span>research_agent_deepagents
+</code></pre></div>
+<p><strong>What happens:</strong>
+- Loads compiled pipeline
+- Initializes DeepAgents agent
+- Runs BDD scenarios from playbook
+- Tests against expected outputs
+- Shows pass/fail rate</p>
+<p><strong>Example Output:</strong>
+<div class="language-text highlight"><pre><span></span><code>Simple research query: PASS
+Technical comparison: PASS
+Complex research: FAIL
+
+Overall: 2/3 PASS (66.7%)
+</code></pre></div></p>
+<h3 id="step-5-optimize-with-gepa">Step 5: Optimize with GEPA</h3>
+<div class="language-bash highlight"><pre><span></span><code>super<span class="w"> </span>agent<span class="w"> </span>optimize<span class="w"> </span>research_agent_deepagents<span class="w"> </span>--auto<span class="w"> </span>medium<span class="w"> </span>--framework<span class="w"> </span>deepagents<span class="w"> </span>--reflection-lm<span class="w"> </span>ollama:llama3.1:8b
+</code></pre></div>
+<p><strong>What happens:</strong>
+- Universal GEPA optimizer analyzes agent performance
+- Optimizes the <code>system_prompt</code> (the optimizable variable)
+- Runs multiple iterations with different prompts
+- Selects best performing version
+- Saves optimized weights</p>
+<p><strong>Key Innovation:</strong> GEPA optimizes DeepAgents agents even though they're not DSPy!</p>
+<h3 id="step-6-re-evaluate">Step 6: Re-evaluate</h3>
+<div class="language-bash highlight"><pre><span></span><code>super<span class="w"> </span>agent<span class="w"> </span>evaluate<span class="w"> </span>research_agent_deepagents
+</code></pre></div>
+<p><strong>What happens:</strong>
+- Loads optimized system prompt
+- Re-runs BDD scenarios
+- Shows improvement</p>
+<p><strong>Expected:</strong> Higher pass rate after optimization!</p>
+<h3 id="step-7-run">Step 7: Run</h3>
+<div class="language-bash highlight"><pre><span></span><code>super<span class="w"> </span>agent<span class="w"> </span>run<span class="w"> </span>research_agent_deepagents<span class="w"> </span>--framework<span class="w"> </span>deepagents<span class="w"> </span>--goal<span class="w"> </span><span class="s2">&quot;Research AI trends in 2025&quot;</span>
+</code></pre></div>
+<hr />
+<h2 id="how-it-works-under-the-hood">🔧 How It Works Under the Hood</h2>
+<p>When you run <code>super agent compile research_agent_deepagents --framework deepagents</code>, SuperOptiX generates a pipeline class that includes:</p>
+<p>High-level: SuperOptiX compiles your playbook into an executable DeepAgents pipeline and wires it to the standard run/evaluate/optimize workflow.</p>
+<p><strong>Key Points:</strong>
+- Your playbook YAML controls all agent configuration
+- BDD scenarios define what success looks like
+- GEPA optimization is automatic - just run <code>super agent optimize</code>
+- The same workflow works across all frameworks (DSPy, CrewAI, etc.)</p>
+<hr />
+<h2 id="deepagents-vs-dspy">📊 DeepAgents vs DSPy</h2>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>DeepAgents</th>
+<th>DSPy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Framework</strong></td>
+<td>LangGraph</td>
+<td>DSPy</td>
+</tr>
+<tr>
+<td><strong>Strength</strong></td>
+<td>Complex multi-step tasks</td>
+<td>Prompt optimization</td>
+</tr>
+<tr>
+<td><strong>Planning</strong></td>
+<td>Built-in <code>write_todos</code></td>
+<td>Manual implementation</td>
+</tr>
+<tr>
+<td><strong>Filesystem</strong></td>
+<td>Built-in tools</td>
+<td>Manual implementation</td>
+</tr>
+<tr>
+<td><strong>Subagents</strong></td>
+<td>Native support</td>
+<td>Manual composition</td>
+</tr>
+<tr>
+<td><strong>SuperOptiX Support</strong></td>
+<td>Full workflow</td>
+<td>Full workflow</td>
+</tr>
+<tr>
+<td><strong>GEPA Optimization</strong></td>
+<td>system_prompt</td>
+<td>All signatures</td>
+</tr>
+<tr>
+<td><strong>Model Requirements</strong></td>
+<td>Function-calling only</td>
+<td>Any LLM</td>
+</tr>
+<tr>
+<td><strong>Ollama Support</strong></td>
+<td>⚠️ Blocked (LangChain issue)</td>
+<td>Full support</td>
+</tr>
+</tbody>
+</table>
+<p><strong>When to use DeepAgents:</strong>
+- Complex research tasks
+- Multi-step workflows requiring planning
+- Need filesystem for context management
+- Want subagent delegation</p>
+<p><strong>When to use DSPy:</strong>
+- Need Ollama/local model support
+- Focus on prompt optimization
+- Simpler task structures
+- Want maximum flexibility</p>
+<hr />
+<h2 id="example-use-cases">🎓 Example Use Cases</h2>
+<h3 id="research-agent">Research Agent</h3>
+<p>Use the <code>research_agent_deepagents</code> demo as a starting point and adapt.</p>
+<h3 id="code-assistant">Code Assistant</h3>
+<p>Use the <code>code_reviewer</code> demo for file-based analysis tasks.</p>
+<h3 id="data-analyst">Data Analyst</h3>
+<p>Use the <code>researcher_hybrid</code> demo for hybrid storage and multi-step analysis.</p>
+<hr />
+<h2 id="advanced-configuration">⚙️ Advanced Configuration</h2>
+<h3 id="custom-subagents">Custom Subagents</h3>
+<p>Start from a pulled agent and extend its playbook with subagents as needed.</p>
+<h3 id="custom-tools">Custom Tools</h3>
+<p>Extend the pulled agent's <code>tools</code> list for your use case; no need to copy YAML from docs.</p>
+<hr />
+<h2 id="troubleshooting">🐛 Troubleshooting</h2>
+<h3 id="notimplementederror-in-bind_tools">NotImplementedError in bind_tools()</h3>
+<p><strong>Symptom:</strong>
+<div class="language-text highlight"><pre><span></span><code>NotImplementedError
+  at langchain_core.language_models.chat_models.py line 1491
+</code></pre></div></p>
+<p><strong>Cause:</strong> Using Ollama model with DeepAgents</p>
+<p><strong>Solution:</strong> Use function-calling capable models:
+<div class="language-yaml highlight"><pre><span></span><code><span class="nt">language_model</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">anthropic</span>
+<span class="w">  </span><span class="nt">model</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">anthropic:claude-sonnet-4-20250514</span>
+</code></pre></div></p>
+<h3 id="agent-initialization-failed">Agent Initialization Failed</h3>
+<p><strong>Symptom:</strong> "Failed to initialize DeepAgents"</p>
+<p><strong>Checklist:</strong>
+1. API key set? (<code>ANTHROPIC_API_KEY</code>, <code>OPENAI_API_KEY</code>)
+2. Model string correct? (e.g., <code>anthropic:claude-sonnet-4-20250514</code>)
+3. LangChain dependencies installed? (<code>pip install langchain langchain-anthropic</code>)</p>
+<h3 id="no-bdd-specifications-found">No BDD Specifications Found</h3>
+<p><strong>Symptom:</strong> "No BDD specifications found!"</p>
+<p><strong>Solution:</strong> Add scenarios to playbook:
+<div class="language-yaml highlight"><pre><span></span><code><span class="nt">feature_specifications</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">scenarios</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Basic test</span>
+<span class="w">      </span><span class="nt">input</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">query</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Test</span><span class="nv"> </span><span class="s">query&quot;</span>
+<span class="w">      </span><span class="nt">expected_output</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">report</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Expected</span><span class="nv"> </span><span class="s">result&quot;</span>
+</code></pre></div></p>
+<p>Then recompile:
+<div class="language-bash highlight"><pre><span></span><code>super<span class="w"> </span>agent<span class="w"> </span>compile<span class="w"> </span>your_agent<span class="w"> </span>--framework<span class="w"> </span>deepagents
+</code></pre></div></p>
+<hr />
+<h2 id="gepa-optimization-details">🎯 GEPA Optimization Details</h2>
+<h3 id="what-gets-optimized">What Gets Optimized</h3>
+<p>DeepAgents agents have one optimizable variable:
+- <strong><code>system_prompt</code></strong>: The main instruction to the agent</p>
+<p>GEPA automatically:
+1. Analyzes agent performance on BDD scenarios
+2. Generates variations of the system prompt
+3. Tests each variation
+4. Selects the best performing prompt
+5. Saves optimized version</p>
+<h3 id="optimization-example">Optimization Example</h3>
+<p><strong>Before (Baseline):</strong>
+<div class="language-text highlight"><pre><span></span><code>System Prompt: &quot;You are an expert researcher.&quot;
+Pass Rate: Baseline performance (varies by hardware/model)
+</code></pre></div></p>
+<p><strong>After GEPA Optimization:</strong>
+<div class="language-text highlight"><pre><span></span><code>System Prompt: &quot;You are an expert researcher. When answering questions:
+1. Use write_todos to plan your research steps
+2. Save findings to research_notes.md
+3. Synthesize information before responding
+...&quot;
+Pass Rate: Improved (results vary by hardware/model)
+</code></pre></div></p>
+<hr />
+<h2 id="architecture">🏗️ Architecture</h2>
+<div class="language-text highlight"><pre><span></span><code>SuperSpec YAML Playbook
+        ↓
+    Compiler (AgentCompiler)
+        ↓
+DeepAgents Pipeline Template (deepagents_pipeline.py.jinja2)
+        ↓
+Generated Python Pipeline
+        ├─ ResearchAgentDeepAgentsComponent (BaseComponent wrapper)
+        │   └─ create_deep_agent() ← Real DeepAgents implementation
+        └─ ResearchAgentDeepAgentsPipeline
+            ├─ run()
+            ├─ evaluate()
+            ├─ optimize_with_gepa() ← Universal GEPA
+            └─ run_bdd_test_suite()
+</code></pre></div>
+<hr />
+<h2 id="additional-resources">📚 Additional Resources</h2>
+<ul>
+<li><strong>DeepAgents Docs</strong>: <a href="https://github.com/langchain-ai/deepagents">https://github.com/langchain-ai/deepagents</a></li>
+<li><strong>LangGraph Docs</strong>: <a href="https://langchain-ai.github.io/langgraph/">https://langchain-ai.github.io/langgraph/</a></li>
+<li><strong>SuperOptiX Multi-Framework Guide</strong>: <code>/docs/guides/multi-framework.md</code></li>
+<li><strong>Universal GEPA</strong>: <code>/docs/guides/universal-gepa.md</code></li>
+</ul>
+<hr />
+<h2 id="tips-best-practices">💡 Tips &amp; Best Practices</h2>
+<h3 id="use-detailed-system-prompts">Use Detailed System Prompts</h3>
+<p>DeepAgents shine with detailed instructions:
+<div class="language-yaml highlight"><pre><span></span><code><span class="nt">persona</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Expert Researcher</span>
+<span class="w">  </span><span class="nt">goal</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">    </span><span class="no">Conduct thorough research on AI topics, producing</span>
+<span class="w">    </span><span class="no">comprehensive, well-sourced reports</span>
+<span class="w">  </span><span class="nt">backstory</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">    </span><span class="no">You have 10+ years of experience in AI research</span>
+</code></pre></div></p>
+<h3 id="leverage-planning">Leverage Planning</h3>
+<p>Always include <code>write_todos</code> in tools:
+<div class="language-yaml highlight"><pre><span></span><code><span class="nt">reasoning</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Break down research into subtasks using write_todos</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Execute each subtask systematically</span>
+</code></pre></div></p>
+<h3 id="use-filesystem-for-context">Use Filesystem for Context</h3>
+<p>For long outputs, instruct agent to save to files:
+<div class="language-yaml highlight"><pre><span></span><code><span class="nt">constraints</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Save research findings to research_notes.md</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Keep main context clean</span>
+</code></pre></div></p>
+<h3 id="start-simple-then-optimize">Start Simple, Then Optimize</h3>
+<ol>
+<li>Get baseline working (compile + evaluate)</li>
+<li>Run optimization (GEPA improves the prompt)</li>
+<li>Iterate on scenarios based on failures</li>
+</ol>
+<hr />
+<h2 id="comparison-with-other-frameworks">🎓 Comparison with Other Frameworks</h2>
+<h3 id="deepagents-superoptix-advantages">DeepAgents + SuperOptiX Advantages</h3>
+<ul>
+<li>Built-in planning and filesystem</li>
+<li>GEPA optimization works</li>
+<li>Standard SuperOptiX workflow</li>
+<li>Full LangGraph features (streaming, checkpointing, etc.)</li>
+</ul>
+<h3 id="dspy-superoptix-advantages">DSPy + SuperOptiX Advantages</h3>
+<ul>
+<li>Works with Ollama (no function-calling requirement)</li>
+<li>More optimization targets (all signatures, not just system_prompt)</li>
+<li>Better for simple, focused tasks</li>
+<li>Native to SuperOptiX</li>
+</ul>
+<h3 id="use-both">Use Both!</h3>
+<p>SuperOptiX lets you:
+- Use <strong>DSPy</strong> for simple tasks with Ollama
+- Use <strong>DeepAgents</strong> for complex tasks with Claude/GPT-4
+- <strong>Optimize both</strong> with the same workflow!</p>
+<hr />
+<h2 id="next-steps">🚀 Next Steps</h2>
+<p>Quick start with demos:</p>
+<div class="language-bash highlight"><pre><span></span><code>super<span class="w"> </span>agent<span class="w"> </span>pull<span class="w"> </span>research_agent_deepagents<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>super<span class="w"> </span>agent<span class="w"> </span>compile<span class="w"> </span>research_agent_deepagents<span class="w"> </span>--framework<span class="w"> </span>deepagents
+super<span class="w"> </span>agent<span class="w"> </span>evaluate<span class="w"> </span>research_agent_deepagents
+</code></pre></div>
+<hr />
+<h2 id="faq">❓ FAQ</h2>
+<p><strong>Q: Why can't I use Ollama with DeepAgents?</strong><br />
+A: LangChain's ChatOllama doesn't implement <code>bind_tools()</code> yet. This is a LangChain limitation, not SuperOptiX or DeepAgents. We're tracking the issue.</p>
+<p><strong>Q: Can I use local models at all?</strong><br />
+A: Yes! Use DSPy agents which work perfectly with Ollama. The workflow is identical.</p>
+<p><strong>Q: Does GEPA really optimize DeepAgents?</strong><br />
+A: Yes! Universal GEPA optimizes the <code>system_prompt</code> through the BaseComponent interface. It's framework-agnostic.</p>
+<p><strong>Q: Can I mix DSPy and DeepAgents agents?</strong><br />
+A: Absolutely! Create orchestrations that use both. Each agent uses the best framework for its task.</p>
+<p><strong>Q: What about other frameworks?</strong><br />
+A: Coming soon! We're extending the same pattern to CrewAI, Microsoft, OpenAI SDK, and Google ADK.</p>
+<hr />
+<h2 id="success-stories">🎉 Success Stories</h2>
+<p><strong>What Users Are Building:</strong>
+- Complex research agents with multi-step planning
+- Code assistants with filesystem access
+- Data analysis agents with specialized subagents
+- All optimized with GEPA for better performance!</p>
+<p><strong>The SuperOptiX Advantage:</strong>
+"Finally, one workflow to rule them all - whether you use DSPy, DeepAgents, or any other framework!"</p>
+<hr />
+<h2 id="additional-resources_1">📚 Additional Resources</h2>
+<h3 id="start-here-recommended">🎯 Start Here (Recommended)</h3>
+<ul>
+<li>🚀 <strong><a href="../../tutorials/deepagents-complete-workflow/">Complete End-to-End Workflow</a></strong> ⭐ <strong>NEW!</strong></li>
+<li>Step-by-step tutorial with real examples</li>
+<li>From zero to deployment-ready agent in 30 minutes</li>
+<li>Includes evaluation, optimization, and deployment</li>
+<li>All using FREE Gemini API!</li>
+</ul>
+<h3 id="backend-configuration-new-in-020_1">Backend Configuration (NEW in 0.2.0)</h3>
+<ul>
+<li>📖 <strong><a href="../deepagents-backends/">Backend Reference Guide</a></strong> - Complete configuration reference</li>
+<li>🎓 <strong><a href="../../tutorials/deepagents-backends-tutorial/">Backends Tutorial</a></strong> - 6 hands-on tutorials  </li>
+<li>📝 <strong><a href="../../DEEPAGENTS_0.2.0_COMPLETE.md">Integration Summary</a></strong> - What's new and how to use</li>
+</ul>
+<h3 id="model-configuration">Model Configuration</h3>
+<ul>
+<li>🔧 <strong><a href="../../GEMINI_CONFIGURATION_GUIDE.md">Gemini Configuration Guide</a></strong> - Gemini 2.5 setup</li>
+<li>🧪 <strong><a href="../../DEEPAGENTS_GEMINI_TEST.md">Gemini Testing Guide</a></strong> - Complete testing workflow</li>
+</ul>
+<h3 id="technical-details">Technical Details</h3>
+<ul>
+<li>🔍 <strong><a href="../../DEEPAGENTS_ANALYSIS.md">Technical Analysis</a></strong> - Why Ollama doesn't work</li>
+<li>🐛 <strong><a href="../../DEEPAGENTS_FIXES_SUMMARY.md">Fixes Summary</a></strong> - Bug fixes applied</li>
+<li>🚀 <strong><a href="../../DEEPAGENTS_0.2.0_INTEGRATION.md">Integration Plan</a></strong> - Implementation details</li>
+</ul>
+<h3 id="demo-agents">Demo Agents</h3>
+<p>Pull these to see backends in action:
+<div class="language-bash highlight"><pre><span></span><code>super<span class="w"> </span>agent<span class="w"> </span>pull<span class="w"> </span>research_agent_deepagents<span class="w">  </span><span class="c1"># StateBackend (default)</span>
+super<span class="w"> </span>agent<span class="w"> </span>pull<span class="w"> </span>chatbot_persistent<span class="w">         </span><span class="c1"># StoreBackend (persistent)</span>
+super<span class="w"> </span>agent<span class="w"> </span>pull<span class="w"> </span>code_reviewer<span class="w">              </span><span class="c1"># FilesystemBackend (real files)</span>
+super<span class="w"> </span>agent<span class="w"> </span>pull<span class="w"> </span>researcher_hybrid<span class="w">          </span><span class="c1"># CompositeBackend (hybrid)</span>
+</code></pre></div></p>
+<h3 id="external-resources">External Resources</h3>
+<ul>
+<li><a href="https://blog.langchain.com/doubling-down-on-deepagents/">DeepAgents 0.2.0 Announcement</a> - LangChain blog post</li>
+<li><a href="https://github.com/langchain-ai/deepagents">DeepAgents GitHub</a> - Source repository</li>
+<li><a href="https://python.langchain.com/">LangChain Docs</a> - LangChain documentation</li>
+</ul>
+<hr />
+<p><em>Need help? Check our <a href="https://superagenticai.github.io/superoptix/">Documentation</a> or email us at <a href="mailto:hello@super-agentic.ai">hello@super-agentic.ai</a>!</em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright © 2025 Superagentic AI. Made with ❤️ for the Agentic AI community.
+    </div>
+  
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/SuperagenticAI" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://x.com/SuperagenticAI" target="_blank" rel="noopener" title="x.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M459.4 151.7c.3 4.5.3 9.1.3 13.6 0 138.7-105.6 298.6-298.6 298.6-59.5 0-114.7-17.2-161.1-47.1 8.4 1 16.6 1.3 25.3 1.3 49.1 0 94.2-16.6 130.3-44.8-46.1-1-84.8-31.2-98.1-72.8 6.5 1 13 1.6 19.8 1.6 9.4 0 18.8-1.3 27.6-3.6-48.1-9.7-84.1-52-84.1-103v-1.3c14 7.8 30.2 12.7 47.4 13.3-28.3-18.8-46.8-51-46.8-87.4 0-19.5 5.2-37.4 14.3-53C87.4 130.8 165 172.4 252.1 176.9c-1.6-7.8-2.6-15.9-2.6-24C249.5 95.1 296.3 48 354.4 48c30.2 0 57.5 12.7 76.7 33.1 23.7-4.5 46.5-13.3 66.6-25.3-7.8 24.4-24.4 44.8-46.1 57.8 21.1-2.3 41.6-8.1 60.4-16.2-14.3 20.8-32.2 39.3-52.6 54.3"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://www.linkedin.com/company/superagenticai" target="_blank" rel="noopener" title="www.linkedin.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3M135.4 416H69V202.2h66.5V416zM102.2 96a38.5 38.5 0 1 1 0 77 38.5 38.5 0 1 1 0-77m282.1 320h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant.prefetch", "navigation.tracking", "navigation.path", "navigation.top", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
+      
+        <script src="../../javascripts/extra.js"></script>
+      
+    
+  </body>
+</html>

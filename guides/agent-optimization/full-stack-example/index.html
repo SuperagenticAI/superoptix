@@ -1,0 +1,7545 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="AI Agent Development Framework: Evaluation-First and Optimization-Core.">
+      
+      
+        <meta name="author" content="SuperagenticAI">
+      
+      
+        <link rel="canonical" href="https://docs.super-agentic.ai/guides/agent-optimization/full-stack-example/">
+      
+      
+        <link rel="prev" href="../datasets/">
+      
+      
+        <link rel="next" href="../../gepa-optimization/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>🎯 Full-Stack Example - SUPEROPTIX AI</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CFira+Code:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"Fira Code"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../stylesheets/extra.css?v=24.0">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="grey" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#full-stack-optimization-complete-example" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="SUPEROPTIX AI" class="md-header__button md-logo" aria-label="SUPEROPTIX AI" data-md-component="logo">
+      
+  <img src="../../../logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SUPEROPTIX AI
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              🎯 Full-Stack Example
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="grey" data-md-color-accent="purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="grey" data-md-color-accent="purple"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="SUPEROPTIX AI" class="md-nav__button md-logo" aria-label="SUPEROPTIX AI" data-md-component="logo">
+      
+  <img src="../../../logo.png" alt="logo">
+
+    </a>
+    SUPEROPTIX AI
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🏠 Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🚀 Get Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🚀 Get Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../introduction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📖 Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🚀 Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../golden-workflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ⭐ Golden Workflow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/multi-framework-quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🌐 Multi-Framework Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ⚙️ Setup & Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting-by-symptom/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🛠️ Troubleshooting by Symptom
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../llm-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧠 LLM Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../environment-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🏗️ Environment Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../project-structure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📁 Project Structure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10" id="__nav_2_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎓 Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🎓 Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📚 Tutorials Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/openai-sdk-gepa-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔧 OpenAI SDK + GEPA Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔬 Frameworks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🔬 Frameworks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📚 Frameworks Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../multi-framework/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🌐 Comparison
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../framework-feature-matrix/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📊 Feature Matrix
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../openai-sdk-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🤖 OpenAI SDK
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../claude-sdk-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧠 Claude Agent SDK
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pydantic-ai-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🐍 Pydantic AI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pydantic-ai-mcp-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🐍 Pydantic AI MCP Demo
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../crewai-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    👥 CrewAI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../crewai-task-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ⚡ CrewAI Advanced
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../google-adk-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔮 Google ADK
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../microsoft-framework-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🏢 Microsoft (Legacy)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deepagents-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🌊 DeepAgents
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📝 SuperSpec
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    📝 SuperSpec
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superspec/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📝 SuperSpec Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superspec-dsl-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📗 DSL Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superspec-dsl-examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📙 DSL Examples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superspec-agent-building/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🏗️ Agent Building
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superspec-configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ⚙️ Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superspec-context-engineering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧠 Context Engineering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🛠️ Build
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🛠️ Build
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../agent-patterns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎨 Agent Patterns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../agent-discovery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔍 Agent Discovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../agent-development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🤖 Agent Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tool-development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔧 Tool Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../technical-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🏛️ Technical Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Evaluate
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Evaluate
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../evaluation-testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Evaluation & Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../bdd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎭 RSpec-Style BDD Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎯 Agent Optimization
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🎯 Agent Optimization
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📖 Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../prompts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    💬 Prompt Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rag/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔍 RAG Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🛠️ Tool Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧠 Memory Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../protocols/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔌 Protocol Optimization (MCP)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../datasets/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📊 Dataset-Driven Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎯 Full-Stack Example
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎯 Full-Stack Example
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+  
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-use-case-code-review-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Use Case: Code Review Agent
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The Use Case: Code Review Agent">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#agent-purpose" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agent Purpose
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-this-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why This Example?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-agent-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Agent Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The Agent Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#full-playbook-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Full Playbook Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-test-input-complex-real-world-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Test Input: Complex Real-World Code
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#baseline-performance-before-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Baseline Performance (Before Optimization)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Baseline Performance (Before Optimization)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#initial-agent-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Initial Agent Behavior
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#layer-by-layer-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer-by-Layer Optimization
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Layer-by-Layer Optimization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-run-gepa-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Run GEPA Optimization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-1-prompt-optimization-in-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 1: Prompt Optimization in Action
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-2-rag-optimization-in-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 2: RAG Optimization in Action
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-3-tool-optimization-in-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 3: Tool Optimization in Action
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-4-memory-optimization-in-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 4: Memory Optimization in Action
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-5-protocol-optimization-in-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 5: Protocol Optimization in Action
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-6-dataset-learning-in-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 6: Dataset Learning in Action
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#final-optimized-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Final Optimized Performance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Final Optimized Performance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#re-evaluation-after-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Re-Evaluation After Optimization
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#complete-optimized-agent-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Complete Optimized Agent Output
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Complete Optimized Agent Output">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#live-query-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Live Query Result
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#layer-by-layer-breakdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer-by-Layer Breakdown
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Layer-by-Layer Breakdown">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-each-layer-contributed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Each Layer Contributed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#optimization-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optimization Metrics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Optimization Metrics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#performance-improvement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance Improvement
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-compound-effect" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Compound Effect
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The Compound Effect">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#single-layer-vs-full-stack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Single-Layer vs. Full-Stack
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#complete-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Complete Workflow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Complete Workflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#end-to-end-optimization-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        End-to-End Optimization Process
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-makes-this-production-ready" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Makes This Production-Ready?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What Makes This Production-Ready?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#quality-indicators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quality Indicators
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#applying-to-your-agents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Applying to Your Agents
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Applying to Your Agents">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-identify-your-layers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Identify Your Layers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-enable-your-layers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Enable Your Layers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-optimize" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Optimize
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Takeaways
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Takeaways">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-you-learned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What You Learned
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-full-stack-advantage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Full-Stack Advantage
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Next Steps">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#explore-individual-layers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Explore Individual Layers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#try-the-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Try the Workflow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#learn-gepa-internals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Learn GEPA Internals
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scale-with-datasets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scale with Datasets
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ⚡ Optimize
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    ⚡ Optimize
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gepa-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧬 GEPA Optimizer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rlm-experimental/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧪 RLM (Experimental)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📈 Optimization Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dspy-optimizers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔬 DSPy Optimizers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/openai-sdk-gepa-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔧 OpenAI SDK + GEPA Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/rag-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔍 RAG Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/mcp-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔌 MCP Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    💡 Memory Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎼 Orchestrate
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🎼 Orchestrate
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../orchestra-development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎼 Orchestra Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/first-orchestra/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎼 Multi-Agent Orchestra
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📊 Monitor
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    📊 Monitor
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../observability/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📊 Observability Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mlflow-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧿 MLFlow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../langfuse-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧬 LangFuse
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../logfire-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔥 LogFire
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../weights-biases-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📈 Weights & Biases
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../observability-comparison/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ⚖️ Comparison
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../enhanced-observability/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🚀 Enhanced
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🗄️ Context
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🗄️ Context
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mcp-rag-complete-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔍 RAG & MCP Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rag/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📚 RAG Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../protocol-first-agents/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔌 MCP Protocol
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dataset-import/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📊 Dataset Import
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧠 Memory Systems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔌 Integrations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🔌 Integrations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/agents/optimas-examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ⚡ Optimas
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../optimas-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ⚡ Optimas Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stackone-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🗂️ StackOne Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stackone-claude-sdk/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🗂️ StackOne + Claude SDK
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/agents/rag-chroma-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🚥 ChromaDB
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/agents/rag-lancedb-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🍀 LanceDB
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/agents/weaviate-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔰 Weaviate
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/agents/qdrant-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔸 Qdrant
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/agents/milvus-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    👁️ Milvus
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/agents/tools-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🛠️ Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/agents/memory-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧠 Memory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/agents/observability-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📊 Observability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/agents/mlflow-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧿 MLFlow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/agents/langfuse-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧬 LangFuse
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/agents/gepa-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🚀 GEPA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_13" >
+        
+          
+          <label class="md-nav__link" for="__nav_13" id="__nav_13_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    💻 CLI
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_13_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_13">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    💻 CLI
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cli-complete-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📘 CLI Complete Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/cli.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📖 CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_14" >
+        
+          
+          <label class="md-nav__link" for="__nav_14" id="__nav_14_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ✨ Super CLI (Beta)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_14_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_14">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    ✨ Super CLI (Beta)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../super-cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    💬 Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../conversational-interface/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔧 Technical Details
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_15" >
+        
+          
+          <label class="md-nav__link" for="__nav_15" id="__nav_15_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🤖 Models
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_15_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_15">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🤖 Models
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../model-management/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧠 Model Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../model-intelligence/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    💡 Model Intelligence
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_15_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_15_3" id="__nav_15_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    💻 Local Inference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_15_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_15_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    💻 Local Inference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/agents/mlx-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    💻 MLX (Apple Silicon)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/agents/ollama-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🐼 Ollama
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/agents/huggingface-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🤗 HuggingFace
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/agents/lmstudio-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎛️ LM Studio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_15_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_15_4" id="__nav_15_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ☁️ Cloud
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_15_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_15_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    ☁️ Cloud
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cloud-inference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ☁️ Cloud Inference (OpenAI, Anthropic, Google)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../vllm-inference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🚀 vLLM (High-Performance Serving)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sglang-inference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ⚡ SGLang (Structured Generation)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_16" >
+        
+          
+          <label class="md-nav__link" for="__nav_16" id="__nav_16_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📚 Examples
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_16_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_16">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    📚 Examples
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📚 Examples Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/agents/optimas-examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ⚡ Optimas
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/agents/rag-chroma-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🚥 ChromaDB
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/agents/rag-lancedb-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🍀 LanceDB
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/agents/weaviate-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔰 Weaviate
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/agents/qdrant-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔸 Qdrant
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/agents/milvus-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    👁️ Milvus
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/agents/tools-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🛠️ Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/agents/memory-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧠 Memory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/agents/observability-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📊 Observability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/agents/mlflow-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧿 MLFlow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/agents/langfuse-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧬 LangFuse
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/agents/weights-biases-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📈 Weights & Biases
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/agents/gepa-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🚀 GEPA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_17" >
+        
+          
+          <label class="md-nav__link" for="__nav_17" id="__nav_17_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎯 Techniques
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_17_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_17">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🎯 Techniques
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../techniques/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎯 Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧠 Memory Systems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    💡 Memory Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rag/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📚 RAG Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📈 Optimization Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../evaluation-testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Evaluation & Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../observability/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📊 Observability Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../bdd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎭 RSpec-Style BDD Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cicd-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔄 CI/CD Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rails-analogy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🚂 Rails Analogy (For Rails Devs)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_18" >
+        
+          
+          <label class="md-nav__link" for="__nav_18" id="__nav_18_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🛍️ Marketplace
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_18_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_18">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🛍️ Marketplace
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../marketplace/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🛍️ Marketplace Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_19" >
+        
+          
+          <label class="md-nav__link" for="__nav_19" id="__nav_19_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Responsible AI
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_19_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_19">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Responsible AI
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../responsible-ai/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Responsible AI Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_20" >
+        
+          
+          <label class="md-nav__link" for="__nav_20" id="__nav_20_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🏢 Company
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_20_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_20">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🏢 Company
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../superagentic-ai/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🌟 Superagentic AI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_21" >
+        
+          
+          <label class="md-nav__link" for="__nav_21" id="__nav_21_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📖 Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_21_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_21">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    📖 Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📚 Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_21_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_21_2" id="__nav_21_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔧 API Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_21_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_21_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🔧 API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/api/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/api/superspec.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📝 SuperSpec API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/api/gepa.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧬 GEPA API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/api/dspy-optimizers.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔬 DSPy Optimizers API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/api/runners.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🏃 Runners API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/api/memory.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧠 Memory API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/api/models.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🤖 Models API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/api/tools.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔧 Tools API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/api/observability.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📊 Observability API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/api/cli.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    💻 CLI API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/api/core.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔧 Core API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ❓ FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../debugging-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🐛 Debugging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-use-case-code-review-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Use Case: Code Review Agent
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The Use Case: Code Review Agent">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#agent-purpose" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agent Purpose
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-this-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why This Example?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-agent-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Agent Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The Agent Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#full-playbook-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Full Playbook Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-test-input-complex-real-world-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Test Input: Complex Real-World Code
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#baseline-performance-before-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Baseline Performance (Before Optimization)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Baseline Performance (Before Optimization)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#initial-agent-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Initial Agent Behavior
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#layer-by-layer-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer-by-Layer Optimization
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Layer-by-Layer Optimization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-run-gepa-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Run GEPA Optimization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-1-prompt-optimization-in-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 1: Prompt Optimization in Action
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-2-rag-optimization-in-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 2: RAG Optimization in Action
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-3-tool-optimization-in-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 3: Tool Optimization in Action
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-4-memory-optimization-in-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 4: Memory Optimization in Action
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-5-protocol-optimization-in-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 5: Protocol Optimization in Action
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-6-dataset-learning-in-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 6: Dataset Learning in Action
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#final-optimized-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Final Optimized Performance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Final Optimized Performance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#re-evaluation-after-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Re-Evaluation After Optimization
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#complete-optimized-agent-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Complete Optimized Agent Output
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Complete Optimized Agent Output">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#live-query-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Live Query Result
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#layer-by-layer-breakdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer-by-Layer Breakdown
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Layer-by-Layer Breakdown">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-each-layer-contributed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Each Layer Contributed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#optimization-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optimization Metrics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Optimization Metrics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#performance-improvement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance Improvement
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-compound-effect" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Compound Effect
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The Compound Effect">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#single-layer-vs-full-stack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Single-Layer vs. Full-Stack
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#complete-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Complete Workflow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Complete Workflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#end-to-end-optimization-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        End-to-End Optimization Process
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-makes-this-production-ready" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Makes This Production-Ready?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What Makes This Production-Ready?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#quality-indicators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quality Indicators
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#applying-to-your-agents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Applying to Your Agents
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Applying to Your Agents">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-identify-your-layers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Identify Your Layers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-enable-your-layers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Enable Your Layers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-optimize" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Optimize
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Takeaways
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Takeaways">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-you-learned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What You Learned
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-full-stack-advantage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Full-Stack Advantage
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Next Steps">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#explore-individual-layers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Explore Individual Layers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#try-the-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Try the Workflow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#learn-gepa-internals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Learn GEPA Internals
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scale-with-datasets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scale with Datasets
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+        
+  
+  
+    <li class="md-path__item">
+      <a href="../../.." class="md-path__link">
+        
+  <span class="md-ellipsis">
+    🏠 Home
+  </span>
+
+      </a>
+    </li>
+  
+
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../overview/" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    🎯 Agent Optimization
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="full-stack-optimization-complete-example">Full-Stack Optimization: Complete Example</h1>
+<h2 id="overview">Overview</h2>
+<p>This guide shows how <strong>all 6 optimization layers</strong> work together in a real production agent. We'll use a <strong>Code Review Agent</strong> as our example because it demonstrates every optimization layer naturally.</p>
+<p><strong>What You'll See</strong>:
+- How each layer contributes to the final result
+- The compound effect of multi-layer optimization
+- Before/after comparisons at each layer
+- Complete end-to-end workflow</p>
+<hr />
+<h2 id="the-use-case-code-review-agent">The Use Case: Code Review Agent</h2>
+<h3 id="agent-purpose">Agent Purpose</h3>
+<p>Analyze code for security vulnerabilities, performance issues, and code quality problems, providing actionable recommendations with code examples.</p>
+<h3 id="why-this-example">Why This Example?</h3>
+<p>Code review requires ALL optimization layers:
+- <strong>Prompts</strong>: How to structure comprehensive reviews
+- <strong>RAG</strong>: When to search security/performance documentation
+- <strong>Tools</strong>: Which analysis tools to use (complexity, security scanning)
+- <strong>Memory</strong>: Recall similar past findings
+- <strong>Protocols</strong>: Use MCP for advanced file operations
+- <strong>Datasets</strong>: Learn from 100 real GitHub code reviews</p>
+<hr />
+<h2 id="the-agent-configuration">The Agent Configuration</h2>
+<h3 id="full-playbook-structure">Full Playbook Structure</h3>
+<div class="language-yaml highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">agent/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AgentSpec</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Code Review Assistant</span>
+<span class="w">  </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">genies</span>
+
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="c1"># Language Model</span>
+<span class="w">  </span><span class="nt">language_model</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ollama</span>
+<span class="w">    </span><span class="nt">model</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">llama3.1:8b</span>
+
+<span class="w">  </span><span class="c1"># Layer 1: Prompts (always optimized)</span>
+<span class="w">  </span><span class="nt">persona</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Senior Software Engineer &amp; Security Reviewer</span>
+<span class="w">    </span><span class="nt">goal</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Provide thorough, actionable code reviews</span>
+<span class="w">    </span><span class="nt">traits</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">detail-oriented</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">security-conscious</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">constructive</span><span class="p p-Indicator">]</span>
+
+<span class="w">  </span><span class="c1"># Layer 2: RAG (knowledge retrieval)</span>
+<span class="w">  </span><span class="nt">rag</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">knowledge_base</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./knowledge/security/*.md</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./knowledge/performance/*.md</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./knowledge/best_practices/*.md</span>
+<span class="w">    </span><span class="nt">top_k</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+
+<span class="w">  </span><span class="c1"># Layer 3: Tools (analysis capabilities)</span>
+<span class="w">  </span><span class="nt">tools</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">specific_tools</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">complexity_calculator</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">security_scanner</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">performance_analyzer</span>
+
+<span class="w">  </span><span class="c1"># Layer 4: Memory (context from past reviews)</span>
+<span class="w">  </span><span class="nt">memory</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">enable_context_optimization</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">max_context_tokens</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2000</span>
+
+<span class="w">  </span><span class="c1"># Layer 5: Protocols (MCP for advanced ops)</span>
+<span class="w">  </span><span class="c1"># (Can be added if needed)</span>
+
+<span class="w">  </span><span class="c1"># Layer 6: Datasets (learn from real reviews)</span>
+<span class="w">  </span><span class="nt">datasets</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">github_reviews</span>
+<span class="w">      </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./data/real_code_reviews.csv</span>
+<span class="w">      </span><span class="nt">limit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+
+<span class="w">  </span><span class="c1"># GEPA optimizes ALL layers</span>
+<span class="w">  </span><span class="nt">optimization</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">optimizer</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GEPA</span>
+<span class="w">      </span><span class="nt">params</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">auto</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">medium</span>
+</code></pre></div>
+<hr />
+<h2 id="the-test-input-complex-real-world-code">The Test Input: Complex Real-World Code</h2>
+<div class="language-python highlight"><pre><span></span><code><span class="c1"># Production authentication code with multiple issues</span>
+<span class="n">password</span> <span class="o">=</span> <span class="s2">&quot;admin123&quot;</span>  <span class="c1"># Issue 1: Hardcoded credential</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">authenticate_user</span><span class="p">(</span><span class="n">username</span><span class="p">):</span>
+    <span class="c1"># Issue 2: SQL injection via string concatenation</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="s2">&quot;SELECT * FROM users WHERE username=&#39;&quot;</span> <span class="o">+</span> <span class="n">username</span> <span class="o">+</span> <span class="s2">&quot;&#39;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+
+    <span class="c1"># Issue 3: High cyclomatic complexity (nested conditionals)</span>
+    <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;password&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">password</span><span class="p">:</span>  <span class="c1"># Issue 4: Plaintext password</span>
+            <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;verified&#39;</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;subscription&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;premium&#39;</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span>
+</code></pre></div>
+<p><strong>Issues Present</strong>:
+1. Hardcoded password (CRITICAL)
+2. SQL injection (CRITICAL)
+3. Plaintext password comparison (CRITICAL)
+4. High cyclomatic complexity (MEDIUM)</p>
+<hr />
+<h2 id="baseline-performance-before-optimization">Baseline Performance (Before Optimization)</h2>
+<h3 id="initial-agent-behavior">Initial Agent Behavior</h3>
+<div class="language-bash highlight"><pre><span></span><code>super<span class="w"> </span>agent<span class="w"> </span>compile<span class="w"> </span>code_review_assistant
+super<span class="w"> </span>agent<span class="w"> </span>evaluate<span class="w"> </span>code_review_assistant
+</code></pre></div>
+<p><strong>Result</strong>:
+<div class="language-text highlight"><pre><span></span><code>Testing 8 RSpec-style BDD scenarios:
+
+SQL Injection Detection: FAIL
+   Expected: Specific vulnerability with solution
+   Got: &quot;Check your SQL queries&quot;
+
+Hardcoded Credentials: FAIL
+   Expected: Identify hardcoded secret with env var solution
+   Got: Generic &quot;use better practices&quot;
+
+Complexity Analysis: PASS
+   (Agent happened to mention complexity)
+
+Security Comprehensive: FAIL
+   Expected: All 3 security issues identified
+   Got: Only 1 issue found
+
+Overall: 1/8 PASS (12.5%)
+</code></pre></div></p>
+<p><strong>Agent Output</strong> (Baseline):
+<div class="language-text highlight"><pre><span></span><code>&quot;Your code has some security issues and could be improved.&quot;
+</code></pre></div></p>
+<p><strong>Problems</strong>:
+- Extremely vague
+- No specific issues identified
+- No solutions provided
+- Not actionable
+- No tool usage
+- No knowledge retrieval
+- No past context referenced</p>
+<hr />
+<h2 id="layer-by-layer-optimization">Layer-by-Layer Optimization</h2>
+<h3 id="step-1-run-gepa-optimization">Step 1: Run GEPA Optimization</h3>
+<div class="language-bash highlight"><pre><span></span><code>super<span class="w"> </span>agent<span class="w"> </span>optimize<span class="w"> </span>code_review_assistant<span class="w"> </span>--auto<span class="w"> </span>medium<span class="w"> </span>--fresh
+</code></pre></div>
+<p><strong>What Happens</strong>: GEPA optimizes all 6 layers simultaneously</p>
+<hr />
+<h3 id="layer-1-prompt-optimization-in-action">Layer 1: Prompt Optimization in Action</h3>
+<p><strong>GEPA Reflection (Iteration 3)</strong>:
+<div class="language-text highlight"><pre><span></span><code>&quot;Agent gave vague &#39;security issues&#39; response. Need specific vulnerability 
+ identification. Optimize persona to include security expertise and goal 
+ to include &#39;specific findings with severity classification&#39;.&quot;
+</code></pre></div></p>
+<p><strong>Prompt Evolution</strong>:</p>
+<p><strong>Before</strong>:
+<div class="language-yaml highlight"><pre><span></span><code><span class="nt">persona</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Code Reviewer</span>
+<span class="w">  </span><span class="nt">goal</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Find code issues</span>
+</code></pre></div></p>
+<p><strong>After GEPA</strong>:
+<div class="language-yaml highlight"><pre><span></span><code><span class="nt">persona</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Senior Software Engineer &amp; Security Reviewer with expertise in</span><span class="w"> </span>
+<span class="w">       </span><span class="l l-Scalar l-Scalar-Plain">OWASP Top 10, secure coding, and performance optimization</span>
+<span class="w">  </span><span class="nt">goal</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Identify specific security vulnerabilities, performance bottlenecks,</span><span class="w"> </span>
+<span class="w">       </span><span class="l l-Scalar l-Scalar-Plain">and code quality issues with severity classification and executable</span><span class="w"> </span>
+<span class="w">       </span><span class="l l-Scalar l-Scalar-Plain">solutions</span>
+</code></pre></div></p>
+<p><strong>Result</strong>: Agent now knows to be specific and provide solutions</p>
+<hr />
+<h3 id="layer-2-rag-optimization-in-action">Layer 2: RAG Optimization in Action</h3>
+<p><strong>GEPA Reflection (Iteration 5)</strong>:
+<div class="language-text highlight"><pre><span></span><code>&quot;Agent should search security documentation BEFORE analyzing SQL queries.
+ Pattern: String concatenation in SQL context → Retrieve sql_injection.md&quot;
+</code></pre></div></p>
+<p><strong>RAG Strategy Evolution</strong>:</p>
+<p><strong>Before</strong>:
+<div class="language-text highlight"><pre><span></span><code>Query: Generic &quot;code review&quot;
+Retrieved: random_doc.md, naming_conventions.md, testing.md
+Relevance: 25% (wrong topics)
+</code></pre></div></p>
+<p><strong>After GEPA</strong>:
+<div class="language-text highlight"><pre><span></span><code>Learned Strategy:
+- Detect: String concatenation + SQL keywords
+- Query: &quot;SQL injection prevention parameterized queries OWASP&quot;
+- Retrieved: sql_injection.md, database_security.md, owasp_a03.md
+- Relevance: 95% (perfect match)
+</code></pre></div></p>
+<p><strong>Result</strong>: Agent retrieves exact security docs needed</p>
+<hr />
+<h3 id="layer-3-tool-optimization-in-action">Layer 3: Tool Optimization in Action</h3>
+<p><strong>GEPA Reflection (Iteration 7)</strong>:
+<div class="language-text highlight"><pre><span></span><code>&quot;Agent should use complexity_calculator for nested conditions.
+ Pattern: &gt;3 nested if statements → Use complexity_calculator
+ Then cite threshold violation in review.&quot;
+</code></pre></div></p>
+<p><strong>Tool Usage Evolution</strong>:</p>
+<p><strong>Before</strong>:
+<div class="language-text highlight"><pre><span></span><code>Tools Available: complexity_calculator, security_scanner
+Tools Used: None
+Result: No metrics, vague assessment
+</code></pre></div></p>
+<p><strong>After GEPA</strong>:
+<div class="language-text highlight"><pre><span></span><code>Learned Strategy:
+1. Detect nested conditionals → Use complexity_calculator
+2. Detect string concatenation in SQL → Use security_scanner
+3. Combine results for comprehensive review
+
+Tools Used:
+- complexity_calculator → Returns: complexity = 5
+- security_scanner → Returns: [SQL injection, hardcoded secret]
+</code></pre></div></p>
+<p><strong>Result</strong>: Metric-driven, tool-backed findings</p>
+<hr />
+<h3 id="layer-4-memory-optimization-in-action">Layer 4: Memory Optimization in Action</h3>
+<p><strong>GEPA Reflection (Iteration 9)</strong>:
+<div class="language-text highlight"><pre><span></span><code>&quot;Agent should reference similar past SQL injection findings.
+ Memory optimization should prioritize high-importance security memories.&quot;
+</code></pre></div></p>
+<p><strong>Memory Selection Evolution</strong>:</p>
+<p><strong>Before</strong>:
+<div class="language-text highlight"><pre><span></span><code>Memories: Last 10 reviews chronologically
+Relevance: 30% (mostly irrelevant)
+</code></pre></div></p>
+<p><strong>After GEPA</strong>:
+<div class="language-text highlight"><pre><span></span><code>Learned Strategy:
+Query: &quot;SQL injection&quot;
+Selected Memories:
+- Memory #47: Previous SQL injection in auth code (0.95 similarity)
+- Memory #23: Parameterized query pattern used before (0.88 similarity)
+- Memory #61: Team security standard (0.82 similarity, high importance)
+
+Result: Highly relevant past context
+</code></pre></div></p>
+<p><strong>Result</strong>: Agent says "Similar to previous finding #47. Use parameterized queries as recommended before."</p>
+<hr />
+<h3 id="layer-5-protocol-optimization-in-action">Layer 5: Protocol Optimization in Action</h3>
+<p><strong>GEPA Reflection (Iteration 11)</strong>:
+<div class="language-text highlight"><pre><span></span><code>&quot;For simple code snippets, use built-in tools (faster).
+ For file system operations, use MCP when recursive or complex.&quot;
+</code></pre></div></p>
+<p><strong>Protocol Strategy Evolution</strong>:</p>
+<p><strong>Before</strong>:
+<div class="language-text highlight"><pre><span></span><code>Always initialize MCP → Slow startup (500ms overhead)
+</code></pre></div></p>
+<p><strong>After GEPA</strong>:
+<div class="language-text highlight"><pre><span></span><code>Learned Strategy:
+- Single code snippet → Use built-in tools (fast)
+- Directory analysis → Use MCP filesystem (powerful)
+- Git context needed → Use MCP github (required)
+
+Current query: Single code snippet
+Tool: built-in security_scanner (50ms vs. 500ms)
+</code></pre></div></p>
+<p><strong>Result</strong>: Optimal tool source selection</p>
+<hr />
+<h3 id="layer-6-dataset-learning-in-action">Layer 6: Dataset Learning in Action</h3>
+<p><strong>GEPA Learning from 100 Real Reviews</strong>:</p>
+<div class="language-text highlight"><pre><span></span><code>Pattern Extraction:
+- 85% of expert reviews cite OWASP standards
+- 90% provide executable code solutions
+- 75% include attack examples for critical issues
+- 95% classify severity based on exploitability
+- 80% prioritize security over code quality
+
+Agent Learns:
+→ Always cite OWASP for web security
+→ Provide code solutions with imports
+→ Show attack vector for CRITICAL issues
+→ Classify: CRITICAL &gt; HIGH &gt; MEDIUM &gt; LOW
+→ Prioritize security in recommendations
+</code></pre></div>
+<p><strong>Result</strong>: Agent review style matches expert reviews</p>
+<hr />
+<h2 id="final-optimized-performance">Final Optimized Performance</h2>
+<h3 id="re-evaluation-after-optimization">Re-Evaluation After Optimization</h3>
+<div class="language-bash highlight"><pre><span></span><code>super<span class="w"> </span>agent<span class="w"> </span>evaluate<span class="w"> </span>code_review_assistant<span class="w">  </span><span class="c1"># automatically loads optimized weights</span>
+</code></pre></div>
+<p><strong>Result</strong>:
+<div class="language-text highlight"><pre><span></span><code>Testing 8 RSpec-style BDD scenarios:
+
+SQL Injection Detection: PASS
+   ✓ Identified SQL injection with specific attack example
+   ✓ Provided parameterized query solution
+   ✓ Cited OWASP Top 10 #1
+
+Hardcoded Credentials: PASS
+   ✓ Found hardcoded password
+   ✓ Recommended environment variables
+   ✓ Cited CWE-798
+
+Complexity Analysis: PASS
+   ✓ Used complexity_calculator tool
+   ✓ Reported complexity 5/4 threshold
+   ✓ Suggested early returns pattern
+
+Security Comprehensive: PASS
+   ✓ Found all 3 security issues
+   ✓ Prioritized by severity
+   ✓ Cited OWASP standards
+
+Performance Issues: PASS
+Memory Reference: PASS
+Multi-Issue Handling: PASS
+Professional Format: PASS
+
+Overall: 8/8 PASS (100%)
+Improvement: +87.5% (12.5% → 100%)
+</code></pre></div></p>
+<hr />
+<h2 id="complete-optimized-agent-output">Complete Optimized Agent Output</h2>
+<h3 id="live-query-result">Live Query Result</h3>
+<div class="language-bash highlight"><pre><span></span><code>super<span class="w"> </span>agent<span class="w"> </span>run<span class="w"> </span>code_review_assistant<span class="w"> </span>--code<span class="w"> </span><span class="s2">&quot;[authentication code above]&quot;</span>
+</code></pre></div>
+<p><strong>Complete Agent Response</strong> (All Layers Working Together):</p>
+<div class="language-text highlight"><pre><span></span><code>═══════════════════════════════════════════════════════════════════════════
+SECURITY CODE REVIEW RESULTS
+═══════════════════════════════════════════════════════════════════════════
+
+OVERALL SEVERITY: 🔴 CRITICAL
+
+📋 CRITICAL ISSUES (Fix Before Deployment):
+
+1. Hardcoded Database Credential (Line 2)
+   ─────────────────────────────────────────────────────────────────────
+   Code: password = &quot;admin123&quot;
+
+   🎯 Issue [Tool: security_scanner]:
+   Sensitive credential stored directly in source code
+
+   ⚠️  Risk:
+   - Credential exposed if code repository accessed
+   - Security breach if code deployed to production
+   - Violates security compliance standards
+
+   Solution:
+   ```python
+   import os
+   password = os.environ.get(&#39;DB_PASSWORD&#39;)
+   if not password:
+       raise ValueError(&quot;DB_PASSWORD environment variable not set&quot;)
+   ```
+
+   📚 Reference [Retrieved from: knowledge/security/hardcoded_secrets.md]:
+   - OWASP ASVS 2.7.1: Credentials must not be hardcoded
+   - CWE-798: Use of Hard-coded Credentials
+   - Similar to: Previous finding #61 (resolved with env vars)
+
+2. SQL Injection Vulnerability (Line 5)
+   ─────────────────────────────────────────────────────────────────────
+   Code: query = &quot;SELECT * FROM users WHERE username=&#39;&quot; + username + &quot;&#39;&quot;
+
+   🎯 Issue [Tool: security_scanner]:
+   User input concatenated directly into SQL query
+
+   ⚠️  Attack Example:
+   Input: username = &quot;admin&#39; OR &#39;1&#39;=&#39;1&quot;
+   Result: SELECT * FROM users WHERE username=&#39;admin&#39; OR &#39;1&#39;=&#39;1&#39;
+   Impact: Returns ALL users, authentication bypass
+
+   Solution:
+   ```python
+   def authenticate_user(username):
+       query = &quot;SELECT * FROM users WHERE username = ?&quot;
+       result = db.execute(query, (username,))
+   ```
+
+   📚 Reference [Retrieved from: knowledge/security/sql_injection.md]:
+   - OWASP Top 10 2024: #1 Injection
+   - CWE-89: SQL Injection
+   - Parameterized queries prevent all injection attacks
+   - Similar to: Previous finding #47 (parameterized queries recommended)
+
+3. Plaintext Password Comparison (Line 7)
+   ─────────────────────────────────────────────────────────────────────
+   Code: if result[&#39;password&#39;] == password
+
+   🎯 Issue [Tool: security_scanner]:
+   Direct password comparison without hashing
+
+   ⚠️  Risk:
+   - Passwords stored in plaintext in database
+   - Timing attack vulnerability (password length leak)
+   - Complete compromise if database breached
+
+   Solution:
+   ```python
+   import bcrypt
+
+   # When storing password:
+   hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
+
+   # When verifying:
+   if bcrypt.checkpw(password.encode(), result[&#39;password_hash&#39;]):
+       return True
+   ```
+
+   📚 Reference [Retrieved from: knowledge/security/password_hashing.md]:
+   - OWASP ASVS 2.4.1: Passwords must be hashed with bcrypt/Argon2
+   - Use constant-time comparison to prevent timing attacks
+
+═══════════════════════════════════════════════════════════════════════════
+
+📊 MEDIUM PRIORITY ISSUES:
+
+4. High Cyclomatic Complexity (Lines 7-12)
+   ─────────────────────────────────────────────────────────────────────
+   Function: authenticate_user()
+
+   🎯 Metrics [Tool: complexity_calculator]:
+   - Cyclomatic Complexity: 5
+   - Recommended Threshold: 4
+   - Nesting Depth: 5 levels
+
+   ⚠️  Impact:
+   - Hard to test (2^5 = 32 test cases needed)
+   - Difficult to maintain
+   - Error-prone modifications
+
+   Solution (Early Returns Pattern):
+   ```python
+   def authenticate_user(username):
+       query = &quot;SELECT * FROM users WHERE username = ?&quot;
+       result = db.execute(query, (username,))
+
+       if not result:
+           return False
+       if not bcrypt.checkpw(password.encode(), result[&#39;password_hash&#39;]):
+           return False
+       if not result[&#39;active&#39;]:
+           return False
+       if not result[&#39;verified&#39;]:
+           return False
+       if result[&#39;subscription&#39;] != &#39;premium&#39;:
+           return False
+
+       return True
+   ```
+
+   📚 Reference [Retrieved from: knowledge/best_practices/code_smells.md]:
+   - Clean Code: Cyclomatic complexity should be &lt;4
+   - Early returns reduce nesting and improve readability
+   - Similar to: Issue #23 (refactored using early returns)
+
+═══════════════════════════════════════════════════════════════════════════
+
+📊 ANALYSIS METRICS:
+
+Lines Analyzed: 13
+Issues Found: 4
+  - CRITICAL: 3
+  - HIGH: 0
+  - MEDIUM: 1
+  - LOW: 0
+
+Tool Usage:
+  - security_scanner: 3 findings
+  - complexity_calculator: 1 finding
+
+Knowledge Retrieved:
+  - security/sql_injection.md (0.94 relevance)
+  - security/hardcoded_secrets.md (0.91 relevance)
+  - security/password_hashing.md (0.89 relevance)
+  - best_practices/code_smells.md (0.87 relevance)
+
+Memory References:
+  - Issue #47: SQL injection (similar pattern)
+  - Issue #61: Hardcoded credentials (team standard)
+  - Issue #23: Complexity refactoring (same solution)
+
+Analysis Time: 2.8 seconds
+
+═══════════════════════════════════════════════════════════════════════════
+
+🎯 RECOMMENDATIONS (Priority Order):
+
+IMMEDIATE (Deploy Blockers):
+1. Fix SQL injection (Line 5) - CRITICAL security risk
+2. Remove hardcoded password (Line 2) - CRITICAL exposure
+3. Implement password hashing (Line 7) - CRITICAL crypto failure
+
+BEFORE NEXT RELEASE:
+4. Refactor complexity (Lines 7-12) - Maintainability
+
+STANDARDS COMPLIANCE CHECK:
+OWASP Top 10 #1: Injection - VIOLATED
+OWASP ASVS 2.4.1: Password Hashing - VIOLATED
+OWASP ASVS 2.7.1: Hardcoded Credentials - VIOLATED
+⚠️  Clean Code: Complexity Threshold - EXCEEDED
+
+RISK LEVEL: 🔴 DEPLOY BLOCKED (3 critical security issues)
+
+═══════════════════════════════════════════════════════════════════════════
+
+📚 REFERENCES &amp; RESOURCES:
+
+Security:
+- OWASP Top 10 2024: https://owasp.org/Top10
+- SQL Injection Prevention: [Local: knowledge/security/sql_injection.md]
+- Password Security: [Local: knowledge/security/password_hashing.md]
+
+Code Quality:
+- Clean Code (Martin): Chapter 3 (Functions)
+- Cyclomatic Complexity: https://en.wikipedia.org/wiki/Cyclomatic_complexity
+
+Team Standards:
+- Previous similar findings: #23, #47, #61
+- Security review checklist: ./docs/security_checklist.md
+
+═══════════════════════════════════════════════════════════════════════════
+</code></pre></div>
+<hr />
+<h2 id="layer-by-layer-breakdown">Layer-by-Layer Breakdown</h2>
+<h3 id="how-each-layer-contributed">How Each Layer Contributed</h3>
+<p><strong>1. Prompts</strong> 💬:
+- Learned to structure reviews: Severity → Findings → Solutions → References
+- Learned to quantify impact: "2^5 = 32 test cases needed"
+- Learned to prioritize: CRITICAL before MEDIUM</p>
+<p><strong>2. RAG</strong> 🔍:
+- Searched security docs when detecting SQL concatenation
+- Retrieved 4 highly relevant docs (&gt;0.87 similarity)
+- Integrated citations naturally: "[Retrieved from: sql_injection.md]"</p>
+<p><strong>3. Tools</strong> 🛠️:
+- Used security_scanner for vulnerability detection
+- Used complexity_calculator for metrics
+- Combined tool outputs: "3 security + 1 complexity findings"</p>
+<p><strong>4. Memory</strong> 🧠:
+- Recalled similar past findings (#23, #47, #61)
+- Referenced team standards and previous solutions
+- Selected only relevant memories (3/50 selected)</p>
+<p><strong>5. Protocols</strong> 🔌:
+- Used built-in tools (code snippet analysis, no MCP needed)
+- Would use MCP for directory scanning or Git context</p>
+<p><strong>6. Datasets</strong> 📊:
+- Learned professional phrasing from 100 real reviews
+- Learned to provide attack examples (from dataset)
+- Learned severity classification (CRITICAL for exploitable)
+- Learned to cite standards (90% of dataset cites OWASP)</p>
+<hr />
+<h2 id="optimization-metrics">Optimization Metrics</h2>
+<h3 id="performance-improvement">Performance Improvement</h3>
+<table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+    <tr style="background: rgba(33, 150, 243, 0.15); font-weight: bold;">
+        <td style="padding: 15px; border: 2px solid rgba(128, 128, 128, 0.3);">Metric</td>
+        <td style="padding: 15px; border: 2px solid rgba(128, 128, 128, 0.3);">Before</td>
+        <td style="padding: 15px; border: 2px solid rgba(128, 128, 128, 0.3);">After</td>
+        <td style="padding: 15px; border: 2px solid rgba(128, 128, 128, 0.3);">Improvement</td>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong>Overall Accuracy</strong></td>
+        <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">12.5%</td>
+        <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">100%</strong></td>
+        <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">+87.5%</strong></td>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong>Security Detection</strong></td>
+        <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">33% (1/3)</td>
+        <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">100% (3/3)</strong></td>
+        <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">+67%</strong></td>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong>RAG Relevance</strong></td>
+        <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">25%</td>
+        <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">95%</strong></td>
+        <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">+70%</strong></td>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong>Tool Usage Accuracy</strong></td>
+        <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">0%</td>
+        <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">100%</strong></td>
+        <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">+100%</strong></td>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong>Memory Relevance</strong></td>
+        <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">30%</td>
+        <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">90%</strong></td>
+        <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">+60%</strong></td>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong>Response Actionability</strong></td>
+        <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">20%</td>
+        <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">95%</strong></td>
+        <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">+75%</strong></td>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong>Token Efficiency</strong></td>
+        <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);">5,000 tokens</td>
+        <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">2,000 tokens</strong></td>
+        <td style="padding: 12px; border: 2px solid rgba(128, 128, 128, 0.3);"><strong style="color: #4CAF50;">-60%</strong></td>
+    </tr>
+</table>
+
+<hr />
+<h2 id="the-compound-effect">The Compound Effect</h2>
+<h3 id="single-layer-vs-full-stack">Single-Layer vs. Full-Stack</h3>
+<p><strong>Optimizing ONLY Prompts</strong>:
+<div class="language-text highlight"><pre><span></span><code>Result: Better instructions, but...
+- Still retrieves wrong knowledge docs
+- Still doesn&#39;t use tools correctly
+- Still includes irrelevant memories
+- Still uses generic phrasing
+
+Final Accuracy: ~45%
+</code></pre></div></p>
+<p><strong>Optimizing ALL Layers</strong>:
+<div class="language-text highlight"><pre><span></span><code>Result: Better instructions AND
+- Retrieves perfect security docs
+- Uses tools strategically
+- Recalls relevant past findings
+- Uses expert-level phrasing from dataset
+
+Final Accuracy: 100%
+</code></pre></div></p>
+<p><strong>Key Insight</strong>: Each layer multiplies the effect of others. This is why full-stack optimization produces 2-3x better results than prompt-only optimization.</p>
+<hr />
+<h2 id="complete-workflow">Complete Workflow</h2>
+<h3 id="end-to-end-optimization-process">End-to-End Optimization Process</h3>
+<div class="language-bash highlight"><pre><span></span><code><span class="c1"># Initialize project</span>
+super<span class="w"> </span>init<span class="w"> </span>code_review_project
+<span class="nb">cd</span><span class="w"> </span>code_review_project
+
+<span class="c1"># Create knowledge base</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span>knowledge/security<span class="w"> </span>knowledge/performance<span class="w"> </span>knowledge/best_practices
+<span class="c1"># ... add your documentation files</span>
+
+<span class="c1"># Prepare dataset (optional but recommended)</span>
+<span class="c1"># Download or create real code review examples</span>
+cp<span class="w"> </span>your_real_reviews.csv<span class="w"> </span>data/code_reviews.csv
+
+<span class="c1"># Create agent playbook</span>
+cat<span class="w"> </span>&gt;<span class="w"> </span>agents/code_reviewer/playbook.yaml<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
+<span class="s">spec:</span>
+<span class="s">  persona:</span>
+<span class="s">    role: Code Reviewer</span>
+<span class="s">    goal: Find issues in code</span>
+
+<span class="s">  rag:</span>
+<span class="s">    enabled: true</span>
+<span class="s">    knowledge_base: [./knowledge/**/*.md]</span>
+
+<span class="s">  tools:</span>
+<span class="s">    enabled: true</span>
+<span class="s">    specific_tools: [complexity_calculator, security_scanner]</span>
+
+<span class="s">  memory:</span>
+<span class="s">    enabled: true</span>
+<span class="s">    enable_context_optimization: true</span>
+
+<span class="s">  datasets:</span>
+<span class="s">    - source: ./data/code_reviews.csv</span>
+<span class="s">      limit: 100</span>
+
+<span class="s">  optimization:</span>
+<span class="s">    optimizer: {name: GEPA, params: {auto: medium}}</span>
+<span class="s">EOF</span>
+
+<span class="c1"># Compile</span>
+super<span class="w"> </span>agent<span class="w"> </span>compile<span class="w"> </span>code_reviewer
+<span class="c1"># → Generates pipeline with all layers enabled</span>
+
+<span class="c1"># Baseline evaluation</span>
+super<span class="w"> </span>agent<span class="w"> </span>evaluate<span class="w"> </span>code_reviewer
+<span class="c1"># → Shows baseline: 12.5% accuracy</span>
+
+<span class="c1"># Optimize ALL layers</span>
+super<span class="w"> </span>agent<span class="w"> </span>optimize<span class="w"> </span>code_reviewer<span class="w"> </span>--auto<span class="w"> </span>medium<span class="w"> </span>--fresh
+<span class="c1"># → GEPA optimizes: prompts + RAG + tools + memory + dataset learning</span>
+<span class="c1"># → Takes 10-15 minutes</span>
+<span class="c1"># → Shows progress for each layer</span>
+
+<span class="c1"># Re-evaluate</span>
+super<span class="w"> </span>agent<span class="w"> </span>evaluate<span class="w"> </span>code_reviewer<span class="w">  </span><span class="c1"># automatically loads optimized weights</span>
+<span class="c1"># → Shows improvement: 100% accuracy (+87.5%)</span>
+
+<span class="c1"># Test on real code</span>
+super<span class="w"> </span>agent<span class="w"> </span>run<span class="w"> </span>code_reviewer<span class="w"> </span>--code<span class="w"> </span><span class="s2">&quot;</span><span class="k">$(</span>cat<span class="w"> </span>suspicious_code.py<span class="k">)</span><span class="s2">&quot;</span>
+<span class="c1"># → Professional, comprehensive security audit</span>
+
+<span class="c1"># Deploy</span>
+super<span class="w"> </span>agent<span class="w"> </span>run<span class="w"> </span>code_reviewer<span class="w"> </span>--interactive
+<span class="c1"># → Production-ready code review agent!</span>
+</code></pre></div>
+<hr />
+<h2 id="what-makes-this-production-ready">What Makes This Production-Ready?</h2>
+<h3 id="quality-indicators">Quality Indicators</h3>
+<p><strong>1. Comprehensive Coverage</strong> - Detects all vulnerability types (SQL, XSS, secrets, etc.)
+- Analyzes performance and code quality
+- Handles edge cases and complex patterns</p>
+<p><strong>2. Actionable Output</strong> - Specific issue identification
+- Executable code solutions
+- Clear priority ordering
+- Standards compliance</p>
+<p><strong>3. Professional Quality</strong> - Expert-level phrasing (learned from dataset)
+- Proper citations (OWASP, CWE, Clean Code)
+- Severity classification
+- Risk assessment</p>
+<p><strong>4. Efficient Operation</strong> - Strategic knowledge retrieval (95% relevance)
+- Correct tool usage (100% accuracy)
+- Optimized memory selection (60% fewer tokens)
+- Fast response time (&lt;3 seconds)</p>
+<p><strong>5. Robust Performance</strong> - Handles unseen code variations (dataset generalization)
+- References past findings (memory consistency)
+- Graceful error handling (tool/protocol failures)</p>
+<hr />
+<h2 id="applying-to-your-agents">Applying to Your Agents</h2>
+<h3 id="step-1-identify-your-layers">Step 1: Identify Your Layers</h3>
+<p>Which layers does your agent need?</p>
+<div class="language-yaml highlight"><pre><span></span><code><span class="nt">Customer Support</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Prompts</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(response quality)</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">RAG</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(product knowledge)</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Tools</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">⚠️ (maybe ticketing system)</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(conversation history)</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Protocols</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(not needed)</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Datasets</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(real support tickets)</span>
+
+<span class="nt">Research Agent</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Prompts</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(research methodology)</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">RAG</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(academic papers)</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Tools</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(search, citations)</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">⚠️ (maybe past searches)</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Protocols</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(MCP for data sources)</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Datasets</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(research examples)</span>
+
+<span class="nt">Code Generator</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Prompts</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(coding standards)</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">RAG</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(API docs, patterns)</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Tools</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(syntax validators)</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">⚠️ (maybe past code)</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Protocols</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">⚠️ (maybe MCP filesystem)</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Datasets</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(code examples)</span>
+</code></pre></div>
+<h3 id="step-2-enable-your-layers">Step 2: Enable Your Layers</h3>
+<div class="language-yaml highlight"><pre><span></span><code><span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="c1"># Enable only what you need</span>
+<span class="w">  </span><span class="nt">rag</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">  </span><span class="c1"># If you have knowledge base</span>
+
+<span class="w">  </span><span class="nt">tools</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">  </span><span class="c1"># If you need tools</span>
+
+<span class="w">  </span><span class="nt">memory</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">  </span><span class="c1"># If you need context</span>
+<span class="w">    </span><span class="nt">enable_context_optimization</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+
+<span class="w">  </span><span class="nt">datasets</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">your_data.csv</span><span class="w">  </span><span class="c1"># If you have examples</span>
+</code></pre></div>
+<h3 id="step-3-optimize">Step 3: Optimize</h3>
+<div class="language-bash highlight"><pre><span></span><code>super<span class="w"> </span>agent<span class="w"> </span>optimize<span class="w"> </span>your_agent<span class="w"> </span>--auto<span class="w"> </span>medium
+</code></pre></div>
+<p>GEPA automatically optimizes all enabled layers!</p>
+<hr />
+<h2 id="key-takeaways">Key Takeaways</h2>
+<h3 id="what-you-learned">What You Learned</h3>
+<ol>
+<li><strong>Full-Stack &gt; Prompts Only</strong>: All 6 layers working together produces 2-3x better results</li>
+<li><strong>Each Layer Compounds</strong>: RAG finds better docs, tools provide better metrics, memory recalls better context</li>
+<li><strong>GEPA Learns Strategies</strong>: Not just what to do, but WHEN, WHICH, and HOW</li>
+<li><strong>Datasets Amplify</strong>: Real examples teach real-world patterns and expert-level quality</li>
+<li><strong>Production-Ready</strong>: 12% → 100% accuracy demonstrates deployment readiness</li>
+</ol>
+<h3 id="the-full-stack-advantage">The Full-Stack Advantage</h3>
+<table>
+<thead>
+<tr>
+<th>Optimization Approach</th>
+<th>Accuracy</th>
+<th>Quality</th>
+<th>Production-Ready</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Prompts Only</strong></td>
+<td>45%</td>
+<td>Basic</td>
+<td>No</td>
+</tr>
+<tr>
+<td><strong>Prompts + RAG</strong></td>
+<td>65%</td>
+<td>Better</td>
+<td>⚠️ Maybe</td>
+</tr>
+<tr>
+<td><strong>Prompts + RAG + Tools</strong></td>
+<td>75%</td>
+<td>Good</td>
+<td>⚠️ Close</td>
+</tr>
+<tr>
+<td><strong>Full-Stack (All 6 Layers)</strong></td>
+<td>100%</td>
+<td>Expert</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="next-steps">Next Steps</h2>
+<h3 id="explore-individual-layers">Explore Individual Layers</h3>
+<p>Deep-dive into specific layers:
+- <a href="../prompts/">💬 Prompt Optimization</a>
+- <a href="../rag/">🔍 RAG Optimization</a>
+- <a href="../tools/">🛠️ Tool Optimization</a>
+- <a href="../memory/">🧠 Memory Optimization</a>
+- <a href="../protocols/">🔌 Protocol Optimization</a>
+- <a href="../datasets/">📊 Dataset Optimization</a></p>
+<h3 id="try-the-workflow">Try the Workflow</h3>
+<div class="language-bash highlight"><pre><span></span><code><span class="c1"># Create an agent with multiple layers</span>
+<span class="c1"># Optimize with GEPA</span>
+<span class="c1"># See the compound effect!</span>
+</code></pre></div>
+<h3 id="learn-gepa-internals">Learn GEPA Internals</h3>
+<ul>
+<li><a href="../../gepa-optimization/">GEPA Optimizer Guide</a></li>
+<li><a href="../../gepa-optimization/#using-the-fresh-flag">GEPA + --fresh Flag</a></li>
+</ul>
+<h3 id="scale-with-datasets">Scale with Datasets</h3>
+<ul>
+<li><a href="../../dataset-import/">Dataset Import Guide</a></li>
+<li>Browse HuggingFace: <a href="https://huggingface.co/datasets">https://huggingface.co/datasets</a></li>
+</ul>
+<hr />
+<p><strong>Related Guides:</strong></p>
+<ul>
+<li><a href="../overview/">Agent Optimization Overview</a></li>
+<li><a href="../../gepa-optimization/">GEPA Optimization</a></li>
+<li><a href="../../memory-optimization/">Memory Optimization</a></li>
+<li><a href="../../dataset-import/">Dataset Import</a></li>
+<li><a href="../../tool-development/">Tool Development</a></li>
+<li><a href="../../rag/">RAG Configuration</a></li>
+<li><a href="../../protocol-first-agents/">MCP Protocol</a></li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright © 2025 Superagentic AI. Made with ❤️ for the Agentic AI community.
+    </div>
+  
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/SuperagenticAI" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://x.com/SuperagenticAI" target="_blank" rel="noopener" title="x.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M459.4 151.7c.3 4.5.3 9.1.3 13.6 0 138.7-105.6 298.6-298.6 298.6-59.5 0-114.7-17.2-161.1-47.1 8.4 1 16.6 1.3 25.3 1.3 49.1 0 94.2-16.6 130.3-44.8-46.1-1-84.8-31.2-98.1-72.8 6.5 1 13 1.6 19.8 1.6 9.4 0 18.8-1.3 27.6-3.6-48.1-9.7-84.1-52-84.1-103v-1.3c14 7.8 30.2 12.7 47.4 13.3-28.3-18.8-46.8-51-46.8-87.4 0-19.5 5.2-37.4 14.3-53C87.4 130.8 165 172.4 252.1 176.9c-1.6-7.8-2.6-15.9-2.6-24C249.5 95.1 296.3 48 354.4 48c30.2 0 57.5 12.7 76.7 33.1 23.7-4.5 46.5-13.3 66.6-25.3-7.8 24.4-24.4 44.8-46.1 57.8 21.1-2.3 41.6-8.1 60.4-16.2-14.3 20.8-32.2 39.3-52.6 54.3"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://www.linkedin.com/company/superagenticai" target="_blank" rel="noopener" title="www.linkedin.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3M135.4 416H69V202.2h66.5V416zM102.2 96a38.5 38.5 0 1 1 0 77 38.5 38.5 0 1 1 0-77m282.1 320h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.instant.prefetch", "navigation.tracking", "navigation.path", "navigation.top", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
+      
+        <script src="../../../javascripts/extra.js"></script>
+      
+    
+  </body>
+</html>
