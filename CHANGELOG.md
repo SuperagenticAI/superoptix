@@ -5,6 +5,37 @@ All notable changes to SuperOptiX will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.9] - 2026-02-21
+
+### 🚀 Added
+- **SurrealDB RAG Integration**: Added native SurrealDB retriever support in runner-managed RAG flows
+  - Added `surrealdb` retriever setup/query/document-ingest paths in `RAGMixin`
+  - Added SurrealDB vector store adapter for GEPA RAG (`surrealdb_store.py`)
+  - Added SuperSpec validation/schema support for `surrealdb` retriever type
+- **Framework Demo Agents**: Added new SurrealDB RAG demo playbooks for:
+  - DSPy embedded mode: `rag_surrealdb_demo`
+  - DSPy Docker mode: `rag_surrealdb_docker_demo`
+  - PydanticAI: `rag_surrealdb_pydanticai_demo`
+  - CrewAI: `rag_surrealdb_crewai_demo`
+  - Google ADK: `rag_surrealdb_adk_demo`
+
+### 🔄 Changed
+- **Framework Pipeline RAG Context Injection**: Updated minimal pipeline templates to inject retrieved SurrealDB context for:
+  - `pydantic_ai_pipeline_minimal.py.jinja2`
+  - `crewai_pipeline_minimal.py.jinja2`
+  - `google_adk_pipeline_minimal.py.jinja2`
+- **SurrealDB URL Handling**: Improved URL normalization for SurrealDB server endpoints to reduce transport/path mismatch issues.
+
+### 📚 Documentation
+- Added detailed SurrealDB documentation pages:
+  - Embedded demo guide
+  - Docker demo guide
+  - Framework guide for DSPy, PydanticAI, CrewAI, and Google ADK
+- Updated docs navigation and examples index with SurrealDB sections and quick-start workflows.
+
+### ✅ Tests
+- Added SurrealDB vector store tests in `tests/test_surrealdb_vector_store.py`.
+
 ## [0.1.0b17] - 2025-08-18
 
 ### 🔧 Fixed

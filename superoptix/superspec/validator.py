@@ -587,6 +587,7 @@ class SuperSpecXValidator:
                 "qdrant",
                 "milvus",
                 "pinecone",
+                "surrealdb",
                 "colbertv2",
                 "custom",
             }

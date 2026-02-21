@@ -184,6 +184,7 @@ def validate_rag_config(rag_config: Dict[str, Any]) -> bool:
             "qdrant",
             "pinecone",
             "faiss",
+            "surrealdb",
         ]
         if rag_config["retriever_type"] not in supported_retrievers:
             raise ValidationError(

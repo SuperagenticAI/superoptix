@@ -109,6 +109,7 @@ class SuperSpecXSchema:
         "ChromaDB",
         "Pinecone",
         "FAISS",
+        "SurrealDB",
         "Custom",
     ]
     VALID_TOOL_SELECTION_STRATEGIES = ["automatic", "manual", "hybrid"]

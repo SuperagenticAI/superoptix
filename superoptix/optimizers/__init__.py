@@ -48,6 +48,7 @@ try:
         ChromaVectorStore,
         WeaviateVectorStore,
         RAGEvaluationMetrics,
+        SurrealDBVectorStore,
     )
 
     _RAG_ADAPTER_AVAILABLE = True
@@ -62,6 +63,7 @@ except ImportError:
     ChromaVectorStore = None
     WeaviateVectorStore = None
     RAGEvaluationMetrics = None
+    SurrealDBVectorStore = None
 
 __all__ = [
     "UniversalGEPA",
@@ -83,5 +85,6 @@ __all__ = [
     "VectorStoreInterface",
     "ChromaVectorStore",
     "WeaviateVectorStore",
+    "SurrealDBVectorStore",
     "RAGEvaluationMetrics",
 ]

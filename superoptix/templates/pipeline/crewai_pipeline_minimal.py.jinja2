@@ -8,12 +8,15 @@ Generated: {{ timestamp }}
 
 from __future__ import annotations
 
+import asyncio
 import json
+import threading
 import time
 from pathlib import Path
 from typing import Any, Dict, Optional
 
 from crewai import Agent, Crew, Process, Task
+from superoptix.core.rag_mixin import RAGMixin
 
 from superoptix.runners.crewai_runtime_helpers import (
     build_instructions as superoptix_build_instructions,
@@ -113,6 +116,61 @@ class {{ agent_name | to_pascal_case }}Pipeline:
             print(f"✅ StackOne tools registered: {len(self._tools)}")
         else:
             print("ℹ️  No StackOne tools configured")
+        self._rag_enabled = False
+        self._rag_helper = None
+        try:
+            rag_cfg = FULL_SPEC.get("rag", {}) or {}
+            retrieval_cfg = FULL_SPEC.get("retrieval", {}) or {}
+            cfg = rag_cfg if isinstance(rag_cfg, dict) and rag_cfg else retrieval_cfg
+            if isinstance(cfg, dict) and bool(cfg.get("enabled", False)):
+                class _RunnerRAGHelper(RAGMixin):
+                    pass
+
+                helper = _RunnerRAGHelper()
+                self._rag_enabled = bool(helper.setup_rag(FULL_SPEC))
+                self._rag_helper = helper if self._rag_enabled else None
+                if self._rag_enabled:
+                    print("🔍 RAG retrieval enabled (runner-managed).")
+        except Exception as _rag_exc:
+            print(f"⚠️ RAG init skipped: {_rag_exc}")
+
+    async def _retrieve_context_text(self, query: str) -> str:
+        if not self._rag_enabled or not self._rag_helper:
+            return ""
+        try:
+            rag_cfg = FULL_SPEC.get("rag", {}) or {}
+            retrieval_cfg = FULL_SPEC.get("retrieval", {}) or {}
+            cfg = rag_cfg if isinstance(rag_cfg, dict) and rag_cfg else retrieval_cfg
+            top_k = int((cfg.get("config", {}) or {}).get("top_k", 3))
+            docs = await self._rag_helper.retrieve_context(query, top_k=top_k)
+            if not docs:
+                return ""
+            return "\n\n".join(str(doc) for doc in docs if doc)
+        except Exception as _rag_query_exc:
+            print(f"⚠️ RAG retrieval skipped: {_rag_query_exc}")
+            return ""
+
+    def _run_coro_sync(self, coro: Any) -> Any:
+        try:
+            asyncio.get_running_loop()
+        except RuntimeError:
+            return asyncio.run(coro)
+
+        result: Dict[str, Any] = {}
+        error: Dict[str, Exception] = {}
+
+        def _runner() -> None:
+            try:
+                result["value"] = asyncio.run(coro)
+            except Exception as exc:
+                error["exc"] = exc
+
+        thread = threading.Thread(target=_runner, daemon=True)
+        thread.start()
+        thread.join()
+        if "exc" in error:
+            raise error["exc"]
+        return result.get("value", "")
 
     def run(self, query: Optional[str] = None, **inputs: Any) -> Dict[str, Any]:
         if query is None:
@@ -122,8 +180,22 @@ class {{ agent_name | to_pascal_case }}Pipeline:
             query = str(inputs.get("query", ""))
 {% endif %}
 
+        context_text = ""
+        if query:
+            try:
+                context_text = self._run_coro_sync(self._retrieve_context_text(query))
+            except Exception as _rag_run_exc:
+                print(f"⚠️ RAG retrieval skipped: {_rag_run_exc}")
+        prompt = query or ""
+        if context_text:
+            prompt = (
+                "Use the retrieved context to answer. If context is insufficient, say so briefly.\n\n"
+                f"Retrieved context:\n{context_text}\n\n"
+                f"User query:\n{query or ''}"
+            )
+
         started = time.time()
-        preview = (query[:120] + "...") if query and len(query) > 120 else (query or "")
+        preview = (prompt[:120] + "...") if prompt and len(prompt) > 120 else (prompt or "")
         print(
             f"🧠 CrewAI run start | model={self._resolved_model} | tools={len(self._tools)}"
         )
@@ -132,13 +204,13 @@ class {{ agent_name | to_pascal_case }}Pipeline:
 {% if include_rlm_code %}
         output = superoptix_run_with_optional_rlm(
             crew=self._crew,
-            prompt=query or "",
+            prompt=prompt,
             spec_data=FULL_SPEC,
             model_name=self._resolved_model,
             task_description=self._task_description,
         )
 {% else %}
-        result = self._crew.kickoff(inputs={"query": query or ""})
+        result = self._crew.kickoff(inputs={"query": prompt})
         output = superoptix_extract_crewai_output(result)
 {% endif %}
 
