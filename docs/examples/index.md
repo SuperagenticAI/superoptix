@@ -22,6 +22,9 @@ Explore Retrieval-Augmented Generation capabilities:
 - **[🗄️ Weaviate Demo](agents/weaviate-demo)** - Advanced semantic search with Weaviate
 - **[🎯 Qdrant Demo](agents/qdrant-demo)** - Lightning-fast vector search with Qdrant
 - **[🏗️ Milvus Demo](agents/milvus-demo)** - Enterprise-scale vector database with Milvus
+- **[🌌 SurrealDB Demo](agents/surrealdb-demo)** - Unified multi-model database with vector + hybrid retrieval
+- **[🐳 SurrealDB Docker Demo](agents/surrealdb-docker-demo)** - Authenticated SurrealDB server mode with Docker
+- **[🧩 SurrealDB Framework Guide](agents/surrealdb-frameworks-demo)** - End-to-end SurrealDB RAG across DSPy, PydanticAI, CrewAI, and Google ADK
 
 ### **🛠️ Framework Feature Demos**
 Discover core framework capabilities:
@@ -49,6 +52,7 @@ Integrate with external observability platforms:
 | **Weaviate** | Advanced Semantic Search | Sophisticated similarity algorithms | Academic research, enterprise search |
 | **Qdrant** | Lightning-Fast Search | Optimized performance, high throughput | Industrial applications, real-time systems |
 | **Milvus** | Enterprise-Scale RAG | Cloud-native, distributed architecture | Massive-scale deployments, enterprise search |
+| **SurrealDB** | Multi-Model + Vector | Unified document/graph/vector with SurrealQL | Operational + retrieval workflows |
 | **Tools** | Tool Integration | 20+ categories, specialized tools | Enhanced agent capabilities |
 | **Memory** | Context Retention | Multi-layered, persistent storage | Conversational AI |
 | **Observability** | Monitoring & Debugging | Tracing, metrics, dashboard | Production monitoring |
@@ -117,7 +121,7 @@ Each demo serves as a template for building custom agents:
 
 ### **RAG Customization**
 - Modify retrieval settings (top_k, chunk_size)
-- Change vector databases (chroma, lancedb, weaviate, qdrant, milvus)
+- Change vector databases (chroma, lancedb, weaviate, qdrant, milvus, surrealdb)
 - Adjust embedding models
 
 ### **Framework Feature Customization**

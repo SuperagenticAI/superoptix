@@ -2,7 +2,7 @@
 RAG (Retrieval-Augmented Generation) Mixin for SuperOptiX Pipelines
 
 This mixin provides RAG capabilities to DSPy pipelines, supporting:
-- ChromaDB, LanceDB, FAISS, Weaviate, Qdrant, Milvus, Pinecone
+- ChromaDB, LanceDB, FAISS, Weaviate, Qdrant, Milvus, Pinecone, SurrealDB
 - Automatic document ingestion and chunking
 - Semantic search and retrieval
 - Integration with DSPy ReAct agents
@@ -11,6 +11,7 @@ This mixin provides RAG capabilities to DSPy pipelines, supporting:
 import logging
 from typing import Dict, Any, List
 from pathlib import Path
+from urllib.parse import urlparse
 
 try:
     import dspy  # noqa: F401
@@ -69,6 +70,13 @@ try:
     PINECONE_AVAILABLE = True
 except ImportError:
     PINECONE_AVAILABLE = False
+
+try:
+    import surrealdb  # noqa: F401
+
+    SURREALDB_AVAILABLE = True
+except ImportError:
+    SURREALDB_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
@@ -172,10 +180,15 @@ class RAGMixin:
                     self._print_dependency_help("pinecone-client", "Pinecone")
                     return None
                 return self._setup_pinecone(vector_store)
+            elif retriever_type == "surrealdb":
+                if not SURREALDB_AVAILABLE:
+                    self._print_dependency_help("surrealdb", "SurrealDB")
+                    return None
+                return self._setup_surrealdb(vector_store)
             else:
                 logger.error(f"❌ Unsupported retriever type: {retriever_type}")
                 logger.error(
-                    "Supported types: chroma, lancedb, faiss, weaviate, qdrant, milvus, pinecone"
+                    "Supported types: chroma, lancedb, faiss, weaviate, qdrant, milvus, pinecone, surrealdb"
                 )
                 return None
 
@@ -455,6 +468,60 @@ class RAGMixin:
             logger.error(f"Pinecone setup failed: {e}")
             return None
 
+    def _setup_surrealdb(self, config: Dict[str, Any]):
+        """Setup SurrealDB vector database configuration."""
+        try:
+            url = self._normalize_surrealdb_url(config.get("url", "ws://localhost:8000"))
+            namespace = config.get("namespace", "test")
+            database = config.get("database", "test")
+            username = config.get("username", "root")
+            password = config.get("password", "root")
+            skip_signin = config.get("skip_signin", self._surrealdb_default_skip_signin(url))
+            table_name = config.get("table_name", "documents")
+            vector_field = config.get("vector_field", "embedding")
+            content_field = config.get("content_field", "content")
+
+            return {
+                "type": "surrealdb",
+                "url": url,
+                "namespace": namespace,
+                "database": database,
+                "username": username,
+                "password": password,
+                "skip_signin": skip_signin,
+                "table_name": table_name,
+                "vector_field": vector_field,
+                "content_field": content_field,
+                "config": config,
+            }
+        except Exception as e:
+            logger.error(f"SurrealDB setup failed: {e}")
+            return None
+
+    def _surrealdb_default_skip_signin(self, url: str) -> bool:
+        """Default signin behavior based on SurrealDB URL scheme."""
+        parsed = urlparse(url)
+        scheme = parsed.scheme.lower()
+        # Embedded transports usually don't require auth for local usage.
+        if scheme in {"memory", "mem", "file", "surrealkv"} or url == "memory":
+            return True
+        return False
+
+    def _normalize_surrealdb_url(self, url: str) -> str:
+        """
+        Normalize SurrealDB URL for SDK compatibility.
+
+        SurrealDB Python SDK appends '/rpc' for ws/http transports internally.
+        If user provides a URL ending with '/rpc', strip it to avoid '/rpc/rpc'.
+        """
+        parsed = urlparse(url)
+        scheme = parsed.scheme.lower()
+
+        if scheme in {"ws", "wss", "http", "https"} and parsed.path.rstrip("/") == "/rpc":
+            base = f"{scheme}://{parsed.netloc}"
+            return base
+        return url
+
     def _setup_dspy_retriever(self, config: Dict[str, Any]):
         """Setup DSPy retriever."""
         if not DSPY_AVAILABLE:
@@ -555,6 +622,8 @@ class RAGMixin:
                 return await self._query_milvus(query, top_k)
             elif db_type == "pinecone":
                 return await self._query_pinecone(query, top_k)
+            elif db_type == "surrealdb":
+                return await self._query_surrealdb(query, top_k)
             else:
                 logger.warning(f"Unknown vector database type: {db_type}")
                 return []
@@ -649,6 +718,56 @@ class RAGMixin:
             logger.error(f"Pinecone query failed: {e}")
             return []
 
+    async def _query_surrealdb(self, query: str, top_k: int) -> List[str]:
+        """Query SurrealDB using vector similarity."""
+        try:
+            from surrealdb import Surreal
+            from sentence_transformers import SentenceTransformer
+
+            url = self.vector_db["url"]
+            namespace = self.vector_db["namespace"]
+            database = self.vector_db["database"]
+            username = self.vector_db["username"]
+            password = self.vector_db["password"]
+            skip_signin = bool(self.vector_db.get("skip_signin", False))
+            table_name = self.vector_db["table_name"]
+            vector_field = self.vector_db["vector_field"]
+            content_field = self.vector_db["content_field"]
+
+            embedding_model_name = self.vector_db.get("config", {}).get(
+                "embedding_model", "all-MiniLM-L6-v2"
+            )
+            model = SentenceTransformer(embedding_model_name)
+            query_vector = model.encode(query).tolist()
+
+            sql = f"""
+            SELECT {content_field},
+                   vector::similarity::cosine({vector_field}, $query_vector) AS score
+            FROM {table_name}
+            WHERE {vector_field} != NONE
+            ORDER BY score DESC
+            LIMIT $top_k;
+            """
+
+            with Surreal(url) as db:
+                if not skip_signin:
+                    db.signin({"username": username, "password": password})
+                db.use(namespace, database)
+                rows = db.query(sql, {"query_vector": query_vector, "top_k": top_k})
+
+            if not isinstance(rows, list):
+                return []
+
+            contents: List[str] = []
+            for row in rows:
+                if isinstance(row, dict) and content_field in row:
+                    contents.append(str(row[content_field]))
+            return contents
+
+        except Exception as e:
+            logger.error(f"SurrealDB query failed: {e}")
+            return []
+
     def add_documents(self, documents: List[Dict[str, Any]]) -> bool:
         """Add documents to the vector database."""
         try:
@@ -672,6 +791,8 @@ class RAGMixin:
                 return self._add_documents_milvus(documents)
             elif db_type == "pinecone":
                 return self._add_documents_pinecone(documents)
+            elif db_type == "surrealdb":
+                return self._add_documents_surrealdb(documents)
             else:
                 logger.warning(f"Unknown vector database type: {db_type}")
                 return False
@@ -784,6 +905,51 @@ class RAGMixin:
             return False
         except Exception as e:
             logger.error(f"Pinecone add documents failed: {e}")
+            return False
+
+    def _add_documents_surrealdb(self, documents: List[Dict[str, Any]]) -> bool:
+        """Add documents to SurrealDB."""
+        try:
+            from surrealdb import Surreal
+            from sentence_transformers import SentenceTransformer
+
+            url = self.vector_db["url"]
+            namespace = self.vector_db["namespace"]
+            database = self.vector_db["database"]
+            username = self.vector_db["username"]
+            password = self.vector_db["password"]
+            skip_signin = bool(self.vector_db.get("skip_signin", False))
+            table_name = self.vector_db["table_name"]
+            vector_field = self.vector_db["vector_field"]
+            content_field = self.vector_db["content_field"]
+            metadata_field = self.vector_db.get("config", {}).get(
+                "metadata_field", "metadata"
+            )
+
+            embedding_model_name = self.vector_db.get("config", {}).get(
+                "embedding_model", "all-MiniLM-L6-v2"
+            )
+            model = SentenceTransformer(embedding_model_name)
+
+            with Surreal(url) as db:
+                if not skip_signin:
+                    db.signin({"username": username, "password": password})
+                db.use(namespace, database)
+
+                for doc in documents:
+                    content = doc.get("content", "")
+                    embedding = model.encode(content).tolist()
+                    payload = {
+                        content_field: content,
+                        vector_field: embedding,
+                        metadata_field: doc.get("metadata", {}),
+                    }
+                    db.create(table_name, payload)
+
+            logger.info(f"Added {len(documents)} documents to SurrealDB")
+            return True
+        except Exception as e:
+            logger.error(f"SurrealDB add documents failed: {e}")
             return False
 
     def get_rag_status(self) -> Dict[str, Any]:

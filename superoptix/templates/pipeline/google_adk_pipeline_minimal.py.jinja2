@@ -13,6 +13,7 @@ import time
 from pathlib import Path
 from typing import Any, Dict, Optional
 
+from superoptix.core.rag_mixin import RAGMixin
 from superoptix.runners.google_adk_runtime_helpers import (
     create_agent_runner as superoptix_create_agent_runner,
     get_google_adk_rlm_config as superoptix_get_google_adk_rlm_config,
@@ -60,6 +61,39 @@ class {{ agent_name | to_pascal_case }}Pipeline:
                 f"(mode={self.rlm_config.get('mode', 'assist')}, "
                 f"backend={self.rlm_config.get('backend', 'litellm')})"
             )
+        self._rag_enabled = False
+        self._rag_helper = None
+        try:
+            rag_cfg = FULL_SPEC.get("rag", {}) or {}
+            retrieval_cfg = FULL_SPEC.get("retrieval", {}) or {}
+            cfg = rag_cfg if isinstance(rag_cfg, dict) and rag_cfg else retrieval_cfg
+            if isinstance(cfg, dict) and bool(cfg.get("enabled", False)):
+                class _RunnerRAGHelper(RAGMixin):
+                    pass
+
+                helper = _RunnerRAGHelper()
+                self._rag_enabled = bool(helper.setup_rag(FULL_SPEC))
+                self._rag_helper = helper if self._rag_enabled else None
+                if self._rag_enabled:
+                    print("🔍 RAG retrieval enabled (runner-managed).")
+        except Exception as _rag_exc:
+            print(f"⚠️ RAG init skipped: {_rag_exc}")
+
+    async def _retrieve_context_text(self, query: str) -> str:
+        if not self._rag_enabled or not self._rag_helper:
+            return ""
+        try:
+            rag_cfg = FULL_SPEC.get("rag", {}) or {}
+            retrieval_cfg = FULL_SPEC.get("retrieval", {}) or {}
+            cfg = rag_cfg if isinstance(rag_cfg, dict) and rag_cfg else retrieval_cfg
+            top_k = int((cfg.get("config", {}) or {}).get("top_k", 3))
+            docs = await self._rag_helper.retrieve_context(query, top_k=top_k)
+            if not docs:
+                return ""
+            return "\n\n".join(str(doc) for doc in docs if doc)
+        except Exception as _rag_query_exc:
+            print(f"⚠️ RAG retrieval skipped: {_rag_query_exc}")
+            return ""
 
     async def run(self, query: Optional[str] = None, **inputs: Any) -> Dict[str, Any]:
         if query is None:
@@ -70,6 +104,13 @@ class {{ agent_name | to_pascal_case }}Pipeline:
 {% endif %}
 
         prompt = query or ""
+        context_text = await self._retrieve_context_text(prompt)
+        if context_text:
+            prompt = (
+                "Use the retrieved context to answer. If context is insufficient, say so briefly.\n\n"
+                f"Retrieved context:\n{context_text}\n\n"
+                f"User query:\n{query or ''}"
+            )
         started = time.time()
         print(
             "🧠 ADK run start | "

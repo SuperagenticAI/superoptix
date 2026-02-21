@@ -1,0 +1,95 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: RAG SurrealDB PydanticAI Demo
+  id: rag_surrealdb_pydanticai_demo
+  namespace: demo
+  version: 1.0.0
+  level: genies
+  description: SurrealDB-backed RAG demo compiled with PydanticAI.
+  author: SuperOptiX
+  tags:
+    - surrealdb
+    - rag
+    - pydantic-ai
+    - demo
+
+spec:
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    api_base: http://localhost:11434
+    temperature: 0.2
+    max_tokens: 1800
+
+  input_fields:
+    - name: knowledge_query
+      type: str
+      description: Query to answer using retrieved SurrealDB context.
+      required: true
+
+  output_fields:
+    - name: retrieved_response
+      type: str
+      description: Response grounded in retrieved knowledge.
+      required: true
+
+  persona:
+    name: SurrealDBPydanticAIAssistant
+    role: SurrealDB RAG Assistant
+    goal: Retrieve relevant context from SurrealDB and answer clearly.
+    traits:
+      - grounded
+      - concise
+      - practical
+
+  tasks:
+    - name: knowledge_retrieval
+      instruction: >
+        Use retrieval-augmented generation with SurrealDB context first,
+        then answer the user query clearly and accurately.
+      inputs:
+        - name: knowledge_query
+          type: str
+          description: User query
+          required: true
+      outputs:
+        - name: retrieved_response
+          type: str
+          description: Final grounded answer
+
+  rag:
+    enabled: true
+    retriever_type: surrealdb
+    config:
+      top_k: 5
+      chunk_size: 512
+      chunk_overlap: 50
+      similarity_threshold: 0.65
+    vector_store:
+      embedding_model: sentence-transformers/all-MiniLM-L6-v2
+      url: ws://localhost:8000
+      namespace: superoptix
+      database: knowledge
+      username: root
+      password: secret
+      skip_signin: false
+      table_name: rag_documents
+      vector_field: embedding
+      content_field: content
+      metadata_field: metadata
+
+  feature_specifications:
+    scenarios:
+      - name: token_retrieval
+        description: Ensure retrieval includes seeded demo token.
+        input:
+          knowledge_query: What is NEON-FOX-742?
+        expected_output:
+          retrieved_response: token retrieval success
+
+# Quick Start:
+#   super agent pull rag_surrealdb_pydanticai_demo
+#   super agent compile rag_surrealdb_pydanticai_demo --framework pydantic-ai
+#   super agent run rag_surrealdb_pydanticai_demo --goal "What is NEON-FOX-742?"

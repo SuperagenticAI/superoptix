@@ -1,0 +1,108 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: RAG SurrealDB CrewAI Demo
+  id: rag_surrealdb_crewai_demo
+  namespace: demo
+  version: 1.0.0
+  level: genies
+  description: SurrealDB-backed RAG demo compiled with CrewAI.
+  author: SuperOptiX
+  tags:
+    - surrealdb
+    - rag
+    - crewai
+    - demo
+
+spec:
+  target_framework: crewai
+
+  language_model:
+    location: local
+    provider: ollama
+    model: ollama:llama3.1:8b
+    api_base: http://localhost:11434
+    temperature: 0.2
+    max_tokens: 1800
+
+  input_fields:
+    - name: knowledge_query
+      type: str
+      description: Query to answer using retrieved SurrealDB context.
+      required: true
+
+  output_fields:
+    - name: retrieved_response
+      type: str
+      description: Response grounded in retrieved knowledge.
+      required: true
+
+  persona:
+    name: SurrealDBCrewAssistant
+    role: SurrealDB RAG Crew Analyst
+    goal: Retrieve relevant context from SurrealDB and answer clearly.
+    backstory: >
+      You are an engineering-focused assistant that always grounds answers in
+      retrieved context before synthesizing a response.
+    traits:
+      - grounded
+      - concise
+      - practical
+    instructions: |
+      Return only the final answer text.
+      Do not include "Thought:", "Reasoning:", "Analysis:", or any internal narration.
+      Use retrieved context as the primary source of truth.
+      If context is insufficient, say exactly: "I don't have enough retrieved context."
+      Keep the answer to 1-3 sentences.
+
+  tasks:
+    - name: analyze_with_retrieval
+      instruction: >
+        Answer the user query directly from SurrealDB retrieved context.
+        Output final answer only, no preamble and no internal thoughts.
+        Prefer concrete facts from retrieved context; if missing, respond exactly:
+        "I don't have enough retrieved context."
+      inputs:
+        - name: knowledge_query
+          type: str
+          description: User query
+          required: true
+      outputs:
+        - name: retrieved_response
+          type: str
+          description: Final grounded answer
+
+  rag:
+    enabled: true
+    retriever_type: surrealdb
+    config:
+      top_k: 5
+      chunk_size: 512
+      chunk_overlap: 50
+      similarity_threshold: 0.65
+    vector_store:
+      embedding_model: sentence-transformers/all-MiniLM-L6-v2
+      url: ws://localhost:8000
+      namespace: superoptix
+      database: knowledge
+      username: root
+      password: secret
+      skip_signin: false
+      table_name: rag_documents
+      vector_field: embedding
+      content_field: content
+      metadata_field: metadata
+
+  feature_specifications:
+    scenarios:
+      - name: token_retrieval
+        description: Ensure retrieval includes seeded demo token.
+        input:
+          knowledge_query: What is NEON-FOX-742?
+        expected_output:
+          retrieved_response: token retrieval success
+
+# Quick Start:
+#   super agent pull rag_surrealdb_crewai_demo
+#   super agent compile rag_surrealdb_crewai_demo --framework crewai
+#   super agent run rag_surrealdb_crewai_demo --goal "What is NEON-FOX-742?"

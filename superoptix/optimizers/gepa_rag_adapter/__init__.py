@@ -45,6 +45,13 @@ try:
 except ImportError:
     _LANCEDB_AVAILABLE = False
 
+try:
+    from .vector_stores.surrealdb_store import SurrealDBVectorStore
+
+    _SURREALDB_AVAILABLE = True
+except ImportError:
+    _SURREALDB_AVAILABLE = False
+
 __all__ = [
     "GenericRAGAdapter",
     "RAGDataInst",
@@ -64,3 +71,5 @@ if _MILVUS_AVAILABLE:
     __all__.append("MilvusVectorStore")
 if _LANCEDB_AVAILABLE:
     __all__.append("LanceDBVectorStore")
+if _SURREALDB_AVAILABLE:
+    __all__.append("SurrealDBVectorStore")

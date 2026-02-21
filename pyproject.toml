@@ -7,7 +7,7 @@ allow-direct-references = true
 
 [project]
 name = "superoptix"
-version = "0.2.8"
+version = "0.2.9"
 description = "Full Stack Agentic AI Optimization Framework - Universal GEPA optimizer for major frameworks"
 authors = [
     {name = "Superagentic AI", email = "hello@super-agentic.ai"},
@@ -238,6 +238,11 @@ milvus = [
     "sentence-transformers",
 ]
 
+surrealdb = [
+    "surrealdb",
+    "sentence-transformers",
+]
+
 # All vector databases
 vectordb = [
     "chromadb",
@@ -246,6 +251,7 @@ vectordb = [
     "weaviate-client",
     "qdrant-client",
     "pymilvus",
+    "surrealdb",
     "sentence-transformers",
 ]
 
@@ -345,6 +351,7 @@ all = [
     "weaviate-client",
     "qdrant-client",
     "pymilvus",
+    "surrealdb",
     "sentence-transformers",
     "redis",
     "mlflow",
@@ -385,6 +392,7 @@ all-with-mlx = [
     "weaviate-client",
     "qdrant-client",
     "pymilvus",
+    "surrealdb",
     "sentence-transformers",
     "redis",
     "mlflow",
