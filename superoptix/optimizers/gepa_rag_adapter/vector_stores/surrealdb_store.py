@@ -208,7 +208,9 @@ class SurrealDBVectorStore(VectorStoreInterface):
             return "", params
         return f" AND {' AND '.join(clauses)}", params
 
-    def _execute_query(self, query: str, params: dict[str, Any]) -> list[dict[str, Any]]:
+    def _execute_query(
+        self, query: str, params: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         """
         Execute query and normalize results from query/query_raw methods.
         """

@@ -471,12 +471,16 @@ class RAGMixin:
     def _setup_surrealdb(self, config: Dict[str, Any]):
         """Setup SurrealDB vector database configuration."""
         try:
-            url = self._normalize_surrealdb_url(config.get("url", "ws://localhost:8000"))
+            url = self._normalize_surrealdb_url(
+                config.get("url", "ws://localhost:8000")
+            )
             namespace = config.get("namespace", "test")
             database = config.get("database", "test")
             username = config.get("username", "root")
             password = config.get("password", "root")
-            skip_signin = config.get("skip_signin", self._surrealdb_default_skip_signin(url))
+            skip_signin = config.get(
+                "skip_signin", self._surrealdb_default_skip_signin(url)
+            )
             table_name = config.get("table_name", "documents")
             vector_field = config.get("vector_field", "embedding")
             content_field = config.get("content_field", "content")
@@ -517,7 +521,10 @@ class RAGMixin:
         parsed = urlparse(url)
         scheme = parsed.scheme.lower()
 
-        if scheme in {"ws", "wss", "http", "https"} and parsed.path.rstrip("/") == "/rpc":
+        if (
+            scheme in {"ws", "wss", "http", "https"}
+            and parsed.path.rstrip("/") == "/rpc"
+        ):
             base = f"{scheme}://{parsed.netloc}"
             return base
         return url
