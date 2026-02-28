@@ -173,19 +173,14 @@ class ConversationalAgent:
                 user_input: User's natural language command
         """
         from rich.text import Text
-        from superoptix.cli.commands.thinking_animation import ThinkingAnimation
-
-        # Create animation helper
-        animator = ThinkingAnimation(self.console)
 
         # Show progressive status
         self.console.print()
 
-        # Step 1: Parse intent with thinking animation
-        animator.thinking()
+        # Step 1: Parse intent with live thinking spinner
         conversation_history = self.context.get_history_summary()
-        intent = self.intent_parser.parse(user_input, conversation_history)
-        animator.stop()
+        with self.console.status("🧠 Analyzing your request...", spinner="dots"):
+            intent = self.intent_parser.parse(user_input, conversation_history)
 
         # Show what we understood
         self.console.print(
@@ -198,11 +193,10 @@ class ConversationalAgent:
             )
         )
 
-        # Step 2: Generate commands with preparing animation
-        animator.preparing()
+        # Step 2: Generate commands with live planning spinner
         project_context = self.context.get_project_state()
-        commands = self.command_generator.generate(intent, project_context)
-        animator.stop()
+        with self.console.status("⚙️ Planning command sequence...", spinner="dots"):
+            commands = self.command_generator.generate(intent, project_context)
 
         # Show generated commands
         if commands:
@@ -219,8 +213,9 @@ class ConversationalAgent:
         # Step 3: Execute commands with progress
         results = self._execute_commands(commands)
 
-        # Step 4: Format response with typing effect
-        self.response_formatter.format(intent, commands, results)
+        # Step 4: Format response with live response spinner
+        with self.console.status("💬 Preparing response...", spinner="dots"):
+            self.response_formatter.format(intent, commands, results)
 
         # Step 5: Update context
         self.context.add_interaction(user_input, intent, commands, results)
@@ -252,25 +247,20 @@ class ConversationalAgent:
                 continue
 
             try:
-                from superoptix.cli.commands.thinking_animation import ThinkingAnimation
                 import os
-
-                # Show what we're executing with animation
-                animator = ThinkingAnimation(self.console)
-                animator.executing(cmd)
 
                 # Execute via subprocess with warning suppression
                 env = os.environ.copy()
                 env["PYTHONWARNINGS"] = "ignore"
-
-                result = subprocess.run(
-                    cmd,
-                    shell=True,
-                    capture_output=True,
-                    text=True,
-                    cwd=str(Path.cwd()),
-                    env=env,
-                )
+                with self.console.status("⚡ Executing command...", spinner="dots"):
+                    result = subprocess.run(
+                        cmd,
+                        shell=True,
+                        capture_output=True,
+                        text=True,
+                        cwd=str(Path.cwd()),
+                        env=env,
+                    )
 
                 # Filter out warning messages from stderr
                 stderr_lines = result.stderr.split("\n") if result.stderr else []

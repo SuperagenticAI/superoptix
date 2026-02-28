@@ -7,6 +7,9 @@ can interact with SuperOptiX through natural language and slash commands.
 import os
 import time
 import warnings
+import io
+import logging
+from contextlib import redirect_stderr
 from pathlib import Path
 from rich.console import Console
 from rich.prompt import Prompt, Confirm
@@ -35,7 +38,25 @@ warnings.filterwarnings("ignore", module="pydantic_ai.*", category=UserWarning)
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", category=ResourceWarning)
 
+# Silence noisy DSPy cache fallback warning in interactive startup.
+logging.getLogger("dspy.clients").setLevel(logging.ERROR)
+logging.getLogger("dspy").setLevel(logging.ERROR)
+
 console = Console()
+_STARTUP_NOISE_PATTERNS = [
+    "Failed to initialize disk cache, falling back to memory-only cache",
+]
+
+
+def _filter_startup_stderr(text: str) -> str:
+    if not text:
+        return ""
+    lines = []
+    for line in text.splitlines():
+        if any(p in line for p in _STARTUP_NOISE_PATTERNS):
+            continue
+        lines.append(line)
+    return "\n".join(lines).strip()
 
 
 def show_animated_welcome():
@@ -143,13 +164,18 @@ def load_config() -> dict:
 
 def save_config(config: dict):
     """Save configuration."""
-    config_path = Path.home() / ".superoptix" / "config.yaml"
-    config_path.parent.mkdir(parents=True, exist_ok=True)
-
     import yaml
-
-    with open(config_path, "w") as f:
-        yaml.dump(config, f, default_flow_style=False)
+    config_path = Path.home() / ".superoptix" / "config.yaml"
+    fallback_path = Path.cwd() / ".superoptix" / "config.yaml"
+    try:
+        config_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(config_path, "w") as f:
+            yaml.dump(config, f, default_flow_style=False)
+        return
+    except OSError:
+        fallback_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(fallback_path, "w") as f:
+            yaml.dump(config, f, default_flow_style=False)
 
 
 def run_setup_wizard(console: Console) -> dict:
@@ -455,7 +481,9 @@ def start_conversation():
             "  [green]/help[/green]              Full command reference\n"
             "  [green]/ask[/green] <question>    Ask about SuperOptiX\n"
             "  [green]/model[/green] list         List available models\n"
+            "  [green]/connect[/green]           Connect ACP/BYOK/LOCAL runtime\n"
             "  [green]/mcp[/green] status         Check MCP server status\n"
+            "  [green]/acp[/green] status         Check ACP session status\n"
             "  [green]/exit[/green]              Exit Super CLI\n\n"
             "[dim]Natural Language (Just type what you want!):[/dim]\n"
             '  [cyan]"Build a developer agent"[/cyan]\n'
@@ -475,16 +503,19 @@ def start_conversation():
     from superoptix.cli.commands.slash_commands import SlashCommandHandler
     from superoptix.cli.commands.chat_agent import ConversationalAgent
 
-    # Initialize conversational agent (for natural language) FIRST
-    try:
-        chat_agent = ConversationalAgent(console, config)
-        natural_language_enabled = True
-    except Exception as e:
-        chat_agent = None
-        natural_language_enabled = False
-
-    # Initialize slash command handler with chat_agent reference
-    slash_handler = SlashCommandHandler(console, config, chat_agent=chat_agent)
+    # Initialize conversational agent + slash handler while filtering known noisy stderr.
+    startup_stderr = io.StringIO()
+    with redirect_stderr(startup_stderr):
+        try:
+            chat_agent = ConversationalAgent(console, config)
+            natural_language_enabled = True
+        except Exception:
+            chat_agent = None
+            natural_language_enabled = False
+        slash_handler = SlashCommandHandler(console, config, chat_agent=chat_agent)
+    remaining_startup_stderr = _filter_startup_stderr(startup_stderr.getvalue())
+    if remaining_startup_stderr:
+        print(remaining_startup_stderr)
 
     # Main conversation loop
     while True:

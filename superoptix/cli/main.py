@@ -168,60 +168,8 @@ warnings.filterwarnings(
     "ignore", message=r".*pydantic\.config\.Extra.*", category=DeprecationWarning
 )
 
-from superoptix.cli.commands.agent import (
-    add_agent,
-    compile_agent,
-    design_agent,
-    inspect_agent,
-    lint_agent,
-    list_agents,
-    optimize_agent,
-    remove_agent,
-    run_agent,
-    show_tier_status,
-    test_agent_bdd,
-)
-from superoptix.cli.commands.dataset import (
-    preview_dataset,
-    validate_dataset,
-    dataset_info,
-)
-from superoptix.cli.commands.dataset_marketplace import (
-    list_example_datasets,
-    pull_example_dataset,
-    show_dataset_details,
-)
-from superoptix.cli.commands.init import init_project
-from superoptix.cli.commands.marketplace import (
-    browse_marketplace,
-    install_component,
-    marketplace_dashboard,
-    search_marketplace,
-    show_component,
-    show_featured,
-)
-from superoptix.cli.commands.observability import (
-    analyze,
-    dashboard,
-    debug,
-    list_agents_with_traces,
-    traces,
-    check_traces,
-)
-from superoptix.cli.commands.orchestra import (
-    create_orchestra,
-    list_orchestras,
-    run_orchestra,
-)
-from superoptix.cli.commands.superspec import (
-    analyze_agents,
-    bootstrap_namespace,
-    generate_agent,
-    show_info,
-    show_schema,
-    validate_agents,
-)
-# from superoptix.cli.commands.auth_commands import login, logout, whoami
+# Command handlers are imported lazily in `main()` to keep conversational startup
+# fast and avoid pulling heavy optional deps when no explicit command is provided.
 
 
 console = Console()
@@ -782,6 +730,67 @@ def main():
     )
     # warnings.filterwarnings("ignore", module="supabase.*", category=UserWarning)
 
+    # Check if conversational mode
+    if check_conversational_mode():
+        from superoptix.cli.commands.conversational import start_conversation
+
+        start_conversation()
+        return
+
+    from superoptix.cli.commands.agent import (
+        add_agent,
+        compile_agent,
+        design_agent,
+        inspect_agent,
+        lint_agent,
+        list_agents,
+        optimize_agent,
+        remove_agent,
+        run_agent,
+        show_tier_status,
+        test_agent_bdd,
+    )
+    from superoptix.cli.commands.connect import (
+        connect_acp,
+        connect_byok,
+        connect_local,
+        connect_mcp,
+        connect_status,
+    )
+    from superoptix.cli.commands.dataset import dataset_info, preview_dataset, validate_dataset
+    from superoptix.cli.commands.dataset_marketplace import (
+        list_example_datasets,
+        pull_example_dataset,
+        show_dataset_details,
+    )
+    from superoptix.cli.commands.init import init_project
+    from superoptix.cli.commands.marketplace import (
+        browse_marketplace,
+        install_component,
+        marketplace_dashboard,
+        search_marketplace,
+        show_component,
+        show_featured,
+    )
+    from superoptix.cli.commands.observability import (
+        analyze,
+        check_traces,
+        dashboard,
+        debug,
+        list_agents_with_traces,
+        traces,
+    )
+    from superoptix.cli.commands.orchestra import create_orchestra, list_orchestras, run_orchestra
+    from superoptix.cli.commands.superspec import (
+        analyze_agents,
+        bootstrap_namespace,
+        generate_agent,
+        show_info,
+        show_schema,
+        validate_agents,
+    )
+    from superoptix.cli.commands.tui import start_tui
+
     # Track CLI usage (anonymous)
     try:
         from superoptix.cli.telemetry import track
@@ -790,13 +799,6 @@ def main():
         track(f"cli.{command_name}", success=True)
     except:
         pass  # Never let telemetry break CLI
-
-    # Check if conversational mode
-    if check_conversational_mode():
-        from superoptix.cli.commands.conversational import start_conversation
-
-        start_conversation()
-        return
 
     # Minimal help description
     description = """\
@@ -904,6 +906,171 @@ Use `super <command> --help` for more information on a specific command.
         help="📚 Comprehensive guide with examples and getting started information",
     )
     docs_parser.set_defaults(func=show_comprehensive_docs)
+
+    tui_parser = subparsers.add_parser(
+        "tui",
+        help="Launch enhanced interactive Super CLI TUI",
+        formatter_class=RawDescriptionHelpFormatter,
+        description="""
+Enhanced Super CLI TUI mode with:
+- connection-aware status bar
+- ACP/MCP live controls
+- transcript + activity panels
+- slash command command-palette UX
+
+Examples:
+  super tui
+  /help
+  /connect byok openai gpt-4o
+  /acp connect opencode gpt-4o-mini
+  /mcp list
+        """,
+    )
+    tui_parser.set_defaults(func=start_tui)
+
+    # Connection commands
+    connect_parser = subparsers.add_parser(
+        "connect",
+        aliases=["cn"],
+        help="Manage Super CLI connections (BYOK, LOCAL, ACP, MCP)",
+        formatter_class=RawDescriptionHelpFormatter,
+        description="""
+Configure and inspect interactive connection profiles for Super CLI.
+
+Examples:
+  super connect status
+  super connect byok --provider openai --model gpt-4o --api-key-env OPENAI_API_KEY --activate
+  super connect local --provider ollama --model llama3.2:3b --test --activate
+  super connect acp --agent opencode --command "opencode acp" --test --activate
+  super connect mcp --name filesystem --transport stdio --command npx --args "-y @modelcontextprotocol/server-filesystem ." --activate
+        """,
+    )
+    connect_subparsers = connect_parser.add_subparsers(
+        dest="connect_command",
+        help="Connection commands",
+        required=False,
+    )
+    connect_parser.set_defaults(func=connect_status)
+
+    connect_status_parser = connect_subparsers.add_parser(
+        "status",
+        aliases=["st"],
+        help="Show saved connection profiles and active connection",
+    )
+    connect_status_parser.set_defaults(func=connect_status)
+
+    connect_byok_parser = connect_subparsers.add_parser(
+        "byok",
+        help="Configure BYOK provider/model connection",
+    )
+    connect_byok_parser.add_argument("--provider", required=True, help="BYOK provider id")
+    connect_byok_parser.add_argument("--model", required=True, help="Model id")
+    connect_byok_parser.add_argument(
+        "--api-key-env",
+        help="Environment variable name for API key (e.g. OPENAI_API_KEY)",
+    )
+    connect_byok_parser.add_argument(
+        "--base-url",
+        help="Optional custom provider base URL",
+    )
+    connect_byok_parser.add_argument(
+        "--activate",
+        action="store_true",
+        help="Mark BYOK as active connection",
+    )
+    connect_byok_parser.set_defaults(func=connect_byok)
+
+    connect_local_parser = connect_subparsers.add_parser(
+        "local",
+        help="Configure local model connection",
+    )
+    connect_local_parser.add_argument(
+        "--provider",
+        required=True,
+        choices=["ollama", "mlx", "lmstudio", "vllm", "sglang"],
+        help="Local provider/runtime",
+    )
+    connect_local_parser.add_argument("--model", required=True, help="Local model id/name")
+    connect_local_parser.add_argument(
+        "--endpoint",
+        help="Optional local endpoint URL",
+    )
+    connect_local_parser.add_argument(
+        "--test",
+        action="store_true",
+        help="Run basic endpoint health check",
+    )
+    connect_local_parser.add_argument(
+        "--activate",
+        action="store_true",
+        help="Mark LOCAL as active connection",
+    )
+    connect_local_parser.set_defaults(func=connect_local)
+
+    connect_acp_parser = connect_subparsers.add_parser(
+        "acp",
+        help="Configure ACP agent connection",
+    )
+    connect_acp_parser.add_argument("--agent", required=True, help="ACP agent id/name")
+    connect_acp_parser.add_argument(
+        "--model",
+        help="Optional ACP model override",
+    )
+    connect_acp_parser.add_argument(
+        "--command",
+        help='ACP launch command (e.g. "opencode acp")',
+    )
+    connect_acp_parser.add_argument(
+        "--test",
+        action="store_true",
+        help="Verify ACP command binary is available",
+    )
+    connect_acp_parser.add_argument(
+        "--activate",
+        action="store_true",
+        help="Mark ACP as active connection",
+    )
+    connect_acp_parser.set_defaults(func=connect_acp)
+
+    connect_mcp_parser = connect_subparsers.add_parser(
+        "mcp",
+        help="Add/update MCP server configuration",
+    )
+    connect_mcp_parser.add_argument("--name", required=True, help="MCP server name")
+    connect_mcp_parser.add_argument(
+        "--transport",
+        required=True,
+        choices=["stdio", "http", "sse"],
+        help="MCP transport type",
+    )
+    connect_mcp_parser.add_argument(
+        "--command",
+        help="Server command for stdio transport",
+    )
+    connect_mcp_parser.add_argument(
+        "--args",
+        help="Quoted command arguments for stdio transport",
+    )
+    connect_mcp_parser.add_argument(
+        "--url",
+        help="Server URL for http/sse transport",
+    )
+    connect_mcp_parser.add_argument(
+        "--disable",
+        action="store_true",
+        help="Save server as disabled",
+    )
+    connect_mcp_parser.add_argument(
+        "--test",
+        action="store_true",
+        help="Run basic availability check",
+    )
+    connect_mcp_parser.add_argument(
+        "--activate",
+        action="store_true",
+        help="Mark MCP server as active connection",
+    )
+    connect_mcp_parser.set_defaults(func=connect_mcp)
 
     # Auth commands - DISABLED FOR OSS VERSION
     # login_parser = subparsers.add_parser(

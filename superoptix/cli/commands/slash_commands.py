@@ -1,5 +1,6 @@
 import os
 import warnings
+import json
 
 """Slash command handler for conversational mode.
 
@@ -13,6 +14,16 @@ from rich.table import Table
 from rich.panel import Panel
 from rich.align import Align
 from rich.text import Text
+from rich.prompt import Prompt
+
+from superoptix.cli.connection_state import ConnectionStateStore
+from superoptix.cli.provider_catalog import load_provider_catalog
+
+try:
+    from prompt_toolkit.shortcuts import input_dialog, radiolist_dialog
+except Exception:
+    input_dialog = None
+    radiolist_dialog = None
 
 # Suppress warnings for clean CLI experience
 warnings.filterwarnings("ignore")
@@ -34,6 +45,8 @@ class SlashCommandHandler:
         self.chat_agent = chat_agent  # Reference to chat agent for reloading
         self.status_bar = status_bar  # Status bar instance
         self.progress_tracker = progress_tracker  # Progress tracker instance
+        self.connection_store = ConnectionStateStore()
+        self.provider_catalog = load_provider_catalog()
 
         # Initialize playbook registry
         try:
@@ -59,6 +72,14 @@ class SlashCommandHandler:
         except Exception:
             self.mcp_client = None
 
+        # Initialize ACP client
+        try:
+            from .acp_client import ACPClient
+
+            self.acp_client = ACPClient(project_root=Path.cwd())
+        except Exception:
+            self.acp_client = None
+
         self.commands = self._register_commands()
 
     def _register_commands(self) -> dict:
@@ -77,6 +98,9 @@ class SlashCommandHandler:
             "/clear": self.cmd_clear,
             "/history": self.cmd_history,
             "/mcp": self.cmd_mcp,
+            "/acp": self.cmd_acp,
+            "/connect": self.cmd_connect,
+            "/c": self.cmd_connect,
             "/session": self.cmd_session,
             "/tasks": self.cmd_tasks,
             "/build": self.cmd_build,
@@ -182,6 +206,10 @@ class SlashCommandHandler:
         table.add_row("/model", "Manage AI models")
         table.add_row("/model list", "List all available models")
         table.add_row("/model set <model>", "Switch model")
+        table.add_row("/connect or /c", "SuperQode-style connection command")
+        table.add_row("/connect byok <provider>/<model>", "Direct BYOK connect")
+        table.add_row("/connect local <provider>/<model>", "Direct local connect")
+        table.add_row("/connect acp [agent] [model]", "Direct ACP connect")
         table.add_row("/config", "Show configuration")
         table.add_row("/config show", "Show all settings")
         table.add_row("/config set <k> <v>", "Set configuration")
@@ -213,7 +241,16 @@ class SlashCommandHandler:
         table.add_row("/mcp list", "List MCP servers")
         table.add_row("/mcp add <name> <cmd>", "Add MCP server")
         table.add_row("/mcp enable <name>", "Enable MCP server")
+        table.add_row("/mcp connect <name>", "Connect MCP server now")
+        table.add_row("/mcp disconnect <name>", "Disconnect MCP server")
         table.add_row("/mcp tools <name>", "List server tools")
+        table.add_row("", "")
+
+        table.add_row("[bold yellow]🔌 ACP Connection[/bold yellow]", "")
+        table.add_row("/acp", "Show ACP status")
+        table.add_row("/acp connect [agent] [model]", "Connect ACP agent")
+        table.add_row("/acp send <prompt>", "Send a prompt to ACP agent")
+        table.add_row("/acp disconnect", "Disconnect ACP agent")
         table.add_row("", "")
 
         # Session & Tasks
@@ -337,75 +374,47 @@ class SlashCommandHandler:
 
         self.console.print(title_panel)
         self.console.print()
+        local_catalog = self.provider_catalog.get("local", {})
+        byok_catalog = self.provider_catalog.get("byok", {})
 
-        # Local models (Ollama)
-        self.console.print("[bold green]🏠 LOCAL MODELS (via Ollama)[/bold green]\n")
+        self.console.print("[bold green]🏠 LOCAL PROVIDERS[/bold green]\n")
+        for provider_id, entry in list(local_catalog.items())[:12]:
+            examples = ", ".join(entry.example_models[:3]) if entry.example_models else "no examples"
+            self.console.print(f"  • [cyan]{provider_id}[/cyan] ({entry.name})")
+            self.console.print(f"    [dim]{examples}[/dim]")
 
-        try:
-            import requests
-
-            response = requests.get("http://localhost:11434/api/tags", timeout=2)
-
-            if response.status_code == 200:
-                tags = response.json().get("models", [])
-
-                if tags:
-                    self.console.print("[green]Installed:[/green]")
-                    for tag in tags:
-                        current = (
-                            " (current)"
-                            if tag["name"] == self.config.get("model")
-                            else ""
-                        )
-                        self.console.print(f"  ✅ {tag['name']}{current}")
-                else:
-                    self.console.print("[yellow]No models installed yet[/yellow]")
-
-                self.console.print("\n[dim]Popular models to install:[/dim]")
-                self.console.print("  • llama3.1:8b (4.7GB) - Fast, good quality")
-                self.console.print("  • qwen2.5:14b (8.9GB) - Better quality")
-                self.console.print("  • deepseek-coder:33b (19GB) - Best for coding")
-                self.console.print("  • mistral:7b (4.1GB) - Fast alternative")
-
-                self.console.print(
-                    "\n[dim]Install: [cyan]ollama pull <model>[/cyan][/dim]"
-                )
-            else:
-                self.console.print("[red]Ollama not responding[/red]")
-        except:
-            self.console.print("[red]❌ Ollama not running[/red]")
-            self.console.print("[dim]Install: https://ollama.com[/dim]")
-
-        # Cloud models
         self.console.print("\n" + "─" * 60 + "\n")
-        self.console.print("[bold cyan]☁️  CLOUD MODELS[/bold cyan]\n")
+        self.console.print("[bold cyan]☁️  BYOK PROVIDERS[/bold cyan]\n")
+        for provider_id, entry in list(byok_catalog.items())[:20]:
+            env_hint = entry.env_vars[0] if entry.env_vars else "no-key"
+            examples = ", ".join(entry.example_models[:2]) if entry.example_models else "no examples"
+            self.console.print(f"  • [cyan]{provider_id}[/cyan] ({entry.name}) [dim]{env_hint}[/dim]")
+            self.console.print(f"    [dim]{examples}[/dim]")
 
-        self.console.print("[bold]OpenAI[/bold] (Requires OPENAI_API_KEY):")
-        self.console.print("  • gpt-4o - Best overall")
-        self.console.print("  • gpt-4o-mini - Fast and affordable")
-        self.console.print("  • gpt-4-turbo - Longer context")
-
-        self.console.print("\n[bold]Anthropic[/bold] (Requires ANTHROPIC_API_KEY):")
-        self.console.print("  • claude-3.5-sonnet - Best for coding")
-        self.console.print("  • claude-3.5-haiku - Fast and affordable")
-
-        self.console.print(
-            "\n[dim]Set API key: [cyan]/config set OPENAI_API_KEY sk-...[/cyan][/dim]"
-        )
-        self.console.print(
-            "[dim]Switch provider: [cyan]/model set gpt-4o[/cyan][/dim]\n"
-        )
+        self.console.print()
+        self.console.print("[dim]Connect examples:[/dim]")
+        self.console.print("[dim]  /connect local ollama/llama3.2:3b[/dim]")
+        self.console.print("[dim]  /connect byok openai/gpt-4o[/dim]")
+        self.console.print("[dim]  /connect byok anthropic/claude-sonnet-4[/dim]\n")
 
     def _set_model(self, model_name: str):
         """Set/switch model."""
         # Update config
         from superoptix.cli.commands.conversational import save_config
 
+        # Support provider/model format.
+        provider_prefix = None
+        bare_model = model_name
+        if "/" in model_name:
+            provider_prefix, bare_model = model_name.split("/", 1)
+            provider_prefix = provider_prefix.strip().lower()
+            bare_model = bare_model.strip()
+
         # Determine provider from model name
-        if model_name.startswith("gpt-4") or model_name.startswith("gpt-3"):
+        if provider_prefix == "openai" or bare_model.startswith("gpt-4") or bare_model.startswith("gpt-3"):
             # OpenAI cloud models
             self.config["provider"] = "openai"
-            self.config["model"] = model_name
+            self.config["model"] = bare_model
 
             # Check for API key
             if "api_key" not in self.config and not os.getenv("OPENAI_API_KEY"):
@@ -415,10 +424,10 @@ class SlashCommandHandler:
                 )
                 return
 
-        elif model_name.startswith("claude"):
+        elif provider_prefix == "anthropic" or bare_model.startswith("claude"):
             # Anthropic cloud models
             self.config["provider"] = "anthropic"
-            self.config["model"] = model_name
+            self.config["model"] = bare_model
 
             if "api_key" not in self.config and not os.getenv("ANTHROPIC_API_KEY"):
                 self.console.print("\n[yellow]⚠️  ANTHROPIC_API_KEY not set[/yellow]")
@@ -427,10 +436,14 @@ class SlashCommandHandler:
                 )
                 return
 
+        elif provider_prefix in {"google", "gemini"}:
+            self.config["provider"] = "google"
+            self.config["model"] = bare_model
+
         else:
             # Other local models via Ollama
             self.config["provider"] = "ollama"
-            self.config["model"] = model_name
+            self.config["model"] = bare_model
             self.config["api_base"] = "http://localhost:11434"
 
         save_config(self.config)
@@ -724,6 +737,349 @@ class SlashCommandHandler:
             "\n[yellow]💬 Conversation history feature coming soon![/yellow]\n"
         )
 
+    def cmd_connect(self, *args):
+        """Handle /connect (SuperQode-style ACP/BYOK/LOCAL connections)."""
+        if not args:
+            self._connect_interactive_root()
+            return
+
+        sub = args[0].lower()
+        if sub in {"status"}:
+            self._connect_show_status()
+            return
+        if sub in {"byok", "local"}:
+            self._connect_mode(sub, list(args[1:]))
+            return
+        if sub == "acp":
+            agent = args[1] if len(args) > 1 else None
+            model = args[2] if len(args) > 2 else None
+            self._connect_acp(agent=agent, model=model)
+            return
+
+        # Shortcut: /connect <provider>/<model> => BYOK
+        provider, model = self._split_provider_model(sub, args[1] if len(args) > 1 else None)
+        if provider and model:
+            self._connect_byok(provider=provider, model=model, api_key_env=None)
+            return
+
+        self._connect_show_help()
+
+    def _connect_mode(self, mode: str, args: list[str]):
+        if not args:
+            self._connect_interactive_mode(mode)
+            return
+
+        token = args[0].strip().lower()
+        if token in {"!", "history"}:
+            self._connect_show_history(mode)
+            return
+        if token in {"-", "last"}:
+            self._connect_previous(mode)
+            return
+
+        provider, model = self._split_provider_model(args[0], args[1] if len(args) > 1 else None)
+        if mode == "byok":
+            api_key_env = args[2] if len(args) > 2 else None
+            self._connect_byok(provider=provider, model=model, api_key_env=api_key_env)
+            return
+        endpoint = args[2] if len(args) > 2 else None
+        self._connect_local(provider=provider, model=model, endpoint=endpoint)
+
+    def _supports_interactive_picker(self) -> bool:
+        return bool(radiolist_dialog and input_dialog and hasattr(self.console.file, "isatty") and self.console.file.isatty())
+
+    def _connect_interactive_root(self):
+        if not self._supports_interactive_picker():
+            self._connect_show_help()
+            return
+        choice = radiolist_dialog(
+            title="Connect Runtime",
+            text="Select a runtime mode:",
+            values=[
+                ("acp", "ACP Agent (coding agent protocol)"),
+                ("byok", "BYOK Provider (cloud API key)"),
+                ("local", "Local Provider (self-hosted model)"),
+                ("status", "Show current connection status"),
+            ],
+        ).run()
+        if not choice:
+            return
+        if choice == "status":
+            self._connect_show_status()
+            return
+        if choice == "acp":
+            self._connect_interactive_acp()
+            return
+        self._connect_interactive_mode(choice)
+
+    def _connect_interactive_mode(self, mode: str):
+        catalog = self.provider_catalog.get(mode, {})
+        if not catalog:
+            self.console.print(f"\n[yellow]No providers available for {mode}.[/yellow]\n")
+            return
+        if not self._supports_interactive_picker():
+            self._connect_show_mode_catalog(mode)
+            return
+
+        provider_values = []
+        for provider_id, entry in sorted(catalog.items(), key=lambda x: x[0]):
+            label = f"{provider_id} - {entry.name}"
+            if mode == "byok" and entry.env_vars:
+                label += f" ({entry.env_vars[0]})"
+            provider_values.append((provider_id, label))
+        provider = radiolist_dialog(
+            title=f"{mode.upper()} Provider",
+            text="Select provider:",
+            values=provider_values,
+        ).run()
+        if not provider:
+            return
+        entry = catalog.get(provider)
+        models = list((entry.example_models if entry else [])[:20])
+        if not models:
+            model = input_dialog(
+                title=f"{mode.upper()} Model",
+                text=f"Enter model for provider '{provider}':",
+            ).run()
+        else:
+            values = [(m, m) for m in models] + [("__custom__", "Custom model...")]
+            selected = radiolist_dialog(
+                title=f"{mode.upper()} Model",
+                text=f"Select model for {provider}:",
+                values=values,
+            ).run()
+            if not selected:
+                return
+            if selected == "__custom__":
+                model = input_dialog(
+                    title=f"{mode.upper()} Model",
+                    text=f"Enter custom model for '{provider}':",
+                ).run()
+            else:
+                model = selected
+        if not model:
+            return
+
+        if mode == "byok":
+            default_env = entry.env_vars[0] if entry and entry.env_vars else ""
+            api_env = input_dialog(
+                title="BYOK API Key Env",
+                text=f"API key env var for {provider} (optional):",
+                default=default_env,
+            ).run()
+            self._connect_byok(provider=provider, model=model, api_key_env=(api_env or default_env or None))
+            return
+
+        default_endpoint = entry.default_base_url if entry else ""
+        endpoint = input_dialog(
+            title="Local Endpoint",
+            text=f"Endpoint for {provider} (optional):",
+            default=default_endpoint or "",
+        ).run()
+        self._connect_local(provider=provider, model=model, endpoint=(endpoint or default_endpoint or None))
+
+    def _connect_interactive_acp(self):
+        if self._supports_interactive_picker():
+            agent = radiolist_dialog(
+                title="ACP Agent",
+                text="Select ACP agent:",
+                values=[
+                    ("opencode", "opencode"),
+                    ("claude-code", "claude-code"),
+                    ("custom", "Custom agent id..."),
+                ],
+            ).run()
+            if not agent:
+                return
+            if agent == "custom":
+                agent = input_dialog(title="ACP Agent", text="Enter ACP agent id:").run()
+                if not agent:
+                    return
+            model = input_dialog(
+                title="ACP Model (optional)",
+                text="Model override (leave blank for saved/default):",
+            ).run()
+            self._connect_acp(agent=agent, model=(model or None))
+            return
+
+        agent = Prompt.ask("ACP agent", default="opencode")
+        model = Prompt.ask("ACP model (optional)", default="")
+        self._connect_acp(agent=agent, model=(model or None))
+
+    def _connect_show_help(self):
+        panel = Panel(
+            Text.from_markup(
+                "[bold cyan]Super Connection Commands[/bold cyan]\n\n"
+                "[green]/connect status[/green]                        Show active profile/runtime\n"
+                "[green]/connect[/green]                               Interactive keyboard picker\n"
+                "[green]/connect acp[/green] [agent] [model]          Connect ACP agent\n"
+                "[green]/connect byok[/green] <provider>/<model> [env] Connect BYOK provider/model\n"
+                "[green]/connect local[/green] <provider>/<model>      Connect local provider/model\n"
+                "[green]/connect byok ![/green] or [green]/connect local ![/green]     Show history\n"
+                "[green]/connect byok -[/green] or [green]/connect local -[/green]     Switch previous\n\n"
+                "[dim]Examples:[/dim]\n"
+                "[dim]/connect acp opencode gpt-4o-mini[/dim]\n"
+                "[dim]/connect byok openai/gpt-4o OPENAI_API_KEY[/dim]\n"
+                "[dim]/connect local ollama/llama3.2:3b[/dim]"
+            ),
+            border_style="bright_cyan",
+            title="[bold]🔌 Connect[/bold]",
+            padding=(1, 2),
+        )
+        self.console.print()
+        self.console.print(panel)
+        self.console.print()
+
+    def _connect_show_status(self):
+        profile = self.connection_store.profile(self.connection_store.load())
+        active = profile.get("active_connection") or {}
+        self.console.print()
+        self.console.print("[bold cyan]Connection Status[/bold cyan]")
+        self.console.print(f"  • Active: [green]{active.get('type', '-')}/{active.get('name') or '-'}[/green]")
+        self.console.print(f"  • BYOK: [dim]{profile.get('byok', {}) or '-'}[/dim]")
+        self.console.print(f"  • LOCAL: [dim]{profile.get('local', {}) or '-'}[/dim]")
+        self.console.print(f"  • ACP: [dim]{profile.get('acp', {}) or '-'}[/dim]")
+        self.console.print()
+
+    def _connect_show_mode_catalog(self, mode: str):
+        catalog = self.provider_catalog.get(mode, {})
+        if not catalog:
+            self.console.print(f"\n[yellow]No providers available for {mode}.[/yellow]\n")
+            return
+        self.console.print()
+        title = "BYOK Providers" if mode == "byok" else "Local Providers"
+        table = Table(title=title, header_style="bold cyan")
+        table.add_column("Provider", style="bold")
+        table.add_column("API Key Env" if mode == "byok" else "Endpoint")
+        table.add_column("Example Models")
+        for entry in catalog.values():
+            key_or_endpoint = (
+                (entry.env_vars[0] if entry.env_vars else "-")
+                if mode == "byok"
+                else (entry.default_base_url or "-")
+            )
+            examples = ", ".join(entry.example_models[:3]) if entry.example_models else "-"
+            table.add_row(entry.provider_id, key_or_endpoint, examples)
+        self.console.print(table)
+        self.console.print()
+
+    def _connect_show_history(self, mode: str):
+        items = [h for h in self.connection_store.connection_history(limit=20) if h.get("type") == mode]
+        self.console.print()
+        if not items:
+            self.console.print(f"[yellow]No {mode.upper()} connection history yet.[/yellow]\n")
+            return
+        self.console.print(f"[bold cyan]{mode.upper()} History[/bold cyan]")
+        for idx, item in enumerate(items[:10], start=1):
+            self.console.print(f"  {idx}. [green]{item.get('type')}/{item.get('name') or '-'}[/green] [dim]{item.get('updated_at', '')}[/dim]")
+        self.console.print()
+
+    def _connect_previous(self, mode: str):
+        items = [h for h in self.connection_store.connection_history(limit=20) if h.get("type") == mode]
+        if len(items) < 2:
+            self.console.print(f"\n[yellow]No previous {mode.upper()} connection found.[/yellow]\n")
+            return
+        previous = items[1]
+        name = previous.get("name")
+        profile = self.connection_store.profile(self.connection_store.load())
+        if mode == "byok":
+            cfg = profile.get("byok", {}) or {}
+            self._connect_byok(cfg.get("provider") or name, cfg.get("model"), cfg.get("api_key_env"))
+        else:
+            cfg = profile.get("local", {}) or {}
+            self._connect_local(cfg.get("provider") or name, cfg.get("model"), cfg.get("endpoint"))
+
+    def _split_provider_model(self, first: str | None, second: str | None) -> tuple[str | None, str | None]:
+        if not first:
+            return None, None
+        raw = first.strip()
+        if "/" in raw:
+            provider, model = raw.split("/", 1)
+            return provider.strip().lower() or None, model.strip() or None
+        provider = raw.lower()
+        return provider, (second.strip() if second else None)
+
+    def _connect_byok(self, provider: str | None, model: str | None, api_key_env: str | None):
+        if not provider:
+            self.console.print("\n[yellow]Usage: /connect byok <provider>/<model> [API_KEY_ENV][/yellow]\n")
+            return
+        catalog = self.provider_catalog.get("byok", {})
+        entry = catalog.get(provider)
+        if not model and entry and entry.example_models:
+            model = entry.example_models[0]
+        if not model:
+            self.console.print("\n[yellow]Missing model. Example: /connect byok openai/gpt-4o[/yellow]\n")
+            return
+
+        resolved_env = api_key_env or (entry.env_vars[0] if entry and entry.env_vars else None)
+        base_url = entry.default_base_url if entry else None
+        try:
+            self.connection_store.set_byok(provider=provider, model=model, api_key_env=resolved_env, base_url=base_url)
+            self.connection_store.set_active("byok", provider)
+        except Exception as exc:
+            self.console.print(f"\n[red]❌ Failed to save BYOK connection:[/red] {exc}\n")
+            return
+
+        self.config["provider"] = provider
+        self.config["model"] = model
+        if resolved_env:
+            self.config["api_key_env"] = resolved_env
+            if os.getenv(resolved_env):
+                self.config["api_key"] = os.getenv(resolved_env)
+        if base_url:
+            self.config["base_url"] = base_url
+        self._persist_and_reload_config()
+
+        env_state = "set" if (resolved_env and os.getenv(resolved_env)) else "missing"
+        self.console.print()
+        self.console.print(f"[green]✅ BYOK connected:[/green] {provider}/{model}")
+        self.console.print(f"[dim]API key env: {resolved_env or '-'} ({env_state})[/dim]")
+        self.console.print()
+
+    def _connect_local(self, provider: str | None, model: str | None, endpoint: str | None):
+        if not provider:
+            self.console.print("\n[yellow]Usage: /connect local <provider>/<model> [endpoint][/yellow]\n")
+            return
+        catalog = self.provider_catalog.get("local", {})
+        entry = catalog.get(provider)
+        if not model and entry and entry.example_models:
+            model = entry.example_models[0]
+        if not model:
+            self.console.print("\n[yellow]Missing model. Example: /connect local ollama/llama3.2:3b[/yellow]\n")
+            return
+        resolved_endpoint = endpoint or (entry.default_base_url if entry else None)
+        try:
+            self.connection_store.set_local(provider=provider, model=model, endpoint=resolved_endpoint)
+            self.connection_store.set_active("local", provider)
+        except Exception as exc:
+            self.console.print(f"\n[red]❌ Failed to save LOCAL connection:[/red] {exc}\n")
+            return
+
+        self.config["provider"] = provider
+        self.config["model"] = model
+        if resolved_endpoint:
+            self.config["api_base"] = resolved_endpoint
+        self._persist_and_reload_config()
+
+        self.console.print()
+        self.console.print(f"[green]✅ LOCAL connected:[/green] {provider}/{model}")
+        if resolved_endpoint:
+            self.console.print(f"[dim]Endpoint: {resolved_endpoint}[/dim]")
+        self.console.print()
+
+    def _persist_and_reload_config(self):
+        from superoptix.cli.commands.conversational import save_config
+
+        try:
+            save_config(self.config)
+        except Exception as exc:
+            self.console.print(f"[yellow]⚠️  Config save warning:[/yellow] {exc}")
+        if self.chat_agent:
+            try:
+                self.chat_agent.reload_config()
+            except Exception:
+                pass
+
     def cmd_mcp(self, *args):
         """Handle /mcp commands for MCP server management."""
         if not self.mcp_client:
@@ -741,6 +1097,12 @@ class SlashCommandHandler:
             self._enable_mcp_server(args[1])
         elif args[0] == "disable" and len(args) > 1:
             self._disable_mcp_server(args[1])
+        elif args[0] == "connect" and len(args) > 1:
+            self._connect_mcp_server(args[1])
+        elif args[0] == "disconnect" and len(args) > 1:
+            self._disconnect_mcp_server(args[1])
+        elif args[0] == "reload":
+            self._reload_mcp_servers()
         elif args[0] == "tools" and len(args) > 1:
             self._list_mcp_tools(args[1])
         else:
@@ -753,6 +1115,11 @@ class SlashCommandHandler:
             )
             self.console.print("  [cyan]/mcp enable <name>[/cyan] - Enable server")
             self.console.print("  [cyan]/mcp disable <name>[/cyan] - Disable server")
+            self.console.print("  [cyan]/mcp connect <name>[/cyan] - Connect server")
+            self.console.print(
+                "  [cyan]/mcp disconnect <name>[/cyan] - Disconnect server"
+            )
+            self.console.print("  [cyan]/mcp reload[/cyan] - Reload MCP config")
             self.console.print("  [cyan]/mcp tools <name>[/cyan] - List server tools\n")
 
     def _show_mcp_status(self):
@@ -796,22 +1163,38 @@ class SlashCommandHandler:
         table = Table(show_header=True, header_style="bold cyan")
         table.add_column("Name", style="yellow")
         table.add_column("Status", style="green")
+        table.add_column("Connection", style="magenta")
         table.add_column("Command", style="dim")
         table.add_column("Description", style="cyan")
 
+        status_map = {s.name: s for s in self.mcp_client.list_server_status()}
         for server in servers:
             status = "✅ Enabled" if server.enabled else "❌ Disabled"
+            conn = status_map.get(server.name)
+            conn_status = conn.state.value if conn else "disconnected"
+            if conn_status == "connected":
+                conn_status = "🟢 connected"
+            elif conn_status == "connecting":
+                conn_status = "🟡 connecting"
+            elif conn_status == "error":
+                conn_status = "🔴 error"
+            else:
+                conn_status = "⚪ disconnected"
             command = f"{server.command} {' '.join(server.args[:2])}"
             if len(server.args) > 2:
                 command += "..."
 
-            table.add_row(server.name, status, command, server.description or "-")
+            table.add_row(
+                server.name, status, conn_status, command, server.description or "-"
+            )
 
         self.console.print(table)
         self.console.print()
 
         self.console.print("[dim]Commands:[/dim]")
         self.console.print("  [cyan]/mcp enable <name>[/cyan] - Enable a server")
+        self.console.print("  [cyan]/mcp connect <name>[/cyan] - Connect a server")
+        self.console.print("  [cyan]/mcp disconnect <name>[/cyan] - Disconnect a server")
         self.console.print("  [cyan]/mcp tools <name>[/cyan] - List server's tools")
         self.console.print(
             "  [cyan]/mcp add <name> <cmd> [args][/cyan] - Add new server\n"
@@ -832,6 +1215,33 @@ class SlashCommandHandler:
         """Disable an MCP server."""
         self.mcp_client.disable_server(name)
         self.console.print(f"\n[yellow]⚠️  Disabled MCP server:[/yellow] {name}\n")
+
+    def _connect_mcp_server(self, name: str):
+        """Connect an MCP server."""
+        ok = self.mcp_client.connect_server_sync(name)
+        if ok:
+            self.console.print(f"\n[green]✅ Connected MCP server:[/green] {name}\n")
+        else:
+            self.console.print(
+                f"\n[yellow]⚠️  Failed to connect MCP server:[/yellow] {name}\n"
+            )
+
+    def _disconnect_mcp_server(self, name: str):
+        """Disconnect an MCP server."""
+        ok = self.mcp_client.disconnect_server_sync(name)
+        if ok:
+            self.console.print(
+                f"\n[green]✅ Disconnected MCP server:[/green] {name}\n"
+            )
+        else:
+            self.console.print(
+                f"\n[yellow]⚠️  Failed to disconnect MCP server:[/yellow] {name}\n"
+            )
+
+    def _reload_mcp_servers(self):
+        """Reload MCP server config from disk."""
+        self.mcp_client.reload_config()
+        self.console.print("\n[green]✅ Reloaded MCP configuration[/green]\n")
 
     def _list_mcp_tools(self, server_name: str):
         """List tools available on an MCP server."""
@@ -855,6 +1265,123 @@ class SlashCommandHandler:
             table.add_row(tool.get("name", "unknown"), tool.get("description", "-"))
 
         self.console.print(table)
+        self.console.print()
+
+    def cmd_acp(self, *args):
+        """Handle /acp commands for ACP session lifecycle."""
+        if not self.acp_client:
+            self.console.print("\n[yellow]⚠️  ACP client not available[/yellow]\n")
+            return
+
+        if not args:
+            self._show_acp_status()
+            return
+
+        sub = args[0]
+        if sub == "status":
+            self._show_acp_status()
+        elif sub == "connect":
+            agent = args[1] if len(args) > 1 else None
+            model = args[2] if len(args) > 2 else None
+            self._connect_acp(agent=agent, model=model)
+        elif sub == "disconnect":
+            self._disconnect_acp()
+        elif sub == "send" and len(args) > 1:
+            self._send_acp_prompt(" ".join(args[1:]))
+        else:
+            self.console.print(f"\n[red]Unknown /acp subcommand[/red]")
+            self.console.print("[dim]Usage:[/dim]")
+            self.console.print("  [cyan]/acp[/cyan] - Show ACP status")
+            self.console.print(
+                "  [cyan]/acp connect [agent] [model][/cyan] - Connect ACP agent"
+            )
+            self.console.print("  [cyan]/acp send <prompt>[/cyan] - Send ACP prompt")
+            self.console.print(
+                "  [cyan]/acp disconnect[/cyan] - Disconnect ACP session\n"
+            )
+
+    def _show_acp_status(self):
+        connected = self.acp_client.is_connected()
+        agent = self.acp_client.connected_agent() or "-"
+        panel = Panel(
+            f"[bold cyan]ACP Session[/bold cyan]\n\n"
+            f"• Connected: {'[green]✅ yes[/green]' if connected else '[yellow]no[/yellow]'}\n"
+            f"• Agent: {agent}\n\n"
+            f"[dim]Use /acp connect [agent] [model] to start[/dim]",
+            border_style="cyan",
+            padding=(1, 2),
+        )
+        self.console.print()
+        self.console.print(panel)
+        self.console.print()
+
+    def _connect_acp(self, agent: Optional[str], model: Optional[str]):
+        from .acp_client import ACPSessionConfig
+        from superoptix.cli.connection_state import ConnectionStateStore
+
+        store = ConnectionStateStore()
+        profile = store.profile(store.load())
+        saved = profile.get("acp", {}) or {}
+
+        resolved_agent = agent or saved.get("agent") or "opencode"
+        command = saved.get("command") or _default_acp_command(resolved_agent)
+        resolved_model = model or saved.get("model")
+
+        if not command:
+            self.console.print(
+                "\n[yellow]No ACP command configured.[/yellow] Use `super connect acp --agent <id> --command \"...\"` first.\n"
+            )
+            return
+
+        cfg = ACPSessionConfig(
+            agent=resolved_agent,
+            command=command,
+            model=resolved_model,
+            cwd=str(Path.cwd()),
+        )
+        ok = self.acp_client.connect_sync(cfg)
+        if ok:
+            self.console.print(
+                f"\n[green]✅ ACP connected:[/green] agent={resolved_agent}"
+                + (f", model={resolved_model}" if resolved_model else "")
+            )
+            store.set_acp(agent=resolved_agent, model=resolved_model, command=command)
+            store.set_active("acp", resolved_agent)
+            self.console.print()
+        else:
+            self.console.print(
+                "\n[yellow]⚠️  ACP connection failed.[/yellow] Check your command and agent installation.\n"
+            )
+
+    def _disconnect_acp(self):
+        self.acp_client.disconnect_sync()
+        self.console.print("\n[green]✅ ACP disconnected[/green]\n")
+
+    def _send_acp_prompt(self, prompt: str):
+        if not self.acp_client.is_connected():
+            self.console.print(
+                "\n[yellow]ACP is not connected.[/yellow] Run `/acp connect` first.\n"
+            )
+            return
+
+        with self.console.status("🧠 ACP agent thinking...", spinner="dots"):
+            result = self.acp_client.send_prompt_sync(prompt)
+        self.console.print()
+        if not result.get("ok"):
+            self.console.print(
+                f"[red]ACP request failed:[/red] {result.get('error', 'unknown error')}\n"
+            )
+            return
+
+        payload = result.get("result") or {}
+        pretty = json.dumps(payload, indent=2, default=str)
+        panel = Panel(
+            pretty,
+            title="[bold bright_cyan]ACP Response[/bold bright_cyan]",
+            border_style="cyan",
+            padding=(1, 1),
+        )
+        self.console.print(panel)
         self.console.print()
 
     def cmd_session(self, *args):
@@ -1268,3 +1795,11 @@ class SlashCommandHandler:
     def cmd_exit(self, *args):
         """Exit conversational mode."""
         pass  # Handled in main loop
+
+
+def _default_acp_command(agent: str) -> Optional[str]:
+    defaults = {
+        "opencode": "opencode acp",
+        "claude-code": "claude-code acp",
+    }
+    return defaults.get(agent)
