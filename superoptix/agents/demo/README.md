@@ -101,7 +101,7 @@ super agent pull dspy-demo
 
 ### DSPy StackOne Calendly Demo
 **Framework:** DSPy  
-**Features:** StackOne discovery tools (Calendly provider)  
+**Features:** StackOne connector tools (Calendly provider)  
 **ID:** `stackone-calendly`  
 **Use Case:** Meeting schedule and conflict queries through connector tools
 
@@ -112,7 +112,7 @@ super agent pull stackone-calendly
 **Highlights:**
 - 🔌 Connector-based SaaS access with managed auth
 - 📅 Calendly provider filters preconfigured
-- 🛠️ Discovery-mode tools for broad connector coverage
+- 🛠️ Direct StackOneToolSet tool loading
 
 ---
 

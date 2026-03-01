@@ -306,12 +306,10 @@ def build_stackone_tools(dspy_tool_config: dict[str, Any] | None) -> list[Any]:
     if not isinstance(stackone_cfg, dict):
         stackone_cfg = {}
 
-    enabled = bool(
-        stackone_cfg.get("enabled", mode in {"stackone", "stackone_discovery"})
-    )
+    enabled = bool(stackone_cfg.get("enabled", mode == "stackone"))
     if not enabled:
         return []
-    if mode not in {"stackone", "stackone_discovery"} and not stackone_cfg:
+    if mode != "stackone" and not stackone_cfg:
         return []
 
     strict_mode = str(
@@ -364,9 +362,6 @@ def build_stackone_tools(dspy_tool_config: dict[str, Any] | None) -> list[Any]:
         account_ids = list(dict.fromkeys(account_ids))
 
     base_url = stackone_cfg.get("base_url")
-    discovery_mode = (
-        bool(stackone_cfg.get("discovery_mode", False)) or mode == "stackone_discovery"
-    )
     init_kwargs = {"api_key": api_key}
     if base_url:
         init_kwargs["base_url"] = str(base_url).strip()
@@ -377,7 +372,6 @@ def build_stackone_tools(dspy_tool_config: dict[str, Any] | None) -> list[Any]:
         providers=providers or [],
         actions=actions or [],
         account_ids_count=len(account_ids or []),
-        discovery_mode=bool(discovery_mode),
     )
 
     try:
@@ -435,11 +429,7 @@ def build_stackone_tools(dspy_tool_config: dict[str, Any] | None) -> list[Any]:
                 continue
 
         bridge = StackOneBridge(fetched_tools)
-        tools = (
-            bridge.to_discovery_tools(framework="dspy")
-            if discovery_mode
-            else bridge.to_dspy()
-        )
+        tools = bridge.to_dspy()
 
         try:
             names = [getattr(t, "name", "") for t in (tools or [])]

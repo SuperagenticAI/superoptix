@@ -254,50 +254,6 @@ class TestStackOneBridgeClaudeSDK:
             assert schema["employee_id"] == str
             assert schema["include_details"] == bool
 
-    def test_to_discovery_tools_claude_sdk_framework(self, sample_stackone_tools):
-        """Test to_discovery_tools supports claude_sdk framework."""
-        mock_stackone_models = types.ModuleType("stackone_ai.models")
-        mock_stackone_models.Tools = MagicMock()
-        mock_stackone_utils = types.ModuleType("stackone_ai.utility_tools")
-        mock_stackone_utils.ToolIndex = MagicMock()
-        mock_stackone_utils.create_tool_search = MagicMock()
-        mock_stackone_utils.create_tool_execute = MagicMock()
-        with patch(
-            "superoptix.adapters.stackone_adapter.STACKONE_AVAILABLE", True
-        ), patch.dict(
-            "sys.modules",
-            {
-                "stackone_ai": types.ModuleType("stackone_ai"),
-                "stackone_ai.models": mock_stackone_models,
-                "stackone_ai.utility_tools": mock_stackone_utils,
-            },
-        ):
-            from superoptix.adapters.stackone_adapter import StackOneBridge
-
-            bridge = StackOneBridge(sample_stackone_tools)
-
-            # Mock the utility tools imports
-            with patch(
-                "stackone_ai.models.Tools"
-            ), patch(
-                "stackone_ai.utility_tools.ToolIndex"
-            ), patch(
-                "stackone_ai.utility_tools.create_tool_search"
-            ) as mock_search, patch(
-                "stackone_ai.utility_tools.create_tool_execute"
-            ) as mock_execute, patch.object(
-                StackOneBridge, "to_claude_sdk"
-            ) as mock_to_claude:
-                mock_search.return_value = MagicMock()
-                mock_execute.return_value = MagicMock()
-                mock_to_claude.return_value = (MagicMock(), ["tool1", "tool2"])
-
-                result = bridge.to_discovery_tools(framework="claude_sdk")
-
-                # Verify to_claude_sdk was called
-                mock_to_claude.assert_called_once()
-
-
 class TestClaudeSDKToolHandler:
     """Tests for Claude SDK tool handler generation."""
 

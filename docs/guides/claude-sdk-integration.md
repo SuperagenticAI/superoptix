@@ -26,7 +26,7 @@ pip install superoptix claude-agent-sdk
 
 For StackOne integration:
 ```bash
-pip install superoptix claude-agent-sdk stackone-ai
+pip install superoptix claude-agent-sdk "stackone-ai[mcp]"
 ```
 
 ---
@@ -104,7 +104,7 @@ from superoptix.adapters import StackOneBridge
 # Fetch StackOne tools
 toolset = StackOneToolSet()
 tools = toolset.fetch_tools(
-    include_tools=["hris_get_employee", "hris_list_employees"],
+    actions=["hris_get_employee", "hris_list_employees"],
     account_ids=["your_account_id"]
 )
 
@@ -142,21 +142,20 @@ async with ClaudeSDKClient(options=options) as client:
         pass
 ```
 
-### Dynamic Tool Discovery
+### StackOne Tool Filtering
 
-For large tool sets, use discovery tools:
+For large tool sets, keep filters narrow and convert directly:
 
 ```python
-# Get all tools
-tools = toolset.fetch_tools(include_tools=["hris_*", "ats_*", "crm_*"])
+# Fetch only needed families
+tools = toolset.fetch_tools(actions=["hris_*", "ats_*", "crm_*"])
 
-# Create discovery meta-tools
+# Convert directly to Claude SDK MCP tools
 bridge = StackOneBridge(tools)
-mcp_server, tool_names = bridge.to_discovery_tools(framework="claude_sdk")
+mcp_server, tool_names = bridge.to_claude_sdk()
 
-# Agent can now search for and execute tools dynamically
 options = ClaudeAgentOptions(
-    system_prompt="Use tool_search to find tools, then tool_execute to run them.",
+    system_prompt="Use StackOne tools for factual answers.",
     mcp_servers={"stackone": mcp_server},
     allowed_tools=tool_names,
 )
@@ -305,4 +304,3 @@ examples/integrations/stackone_claude_sdk_example.py
 This includes:
 - Basic StackOne + Claude SDK integration
 - Interactive sessions with ClaudeSDKClient
-- Dynamic tool discovery

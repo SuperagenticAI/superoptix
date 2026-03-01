@@ -9,6 +9,17 @@ import inspect
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
+from superoptix.runners.rlm_mode_utils import resolve_effective_rlm_mode
+
+
+def _normalize_rlm_provider(provider: Any) -> str:
+    value = str(provider or "").strip().lower()
+    if not value:
+        return "native"
+    if value == "legacy":
+        return "native"
+    return value
+
 
 def _normalize_provider(provider: str) -> str:
     value = str(provider or "").strip().lower()
@@ -117,7 +128,7 @@ def build_stackone_tools(spec_data: Dict[str, Any] | None) -> List[Any]:
     """Build Google ADK-compatible StackOne tools when configured."""
     cfg = resolve_stackone_config(spec_data)
     mode = str(cfg.get("mode", "none")).strip().lower()
-    enabled = bool(cfg.get("enabled", mode in {"stackone", "stackone_discovery"}))
+    enabled = bool(cfg.get("enabled", mode == "stackone"))
     if not enabled:
         return []
 
@@ -168,30 +179,28 @@ def build_stackone_tools(spec_data: Dict[str, Any] | None) -> List[Any]:
     fallback_unfiltered = bool(cfg.get("fallback_unfiltered", True))
 
     init_kwargs: Dict[str, Any] = {"api_key": api_key}
-    if account_ids:
-        init_kwargs["account_ids"] = account_ids
-    if providers:
-        init_kwargs["providers"] = providers
-    if actions:
-        init_kwargs["actions"] = actions
+    base_url = cfg.get("base_url")
+    if base_url:
+        init_kwargs["base_url"] = str(base_url).strip()
 
     try:
         toolset = StackOneToolSet(**init_kwargs)
-        tools = toolset.get_tools()
-        bridge = StackOneBridge(tools)
-        if mode == "stackone_discovery":
-            source_tools = bridge.to_discovery_tools(framework="dspy")
-        else:
-            source_tools = bridge.to_dspy()
+        fetched_tools = toolset.fetch_tools(
+            account_ids=account_ids or None,
+            providers=providers or None,
+            actions=actions or None,
+        )
+        bridge = StackOneBridge(fetched_tools or [])
+        source_tools = bridge.to_dspy()
         converted = _to_adk_stackone_callables(source_tools)
         if not converted and fallback_unfiltered and (providers or actions):
-            toolset = StackOneToolSet(api_key=api_key)
-            tools = toolset.get_tools()
-            bridge = StackOneBridge(tools)
-            if mode == "stackone_discovery":
-                source_tools = bridge.to_discovery_tools(framework="dspy")
-            else:
-                source_tools = bridge.to_dspy()
+            fetched_tools = toolset.fetch_tools(
+                account_ids=account_ids or None,
+                providers=None,
+                actions=None,
+            )
+            bridge = StackOneBridge(fetched_tools or [])
+            source_tools = bridge.to_dspy()
             converted = _to_adk_stackone_callables(source_tools)
         names = [getattr(t, "__name__", "") for t in converted[:5]]
         if converted:
@@ -373,7 +382,15 @@ def get_google_adk_rlm_config(spec_data: Dict[str, Any] | None) -> Dict[str, Any
 
     return {
         "enabled": bool(rlm_cfg.get("enabled", False)),
+        "provider": _normalize_rlm_provider(rlm_cfg.get("provider", "native")),
         "mode": str(rlm_cfg.get("mode", "assist")).strip().lower() or "assist",
+        "auto_long_context_chars": int(
+            rlm_cfg.get("auto_long_context_chars", 12000) or 12000
+        ),
+        "auto_short_context_mode": str(
+            rlm_cfg.get("auto_short_context_mode", "direct")
+        ).strip().lower()
+        or "direct",
         "backend": str(rlm_cfg.get("backend", "litellm")).strip() or "litellm",
         "environment": str(rlm_cfg.get("environment", "python")).strip() or "python",
         "max_iterations": int(rlm_cfg.get("max_iterations", 8) or 8),
@@ -427,6 +444,7 @@ async def run_agent_with_optional_rlm(
     - disabled: direct ADK run
     - assist: RLM draft -> ADK run(augmented_prompt)
     - replace: RLM only
+    - auto: choose direct/assist/replace from prompt size thresholds
     """
     cfg = get_google_adk_rlm_config(spec_data)
     if not cfg.get("enabled", False):
@@ -437,6 +455,32 @@ async def run_agent_with_optional_rlm(
             app_name=app_name,
             user_id=user_id,
         )
+
+    mode, mode_reason = resolve_effective_rlm_mode(prompt=prompt, config=cfg)
+    if mode == "direct":
+        print(f"🧠 RLM auto mode selected direct execution ({mode_reason})")
+        return await run_agent_query(
+            agent=agent,
+            runner=runner,
+            prompt=prompt,
+            app_name=app_name,
+            user_id=user_id,
+        )
+
+    provider = _normalize_rlm_provider(cfg.get("provider", "native"))
+    if provider == "rlm_code":
+        print(
+            "⚠️ google_adk.rlm.provider=rlm_code is not wired yet; "
+            "falling back to provider=native."
+        )
+        provider = "native"
+    elif provider != "native":
+        print(
+            f"⚠️ Unsupported google_adk.rlm.provider '{provider}'. "
+            "Falling back to provider=native."
+        )
+        provider = "native"
+    cfg["provider"] = provider
 
     try:
         from rlm import RLM  # type: ignore
@@ -490,16 +534,14 @@ async def run_agent_with_optional_rlm(
     )
 
     span = _build_logfire_span(logfire_enabled=logfire_enabled, config=cfg)
-    mode = str(cfg.get("mode", "assist")).strip().lower()
-    if mode not in {"assist", "replace"}:
-        mode = "assist"
-
     if span is not None:
         span.__enter__()
     try:
         print(
             "🧠 RLM enabled "
-            f"(mode={mode}, backend={cfg.get('backend')}, max_iterations={cfg.get('max_iterations')})"
+            f"(provider={cfg.get('provider')}, mode={mode}, "
+            f"backend={cfg.get('backend')}, max_iterations={cfg.get('max_iterations')}, "
+            f"resolution={mode_reason})"
         )
         started = time.time()
         completion = await asyncio.to_thread(rlm.completion, prompt)

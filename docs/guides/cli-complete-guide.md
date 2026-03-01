@@ -168,7 +168,7 @@ super agent evaluate my_agent --format json --exit-code
 # Optimize with auto settings (recommended)
 super agent optimize my_agent --auto light      # Quick (5 min)
 super agent optimize my_agent --auto medium     # Balanced (15 min) ⭐ Recommended
-super agent optimize my_agent --auto intensive  # Thorough (30+ min)
+super agent optimize my_agent --auto heavy      # Thorough (30+ min)
 
 # Optimize with custom settings
 super agent optimize my_agent \
@@ -180,6 +180,10 @@ super agent optimize my_agent \
 super agent optimize my_agent \
   --auto medium \
   --reflection-lm qwen3:8b
+
+# Choose GEPA API mode (default: legacy)
+super agent optimize my_agent --auto medium --reflection-lm qwen3:8b --gepa-api legacy
+super agent optimize my_agent --auto medium --reflection-lm qwen3:8b --gepa-api optimize_anything
 
 # Fresh optimization (discard previous)
 super agent optimize my_agent --auto medium --fresh

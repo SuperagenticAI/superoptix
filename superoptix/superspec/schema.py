@@ -787,11 +787,29 @@ class SuperSpecXSchema:
                     "description": "Optional RLM orchestration for Pydantic AI runs",
                     "properties": {
                         "enabled": {"type": "boolean", "default": False},
+                        "provider": {
+                            "type": "string",
+                            "enum": ["native", "rlm_code", "legacy"],
+                            "default": "native",
+                            "description": "RLM provider (legacy is an alias of native)",
+                        },
                         "mode": {
                             "type": "string",
-                            "enum": ["assist", "replace"],
+                            "enum": ["assist", "replace", "auto"],
                             "default": "assist",
-                            "description": "assist: RLM draft then Agent.run, replace: RLM only",
+                            "description": "assist: RLM draft then Agent.run, replace: RLM only, auto: context-aware mode selection",
+                        },
+                        "auto_long_context_chars": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "default": 12000,
+                            "description": "Auto mode threshold for long-context prompts",
+                        },
+                        "auto_short_context_mode": {
+                            "type": "string",
+                            "enum": ["direct", "assist"],
+                            "default": "direct",
+                            "description": "Auto mode behavior below long-context threshold",
                         },
                         "backend": {
                             "type": "string",
@@ -859,11 +877,29 @@ class SuperSpecXSchema:
                     "description": "Optional RLM orchestration for OpenAI Agents SDK runs",
                     "properties": {
                         "enabled": {"type": "boolean", "default": False},
+                        "provider": {
+                            "type": "string",
+                            "enum": ["native", "rlm_code", "legacy"],
+                            "default": "native",
+                            "description": "RLM provider (legacy is an alias of native)",
+                        },
                         "mode": {
                             "type": "string",
-                            "enum": ["assist", "replace"],
+                            "enum": ["assist", "replace", "auto"],
                             "default": "assist",
-                            "description": "assist: RLM draft then Runner.run, replace: RLM only",
+                            "description": "assist: RLM draft then Runner.run, replace: RLM only, auto: context-aware mode selection",
+                        },
+                        "auto_long_context_chars": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "default": 12000,
+                            "description": "Auto mode threshold for long-context prompts",
+                        },
+                        "auto_short_context_mode": {
+                            "type": "string",
+                            "enum": ["direct", "assist"],
+                            "default": "direct",
+                            "description": "Auto mode behavior below long-context threshold",
                         },
                         "backend": {
                             "type": "string",
@@ -931,11 +967,29 @@ class SuperSpecXSchema:
                     "description": "Optional RLM orchestration for Google ADK runs",
                     "properties": {
                         "enabled": {"type": "boolean", "default": False},
+                        "provider": {
+                            "type": "string",
+                            "enum": ["native", "rlm_code", "legacy"],
+                            "default": "native",
+                            "description": "RLM provider (legacy is an alias of native)",
+                        },
                         "mode": {
                             "type": "string",
-                            "enum": ["assist", "replace"],
+                            "enum": ["assist", "replace", "auto"],
                             "default": "assist",
-                            "description": "assist: RLM draft then ADK run, replace: RLM only",
+                            "description": "assist: RLM draft then ADK run, replace: RLM only, auto: context-aware mode selection",
+                        },
+                        "auto_long_context_chars": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "default": 12000,
+                            "description": "Auto mode threshold for long-context prompts",
+                        },
+                        "auto_short_context_mode": {
+                            "type": "string",
+                            "enum": ["direct", "assist"],
+                            "default": "direct",
+                            "description": "Auto mode behavior below long-context threshold",
                         },
                         "backend": {
                             "type": "string",
@@ -1003,11 +1057,29 @@ class SuperSpecXSchema:
                     "description": "Optional RLM orchestration for DeepAgents runs",
                     "properties": {
                         "enabled": {"type": "boolean", "default": False},
+                        "provider": {
+                            "type": "string",
+                            "enum": ["native", "rlm_code", "legacy"],
+                            "default": "native",
+                            "description": "RLM provider (legacy is an alias of native)",
+                        },
                         "mode": {
                             "type": "string",
-                            "enum": ["assist", "replace"],
+                            "enum": ["assist", "replace", "auto"],
                             "default": "assist",
-                            "description": "assist: RLM draft then DeepAgents invoke, replace: RLM only",
+                            "description": "assist: RLM draft then DeepAgents invoke, replace: RLM only, auto: context-aware mode selection",
+                        },
+                        "auto_long_context_chars": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "default": 12000,
+                            "description": "Auto mode threshold for long-context prompts",
+                        },
+                        "auto_short_context_mode": {
+                            "type": "string",
+                            "enum": ["direct", "assist"],
+                            "default": "direct",
+                            "description": "Auto mode behavior below long-context threshold",
                         },
                         "backend": {
                             "type": "string",
@@ -1075,11 +1147,29 @@ class SuperSpecXSchema:
                     "description": "Optional RLM orchestration for CrewAI runs",
                     "properties": {
                         "enabled": {"type": "boolean", "default": False},
+                        "provider": {
+                            "type": "string",
+                            "enum": ["native", "rlm_code", "legacy"],
+                            "default": "native",
+                            "description": "RLM provider (legacy is an alias of native)",
+                        },
                         "mode": {
                             "type": "string",
-                            "enum": ["assist", "replace"],
+                            "enum": ["assist", "replace", "auto"],
                             "default": "assist",
-                            "description": "assist: RLM draft then Crew.kickoff, replace: RLM only",
+                            "description": "assist: RLM draft then Crew.kickoff, replace: RLM only, auto: context-aware mode selection",
+                        },
+                        "auto_long_context_chars": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "default": 12000,
+                            "description": "Auto mode threshold for long-context prompts",
+                        },
+                        "auto_short_context_mode": {
+                            "type": "string",
+                            "enum": ["direct", "assist"],
+                            "default": "direct",
+                            "description": "Auto mode behavior below long-context threshold",
                         },
                         "backend": {
                             "type": "string",

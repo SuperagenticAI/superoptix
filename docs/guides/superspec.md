@@ -96,6 +96,8 @@ metadata:                              # REQUIRED - Agent identity
 spec:                                  # REQUIRED - Agent specification
   target_framework: string             # REQUIRED - Framework choice (dspy, openai, crewai, google-adk, microsoft, deepagents)
   language_model:                      # REQUIRED - LLM configuration
+  openai_agent|pydantic_ai|google_adk|deepagents|crewai:
+    rlm:                               # OPTIONAL - Framework-specific RLM settings (experimental)
   persona:                             # OPTIONAL - Agent personality
   tasks:                               # REQUIRED - Agent capabilities (framework-specific)
   agentflow:                           # OPTIONAL - Execution flow
@@ -106,6 +108,26 @@ spec:                                  # REQUIRED - Agent specification
   feature_specifications:              # REQUIRED - BDD scenarios (universal)
   optimization:                        # OPTIONAL - GEPA optimization (universal)
 ```
+
+### **Framework RLM Block (Experimental)**
+
+Use RLM only under the framework you are compiling/running.
+
+```yaml
+spec:
+  openai_agent:  # same pattern for pydantic_ai, google_adk, deepagents, crewai
+    rlm:
+      enabled: true
+      provider: native                 # native | legacy | rlm_code
+      mode: auto                       # assist | replace | auto
+      auto_long_context_chars: 12000
+      auto_short_context_mode: direct  # direct | assist
+```
+
+Notes:
+- `legacy` is an alias of `native`.
+- `rlm_code` is an opt-in provider. Prefer `native` first, then enable `rlm_code` only where your framework/runtime path supports it.
+- See full details: [RLM (Experimental)](rlm-experimental.md).
 
 ## 🔧 **Multi-Framework Support**
 
@@ -701,6 +723,7 @@ spec:
         # GEPA-specific parameters
         auto: minimal|light|medium|heavy            # GEPA budget control
         reflection_lm: string                       # Reflection model name
+        gepa_api: legacy|optimize_anything         # Optional API mode (default: legacy)
         reflection_minibatch_size: 3                # Reflection batch size
         skip_perfect_score: true                    # Skip if perfect
         add_format_failure_as_feedback: true       # Include format errors
@@ -761,6 +784,7 @@ SuperSpec now supports all major DSPy optimizers with universal tier compatibili
         metric: advanced_math_feedback
         auto: light
         reflection_lm: qwen3:8b
+        gepa_api: optimize_anything  # optional opt-in
         reflection_minibatch_size: 3
 ```
 

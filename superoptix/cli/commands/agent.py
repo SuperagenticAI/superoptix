@@ -2396,6 +2396,22 @@ def _run_universal_gepa_optimization(args, agent_name, project_root, playbook):
         True if optimization succeeded, False otherwise
     """
     framework = getattr(args, "framework", "dspy")
+    def _normalize_gepa_api(value):
+        if not value:
+            return None
+        normalized = str(value).strip().lower().replace("-", "_")
+        aliases = {
+            "legacy": "legacy",
+            "optimize_anything": "optimize_anything",
+            "optimize_everything": "optimize_anything",
+            "anything": "optimize_anything",
+        }
+        if normalized in aliases:
+            return aliases[normalized]
+        console.print(
+            f"[yellow]⚠️  Unknown GEPA API '{value}'. Falling back to 'legacy'.[/]"
+        )
+        return "legacy"
 
     console.print("\n🔬 [bold cyan]Running Universal GEPA Optimization[/]")
     console.print(f"   Framework: [yellow]{framework}[/]")
@@ -2405,6 +2421,7 @@ def _run_universal_gepa_optimization(args, agent_name, project_root, playbook):
     cli_max_full_evals = getattr(args, "max_full_evals", None)
     cli_max_metric_calls = getattr(args, "max_metric_calls", None)
     reflection_lm = getattr(args, "reflection_lm", None)
+    cli_gepa_api = _normalize_gepa_api(getattr(args, "gepa_api", None))
 
     # Check if CLI provided any budget parameter
     cli_budget_provided = bool(cli_auto or cli_max_full_evals or cli_max_metric_calls)
@@ -2418,6 +2435,7 @@ def _run_universal_gepa_optimization(args, agent_name, project_root, playbook):
     auto = cli_auto
     max_full_evals = cli_max_full_evals
     max_metric_calls = cli_max_metric_calls
+    gepa_api = cli_gepa_api
 
     # Fallback to playbook ONLY if CLI didn't provide that specific parameter
     if not cli_auto and not cli_budget_provided:
@@ -2436,6 +2454,12 @@ def _run_universal_gepa_optimization(args, agent_name, project_root, playbook):
             console.print(
                 f"\n✅ Using max_metric_calls from playbook: {max_metric_calls}"
             )
+    if not gepa_api:
+        playbook_api = params.get("gepa_api") or params.get("api")
+        gepa_api = _normalize_gepa_api(playbook_api)
+        if gepa_api:
+            console.print(f"\n✅ Using GEPA API from playbook: {gepa_api}")
+    gepa_api = gepa_api or "legacy"
 
     # IMPORTANT: If CLI provided max_metric_calls or max_full_evals,
     # we must NOT use 'auto' from playbook (they conflict in GEPA)
@@ -2675,6 +2699,7 @@ def _run_universal_gepa_optimization(args, agent_name, project_root, playbook):
             "perfect_score": 1.0,
             "track_stats": getattr(args, "track_stats", False),
             "seed": 42,
+            "gepa_api": gepa_api,
         }
 
         # Add budget parameter
@@ -2694,6 +2719,7 @@ def _run_universal_gepa_optimization(args, agent_name, project_root, playbook):
         console.print("   ✅ Optimizer created")
         console.print(f"   Budget: {auto or max_full_evals or max_metric_calls}")
         console.print(f"   Reflection LM: {reflection_lm}")
+        console.print(f"   GEPA API: {gepa_api}")
 
     except Exception as e:
         console.print(f"\n[red]❌ Failed to create optimizer: {e}[/]")
@@ -2716,6 +2742,7 @@ def _run_universal_gepa_optimization(args, agent_name, project_root, playbook):
             max_metric_calls=max_metric_calls,
             agent_name=agent_name,
             project_root=project_root,
+            gepa_api=gepa_api,
         )
         if not mcp_result:
             console.print(
@@ -2736,6 +2763,7 @@ def _run_universal_gepa_optimization(args, agent_name, project_root, playbook):
             agent_name=agent_name,
             project_root=project_root,
             optimizer_kwargs=optimizer_kwargs,
+            gepa_api=gepa_api,
         )
         if not field_result:
             console.print(
@@ -2803,6 +2831,7 @@ def _optimize_field_descriptions(
     agent_name: str,
     project_root: Path,
     optimizer_kwargs: dict,
+    gepa_api: str = "legacy",
 ) -> bool:
     """
     Optimize Pydantic model field descriptions using GEPA.
@@ -2935,6 +2964,7 @@ def _optimize_field_descriptions(
             "perfect_score": optimizer_kwargs.get("perfect_score", 1.0),
             "track_stats": optimizer_kwargs.get("track_stats", False),
             "seed": optimizer_kwargs.get("seed", 42),
+            "gepa_api": gepa_api,
         }
 
         # Use smaller budget for field description optimization (it's an addon feature)
@@ -3054,6 +3084,7 @@ def _optimize_mcp_tools(
     max_metric_calls: int | None,
     agent_name: str,
     project_root: Path,
+    gepa_api: str = "legacy",
 ) -> bool:
     """
     Optimize MCP tool descriptions using existing MCPAdapter.
@@ -3216,7 +3247,9 @@ def _optimize_mcp_tools(
             }
             optimize_kwargs["max_metric_calls"] = budget_map.get(auto.lower(), 150)
         elif max_full_evals:
-            optimize_kwargs["max_full_evals"] = max_full_evals
+            # gepa.optimize has no max_full_evals arg; convert to equivalent metric budget.
+            full_eval_size = max(1, len(mcp_train_data) + len(mcp_val_data))
+            optimize_kwargs["max_metric_calls"] = max_full_evals * full_eval_size
         elif max_metric_calls:
             optimize_kwargs["max_metric_calls"] = max_metric_calls
         else:
@@ -3240,8 +3273,12 @@ def _optimize_mcp_tools(
         with open(mcp_optimized_file, "w") as f:
             json.dump(result.best_candidate, f, indent=2)
 
+        best_score = 0.0
+        if getattr(result, "val_aggregate_scores", None):
+            best_score = float(result.val_aggregate_scores[result.best_idx])
+
         console.print(f"[green]✅ MCP tool optimization complete![/]")
-        console.print(f"   Best score: {result.best_score:.3f}")
+        console.print(f"   Best score: {best_score:.3f}")
         console.print(f"   Saved to: {mcp_optimized_file}")
 
         return True
@@ -3360,12 +3397,12 @@ def optimize_agent(args):
         max_full_evals = getattr(args, "max_full_evals", None)
         max_metric_calls = getattr(args, "max_metric_calls", None)
         reflection_lm = getattr(args, "reflection_lm", None)
+        gepa_api = getattr(args, "gepa_api", None)
 
         # Check playbook for optimization config if CLI params not provided
-        if (
-            not (auto or max_full_evals or max_metric_calls or reflection_lm)
-            and playbook
-        ):
+        if not (
+            auto or max_full_evals or max_metric_calls or reflection_lm or gepa_api
+        ) and playbook:
             opt_config = playbook.get("spec", {}).get("optimization", {})
             optimizer_config = opt_config.get("optimizer", {})
             params = optimizer_config.get("params", {})
@@ -3373,9 +3410,10 @@ def optimize_agent(args):
             max_full_evals = max_full_evals or params.get("max_full_evals")
             max_metric_calls = max_metric_calls or params.get("max_metric_calls")
             reflection_lm = reflection_lm or params.get("reflection_lm")
+            gepa_api = gepa_api or params.get("gepa_api") or params.get("api")
 
         use_universal_gepa = (
-            (auto or max_full_evals or max_metric_calls or reflection_lm)
+            (auto or max_full_evals or max_metric_calls or reflection_lm or gepa_api)
             and framework
             in [
                 "microsoft",

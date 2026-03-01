@@ -989,7 +989,6 @@ class DSPyRunner:
             "builtin",
             "mcp",
             "stackone",
-            "stackone_discovery",
         }:
             return "chat"
 

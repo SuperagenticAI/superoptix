@@ -1,4 +1,4 @@
-# 🌌 SurrealDB Framework Guide
+# 🟣🟢 SurrealDB Framework Guide
 
 This page explains how to run SurrealDB RAG in SuperOptiX across DSPy, PydanticAI, CrewAI, and Google ADK.
 
