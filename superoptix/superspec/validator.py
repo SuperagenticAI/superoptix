@@ -1471,9 +1471,7 @@ class SuperSpecXValidator:
 
         mode = rlm_cfg.get("mode")
         if mode is not None and mode not in {"assist", "replace", "auto"}:
-            self.errors.append(
-                "crewai.rlm.mode must be one of: assist, replace, auto"
-            )
+            self.errors.append("crewai.rlm.mode must be one of: assist, replace, auto")
 
         auto_long_context_chars = rlm_cfg.get("auto_long_context_chars")
         if auto_long_context_chars is not None and (

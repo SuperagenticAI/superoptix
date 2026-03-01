@@ -399,10 +399,12 @@ def get_openai_rlm_config(spec_data: Dict[str, Any] | None) -> Dict[str, Any]:
         "enabled": bool(rlm_cfg.get("enabled", False)),
         "provider": _normalize_rlm_provider(rlm_cfg.get("provider", "native")),
         "mode": str(rlm_cfg.get("mode", "assist")).strip().lower() or "assist",
-        "auto_long_context_chars": int(rlm_cfg.get("auto_long_context_chars", 12000) or 12000),
-        "auto_short_context_mode": str(
-            rlm_cfg.get("auto_short_context_mode", "direct")
-        ).strip().lower()
+        "auto_long_context_chars": int(
+            rlm_cfg.get("auto_long_context_chars", 12000) or 12000
+        ),
+        "auto_short_context_mode": str(rlm_cfg.get("auto_short_context_mode", "direct"))
+        .strip()
+        .lower()
         or "direct",
         "backend": str(rlm_cfg.get("backend", "litellm")).strip() or "litellm",
         "environment": str(rlm_cfg.get("environment", "python")).strip() or "python",
