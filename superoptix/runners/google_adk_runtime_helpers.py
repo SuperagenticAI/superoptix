@@ -387,9 +387,9 @@ def get_google_adk_rlm_config(spec_data: Dict[str, Any] | None) -> Dict[str, Any
         "auto_long_context_chars": int(
             rlm_cfg.get("auto_long_context_chars", 12000) or 12000
         ),
-        "auto_short_context_mode": str(
-            rlm_cfg.get("auto_short_context_mode", "direct")
-        ).strip().lower()
+        "auto_short_context_mode": str(rlm_cfg.get("auto_short_context_mode", "direct"))
+        .strip()
+        .lower()
         or "direct",
         "backend": str(rlm_cfg.get("backend", "litellm")).strip() or "litellm",
         "environment": str(rlm_cfg.get("environment", "python")).strip() or "python",

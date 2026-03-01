@@ -581,7 +581,9 @@ class UniversalGEPA:
             "litellm",
             "gateway",
         ]
-        has_provider_prefix = any(normalized.startswith(f"{p}:") for p in known_providers)
+        has_provider_prefix = any(
+            normalized.startswith(f"{p}:") for p in known_providers
+        )
 
         # If no prefix and model contains ':' (like llama3.1:8b), assume Ollama
         if not has_provider_prefix and ":" in normalized:
@@ -620,7 +622,11 @@ class UniversalGEPA:
             try:
                 import dspy
 
-                api_base = "http://localhost:11434" if normalized_model.startswith("ollama_chat/") else None
+                api_base = (
+                    "http://localhost:11434"
+                    if normalized_model.startswith("ollama_chat/")
+                    else None
+                )
                 api_key = "" if normalized_model.startswith("ollama_chat/") else None
 
                 lm = dspy.LM(

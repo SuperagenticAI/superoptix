@@ -85,7 +85,9 @@ def _parse_provider_and_model(raw: str) -> Tuple[str, str]:
     return "", token
 
 
-def _resolve_provider_and_model(config: Dict[str, Any], model_name: str) -> Tuple[str, str]:
+def _resolve_provider_and_model(
+    config: Dict[str, Any], model_name: str
+) -> Tuple[str, str]:
     backend = _normalize_provider(str(config.get("backend", "") or ""))
     backend_provider = _BACKEND_TO_PROVIDER.get(backend, "")
 
@@ -164,7 +166,9 @@ def _run_rlm_code_sync(prompt: str, config: Dict[str, Any], model_name: str) -> 
     except Exception:
         pass
 
-    log_root = str(config.get("logger_dir", "") or "").strip() or ".superoptix/logs/rlm_code"
+    log_root = (
+        str(config.get("logger_dir", "") or "").strip() or ".superoptix/logs/rlm_code"
+    )
     run_dir = Path(log_root).expanduser().resolve() / "runs"
     run_dir.mkdir(parents=True, exist_ok=True)
 

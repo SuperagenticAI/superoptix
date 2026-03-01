@@ -38,8 +38,7 @@ def resolve_effective_rlm_mode(
         threshold = 1
 
     short_mode = (
-        str(config.get("auto_short_context_mode", "direct")).strip().lower()
-        or "direct"
+        str(config.get("auto_short_context_mode", "direct")).strip().lower() or "direct"
     )
     if short_mode not in {"direct", "assist"}:
         short_mode = "direct"
@@ -48,5 +47,11 @@ def resolve_effective_rlm_mode(
     if prompt_len >= threshold:
         return "replace", f"auto_long_context(len={prompt_len}, threshold={threshold})"
     if short_mode == "assist":
-        return "assist", f"auto_short_context_assist(len={prompt_len}, threshold={threshold})"
-    return "direct", f"auto_short_context_direct(len={prompt_len}, threshold={threshold})"
+        return (
+            "assist",
+            f"auto_short_context_assist(len={prompt_len}, threshold={threshold})",
+        )
+    return (
+        "direct",
+        f"auto_short_context_direct(len={prompt_len}, threshold={threshold})",
+    )

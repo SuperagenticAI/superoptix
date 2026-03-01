@@ -2396,6 +2396,7 @@ def _run_universal_gepa_optimization(args, agent_name, project_root, playbook):
         True if optimization succeeded, False otherwise
     """
     framework = getattr(args, "framework", "dspy")
+
     def _normalize_gepa_api(value):
         if not value:
             return None
@@ -3400,9 +3401,12 @@ def optimize_agent(args):
         gepa_api = getattr(args, "gepa_api", None)
 
         # Check playbook for optimization config if CLI params not provided
-        if not (
-            auto or max_full_evals or max_metric_calls or reflection_lm or gepa_api
-        ) and playbook:
+        if (
+            not (
+                auto or max_full_evals or max_metric_calls or reflection_lm or gepa_api
+            )
+            and playbook
+        ):
             opt_config = playbook.get("spec", {}).get("optimization", {})
             optimizer_config = opt_config.get("optimizer", {})
             params = optimizer_config.get("params", {})
