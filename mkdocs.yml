@@ -158,13 +158,14 @@ nav:
       - '🎯 Full-Stack Example': guides/agent-optimization/full-stack-example.md
   - ⚡ Optimize:
       - '🧬 GEPA Optimizer': guides/gepa-optimization.md
-      - '🧪 RLM (Experimental)': guides/rlm-experimental.md
       - '📈 Optimization Guide': guides/optimization.md
       - '🔬 DSPy Optimizers': guides/dspy-optimizers.md
       - '🔧 OpenAI SDK + GEPA Tutorial': tutorials/openai-sdk-gepa-optimization.md
       - '🔍 RAG Optimization': tutorials/rag-optimization.md
       - '🔌 MCP Optimization': tutorials/mcp-optimization.md
       - '💡 Memory Optimization': guides/memory-optimization.md
+  - 🧪 RLM:
+      - '🧪 RLM Overview (Experimental)': guides/rlm-experimental.md
   - 🎼 Orchestrate:
       - '🎼 Orchestra Development': guides/orchestra-development.md
       - '🎼 Multi-Agent Orchestra': tutorials/first-orchestra.md
@@ -192,9 +193,9 @@ nav:
       - '🔰 Weaviate': examples/agents/weaviate-demo.md
       - '🔸 Qdrant': examples/agents/qdrant-demo.md
       - '👁️ Milvus': examples/agents/milvus-demo.md
-      - '🌌 SurrealDB': examples/agents/surrealdb-demo.md
-      - '🐳 SurrealDB Docker': examples/agents/surrealdb-docker-demo.md
-      - '🧩 SurrealDB Framework Guide': examples/agents/surrealdb-frameworks-demo.md
+      - '🟣🟢 SurrealDB': examples/agents/surrealdb-demo.md
+      - '🟣🟢 SurrealDB Docker': examples/agents/surrealdb-docker-demo.md
+      - '🟣🟢 SurrealDB Framework Guide': examples/agents/surrealdb-frameworks-demo.md
       - '🛠️ Tools': examples/agents/tools-demo.md
       - '🧠 Memory': examples/agents/memory-demo.md
       - '📊 Observability': examples/agents/observability-demo.md
@@ -227,9 +228,9 @@ nav:
       - '🔰 Weaviate': examples/agents/weaviate-demo.md
       - '🔸 Qdrant': examples/agents/qdrant-demo.md
       - '👁️ Milvus': examples/agents/milvus-demo.md
-      - '🌌 SurrealDB': examples/agents/surrealdb-demo.md
-      - '🐳 SurrealDB Docker': examples/agents/surrealdb-docker-demo.md
-      - '🧩 SurrealDB Framework Guide': examples/agents/surrealdb-frameworks-demo.md
+      - '🟣🟢 SurrealDB': examples/agents/surrealdb-demo.md
+      - '🟣🟢 SurrealDB Docker': examples/agents/surrealdb-docker-demo.md
+      - '🟣🟢 SurrealDB Framework Guide': examples/agents/surrealdb-frameworks-demo.md
       - '🛠️ Tools': examples/agents/tools-demo.md
       - '🧠 Memory': examples/agents/memory-demo.md
       - '📊 Observability': examples/agents/observability-demo.md

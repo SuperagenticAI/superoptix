@@ -20,13 +20,13 @@ SuperOptiX serves as the **Universal Bridge** for [StackOne](https://stackone.co
 Install both SuperOptiX and the StackOne SDK:
 
 ```bash
-pip install superoptix stackone-ai
+pip install superoptix "stackone-ai[mcp]"
 ```
 
 For Claude Agent SDK integration:
 
 ```bash
-pip install superoptix stackone-ai claude-agent-sdk
+pip install superoptix "stackone-ai[mcp]" claude-agent-sdk
 ```
 
 ---
@@ -100,7 +100,7 @@ spec:
   dspy:
     module: react
     tools:
-      mode: stackone_discovery
+      mode: stackone
       trace:
         enabled: true   # optional: transient live tool logs
       stackone:
@@ -228,7 +228,7 @@ from superoptix.adapters import StackOneBridge
 
 toolset = StackOneToolSet()
 tools = toolset.fetch_tools(
-    include_tools=["hris_list_employees", "hris_get_employee"],
+    actions=["hris_list_employees", "hris_get_employee"],
     account_ids=["your_stackone_account_id"],
 )
 
@@ -257,40 +257,31 @@ Runtime setup:
 export ANTHROPIC_API_KEY="sk-ant-..."
 ```
 
-For large toolsets with discovery mode:
+For large toolsets, keep provider/action filters narrow:
 
 ```python
-mcp_server, tool_names = StackOneBridge(tools).to_discovery_tools(framework="claude_sdk")
+mcp_server, tool_names = StackOneBridge(tools).to_claude_sdk()
 ```
 
 See full guide: `docs/guides/stackone-claude-sdk.md`
 
 ---
 
-## 🔍 Dynamic Tool Discovery (Discovery Mode)
+## 🔍 Large Tool Catalogs
 
-StackOne provides 100+ tools. Loading them all into an LLM's context window is expensive and confusing. **Discovery Mode** provides the agent with just two "meta-tools" to navigate the entire ecosystem at runtime.
-
-### How it Works
-1.  The agent receives `tool_search` and `tool_execute`.
-2.  The agent searches for a capability (e.g., "how to find employees").
-3.  The agent receives the specific tool name from the index and executes it.
-
-### Usage
+SuperOptiX now keeps StackOne integration simple: fetch filtered tools from `StackOneToolSet` and convert them directly for your framework.
 
 ```python
-# Fetch a large set of tools (e.g., everything)
-all_tools = toolset.fetch_tools(account_ids=["acc_123"])
+# Fetch only what you need
+filtered_tools = toolset.fetch_tools(
+    account_ids=["acc_123"],
+    providers=["bamboohr"],
+    actions=["hris_*"],
+)
 
-# Get Discovery Tools for your framework
-# Supported: 'dspy', 'pydantic_ai', 'crewai', 'google', 'semantic_kernel'
-discovery_tools = StackOneBridge(all_tools).to_discovery_tools(framework="dspy")
-
-# For CrewAI:
-# discovery_tools = StackOneBridge(all_tools).to_discovery_tools(framework="crewai")
-
-# Equip the agent (Only 2 tools injected!)
-agent = dspy.ReAct("question -> answer", tools=discovery_tools)
+# Convert directly for your framework
+dspy_tools = StackOneBridge(filtered_tools).to_dspy()
+agent = dspy.ReAct("question -> answer", tools=dspy_tools)
 ```
 
 ---

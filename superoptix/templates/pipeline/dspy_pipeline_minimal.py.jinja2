@@ -16,7 +16,7 @@ SuperOptiX runner handles playbook loading/execution orchestration.
 {% set dspy_tools_cfg = ((spec.get('dspy', {}) or {}).get('tools', {}) or {}) %}
 {% set stackone_mode = (dspy_tools_cfg.get('mode', '') | string | lower) %}
 {% set stackone_cfg = dspy_tools_cfg.get('stackone') %}
-{% set include_stackone_code = (stackone_mode in ['stackone', 'stackone_discovery']) or (stackone_cfg is mapping and (stackone_cfg | length > 0)) %}
+{% set include_stackone_code = (stackone_mode in ['stackone']) or (stackone_cfg is mapping and (stackone_cfg | length > 0)) %}
 
 import inspect
 import json

@@ -393,7 +393,7 @@ schema:
                   type: string
                   required: false
                   default: "builtin"
-                  enum: ["none", "builtin", "mcp", "stackone", "stackone_discovery"]
+                  enum: ["none", "builtin", "mcp", "stackone"]
                 builtin_tools:
                   type: array
                   required: false
@@ -413,10 +413,6 @@ schema:
                       type: boolean
                       required: false
                       default: true
-                    discovery_mode:
-                      type: boolean
-                      required: false
-                      default: false
                     api_key_env:
                       type: string
                       required: false
@@ -540,11 +536,27 @@ schema:
                   type: boolean
                   required: false
                   default: false
+                provider:
+                  type: string
+                  required: false
+                  default: "native"
+                  enum: ["native", "rlm_code", "legacy"]
+                  description: "RLM provider (legacy is an alias of native)"
                 mode:
                   type: string
                   required: false
                   default: "assist"
-                  enum: ["assist", "replace"]
+                  enum: ["assist", "replace", "auto"]
+                auto_long_context_chars:
+                  type: integer
+                  required: false
+                  default: 12000
+                  minimum: 1
+                auto_short_context_mode:
+                  type: string
+                  required: false
+                  default: "direct"
+                  enum: ["direct", "assist"]
                 backend:
                   type: string
                   required: false
@@ -613,11 +625,27 @@ schema:
                   type: boolean
                   required: false
                   default: false
+                provider:
+                  type: string
+                  required: false
+                  default: "native"
+                  enum: ["native", "rlm_code", "legacy"]
+                  description: "RLM provider (legacy is an alias of native)"
                 mode:
                   type: string
                   required: false
                   default: "assist"
-                  enum: ["assist", "replace"]
+                  enum: ["assist", "replace", "auto"]
+                auto_long_context_chars:
+                  type: integer
+                  required: false
+                  default: 12000
+                  minimum: 1
+                auto_short_context_mode:
+                  type: string
+                  required: false
+                  default: "direct"
+                  enum: ["direct", "assist"]
                 backend:
                   type: string
                   required: false
@@ -686,11 +714,27 @@ schema:
                   type: boolean
                   required: false
                   default: false
+                provider:
+                  type: string
+                  required: false
+                  default: "native"
+                  enum: ["native", "rlm_code", "legacy"]
+                  description: "RLM provider (legacy is an alias of native)"
                 mode:
                   type: string
                   required: false
                   default: "assist"
-                  enum: ["assist", "replace"]
+                  enum: ["assist", "replace", "auto"]
+                auto_long_context_chars:
+                  type: integer
+                  required: false
+                  default: 12000
+                  minimum: 1
+                auto_short_context_mode:
+                  type: string
+                  required: false
+                  default: "direct"
+                  enum: ["direct", "assist"]
                 backend:
                   type: string
                   required: false
@@ -759,11 +803,27 @@ schema:
                   type: boolean
                   required: false
                   default: false
+                provider:
+                  type: string
+                  required: false
+                  default: "native"
+                  enum: ["native", "rlm_code", "legacy"]
+                  description: "RLM provider (legacy is an alias of native)"
                 mode:
                   type: string
                   required: false
                   default: "assist"
-                  enum: ["assist", "replace"]
+                  enum: ["assist", "replace", "auto"]
+                auto_long_context_chars:
+                  type: integer
+                  required: false
+                  default: 12000
+                  minimum: 1
+                auto_short_context_mode:
+                  type: string
+                  required: false
+                  default: "direct"
+                  enum: ["direct", "assist"]
                 backend:
                   type: string
                   required: false
@@ -832,11 +892,27 @@ schema:
                   type: boolean
                   required: false
                   default: false
+                provider:
+                  type: string
+                  required: false
+                  default: "native"
+                  enum: ["native", "rlm_code", "legacy"]
+                  description: "RLM provider (legacy is an alias of native)"
                 mode:
                   type: string
                   required: false
                   default: "assist"
-                  enum: ["assist", "replace"]
+                  enum: ["assist", "replace", "auto"]
+                auto_long_context_chars:
+                  type: integer
+                  required: false
+                  default: 12000
+                  minimum: 1
+                auto_short_context_mode:
+                  type: string
+                  required: false
+                  default: "direct"
+                  enum: ["direct", "assist"]
                 backend:
                   type: string
                   required: false

@@ -386,6 +386,8 @@ class UniversalGEPA:
         display_progress: bool = True,
         # Reproducibility
         seed: int | None = 0,
+        # API selection
+        gepa_api: Literal["legacy", "optimize_anything"] = "legacy",
     ):
         """Initialize Universal GEPA optimizer."""
 
@@ -425,6 +427,14 @@ class UniversalGEPA:
 
         # Reproducibility
         self.seed = seed
+
+        # API selection (legacy is default for backward compatibility)
+        if gepa_api not in {"legacy", "optimize_anything"}:
+            raise ValueError(
+                f"Unsupported GEPA API '{gepa_api}'. "
+                "Use 'legacy' or 'optimize_anything'."
+            )
+        self.gepa_api = gepa_api
 
     def compile(
         self,
@@ -492,114 +502,41 @@ class UniversalGEPA:
         # Create base candidate with current variable
         base_candidate = {component.name: component.variable}
 
-        # Create reflection LM wrapper if string model name provided
-        reflection_lm_fn = None
-        if self.reflection_lm is not None:
-            if isinstance(self.reflection_lm, str):
-                # Import here to avoid circular dependency
-                try:
-                    import dspy
-
-                    # Convert ollama:model_name to ollama_chat/model_name for LiteLLM
-                    model_name = self.reflection_lm
-                    api_base = None
-                    api_key = ""
-
-                    # Detect Ollama models without prefix
-                    # Check if model string lacks a known provider prefix
-                    known_providers = [
-                        "ollama",
-                        "openai",
-                        "anthropic",
-                        "google",
-                        "bedrock",
-                        "azure",
-                        "cohere",
-                        "mistral",
-                        "deepseek",
-                        "groq",
-                        "together",
-                        "fireworks",
-                        "litellm",
-                        "gateway",
-                    ]
-                    has_provider_prefix = any(
-                        model_name.startswith(f"{p}:") for p in known_providers
-                    )
-
-                    # If no prefix and model contains ':' (like llama3.1:8b), assume Ollama
-                    if not has_provider_prefix and ":" in model_name:
-                        # Check if it looks like an Ollama model (has version suffix like :8b, :7b, etc.)
-                        # or if it's a common Ollama model name
-                        ollama_indicators = [
-                            ":8b",
-                            ":7b",
-                            ":13b",
-                            ":70b",
-                            "llama",
-                            "mistral",
-                            "codellama",
-                            "phi",
-                            "gemma",
-                            "qwen",
-                        ]
-                        if any(
-                            indicator in model_name.lower()
-                            for indicator in ollama_indicators
-                        ):
-                            model_name = f"ollama:{model_name}"
-
-                    if model_name.startswith("ollama:"):
-                        # Convert "ollama:llama3.1:8b" to "ollama_chat/llama3.1:8b"
-                        model_name = model_name.replace("ollama:", "ollama_chat/")
-                        api_base = "http://localhost:11434"
-                        api_key = ""
-
-                    lm = dspy.LM(
-                        model=model_name,
-                        temperature=1.0,
-                        max_tokens=32000,
-                        api_base=api_base,
-                        api_key=api_key,
-                    )
-
-                    def reflection_lm_fn(x):
-                        return lm(x)[0]
-                except ImportError:
-                    logger.warning(
-                        "DSPy not available. Reflection LM string model names require DSPy. "
-                        "Please install DSPy or provide an LM instance."
-                    )
-                    reflection_lm_fn = None
-            else:
-                # Assume it's already an LM instance
-                def reflection_lm_fn(x):
-                    return self.reflection_lm(x)[0]
+        reflection_lm_fn, reflection_lm_for_anything = self._prepare_reflection_lm()
 
         # Run GEPA optimization
         logger.info(f"🔧 Running GEPA optimization...")
-        gepa_result: GEPAResult = optimize(
-            seed_candidate=base_candidate,
-            trainset=trainset,
-            valset=valset,
-            adapter=adapter,
-            # Reflection configuration
-            reflection_lm=reflection_lm_fn,
-            candidate_selection_strategy=self.candidate_selection_strategy,
-            skip_perfect_score=self.skip_perfect_score,
-            reflection_minibatch_size=self.reflection_minibatch_size,
-            perfect_score=self.perfect_score,
-            # Merge configuration
-            use_merge=self.use_merge,
-            max_merge_invocations=self.max_merge_invocations,
-            # Budget
-            max_metric_calls=self.max_metric_calls,
-            # Logging
-            run_dir=self.log_dir,  # GEPA uses 'run_dir' not 'log_dir'
-            display_progress_bar=self.display_progress,
-            # Reproducibility
-            seed=self.seed,
-        )
+        if self.gepa_api == "optimize_anything":
+            try:
+                gepa_result = self._run_optimize_anything(
+                    component=component,
+                    adapter=adapter,
+                    seed_candidate=base_candidate,
+                    trainset=trainset,
+                    valset=valset,
+                    reflection_lm=reflection_lm_for_anything,
+                )
+            except Exception as e:
+                logger.warning(
+                    "optimize_anything API requested but unavailable/failed (%s). "
+                    "Falling back to legacy GEPA optimize API.",
+                    e,
+                )
+                gepa_result = self._run_legacy_optimize(
+                    seed_candidate=base_candidate,
+                    trainset=trainset,
+                    valset=valset,
+                    adapter=adapter,
+                    reflection_lm=reflection_lm_fn,
+                )
+        else:
+            gepa_result = self._run_legacy_optimize(
+                seed_candidate=base_candidate,
+                trainset=trainset,
+                valset=valset,
+                adapter=adapter,
+                reflection_lm=reflection_lm_fn,
+            )
 
         # Extract best candidate
         best_idx = gepa_result.best_idx
@@ -623,6 +560,206 @@ class UniversalGEPA:
             all_scores=gepa_result.val_aggregate_scores,
             num_iterations=len(gepa_result.candidates),
             framework=component.framework,
+        )
+
+    def _normalize_reflection_model_name(self, model_name: str) -> str:
+        """Normalize model names for better provider compatibility."""
+        normalized = model_name
+        known_providers = [
+            "ollama",
+            "openai",
+            "anthropic",
+            "google",
+            "bedrock",
+            "azure",
+            "cohere",
+            "mistral",
+            "deepseek",
+            "groq",
+            "together",
+            "fireworks",
+            "litellm",
+            "gateway",
+        ]
+        has_provider_prefix = any(normalized.startswith(f"{p}:") for p in known_providers)
+
+        # If no prefix and model contains ':' (like llama3.1:8b), assume Ollama
+        if not has_provider_prefix and ":" in normalized:
+            ollama_indicators = [
+                ":8b",
+                ":7b",
+                ":13b",
+                ":70b",
+                "llama",
+                "mistral",
+                "codellama",
+                "phi",
+                "gemma",
+                "qwen",
+            ]
+            if any(indicator in normalized.lower() for indicator in ollama_indicators):
+                normalized = f"ollama:{normalized}"
+
+        if normalized.startswith("ollama:"):
+            # LiteLLM-compatible model identifier for Ollama chat models
+            normalized = normalized.replace("ollama:", "ollama_chat/", 1)
+        return normalized
+
+    def _prepare_reflection_lm(self) -> tuple[Any | None, Any | None]:
+        """
+        Build reflection LM callables for both legacy and optimize_anything APIs.
+
+        Returns:
+            (legacy_reflection_lm, optimize_anything_reflection_lm)
+        """
+        if self.reflection_lm is None:
+            return None, None
+
+        if isinstance(self.reflection_lm, str):
+            normalized_model = self._normalize_reflection_model_name(self.reflection_lm)
+            try:
+                import dspy
+
+                api_base = "http://localhost:11434" if normalized_model.startswith("ollama_chat/") else None
+                api_key = "" if normalized_model.startswith("ollama_chat/") else None
+
+                lm = dspy.LM(
+                    model=normalized_model,
+                    temperature=1.0,
+                    max_tokens=32000,
+                    api_base=api_base,
+                    api_key=api_key,
+                )
+
+                def _dspy_lm(prompt):
+                    output = lm(prompt)
+                    return output[0] if isinstance(output, list) else output
+
+                # Keep legacy path on DSPy LM callable, but let optimize_anything
+                # use model string directly via its own LiteLLM integration.
+                return _dspy_lm, normalized_model
+            except ImportError:
+                logger.warning(
+                    "DSPy not available. Falling back to model string for reflection LM."
+                )
+                return None, normalized_model
+
+        # Assume LM-like object/callable
+        def _callable_lm(prompt):
+            output = self.reflection_lm(prompt)
+            return output[0] if isinstance(output, list) else output
+
+        return _callable_lm, _callable_lm
+
+    def _run_legacy_optimize(
+        self,
+        *,
+        seed_candidate: Dict[str, str],
+        trainset: List[Dict[str, Any]],
+        valset: List[Dict[str, Any]],
+        adapter: BaseComponentAdapter,
+        reflection_lm: Any | None,
+    ) -> GEPAResult:
+        """Run legacy GEPA optimize API."""
+        return optimize(
+            seed_candidate=seed_candidate,
+            trainset=trainset,
+            valset=valset,
+            adapter=adapter,
+            # Reflection configuration
+            reflection_lm=reflection_lm,
+            candidate_selection_strategy=self.candidate_selection_strategy,
+            skip_perfect_score=self.skip_perfect_score,
+            reflection_minibatch_size=self.reflection_minibatch_size,
+            perfect_score=self.perfect_score,
+            # Merge configuration
+            use_merge=self.use_merge,
+            max_merge_invocations=self.max_merge_invocations,
+            # Budget
+            max_metric_calls=self.max_metric_calls,
+            # Logging
+            run_dir=self.log_dir,
+            display_progress_bar=self.display_progress,
+            # Reproducibility
+            seed=self.seed,
+        )
+
+    def _run_optimize_anything(
+        self,
+        *,
+        component: BaseComponent,
+        adapter: BaseComponentAdapter,
+        seed_candidate: Dict[str, str],
+        trainset: List[Dict[str, Any]],
+        valset: List[Dict[str, Any]],
+        reflection_lm: Any | None,
+    ) -> GEPAResult:
+        """Run opt-in optimize_anything API."""
+        from gepa.optimize_anything import (
+            EngineConfig,
+            GEPAConfig,
+            MergeConfig,
+            ReflectionConfig,
+            optimize_anything,
+        )
+
+        def evaluator(candidate: Dict[str, str], example: Dict[str, Any]):
+            eval_batch = adapter.evaluate([example], candidate, capture_traces=True)
+
+            score = (
+                float(eval_batch.scores[0])
+                if eval_batch.scores
+                else float(self.failure_score)
+            )
+            output = eval_batch.outputs[0] if eval_batch.outputs else {}
+            trajectory = (
+                eval_batch.trajectories[0]
+                if eval_batch.trajectories and len(eval_batch.trajectories) > 0
+                else {}
+            )
+            side_info = {
+                "Inputs": example.get("inputs", {}),
+                "Generated Outputs": output,
+                "Expected Outputs": example.get("outputs", {}),
+                "Feedback": trajectory.get("feedback", f"Score: {score}"),
+                "scores": {"metric": score},
+            }
+            return score, side_info
+
+        objective = (
+            f"Improve the {component.variable_type} for component '{component.name}' "
+            f"in framework '{component.framework}' to maximize evaluation score."
+        )
+
+        config = GEPAConfig(
+            engine=EngineConfig(
+                run_dir=self.log_dir,
+                seed=self.seed or 0,
+                max_metric_calls=self.max_metric_calls,
+                candidate_selection_strategy=self.candidate_selection_strategy,
+                frontier_type="instance",
+                display_progress_bar=self.display_progress,
+            ),
+            reflection=ReflectionConfig(
+                reflection_lm=reflection_lm,
+                reflection_minibatch_size=self.reflection_minibatch_size,
+                skip_perfect_score=self.skip_perfect_score,
+                perfect_score=self.perfect_score,
+            ),
+            merge=(
+                MergeConfig(max_merge_invocations=self.max_merge_invocations or 5)
+                if self.use_merge
+                else None
+            ),
+        )
+
+        return optimize_anything(
+            seed_candidate=seed_candidate,
+            evaluator=evaluator,
+            dataset=trainset,
+            valset=valset,
+            objective=objective,
+            config=config,
         )
 
     def _auto_budget(

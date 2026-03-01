@@ -4,7 +4,7 @@
 
 **Works great with FREE Ollama (No API Keys Needed!)**
 
-RLM support is experimental. Unified sandbox support is coming soon.
+RLM support is experimental (`assist`, `replace`, `auto` modes). See [RLM (Experimental)](rlm-experimental.md).
 
 > **Hands-on demo:** Clone the MIT-licensed companion repo [`superoptix-lite-openai`](https://github.com/SuperagenticAI/superoptix-lite-openai) to try the OpenAI Agents SDK with SuperOptiX Lite right away. The Code Reviewer example in that project mirrors this guide step by step.
 

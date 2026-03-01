@@ -10,6 +10,18 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List
 
+from superoptix.runners.rlm_code_runtime import run_rlm_code_completion
+from superoptix.runners.rlm_mode_utils import resolve_effective_rlm_mode
+
+
+def _normalize_rlm_provider(provider: Any) -> str:
+    value = str(provider or "").strip().lower()
+    if not value:
+        return "native"
+    if value == "legacy":
+        return "native"
+    return value
+
 
 def _normalize_provider(provider: str) -> str:
     value = str(provider or "").strip().lower()
@@ -268,7 +280,7 @@ def build_stackone_tools(spec_data: Dict[str, Any] | None) -> List[Any]:
     """Build OpenAI Agents-compatible StackOne tools when configured."""
     cfg = resolve_stackone_config(spec_data)
     mode = str(cfg.get("mode", "none")).strip().lower()
-    enabled = bool(cfg.get("enabled", mode in {"stackone", "stackone_discovery"}))
+    enabled = bool(cfg.get("enabled", mode == "stackone"))
     if not enabled:
         return []
 
@@ -338,10 +350,7 @@ def build_stackone_tools(spec_data: Dict[str, Any] | None) -> List[Any]:
             )
 
         bridge = StackOneBridge(fetched_tools or [])
-        if mode == "stackone_discovery":
-            source_tools = bridge.to_discovery_tools(framework="dspy")
-        else:
-            source_tools = bridge.tools
+        source_tools = bridge.tools
 
         tools = _stackone_to_openai_function_tools(source_tools)
         names = [getattr(t, "name", "") for t in tools[:5]]
@@ -388,7 +397,13 @@ def get_openai_rlm_config(spec_data: Dict[str, Any] | None) -> Dict[str, Any]:
 
     return {
         "enabled": bool(rlm_cfg.get("enabled", False)),
+        "provider": _normalize_rlm_provider(rlm_cfg.get("provider", "native")),
         "mode": str(rlm_cfg.get("mode", "assist")).strip().lower() or "assist",
+        "auto_long_context_chars": int(rlm_cfg.get("auto_long_context_chars", 12000) or 12000),
+        "auto_short_context_mode": str(
+            rlm_cfg.get("auto_short_context_mode", "direct")
+        ).strip().lower()
+        or "direct",
         "backend": str(rlm_cfg.get("backend", "litellm")).strip() or "litellm",
         "environment": str(rlm_cfg.get("environment", "python")).strip() or "python",
         "max_iterations": int(rlm_cfg.get("max_iterations", 8) or 8),
@@ -422,12 +437,59 @@ async def run_with_optional_rlm(
     - disabled: direct Runner.run(agent, input=prompt)
     - assist: RLM draft -> Runner.run(augmented_prompt)
     - replace: RLM-only response
+    - auto: choose direct/assist/replace from prompt size thresholds
     """
     from agents import Runner
 
     cfg = get_openai_rlm_config(spec_data)
     if not cfg.get("enabled", False):
         return await Runner.run(agent, input=prompt)
+
+    mode, mode_reason = resolve_effective_rlm_mode(prompt=prompt, config=cfg)
+    if mode == "direct":
+        print(f"🧠 RLM auto mode selected direct execution ({mode_reason})")
+        return await Runner.run(agent, input=prompt)
+
+    provider = _normalize_rlm_provider(cfg.get("provider", "native"))
+    if provider == "rlm_code":
+        cfg["provider"] = provider
+        print(
+            "🧠 RLM enabled "
+            f"(provider={cfg.get('provider')}, mode={mode}, "
+            f"backend={cfg.get('backend')}, max_iterations={cfg.get('max_iterations')}, "
+            f"resolution={mode_reason})"
+        )
+        started = time.time()
+        rlm_text, rlm_error = await run_rlm_code_completion(
+            prompt=prompt,
+            config=cfg,
+            model_name=model_name,
+        )
+        if rlm_text is not None:
+            elapsed = int((time.time() - started) * 1000)
+            print(f"✅ RLM completed ({elapsed}ms)")
+            if mode == "replace":
+                return rlm_text
+            augmented_prompt = (
+                "User request:\n"
+                f"{prompt}\n\n"
+                "RLM draft reasoning (use as guidance, verify with tools when needed):\n"
+                f"{rlm_text}\n"
+            )
+            return await Runner.run(agent, input=augmented_prompt)
+
+        print(
+            "⚠️ openai_agent.rlm.provider=rlm_code failed; "
+            f"falling back to provider=native. ({rlm_error or 'unknown error'})"
+        )
+        provider = "native"
+    elif provider != "native":
+        print(
+            f"⚠️ Unsupported openai_agent.rlm.provider '{provider}'. "
+            "Falling back to provider=native."
+        )
+        provider = "native"
+    cfg["provider"] = provider
 
     try:
         from rlm import RLM  # type: ignore
@@ -468,13 +530,11 @@ async def run_with_optional_rlm(
         persistent=bool(cfg.get("persistent", False)),
     )
 
-    mode = str(cfg.get("mode", "assist")).strip().lower()
-    if mode not in {"assist", "replace"}:
-        mode = "assist"
-
     print(
         "🧠 RLM enabled "
-        f"(mode={mode}, backend={cfg.get('backend')}, max_iterations={cfg.get('max_iterations')})"
+        f"(provider={cfg.get('provider')}, mode={mode}, "
+        f"backend={cfg.get('backend')}, max_iterations={cfg.get('max_iterations')}, "
+        f"resolution={mode_reason})"
     )
     started = time.time()
     completion = await asyncio.to_thread(rlm.completion, prompt)

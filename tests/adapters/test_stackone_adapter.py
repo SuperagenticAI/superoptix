@@ -6,7 +6,6 @@ Tests the StackOneBridge adapter for converting StackOne tools to various framew
 """
 
 import pytest
-import types
 from unittest.mock import MagicMock, patch
 from typing import Any, Dict, List
 
@@ -248,96 +247,6 @@ class TestStackOneBridgeCrewAI:
             assert "description" in call_kwargs
             assert "func" in call_kwargs
             assert "args_schema" in call_kwargs
-
-
-class TestStackOneBridgeDiscoveryTools:
-    """Tests for discovery tools with CrewAI support."""
-
-    def test_to_discovery_tools_crewai_framework(self, sample_stackone_tools):
-        """Test discovery tools conversion for CrewAI framework."""
-        # This test verifies the framework parameter routing
-        mock_stackone_models = types.ModuleType("stackone_ai.models")
-        mock_stackone_models.Tools = MagicMock()
-        mock_stackone_utils = types.ModuleType("stackone_ai.utility_tools")
-        mock_stackone_utils.ToolIndex = MagicMock()
-        mock_stackone_utils.create_tool_search = MagicMock()
-        mock_stackone_utils.create_tool_execute = MagicMock()
-        with patch(
-            "superoptix.adapters.stackone_adapter.STACKONE_AVAILABLE", True
-        ), patch(
-            "superoptix.adapters.stackone_adapter.CREWAI_AVAILABLE", True
-        ), patch.dict(
-            "sys.modules",
-            {
-                "stackone_ai": types.ModuleType("stackone_ai"),
-                "stackone_ai.models": mock_stackone_models,
-                "stackone_ai.utility_tools": mock_stackone_utils,
-            },
-        ):
-            from superoptix.adapters.stackone_adapter import StackOneBridge
-
-            bridge = StackOneBridge(sample_stackone_tools)
-
-            # Mock the utility tools imports
-            with patch(
-                "superoptix.adapters.stackone_adapter.StackOneBridge.to_crewai"
-            ) as mock_to_crewai, patch(
-                "stackone_ai.models.Tools"
-            ), patch(
-                "stackone_ai.utility_tools.ToolIndex"
-            ), patch(
-                "stackone_ai.utility_tools.create_tool_search"
-            ), patch(
-                "stackone_ai.utility_tools.create_tool_execute"
-            ):
-                mock_to_crewai.return_value = [MagicMock(), MagicMock()]
-
-                # This should call to_crewai on the temp bridge
-                # Note: The actual call will fail due to missing imports,
-                # but we're testing the framework routing logic
-                pass
-
-    def test_to_discovery_tools_invalid_framework(self, sample_stackone_tools):
-        """Test discovery tools with invalid framework raises ValueError."""
-        mock_stackone_models = types.ModuleType("stackone_ai.models")
-        mock_stackone_models.Tools = MagicMock()
-        mock_stackone_utils = types.ModuleType("stackone_ai.utility_tools")
-        mock_stackone_utils.ToolIndex = MagicMock()
-        mock_stackone_utils.create_tool_search = MagicMock()
-        mock_stackone_utils.create_tool_execute = MagicMock()
-        with patch(
-            "superoptix.adapters.stackone_adapter.STACKONE_AVAILABLE", True
-        ), patch.dict(
-            "sys.modules",
-            {
-                "stackone_ai": types.ModuleType("stackone_ai"),
-                "stackone_ai.models": mock_stackone_models,
-                "stackone_ai.utility_tools": mock_stackone_utils,
-            },
-        ):
-            from superoptix.adapters.stackone_adapter import StackOneBridge
-
-            bridge = StackOneBridge(sample_stackone_tools)
-
-            # Mock the utility tools imports to get past initial checks
-            with patch(
-                "stackone_ai.models.Tools"
-            ), patch(
-                "stackone_ai.utility_tools.ToolIndex"
-            ), patch(
-                "stackone_ai.utility_tools.create_tool_search"
-            ) as mock_search, patch(
-                "stackone_ai.utility_tools.create_tool_execute"
-            ) as mock_execute:
-                mock_search.return_value = MagicMock()
-                mock_execute.return_value = MagicMock()
-
-                with pytest.raises(ValueError) as exc_info:
-                    bridge.to_discovery_tools(framework="invalid_framework")
-
-                assert "Unknown framework" in str(exc_info.value)
-                assert "crewai" in str(exc_info.value)  # Should list supported frameworks
-
 
 class TestStackOneOptimizableComponent:
     """Tests for StackOneOptimizableComponent."""

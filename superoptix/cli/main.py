@@ -1304,6 +1304,11 @@ Use `super agent <command> --help` for more information on a specific command.
         help="Language model for GEPA reflection (e.g., 'gpt-4o', 'gpt-4o-mini'). Required for GEPA.",
     )
     optimize_parser.add_argument(
+        "--gepa-api",
+        choices=["legacy", "optimize_anything"],
+        help="Universal GEPA API mode (default: legacy). Use optimize_anything only when explicitly opting in.",
+    )
+    optimize_parser.add_argument(
         "--max-full-evals",
         type=int,
         help="GEPA: Maximum number of full evaluations (alternative to --auto)",

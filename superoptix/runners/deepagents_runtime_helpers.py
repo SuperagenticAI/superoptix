@@ -8,6 +8,17 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List
 
+from superoptix.runners.rlm_mode_utils import resolve_effective_rlm_mode
+
+
+def _normalize_rlm_provider(provider: Any) -> str:
+    value = str(provider or "").strip().lower()
+    if not value:
+        return "native"
+    if value == "legacy":
+        return "native"
+    return value
+
 
 def _normalize_provider(provider: str) -> str:
     value = str(provider or "").strip().lower()
@@ -132,7 +143,7 @@ def build_stackone_tools(spec_data: Dict[str, Any] | None) -> List[Any]:
     """Build LangChain-compatible StackOne tools when configured."""
     cfg = resolve_stackone_config(spec_data)
     mode = str(cfg.get("mode", "none")).strip().lower()
-    enabled = bool(cfg.get("enabled", mode in {"stackone", "stackone_discovery"}))
+    enabled = bool(cfg.get("enabled", mode == "stackone"))
     if not enabled:
         return []
 
@@ -247,7 +258,15 @@ def get_deepagents_rlm_config(spec_data: Dict[str, Any] | None) -> Dict[str, Any
 
     return {
         "enabled": bool(rlm_cfg.get("enabled", False)),
+        "provider": _normalize_rlm_provider(rlm_cfg.get("provider", "native")),
         "mode": str(rlm_cfg.get("mode", "assist")).strip().lower() or "assist",
+        "auto_long_context_chars": int(
+            rlm_cfg.get("auto_long_context_chars", 12000) or 12000
+        ),
+        "auto_short_context_mode": str(
+            rlm_cfg.get("auto_short_context_mode", "direct")
+        ).strip().lower()
+        or "direct",
         "backend": str(rlm_cfg.get("backend", "litellm")).strip() or "litellm",
         "environment": str(rlm_cfg.get("environment", "python")).strip() or "python",
         "max_iterations": int(rlm_cfg.get("max_iterations", 8) or 8),
@@ -309,6 +328,7 @@ async def run_with_optional_rlm(
     - disabled: direct deep agent invoke
     - assist: RLM draft -> invoke with augmented prompt
     - replace: RLM only
+    - auto: choose direct/assist/replace from prompt size thresholds
     """
     cfg = get_deepagents_rlm_config(spec_data)
     if not cfg.get("enabled", False):
@@ -316,6 +336,29 @@ async def run_with_optional_rlm(
             agent_graph.invoke, {"messages": [{"role": "user", "content": prompt}]}
         )
         return _extract_output_text(result)
+
+    mode, mode_reason = resolve_effective_rlm_mode(prompt=prompt, config=cfg)
+    if mode == "direct":
+        print(f"🧠 RLM auto mode selected direct execution ({mode_reason})")
+        result = await asyncio.to_thread(
+            agent_graph.invoke, {"messages": [{"role": "user", "content": prompt}]}
+        )
+        return _extract_output_text(result)
+
+    provider = _normalize_rlm_provider(cfg.get("provider", "native"))
+    if provider == "rlm_code":
+        print(
+            "⚠️ deepagents.rlm.provider=rlm_code is not wired yet; "
+            "falling back to provider=native."
+        )
+        provider = "native"
+    elif provider != "native":
+        print(
+            f"⚠️ Unsupported deepagents.rlm.provider '{provider}'. "
+            "Falling back to provider=native."
+        )
+        provider = "native"
+    cfg["provider"] = provider
 
     try:
         from rlm import RLM  # type: ignore
@@ -359,13 +402,11 @@ async def run_with_optional_rlm(
         persistent=bool(cfg.get("persistent", False)),
     )
 
-    mode = str(cfg.get("mode", "assist")).strip().lower()
-    if mode not in {"assist", "replace"}:
-        mode = "assist"
-
     print(
         "🧠 RLM enabled "
-        f"(mode={mode}, backend={cfg.get('backend')}, max_iterations={cfg.get('max_iterations')})"
+        f"(provider={cfg.get('provider')}, mode={mode}, "
+        f"backend={cfg.get('backend')}, max_iterations={cfg.get('max_iterations')}, "
+        f"resolution={mode_reason})"
     )
     started = time.time()
     completion = await asyncio.to_thread(rlm.completion, prompt)

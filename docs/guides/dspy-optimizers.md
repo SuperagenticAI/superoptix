@@ -4,6 +4,26 @@ SuperOptiX provides **pure DSPy optimization** without mixing frameworks. Use DS
 
 **🌟 Key Achievement**: DSPy agents optimized with GEPA achieve **37.5% → 80%** improvement (+42.5 points)!
 
+## 🧠 RLM Provider Quick Decision (DSPy)
+
+DSPy uses its native RLM path (`dspy.RLM`) under `spec.dspy.rlm`.
+
+| Use Case | What To Configure | Recommendation |
+| --- | --- | --- |
+| DSPy-native reasoning/optimization | `spec.dspy.rlm` | Use native DSPy RLM (default approach). |
+| Need `rlm_code` runtime features | Switch to a framework RLM block (`spec.pydantic_ai.rlm` / `spec.openai_agent.rlm` / `spec.google_adk.rlm`) | `rlm_code` is not the default DSPy RLM path. |
+
+Quick example:
+
+```yaml
+spec:
+  dspy:
+    rlm:
+      enabled: true
+      max_iters: 10
+      max_llm_calls: 5
+```
+
 ## Overview
 
 DSPy optimizers automatically improve your agent's prompts and reasoning patterns through systematic optimization. SuperOptiX enhances this with:

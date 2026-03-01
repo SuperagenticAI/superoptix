@@ -989,6 +989,15 @@ wheels = [
 ]
 
 [[package]]
+name = "cached-property"
+version = "2.0.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/76/4b/3d870836119dbe9a5e3c9a61af8cc1a8b69d75aea564572e385882d5aefb/cached_property-2.0.1.tar.gz", hash = "sha256:484d617105e3ee0e4f1f58725e72a8ef9e93deee462222dbd51cd91230897641", size = 10574, upload-time = "2024-10-25T15:43:55.667Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/11/0e/7d8225aab3bc1a0f5811f8e1b557aa034ac04bdf641925b30d3caf586b28/cached_property-2.0.1-py3-none-any.whl", hash = "sha256:f617d70ab1100b7bcf6e42228f9ddcb78c676ffa167278d9f730d1c2fba69ccb", size = 7428, upload-time = "2024-10-25T15:43:54.711Z" },
+]
+
+[[package]]
 name = "cachetools"
 version = "6.2.6"
 source = { registry = "https://pypi.org/simple" }
@@ -5759,6 +5768,27 @@ wheels = [
 ]
 
 [[package]]
+name = "portkey-ai"
+version = "2.2.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anyio" },
+    { name = "cached-property" },
+    { name = "distro" },
+    { name = "httpx" },
+    { name = "jiter" },
+    { name = "pydantic" },
+    { name = "sniffio" },
+    { name = "tqdm" },
+    { name = "types-requests" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/40/b6/b5ff914ed6f171e6e0bc62fdec2b20b9bd812396acf133e10ecae15536ee/portkey_ai-2.2.0.tar.gz", hash = "sha256:ccff66e34c4014d65b18883c92ac242ab61663d02a46bde1d179bbe3157ed36c", size = 605122, upload-time = "2026-02-16T10:50:39.953Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1c/be/0a817a2ab407f929deff8b94abfe170171ca8ff0e9f81e7a8182328e5bb0/portkey_ai-2.2.0-py3-none-any.whl", hash = "sha256:9d33c2f6f29777904a269da1deb3a34e3517028e779dac95b3297481c005291a", size = 1253175, upload-time = "2026-02-16T10:50:38.634Z" },
+]
+
+[[package]]
 name = "posthog"
 version = "5.4.0"
 source = { registry = "https://pypi.org/simple" }
@@ -7112,6 +7142,48 @@ wheels = [
 ]
 
 [[package]]
+name = "rlm-code"
+version = "0.1.6"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anyio" },
+    { name = "click" },
+    { name = "dspy" },
+    { name = "httpx" },
+    { name = "httpx-sse" },
+    { name = "jsonschema" },
+    { name = "mcp" },
+    { name = "packaging" },
+    { name = "pydantic" },
+    { name = "pyyaml" },
+    { name = "requests" },
+    { name = "rich" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/12/72/c4679f8f620c68bfbf640796285ae0d1dcffc60d2cc5f472a4592af33a98/rlm_code-0.1.6.tar.gz", hash = "sha256:d6617a388299aee524622beb27f99ec33a8093b94b666b1f6975226114aa0a59", size = 770969, upload-time = "2026-02-20T18:38:33.552Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/48/80/b2bd95fae60ec8b1a3531f41f00cdd68ebd983bc323133b3785a1cacc0a6/rlm_code-0.1.6-py3-none-any.whl", hash = "sha256:58cd3d8f0f34fc5cae4862835a907ce8271e3c9b76c2153504800d5b4a0de233", size = 790039, upload-time = "2026-02-20T18:38:31.102Z" },
+]
+
+[[package]]
+name = "rlms"
+version = "0.1.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anthropic" },
+    { name = "google-genai" },
+    { name = "openai" },
+    { name = "portkey-ai" },
+    { name = "pytest" },
+    { name = "python-dotenv" },
+    { name = "requests" },
+    { name = "rich" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/64/09/13fd4abcf935fbbfe33c06f14d2c814513ee43d4ff1e40f6aee51f8b2039/rlms-0.1.1.tar.gz", hash = "sha256:926487e3512526f27505a8306bcc2e20648991f99b232d9be6c5b76e8fec8731", size = 86341, upload-time = "2026-02-18T21:08:37.644Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5c/a9/6538aec016b4e056c5553336a1b42134c108a9305db3e4ca8945dc00cebd/rlms-0.1.1-py3-none-any.whl", hash = "sha256:3dff7d40013065ef62d57deb50e2578ba658045829ed340f94de9b59a49d5369", size = 84370, upload-time = "2026-02-18T21:08:35.855Z" },
+]
+
+[[package]]
 name = "rpds-py"
 version = "0.30.0"
 source = { registry = "https://pypi.org/simple" }
@@ -7961,6 +8033,12 @@ qdrant = [
 redis = [
     { name = "redis" },
 ]
+rlm-code = [
+    { name = "rlm-code" },
+]
+rlm-native = [
+    { name = "rlms" },
+]
 surrealdb = [
     { name = "sentence-transformers" },
     { name = "surrealdb" },
@@ -8118,6 +8196,8 @@ requires-dist = [
     { name = "requests" },
     { name = "responses", marker = "extra == 'testing'" },
     { name = "rich" },
+    { name = "rlm-code", marker = "extra == 'rlm-code'" },
+    { name = "rlms", marker = "extra == 'rlm-native'" },
     { name = "ruff", marker = "extra == 'dev'" },
     { name = "sentence-transformers", marker = "extra == 'all'" },
     { name = "sentence-transformers", marker = "extra == 'all-with-mlx'" },
@@ -8157,7 +8237,7 @@ requires-dist = [
     { name = "weaviate-client", marker = "extra == 'vectordb'" },
     { name = "weaviate-client", marker = "extra == 'weaviate'" },
 ]
-provides-extras = ["frameworks-dspy", "frameworks-openai", "frameworks-google", "frameworks-microsoft", "frameworks-deepagents", "frameworks-pydantic-ai", "frameworks-claude-sdk", "frameworks", "mcp", "logfire", "connectors-stackone", "dev", "ui", "chromadb", "lancedb", "faiss", "weaviate", "qdrant", "milvus", "surrealdb", "vectordb", "mlx", "ml-cross-platform", "huggingface", "redis", "observability", "web", "data", "cloud", "testing", "docs", "all", "all-with-mlx"]
+provides-extras = ["frameworks-dspy", "frameworks-openai", "frameworks-google", "frameworks-microsoft", "frameworks-deepagents", "frameworks-pydantic-ai", "frameworks-claude-sdk", "frameworks", "mcp", "rlm-native", "rlm-code", "logfire", "connectors-stackone", "dev", "ui", "chromadb", "lancedb", "faiss", "weaviate", "qdrant", "milvus", "surrealdb", "vectordb", "mlx", "ml-cross-platform", "huggingface", "redis", "observability", "web", "data", "cloud", "testing", "docs", "all", "all-with-mlx"]
 
 [[package]]
 name = "surrealdb"

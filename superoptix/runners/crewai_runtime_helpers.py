@@ -6,6 +6,17 @@ import os
 from pathlib import Path
 from typing import Any, Dict, List
 
+from superoptix.runners.rlm_mode_utils import resolve_effective_rlm_mode
+
+
+def _normalize_rlm_provider(provider: Any) -> str:
+    value = str(provider or "").strip().lower()
+    if not value:
+        return "native"
+    if value == "legacy":
+        return "native"
+    return value
+
 
 def _normalize_provider(provider: str) -> str:
     value = str(provider or "").strip().lower()
@@ -145,7 +156,7 @@ def build_stackone_tools(spec_data: Dict[str, Any] | None) -> List[Any]:
     """Build CrewAI-compatible StackOne tools when configured."""
     cfg = resolve_stackone_config(spec_data)
     mode = str(cfg.get("mode", "none")).strip().lower()
-    enabled = bool(cfg.get("enabled", mode in {"stackone", "stackone_discovery"}))
+    enabled = bool(cfg.get("enabled", mode == "stackone"))
     if not enabled:
         return []
 
@@ -332,7 +343,15 @@ def get_crewai_rlm_config(spec_data: Dict[str, Any] | None) -> Dict[str, Any]:
 
     return {
         "enabled": bool(rlm_cfg.get("enabled", False)),
+        "provider": _normalize_rlm_provider(rlm_cfg.get("provider", "native")),
         "mode": str(rlm_cfg.get("mode", "assist")).strip().lower() or "assist",
+        "auto_long_context_chars": int(
+            rlm_cfg.get("auto_long_context_chars", 12000) or 12000
+        ),
+        "auto_short_context_mode": str(
+            rlm_cfg.get("auto_short_context_mode", "direct")
+        ).strip().lower()
+        or "direct",
         "backend": str(rlm_cfg.get("backend", "litellm")).strip() or "litellm",
         "environment": str(rlm_cfg.get("environment", "python")).strip() or "python",
         "max_iterations": int(rlm_cfg.get("max_iterations", 8) or 8),
@@ -360,11 +379,40 @@ def run_with_optional_rlm(
     model_name: str,
     task_description: str,
 ) -> str:
-    """Execute CrewAI with optional RLM orchestration."""
+    """
+    Execute CrewAI with optional RLM orchestration.
+
+    Modes:
+    - disabled: direct CrewAI kickoff
+    - assist: RLM draft -> CrewAI kickoff(augmented_prompt)
+    - replace: RLM-only response
+    - auto: choose direct/assist/replace from prompt size thresholds
+    """
     cfg = get_crewai_rlm_config(spec_data)
     if not cfg.get("enabled", False):
         result = crew.kickoff(inputs={"query": prompt})
         return extract_crewai_output(result)
+
+    mode, mode_reason = resolve_effective_rlm_mode(prompt=prompt, config=cfg)
+    if mode == "direct":
+        print(f"🧠 RLM auto mode selected direct execution ({mode_reason})")
+        result = crew.kickoff(inputs={"query": prompt})
+        return extract_crewai_output(result)
+
+    provider = _normalize_rlm_provider(cfg.get("provider", "native"))
+    if provider == "rlm_code":
+        print(
+            "⚠️ crewai.rlm.provider=rlm_code is not wired yet; "
+            "falling back to provider=native."
+        )
+        provider = "native"
+    elif provider != "native":
+        print(
+            f"⚠️ Unsupported crewai.rlm.provider '{provider}'. "
+            "Falling back to provider=native."
+        )
+        provider = "native"
+    cfg["provider"] = provider
 
     try:
         from rlm import RLM  # type: ignore
@@ -408,9 +456,11 @@ def run_with_optional_rlm(
         "Provide a concise, actionable answer."
     )
 
-    mode = cfg.get("mode", "assist")
     if mode == "replace":
-        print("🧠 CrewAI RLM mode=replace (RLM-only)")
+        print(
+            "🧠 CrewAI RLM "
+            f"provider={cfg.get('provider')} mode=replace (resolution={mode_reason})"
+        )
         try:
             return str(rlm(task_prompt)).strip()
         except Exception as exc:
@@ -418,7 +468,10 @@ def run_with_optional_rlm(
             result = crew.kickoff(inputs={"query": prompt})
             return extract_crewai_output(result)
 
-    print("🧠 CrewAI RLM mode=assist (RLM draft + CrewAI execution)")
+    print(
+        f"🧠 CrewAI RLM provider={cfg.get('provider')} mode=assist "
+        f"(RLM draft + CrewAI execution, resolution={mode_reason})"
+    )
     try:
         draft = str(rlm(task_prompt)).strip()
     except Exception as exc:

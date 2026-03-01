@@ -7,12 +7,11 @@ This guide explains how to run StackOne tools through Claude Agent SDK using Sup
 - Converts StackOne tools into Claude SDK `SdkMcpTool` objects.
 - Bundles them into one in-process MCP server using `create_sdk_mcp_server(...)`.
 - Returns Claude-compatible allowed tool names (`mcp__stackone__<tool_name>`).
-- Supports discovery mode (`tool_search`, `tool_execute`) for large tool inventories.
 
 ## Install
 
 ```bash
-pip install superoptix stackone-ai claude-agent-sdk
+pip install superoptix "stackone-ai[mcp]" claude-agent-sdk
 ```
 
 If you installed SuperOptiX in editable mode:
@@ -61,7 +60,7 @@ from superoptix.adapters import StackOneBridge
 async def main():
     toolset = StackOneToolSet()
     tools = toolset.fetch_tools(
-        include_tools=["hris_list_employees", "hris_get_employee"],
+        actions=["hris_list_employees", "hris_get_employee"],
         account_ids=["your_stackone_account_id"],
     )
 
@@ -85,18 +84,18 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-## Discovery Mode (Large Tool Catalogs)
+## Large Tool Catalogs
 
-If you have many tools, inject only two meta-tools and let the agent discover dynamically:
+Keep tool loading explicit and filtered:
 
 ```python
-mcp_server, tool_names = StackOneBridge(tools).to_discovery_tools(framework="claude_sdk")
+tools = toolset.fetch_tools(
+    account_ids=["your_stackone_account_id"],
+    providers=["bamboohr"],
+    actions=["hris_*"],
+)
+mcp_server, tool_names = StackOneBridge(tools).to_claude_sdk()
 ```
-
-This gives the model:
-
-- `tool_search`: find the best tool
-- `tool_execute`: execute by name with args
 
 ## How SuperOptiX Playbook Should Look
 

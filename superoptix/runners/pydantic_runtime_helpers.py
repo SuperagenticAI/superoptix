@@ -8,10 +8,22 @@ import time
 from pathlib import Path
 from typing import Any, Dict, Optional
 
+from superoptix.runners.rlm_code_runtime import run_rlm_code_completion
+from superoptix.runners.rlm_mode_utils import resolve_effective_rlm_mode
+
 try:
     from pydantic_ai import Agent
 except Exception:  # pragma: no cover - handled by generated pipeline import checks
     Agent = None  # type: ignore
+
+
+def _normalize_rlm_provider(provider: Any) -> str:
+    value = str(provider or "").strip().lower()
+    if not value:
+        return "native"
+    if value == "legacy":
+        return "native"
+    return value
 
 
 def _normalize_provider(provider: str) -> str:
@@ -237,7 +249,7 @@ def build_stackone_tools(
 
     mode = str(stackone_cfg.get("mode", "stackone")).strip().lower()
     enabled = bool(
-        stackone_cfg.get("enabled", mode in {"stackone", "stackone_discovery"})
+        stackone_cfg.get("enabled", mode == "stackone")
     )
     if not enabled:
         return []
@@ -289,10 +301,6 @@ def build_stackone_tools(
     if base_url:
         init_kwargs["base_url"] = str(base_url).strip()
 
-    discovery_mode = (
-        bool(stackone_cfg.get("discovery_mode", False)) or mode == "stackone_discovery"
-    )
-
     try:
         toolset = StackOneToolSet(**init_kwargs)
         fetched_tools = toolset.fetch_tools(
@@ -323,9 +331,7 @@ def build_stackone_tools(
             return []
 
         bridge = StackOneBridge(fetched_tools)
-        if discovery_mode:
-            tools = bridge.to_discovery_tools(framework=framework)
-        elif framework == "pydantic_ai":
+        if framework == "pydantic_ai":
             tools = bridge.to_pydantic_ai()
         else:
             raise ValueError(f"Unsupported framework for StackOne tools: {framework}")
@@ -374,7 +380,15 @@ def get_pydantic_rlm_config(spec_data: Dict[str, Any] | None) -> Dict[str, Any]:
 
     return {
         "enabled": bool(rlm_cfg.get("enabled", False)),
+        "provider": _normalize_rlm_provider(rlm_cfg.get("provider", "native")),
         "mode": str(rlm_cfg.get("mode", "assist")).strip().lower() or "assist",
+        "auto_long_context_chars": int(
+            rlm_cfg.get("auto_long_context_chars", 12000) or 12000
+        ),
+        "auto_short_context_mode": str(
+            rlm_cfg.get("auto_short_context_mode", "direct")
+        ).strip().lower()
+        or "direct",
         "backend": str(rlm_cfg.get("backend", "litellm")).strip() or "litellm",
         "environment": str(rlm_cfg.get("environment", "python")).strip() or "python",
         "max_iterations": int(rlm_cfg.get("max_iterations", 8) or 8),
@@ -427,10 +441,65 @@ async def run_agent_with_optional_rlm(
     - disabled: direct Agent.run(prompt)
     - assist: RLM draft -> Agent.run(augmented_prompt)
     - replace: RLM only (returns string)
+    - auto: choose direct/assist/replace from prompt size thresholds
     """
     cfg = get_pydantic_rlm_config(spec_data)
     if not cfg.get("enabled", False):
         return await agent.run(prompt)
+
+    mode, mode_reason = resolve_effective_rlm_mode(prompt=prompt, config=cfg)
+    if mode == "direct":
+        print(f"🧠 RLM auto mode selected direct execution ({mode_reason})")
+        return await agent.run(prompt)
+
+    provider = _normalize_rlm_provider(cfg.get("provider", "native"))
+    if provider == "rlm_code":
+        cfg["provider"] = provider
+        span = _build_logfire_span(logfire_enabled=logfire_enabled, config=cfg)
+        if span is not None:
+            span.__enter__()
+        try:
+            print(
+                "🧠 RLM enabled "
+                f"(provider={cfg.get('provider')}, mode={mode}, "
+                f"backend={cfg.get('backend')}, max_iterations={cfg.get('max_iterations')}, "
+                f"resolution={mode_reason})"
+            )
+            started = time.time()
+            rlm_text, rlm_error = await run_rlm_code_completion(
+                prompt=prompt,
+                config=cfg,
+                model_name=model_name,
+            )
+            if rlm_text is not None:
+                elapsed = int((time.time() - started) * 1000)
+                print(f"✅ RLM completed ({elapsed}ms)")
+                if mode == "replace":
+                    return rlm_text
+
+                augmented_prompt = (
+                    "User request:\n"
+                    f"{prompt}\n\n"
+                    "RLM draft reasoning (use as guidance, verify with tools when needed):\n"
+                    f"{rlm_text}\n"
+                )
+                return await agent.run(augmented_prompt)
+
+            print(
+                "⚠️ pydantic_ai.rlm.provider=rlm_code failed; "
+                f"falling back to provider=native. ({rlm_error or 'unknown error'})"
+            )
+        finally:
+            if span is not None:
+                span.__exit__(None, None, None)
+        provider = "native"
+    elif provider != "native":
+        print(
+            f"⚠️ Unsupported pydantic_ai.rlm.provider '{provider}'. "
+            "Falling back to provider=native."
+        )
+        provider = "native"
+    cfg["provider"] = provider
 
     try:
         from rlm import RLM  # type: ignore
@@ -478,16 +547,14 @@ async def run_agent_with_optional_rlm(
     )
 
     span = _build_logfire_span(logfire_enabled=logfire_enabled, config=cfg)
-    mode = str(cfg.get("mode", "assist")).strip().lower()
-    if mode not in {"assist", "replace"}:
-        mode = "assist"
-
     if span is not None:
         span.__enter__()
     try:
         print(
             "🧠 RLM enabled "
-            f"(mode={mode}, backend={cfg.get('backend')}, max_iterations={cfg.get('max_iterations')})"
+            f"(provider={cfg.get('provider')}, mode={mode}, "
+            f"backend={cfg.get('backend')}, max_iterations={cfg.get('max_iterations')}, "
+            f"resolution={mode_reason})"
         )
         started = time.time()
         completion = await asyncio.to_thread(rlm.completion, prompt)

@@ -73,7 +73,6 @@ spec:
     mode: stackone
     stackone:
       enabled: true
-      discovery_mode: false
       api_key_env: STACKONE_API_KEY
       account_ids_env: STACKONE_ACCOUNT_IDS
       providers:

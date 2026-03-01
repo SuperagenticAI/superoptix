@@ -4,7 +4,27 @@
 
 SuperOptiX now supports **Google ADK (Agent Development Kit)** - Google's code-first Python toolkit optimized for Gemini models. This integration brings GEPA optimization to Google's enterprise-grade agent framework.
 
-RLM support is experimental. Unified sandbox support is coming soon.
+RLM support is experimental (`assist`, `replace`, `auto` modes). See [RLM (Experimental)](rlm-experimental.md).
+
+## 🧠 RLM Provider Quick Decision
+
+Use this for `spec.google_adk.rlm.provider`:
+
+| Use Case | Provider | Why |
+| --- | --- | --- |
+| Recommended default for ADK | `native` | Uses the current stable ADK runtime path. |
+| Trying `rlm_code` in ADK | `rlm_code` | Accepted in schema, but current ADK runtime keeps native-first behavior with fallback/warning. |
+
+Quick example:
+
+```yaml
+spec:
+  google_adk:
+    rlm:
+      enabled: true
+      provider: native
+      mode: auto
+```
 
 **Key Features:**
 - **Gemini 2.0 Flash** integration (Google's latest model!)

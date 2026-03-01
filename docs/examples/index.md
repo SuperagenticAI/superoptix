@@ -22,9 +22,9 @@ Explore Retrieval-Augmented Generation capabilities:
 - **[🗄️ Weaviate Demo](agents/weaviate-demo)** - Advanced semantic search with Weaviate
 - **[🎯 Qdrant Demo](agents/qdrant-demo)** - Lightning-fast vector search with Qdrant
 - **[🏗️ Milvus Demo](agents/milvus-demo)** - Enterprise-scale vector database with Milvus
-- **[🌌 SurrealDB Demo](agents/surrealdb-demo)** - Unified multi-model database with vector + hybrid retrieval
-- **[🐳 SurrealDB Docker Demo](agents/surrealdb-docker-demo)** - Authenticated SurrealDB server mode with Docker
-- **[🧩 SurrealDB Framework Guide](agents/surrealdb-frameworks-demo)** - End-to-end SurrealDB RAG across DSPy, PydanticAI, CrewAI, and Google ADK
+- **[🟣🟢 SurrealDB Demo](agents/surrealdb-demo)** - Unified multi-model database with vector + hybrid retrieval
+- **[🟣🟢 SurrealDB Docker Demo](agents/surrealdb-docker-demo)** - Authenticated SurrealDB server mode with Docker
+- **[🟣🟢 SurrealDB Framework Guide](agents/surrealdb-frameworks-demo)** - End-to-end SurrealDB RAG across DSPy, PydanticAI, CrewAI, and Google ADK
 
 ### **🛠️ Framework Feature Demos**
 Discover core framework capabilities:

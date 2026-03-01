@@ -577,7 +577,7 @@ class AgentCompiler:
                     tools_cfg.get("mcp_servers"), list
                 ):
                     spec["mcp_servers"] = tools_cfg.get("mcp_servers")
-            elif mode in {"stackone", "stackone_discovery"}:
+            elif mode == "stackone":
                 # Runner/template will fetch + convert StackOne tools at runtime.
                 spec["tool_backend"] = "dspy"
                 spec.pop("mcp_servers", None)

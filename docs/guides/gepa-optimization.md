@@ -167,6 +167,43 @@ super agent optimize assistant_microsoft --auto medium --framework microsoft --r
 super agent optimize research_agent_deepagents --auto medium --framework deepagents --reflection-lm ollama:llama3.1:8b # DeepAgents
 ```
 
+### GEPA API Mode (Default + Opt-In)
+
+SuperOptiX keeps existing behavior by default:
+
+- `legacy` is the default GEPA API mode (backward compatible)
+- `optimize_anything` is available as an explicit opt-in
+
+Use CLI flag:
+
+```bash
+# Default behavior (legacy)
+super agent optimize my_agent --framework openai --auto light --reflection-lm ollama:llama3.1:8b
+
+# Explicit legacy
+super agent optimize my_agent --framework openai --auto light --reflection-lm ollama:llama3.1:8b --gepa-api legacy
+
+# Opt in to optimize_anything
+super agent optimize my_agent --framework openai --auto light --reflection-lm ollama:llama3.1:8b --gepa-api optimize_anything
+```
+
+Use playbook params:
+
+```yaml
+spec:
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        auto: light
+        reflection_lm: llama3.1:8b
+        gepa_api: optimize_anything  # optional; default is legacy
+```
+
+Compatibility note:
+- `optimize_everything` is accepted as an alias and mapped internally to `optimize_anything`.
+- If `optimize_anything` is requested but unavailable in your installed GEPA version, SuperOptiX falls back to legacy automatically.
+
 **💡 About Reflection Models**
 
 The `--reflection-lm` parameter specifies which model GEPA uses to analyze evaluation results and suggest prompt improvements. We typically recommend using a **smaller, faster model** for reflection:

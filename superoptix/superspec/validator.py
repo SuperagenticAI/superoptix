@@ -850,7 +850,6 @@ class SuperSpecXValidator:
                     "builtin",
                     "mcp",
                     "stackone",
-                    "stackone_discovery",
                 ]
                 if mode is not None and mode not in valid_modes:
                     self.errors.append(
@@ -881,12 +880,6 @@ class SuperSpecXValidator:
                         ):
                             self.errors.append(
                                 "dspy.tools.stackone.enabled must be a boolean"
-                            )
-                        if "discovery_mode" in stackone_cfg and not isinstance(
-                            stackone_cfg.get("discovery_mode"), bool
-                        ):
-                            self.errors.append(
-                                "dspy.tools.stackone.discovery_mode must be a boolean"
                             )
                         if "fallback_unfiltered" in stackone_cfg and not isinstance(
                             stackone_cfg.get("fallback_unfiltered"), bool
@@ -1019,9 +1012,41 @@ class SuperSpecXValidator:
         if "enabled" in rlm_cfg and not isinstance(rlm_cfg["enabled"], bool):
             self.errors.append("pydantic_ai.rlm.enabled must be a boolean")
 
+        provider = rlm_cfg.get("provider")
+        if provider is not None:
+            if not isinstance(provider, str):
+                self.errors.append("pydantic_ai.rlm.provider must be a string")
+            elif str(provider).strip().lower() not in {
+                "native",
+                "rlm_code",
+                "legacy",
+            }:
+                self.errors.append(
+                    "pydantic_ai.rlm.provider must be one of: native, rlm_code, legacy"
+                )
+
         mode = rlm_cfg.get("mode")
-        if mode is not None and mode not in {"assist", "replace"}:
-            self.errors.append("pydantic_ai.rlm.mode must be one of: assist, replace")
+        if mode is not None and mode not in {"assist", "replace", "auto"}:
+            self.errors.append(
+                "pydantic_ai.rlm.mode must be one of: assist, replace, auto"
+            )
+
+        auto_long_context_chars = rlm_cfg.get("auto_long_context_chars")
+        if auto_long_context_chars is not None and (
+            not isinstance(auto_long_context_chars, int) or auto_long_context_chars < 1
+        ):
+            self.errors.append(
+                "pydantic_ai.rlm.auto_long_context_chars must be an integer >= 1"
+            )
+
+        auto_short_context_mode = rlm_cfg.get("auto_short_context_mode")
+        if auto_short_context_mode is not None and auto_short_context_mode not in {
+            "direct",
+            "assist",
+        }:
+            self.errors.append(
+                "pydantic_ai.rlm.auto_short_context_mode must be one of: direct, assist"
+            )
 
         backend = rlm_cfg.get("backend")
         if backend is not None and not isinstance(backend, str):
@@ -1098,9 +1123,41 @@ class SuperSpecXValidator:
         if "enabled" in rlm_cfg and not isinstance(rlm_cfg["enabled"], bool):
             self.errors.append("openai_agent.rlm.enabled must be a boolean")
 
+        provider = rlm_cfg.get("provider")
+        if provider is not None:
+            if not isinstance(provider, str):
+                self.errors.append("openai_agent.rlm.provider must be a string")
+            elif str(provider).strip().lower() not in {
+                "native",
+                "rlm_code",
+                "legacy",
+            }:
+                self.errors.append(
+                    "openai_agent.rlm.provider must be one of: native, rlm_code, legacy"
+                )
+
         mode = rlm_cfg.get("mode")
-        if mode is not None and mode not in {"assist", "replace"}:
-            self.errors.append("openai_agent.rlm.mode must be one of: assist, replace")
+        if mode is not None and mode not in {"assist", "replace", "auto"}:
+            self.errors.append(
+                "openai_agent.rlm.mode must be one of: assist, replace, auto"
+            )
+
+        auto_long_context_chars = rlm_cfg.get("auto_long_context_chars")
+        if auto_long_context_chars is not None and (
+            not isinstance(auto_long_context_chars, int) or auto_long_context_chars < 1
+        ):
+            self.errors.append(
+                "openai_agent.rlm.auto_long_context_chars must be an integer >= 1"
+            )
+
+        auto_short_context_mode = rlm_cfg.get("auto_short_context_mode")
+        if auto_short_context_mode is not None and auto_short_context_mode not in {
+            "direct",
+            "assist",
+        }:
+            self.errors.append(
+                "openai_agent.rlm.auto_short_context_mode must be one of: direct, assist"
+            )
 
         backend = rlm_cfg.get("backend")
         if backend is not None and not isinstance(backend, str):
@@ -1177,9 +1234,41 @@ class SuperSpecXValidator:
         if "enabled" in rlm_cfg and not isinstance(rlm_cfg["enabled"], bool):
             self.errors.append("google_adk.rlm.enabled must be a boolean")
 
+        provider = rlm_cfg.get("provider")
+        if provider is not None:
+            if not isinstance(provider, str):
+                self.errors.append("google_adk.rlm.provider must be a string")
+            elif str(provider).strip().lower() not in {
+                "native",
+                "rlm_code",
+                "legacy",
+            }:
+                self.errors.append(
+                    "google_adk.rlm.provider must be one of: native, rlm_code, legacy"
+                )
+
         mode = rlm_cfg.get("mode")
-        if mode is not None and mode not in {"assist", "replace"}:
-            self.errors.append("google_adk.rlm.mode must be one of: assist, replace")
+        if mode is not None and mode not in {"assist", "replace", "auto"}:
+            self.errors.append(
+                "google_adk.rlm.mode must be one of: assist, replace, auto"
+            )
+
+        auto_long_context_chars = rlm_cfg.get("auto_long_context_chars")
+        if auto_long_context_chars is not None and (
+            not isinstance(auto_long_context_chars, int) or auto_long_context_chars < 1
+        ):
+            self.errors.append(
+                "google_adk.rlm.auto_long_context_chars must be an integer >= 1"
+            )
+
+        auto_short_context_mode = rlm_cfg.get("auto_short_context_mode")
+        if auto_short_context_mode is not None and auto_short_context_mode not in {
+            "direct",
+            "assist",
+        }:
+            self.errors.append(
+                "google_adk.rlm.auto_short_context_mode must be one of: direct, assist"
+            )
 
         backend = rlm_cfg.get("backend")
         if backend is not None and not isinstance(backend, str):
@@ -1256,9 +1345,41 @@ class SuperSpecXValidator:
         if "enabled" in rlm_cfg and not isinstance(rlm_cfg["enabled"], bool):
             self.errors.append("deepagents.rlm.enabled must be a boolean")
 
+        provider = rlm_cfg.get("provider")
+        if provider is not None:
+            if not isinstance(provider, str):
+                self.errors.append("deepagents.rlm.provider must be a string")
+            elif str(provider).strip().lower() not in {
+                "native",
+                "rlm_code",
+                "legacy",
+            }:
+                self.errors.append(
+                    "deepagents.rlm.provider must be one of: native, rlm_code, legacy"
+                )
+
         mode = rlm_cfg.get("mode")
-        if mode is not None and mode not in {"assist", "replace"}:
-            self.errors.append("deepagents.rlm.mode must be one of: assist, replace")
+        if mode is not None and mode not in {"assist", "replace", "auto"}:
+            self.errors.append(
+                "deepagents.rlm.mode must be one of: assist, replace, auto"
+            )
+
+        auto_long_context_chars = rlm_cfg.get("auto_long_context_chars")
+        if auto_long_context_chars is not None and (
+            not isinstance(auto_long_context_chars, int) or auto_long_context_chars < 1
+        ):
+            self.errors.append(
+                "deepagents.rlm.auto_long_context_chars must be an integer >= 1"
+            )
+
+        auto_short_context_mode = rlm_cfg.get("auto_short_context_mode")
+        if auto_short_context_mode is not None and auto_short_context_mode not in {
+            "direct",
+            "assist",
+        }:
+            self.errors.append(
+                "deepagents.rlm.auto_short_context_mode must be one of: direct, assist"
+            )
 
         backend = rlm_cfg.get("backend")
         if backend is not None and not isinstance(backend, str):
@@ -1335,9 +1456,41 @@ class SuperSpecXValidator:
         if "enabled" in rlm_cfg and not isinstance(rlm_cfg["enabled"], bool):
             self.errors.append("crewai.rlm.enabled must be a boolean")
 
+        provider = rlm_cfg.get("provider")
+        if provider is not None:
+            if not isinstance(provider, str):
+                self.errors.append("crewai.rlm.provider must be a string")
+            elif str(provider).strip().lower() not in {
+                "native",
+                "rlm_code",
+                "legacy",
+            }:
+                self.errors.append(
+                    "crewai.rlm.provider must be one of: native, rlm_code, legacy"
+                )
+
         mode = rlm_cfg.get("mode")
-        if mode is not None and mode not in {"assist", "replace"}:
-            self.errors.append("crewai.rlm.mode must be one of: assist, replace")
+        if mode is not None and mode not in {"assist", "replace", "auto"}:
+            self.errors.append(
+                "crewai.rlm.mode must be one of: assist, replace, auto"
+            )
+
+        auto_long_context_chars = rlm_cfg.get("auto_long_context_chars")
+        if auto_long_context_chars is not None and (
+            not isinstance(auto_long_context_chars, int) or auto_long_context_chars < 1
+        ):
+            self.errors.append(
+                "crewai.rlm.auto_long_context_chars must be an integer >= 1"
+            )
+
+        auto_short_context_mode = rlm_cfg.get("auto_short_context_mode")
+        if auto_short_context_mode is not None and auto_short_context_mode not in {
+            "direct",
+            "assist",
+        }:
+            self.errors.append(
+                "crewai.rlm.auto_short_context_mode must be one of: direct, assist"
+            )
 
         backend = rlm_cfg.get("backend")
         if backend is not None and not isinstance(backend, str):
