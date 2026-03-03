@@ -553,7 +553,7 @@ genie_features:
         type: array
         required: false
         items:
-          enum: ["calculator", "web_search", "file_reader", "code_executor", "email_sender", "calendar", "database_query", "api_caller"]
+          enum: ["calculator", "web_search", "file_reader", "code_executor", "email_sender", "calendar", "database_query", "api_caller", "surrealdb_query"]
       custom_tools:
         type: array
         required: false

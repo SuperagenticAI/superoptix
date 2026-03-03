@@ -1,6 +1,6 @@
 # 🟣🟢 SurrealDB Framework Guide
 
-This page explains how to run SurrealDB RAG in SuperOptiX across DSPy, PydanticAI, CrewAI, and Google ADK.
+This page explains how to run SurrealDB RAG in SuperOptiX across DSPy, OpenAI Agents SDK, Claude Agent SDK, Microsoft Agent Framework, PydanticAI, CrewAI, Google ADK, and DeepAgents.
 
 ## Quick start for beginners
 
@@ -34,6 +34,12 @@ super agent compile rag_surrealdb_demo
 super agent run rag_surrealdb_demo --goal "What is NEON-FOX-742?"
 ```
 
+### 4.5 Seed demo knowledge once (recommended)
+
+```bash
+python superoptix/agents/demo/setup_surrealdb_seed.py
+```
+
 ### 5. Confirm it is working
 
 Look for this line in logs:
@@ -47,10 +53,13 @@ Look for this line in logs:
 | Framework | SurrealDB RAG | Status | Notes |
 |---|---|---|---|
 | DSPy | Yes | Stable | Best first demo for new users |
+| OpenAI Agents SDK | Yes | Stable | Works with local Ollama or cloud OpenAI-compatible endpoints |
+| Claude Agent SDK | Yes | Stable | Requires Anthropic credentials and Claude-compatible model |
+| Microsoft Agent Framework | Yes | Stable | Works with Ollama/OpenAI-compatible endpoints |
 | PydanticAI | Yes | Stable | Same RAG config |
 | CrewAI | Yes | Stable | Same RAG config, prompt style may need tuning |
 | Google ADK | Yes | Stable | Works with cloud model runtime |
-| DeepAgents | Shared RAG engine | Expected | Use same `rag` block and validate playbook behavior |
+| DeepAgents | Yes | Stable | Same RAG config with DeepAgents runtime |
 
 ## Core shared RAG config
 
@@ -65,6 +74,10 @@ rag:
     chunk_size: 512
     chunk_overlap: 50
     similarity_threshold: 0.65
+    retrieval_mode: vector  # or "hybrid"
+    hybrid_alpha: 0.7       # used when retrieval_mode=hybrid
+    telemetry: true         # emit structured retrieval telemetry
+    index_check: true       # warn if vector/full-text indexes look missing
   vector_store:
     embedding_model: sentence-transformers/all-MiniLM-L6-v2
     url: ws://localhost:8000
@@ -135,6 +148,31 @@ super agent compile rag_surrealdb_pydanticai_demo --framework pydantic-ai
 super agent run rag_surrealdb_pydanticai_demo --goal "What is NEON-FOX-742?"
 ```
 
+### OpenAI Agents SDK
+
+```bash
+super agent pull rag_surrealdb_openai_demo
+super agent compile rag_surrealdb_openai_demo --framework openai
+super agent run rag_surrealdb_openai_demo --framework openai --goal "What is NEON-FOX-742?"
+```
+
+### Claude Agent SDK
+
+```bash
+export ANTHROPIC_API_KEY=your_key_here
+super agent pull rag_surrealdb_claude_sdk_demo
+super agent compile rag_surrealdb_claude_sdk_demo --framework claude-sdk --cloud --provider anthropic --model claude-sonnet-4-5
+super agent run rag_surrealdb_claude_sdk_demo --framework claude-sdk --cloud --provider anthropic --model claude-sonnet-4-5 --goal "What is NEON-FOX-742?"
+```
+
+### Microsoft Agent Framework
+
+```bash
+super agent pull rag_surrealdb_microsoft_demo
+super agent compile rag_surrealdb_microsoft_demo --framework microsoft
+super agent run rag_surrealdb_microsoft_demo --framework microsoft --goal "What is NEON-FOX-742?"
+```
+
 ### CrewAI
 
 ```bash
@@ -157,6 +195,15 @@ super agent compile rag_surrealdb_adk_demo --framework google-adk --cloud --prov
 super agent run rag_surrealdb_adk_demo --framework google-adk --cloud --provider google --model gemini-2.5-flash --goal "What is NEON-FOX-742?"
 ```
 
+### DeepAgents
+
+```bash
+export ANTHROPIC_API_KEY=your_key_here
+super agent pull rag_surrealdb_deepagents_demo
+super agent compile rag_surrealdb_deepagents_demo --framework deepagents --cloud --provider anthropic --model claude-sonnet-4-20250514
+super agent run rag_surrealdb_deepagents_demo --framework deepagents --cloud --provider anthropic --model claude-sonnet-4-20250514 --goal "What is NEON-FOX-742?"
+```
+
 ## How retrieval works across frameworks
 
 1. The framework pipeline starts.
@@ -164,6 +211,24 @@ super agent run rag_surrealdb_adk_demo --framework google-adk --cloud --provider
 3. SurrealDB retrieves context.
 4. Retrieved context is injected into the prompt.
 5. The model returns a final answer.
+
+## Production retrieval profile (recommended)
+
+Use `retrieval_mode: hybrid` when you need lexical + semantic ranking:
+
+```yaml
+rag:
+  enabled: true
+  retriever_type: surrealdb
+  config:
+    top_k: 8
+    retrieval_mode: hybrid
+    hybrid_alpha: 0.7
+    telemetry: true
+    index_check: true
+```
+
+Telemetry fields include: `latency_ms`, `hit_count`, `score_min`, `score_max`, `warning_count`, and `mode`.
 
 ## Troubleshooting
 

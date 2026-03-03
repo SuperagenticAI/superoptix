@@ -369,6 +369,10 @@ class ToolsMixin:
                 tool_count += self._add_json_processor_tool(
                     tool_config.get("config", {})
                 )
+            elif tool_name == "surrealdb_query":
+                tool_count += self._add_surrealdb_query_tool(
+                    tool_config.get("config", {})
+                )
 
         return tool_count
 
@@ -639,6 +643,24 @@ class ToolsMixin:
             self.tools.append(Tool(process_json, name="json_processor"))
             return 1
         return 0
+
+    def _add_surrealdb_query_tool(self, config):
+        """Add read-only SurrealDB query tool."""
+        try:
+            from superoptix.tools.builtin_tools import create_tool as create_builtin_tool
+        except Exception:
+            return 0
+
+        if not Tool:
+            return 0
+
+        try:
+            tool = create_builtin_tool("surrealdb_query", **dict(config or {}))
+            self.tools.append(tool)
+            return 1
+        except Exception as e:
+            logger.warning("Failed to configure surrealdb_query tool: %s", e)
+            return 0
 
     def _execute_calculator(self, expression: str, precision: int = 10) -> str:
         """Execute calculator tool with error handling."""

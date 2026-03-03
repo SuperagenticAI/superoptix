@@ -1,7 +1,10 @@
 """Memory backend implementations for different storage systems."""
 
+import base64
+import fnmatch
 import json
 import pickle
+import re
 import sqlite3
 import threading
 from abc import ABC, abstractmethod
@@ -15,6 +18,14 @@ try:
     REDIS_AVAILABLE = True
 except ImportError:
     REDIS_AVAILABLE = False
+
+try:
+    from surrealdb import Surreal
+
+    SURREALDB_AVAILABLE = True
+except ImportError:
+    Surreal = None
+    SURREALDB_AVAILABLE = False
 
 
 class MemoryBackend(ABC):
@@ -561,3 +572,428 @@ class RedisBackend(MemoryBackend):
         except Exception as e:
             print(f"Error getting size: {e}")
             return 0
+
+
+class SurrealDBBackend(MemoryBackend):
+    """SurrealDB-based memory backend."""
+
+    def __init__(
+        self,
+        url: str = "ws://localhost:8000",
+        namespace: str = "test",
+        database: str = "test",
+        username: str = "root",
+        password: str = "root",
+        table_name: str = "superoptix_memory",
+        skip_signin: Optional[bool] = None,
+        temporal_enabled: bool = False,
+        max_versions_per_key: int = 50,
+    ):
+        if not SURREALDB_AVAILABLE:
+            raise ImportError(
+                "SurrealDB backend requires surrealdb package. Install with: pip install surrealdb"
+            )
+        if not re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", table_name):
+            raise ValueError(
+                "Invalid SurrealDB table name. Use letters, numbers, and underscores only."
+            )
+
+        self.url = self._normalize_surrealdb_url(url)
+        self.namespace = namespace
+        self.database = database
+        self.username = username
+        self.password = password
+        self.skip_signin = (
+            self._default_skip_signin(self.url)
+            if skip_signin is None
+            else bool(skip_signin)
+        )
+        self.table_name = table_name
+        self.temporal_enabled = bool(temporal_enabled)
+        self.max_versions_per_key = max(5, int(max_versions_per_key))
+        self.versions_table = f"{table_name}_versions"
+        self._lock = threading.RLock()
+        self._sticky_ctx = None
+        self._sticky_db = None
+
+    def _with_connection(self):
+        """Context manager-like helper that returns a configured SurrealDB client."""
+        db = Surreal(self.url)
+        return db
+
+    def _should_use_sticky_connection(self) -> bool:
+        from urllib.parse import urlparse
+
+        parsed = urlparse(self.url)
+        scheme = parsed.scheme.lower()
+        return scheme in {"memory", "mem", "file", "surrealkv"} or self.url == "memory"
+
+    def _get_sticky_db(self):
+        if self._sticky_db is not None:
+            return self._sticky_db
+        self._sticky_ctx = self._with_connection()
+        self._sticky_db = self._sticky_ctx.__enter__()
+        if not self.skip_signin:
+            self._sticky_db.signin({"username": self.username, "password": self.password})
+        self._sticky_db.use(self.namespace, self.database)
+        return self._sticky_db
+
+    def _run_query(self, query: str, params: Optional[dict[str, Any]] = None) -> Any:
+        params = params or {}
+        if self._should_use_sticky_connection():
+            db = self._get_sticky_db()
+            return db.query(query, params)
+
+        with self._with_connection() as db:
+            if not self.skip_signin:
+                db.signin({"username": self.username, "password": self.password})
+            db.use(self.namespace, self.database)
+            return db.query(query, params)
+
+    def __del__(self):
+        """Best-effort cleanup for sticky SurrealDB sessions."""
+        try:
+            if self._sticky_ctx is not None:
+                self._sticky_ctx.__exit__(None, None, None)
+        except Exception:
+            pass
+
+    def _extract_rows(self, raw: Any) -> list[dict[str, Any]]:
+        """Normalize query outputs from SurrealDB SDK variants."""
+        if isinstance(raw, list):
+            if (
+                raw
+                and isinstance(raw[0], dict)
+                and "result" in raw[0]
+                and isinstance(raw[0]["result"], list)
+            ):
+                return [row for row in raw[0]["result"] if isinstance(row, dict)]
+            return [row for row in raw if isinstance(row, dict)]
+
+        if isinstance(raw, dict):
+            result = raw.get("result")
+            if isinstance(result, list):
+                if (
+                    result
+                    and isinstance(result[0], dict)
+                    and "result" in result[0]
+                    and isinstance(result[0]["result"], list)
+                ):
+                    return [row for row in result[0]["result"] if isinstance(row, dict)]
+                return [row for row in result if isinstance(row, dict)]
+            return [raw]
+
+        return []
+
+    def _parse_datetime(self, value: Any) -> Optional[datetime]:
+        if not isinstance(value, str) or not value:
+            return None
+        try:
+            normalized = value.replace("Z", "+00:00")
+            return datetime.fromisoformat(normalized)
+        except Exception:
+            return None
+
+    def _is_expired(self, row: dict[str, Any]) -> bool:
+        expires_at = self._parse_datetime(row.get("expires_at"))
+        if expires_at is None:
+            return False
+        return datetime.now(expires_at.tzinfo) > expires_at
+
+    def _cleanup_expired(self) -> None:
+        try:
+            self._run_query(
+                f"DELETE {self.table_name} WHERE expires_at != NONE AND expires_at < time::now();"
+            )
+        except Exception:
+            # Best-effort cleanup only.
+            pass
+
+    def store(self, key: str, value: Any, ttl: Optional[int] = None) -> bool:
+        """Store value in SurrealDB with optional TTL.
+
+        When ``temporal_enabled=True``, also appends a version record to the
+        ``{table_name}_versions`` table so full history is preserved.
+        The primary table always holds only the latest value — existing
+        ``retrieve``, ``delete``, ``size``, and ``keys`` semantics are unchanged.
+        """
+        try:
+            with self._lock:
+                self._cleanup_expired()
+                try:
+                    encoded_value = json.dumps(value)
+                    is_pickle = False
+                except (TypeError, ValueError):
+                    encoded_value = base64.b64encode(pickle.dumps(value)).decode("ascii")
+                    is_pickle = True
+
+                now_iso = datetime.now().isoformat()
+                expires_at = None
+                if ttl is not None:
+                    expires_at = (datetime.now() + timedelta(seconds=int(ttl))).isoformat()
+
+                payload = {
+                    "memory_key": key,
+                    "stored_value": encoded_value,
+                    "is_pickle": is_pickle,
+                    "created_at": now_iso,
+                    "updated_at": now_iso,
+                    "expires_at": expires_at,
+                }
+
+                # Primary table: replace with latest value (unchanged semantics)
+                self._run_query(
+                    f"DELETE {self.table_name} WHERE memory_key = $memory_key;",
+                    {"memory_key": key},
+                )
+                self._run_query(
+                    f"CREATE {self.table_name} CONTENT $payload;",
+                    {"payload": payload},
+                )
+
+                # Versions table: append-only log (temporal mode only)
+                if self.temporal_enabled:
+                    version_payload = {
+                        "memory_key": key,
+                        "stored_value": encoded_value,
+                        "is_pickle": is_pickle,
+                        "version_ts": now_iso,
+                    }
+                    self._run_query(
+                        f"CREATE {self.versions_table} CONTENT $payload;",
+                        {"payload": version_payload},
+                    )
+                    self._prune_versions(key)
+
+                return True
+        except Exception as e:
+            print(f"Error storing key {key}: {e}")
+            return False
+
+    def retrieve(self, key: str) -> Optional[Any]:
+        """Retrieve value from SurrealDB by key."""
+        try:
+            with self._lock:
+                self._cleanup_expired()
+                raw = self._run_query(
+                    f"SELECT * FROM {self.table_name} WHERE memory_key = $memory_key LIMIT 1;",
+                    {"memory_key": key},
+                )
+                rows = self._extract_rows(raw)
+                if not rows:
+                    return None
+                row = rows[0]
+                if self._is_expired(row):
+                    self.delete(key)
+                    return None
+                stored_value = row.get("stored_value")
+                if stored_value is None:
+                    return None
+                if bool(row.get("is_pickle", False)):
+                    return pickle.loads(base64.b64decode(str(stored_value).encode("ascii")))
+                return json.loads(str(stored_value))
+        except Exception as e:
+            print(f"Error retrieving key {key}: {e}")
+            return None
+
+    def delete(self, key: str) -> bool:
+        """Delete key from SurrealDB."""
+        try:
+            with self._lock:
+                self._run_query(
+                    f"DELETE {self.table_name} WHERE memory_key = $memory_key;",
+                    {"memory_key": key},
+                )
+                return True
+        except Exception as e:
+            print(f"Error deleting key {key}: {e}")
+            return False
+
+    def exists(self, key: str) -> bool:
+        """Check if key exists in SurrealDB."""
+        return self.retrieve(key) is not None
+
+    def keys(self, pattern: str = "*") -> List[str]:
+        """Get keys matching glob pattern."""
+        try:
+            with self._lock:
+                self._cleanup_expired()
+                raw = self._run_query(f"SELECT memory_key FROM {self.table_name};")
+                rows = self._extract_rows(raw)
+                all_keys: list[str] = []
+                for row in rows:
+                    key = row.get("memory_key")
+                    if isinstance(key, str):
+                        all_keys.append(key)
+                if pattern == "*":
+                    return all_keys
+                return [key for key in all_keys if fnmatch.fnmatch(key, pattern)]
+        except Exception as e:
+            print(f"Error getting keys: {e}")
+            return []
+
+    def clear(self) -> bool:
+        """Clear all keys in table."""
+        try:
+            with self._lock:
+                self._run_query(f"DELETE {self.table_name};")
+                return True
+        except Exception as e:
+            print(f"Error clearing SurrealDB: {e}")
+            return False
+
+    def size(self) -> int:
+        """Get number of non-expired memory records."""
+        try:
+            with self._lock:
+                self._cleanup_expired()
+                raw = self._run_query(
+                    f"SELECT count() AS count FROM {self.table_name} GROUP ALL;"
+                )
+                rows = self._extract_rows(raw)
+                if not rows:
+                    return 0
+                count = rows[0].get("count", 0)
+                return int(count) if isinstance(count, (int, float)) else 0
+        except Exception as e:
+            print(f"Error getting size: {e}")
+            return 0
+
+    def retrieve_at(self, key: str, as_of: datetime) -> Optional[Any]:
+        """Retrieve the value for *key* as it was at *as_of* (point-in-time).
+
+        Requires ``temporal_enabled=True``.  Falls back to the current value
+        when temporal is disabled so callers don't need to branch.
+
+        Args:
+            key: Memory key to look up.
+            as_of: Datetime at which to retrieve the value.
+
+        Returns:
+            The decoded value that was stored at or before *as_of*, or ``None``
+            if no matching version is found.
+        """
+        if not self.temporal_enabled:
+            return self.retrieve(key)
+
+        try:
+            with self._lock:
+                as_of_iso = as_of.isoformat()
+                raw = self._run_query(
+                    f"SELECT * FROM {self.versions_table} "
+                    f"WHERE memory_key = $key AND version_ts <= $as_of "
+                    f"ORDER BY version_ts DESC LIMIT 1;",
+                    {"key": key, "as_of": as_of_iso},
+                )
+                rows = self._extract_rows(raw)
+                if not rows:
+                    return None
+                row = rows[0]
+                stored_value = row.get("stored_value")
+                if stored_value is None:
+                    return None
+                if bool(row.get("is_pickle", False)):
+                    return pickle.loads(base64.b64decode(str(stored_value).encode("ascii")))
+                return json.loads(str(stored_value))
+        except Exception as e:
+            print(f"Error in retrieve_at for key {key}: {e}")
+            return None
+
+    def history(self, key: str, limit: int = 10) -> list[dict[str, Any]]:
+        """Return version history for *key* in reverse chronological order.
+
+        Requires ``temporal_enabled=True``.  Returns an empty list when
+        temporal is disabled.
+
+        Args:
+            key: Memory key to look up.
+            limit: Maximum number of versions to return.
+
+        Returns:
+            List of dicts with ``value``, ``version_ts``, and ``is_pickle`` keys.
+        """
+        if not self.temporal_enabled:
+            return []
+
+        try:
+            with self._lock:
+                raw = self._run_query(
+                    f"SELECT memory_key, stored_value, is_pickle, version_ts "
+                    f"FROM {self.versions_table} "
+                    f"WHERE memory_key = $key "
+                    f"ORDER BY version_ts DESC LIMIT $limit;",
+                    {"key": key, "limit": int(limit)},
+                )
+                rows = self._extract_rows(raw)
+                results: list[dict[str, Any]] = []
+                for row in rows:
+                    stored_value = row.get("stored_value")
+                    if stored_value is None:
+                        continue
+                    try:
+                        if bool(row.get("is_pickle", False)):
+                            decoded = pickle.loads(
+                                base64.b64decode(str(stored_value).encode("ascii"))
+                            )
+                        else:
+                            decoded = json.loads(str(stored_value))
+                    except Exception:
+                        decoded = stored_value
+                    results.append({
+                        "value": decoded,
+                        "version_ts": row.get("version_ts"),
+                        "is_pickle": bool(row.get("is_pickle", False)),
+                    })
+                return results
+        except Exception as e:
+            print(f"Error in history for key {key}: {e}")
+            return []
+
+    def _prune_versions(self, key: str) -> None:
+        """Keep only the most recent ``max_versions_per_key`` versions."""
+        try:
+            # Count existing versions for this key
+            raw = self._run_query(
+                f"SELECT count() AS count FROM {self.versions_table} "
+                f"WHERE memory_key = $key GROUP ALL;",
+                {"key": key},
+            )
+            rows = self._extract_rows(raw)
+            if not rows:
+                return
+            count = int(rows[0].get("count", 0))
+            if count <= self.max_versions_per_key:
+                return
+
+            # Delete oldest versions beyond the limit
+            excess = count - self.max_versions_per_key
+            self._run_query(
+                f"DELETE FROM (SELECT id FROM {self.versions_table} "
+                f"WHERE memory_key = $key "
+                f"ORDER BY version_ts ASC LIMIT $excess);",
+                {"key": key, "excess": excess},
+            )
+        except Exception:
+            # Pruning is best-effort; never fail the calling store()
+            pass
+
+    def _normalize_surrealdb_url(self, url: str) -> str:
+        """Normalize URL so SDK does not append duplicate /rpc."""
+        from urllib.parse import urlparse
+
+        parsed = urlparse(url)
+        scheme = parsed.scheme.lower()
+        if (
+            scheme in {"ws", "wss", "http", "https"}
+            and parsed.path.rstrip("/") == "/rpc"
+        ):
+            return f"{scheme}://{parsed.netloc}"
+        return url
+
+    def _default_skip_signin(self, url: str) -> bool:
+        """Embedded transports generally don't require explicit signin."""
+        from urllib.parse import urlparse
+
+        parsed = urlparse(url)
+        scheme = parsed.scheme.lower()
+        return scheme in {"memory", "mem", "file", "surrealkv"} or url == "memory"

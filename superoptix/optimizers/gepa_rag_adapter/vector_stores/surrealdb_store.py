@@ -119,6 +119,104 @@ class SurrealDBVectorStore(VectorStoreInterface):
         """SurrealDB supports hybrid retrieval with combined scoring."""
         return True
 
+    def supports_graph_search(self) -> bool:
+        """SurrealDB supports graph traversal combined with vector search."""
+        return True
+
+    def graph_search(
+        self,
+        query: str,
+        k: int = 5,
+        graph_depth: int = 1,
+        graph_relations: list[str] | None = None,
+        filters: dict[str, Any] | None = None,
+    ) -> list[dict[str, Any]]:
+        """GraphRAG: vector seed search followed by graph traversal expansion.
+
+        Performs a vector similarity search to find seed documents, then
+        traverses RELATE edges to expand the result set with related entities.
+
+        Args:
+            query: Natural language query string.
+            k: Number of seed documents to retrieve before graph expansion.
+            graph_depth: Number of hops to traverse (1–3).
+            graph_relations: Edge table names to follow (e.g. ["integrates_with"]).
+                If empty or None, returns vector-only results (no expansion).
+            filters: Optional metadata filters (same format as vector_search).
+
+        Returns:
+            List of result dicts with 'content', 'metadata', and 'score' keys.
+            Seed documents appear first (with real scores); graph-expanded
+            documents follow (with score=0.0 and _source="graph_expansion").
+        """
+        from superoptix.utils.surrealdb_features import SurrealDBFeatureDetector
+
+        if self.embedding_function is None:
+            raise ValueError("No embedding function provided for graph search")
+
+        graph_relations = list(graph_relations or [])
+        graph_depth = max(1, min(3, int(graph_depth)))
+
+        query_vector = self.embedding_function(query)
+        if hasattr(query_vector, "tolist"):
+            query_vector = query_vector.tolist()
+
+        # Capability gate
+        detector = SurrealDBFeatureDetector(self.client)
+        if not detector.has("relate") or not graph_relations:
+            return self.vector_search(query_vector, k=k, filters=filters)
+
+        where_clause, params = self._build_where_clause(filters)
+        params["query_vector"] = query_vector
+        params["limit"] = int(k)
+
+        seed_sql = f"""
+        SELECT *,
+               vector::similarity::cosine({self.vector_field}, $query_vector) AS score
+        FROM {self.table_name}
+        WHERE {self.vector_field} != NONE{where_clause}
+        ORDER BY score DESC
+        LIMIT $limit;
+        """
+        seed_rows = self._execute_query(seed_sql, params)
+        seed_results = self._format_results(seed_rows)
+
+        if not graph_relations:
+            return seed_results
+
+        # Collect seed record IDs for graph traversal
+        seed_ids = [row.get("id") for row in seed_rows if row.get("id")]
+        seen_content = {r["content"] for r in seed_results}
+
+        # Build traversal arrow (repeated per depth level)
+        rel_list = ", ".join(graph_relations)
+        arrow_segment = f"->({rel_list})->"
+        arrow = arrow_segment * graph_depth
+
+        graph_results: list[dict[str, Any]] = []
+        for sid in seed_ids[:k]:
+            expand_sql = f"SELECT {self.content_field}, {self.metadata_field} FROM {sid}{arrow}*;"
+            try:
+                expanded = self._execute_query(expand_sql, {})
+                for row in expanded:
+                    content = str(row.get(self.content_field, ""))
+                    if content and content not in seen_content:
+                        seen_content.add(content)
+                        metadata = row.get(self.metadata_field, {})
+                        if not isinstance(metadata, dict):
+                            metadata = {}
+                        metadata["_source"] = "graph_expansion"
+                        graph_results.append({
+                            "content": content,
+                            "metadata": metadata,
+                            "score": 0.0,
+                        })
+            except Exception:
+                # Graph expansion is non-fatal; fall through to seed results
+                pass
+
+        return seed_results + graph_results
+
     def hybrid_search(
         self,
         query: str,

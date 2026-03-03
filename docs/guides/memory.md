@@ -13,6 +13,7 @@ Provides flexible storage options:
 - **FileBackend**: JSON/pickle file-based storage with TTL support
 - **SQLiteBackend**: Relational database storage with automatic cleanup
 - **RedisBackend**: High-performance in-memory storage (optional)
+- **SurrealDBBackend**: Unified multi-model memory backend for distributed agent memory
 
 Key Features:
 - Automatic TTL (time-to-live) management

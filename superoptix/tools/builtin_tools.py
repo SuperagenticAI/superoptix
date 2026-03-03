@@ -9,6 +9,7 @@ These tools provide essential capabilities for ReAct agents.
 import datetime
 import json
 import math
+import os
 from pathlib import Path
 from typing import List
 
@@ -2038,6 +2039,57 @@ def create_database_query_tool() -> Tool:
     )
 
 
+def create_surrealdb_query_tool(
+    *,
+    url: str | None = None,
+    namespace: str | None = None,
+    database: str | None = None,
+    username: str | None = None,
+    password: str | None = None,
+    skip_signin: bool | None = None,
+    max_rows: int = 100,
+    timeout_s: float = 5.0,
+) -> Tool:
+    """Create a read-only SurrealDB query tool backed by SurrealDBMCPTool."""
+    from superoptix.protocols.mcp.surrealdb_mcp import SurrealDBMCPTool
+
+    resolved_url = url or os.getenv("SURREALDB_URL", "ws://localhost:8000")
+    resolved_namespace = namespace or os.getenv("SURREALDB_NAMESPACE", "test")
+    resolved_database = database or os.getenv("SURREALDB_DATABASE", "test")
+    resolved_username = username or os.getenv("SURREALDB_USERNAME", "root")
+    resolved_password = password or os.getenv("SURREALDB_PASSWORD", "root")
+
+    if skip_signin is None:
+        skip_signin_env = os.getenv("SURREALDB_SKIP_SIGNIN", "").strip().lower()
+        resolved_skip_signin = skip_signin_env in {"1", "true", "yes", "on"}
+    else:
+        resolved_skip_signin = bool(skip_signin)
+
+    mcp_tool = SurrealDBMCPTool(
+        url=resolved_url,
+        namespace=resolved_namespace,
+        database=resolved_database,
+        username=resolved_username,
+        password=resolved_password,
+        skip_signin=resolved_skip_signin,
+        max_rows=max_rows,
+        timeout_s=timeout_s,
+    )
+
+    def _query_surrealdb(sql: str) -> str:
+        result = mcp_tool.execute(sql)
+        return json.dumps(result, ensure_ascii=True)
+
+    return Tool(
+        func=_query_surrealdb,
+        name="surrealdb_query",
+        desc=(
+            "Execute read-only SurrealQL against SurrealDB. "
+            "Allowed statements: SELECT, INFO, RETURN."
+        ),
+    )
+
+
 def create_currency_converter_tool() -> Tool:
     """Create a currency conversion tool."""
     tool_instance = CurrencyConverterTool()
@@ -2567,6 +2619,7 @@ BUILTIN_TOOLS = {
     "git_analyzer": create_git_tool,
     "api_tester": create_api_tester_tool,
     "database_query": create_database_query_tool,
+    "surrealdb_query": create_surrealdb_query_tool,
     "version_checker": lambda: Tool(
         func=lambda package: f"Version check for {package}: Latest available",
         name="check_version",
