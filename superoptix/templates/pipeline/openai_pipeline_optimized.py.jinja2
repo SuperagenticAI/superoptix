@@ -18,6 +18,7 @@ from typing import Any, Dict, Optional
 from agents import Agent, Runner
 
 from superoptix.core.base_component import BaseComponent
+from superoptix.core.rag_mixin import RAGMixin
 from superoptix.runners.openai_runtime_helpers import (
     build_instructions as superoptix_build_instructions,
     resolve_model as superoptix_resolve_model,
@@ -125,6 +126,23 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
         self._model = resolved_model
         self._tools = tools
         self._agent: Optional[Agent] = None
+        self._rag_enabled = False
+        self._rag_helper = None
+        try:
+            rag_cfg = FULL_SPEC.get("rag", {}) or {}
+            retrieval_cfg = FULL_SPEC.get("retrieval", {}) or {}
+            cfg = rag_cfg if isinstance(rag_cfg, dict) and rag_cfg else retrieval_cfg
+            if isinstance(cfg, dict) and bool(cfg.get("enabled", False)):
+                class _RunnerRAGHelper(RAGMixin):
+                    pass
+
+                helper = _RunnerRAGHelper()
+                self._rag_enabled = bool(helper.setup_rag(FULL_SPEC))
+                self._rag_helper = helper if self._rag_enabled else None
+                if self._rag_enabled:
+                    print("🔍 RAG retrieval enabled (runner-managed).")
+        except Exception as _rag_exc:
+            print(f"⚠️ RAG init skipped: {_rag_exc}")
 
     def _build_agent(self) -> Agent:
         if self._agent is None:
@@ -136,8 +154,36 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
             )
         return self._agent
 
+    async def _retrieve_context_text(self, query: str) -> str:
+        if not self._rag_enabled or not self._rag_helper:
+            return ""
+        try:
+            rag_cfg = FULL_SPEC.get("rag", {}) or {}
+            retrieval_cfg = FULL_SPEC.get("retrieval", {}) or {}
+            cfg = rag_cfg if isinstance(rag_cfg, dict) and rag_cfg else retrieval_cfg
+            top_k = int((cfg.get("config", {}) or {}).get("top_k", 3))
+            docs = await self._rag_helper.retrieve_context(query, top_k=top_k)
+            if not docs:
+                return ""
+            return "\n\n".join(str(doc) for doc in docs if doc)
+        except Exception as _rag_query_exc:
+            print(f"⚠️ RAG retrieval skipped: {_rag_query_exc}")
+            return ""
+
+    async def _augment_prompt_with_retrieval(self, prompt: str) -> str:
+        query_text = prompt or ""
+        context_text = await self._retrieve_context_text(query_text)
+        if not context_text:
+            return query_text
+        return (
+            "Use the retrieved context to answer. If context is insufficient, say so briefly.\n\n"
+            f"Retrieved context:\n{context_text}\n\n"
+            f"User query:\n{query_text}"
+        )
+
     async def arun(self, prompt: str) -> str:
         agent = self._build_agent()
+        prompt = await self._augment_prompt_with_retrieval(prompt)
 {% if include_rlm_code %}
         result = await superoptix_run_with_optional_rlm(
             agent=agent,

@@ -5,10 +5,12 @@ This module provides MCP client and session implementations for protocol-first a
 
 from superoptix.protocols.mcp.client import MCPClient, RealMCPClient
 from superoptix.protocols.mcp.session import MockMCPSession, BackgroundMCPServer
+from superoptix.protocols.mcp.surrealdb_mcp import SurrealDBMCPTool
 
 __all__ = [
     "MCPClient",
     "RealMCPClient",
     "MockMCPSession",
     "BackgroundMCPServer",
+    "SurrealDBMCPTool",
 ]

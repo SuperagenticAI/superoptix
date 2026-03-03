@@ -8,8 +8,10 @@ This mixin provides RAG capabilities to DSPy pipelines, supporting:
 - Integration with DSPy ReAct agents
 """
 
+import json
 import logging
-from typing import Dict, Any, List
+import time
+from typing import Dict, Any, List, Optional
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -114,6 +116,7 @@ class RAGMixin:
                     f"⚠️ Failed to setup vector database for {retriever_type}"
                 )
                 return False
+            self._last_retrieval_telemetry = None
 
             # Setup document processor
             self.doc_processor = self._setup_document_processor(config)
@@ -143,6 +146,11 @@ class RAGMixin:
         if not vector_store:
             # If no nested vector_store, use the config directly
             vector_store = config
+        if isinstance(vector_store, dict):
+            vector_store = dict(vector_store)
+            runtime_cfg = config.get("config", {})
+            if isinstance(runtime_cfg, dict):
+                vector_store["_rag_runtime_config"] = dict(runtime_cfg)
 
         try:
             if retriever_type == "chroma":
@@ -471,6 +479,9 @@ class RAGMixin:
     def _setup_surrealdb(self, config: Dict[str, Any]):
         """Setup SurrealDB vector database configuration."""
         try:
+            runtime_cfg = config.get("_rag_runtime_config", {})
+            if not isinstance(runtime_cfg, dict):
+                runtime_cfg = {}
             url = self._normalize_surrealdb_url(
                 config.get("url", "ws://localhost:8000")
             )
@@ -484,6 +495,39 @@ class RAGMixin:
             table_name = config.get("table_name", "documents")
             vector_field = config.get("vector_field", "embedding")
             content_field = config.get("content_field", "content")
+            retrieval_mode = str(
+                runtime_cfg.get("retrieval_mode", runtime_cfg.get("mode", "vector"))
+            ).strip().lower()
+            if retrieval_mode not in {"vector", "hybrid", "graph", "multi"}:
+                retrieval_mode = "vector"
+
+            hybrid_alpha_raw = runtime_cfg.get("hybrid_alpha", 0.7)
+            try:
+                hybrid_alpha = float(hybrid_alpha_raw)
+            except (TypeError, ValueError):
+                hybrid_alpha = 0.7
+            hybrid_alpha = max(0.0, min(1.0, hybrid_alpha))
+
+            telemetry_enabled = bool(runtime_cfg.get("telemetry", True))
+            index_check_enabled = bool(runtime_cfg.get("index_check", True))
+
+            # GraphRAG configuration
+            graph_depth_raw = runtime_cfg.get("graph_depth", 1)
+            try:
+                graph_depth = max(1, min(3, int(graph_depth_raw)))
+            except (TypeError, ValueError):
+                graph_depth = 1
+            graph_relations = runtime_cfg.get("graph_relations", [])
+            if not isinstance(graph_relations, list):
+                graph_relations = []
+            graph_relations = [str(r).strip() for r in graph_relations if str(r).strip()]
+
+            # Embedding mode: "client" (default) or "server" (fn::embed in SurrealDB)
+            embedding_mode = str(
+                runtime_cfg.get("embedding_mode", "client")
+            ).strip().lower()
+            if embedding_mode not in {"client", "server"}:
+                embedding_mode = "client"
 
             return {
                 "type": "surrealdb",
@@ -496,6 +540,13 @@ class RAGMixin:
                 "table_name": table_name,
                 "vector_field": vector_field,
                 "content_field": content_field,
+                "retrieval_mode": retrieval_mode,
+                "hybrid_alpha": hybrid_alpha,
+                "telemetry_enabled": telemetry_enabled,
+                "index_check": index_check_enabled,
+                "graph_depth": graph_depth,
+                "graph_relations": graph_relations,
+                "embedding_mode": embedding_mode,
                 "config": config,
             }
         except Exception as e:
@@ -528,6 +579,136 @@ class RAGMixin:
             base = f"{scheme}://{parsed.netloc}"
             return base
         return url
+
+    def _surreal_extract_rows(self, raw: Any) -> List[Dict[str, Any]]:
+        """Normalize query outputs from SurrealDB SDK variants."""
+        if isinstance(raw, list):
+            if (
+                raw
+                and isinstance(raw[0], dict)
+                and "result" in raw[0]
+                and isinstance(raw[0]["result"], list)
+            ):
+                return [row for row in raw[0]["result"] if isinstance(row, dict)]
+            return [row for row in raw if isinstance(row, dict)]
+
+        if isinstance(raw, dict):
+            result = raw.get("result")
+            if isinstance(result, list):
+                if (
+                    result
+                    and isinstance(result[0], dict)
+                    and "result" in result[0]
+                    and isinstance(result[0]["result"], list)
+                ):
+                    return [row for row in result[0]["result"] if isinstance(row, dict)]
+                return [row for row in result if isinstance(row, dict)]
+            return [raw]
+
+        return []
+
+    def _record_retrieval_telemetry(
+        self,
+        *,
+        provider: str,
+        mode: str,
+        query: str,
+        top_k: int,
+        latency_ms: int,
+        hit_count: int,
+        scores: List[float],
+        telemetry_enabled: bool = True,
+        warning_count: int = 0,
+        error: Optional[str] = None,
+    ) -> None:
+        telemetry = {
+            "provider": provider,
+            "mode": mode,
+            "query_chars": len(str(query or "")),
+            "top_k": int(top_k),
+            "latency_ms": int(latency_ms),
+            "hit_count": int(hit_count),
+            "score_min": min(scores) if scores else None,
+            "score_max": max(scores) if scores else None,
+            "warning_count": int(warning_count),
+            "error": error,
+        }
+        self._last_retrieval_telemetry = telemetry
+        if telemetry_enabled:
+            logger.info(
+                "surrealdb_retrieval_telemetry=%s",
+                json.dumps(telemetry, sort_keys=True),
+            )
+
+    def _check_surrealdb_indexes(
+        self,
+        db: Any,
+        *,
+        table_name: str,
+        vector_field: str,
+        content_field: str,
+        mode: str,
+    ) -> List[str]:
+        """
+        Best-effort index readiness checks for SurrealDB.
+
+        Warning-only: does not block retrieval.
+        """
+        if not bool(self.vector_db.get("index_check", True)):
+            return []
+        if bool(self.vector_db.get("_index_check_done", False)):
+            cached = self.vector_db.get("_index_warnings", [])
+            return cached if isinstance(cached, list) else []
+
+        warnings: List[str] = []
+        info_sql = f"INFO FOR TABLE {table_name};"
+        info_raw = db.query(info_sql)
+        rows = self._surreal_extract_rows(info_raw)
+        table_info = rows[0] if rows else {}
+        indexes = table_info.get("indexes", {})
+
+        vector_found = False
+        lexical_found = False
+
+        if isinstance(indexes, dict):
+            for idx in indexes.values():
+                idx_str = str(idx).lower()
+                if vector_field.lower() in idx_str and any(
+                    token in idx_str for token in ("hnsw", "mtree", "vector")
+                ):
+                    vector_found = True
+                if content_field.lower() in idx_str and any(
+                    token in idx_str for token in ("search", "bm25", "analyzer", "fulltext")
+                ):
+                    lexical_found = True
+        else:
+            idx_str = str(indexes).lower()
+            if vector_field.lower() in idx_str and any(
+                token in idx_str for token in ("hnsw", "mtree", "vector")
+            ):
+                vector_found = True
+            if content_field.lower() in idx_str and any(
+                token in idx_str for token in ("search", "bm25", "analyzer", "fulltext")
+            ):
+                lexical_found = True
+
+        if not vector_found:
+            warnings.append(
+                f"No obvious vector index found for '{table_name}.{vector_field}'. "
+                "Define an HNSW/MTREE vector index for better kNN performance."
+            )
+        if mode == "hybrid" and not lexical_found:
+            warnings.append(
+                f"No obvious lexical/full-text index found for '{table_name}.{content_field}'. "
+                "Hybrid retrieval may underperform without search index support."
+            )
+
+        for warning in warnings:
+            logger.warning("⚠️ SurrealDB index check: %s", warning)
+
+        self.vector_db["_index_check_done"] = True
+        self.vector_db["_index_warnings"] = warnings
+        return warnings
 
     def _setup_dspy_retriever(self, config: Dict[str, Any]):
         """Setup DSPy retriever."""
@@ -726,11 +907,13 @@ class RAGMixin:
             return []
 
     async def _query_surrealdb(self, query: str, top_k: int) -> List[str]:
-        """Query SurrealDB using vector similarity."""
+        """Query SurrealDB using vector, hybrid, graph, or multi mode."""
         try:
             from surrealdb import Surreal
-            from sentence_transformers import SentenceTransformer
 
+            from superoptix.utils.surrealdb_features import SurrealDBFeatureDetector
+
+            started_at = time.perf_counter()
             url = self.vector_db["url"]
             namespace = self.vector_db["namespace"]
             database = self.vector_db["database"]
@@ -740,40 +923,357 @@ class RAGMixin:
             table_name = self.vector_db["table_name"]
             vector_field = self.vector_db["vector_field"]
             content_field = self.vector_db["content_field"]
+            mode = str(self.vector_db.get("retrieval_mode", "vector")).strip().lower()
+            if mode not in {"vector", "hybrid", "graph", "multi"}:
+                mode = "vector"
+            hybrid_alpha = float(self.vector_db.get("hybrid_alpha", 0.7))
+            telemetry_enabled = bool(self.vector_db.get("telemetry_enabled", True))
+            graph_depth = int(self.vector_db.get("graph_depth", 1))
+            graph_relations = list(self.vector_db.get("graph_relations", []))
+            embedding_mode = str(self.vector_db.get("embedding_mode", "client")).strip().lower()
+            if embedding_mode not in {"client", "server"}:
+                embedding_mode = "client"
 
-            embedding_model_name = self.vector_db.get("config", {}).get(
-                "embedding_model", "all-MiniLM-L6-v2"
+            # Client-side embeddings (default): encode query locally with SentenceTransformer
+            query_vector: Optional[List[float]] = None
+            if embedding_mode == "client":
+                from sentence_transformers import SentenceTransformer
+
+                embedding_model_name = self.vector_db.get("config", {}).get(
+                    "embedding_model", "all-MiniLM-L6-v2"
+                )
+                model = SentenceTransformer(embedding_model_name)
+                query_vector = model.encode(query).tolist()
+
+            with Surreal(url) as db:
+                if not skip_signin:
+                    db.signin({"username": username, "password": password})
+                db.use(namespace, database)
+
+                # Server-side embedding probe: fall back to client if fn::embed unavailable
+                if embedding_mode == "server":
+                    try:
+                        db.query("RETURN fn::embed('superoptix probe');")
+                    except Exception:
+                        logger.warning(
+                            "SurrealDB fn::embed not available; "
+                            "falling back to client-side embeddings"
+                        )
+                        embedding_mode = "client"
+                        from sentence_transformers import SentenceTransformer
+
+                        embedding_model_name = self.vector_db.get("config", {}).get(
+                            "embedding_model", "all-MiniLM-L6-v2"
+                        )
+                        model = SentenceTransformer(embedding_model_name)
+                        query_vector = model.encode(query).tolist()
+
+                # Capability gating: fall back if graph features not supported
+                if mode in ("graph", "multi"):
+                    detector = SurrealDBFeatureDetector(db)
+                    if not detector.has("relate"):
+                        logger.warning(
+                            "SurrealDB server does not support RELATE; "
+                            "falling back from '%s' to 'vector' mode", mode
+                        )
+                        mode = "hybrid" if mode == "multi" else "vector"
+
+                index_warnings = self._check_surrealdb_indexes(
+                    db,
+                    table_name=table_name,
+                    vector_field=vector_field,
+                    content_field=content_field,
+                    mode=mode if mode in ("vector", "hybrid") else "vector",
+                )
+
+                if mode == "hybrid":
+                    hybrid_beta = 1.0 - hybrid_alpha
+                    if embedding_mode == "server":
+                        sql = f"""
+                        SELECT {content_field},
+                               vector::similarity::cosine({vector_field}, fn::embed($query_text)) AS vector_score,
+                               search::score() AS lexical_score,
+                               (($alpha * vector::similarity::cosine({vector_field}, fn::embed($query_text)))
+                                 + ($beta * search::score())) AS score
+                        FROM {table_name}
+                        WHERE {vector_field} != NONE AND {content_field} @0@ $query
+                        ORDER BY score DESC
+                        LIMIT $top_k;
+                        """
+                        params = {
+                            "query_text": query,
+                            "query": query,
+                            "alpha": hybrid_alpha,
+                            "beta": hybrid_beta,
+                            "top_k": top_k,
+                        }
+                    else:
+                        sql = f"""
+                        SELECT {content_field},
+                               vector::similarity::cosine({vector_field}, $query_vector) AS vector_score,
+                               search::score() AS lexical_score,
+                               (($alpha * vector::similarity::cosine({vector_field}, $query_vector))
+                                 + ($beta * search::score())) AS score
+                        FROM {table_name}
+                        WHERE {vector_field} != NONE AND {content_field} @0@ $query
+                        ORDER BY score DESC
+                        LIMIT $top_k;
+                        """
+                        params = {
+                            "query_vector": query_vector,
+                            "query": query,
+                            "alpha": hybrid_alpha,
+                            "beta": hybrid_beta,
+                            "top_k": top_k,
+                        }
+                    rows = self._surreal_extract_rows(db.query(sql, params))
+
+                elif mode == "graph":
+                    rows = self._query_surrealdb_graph(
+                        db=db,
+                        query_vector=query_vector,
+                        query_text=query,
+                        top_k=top_k,
+                        table_name=table_name,
+                        vector_field=vector_field,
+                        content_field=content_field,
+                        graph_depth=graph_depth,
+                        graph_relations=graph_relations,
+                        embedding_mode=embedding_mode,
+                    )
+
+                elif mode == "multi":
+                    # Multi mode: hybrid query first, then graph expansion
+                    hybrid_beta = 1.0 - hybrid_alpha
+                    if embedding_mode == "server":
+                        hybrid_sql = f"""
+                        SELECT *,
+                               vector::similarity::cosine({vector_field}, fn::embed($query_text)) AS vector_score,
+                               search::score() AS lexical_score,
+                               (($alpha * vector::similarity::cosine({vector_field}, fn::embed($query_text)))
+                                 + ($beta * search::score())) AS score
+                        FROM {table_name}
+                        WHERE {vector_field} != NONE AND {content_field} @0@ $query
+                        ORDER BY score DESC
+                        LIMIT $top_k;
+                        """
+                        hybrid_params = {
+                            "query_text": query,
+                            "query": query,
+                            "alpha": hybrid_alpha,
+                            "beta": hybrid_beta,
+                            "top_k": top_k,
+                        }
+                    else:
+                        hybrid_sql = f"""
+                        SELECT *,
+                               vector::similarity::cosine({vector_field}, $query_vector) AS vector_score,
+                               search::score() AS lexical_score,
+                               (($alpha * vector::similarity::cosine({vector_field}, $query_vector))
+                                 + ($beta * search::score())) AS score
+                        FROM {table_name}
+                        WHERE {vector_field} != NONE AND {content_field} @0@ $query
+                        ORDER BY score DESC
+                        LIMIT $top_k;
+                        """
+                        hybrid_params = {
+                            "query_vector": query_vector,
+                            "query": query,
+                            "alpha": hybrid_alpha,
+                            "beta": hybrid_beta,
+                            "top_k": top_k,
+                        }
+                    hybrid_rows = self._surreal_extract_rows(
+                        db.query(hybrid_sql, hybrid_params)
+                    )
+                    # Graph-expand the hybrid results
+                    rows = self._expand_with_graph(
+                        db=db,
+                        seed_rows=hybrid_rows,
+                        content_field=content_field,
+                        table_name=table_name,
+                        graph_depth=graph_depth,
+                        graph_relations=graph_relations,
+                        top_k=top_k,
+                    )
+
+                else:
+                    # Default: vector mode
+                    if embedding_mode == "server":
+                        sql = f"""
+                        SELECT {content_field},
+                               vector::similarity::cosine({vector_field}, fn::embed($query_text)) AS score
+                        FROM {table_name}
+                        WHERE {vector_field} != NONE
+                        ORDER BY score DESC
+                        LIMIT $top_k;
+                        """
+                        params = {"query_text": query, "top_k": top_k}
+                    else:
+                        sql = f"""
+                        SELECT {content_field},
+                               vector::similarity::cosine({vector_field}, $query_vector) AS score
+                        FROM {table_name}
+                        WHERE {vector_field} != NONE
+                        ORDER BY score DESC
+                        LIMIT $top_k;
+                        """
+                        params = {"query_vector": query_vector, "top_k": top_k}
+                    rows = self._surreal_extract_rows(db.query(sql, params))
+
+            contents: List[str] = []
+            scores: List[float] = []
+            for row in rows:
+                if isinstance(row, dict) and content_field in row:
+                    contents.append(str(row[content_field]))
+                    raw_score = row.get("score", row.get("vector_score"))
+                    if isinstance(raw_score, int | float):
+                        scores.append(float(raw_score))
+
+            latency_ms = int((time.perf_counter() - started_at) * 1000)
+            self._record_retrieval_telemetry(
+                provider="surrealdb",
+                mode=mode,
+                query=query,
+                top_k=top_k,
+                latency_ms=latency_ms,
+                hit_count=len(contents),
+                scores=scores,
+                telemetry_enabled=telemetry_enabled,
+                warning_count=len(index_warnings),
             )
-            model = SentenceTransformer(embedding_model_name)
-            query_vector = model.encode(query).tolist()
+            return contents
 
-            sql = f"""
-            SELECT {content_field},
+        except Exception as e:
+            try:
+                self._record_retrieval_telemetry(
+                    provider="surrealdb",
+                    mode=str(self.vector_db.get("retrieval_mode", "vector")),
+                    query=query,
+                    top_k=top_k,
+                    latency_ms=0,
+                    hit_count=0,
+                    scores=[],
+                    telemetry_enabled=bool(
+                        self.vector_db.get("telemetry_enabled", True)
+                    ),
+                    warning_count=0,
+                    error=str(e),
+                )
+            except Exception:
+                pass
+            logger.error(f"SurrealDB query failed: {e}")
+            return []
+
+    def _query_surrealdb_graph(
+        self,
+        *,
+        db,
+        query_vector: Optional[List[float]],
+        query_text: str,
+        top_k: int,
+        table_name: str,
+        vector_field: str,
+        content_field: str,
+        graph_depth: int,
+        graph_relations: List[str],
+        embedding_mode: str = "client",
+    ) -> List[dict]:
+        """GraphRAG: vector seed search + graph traversal expansion.
+
+        Returns a list of row dicts (with content_field and score keys)
+        combining seed results and graph-expanded content.
+        """
+        # Step 1: Vector seed search
+        if embedding_mode == "server":
+            seed_sql = f"""
+            SELECT *,
+                   vector::similarity::cosine({vector_field}, fn::embed($query_text)) AS score
+            FROM {table_name}
+            WHERE {vector_field} != NONE
+            ORDER BY score DESC
+            LIMIT $top_k;
+            """
+            seed_params = {"query_text": query_text, "top_k": top_k}
+        else:
+            seed_sql = f"""
+            SELECT *,
                    vector::similarity::cosine({vector_field}, $query_vector) AS score
             FROM {table_name}
             WHERE {vector_field} != NONE
             ORDER BY score DESC
             LIMIT $top_k;
             """
+            seed_params = {"query_vector": query_vector, "top_k": top_k}
+        seed_rows = self._surreal_extract_rows(db.query(seed_sql, seed_params))
 
-            with Surreal(url) as db:
-                if not skip_signin:
-                    db.signin({"username": username, "password": password})
-                db.use(namespace, database)
-                rows = db.query(sql, {"query_vector": query_vector, "top_k": top_k})
+        if not graph_relations:
+            return seed_rows
 
-            if not isinstance(rows, list):
-                return []
+        return self._expand_with_graph(
+            db=db,
+            seed_rows=seed_rows,
+            content_field=content_field,
+            table_name=table_name,
+            graph_depth=graph_depth,
+            graph_relations=graph_relations,
+            top_k=top_k,
+        )
 
-            contents: List[str] = []
-            for row in rows:
-                if isinstance(row, dict) and content_field in row:
-                    contents.append(str(row[content_field]))
-            return contents
+    def _expand_with_graph(
+        self,
+        *,
+        db,
+        seed_rows: List[dict],
+        content_field: str,
+        table_name: str,
+        graph_depth: int,
+        graph_relations: List[str],
+        top_k: int,
+    ) -> List[dict]:
+        """Expand seed rows by traversing graph edges.
 
-        except Exception as e:
-            logger.error(f"SurrealDB query failed: {e}")
-            return []
+        Follows RELATE edges from seed document IDs to discover related
+        entities, then merges their content with the seed results.
+        """
+        # Collect seed record IDs and existing content for dedup
+        seed_ids = [row.get("id") for row in seed_rows if row.get("id")]
+        seen_content = {
+            str(row.get(content_field, ""))
+            for row in seed_rows
+            if row.get(content_field)
+        }
+
+        if not seed_ids or not graph_relations:
+            return seed_rows
+
+        # Build traversal arrow for the specified depth
+        rel_list = ", ".join(graph_relations)
+        # Single hop: ->(rel1, rel2)->  |  Two hops: ->(rel1, rel2)->(rel1, rel2)->
+        arrow_segment = f"->({rel_list})->"
+        arrow = arrow_segment * min(graph_depth, 3)
+
+        # Expand each seed ID (limit to top_k to bound expansion)
+        graph_rows: List[dict] = []
+        for sid in seed_ids[:top_k]:
+            try:
+                expand_sql = f"SELECT {content_field} FROM {sid}{arrow}*;"
+                expanded = self._surreal_extract_rows(db.query(expand_sql))
+                for row in expanded:
+                    c = row.get(content_field)
+                    if c and str(c) not in seen_content:
+                        seen_content.add(str(c))
+                        graph_rows.append({
+                            content_field: str(c),
+                            "score": 0.0,  # graph-expanded, no vector score
+                            "_source": "graph_expansion",
+                        })
+            except Exception as e:
+                # Graph expansion failures are non-fatal — log and continue
+                logger.debug("Graph expansion from %s failed: %s", sid, e)
+
+        # Merge: seed rows first (higher relevance), then graph-expanded
+        return seed_rows + graph_rows
 
     def add_documents(self, documents: List[Dict[str, Any]]) -> bool:
         """Add documents to the vector database."""
@@ -991,6 +1491,9 @@ class RAGMixin:
                 "vector_db_type": db_type,
                 "document_count": document_count,
                 "config": self.vector_db.get("config", {}),
+                "last_retrieval_telemetry": getattr(
+                    self, "_last_retrieval_telemetry", None
+                ),
                 "setup_required": False,
                 "doc_processor_available": hasattr(self, "doc_processor")
                 and self.doc_processor is not None,

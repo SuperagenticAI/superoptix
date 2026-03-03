@@ -63,6 +63,11 @@ super agent pull rag_surrealdb_demo
 super agent compile rag_surrealdb_demo
 ```
 
+### Seed demo knowledge once
+```bash
+python superoptix/agents/demo/setup_surrealdb_seed.py
+```
+
 ### Run
 ```bash
 super agent run rag_surrealdb_demo --goal "How can SurrealDB improve RAG workflows in SuperOptiX?"
@@ -79,6 +84,10 @@ rag:
     chunk_size: 512
     chunk_overlap: 50
     similarity_threshold: 0.7
+    retrieval_mode: vector  # or "hybrid"
+    hybrid_alpha: 0.7
+    telemetry: true
+    index_check: true
 vector_store:
   embedding_model: sentence-transformers/all-MiniLM-L6-v2
   url: surrealkv://./.superoptix/surreal.db
@@ -99,6 +108,8 @@ vector_store:
 - Store graph links between documents and entities, then combine relation hops with vector retrieval.
 - Use SurrealQL filtering to scope retrieval by tenant, document type, or freshness window.
 - Use hybrid retrieval when exact terms matter alongside semantic similarity.
+- Set `rag.config.retrieval_mode: hybrid` to combine lexical and vector ranking.
+- Keep `rag.config.telemetry: true` for retrieval latency/hit/score observability.
 - `memory` is connection-scoped and ephemeral; for repeated runs use `surrealkv://...`.
 - Set `skip_signin: false` when using authenticated `ws://` / `http://` SurrealDB servers.
 

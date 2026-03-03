@@ -29,7 +29,13 @@ except Exception:
     RAG_MIXIN_AVAILABLE = False
 
 try:
-    from superoptix.memory import AgentMemory, FileBackend, RedisBackend, SQLiteBackend
+    from superoptix.memory import (
+        AgentMemory,
+        FileBackend,
+        RedisBackend,
+        SQLiteBackend,
+        SurrealDBBackend,
+    )
 
     MEMORY_AVAILABLE = True
 except Exception:
@@ -37,6 +43,7 @@ except Exception:
     FileBackend = None
     RedisBackend = None
     SQLiteBackend = None
+    SurrealDBBackend = None
     MEMORY_AVAILABLE = False
 
 console = Console()
@@ -423,6 +430,30 @@ class DSPyRunner:
                 db=int(backend_config.get("db", 0)),
                 password=backend_config.get("password"),
                 prefix=backend_config.get("prefix", "superoptix:"),
+            )
+
+        if backend_type in {"surrealdb", "surreal"} and SurrealDBBackend is not None:
+            temporal_cfg = memory_cfg.get("temporal", {})
+            if not isinstance(temporal_cfg, dict):
+                temporal_cfg = {}
+            temporal_enabled = bool(temporal_cfg.get("enabled", False))
+            max_versions_raw = temporal_cfg.get("max_versions_per_key", 50)
+            try:
+                max_versions_per_key = int(max_versions_raw)
+            except (TypeError, ValueError):
+                max_versions_per_key = 50
+            return SurrealDBBackend(
+                url=str(backend_config.get("url", "ws://localhost:8000")),
+                namespace=str(backend_config.get("namespace", "test")),
+                database=str(backend_config.get("database", "test")),
+                username=str(backend_config.get("username", "root")),
+                password=str(backend_config.get("password", "root")),
+                table_name=str(
+                    backend_config.get("table_name", "superoptix_memory")
+                ),
+                skip_signin=backend_config.get("skip_signin"),
+                temporal_enabled=temporal_enabled,
+                max_versions_per_key=max_versions_per_key,
             )
 
         if SQLiteBackend is not None:

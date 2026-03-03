@@ -24,7 +24,7 @@ Explore Retrieval-Augmented Generation capabilities:
 - **[🏗️ Milvus Demo](agents/milvus-demo)** - Enterprise-scale vector database with Milvus
 - **[🟣🟢 SurrealDB Demo](agents/surrealdb-demo)** - Unified multi-model database with vector + hybrid retrieval
 - **[🟣🟢 SurrealDB Docker Demo](agents/surrealdb-docker-demo)** - Authenticated SurrealDB server mode with Docker
-- **[🟣🟢 SurrealDB Framework Guide](agents/surrealdb-frameworks-demo)** - End-to-end SurrealDB RAG across DSPy, PydanticAI, CrewAI, and Google ADK
+- **[🟣🟢 SurrealDB Framework Guide](agents/surrealdb-frameworks-demo)** - End-to-end SurrealDB RAG across DSPy, OpenAI, Claude SDK, Microsoft, PydanticAI, CrewAI, Google ADK, and DeepAgents
 
 ### **🛠️ Framework Feature Demos**
 Discover core framework capabilities:

@@ -1327,11 +1327,16 @@ class ClaudeAgentSDKFrameworkAdapter(FrameworkAdapter):
         else:
             agent_name = to_snake_case(agent_name)
 
+        compiled_spec_filename = _write_compiled_spec_sidecar(
+            str(output_file), playbook.get("spec", {})
+        )
+
         # Prepare context
         context = {
             "agent_name": agent_name,
             "metadata": playbook.get("metadata", {}),
             "spec": playbook.get("spec", {}),
+            "compiled_spec_filename": compiled_spec_filename,
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         }
 

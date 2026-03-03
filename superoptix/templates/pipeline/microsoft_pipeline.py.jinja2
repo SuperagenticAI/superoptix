@@ -14,7 +14,9 @@ SuperSpec Metadata:
 
 from typing import List, Dict, Any, Optional
 import asyncio
+import json
 import os
+from pathlib import Path
 
 # Microsoft Agent Framework imports
 try:
@@ -28,6 +30,24 @@ except ImportError as e:
 	print("⚠️  Install with: pip install agent-framework --pre")
 
 from superoptix.core.base_component import BaseComponent
+from superoptix.core.rag_mixin import RAGMixin
+
+COMPILED_SPEC_PATH = Path(__file__).resolve().parent / "{{ compiled_spec_filename }}"
+def _load_compiled_spec(path: Path) -> Dict[str, Any]:
+	try:
+		with path.open("r", encoding="utf-8") as _spec_file:
+			return json.load(_spec_file)
+	except FileNotFoundError as exc:
+		raise FileNotFoundError(
+			f"Compiled spec file not found at {path}. Recompile this agent to regenerate pipeline artifacts."
+		) from exc
+	except json.JSONDecodeError as exc:
+		raise ValueError(
+			f"Compiled spec file is invalid JSON at {path}. Recompile this agent to regenerate pipeline artifacts."
+		) from exc
+
+
+FULL_SPEC = _load_compiled_spec(COMPILED_SPEC_PATH)
 
 
 class {{ agent_name | to_pascal_case }}Component(BaseComponent):
@@ -81,6 +101,23 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 		# Lazy initialization
 		self._chat_client = None
 		self._agent = None
+		self._rag_enabled = False
+		self._rag_helper = None
+		try:
+			rag_cfg = FULL_SPEC.get("rag", {}) or {}
+			retrieval_cfg = FULL_SPEC.get("retrieval", {}) or {}
+			cfg = rag_cfg if isinstance(rag_cfg, dict) and rag_cfg else retrieval_cfg
+			if isinstance(cfg, dict) and bool(cfg.get("enabled", False)):
+				class _RunnerRAGHelper(RAGMixin):
+					pass
+
+				helper = _RunnerRAGHelper()
+				self._rag_enabled = bool(helper.setup_rag(FULL_SPEC))
+				self._rag_helper = helper if self._rag_enabled else None
+				if self._rag_enabled:
+					print("🔍 RAG retrieval enabled (runner-managed).")
+		except Exception as _rag_exc:
+			print(f"⚠️ RAG init skipped: {_rag_exc}")
 	
 	def _build_default_instructions(self) -> str:
 		"""Build default instructions from playbook persona."""
@@ -165,6 +202,22 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 			instructions=self.variable,  # GEPA-optimized instructions!
 			tools=self._tools if self._tools else None,
 		)
+
+	async def _retrieve_context_text(self, query_text: str) -> str:
+		if not self._rag_enabled or not self._rag_helper:
+			return ""
+		try:
+			rag_cfg = FULL_SPEC.get("rag", {}) or {}
+			retrieval_cfg = FULL_SPEC.get("retrieval", {}) or {}
+			cfg = rag_cfg if isinstance(rag_cfg, dict) and rag_cfg else retrieval_cfg
+			top_k = int((cfg.get("config", {}) or {}).get("top_k", 3))
+			docs = await self._rag_helper.retrieve_context(query_text, top_k=top_k)
+			if not docs:
+				return ""
+			return "\n\n".join(str(doc) for doc in docs if doc)
+		except Exception as _rag_query_exc:
+			print(f"⚠️ RAG retrieval skipped: {_rag_query_exc}")
+			return ""
 	
 	async def forward(self, **inputs: Any) -> Dict[str, Any]:
 		"""
@@ -193,6 +246,14 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 		{% else %}
 		user_message = inputs.get("query", "")
 		{% endif %}
+		user_message = str(user_message or "")
+		context_text = await self._retrieve_context_text(user_message)
+		if context_text:
+			user_message = (
+				"Use the retrieved context to answer. If context is insufficient, say so briefly.\n\n"
+				f"Retrieved context:\n{context_text}\n\n"
+				f"User query:\n{user_message}"
+			)
 		
 		# Run agent
 		response = await self._agent.run(user_message)

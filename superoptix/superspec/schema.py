@@ -97,7 +97,7 @@ class SuperSpecXSchema:
     VALID_RETRY_STRATEGIES = ["exponential", "linear", "fixed"]
 
     # Genies-specific features
-    VALID_MEMORY_BACKENDS = ["file", "sqlite", "redis"]
+    VALID_MEMORY_BACKENDS = ["file", "sqlite", "redis", "surrealdb"]
     VALID_MEMORY_RETENTION_POLICIES = ["lru", "fifo", "priority"]
     VALID_MEMORY_EPISODE_BOUNDARIES = ["time", "task", "manual", "interaction"]
     VALID_MEMORY_COMPRESSION_STRATEGIES = ["summarization", "key_extraction", "both"]
@@ -124,6 +124,7 @@ class SuperSpecXSchema:
         "email_sender",
         "calendar",
         "database_query",
+        "surrealdb_query",
     ]
 
     # Evaluation and optimization
@@ -654,6 +655,29 @@ class SuperSpecXSchema:
                                 "host": {"type": "string", "default": "localhost"},
                                 "port": {"type": "integer", "default": 6379},
                             },
+                        },
+                    },
+                },
+                "temporal": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {"type": "boolean", "default": False},
+                        "versioning": {"type": "boolean", "default": True},
+                        "max_versions_per_key": {
+                            "type": "integer",
+                            "minimum": 5,
+                            "maximum": 1000,
+                            "default": 50,
+                        },
+                    },
+                },
+                "live_queries": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {"type": "boolean", "default": False},
+                        "subscriptions": {
+                            "type": "array",
+                            "items": {"type": "object"},
                         },
                     },
                 },

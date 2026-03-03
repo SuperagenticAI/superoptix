@@ -537,15 +537,37 @@ class SuperSpecXValidator:
         if "retrieval" in spec:
             self._validate_retrieval_config(spec["retrieval"])
 
+        if "rag" in spec:
+            self._validate_rag_config(spec["rag"])
+
     def _validate_memory_config(self, memory_config: Dict[str, Any]):
         """Validate memory configuration."""
         if "backend" in memory_config:
             backend = memory_config["backend"]
             if isinstance(backend, dict) and "type" in backend:
-                valid_backends = ["file", "sqlite", "redis"]
+                valid_backends = ["file", "sqlite", "redis", "surrealdb"]
                 if backend["type"] not in valid_backends:
                     self.errors.append(
                         f"Invalid memory backend type: {backend['type']}"
+                    )
+
+        # Validate temporal config (SurrealDB-specific versioning)
+        if "temporal" in memory_config:
+            temporal = memory_config["temporal"]
+            if isinstance(temporal, dict):
+                if "enabled" in temporal and not isinstance(temporal["enabled"], bool):
+                    self.errors.append("memory.temporal.enabled must be a boolean")
+                if "max_versions_per_key" in temporal:
+                    mv = temporal["max_versions_per_key"]
+                    if not isinstance(mv, int) or mv < 5 or mv > 1000:
+                        self.errors.append(
+                            "memory.temporal.max_versions_per_key must be an integer between 5 and 1000"
+                        )
+                # temporal requires surrealdb backend
+                backend = memory_config.get("backend", {})
+                if isinstance(backend, dict) and backend.get("type") not in (None, "surrealdb"):
+                    self.warnings.append(
+                        "memory.temporal versioning is only supported with the surrealdb backend"
                     )
 
         # Validate memory types
@@ -595,6 +617,75 @@ class SuperSpecXValidator:
                 self.errors.append(
                     f"Invalid retriever_type: {retrieval_config['retriever_type']}"
                 )
+
+    def _validate_rag_config(self, rag_config: Dict[str, Any]):
+        """Validate RAG (rag:) configuration block in the spec."""
+        if not isinstance(rag_config, dict):
+            self.errors.append("rag configuration must be an object")
+            return
+
+        if "retriever_type" in rag_config:
+            retriever = str(rag_config["retriever_type"]).strip().lower()
+            valid_retrievers = {
+                "chroma", "chromadb", "weaviate", "lancedb", "lance",
+                "faiss", "qdrant", "milvus", "pinecone", "surrealdb",
+                "colbertv2", "custom",
+            }
+            if retriever not in valid_retrievers:
+                self.errors.append(
+                    f"rag.retriever_type '{rag_config['retriever_type']}' is not valid. "
+                    f"Valid values: {sorted(valid_retrievers)}"
+                )
+
+        config = rag_config.get("config", {})
+        if isinstance(config, dict):
+            # Validate retrieval_mode
+            if "retrieval_mode" in config:
+                mode = str(config["retrieval_mode"]).strip().lower()
+                valid_modes = {"vector", "hybrid", "graph", "multi"}
+                if mode not in valid_modes:
+                    self.errors.append(
+                        f"rag.config.retrieval_mode '{config['retrieval_mode']}' is not valid. "
+                        f"Valid values: {sorted(valid_modes)}"
+                    )
+
+            # Validate graph_depth
+            if "graph_depth" in config:
+                depth = config["graph_depth"]
+                if not isinstance(depth, int) or depth < 1 or depth > 3:
+                    self.errors.append(
+                        "rag.config.graph_depth must be an integer between 1 and 3"
+                    )
+
+            # Validate graph_relations
+            if "graph_relations" in config:
+                rels = config["graph_relations"]
+                if not isinstance(rels, list):
+                    self.errors.append("rag.config.graph_relations must be a list of strings")
+                else:
+                    import re as _re
+                    for rel in rels:
+                        if not isinstance(rel, str) or not _re.match(r"^[a-z_][a-z0-9_]*$", str(rel)):
+                            self.errors.append(
+                                f"rag.config.graph_relations entry '{rel}' must be a lowercase "
+                                f"alphanumeric string with underscores only."
+                            )
+
+            # Validate hybrid_alpha
+            if "hybrid_alpha" in config:
+                alpha = config["hybrid_alpha"]
+                if not isinstance(alpha, (int, float)) or not (0.0 <= float(alpha) <= 1.0):
+                    self.errors.append(
+                        "rag.config.hybrid_alpha must be a float between 0.0 and 1.0"
+                    )
+
+            # Validate top_k
+            if "top_k" in config:
+                top_k = config["top_k"]
+                if not isinstance(top_k, int) or top_k < 1 or top_k > 50:
+                    self.warnings.append(
+                        f"rag.config.top_k should be between 1 and 50, got: {top_k}"
+                    )
 
     def _validate_rlm_config(self, rlm_config: Dict[str, Any]):
         """Validate DSPy RLM configuration."""
