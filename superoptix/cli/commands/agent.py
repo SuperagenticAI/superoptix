@@ -42,6 +42,370 @@ from superoptix.optimizers import UniversalGEPA
 console = Console()
 
 
+class _MinimalDSPyBDDEvaluator:
+    """Compatibility adapter for minimal DSPy modules exposing build_program()."""
+
+    def __init__(self, pipeline_module, playbook_path: Path):
+        self._pipeline_module = pipeline_module
+        self._program = pipeline_module.build_program()
+        self.playbook_path = Path(playbook_path)
+        self.test_examples = self._load_scenarios()
+
+    def _load_scenarios(self) -> list[dict]:
+        if not self.playbook_path.exists():
+            return []
+
+        with open(self.playbook_path, "r") as f:
+            playbook = yaml.safe_load(f) or {}
+
+        spec_data = playbook.get("spec", playbook)
+        scenarios = []
+        if isinstance(spec_data, dict):
+            feature_specs = spec_data.get("feature_specifications", {})
+            if isinstance(feature_specs, dict) and isinstance(
+                feature_specs.get("scenarios"), list
+            ):
+                scenarios = feature_specs.get("scenarios", [])
+            elif isinstance(spec_data.get("scenarios"), list):
+                scenarios = spec_data.get("scenarios", [])
+
+        return [s for s in scenarios if isinstance(s, dict)]
+
+    def load_optimized(self, optimized_path: str):
+        if hasattr(self._program, "load"):
+            self._program.load(str(optimized_path))
+            return
+        raise AttributeError("Native DSPy program does not support .load()")
+
+    def run(self, **inputs):
+        if callable(self._program):
+            return self._program(**inputs)
+        if hasattr(self._program, "forward") and callable(self._program.forward):
+            return self._program.forward(**inputs)
+        raise TypeError("build_program() returned a non-callable program")
+
+    @staticmethod
+    def _expected_to_text(expected_outputs: dict) -> str:
+        if not expected_outputs:
+            return ""
+        if len(expected_outputs) == 1:
+            return str(next(iter(expected_outputs.values()))).strip()
+        return json.dumps(expected_outputs, sort_keys=True, ensure_ascii=True)
+
+    @staticmethod
+    def _actual_to_text(result) -> str:
+        if result is None:
+            return ""
+        if isinstance(result, str):
+            return result.strip()
+        if isinstance(result, dict):
+            return json.dumps(result, sort_keys=True, ensure_ascii=True)
+        if hasattr(result, "toDict") and callable(result.toDict):
+            try:
+                return json.dumps(result.toDict(), sort_keys=True, ensure_ascii=True)
+            except Exception:
+                pass
+        return str(result).strip()
+
+    @staticmethod
+    def _semantic_similarity(actual: str, expected: str) -> float:
+        actual_words = set(actual.lower().split())
+        expected_words = set(expected.lower().split())
+        if not expected_words:
+            return 1.0 if not actual_words else 0.5
+        intersection = actual_words.intersection(expected_words)
+        union = actual_words.union(expected_words)
+        return len(intersection) / len(union) if union else 0.0
+
+    @staticmethod
+    def _keyword_presence(actual: str, expected: str) -> float:
+        common_words = {
+            "the",
+            "and",
+            "or",
+            "but",
+            "in",
+            "on",
+            "at",
+            "to",
+            "for",
+            "of",
+            "with",
+            "by",
+            "is",
+            "are",
+            "was",
+            "were",
+            "be",
+            "been",
+            "have",
+            "has",
+            "had",
+            "do",
+            "does",
+            "did",
+            "will",
+            "would",
+            "could",
+            "should",
+            "may",
+            "might",
+            "can",
+            "this",
+            "that",
+            "these",
+            "those",
+        }
+        expected_keywords = {
+            word.lower()
+            for word in expected.split()
+            if len(word) > 3 and word.lower() not in common_words
+        }
+        actual_keywords = {
+            word.lower()
+            for word in actual.split()
+            if len(word) > 3 and word.lower() not in common_words
+        }
+        if not expected_keywords:
+            return 1.0
+        return len(actual_keywords.intersection(expected_keywords)) / len(
+            expected_keywords
+        )
+
+    @staticmethod
+    def _length_score(actual: str, expected: str) -> float:
+        actual_len = len(actual.split())
+        expected_len = len(expected.split())
+        if expected_len == 0:
+            return 1.0 if actual_len > 0 else 0.0
+        ratio = actual_len / expected_len
+        if 0.5 <= ratio <= 2.0:
+            return 1.0
+        if 0.25 <= ratio < 0.5 or 2.0 < ratio <= 4.0:
+            return 0.7
+        return 0.3
+
+    @staticmethod
+    def _structure_score(actual: str, expected: str) -> float:
+        actual_lines = len(actual.split("\n"))
+        expected_lines = len(expected.split("\n"))
+        if expected_lines == 0:
+            return 1.0
+        line_ratio = min(actual_lines, expected_lines) / max(
+            actual_lines, expected_lines
+        )
+        actual_has_bullets = "•" in actual or "*" in actual or "-" in actual
+        expected_has_bullets = "•" in expected or "*" in expected or "-" in expected
+        format_match = 1.0 if actual_has_bullets == expected_has_bullets else 0.5
+        return (line_ratio + format_match) / 2
+
+    def _evaluate(self, actual_text: str, expected_outputs: dict) -> dict:
+        expected_text = self._expected_to_text(expected_outputs)
+        if not actual_text:
+            return {
+                "passed": False,
+                "confidence_score": 0.0,
+                "semantic_similarity": 0.0,
+                "failure_reason": "Empty response generated",
+                "criteria_breakdown": {
+                    "semantic_similarity": 0.0,
+                    "keyword_presence": 0.0,
+                    "structure_match": 0.0,
+                    "output_length": 0.0,
+                },
+            }
+
+        semantic_score = self._semantic_similarity(actual_text, expected_text)
+        keyword_score = self._keyword_presence(actual_text, expected_text)
+        structure_score = self._structure_score(actual_text, expected_text)
+        length_score = self._length_score(actual_text, expected_text)
+
+        confidence_score = (
+            semantic_score * 0.5
+            + keyword_score * 0.2
+            + structure_score * 0.2
+            + length_score * 0.1
+        )
+        passed = confidence_score >= 0.6
+
+        failure_reason = None
+        if not passed:
+            if semantic_score < 0.5:
+                failure_reason = "semantic meaning differs significantly"
+            elif keyword_score < 0.3:
+                failure_reason = "missing key terms or concepts"
+            elif structure_score < 0.4:
+                failure_reason = "output structure doesn't match expectations"
+            elif length_score < 0.5:
+                failure_reason = "response length inappropriate"
+            else:
+                failure_reason = "overall quality below threshold"
+
+        return {
+            "passed": passed,
+            "confidence_score": confidence_score,
+            "semantic_similarity": semantic_score,
+            "failure_reason": failure_reason,
+            "criteria_breakdown": {
+                "semantic_similarity": semantic_score,
+                "keyword_presence": keyword_score,
+                "structure_match": structure_score,
+                "output_length": length_score,
+            },
+        }
+
+    def _model_analysis(self, detailed_results: list[dict]) -> dict:
+        if not detailed_results:
+            avg_score = 0.0
+        else:
+            avg_score = sum(
+                r.get("confidence_score", 0.0) for r in detailed_results
+            ) / len(detailed_results)
+        if avg_score >= 0.8:
+            capability = "High - suitable for complex tasks"
+        elif avg_score >= 0.6:
+            capability = "Medium - good for standard tasks"
+        elif avg_score >= 0.4:
+            capability = "Basic - suitable for simple tasks"
+        else:
+            capability = "Limited - needs improvement or different model"
+        return {
+            "model_name": "Native DSPy Program",
+            "capability_score": avg_score,
+            "capability_assessment": capability,
+            "suggested_upgrade": "None needed"
+            if avg_score >= 0.6
+            else "Consider llama3.1:8b or gpt-4 for better performance",
+            "performance_category": "excellent"
+            if avg_score >= 0.8
+            else "good"
+            if avg_score >= 0.6
+            else "needs_improvement",
+        }
+
+    @staticmethod
+    def _recommendations(detailed_results: list[dict], pass_rate: float) -> list[str]:
+        if not detailed_results:
+            return ["Add BDD scenarios to your agent playbook for proper testing"]
+        failed = [r for r in detailed_results if not r.get("passed")]
+        if pass_rate == 100:
+            return [
+                "Excellent! All scenarios pass. Consider adding more comprehensive test cases.",
+                "Your agent is ready for production use.",
+            ]
+        if pass_rate >= 80:
+            return [
+                f"Good performance! {len(failed)} scenario(s) need minor improvements.",
+                "Review failing scenarios and refine agent context.",
+            ]
+        if pass_rate >= 60:
+            return [
+                f"Moderate performance. {len(failed)} scenarios failing.",
+                "Consider running optimization: super agent optimize <agent_name>",
+            ]
+        return [
+            f"Poor performance. {len(failed)} scenarios failing.",
+            "Strong recommendation: Run optimization before production use.",
+            "Consider using a more capable model (llama3.1:8b or gpt-4).",
+        ]
+
+    def run_bdd_test_suite(self, auto_tune: bool = False, ignore_checks: bool = False):
+        del auto_tune  # minimal-mode adapter currently does not use auto-tune knobs
+
+        if not self.test_examples:
+            return {
+                "success": False,
+                "message": "No BDD specifications defined in feature_specifications",
+                "summary": {"total": 0, "passed": 0, "failed": 0, "pass_rate": "0.0%"},
+                "bdd_results": {"detailed_results": []},
+                "model_analysis": {},
+                "recommendations": [],
+            }
+
+        detailed_results = []
+        total = len(self.test_examples)
+        passed = 0
+
+        for scenario in self.test_examples:
+            inputs = scenario.get("input", {}) or {}
+            expected_outputs = scenario.get("expected_output", {}) or {}
+            scenario_name = scenario.get("name", "unnamed_specification")
+            description = scenario.get("description", "No description provided")
+
+            try:
+                result = self.run(**inputs)
+                actual_text = self._actual_to_text(result)
+                evaluation = self._evaluate(actual_text, expected_outputs)
+                is_pass = bool(evaluation.get("passed"))
+                if ignore_checks:
+                    is_pass = True
+                if is_pass:
+                    passed += 1
+
+                detailed_results.append(
+                    {
+                        "scenario_name": scenario_name,
+                        "description": description,
+                        "passed": is_pass,
+                        "confidence_score": evaluation.get("confidence_score", 0.0),
+                        "semantic_similarity": evaluation.get(
+                            "semantic_similarity", 0.0
+                        ),
+                        "failure_reason": None
+                        if is_pass
+                        else evaluation.get("failure_reason"),
+                        "actual_output": actual_text,
+                        "expected_output": expected_outputs,
+                        "criteria_breakdown": evaluation.get(
+                            "criteria_breakdown", {}
+                        ),
+                    }
+                )
+            except Exception as e:
+                detailed_results.append(
+                    {
+                        "scenario_name": scenario_name,
+                        "description": description,
+                        "passed": bool(ignore_checks),
+                        "confidence_score": 0.0,
+                        "semantic_similarity": 0.0,
+                        "failure_reason": None
+                        if ignore_checks
+                        else f"Execution error: {str(e)}",
+                        "actual_output": "",
+                        "expected_output": expected_outputs,
+                        "criteria_breakdown": {},
+                        "error": str(e),
+                    }
+                )
+                if ignore_checks:
+                    passed += 1
+
+        pass_rate = (passed / total * 100.0) if total else 0.0
+        model_analysis = self._model_analysis(detailed_results)
+        recommendations = self._recommendations(detailed_results, pass_rate)
+
+        return {
+            "success": True,
+            "summary": {
+                "total": total,
+                "passed": passed,
+                "failed": total - passed,
+                "pass_rate": f"{pass_rate:.1f}%",
+            },
+            "bdd_results": {
+                "detailed_results": detailed_results,
+                "total_scenarios": total,
+                "scenarios_passed": passed,
+                "scenarios_failed": total - passed,
+                "pass_rate": f"{pass_rate:.1f}%",
+                "bdd_score": pass_rate / 100.0,
+            },
+            "model_analysis": model_analysis,
+            "recommendations": recommendations,
+        }
+
+
 def _optimize_crewai_component(component, trainset, llm_model, temperature, max_tokens):
     """
     Custom optimization function for CrewAI components that avoids hanging.
@@ -980,20 +1344,29 @@ def test_agent_bdd(args):
                 pipeline_class = obj
                 break
 
-        if not pipeline_class:
+        pipeline = None
+        if pipeline_class:
+            # Create pipeline with playbook path for BDD scenario loading
+            try:
+                pipeline = pipeline_class(playbook_path=str(runner.playbook_path))
+            except TypeError:
+                # Fallback for pipelines that don't accept playbook_path
+                pipeline = pipeline_class()
+            console.print("[green]Pipeline loaded successfully[/]")
+        elif engine == "dspy" and hasattr(module, "build_program") and callable(
+            module.build_program
+        ):
+            pipeline = _MinimalDSPyBDDEvaluator(module, runner.playbook_path)
+            console.print("[green]Pipeline loaded successfully[/]")
+            console.print(
+                "[dim]Using native DSPy module compatibility path (build_program).[/]"
+            )
+        else:
             console.print("❌ [bold red]Pipeline Class Not Found[/]")
             console.print(
                 f"   Expected: Class ending with 'Pipeline' in {runner.pipeline_path}"
             )
             return
-
-        # Create pipeline with playbook path for BDD scenario loading
-        try:
-            pipeline = pipeline_class(playbook_path=str(runner.playbook_path))
-        except TypeError:
-            # Fallback for pipelines that don't accept playbook_path
-            pipeline = pipeline_class()
-        console.print("[green]Pipeline loaded successfully[/]")
 
         # Step 2: Optimization Check (no spinner)
         optimization_status = (
