@@ -128,13 +128,64 @@ class DSPyFrameworkAdapter(FrameworkAdapter):
         output_path: str,
         compile_profile: str = "minimal",
     ) -> str:
-        """Compile SuperSpec to DSPy pipeline (existing implementation)."""
-        # This will delegate to the existing AgentCompiler
-        # We keep the current excellent DSPy workflow unchanged
-        from ..compiler.agent_compiler import AgentCompiler
+        """Compile SuperSpec to DSPy pipeline code."""
+        from datetime import datetime
+        from jinja2 import Environment, FileSystemLoader
 
-        compiler = AgentCompiler(playbook, output_path)
-        return compiler.compile()
+        from ..compiler.agent_compiler import clean_filter, to_pascal_case, to_snake_case
+
+        # Build template environment
+        template_dir = Path(__file__).parent.parent / "templates" / "pipeline"
+        env = Environment(
+            loader=FileSystemLoader(template_dir),
+            trim_blocks=True,
+            lstrip_blocks=True,
+        )
+        env.filters["clean"] = clean_filter
+        env.filters["to_pascal_case"] = to_pascal_case
+        env.filters["to_snake_case"] = to_snake_case
+
+        output_file = Path(output_path)
+        filename = output_file.stem
+        if "_dspy_pipeline" in filename:
+            agent_name = filename.replace("_dspy_pipeline", "")
+        else:
+            agent_name = filename.replace("_pipeline", "")
+        if not agent_name or agent_name == "pipeline":
+            agent_name = to_snake_case(playbook.get("metadata", {}).get("name", "agent"))
+        else:
+            agent_name = to_snake_case(agent_name)
+
+        spec = playbook.get("spec", {}) or {}
+        tool_backend = str(spec.get("tool_backend", "dspy")).strip().lower()
+        mcp_servers = spec.get("mcp_servers", [])
+        use_protocol_first = (tool_backend == "agenspy") or bool(mcp_servers)
+        template_name = (
+            "dspy_pipeline_agenspy.py.jinja2"
+            if use_protocol_first
+            else "dspy_pipeline_minimal.py.jinja2"
+        )
+        template = env.get_template(template_name)
+
+        compiled_spec_filename = _write_compiled_spec_sidecar(str(output_file), spec)
+        context = {
+            "agent_name": agent_name,
+            "metadata": playbook.get("metadata", {}),
+            "spec": spec,
+            "compiled_spec_filename": compiled_spec_filename,
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            # Keep defaults aligned with AgentCompiler-generated DSPy templates.
+            "compile_profile": compile_profile,
+            "runtime_mode": "auto",
+            "provider_override": None,
+            "model_override": None,
+            "include_local_ollama_code": True,
+        }
+
+        code = template.render(**context)
+        output_file.parent.mkdir(parents=True, exist_ok=True)
+        output_file.write_text(code)
+        return str(output_file)
 
     @classmethod
     def create_component(cls, playbook: Dict[str, Any], **kwargs) -> BaseComponent:
