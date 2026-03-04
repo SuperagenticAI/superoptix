@@ -188,14 +188,19 @@ class SurrealDBVectorStore(VectorStoreInterface):
         seed_ids = [row.get("id") for row in seed_rows if row.get("id")]
         seen_content = {r["content"] for r in seed_results}
 
-        # Build traversal arrow (repeated per depth level)
+        # Build traversal path (repeated per depth level).
+        # Use explicit target table names (instead of wildcard `*`) for
+        # compatibility with SurrealDB versions that disallow `->*`.
         rel_list = ", ".join(graph_relations)
-        arrow_segment = f"->({rel_list})->"
-        arrow = arrow_segment * graph_depth
+        hop_segment = f"->({rel_list})->{self.table_name}"
+        traversal_path = hop_segment * graph_depth
 
         graph_results: list[dict[str, Any]] = []
         for sid in seed_ids[:k]:
-            expand_sql = f"SELECT {self.content_field}, {self.metadata_field} FROM {sid}{arrow}*;"
+            expand_sql = (
+                f"SELECT {self.content_field}, {self.metadata_field} "
+                f"FROM {sid}{traversal_path};"
+            )
             try:
                 expanded = self._execute_query(expand_sql, {})
                 for row in expanded:

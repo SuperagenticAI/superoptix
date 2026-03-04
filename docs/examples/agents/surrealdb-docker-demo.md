@@ -1,59 +1,113 @@
-# SurrealDB Docker RAG Demo
+# SurrealDB Docker Demo (Simple Path)
 
-Run SuperOptiX RAG with SurrealDB in Docker using authenticated WebSocket mode.
+Use this when you want SurrealDB in Docker with username/password auth.
 
-## 1) Install dependencies
+## What This Page Covers
+
+- start SurrealDB in Docker
+- seed data
+- run RAG demo
+- run GraphRAG demo
+
+## 1) Install
 
 ```bash
 pip install "superoptix[surrealdb]"
+super model install llama3.1:8b
 ```
 
-## 2) Start SurrealDB in Docker
+## 2) Start services
+
+Terminal A:
+
+```bash
+ollama serve
+```
+
+Terminal B:
 
 ```bash
 docker run --rm -p 8000:8000 --name surrealdb-demo surrealdb/surrealdb:latest \
   start --log info --user root --pass secret memory
 ```
 
-## 3) Start model backend
+## 3) Seed data
+
+Terminal C:
 
 ```bash
-super model install llama3.1:8b
-ollama serve
+python -m superoptix.agents.demo.setup_surrealdb_seed
 ```
 
-## 4) Pull, compile, run Docker demo agent
+For GraphRAG:
 
 ```bash
-super agent pull rag_surrealdb_docker_demo
-super agent compile rag_surrealdb_docker_demo
-super agent run rag_surrealdb_docker_demo --goal "Explain SurrealDB hybrid retrieval in SuperOptiX"
+python -m superoptix.agents.demo.setup_surrealdb_seed --graph
 ```
 
-## Playbook settings used
+## 4) Run RAG demo
+
+```bash
+super agent pull rag_surrealdb_dspy_demo
+super agent compile rag_surrealdb_dspy_demo --framework dspy
+super agent run rag_surrealdb_dspy_demo --framework dspy --goal "What is NEON-FOX-742?"
+```
+
+## 5) Run GraphRAG demo
+
+```bash
+super agent pull graphrag_surrealdb_dspy_demo
+super agent compile graphrag_surrealdb_dspy_demo --framework dspy
+super agent run graphrag_surrealdb_dspy_demo --framework dspy --goal "What capabilities does SurrealDB provide?"
+```
+
+## Docker Config Used
 
 ```yaml
-rag:
-  enabled: true
-  retriever_type: surrealdb
-  vector_store:
-    url: ws://localhost:8000
-    namespace: superoptix
-    database: knowledge
-    username: root
-    password: secret
-    skip_signin: false
-    table_name: rag_documents
+vector_store:
+  url: ws://localhost:8000
+  namespace: superoptix
+  database: knowledge
+  username: root
+  password: secret
+  skip_signin: false
+  table_name: rag_documents
 ```
 
 ## Troubleshooting
 
-- If you see auth errors, ensure Docker command credentials match playbook credentials.
-- If port conflict occurs, free `8000` or map to another port and update playbook URL.
-- If answer is generic, table may have no data yet; ingest documents first.
-- Use base server URL (`ws://localhost:8000`), not `.../rpc` (SDK appends `/rpc` internally).
+### Auth error
+
+Make sure Docker `--user root --pass secret` matches playbook credentials.
+
+### Port conflict
+
+If `8000` is already used, map a different port and update playbook URL.
+
+Example:
+
+```bash
+docker run --rm -p 18000:8000 --name surrealdb-demo surrealdb/surrealdb:latest \
+  start --log info --user root --pass secret memory
+```
+
+Then use `ws://localhost:18000` in playbook.
+
+### Graph falls back to vector mode
+
+Run graph seed again and confirm edges are created:
+
+```bash
+python -m superoptix.agents.demo.setup_surrealdb_seed --graph
+```
+
+### `.../rpc` URL issue
+
+Use base URL only. Correct format:
+
+- `ws://localhost:8000`
 
 ## Related
 
-- [SurrealDB Embedded Demo](surrealdb-demo.md)
-- [RAG Guide](../../guides/rag.md)
+- [SurrealDB Demo](surrealdb-demo.md)
+- [SurrealDB Framework Guide](surrealdb-frameworks-demo.md)

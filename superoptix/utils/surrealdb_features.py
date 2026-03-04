@@ -41,8 +41,8 @@ class SurrealDBFeatureDetector:
         # Graph traversal parser support (used by GraphRAG expansion).
         # This is a read-only probe with no side effects.
         "relate": (
-            "SELECT * FROM ONLY __superoptix_feature_probe__:a"
-            "->__superoptix_feature_probe_edge__->* LIMIT 1;"
+            "SELECT * FROM __superoptix_feature_probe__:a"
+            "->__superoptix_feature_probe_edge__->__superoptix_feature_probe LIMIT 1;"
         ),
         # Live queries require WebSocket — checked by connection scheme, not query.
         "live_select": None,

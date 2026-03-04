@@ -117,14 +117,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Memory systems with multi-layered architecture
 - Comprehensive observability and tracing
 - Enterprise-ready agent deployment patterns
+- SurrealDB GraphRAG demo playbooks for all supported frameworks (DSPy, OpenAI, Claude SDK, Microsoft, PydanticAI, CrewAI, Google ADK, DeepAgents)
+- Lean SurrealDB parity checks in test matrix for both RAG and GraphRAG playbooks
 
 ### 🔄 Changed
 - Established project structure and core modules
 - Defined API contracts for agent development
 - Set up development workflow and contribution guidelines
+- SurrealDB framework docs now use source-independent seeding commands via `python -m superoptix.agents.demo.setup_surrealdb_seed`
+- SurrealDB docs now include explicit GraphRAG validation commands and parser-compatibility troubleshooting
 
 ### 🐛 Fixed
 - Bug fixes in development
+- DSPy SurrealDB runtime compile/run parity for demo flow
+- SurrealDB GraphRAG feature detection compatibility (RELATE probe parsing)
+- SurrealDB Graph traversal query compatibility for parser variants that reject wildcard `->*` traversal syntax
+
+### 📚 Documentation
+- Updated SurrealDB framework guide with:
+  - full RAG + GraphRAG demo ID matrix across frameworks
+  - no-source seeding workflow
+  - GraphRAG fallback and parser compatibility troubleshooting
+  - Gemini/Ollama model configuration troubleshooting
+- Updated SurrealDB embedded and Docker demo pages to align with current demo IDs and seeding workflow
 
 ### 🔒 Security
 - Implemented secure agent execution sandboxing
