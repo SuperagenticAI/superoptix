@@ -1247,17 +1247,18 @@ class RAGMixin:
         if not seed_ids or not graph_relations:
             return seed_rows
 
-        # Build traversal arrow for the specified depth
+        # Build traversal path for the specified depth.
+        # Use explicit target table names (instead of wildcard `*`) for
+        # compatibility with SurrealDB versions that disallow `->*`.
         rel_list = ", ".join(graph_relations)
-        # Single hop: ->(rel1, rel2)->  |  Two hops: ->(rel1, rel2)->(rel1, rel2)->
-        arrow_segment = f"->({rel_list})->"
-        arrow = arrow_segment * min(graph_depth, 3)
+        hop_segment = f"->({rel_list})->{table_name}"
+        traversal_path = hop_segment * min(graph_depth, 3)
 
         # Expand each seed ID (limit to top_k to bound expansion)
         graph_rows: List[dict] = []
         for sid in seed_ids[:top_k]:
             try:
-                expand_sql = f"SELECT {content_field} FROM {sid}{arrow}*;"
+                expand_sql = f"SELECT {content_field} FROM {sid}{traversal_path};"
                 expanded = self._surreal_extract_rows(db.query(expand_sql))
                 for row in expanded:
                     c = row.get(content_field)

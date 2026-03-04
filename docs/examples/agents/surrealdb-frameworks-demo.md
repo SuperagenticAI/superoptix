@@ -1,240 +1,194 @@
-# 🟣🟢 SurrealDB Framework Guide
+# SurrealDB + SuperOptiX Framework Guide
 
-This page explains how to run SurrealDB RAG in SuperOptiX across DSPy, OpenAI Agents SDK, Claude Agent SDK, Microsoft Agent Framework, PydanticAI, CrewAI, Google ADK, and DeepAgents.
+This guide is written for beginners.
 
-## Quick start for beginners
+If you can copy and paste terminal commands, you can run this.
 
-Follow these steps in order.
+## What You Will Do
 
-### 1. Install dependencies
+You will run an AI agent that:
+
+- stores knowledge in SurrealDB
+- retrieves that knowledge during a question
+- works in multiple frameworks (DSPy, OpenAI SDK, Claude SDK, Microsoft, PydanticAI, CrewAI, Google ADK, DeepAgents)
+
+## Time Needed
+
+- First run: about 10-20 minutes
+- Later runs: 2-5 minutes
+
+## Before You Start
+
+You need:
+
+- Python environment with `superoptix`
+- Docker installed
+- Terminal access
+- Optional for cloud models: API keys (Gemini/Anthropic/OpenAI)
+
+## Step 1: Install Dependencies
+
+Run:
 
 ```bash
 pip install "superoptix[surrealdb]"
+```
+
+If you want local model runs (recommended for first test), also run:
+
+```bash
 super model install llama3.1:8b
 ```
 
-### 2. Start Ollama
+## Step 2: Start Required Services
+
+### 2A) Start Ollama (local model service)
 
 ```bash
 ollama serve
 ```
 
-### 3. Start SurrealDB (Docker)
+Keep this terminal open.
+
+### 2B) Start SurrealDB
+
+Open a new terminal and run:
 
 ```bash
 docker run --rm -p 8000:8000 --name surrealdb-demo surrealdb/surrealdb:latest \
   start --log info --user root --pass secret memory
 ```
 
-### 4. Run one demo first (DSPy)
+Keep this terminal open too.
+
+## Step 3: Seed Demo Data (No Source Code Needed)
+
+In a third terminal, run:
 
 ```bash
-super agent pull rag_surrealdb_demo
-super agent compile rag_surrealdb_demo
-super agent run rag_surrealdb_demo --goal "What is NEON-FOX-742?"
+python -m superoptix.agents.demo.setup_surrealdb_seed
 ```
 
-### 4.5 Seed demo knowledge once (recommended)
+Expected success output includes:
+
+- `SurrealDB seed complete`
+- `Inserted: 8`
+
+### Optional: Seed GraphRAG Data
 
 ```bash
-python superoptix/agents/demo/setup_surrealdb_seed.py
+python -m superoptix.agents.demo.setup_surrealdb_seed --graph
 ```
 
-### 5. Confirm it is working
+Expected success output includes:
 
-Look for this line in logs:
+- `GraphRAG seeding:`
+- `Nodes created:`
+- `Edges created:` (should be greater than 0)
 
-```text
-🔍 RAG retrieval enabled (runner-managed).
-```
+Important note:
 
-## Framework support matrix
-
-| Framework | SurrealDB RAG | Status | Notes |
-|---|---|---|---|
-| DSPy | Yes | Stable | Best first demo for new users |
-| OpenAI Agents SDK | Yes | Stable | Works with local Ollama or cloud OpenAI-compatible endpoints |
-| Claude Agent SDK | Yes | Stable | Requires Anthropic credentials and Claude-compatible model |
-| Microsoft Agent Framework | Yes | Stable | Works with Ollama/OpenAI-compatible endpoints |
-| PydanticAI | Yes | Stable | Same RAG config |
-| CrewAI | Yes | Stable | Same RAG config, prompt style may need tuning |
-| Google ADK | Yes | Stable | Works with cloud model runtime |
-| DeepAgents | Yes | Stable | Same RAG config with DeepAgents runtime |
-
-## Core shared RAG config
-
-Use this in playbooks for all frameworks.
-
-```yaml
-rag:
-  enabled: true
-  retriever_type: surrealdb
-  config:
-    top_k: 5
-    chunk_size: 512
-    chunk_overlap: 50
-    similarity_threshold: 0.65
-    retrieval_mode: vector  # or "hybrid"
-    hybrid_alpha: 0.7       # used when retrieval_mode=hybrid
-    telemetry: true         # emit structured retrieval telemetry
-    index_check: true       # warn if vector/full-text indexes look missing
-  vector_store:
-    embedding_model: sentence-transformers/all-MiniLM-L6-v2
-    url: ws://localhost:8000
-    namespace: superoptix
-    database: knowledge
-    username: root
-    password: secret
-    skip_signin: false
-    table_name: rag_documents
-    vector_field: embedding
-    content_field: content
-    metadata_field: metadata
-```
-
-## SurrealDB deployment options
-
-### Option A: In-memory embedded mode (no Docker)
-
-```yaml
-vector_store:
-  url: memory
-  namespace: test
-  database: test
-  username: root
-  password: root
-  skip_signin: true
-```
-
-### Option B: Embedded persistent file (no Docker)
-
-```yaml
-vector_store:
-  url: surrealkv://./.superoptix/surreal.db
-  namespace: test
-  database: test
-  username: root
-  password: root
-  skip_signin: true
-```
-
-### Option C: Docker server mode
-
-```yaml
-vector_store:
-  url: ws://localhost:8000
-  namespace: superoptix
-  database: knowledge
-  username: root
-  password: secret
-  skip_signin: false
-```
-
-## Framework run commands
-
-### DSPy
+- `--graph` replaces previous seed rows from the same source.
+- If you want both graph docs and token docs together, run this after `--graph`:
 
 ```bash
-super agent pull rag_surrealdb_demo
-super agent compile rag_surrealdb_demo
-super agent run rag_surrealdb_demo --goal "What is NEON-FOX-742?"
+python -m superoptix.agents.demo.setup_surrealdb_seed --append
 ```
 
-### PydanticAI
+## Step 4: First Successful Run (DSPy + Local)
+
+Run exactly:
 
 ```bash
-super agent pull rag_surrealdb_pydanticai_demo
-super agent compile rag_surrealdb_pydanticai_demo --framework pydantic-ai
-super agent run rag_surrealdb_pydanticai_demo --goal "What is NEON-FOX-742?"
+super agent pull rag_surrealdb_dspy_demo
+super agent compile rag_surrealdb_dspy_demo --framework dspy
+super agent run rag_surrealdb_dspy_demo --framework dspy --goal "What is NEON-FOX-742?"
 ```
 
-### OpenAI Agents SDK
+Expected success signs:
+
+- `🔍 RAG retrieval enabled (runner-managed).`
+- output mentions `NEON-FOX-742`
+- `Validation Status: ✅ PASSED`
+
+## Step 5: Run GraphRAG (DSPy)
+
+Run:
 
 ```bash
-super agent pull rag_surrealdb_openai_demo
-super agent compile rag_surrealdb_openai_demo --framework openai
-super agent run rag_surrealdb_openai_demo --framework openai --goal "What is NEON-FOX-742?"
+super agent pull graphrag_surrealdb_dspy_demo
+super agent compile graphrag_surrealdb_dspy_demo --framework dspy
+super agent run graphrag_surrealdb_dspy_demo --framework dspy --goal "What capabilities does SurrealDB provide?"
 ```
 
-### Claude Agent SDK
+Expected success signs:
+
+- No fallback warning about RELATE
+- answer includes SurrealDB capabilities from graph-connected docs
+- `Validation Status: ✅ PASSED`
+
+## Optional: Run with Gemini 2.5 Flash
+
+Set your key:
 
 ```bash
-export ANTHROPIC_API_KEY=your_key_here
-super agent pull rag_surrealdb_claude_sdk_demo
-super agent compile rag_surrealdb_claude_sdk_demo --framework claude-sdk --cloud --provider anthropic --model claude-sonnet-4-5
-super agent run rag_surrealdb_claude_sdk_demo --framework claude-sdk --cloud --provider anthropic --model claude-sonnet-4-5 --goal "What is NEON-FOX-742?"
+export GEMINI_API_KEY=your_key_here
+# or
+export GOOGLE_API_KEY=your_key_here
 ```
 
-### Microsoft Agent Framework
+Run RAG with Gemini:
 
 ```bash
-super agent pull rag_surrealdb_microsoft_demo
-super agent compile rag_surrealdb_microsoft_demo --framework microsoft
-super agent run rag_surrealdb_microsoft_demo --framework microsoft --goal "What is NEON-FOX-742?"
+super agent run rag_surrealdb_dspy_demo --framework dspy --cloud --provider google-genai --model gemini-2.5-flash --goal "What is NEON-FOX-742?"
 ```
 
-### CrewAI
+Run GraphRAG with Gemini:
 
 ```bash
-super agent pull rag_surrealdb_crewai_demo
-super agent compile rag_surrealdb_crewai_demo --framework crewai
-super agent run rag_surrealdb_crewai_demo --goal "What is NEON-FOX-742?"
+super agent run graphrag_surrealdb_dspy_demo --framework dspy --cloud --provider google-genai --model gemini-2.5-flash --goal "What capabilities does SurrealDB provide?"
 ```
 
-### Google ADK
+## Framework Demo IDs
 
-Fish shell:
+Use these IDs with `pull`, `compile`, and `run`.
 
-```fish
-set -x GOOGLE_API_KEY your_key_here
-```
+| Framework | RAG demo id | GraphRAG demo id |
+|---|---|---|
+| DSPy | `rag_surrealdb_dspy_demo` | `graphrag_surrealdb_dspy_demo` |
+| OpenAI | `rag_surrealdb_openai_demo` | `graphrag_surrealdb_openai_demo` |
+| Claude SDK | `rag_surrealdb_claude_sdk_demo` | `graphrag_surrealdb_claude_sdk_demo` |
+| Microsoft | `rag_surrealdb_microsoft_demo` | `graphrag_surrealdb_microsoft_demo` |
+| PydanticAI | `rag_surrealdb_pydanticai_demo` | `graphrag_surrealdb_pydanticai_demo` |
+| CrewAI | `rag_surrealdb_crewai_demo` | `graphrag_surrealdb_crewai_demo` |
+| Google ADK | `rag_surrealdb_adk_demo` | `graphrag_surrealdb_adk_demo` |
+| DeepAgents | `rag_surrealdb_deepagents_demo` | `graphrag_surrealdb_deepagents_demo` |
+
+## One-Command Pattern for Any Framework
+
+1. Pull:
 
 ```bash
-super agent pull rag_surrealdb_adk_demo
-super agent compile rag_surrealdb_adk_demo --framework google-adk --cloud --provider google --model gemini-2.5-flash
-super agent run rag_surrealdb_adk_demo --framework google-adk --cloud --provider google --model gemini-2.5-flash --goal "What is NEON-FOX-742?"
+super agent pull <demo_id>
 ```
 
-### DeepAgents
+2. Compile:
 
 ```bash
-export ANTHROPIC_API_KEY=your_key_here
-super agent pull rag_surrealdb_deepagents_demo
-super agent compile rag_surrealdb_deepagents_demo --framework deepagents --cloud --provider anthropic --model claude-sonnet-4-20250514
-super agent run rag_surrealdb_deepagents_demo --framework deepagents --cloud --provider anthropic --model claude-sonnet-4-20250514 --goal "What is NEON-FOX-742?"
+super agent compile <demo_id> --framework <framework_name>
 ```
 
-## How retrieval works across frameworks
+3. Run:
 
-1. The framework pipeline starts.
-2. SuperOptiX checks `rag.enabled` and `retriever_type: surrealdb`.
-3. SurrealDB retrieves context.
-4. Retrieved context is injected into the prompt.
-5. The model returns a final answer.
-
-## Production retrieval profile (recommended)
-
-Use `retrieval_mode: hybrid` when you need lexical + semantic ranking:
-
-```yaml
-rag:
-  enabled: true
-  retriever_type: surrealdb
-  config:
-    top_k: 8
-    retrieval_mode: hybrid
-    hybrid_alpha: 0.7
-    telemetry: true
-    index_check: true
+```bash
+super agent run <demo_id> --framework <framework_name> --goal "your question"
 ```
 
-Telemetry fields include: `latency_ms`, `hit_count`, `score_min`, `score_max`, `warning_count`, and `mode`.
+## Most Common Problems and Fixes
 
-## Troubleshooting
+### Problem: `Connection refused`
 
-### `Connection refused`
-
-Cause: SurrealDB is not reachable.
+Meaning: SurrealDB is not running.
 
 Fix:
 
@@ -242,46 +196,79 @@ Fix:
 docker ps --filter name=surrealdb-demo
 ```
 
-If Docker maps a different host port, update `vector_store.url` to that port.
-Example: `ws://localhost:18000`.
+If nothing is listed, start SurrealDB again (Step 2B).
 
-### `did not receive a valid HTTP response`
+### Problem: `did not receive a valid HTTP response`
 
-Cause: invalid URL.
-
-Fix: use base URL only, no `/rpc`.
-Correct: `ws://localhost:8000`
-
-### Authentication failed
-
-Cause: credentials mismatch.
-
-Fix: `--user` and `--pass` in Docker must match `username` and `password` in playbook.
-
-### Generic answer even though run passed
-
-Cause: model style, not retrieval wiring.
+Meaning: wrong SurrealDB URL.
 
 Fix:
 
-- Confirm log contains `🔍 RAG retrieval enabled (runner-managed).`
-- Confirm prompt shows retrieved context.
-- Tighten task/persona instruction to enforce final-answer-only output.
+- use `ws://localhost:8000`
+- do not use `/rpc` in URL
 
-### First run downloads embeddings
+### Problem: Graph warning `falling back from 'graph' to 'vector' mode`
 
-`sentence-transformers/all-MiniLM-L6-v2` is fetched from HuggingFace on first run and then cached.
+Meaning: graph edges were not available or parser compatibility issue.
 
-## Validation checklist
+Fix:
 
-- SurrealDB container is running.
-- `vector_store.url` matches running port.
-- Logs show `🔍 RAG retrieval enabled (runner-managed).`
-- No SurrealDB connection or auth error.
-- Output contains facts from retrieved context.
+```bash
+python -m superoptix.agents.demo.setup_surrealdb_seed --graph
+```
 
-## Related
+Confirm `Edges created:` is greater than `0`.
 
-- [SurrealDB Embedded Demo](surrealdb-demo.md)
+### Problem: `Ollama_chatException - {"error":"model is required"}`
+
+Meaning: wrong model string passed.
+
+Fix: use this exact format:
+
+```bash
+super agent run rag_surrealdb_dspy_demo --framework dspy --local --provider ollama --model llama3.1:8b --goal "What is NEON-FOX-742?"
+```
+
+### Problem: Gemini says `API_KEY_INVALID` or `API Key not found`
+
+Meaning: key missing or wrong.
+
+Fix:
+
+```bash
+export GEMINI_API_KEY=your_key_here
+# or
+export GOOGLE_API_KEY=your_key_here
+```
+
+Then run again.
+
+### Problem: You see `embeddings.position_ids | UNEXPECTED`
+
+Meaning: model loading report. Usually safe.
+
+If seeding/run still completes, ignore it.
+
+## Quick Verification (Graph Really Works)
+
+Run:
+
+```bash
+python - <<'PY'
+from surrealdb import Surreal
+
+with Surreal("ws://localhost:8000") as db:
+    db.signin({"username":"root","password":"secret"})
+    db.use("superoptix","knowledge")
+    print(db.query("SELECT count() AS c FROM integrates_with WHERE source='superoptix_seed';"))
+    print(db.query("SELECT content FROM rag_documents:superoptix->integrates_with->rag_documents;"))
+PY
+```
+
+If count is non-zero and traversal returns rows, GraphRAG data is active.
+
+## Related Pages
+
+- [SurrealDB Demo](surrealdb-demo.md)
 - [SurrealDB Docker Demo](surrealdb-docker-demo.md)
 - [RAG Guide](../../guides/rag.md)

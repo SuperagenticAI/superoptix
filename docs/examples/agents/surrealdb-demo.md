@@ -1,79 +1,83 @@
-# SurrealDB RAG Demo
+# SurrealDB RAG Demo (Beginner Friendly)
 
-A demonstration of SuperOptiX RAG capabilities using **SurrealDB** for vector and hybrid retrieval workflows.
+This is the easiest SurrealDB demo to start with.
 
-## Overview
+You will run one agent that reads knowledge from SurrealDB and answers with grounded context.
 
-This demo shows how to connect SuperOptiX RAG to SurrealDB and use:
+## What You Get
 
-- Vector similarity retrieval via SurrealQL vector functions
-- Metadata-aware filtering for targeted retrieval
-- Hybrid retrieval design (semantic + lexical scoring)
+- SurrealDB-backed retrieval
+- token grounding check (`NEON-FOX-742`)
+- simple run path using DSPy framework
 
-## Prerequisites
+## Step-by-Step
 
-### Install SuperOptiX + SurrealDB extra
+### 1) Install
+
 ```bash
 pip install "superoptix[surrealdb]"
+super model install llama3.1:8b
 ```
 
-### Option A: No Docker (embedded, in-memory, ephemeral)
-```yaml
-vector_store:
-  url: memory
-  namespace: test
-  database: test
-  username: root
-  password: root
-  skip_signin: true
+### 2) Start services
+
+Terminal A:
+
+```bash
+ollama serve
 ```
 
-### Option B: No Docker (embedded, persistent local file)
-```yaml
-vector_store:
-  url: surrealkv://./.superoptix/surreal.db
-  namespace: test
-  database: test
-  username: root
-  password: root
-  skip_signin: true
-```
+Terminal B:
 
-### Option C: Start SurrealDB with Docker
 ```bash
 docker run --rm -p 8000:8000 surrealdb/surrealdb:latest \
   start --log info --user root --pass secret memory
 ```
 
-### Install and serve model
+### 3) Seed demo data
+
+Terminal C:
+
 ```bash
-super model install llama3.1:8b
-ollama serve
+python -m superoptix.agents.demo.setup_surrealdb_seed
 ```
 
-## Quick Start
+Expected:
 
-### Pull the demo
+- `SurrealDB seed complete`
+- `Inserted: 8`
+
+### 4) Pull + compile + run
+
 ```bash
-super agent pull rag_surrealdb_demo
+super agent pull rag_surrealdb_dspy_demo
+super agent compile rag_surrealdb_dspy_demo --framework dspy
+super agent run rag_surrealdb_dspy_demo --framework dspy --goal "What is NEON-FOX-742?"
 ```
 
-### Compile
+Expected:
+
+- `🔍 RAG retrieval enabled (runner-managed).`
+- response mentions `NEON-FOX-742`
+- `Validation Status: ✅ PASSED`
+
+## Optional: Run with Gemini
+
+Set key:
+
 ```bash
-super agent compile rag_surrealdb_demo
+export GEMINI_API_KEY=your_key_here
+# or
+export GOOGLE_API_KEY=your_key_here
 ```
 
-### Seed demo knowledge once
+Run:
+
 ```bash
-python superoptix/agents/demo/setup_surrealdb_seed.py
+super agent run rag_surrealdb_dspy_demo --framework dspy --cloud --provider google-genai --model gemini-2.5-flash --goal "What is NEON-FOX-742?"
 ```
 
-### Run
-```bash
-super agent run rag_surrealdb_demo --goal "How can SurrealDB improve RAG workflows in SuperOptiX?"
-```
-
-## Playbook Configuration
+## Minimal Config Reference
 
 ```yaml
 rag:
@@ -81,40 +85,40 @@ rag:
   retriever_type: surrealdb
   config:
     top_k: 5
-    chunk_size: 512
-    chunk_overlap: 50
-    similarity_threshold: 0.7
-    retrieval_mode: vector  # or "hybrid"
-    hybrid_alpha: 0.7
-    telemetry: true
-    index_check: true
-vector_store:
-  embedding_model: sentence-transformers/all-MiniLM-L6-v2
-  url: surrealkv://./.superoptix/surreal.db
-  namespace: test
-  database: test
-  username: root
-  password: root
-  skip_signin: true
-  table_name: rag_documents
-  vector_field: embedding
-  content_field: content
-  metadata_field: metadata
+    retrieval_mode: vector   # or hybrid
+  vector_store:
+    url: ws://localhost:8000
+    namespace: superoptix
+    database: knowledge
+    username: root
+    password: secret
+    skip_signin: false
+    table_name: rag_documents
+    vector_field: embedding
+    content_field: content
+    metadata_field: metadata
 ```
 
-## Workflow Integration Ideas
+## Troubleshooting
 
-- Use SurrealDB as a unified operational + vector layer for agent memory and retrieval.
-- Store graph links between documents and entities, then combine relation hops with vector retrieval.
-- Use SurrealQL filtering to scope retrieval by tenant, document type, or freshness window.
-- Use hybrid retrieval when exact terms matter alongside semantic similarity.
-- Set `rag.config.retrieval_mode: hybrid` to combine lexical and vector ranking.
-- Keep `rag.config.telemetry: true` for retrieval latency/hit/score observability.
-- `memory` is connection-scoped and ephemeral; for repeated runs use `surrealkv://...`.
-- Set `skip_signin: false` when using authenticated `ws://` / `http://` SurrealDB servers.
+### `Connection refused`
 
-## Related
+SurrealDB is not running. Start Docker command again.
 
-- [RAG Guide](../../guides/rag.md)
-- [Qdrant Demo](qdrant-demo.md)
-- [Milvus Demo](milvus-demo.md)
+### `model is required` with Ollama
+
+Use model as `llama3.1:8b` (not `ollama:llama3.1:8b`).
+
+### `API Key not found` for Gemini
+
+Set `GEMINI_API_KEY` (or `GOOGLE_API_KEY`) before run.
+
+### `embeddings.position_ids | UNEXPECTED`
+
+Usually informational only. Ignore if run succeeds.
+
+## Next Step
+
+If this worked, continue with GraphRAG:
+
+- [SurrealDB Framework Guide](surrealdb-frameworks-demo.md)
