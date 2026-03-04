@@ -1,0 +1,127 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Temporal Memory SurrealDB Demo
+  id: temporal_memory_surrealdb_demo
+  namespace: demo
+  version: 1.0.0
+  level: genies
+  description: >
+    Demonstrates SurrealDB temporal memory versioning: every store() call is recorded
+    in a _versions table, enabling point-in-time retrieval and full history queries.
+    Shows how agents can recall what they knew at a specific point in time.
+  author: SuperOptiX
+  tags:
+    - surrealdb
+    - temporal
+    - memory
+    - versioning
+    - demo
+
+spec:
+  target_framework: openai
+
+  language_model:
+    location: local
+    provider: ollama
+    model: ollama:llama3.1:8b
+    api_base: http://localhost:11434
+    temperature: 0.2
+    max_tokens: 1800
+
+  input_fields:
+    - name: user_message
+      type: str
+      description: User interaction to process and remember.
+      required: true
+
+  output_fields:
+    - name: agent_response
+      type: str
+      description: Agent response grounded in current and historical memory.
+      required: true
+
+  persona:
+    name: TemporalMemoryAssistant
+    role: Temporal Memory SurrealDB Analyst
+    goal: >
+      Demonstrate SurrealDB's temporal memory capabilities by maintaining
+      versioned state across interactions. Show how agents can recall past
+      versions of knowledge and track how their understanding evolves.
+    traits:
+      - memory-aware
+      - versioned
+      - historically-grounded
+
+  tasks:
+    - name: process_with_temporal_memory
+      instruction: >
+        Process the user message using agent memory with temporal versioning enabled.
+        The memory backend stores every update in a _versions table alongside the
+        primary table, enabling point-in-time retrieval via retrieve_at() and
+        full history queries via history(). Respond based on current state.
+      inputs:
+        - name: user_message
+          type: str
+          description: User input
+          required: true
+      outputs:
+        - name: agent_response
+          type: str
+          description: Agent response
+
+  memory:
+    enabled: true
+    agent_id: temporal_demo_agent
+    backend:
+      type: surrealdb
+      config:
+        url: ws://localhost:8000
+        namespace: superoptix
+        database: agents
+        username: root
+        password: secret
+        skip_signin: false
+        table_name: superoptix_memory
+
+    # Temporal versioning: appends every store() to a _versions table
+    temporal:
+      enabled: true
+      versioning: true
+      max_versions_per_key: 50
+
+    short_term:
+      enabled: true
+      capacity: 100
+      retention_policy: lru
+
+    episodic:
+      enabled: true
+      max_episodes: 50
+
+  feature_specifications:
+    scenarios:
+      - name: versioned_state_tracking
+        description: >
+          Agent stores user preference, updates it, then retrieves both the
+          current value and the history of changes.
+        input:
+          user_message: Remember that I prefer dark mode. Previously I preferred light mode.
+        expected_output:
+          agent_response: preference recorded with history
+
+# Temporal Memory API (available on SurrealDBBackend when temporal_enabled=True):
+#
+#   backend.store("pref:theme", "dark")          # writes to primary + _versions table
+#   backend.retrieve("pref:theme")               # -> "dark" (latest, unchanged semantics)
+#   backend.history("pref:theme", limit=5)       # -> [{value:"dark",...}, {value:"light",...}]
+#   backend.retrieve_at("pref:theme", datetime)  # -> value at that point in time
+#
+# Quick Start:
+#   # 1. Start SurrealDB:
+#   docker run --rm -p 8000:8000 surrealdb/surrealdb:latest start --user root --pass secret
+#
+#   # 2. Compile and run:
+#   super agent compile temporal_memory_surrealdb_demo --framework openai
+#   super agent run temporal_memory_surrealdb_demo --framework openai \
+#     --goal "Remember that I prefer dark mode."

@@ -373,6 +373,10 @@ class DSPyRunner:
             )
             cfg = rag_cfg if isinstance(rag_cfg, dict) and rag_cfg else retrieval_cfg
             top_k = cfg.get("top_k") if isinstance(cfg, dict) else None
+            if top_k is None and isinstance(cfg, dict):
+                runtime_cfg = cfg.get("config", {})
+                if isinstance(runtime_cfg, dict):
+                    top_k = runtime_cfg.get("top_k")
             retrieved_docs = await self._rag_helper.retrieve_context(query, top_k=top_k)
             if not retrieved_docs:
                 return ""

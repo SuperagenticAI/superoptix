@@ -1,0 +1,93 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: RAG SurrealDB Claude SDK Demo
+  id: rag_surrealdb_claude_sdk_demo
+  namespace: demo
+  version: 1.0.0
+  level: genies
+  description: SurrealDB-backed RAG demo compiled with Claude Agent SDK.
+  author: SuperOptiX
+  tags:
+    - surrealdb
+    - rag
+    - claude-sdk
+    - demo
+
+spec:
+  target_framework: claude-sdk
+
+  language_model:
+    location: cloud
+    provider: anthropic
+    model: claude-sonnet-4-5
+
+  input_fields:
+    - name: knowledge_query
+      type: str
+      description: Query to answer using retrieved SurrealDB context.
+      required: true
+
+  output_fields:
+    - name: retrieved_response
+      type: str
+      description: Response grounded in retrieved knowledge.
+      required: true
+
+  persona:
+    name: SurrealDBClaudeAssistant
+    role: SurrealDB RAG Claude Analyst
+    goal: Retrieve relevant context from SurrealDB and answer clearly.
+    traits:
+      - grounded
+      - concise
+      - practical
+
+  tasks:
+    - name: analyze_with_retrieval
+      instruction: Analyze the query and answer using SurrealDB retrieved context.
+      inputs:
+        - name: knowledge_query
+          type: str
+          description: User query
+          required: true
+      outputs:
+        - name: retrieved_response
+          type: str
+          description: Final grounded answer
+
+  rag:
+    enabled: true
+    retriever_type: surrealdb
+    config:
+      top_k: 5
+      chunk_size: 512
+      chunk_overlap: 50
+      similarity_threshold: 0.65
+    vector_store:
+      embedding_model: sentence-transformers/all-MiniLM-L6-v2
+      url: ws://localhost:8000
+      namespace: superoptix
+      database: knowledge
+      username: root
+      password: secret
+      skip_signin: false
+      table_name: rag_documents
+      vector_field: embedding
+      content_field: content
+      metadata_field: metadata
+
+  feature_specifications:
+    scenarios:
+      - name: token_retrieval
+        description: Ensure retrieval includes seeded demo token.
+        input:
+          knowledge_query: What is NEON-FOX-742?
+        expected_output:
+          retrieved_response: token retrieval success
+
+# Quick Start:
+#   super agent pull rag_surrealdb_claude_sdk_demo
+#   export ANTHROPIC_API_KEY=your_key
+#   super agent compile rag_surrealdb_claude_sdk_demo --framework claude-sdk --cloud --provider anthropic --model claude-sonnet-4-5
+#   super agent run rag_surrealdb_claude_sdk_demo --framework claude-sdk --cloud --provider anthropic --model claude-sonnet-4-5 --goal "What is NEON-FOX-742?"

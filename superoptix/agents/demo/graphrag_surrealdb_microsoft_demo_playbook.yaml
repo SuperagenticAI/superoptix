@@ -1,0 +1,103 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: GraphRAG SurrealDB Microsoft Demo
+  id: graphrag_surrealdb_microsoft_demo
+  namespace: demo
+  version: 1.0.0
+  level: genies
+  description: SurrealDB GraphRAG demo compiled with Microsoft Agent Framework.
+  author: SuperOptiX
+  tags:
+    - surrealdb
+    - graphrag
+    - microsoft
+    - demo
+
+spec:
+  target_framework: microsoft
+
+  language_model:
+    location: local
+    provider: ollama
+    model: gpt-oss:20b
+    api_base: http://localhost:11434
+    temperature: 0.2
+    max_tokens: 1800
+
+  input_fields:
+    - name: knowledge_query
+      type: str
+      description: Query to answer using GraphRAG context (vector search + graph traversal).
+      required: true
+
+  output_fields:
+    - name: retrieved_response
+      type: str
+      description: Response grounded in graph-expanded retrieved knowledge.
+      required: true
+
+  persona:
+    name: GraphRAGMicrosoftAssistant
+    role: SurrealDB GraphRAG Microsoft Analyst
+    goal: Retrieve relevant context from SurrealDB using graph-aware retrieval and answer clearly.
+    traits:
+      - grounded
+      - graph-aware
+      - practical
+
+  tasks:
+    - name: analyze_with_graphrag
+      instruction: Analyze the query and answer using SurrealDB GraphRAG context.
+      inputs:
+        - name: knowledge_query
+          type: str
+          description: User query
+          required: true
+      outputs:
+        - name: retrieved_response
+          type: str
+          description: Final grounded answer
+
+  rag:
+    enabled: true
+    retriever_type: surrealdb
+    config:
+      top_k: 5
+      retrieval_mode: graph
+      graph_depth: 2
+      graph_relations:
+        - integrates_with
+        - provides
+        - supports
+        - enables
+      chunk_size: 512
+      chunk_overlap: 50
+      similarity_threshold: 0.60
+      hybrid_alpha: 0.7
+    vector_store:
+      embedding_model: sentence-transformers/all-MiniLM-L6-v2
+      url: ws://localhost:8000
+      namespace: superoptix
+      database: knowledge
+      username: root
+      password: secret
+      skip_signin: false
+      table_name: rag_documents
+      vector_field: embedding
+      content_field: content
+      metadata_field: metadata
+
+  feature_specifications:
+    scenarios:
+      - name: graph_entity_traversal
+        description: Verify GraphRAG expands from SurrealDB entity to related capabilities.
+        input:
+          knowledge_query: What capabilities does SurrealDB provide?
+        expected_output:
+          retrieved_response: graph traversal context expanded
+
+# Quick Start:
+#   super agent compile graphrag_surrealdb_microsoft_demo --framework microsoft
+#   super agent run graphrag_surrealdb_microsoft_demo --framework microsoft \
+#     --goal "What capabilities does SurrealDB provide?"
