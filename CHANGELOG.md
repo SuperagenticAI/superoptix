@@ -5,6 +5,26 @@ All notable changes to SuperOptiX will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.12] - 2026-03-04
+
+### 🚀 Added
+- SurrealDB GraphRAG demo playbooks for all supported frameworks (DSPy, OpenAI, Claude SDK, Microsoft, PydanticAI, CrewAI, Google ADK, DeepAgents).
+- Lean SurrealDB parity checks in test matrix for both RAG and GraphRAG playbooks.
+
+### 🔄 Changed
+- SurrealDB docs rewritten for beginner-first setup and troubleshooting.
+- SurrealDB docs now use source-independent seeding commands via `python -m superoptix.agents.demo.setup_surrealdb_seed`.
+- SurrealDB examples index updated to reflect full feature coverage.
+
+### 🐛 Fixed
+- DSPy SurrealDB runtime compile/run parity in demo flow.
+- SurrealDB GraphRAG feature detection compatibility (RELATE probe parsing).
+- SurrealDB graph traversal query compatibility for parser variants that reject wildcard `->*` syntax.
+
+### 📚 Documentation
+- Added explicit SurrealDB feature coverage map with tags and runnable commands (vector, hybrid, GraphRAG, multi, temporal, server embeddings, live utility, MCP tool, capability gating).
+- Added beginner-friendly runbooks for SurrealDB local and Docker workflows with expected outputs and error-to-fix steps.
+
 ## [0.2.9] - 2026-02-21
 
 ### 🚀 Added
