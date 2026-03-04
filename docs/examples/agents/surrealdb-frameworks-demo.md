@@ -12,6 +12,22 @@ You will run an AI agent that:
 - retrieves that knowledge during a question
 - works in multiple frameworks (DSPy, OpenAI SDK, Claude SDK, Microsoft, PydanticAI, CrewAI, Google ADK, DeepAgents)
 
+## SurrealDB Feature Coverage (Tagged)
+
+This table lists every SurrealDB capability currently integrated in SuperOptiX.
+
+| Feature Tag | Feature Name | Status | Where To Run It |
+|---|---|---|---|
+| `surrealdb-vector-rag` | Vector retrieval | Supported | `rag_surrealdb_*_demo` |
+| `surrealdb-hybrid-rag` | Hybrid retrieval (vector + lexical) | Supported | any `rag_surrealdb_*_demo` with `retrieval_mode: hybrid` |
+| `surrealdb-graphrag` | GraphRAG (vector + RELATE traversal) | Supported | `graphrag_surrealdb_*_demo` |
+| `surrealdb-multi-rag` | Multi mode (hybrid + graph expansion) | Supported | custom playbook with `retrieval_mode: multi` |
+| `surrealdb-temporal-memory` | Temporal memory (`history`, `retrieve_at`) | Supported | `temporal_memory_surrealdb_demo` |
+| `surrealdb-server-embeddings` | Server-side embeddings (`fn::embed`) with fallback | Supported | any SurrealDB RAG playbook with `embedding_mode: server` |
+| `surrealdb-live-memory` | Live memory stream utility (`LIVE SELECT`) | Supported utility | `superoptix.memory.LiveMemorySubscriber` |
+| `surrealdb-mcp-readonly` | Read-only SurrealDB MCP tool (`surrealdb_query`) | Supported | built-in tool config |
+| `surrealdb-capability-gating` | Runtime capability detection + graceful fallback | Supported | automatic at runtime |
+
 ## Time Needed
 
 - First run: about 10-20 minutes
@@ -163,6 +179,121 @@ Use these IDs with `pull`, `compile`, and `run`.
 | CrewAI | `rag_surrealdb_crewai_demo` | `graphrag_surrealdb_crewai_demo` |
 | Google ADK | `rag_surrealdb_adk_demo` | `graphrag_surrealdb_adk_demo` |
 | DeepAgents | `rag_surrealdb_deepagents_demo` | `graphrag_surrealdb_deepagents_demo` |
+
+## How To Run Each Feature
+
+### Feature: Vector RAG (`surrealdb-vector-rag`)
+
+```bash
+super agent pull rag_surrealdb_dspy_demo
+super agent compile rag_surrealdb_dspy_demo --framework dspy
+super agent run rag_surrealdb_dspy_demo --framework dspy --goal "What is NEON-FOX-742?"
+```
+
+### Feature: Hybrid RAG (`surrealdb-hybrid-rag`)
+
+Use any `rag_surrealdb_*_demo` playbook and set:
+
+```yaml
+rag:
+  config:
+    retrieval_mode: hybrid
+    hybrid_alpha: 0.7
+```
+
+Then compile and run as normal.
+
+### Feature: GraphRAG (`surrealdb-graphrag`)
+
+```bash
+python -m superoptix.agents.demo.setup_surrealdb_seed --graph
+super agent pull graphrag_surrealdb_dspy_demo
+super agent compile graphrag_surrealdb_dspy_demo --framework dspy
+super agent run graphrag_surrealdb_dspy_demo --framework dspy --goal "What capabilities does SurrealDB provide?"
+```
+
+### Feature: Multi Retrieval (`surrealdb-multi-rag`)
+
+Use a playbook with:
+
+```yaml
+rag:
+  config:
+    retrieval_mode: multi
+    graph_depth: 2
+    graph_relations:
+      - integrates_with
+      - provides
+      - supports
+      - enables
+```
+
+### Feature: Temporal Memory (`surrealdb-temporal-memory`)
+
+```bash
+super agent pull temporal_memory_surrealdb_demo
+super agent compile temporal_memory_surrealdb_demo --framework openai
+super agent run temporal_memory_surrealdb_demo --framework openai --goal "Remember that I prefer dark mode."
+```
+
+### Feature: Server-side Embeddings (`surrealdb-server-embeddings`)
+
+Enable in playbook:
+
+```yaml
+rag:
+  config:
+    embedding_mode: server
+```
+
+Behavior:
+
+- If `fn::embed` is available in SurrealDB, server embeddings are used.
+- If unavailable, SuperOptiX falls back to client embeddings automatically.
+
+### Feature: Live Memory Utility (`surrealdb-live-memory`)
+
+Python usage:
+
+```python
+from superoptix.memory import LiveMemorySubscriber
+
+# Requires SurrealDB backend using ws:// or wss://
+# subscribe(table, callback) gives real-time memory updates
+```
+
+Note: this is provided as a standalone utility and is not auto-wired into every runtime path.
+
+### Feature: Read-only MCP Tool (`surrealdb-mcp-readonly`)
+
+Use built-in tool:
+
+```yaml
+tools:
+  built_in_tools:
+    - name: surrealdb_query
+      config:
+        url: ws://localhost:8000
+        namespace: superoptix
+        database: knowledge
+        username: root
+        password: secret
+```
+
+Safety controls:
+
+- read-only statement allowlist (`SELECT`, `INFO`, `RETURN`)
+- row limit injection when missing
+- query timeout protection
+
+### Feature: Capability Gating (`surrealdb-capability-gating`)
+
+SuperOptiX probes SurrealDB features at runtime and degrades safely when needed.
+
+Examples:
+
+- Graph mode falls back to vector/hybrid when RELATE is unavailable.
+- Server embedding mode falls back to client embedding when `fn::embed` is unavailable.
 
 ## One-Command Pattern for Any Framework
 

@@ -24,7 +24,7 @@ Explore Retrieval-Augmented Generation capabilities:
 - **[🏗️ Milvus Demo](agents/milvus-demo)** - Enterprise-scale vector database with Milvus
 - **[🟣🟢 SurrealDB Demo](agents/surrealdb-demo)** - Unified multi-model database with vector + hybrid retrieval
 - **[🟣🟢 SurrealDB Docker Demo](agents/surrealdb-docker-demo)** - Authenticated SurrealDB server mode with Docker
-- **[🟣🟢 SurrealDB Framework Guide](agents/surrealdb-frameworks-demo)** - End-to-end SurrealDB RAG across DSPy, OpenAI, Claude SDK, Microsoft, PydanticAI, CrewAI, Google ADK, and DeepAgents
+- **[🟣🟢 SurrealDB Framework Guide](agents/surrealdb-frameworks-demo)** - Full SurrealDB feature map: vector, hybrid, GraphRAG, multi mode, temporal memory, server embeddings, live utility, and MCP tool across all frameworks
 
 ### **🛠️ Framework Feature Demos**
 Discover core framework capabilities:
@@ -52,7 +52,7 @@ Integrate with external observability platforms:
 | **Weaviate** | Advanced Semantic Search | Sophisticated similarity algorithms | Academic research, enterprise search |
 | **Qdrant** | Lightning-Fast Search | Optimized performance, high throughput | Industrial applications, real-time systems |
 | **Milvus** | Enterprise-Scale RAG | Cloud-native, distributed architecture | Massive-scale deployments, enterprise search |
-| **SurrealDB** | Multi-Model + Vector | Unified document/graph/vector with SurrealQL | Operational + retrieval workflows |
+| **SurrealDB** | Multi-Model + Agent Memory | Vector + hybrid + graph + temporal + MCP + live utility | Operational memory and retrieval workflows |
 | **Tools** | Tool Integration | 20+ categories, specialized tools | Enhanced agent capabilities |
 | **Memory** | Context Retention | Multi-layered, persistent storage | Conversational AI |
 | **Observability** | Monitoring & Debugging | Tracing, metrics, dashboard | Production monitoring |
