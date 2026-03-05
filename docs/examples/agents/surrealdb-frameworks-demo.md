@@ -1,18 +1,23 @@
-# SurrealDB + SuperOptiX Framework Guide
+# SurrealDB Guide
 
-This guide is written for beginners.
+This is the single SurrealDB guide for SuperOptiX.
 
-If you can copy and paste terminal commands, you can run this.
+It combines the earlier beginner demo, Docker demo, and framework guide into one page so you can find everything in one place.
 
-## What You Will Do
+## What This Guide Covers
 
-You will run an AI agent that:
+You will learn how to:
 
-- stores knowledge in SurrealDB
-- retrieves that knowledge during a question
-- works in multiple frameworks (DSPy, OpenAI SDK, Claude SDK, Microsoft, PydanticAI, CrewAI, Google ADK, DeepAgents)
+- start SurrealDB
+- seed demo data
+- run standard RAG
+- run GraphRAG
+- run the same SurrealDB-backed behavior across multiple frameworks
+- understand which SurrealDB features are already integrated in SuperOptiX
 
-## SurrealDB Feature Coverage (Tagged)
+This guide is written for beginners. If you can copy and paste terminal commands, you can run it.
+
+## SurrealDB Feature Coverage
 
 This table lists every SurrealDB capability currently integrated in SuperOptiX.
 
@@ -39,47 +44,40 @@ You need:
 
 - Python environment with `superoptix`
 - Docker installed
-- Terminal access
-- Optional for cloud models: API keys (Gemini/Anthropic/OpenAI)
+- terminal access
+- optional for cloud models: API keys for Gemini, Anthropic, or OpenAI
 
-## Step 1: Install Dependencies
+## Quick Start
 
-Run:
+This is the fastest path to a successful first run.
+
+### 1) Install
 
 ```bash
 pip install "superoptix[surrealdb]"
-```
-
-If you want local model runs (recommended for first test), also run:
-
-```bash
 super model install llama3.1:8b
 ```
 
-## Step 2: Start Required Services
+### 2) Start services
 
-### 2A) Start Ollama (local model service)
+Terminal A:
 
 ```bash
 ollama serve
 ```
 
-Keep this terminal open.
-
-### 2B) Start SurrealDB
-
-Open a new terminal and run:
+Terminal B:
 
 ```bash
 docker run --rm -p 8000:8000 --name surrealdb-demo surrealdb/surrealdb:latest \
   start --log info --user root --pass secret memory
 ```
 
-Keep this terminal open too.
+Keep both terminals open.
 
-## Step 3: Seed Demo Data (No Source Code Needed)
+### 3) Seed demo data
 
-In a third terminal, run:
+Terminal C:
 
 ```bash
 python -m superoptix.agents.demo.setup_surrealdb_seed
@@ -90,30 +88,7 @@ Expected success output includes:
 - `SurrealDB seed complete`
 - `Inserted: 8`
 
-### Optional: Seed GraphRAG Data
-
-```bash
-python -m superoptix.agents.demo.setup_surrealdb_seed --graph
-```
-
-Expected success output includes:
-
-- `GraphRAG seeding:`
-- `Nodes created:`
-- `Edges created:` (should be greater than 0)
-
-Important note:
-
-- `--graph` replaces previous seed rows from the same source.
-- If you want both graph docs and token docs together, run this after `--graph`:
-
-```bash
-python -m superoptix.agents.demo.setup_surrealdb_seed --append
-```
-
-## Step 4: First Successful Run (DSPy + Local)
-
-Run exactly:
+### 4) Pull, compile, and run RAG
 
 ```bash
 super agent pull rag_surrealdb_dspy_demo
@@ -123,13 +98,35 @@ super agent run rag_surrealdb_dspy_demo --framework dspy --goal "What is NEON-FO
 
 Expected success signs:
 
-- `🔍 RAG retrieval enabled (runner-managed).`
+- `RAG retrieval enabled`
 - output mentions `NEON-FOX-742`
 - `Validation Status: ✅ PASSED`
 
-## Step 5: Run GraphRAG (DSPy)
+## GraphRAG Quick Start
 
-Run:
+### 1) Seed graph data
+
+```bash
+python -m superoptix.agents.demo.setup_surrealdb_seed --graph
+```
+
+Expected success output includes:
+
+- `GraphRAG seeding:`
+- `Nodes created:`
+- `Edges created:`
+
+Important:
+
+- `Edges created:` should be greater than `0` for real graph traversal support.
+- `--graph` replaces previous rows from the same graph seed source.
+- If you want graph docs and the normal token docs together, run this afterwards:
+
+```bash
+python -m superoptix.agents.demo.setup_surrealdb_seed --append
+```
+
+### 2) Pull, compile, and run GraphRAG
 
 ```bash
 super agent pull graphrag_surrealdb_dspy_demo
@@ -139,13 +136,13 @@ super agent run graphrag_surrealdb_dspy_demo --framework dspy --goal "What capab
 
 Expected success signs:
 
-- No fallback warning about RELATE
+- no fallback warning about `RELATE`
 - answer includes SurrealDB capabilities from graph-connected docs
 - `Validation Status: ✅ PASSED`
 
-## Optional: Run with Gemini 2.5 Flash
+## Run With Gemini
 
-Set your key:
+Set your API key:
 
 ```bash
 export GEMINI_API_KEY=your_key_here
@@ -153,17 +150,60 @@ export GEMINI_API_KEY=your_key_here
 export GOOGLE_API_KEY=your_key_here
 ```
 
-Run RAG with Gemini:
+Run standard RAG:
 
 ```bash
 super agent run rag_surrealdb_dspy_demo --framework dspy --cloud --provider google-genai --model gemini-2.5-flash --goal "What is NEON-FOX-742?"
 ```
 
-Run GraphRAG with Gemini:
+Run GraphRAG:
 
 ```bash
 super agent run graphrag_surrealdb_dspy_demo --framework dspy --cloud --provider google-genai --model gemini-2.5-flash --goal "What capabilities does SurrealDB provide?"
 ```
+
+## Docker And Connection Notes
+
+SuperOptiX demos use authenticated SurrealDB server mode in Docker.
+
+Default Docker command:
+
+```bash
+docker run --rm -p 8000:8000 --name surrealdb-demo surrealdb/surrealdb:latest \
+  start --log info --user root --pass secret memory
+```
+
+Default connection settings:
+
+```yaml
+vector_store:
+  url: ws://localhost:8000
+  namespace: superoptix
+  database: knowledge
+  username: root
+  password: secret
+  skip_signin: false
+  table_name: rag_documents
+  vector_field: embedding
+  content_field: content
+  metadata_field: metadata
+```
+
+If port `8000` is already used, map another port:
+
+```bash
+docker run --rm -p 18000:8000 --name surrealdb-demo surrealdb/surrealdb:latest \
+  start --log info --user root --pass secret memory
+```
+
+Then use:
+
+- `ws://localhost:18000`
+
+Important URL rule:
+
+- use the base WebSocket URL only
+- do not add `/rpc`
 
 ## Framework Demo IDs
 
@@ -179,6 +219,26 @@ Use these IDs with `pull`, `compile`, and `run`.
 | CrewAI | `rag_surrealdb_crewai_demo` | `graphrag_surrealdb_crewai_demo` |
 | Google ADK | `rag_surrealdb_adk_demo` | `graphrag_surrealdb_adk_demo` |
 | DeepAgents | `rag_surrealdb_deepagents_demo` | `graphrag_surrealdb_deepagents_demo` |
+
+## One Command Pattern For Any Framework
+
+1. Pull:
+
+```bash
+super agent pull <demo_id>
+```
+
+2. Compile:
+
+```bash
+super agent compile <demo_id> --framework <framework_name>
+```
+
+3. Run:
+
+```bash
+super agent run <demo_id> --framework <framework_name> --goal "your question"
+```
 
 ## How To Run Each Feature
 
@@ -248,8 +308,8 @@ rag:
 
 Behavior:
 
-- If `fn::embed` is available in SurrealDB, server embeddings are used.
-- If unavailable, SuperOptiX falls back to client embeddings automatically.
+- if `fn::embed` is available in SurrealDB, server embeddings are used
+- if unavailable, SuperOptiX falls back to client embeddings automatically
 
 ### Feature: Live Memory Utility (`surrealdb-live-memory`)
 
@@ -262,11 +322,11 @@ from superoptix.memory import LiveMemorySubscriber
 # subscribe(table, callback) gives real-time memory updates
 ```
 
-Note: this is provided as a standalone utility and is not auto-wired into every runtime path.
+This is a standalone utility and is not auto-wired into every runtime path.
 
 ### Feature: Read-only MCP Tool (`surrealdb-mcp-readonly`)
 
-Use built-in tool:
+Use built-in tool config:
 
 ```yaml
 tools:
@@ -282,7 +342,7 @@ tools:
 
 Safety controls:
 
-- read-only statement allowlist (`SELECT`, `INFO`, `RETURN`)
+- read-only statement allowlist: `SELECT`, `INFO`, `RETURN`
 - row limit injection when missing
 - query timeout protection
 
@@ -292,30 +352,32 @@ SuperOptiX probes SurrealDB features at runtime and degrades safely when needed.
 
 Examples:
 
-- Graph mode falls back to vector/hybrid when RELATE is unavailable.
-- Server embedding mode falls back to client embedding when `fn::embed` is unavailable.
+- graph mode falls back to vector or hybrid when `RELATE` is unavailable
+- server embedding mode falls back to client embedding when `fn::embed` is unavailable
 
-## One-Command Pattern for Any Framework
+## Minimal Config Reference
 
-1. Pull:
-
-```bash
-super agent pull <demo_id>
+```yaml
+rag:
+  enabled: true
+  retriever_type: surrealdb
+  config:
+    top_k: 5
+    retrieval_mode: vector
+  vector_store:
+    url: ws://localhost:8000
+    namespace: superoptix
+    database: knowledge
+    username: root
+    password: secret
+    skip_signin: false
+    table_name: rag_documents
+    vector_field: embedding
+    content_field: content
+    metadata_field: metadata
 ```
 
-2. Compile:
-
-```bash
-super agent compile <demo_id> --framework <framework_name>
-```
-
-3. Run:
-
-```bash
-super agent run <demo_id> --framework <framework_name> --goal "your question"
-```
-
-## Most Common Problems and Fixes
+## Most Common Problems And Fixes
 
 ### Problem: `Connection refused`
 
@@ -327,7 +389,7 @@ Fix:
 docker ps --filter name=surrealdb-demo
 ```
 
-If nothing is listed, start SurrealDB again (Step 2B).
+If nothing is listed, start SurrealDB again.
 
 ### Problem: `did not receive a valid HTTP response`
 
@@ -336,11 +398,11 @@ Meaning: wrong SurrealDB URL.
 Fix:
 
 - use `ws://localhost:8000`
-- do not use `/rpc` in URL
+- do not use `/rpc` in the URL
 
 ### Problem: Graph warning `falling back from 'graph' to 'vector' mode`
 
-Meaning: graph edges were not available or parser compatibility issue.
+Meaning: graph edges were not available or the running SurrealDB server does not support the required graph behavior.
 
 Fix:
 
@@ -348,13 +410,13 @@ Fix:
 python -m superoptix.agents.demo.setup_surrealdb_seed --graph
 ```
 
-Confirm `Edges created:` is greater than `0`.
+Then confirm `Edges created:` is greater than `0`.
 
-### Problem: `Ollama_chatException - {"error":"model is required"}`
+### Problem: `model is required` with Ollama
 
-Meaning: wrong model string passed.
+Meaning: wrong model string was passed.
 
-Fix: use this exact format:
+Fix:
 
 ```bash
 super agent run rag_surrealdb_dspy_demo --framework dspy --local --provider ollama --model llama3.1:8b --goal "What is NEON-FOX-742?"
@@ -362,7 +424,7 @@ super agent run rag_surrealdb_dspy_demo --framework dspy --local --provider olla
 
 ### Problem: Gemini says `API_KEY_INVALID` or `API Key not found`
 
-Meaning: key missing or wrong.
+Meaning: the key is missing or invalid.
 
 Fix:
 
@@ -374,13 +436,31 @@ export GOOGLE_API_KEY=your_key_here
 
 Then run again.
 
-### Problem: You see `embeddings.position_ids | UNEXPECTED`
+### Problem: Auth error
 
-Meaning: model loading report. Usually safe.
+Meaning: Docker credentials and playbook credentials do not match.
 
-If seeding/run still completes, ignore it.
+Fix:
 
-## Quick Verification (Graph Really Works)
+- make sure Docker uses `--user root --pass secret`
+- make sure the playbook uses the same username and password
+
+### Problem: `embeddings.position_ids | UNEXPECTED`
+
+Meaning: model loading report. Usually informational only.
+
+If the run still completes, ignore it.
+
+## Quick Verification
+
+### Verify basic RAG
+
+Success means:
+
+- the answer contains `NEON-FOX-742`
+- the run ends with `Validation Status: ✅ PASSED`
+
+### Verify GraphRAG really works
 
 Run:
 
@@ -389,17 +469,16 @@ python - <<'PY'
 from surrealdb import Surreal
 
 with Surreal("ws://localhost:8000") as db:
-    db.signin({"username":"root","password":"secret"})
-    db.use("superoptix","knowledge")
+    db.signin({"username": "root", "password": "secret"})
+    db.use("superoptix", "knowledge")
     print(db.query("SELECT count() AS c FROM integrates_with WHERE source='superoptix_seed';"))
     print(db.query("SELECT content FROM rag_documents:superoptix->integrates_with->rag_documents;"))
 PY
 ```
 
-If count is non-zero and traversal returns rows, GraphRAG data is active.
+If the count is non-zero and traversal returns rows, GraphRAG data is active.
 
-## Related Pages
+## Related
 
-- [SurrealDB Demo](surrealdb-demo.md)
-- [SurrealDB Docker Demo](surrealdb-docker-demo.md)
 - [RAG Guide](../../guides/rag.md)
+- [Memory Guide](../../guides/memory.md)
