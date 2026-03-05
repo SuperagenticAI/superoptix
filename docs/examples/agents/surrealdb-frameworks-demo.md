@@ -1,4 +1,4 @@
-# SurrealDB Guide
+# SurrealDB
 
 This is the single SurrealDB guide for SuperOptiX.
 
@@ -55,7 +55,7 @@ This is the fastest path to a successful first run.
 
 ```bash
 pip install "superoptix[surrealdb]"
-super model install llama3.1:8b
+ollama pull llama3.1:8b
 ```
 
 ### 2) Start services

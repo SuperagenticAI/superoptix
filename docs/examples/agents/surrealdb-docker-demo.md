@@ -4,7 +4,7 @@ This page has been merged into the main SurrealDB guide.
 
 Use:
 
-- [SurrealDB Guide](surrealdb-frameworks-demo.md)
+- [SurrealDB](surrealdb-frameworks-demo.md)
 
 The main guide now includes:
 
