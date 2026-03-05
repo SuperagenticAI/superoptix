@@ -22,7 +22,7 @@ Explore Retrieval-Augmented Generation capabilities:
 - **[🗄️ Weaviate Demo](agents/weaviate-demo)** - Advanced semantic search with Weaviate
 - **[🎯 Qdrant Demo](agents/qdrant-demo)** - Lightning-fast vector search with Qdrant
 - **[🏗️ Milvus Demo](agents/milvus-demo)** - Enterprise-scale vector database with Milvus
-- **[🟣 SurrealDB Guide](agents/surrealdb-frameworks-demo)** - Complete SurrealDB setup and feature guide: vector, hybrid, GraphRAG, multi mode, temporal memory, server embeddings, live utility, and MCP across all supported frameworks
+- **[🟣 SurrealDB](agents/surrealdb-frameworks-demo)** - Complete SurrealDB setup and feature guide: vector, hybrid, GraphRAG, multi mode, temporal memory, server embeddings, live utility, and MCP across all supported frameworks
 
 ### **🛠️ Framework Feature Demos**
 Discover core framework capabilities:

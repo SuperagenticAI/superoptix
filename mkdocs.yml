@@ -193,7 +193,7 @@ nav:
       - '🔰 Weaviate': examples/agents/weaviate-demo.md
       - '🔸 Qdrant': examples/agents/qdrant-demo.md
       - '👁️ Milvus': examples/agents/milvus-demo.md
-      - '🟣 SurrealDB Guide': examples/agents/surrealdb-frameworks-demo.md
+      - '🟣 SurrealDB': examples/agents/surrealdb-frameworks-demo.md
       - '🛠️ Tools': examples/agents/tools-demo.md
       - '🧠 Memory': examples/agents/memory-demo.md
       - '📊 Observability': examples/agents/observability-demo.md
@@ -226,7 +226,7 @@ nav:
       - '🔰 Weaviate': examples/agents/weaviate-demo.md
       - '🔸 Qdrant': examples/agents/qdrant-demo.md
       - '👁️ Milvus': examples/agents/milvus-demo.md
-      - '🟣 SurrealDB Guide': examples/agents/surrealdb-frameworks-demo.md
+      - '🟣 SurrealDB': examples/agents/surrealdb-frameworks-demo.md
       - '🛠️ Tools': examples/agents/tools-demo.md
       - '🧠 Memory': examples/agents/memory-demo.md
       - '📊 Observability': examples/agents/observability-demo.md
