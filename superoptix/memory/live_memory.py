@@ -12,8 +12,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import time
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict
 from urllib.parse import urlparse
 
 logger = logging.getLogger(__name__)
@@ -95,7 +94,9 @@ class LiveMemorySubscriber:
             self._db = await self._open_connection()
             logger.debug("LiveMemorySubscriber: connected to %s", self._url)
 
-    async def subscribe(self, table: str, callback: Callable[[Dict[str, Any]], None]) -> str:
+    async def subscribe(
+        self, table: str, callback: Callable[[Dict[str, Any]], None]
+    ) -> str:
         """Register a LIVE SELECT on *table*.
 
         Parameters
@@ -153,7 +154,9 @@ class LiveMemorySubscriber:
             if self._db is not None:
                 await self._db.kill(live_query_id)
             logger.info(
-                "LiveMemorySubscriber: unsubscribed from '%s' (sub_id=%s)", table, sub_id
+                "LiveMemorySubscriber: unsubscribed from '%s' (sub_id=%s)",
+                table,
+                sub_id,
             )
         except Exception as exc:
             logger.warning(
@@ -207,14 +210,17 @@ class LiveMemorySubscriber:
 
                 if not self._backend.skip_signin:
                     await db.signin(
-                        {"username": self._backend.username, "password": self._backend.password}
+                        {
+                            "username": self._backend.username,
+                            "password": self._backend.password,
+                        }
                     )
                 await db.use(self._backend.namespace, self._backend.database)
                 return db
 
             except Exception as exc:
                 last_exc = exc
-                delay = self._reconnect_delay_s * (2 ** attempt)
+                delay = self._reconnect_delay_s * (2**attempt)
                 logger.warning(
                     "LiveMemorySubscriber: connection attempt %d/%d failed (%s). "
                     "Retrying in %.1fs...",
@@ -267,11 +273,15 @@ class LiveMemorySubscriber:
                 new_live_id = await self._live_select(table, cb)
                 new_subs[sub_id] = (new_live_id, table, cb)
                 logger.debug(
-                    "LiveMemorySubscriber: re-registered sub_id=%s table=%s", sub_id, table
+                    "LiveMemorySubscriber: re-registered sub_id=%s table=%s",
+                    sub_id,
+                    table,
                 )
             except Exception as exc:
                 logger.error(
-                    "LiveMemorySubscriber: failed to re-register sub_id=%s: %s", sub_id, exc
+                    "LiveMemorySubscriber: failed to re-register sub_id=%s: %s",
+                    sub_id,
+                    exc,
                 )
 
         self._subscriptions = new_subs

@@ -31,7 +31,7 @@ from __future__ import annotations
 import logging
 import re
 import threading
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 logger = logging.getLogger(__name__)
 
@@ -152,7 +152,9 @@ class SurrealDBMCPTool:
 
                 with Surreal(self.url) as db:
                     if not self.skip_signin:
-                        db.signin({"username": self.username, "password": self.password})
+                        db.signin(
+                            {"username": self.username, "password": self.password}
+                        )
                     db.use(self.namespace, self.database)
                     raw = db.query(sql)
                     result_holder["raw"] = raw

@@ -452,9 +452,7 @@ class DSPyRunner:
                 database=str(backend_config.get("database", "test")),
                 username=str(backend_config.get("username", "root")),
                 password=str(backend_config.get("password", "root")),
-                table_name=str(
-                    backend_config.get("table_name", "superoptix_memory")
-                ),
+                table_name=str(backend_config.get("table_name", "superoptix_memory")),
                 skip_signin=backend_config.get("skip_signin"),
                 temporal_enabled=temporal_enabled,
                 max_versions_per_key=max_versions_per_key,

@@ -647,7 +647,9 @@ class ToolsMixin:
     def _add_surrealdb_query_tool(self, config):
         """Add read-only SurrealDB query tool."""
         try:
-            from superoptix.tools.builtin_tools import create_tool as create_builtin_tool
+            from superoptix.tools.builtin_tools import (
+                create_tool as create_builtin_tool,
+            )
         except Exception:
             return 0
 

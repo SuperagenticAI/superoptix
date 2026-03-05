@@ -634,7 +634,9 @@ class SurrealDBBackend(MemoryBackend):
         self._sticky_ctx = self._with_connection()
         self._sticky_db = self._sticky_ctx.__enter__()
         if not self.skip_signin:
-            self._sticky_db.signin({"username": self.username, "password": self.password})
+            self._sticky_db.signin(
+                {"username": self.username, "password": self.password}
+            )
         self._sticky_db.use(self.namespace, self.database)
         return self._sticky_db
 
@@ -724,13 +726,17 @@ class SurrealDBBackend(MemoryBackend):
                     encoded_value = json.dumps(value)
                     is_pickle = False
                 except (TypeError, ValueError):
-                    encoded_value = base64.b64encode(pickle.dumps(value)).decode("ascii")
+                    encoded_value = base64.b64encode(pickle.dumps(value)).decode(
+                        "ascii"
+                    )
                     is_pickle = True
 
                 now_iso = datetime.now().isoformat()
                 expires_at = None
                 if ttl is not None:
-                    expires_at = (datetime.now() + timedelta(seconds=int(ttl))).isoformat()
+                    expires_at = (
+                        datetime.now() + timedelta(seconds=int(ttl))
+                    ).isoformat()
 
                 payload = {
                     "memory_key": key,
@@ -790,7 +796,9 @@ class SurrealDBBackend(MemoryBackend):
                 if stored_value is None:
                     return None
                 if bool(row.get("is_pickle", False)):
-                    return pickle.loads(base64.b64decode(str(stored_value).encode("ascii")))
+                    return pickle.loads(
+                        base64.b64decode(str(stored_value).encode("ascii"))
+                    )
                 return json.loads(str(stored_value))
         except Exception as e:
             print(f"Error retrieving key {key}: {e}")
@@ -893,7 +901,9 @@ class SurrealDBBackend(MemoryBackend):
                 if stored_value is None:
                     return None
                 if bool(row.get("is_pickle", False)):
-                    return pickle.loads(base64.b64decode(str(stored_value).encode("ascii")))
+                    return pickle.loads(
+                        base64.b64decode(str(stored_value).encode("ascii"))
+                    )
                 return json.loads(str(stored_value))
         except Exception as e:
             print(f"Error in retrieve_at for key {key}: {e}")
@@ -939,11 +949,13 @@ class SurrealDBBackend(MemoryBackend):
                             decoded = json.loads(str(stored_value))
                     except Exception:
                         decoded = stored_value
-                    results.append({
-                        "value": decoded,
-                        "version_ts": row.get("version_ts"),
-                        "is_pickle": bool(row.get("is_pickle", False)),
-                    })
+                    results.append(
+                        {
+                            "value": decoded,
+                            "version_ts": row.get("version_ts"),
+                            "is_pickle": bool(row.get("is_pickle", False)),
+                        }
+                    )
                 return results
         except Exception as e:
             print(f"Error in history for key {key}: {e}")
