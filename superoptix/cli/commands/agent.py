@@ -356,9 +356,7 @@ class _MinimalDSPyBDDEvaluator:
                         else evaluation.get("failure_reason"),
                         "actual_output": actual_text,
                         "expected_output": expected_outputs,
-                        "criteria_breakdown": evaluation.get(
-                            "criteria_breakdown", {}
-                        ),
+                        "criteria_breakdown": evaluation.get("criteria_breakdown", {}),
                     }
                 )
             except Exception as e:
@@ -1353,8 +1351,10 @@ def test_agent_bdd(args):
                 # Fallback for pipelines that don't accept playbook_path
                 pipeline = pipeline_class()
             console.print("[green]Pipeline loaded successfully[/]")
-        elif engine == "dspy" and hasattr(module, "build_program") and callable(
-            module.build_program
+        elif (
+            engine == "dspy"
+            and hasattr(module, "build_program")
+            and callable(module.build_program)
         ):
             pipeline = _MinimalDSPyBDDEvaluator(module, runner.playbook_path)
             console.print("[green]Pipeline loaded successfully[/]")

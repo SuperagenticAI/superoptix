@@ -104,7 +104,9 @@ class SurrealDBFeatureDetector:
 
         probe = self._PROBES.get(feature)
         if probe is None:
-            logger.debug("No probe defined for feature '%s'; assuming unavailable", feature)
+            logger.debug(
+                "No probe defined for feature '%s'; assuming unavailable", feature
+            )
             self._cache[feature] = False
             return False
 

@@ -35,10 +35,7 @@ def _normalize_surrealdb_url(url: str) -> str:
 
     parsed = urlparse(url)
     scheme = parsed.scheme.lower()
-    if (
-        scheme in {"ws", "wss", "http", "https"}
-        and parsed.path.rstrip("/") == "/rpc"
-    ):
+    if scheme in {"ws", "wss", "http", "https"} and parsed.path.rstrip("/") == "/rpc":
         return f"{scheme}://{parsed.netloc}"
     return url
 
@@ -109,12 +106,14 @@ def load_graph_seed_documents(dataset_path: Path) -> list[dict[str, Any]]:
             relationships = row.get("relationships", [])
             if not isinstance(relationships, list):
                 relationships = []
-            docs.append({
-                "id": sanitized,
-                "content": content,
-                "metadata": metadata,
-                "relationships": relationships,
-            })
+            docs.append(
+                {
+                    "id": sanitized,
+                    "content": content,
+                    "metadata": metadata,
+                    "relationships": relationships,
+                }
+            )
     if not docs:
         raise ValueError(f"No graph seed documents found in {dataset_path}")
     return docs
@@ -211,7 +210,9 @@ def _seed_graph_relations(
                 )
                 created += 1
             except Exception as e:
-                print(f"   Warning: RELATE {source_id}->{rel_type}->{target} failed: {e}")
+                print(
+                    f"   Warning: RELATE {source_id}->{rel_type}->{target} failed: {e}"
+                )
     return created
 
 
@@ -282,7 +283,13 @@ def seed_surrealdb_graph(
 
         # Rollout order: indexes (done above) -> nodes -> edges
         nodes = _seed_graph_nodes(
-            db, documents, table_name, vector_field, content_field, metadata_field, model
+            db,
+            documents,
+            table_name,
+            vector_field,
+            content_field,
+            metadata_field,
+            model,
         )
         edges = 0
         if detector.has("relate"):
@@ -461,9 +468,13 @@ def main() -> int:
 
     print("")
     print("Try:")
-    print('  super agent run rag_surrealdb_openai_demo --framework openai --goal "What is NEON-FOX-742?"')
+    print(
+        '  super agent run rag_surrealdb_openai_demo --framework openai --goal "What is NEON-FOX-742?"'
+    )
     if args.graph:
-        print('  super agent run graphrag_surrealdb_openai_demo --framework openai --goal "What capabilities does SurrealDB provide?"')
+        print(
+            '  super agent run graphrag_surrealdb_openai_demo --framework openai --goal "What capabilities does SurrealDB provide?"'
+        )
     return 0
 
 

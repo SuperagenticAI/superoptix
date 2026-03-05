@@ -565,7 +565,10 @@ class SuperSpecXValidator:
                         )
                 # temporal requires surrealdb backend
                 backend = memory_config.get("backend", {})
-                if isinstance(backend, dict) and backend.get("type") not in (None, "surrealdb"):
+                if isinstance(backend, dict) and backend.get("type") not in (
+                    None,
+                    "surrealdb",
+                ):
                     self.warnings.append(
                         "memory.temporal versioning is only supported with the surrealdb backend"
                     )
@@ -627,9 +630,18 @@ class SuperSpecXValidator:
         if "retriever_type" in rag_config:
             retriever = str(rag_config["retriever_type"]).strip().lower()
             valid_retrievers = {
-                "chroma", "chromadb", "weaviate", "lancedb", "lance",
-                "faiss", "qdrant", "milvus", "pinecone", "surrealdb",
-                "colbertv2", "custom",
+                "chroma",
+                "chromadb",
+                "weaviate",
+                "lancedb",
+                "lance",
+                "faiss",
+                "qdrant",
+                "milvus",
+                "pinecone",
+                "surrealdb",
+                "colbertv2",
+                "custom",
             }
             if retriever not in valid_retrievers:
                 self.errors.append(
@@ -661,11 +673,16 @@ class SuperSpecXValidator:
             if "graph_relations" in config:
                 rels = config["graph_relations"]
                 if not isinstance(rels, list):
-                    self.errors.append("rag.config.graph_relations must be a list of strings")
+                    self.errors.append(
+                        "rag.config.graph_relations must be a list of strings"
+                    )
                 else:
                     import re as _re
+
                     for rel in rels:
-                        if not isinstance(rel, str) or not _re.match(r"^[a-z_][a-z0-9_]*$", str(rel)):
+                        if not isinstance(rel, str) or not _re.match(
+                            r"^[a-z_][a-z0-9_]*$", str(rel)
+                        ):
                             self.errors.append(
                                 f"rag.config.graph_relations entry '{rel}' must be a lowercase "
                                 f"alphanumeric string with underscores only."
@@ -674,7 +691,9 @@ class SuperSpecXValidator:
             # Validate hybrid_alpha
             if "hybrid_alpha" in config:
                 alpha = config["hybrid_alpha"]
-                if not isinstance(alpha, (int, float)) or not (0.0 <= float(alpha) <= 1.0):
+                if not isinstance(alpha, (int, float)) or not (
+                    0.0 <= float(alpha) <= 1.0
+                ):
                     self.errors.append(
                         "rag.config.hybrid_alpha must be a float between 0.0 and 1.0"
                     )

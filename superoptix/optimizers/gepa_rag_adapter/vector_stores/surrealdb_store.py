@@ -211,11 +211,13 @@ class SurrealDBVectorStore(VectorStoreInterface):
                         if not isinstance(metadata, dict):
                             metadata = {}
                         metadata["_source"] = "graph_expansion"
-                        graph_results.append({
-                            "content": content,
-                            "metadata": metadata,
-                            "score": 0.0,
-                        })
+                        graph_results.append(
+                            {
+                                "content": content,
+                                "metadata": metadata,
+                                "score": 0.0,
+                            }
+                        )
             except Exception:
                 # Graph expansion is non-fatal; fall through to seed results
                 pass

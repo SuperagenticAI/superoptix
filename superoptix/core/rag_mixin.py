@@ -495,9 +495,13 @@ class RAGMixin:
             table_name = config.get("table_name", "documents")
             vector_field = config.get("vector_field", "embedding")
             content_field = config.get("content_field", "content")
-            retrieval_mode = str(
-                runtime_cfg.get("retrieval_mode", runtime_cfg.get("mode", "vector"))
-            ).strip().lower()
+            retrieval_mode = (
+                str(
+                    runtime_cfg.get("retrieval_mode", runtime_cfg.get("mode", "vector"))
+                )
+                .strip()
+                .lower()
+            )
             if retrieval_mode not in {"vector", "hybrid", "graph", "multi"}:
                 retrieval_mode = "vector"
 
@@ -520,12 +524,14 @@ class RAGMixin:
             graph_relations = runtime_cfg.get("graph_relations", [])
             if not isinstance(graph_relations, list):
                 graph_relations = []
-            graph_relations = [str(r).strip() for r in graph_relations if str(r).strip()]
+            graph_relations = [
+                str(r).strip() for r in graph_relations if str(r).strip()
+            ]
 
             # Embedding mode: "client" (default) or "server" (fn::embed in SurrealDB)
-            embedding_mode = str(
-                runtime_cfg.get("embedding_mode", "client")
-            ).strip().lower()
+            embedding_mode = (
+                str(runtime_cfg.get("embedding_mode", "client")).strip().lower()
+            )
             if embedding_mode not in {"client", "server"}:
                 embedding_mode = "client"
 
@@ -678,7 +684,8 @@ class RAGMixin:
                 ):
                     vector_found = True
                 if content_field.lower() in idx_str and any(
-                    token in idx_str for token in ("search", "bm25", "analyzer", "fulltext")
+                    token in idx_str
+                    for token in ("search", "bm25", "analyzer", "fulltext")
                 ):
                     lexical_found = True
         else:
@@ -930,7 +937,9 @@ class RAGMixin:
             telemetry_enabled = bool(self.vector_db.get("telemetry_enabled", True))
             graph_depth = int(self.vector_db.get("graph_depth", 1))
             graph_relations = list(self.vector_db.get("graph_relations", []))
-            embedding_mode = str(self.vector_db.get("embedding_mode", "client")).strip().lower()
+            embedding_mode = (
+                str(self.vector_db.get("embedding_mode", "client")).strip().lower()
+            )
             if embedding_mode not in {"client", "server"}:
                 embedding_mode = "client"
 
@@ -974,7 +983,8 @@ class RAGMixin:
                     if not detector.has("relate"):
                         logger.warning(
                             "SurrealDB server does not support RELATE; "
-                            "falling back from '%s' to 'vector' mode", mode
+                            "falling back from '%s' to 'vector' mode",
+                            mode,
                         )
                         mode = "hybrid" if mode == "multi" else "vector"
 
@@ -1264,11 +1274,13 @@ class RAGMixin:
                     c = row.get(content_field)
                     if c and str(c) not in seen_content:
                         seen_content.add(str(c))
-                        graph_rows.append({
-                            content_field: str(c),
-                            "score": 0.0,  # graph-expanded, no vector score
-                            "_source": "graph_expansion",
-                        })
+                        graph_rows.append(
+                            {
+                                content_field: str(c),
+                                "score": 0.0,  # graph-expanded, no vector score
+                                "_source": "graph_expansion",
+                            }
+                        )
             except Exception as e:
                 # Graph expansion failures are non-fatal — log and continue
                 logger.debug("Graph expansion from %s failed: %s", sid, e)

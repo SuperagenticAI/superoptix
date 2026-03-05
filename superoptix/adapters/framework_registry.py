@@ -132,7 +132,11 @@ class DSPyFrameworkAdapter(FrameworkAdapter):
         from datetime import datetime
         from jinja2 import Environment, FileSystemLoader
 
-        from ..compiler.agent_compiler import clean_filter, to_pascal_case, to_snake_case
+        from ..compiler.agent_compiler import (
+            clean_filter,
+            to_pascal_case,
+            to_snake_case,
+        )
 
         # Build template environment
         template_dir = Path(__file__).parent.parent / "templates" / "pipeline"
@@ -152,7 +156,9 @@ class DSPyFrameworkAdapter(FrameworkAdapter):
         else:
             agent_name = filename.replace("_pipeline", "")
         if not agent_name or agent_name == "pipeline":
-            agent_name = to_snake_case(playbook.get("metadata", {}).get("name", "agent"))
+            agent_name = to_snake_case(
+                playbook.get("metadata", {}).get("name", "agent")
+            )
         else:
             agent_name = to_snake_case(agent_name)
 

@@ -32,10 +32,20 @@ class SuiteResult:
 
 
 SUITES: list[tuple[str, list[str]]] = [
-    ("framework_grounding", ["tests/adapters/test_surrealdb_rag_framework_grounding.py"]),
+    (
+        "framework_grounding",
+        ["tests/adapters/test_surrealdb_rag_framework_grounding.py"],
+    ),
     ("framework_matrix", ["tests/adapters/test_surrealdb_lean_matrix.py"]),
     ("retrieval_modes", ["tests/test_surrealdb_rag_mixin.py"]),
-    ("memory_temporal_mcp", ["tests/test_memory_system.py", "-k", "TemporalSurrealDBBackend or SurrealDBMCPTool"]),
+    (
+        "memory_temporal_mcp",
+        [
+            "tests/test_memory_system.py",
+            "-k",
+            "TemporalSurrealDBBackend or SurrealDBMCPTool",
+        ],
+    ),
     ("seed_setup", ["tests/test_surrealdb_seed_setup.py"]),
 ]
 
@@ -110,7 +120,9 @@ def _write_report(path: Path, results: list[SuiteResult]) -> None:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run lean SurrealDB reliability harness.")
+    parser = argparse.ArgumentParser(
+        description="Run lean SurrealDB reliability harness."
+    )
     parser.add_argument(
         "--report",
         type=Path,
