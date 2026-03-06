@@ -38,6 +38,10 @@ If you are already comfortable with SuperOptiX and only want the internals, you 
 - `Configuration Reference`
 - `Operational Notes`
 
+If you want the framework-specific demo commands immediately, jump here:
+
+- [SurrealDB Across Frameworks](#surrealdb-across-frameworks)
+
 ## SurrealDB Feature Coverage
 
 This table lists every SurrealDB capability currently integrated in SuperOptiX.
@@ -239,9 +243,22 @@ Goal of this section:
 - prove that SuperOptiX can retrieve from SurrealDB
 - verify the seeded token `NEON-FOX-742` is coming from retrieval, not guesswork
 
+If you want the framework tabs after your first successful run, jump here:
+
+- [SurrealDB Across Frameworks](#surrealdb-across-frameworks)
+
 ### 1) Install
 
 Run this in Terminal C:
+
+With `uv`:
+
+```bash
+uv pip install "superoptix[surrealdb]"
+ollama pull llama3.1:8b
+```
+
+Or with `pip`:
 
 ```bash
 pip install "superoptix[surrealdb]"
@@ -482,6 +499,220 @@ Use these IDs with `pull`, `compile`, and `run`.
 | CrewAI | `rag_surrealdb_crewai_demo` | `graphrag_surrealdb_crewai_demo` |
 | Google ADK | `rag_surrealdb_adk_demo` | `graphrag_surrealdb_adk_demo` |
 | DeepAgents | `rag_surrealdb_deepagents_demo` | `graphrag_surrealdb_deepagents_demo` |
+
+## SurrealDB Across Frameworks
+
+This section demonstrates the same SurrealDB backend across every supported framework.
+
+Use the same shared setup for all tabs:
+
+- start Ollama in Terminal A if you want local runs
+- start SurrealDB in Terminal B
+- run the standard seed command once
+- run the graph seed command once before GraphRAG tests
+
+Shared setup commands:
+
+```bash
+python -m superoptix.agents.demo.setup_surrealdb_seed
+python -m superoptix.agents.demo.setup_surrealdb_seed --graph
+```
+
+Use the same two questions everywhere:
+
+- basic RAG question: `What is NEON-FOX-742?`
+- GraphRAG question: `What capabilities does SurrealDB provide?`
+
+What should stay the same across frameworks:
+
+- the same SurrealDB backend
+- the same seed data
+- the same retrieval behavior
+- the same validation expectation
+
+=== "🔬 DSPy"
+    Basic RAG:
+
+    ```bash
+    super agent pull rag_surrealdb_dspy_demo
+    super agent compile rag_surrealdb_dspy_demo --framework dspy
+    super agent run rag_surrealdb_dspy_demo --framework dspy --goal "What is NEON-FOX-742?"
+    ```
+
+    GraphRAG:
+
+    ```bash
+    super agent pull graphrag_surrealdb_dspy_demo
+    super agent compile graphrag_surrealdb_dspy_demo --framework dspy
+    super agent run graphrag_surrealdb_dspy_demo --framework dspy --goal "What capabilities does SurrealDB provide?"
+    ```
+
+    Verify:
+
+    - basic RAG answer mentions `NEON-FOX-742`
+    - GraphRAG run does not fall back to vector mode
+    - both runs end with `Validation Status: ✅ PASSED`
+
+=== "🤖 OpenAI"
+    Basic RAG:
+
+    ```bash
+    super agent pull rag_surrealdb_openai_demo
+    super agent compile rag_surrealdb_openai_demo --framework openai
+    super agent run rag_surrealdb_openai_demo --framework openai --goal "What is NEON-FOX-742?"
+    ```
+
+    GraphRAG:
+
+    ```bash
+    super agent pull graphrag_surrealdb_openai_demo
+    super agent compile graphrag_surrealdb_openai_demo --framework openai
+    super agent run graphrag_surrealdb_openai_demo --framework openai --goal "What capabilities does SurrealDB provide?"
+    ```
+
+    Verify:
+
+    - basic RAG answer mentions `NEON-FOX-742`
+    - GraphRAG answer includes SurrealDB capabilities from related records
+    - both runs complete successfully
+
+=== "🧠 Claude SDK"
+    Basic RAG:
+
+    ```bash
+    super agent pull rag_surrealdb_claude_sdk_demo
+    super agent compile rag_surrealdb_claude_sdk_demo --framework claude-sdk
+    super agent run rag_surrealdb_claude_sdk_demo --framework claude-sdk --goal "What is NEON-FOX-742?"
+    ```
+
+    GraphRAG:
+
+    ```bash
+    super agent pull graphrag_surrealdb_claude_sdk_demo
+    super agent compile graphrag_surrealdb_claude_sdk_demo --framework claude-sdk
+    super agent run graphrag_surrealdb_claude_sdk_demo --framework claude-sdk --goal "What capabilities does SurrealDB provide?"
+    ```
+
+    Verify:
+
+    - basic RAG answer mentions `NEON-FOX-742`
+    - GraphRAG answer reflects graph-connected SurrealDB capabilities
+    - both runs complete successfully
+
+=== "🏢 Microsoft"
+    Basic RAG:
+
+    ```bash
+    super agent pull rag_surrealdb_microsoft_demo
+    super agent compile rag_surrealdb_microsoft_demo --framework microsoft
+    super agent run rag_surrealdb_microsoft_demo --framework microsoft --goal "What is NEON-FOX-742?"
+    ```
+
+    GraphRAG:
+
+    ```bash
+    super agent pull graphrag_surrealdb_microsoft_demo
+    super agent compile graphrag_surrealdb_microsoft_demo --framework microsoft
+    super agent run graphrag_surrealdb_microsoft_demo --framework microsoft --goal "What capabilities does SurrealDB provide?"
+    ```
+
+    Verify:
+
+    - basic RAG answer mentions `NEON-FOX-742`
+    - GraphRAG answer uses the same SurrealDB graph data
+    - both runs complete successfully
+
+=== "🐍 PydanticAI"
+    Basic RAG:
+
+    ```bash
+    super agent pull rag_surrealdb_pydanticai_demo
+    super agent compile rag_surrealdb_pydanticai_demo --framework pydanticai
+    super agent run rag_surrealdb_pydanticai_demo --framework pydanticai --goal "What is NEON-FOX-742?"
+    ```
+
+    GraphRAG:
+
+    ```bash
+    super agent pull graphrag_surrealdb_pydanticai_demo
+    super agent compile graphrag_surrealdb_pydanticai_demo --framework pydanticai
+    super agent run graphrag_surrealdb_pydanticai_demo --framework pydanticai --goal "What capabilities does SurrealDB provide?"
+    ```
+
+    Verify:
+
+    - basic RAG answer mentions `NEON-FOX-742`
+    - GraphRAG answer reflects graph-expanded retrieval
+    - both runs complete successfully
+
+=== "👥 CrewAI"
+    Basic RAG:
+
+    ```bash
+    super agent pull rag_surrealdb_crewai_demo
+    super agent compile rag_surrealdb_crewai_demo --framework crewai
+    super agent run rag_surrealdb_crewai_demo --framework crewai --goal "What is NEON-FOX-742?"
+    ```
+
+    GraphRAG:
+
+    ```bash
+    super agent pull graphrag_surrealdb_crewai_demo
+    super agent compile graphrag_surrealdb_crewai_demo --framework crewai
+    super agent run graphrag_surrealdb_crewai_demo --framework crewai --goal "What capabilities does SurrealDB provide?"
+    ```
+
+    Verify:
+
+    - basic RAG answer mentions `NEON-FOX-742`
+    - GraphRAG answer reflects the seeded SurrealDB graph
+    - both runs complete successfully
+
+=== "🔮 Google ADK"
+    Basic RAG:
+
+    ```bash
+    super agent pull rag_surrealdb_adk_demo
+    super agent compile rag_surrealdb_adk_demo --framework google-adk
+    super agent run rag_surrealdb_adk_demo --framework google-adk --goal "What is NEON-FOX-742?"
+    ```
+
+    GraphRAG:
+
+    ```bash
+    super agent pull graphrag_surrealdb_adk_demo
+    super agent compile graphrag_surrealdb_adk_demo --framework google-adk
+    super agent run graphrag_surrealdb_adk_demo --framework google-adk --goal "What capabilities does SurrealDB provide?"
+    ```
+
+    Verify:
+
+    - basic RAG answer mentions `NEON-FOX-742`
+    - GraphRAG answer reflects graph-connected SurrealDB capabilities
+    - both runs complete successfully
+
+=== "🌊 DeepAgents"
+    Basic RAG:
+
+    ```bash
+    super agent pull rag_surrealdb_deepagents_demo
+    super agent compile rag_surrealdb_deepagents_demo --framework deepagents
+    super agent run rag_surrealdb_deepagents_demo --framework deepagents --goal "What is NEON-FOX-742?"
+    ```
+
+    GraphRAG:
+
+    ```bash
+    super agent pull graphrag_surrealdb_deepagents_demo
+    super agent compile graphrag_surrealdb_deepagents_demo --framework deepagents
+    super agent run graphrag_surrealdb_deepagents_demo --framework deepagents --goal "What capabilities does SurrealDB provide?"
+    ```
+
+    Verify:
+
+    - basic RAG answer mentions `NEON-FOX-742`
+    - GraphRAG answer reflects graph-expanded retrieval
+    - both runs complete successfully
 
 ## One Command Pattern For Any Framework
 
