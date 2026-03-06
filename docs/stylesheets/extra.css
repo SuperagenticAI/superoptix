@@ -343,6 +343,51 @@ table.animate-in {
 	color: #fbbf24 !important;
 }
 
+/* Headings use gradient text; inline code inside headings must opt out */
+.md-typeset h1 code,
+.md-typeset h2 code,
+.md-typeset h3 code,
+.md-typeset h4 code,
+.md-typeset h5 code,
+.md-typeset h6 code {
+	-webkit-text-fill-color: initial !important;
+	background-image: none !important;
+	background-clip: border-box !important;
+	-webkit-background-clip: border-box !important;
+}
+
+[data-md-color-scheme="slate"] .md-typeset h1 code,
+[data-md-color-scheme="slate"] .md-typeset h2 code,
+[data-md-color-scheme="slate"] .md-typeset h3 code,
+[data-md-color-scheme="slate"] .md-typeset h4 code,
+[data-md-color-scheme="slate"] .md-typeset h5 code,
+[data-md-color-scheme="slate"] .md-typeset h6 code {
+	background-color: #141414 !important;
+	color: #f8f8f2 !important;
+	border: 1px solid #333333 !important;
+}
+
+[data-md-color-scheme="default"] .md-typeset h1 code,
+[data-md-color-scheme="default"] .md-typeset h2 code,
+[data-md-color-scheme="default"] .md-typeset h3 code,
+[data-md-color-scheme="default"] .md-typeset h4 code,
+[data-md-color-scheme="default"] .md-typeset h5 code,
+[data-md-color-scheme="default"] .md-typeset h6 code {
+	background-color: #f5f5f5 !important;
+	color: #1f2937 !important;
+	border: 1px solid #d1d5db !important;
+}
+
+/* Table tags need explicit contrast on the custom dark theme */
+[data-md-color-scheme="slate"] .md-typeset table code,
+[data-md-color-scheme="slate"] .md-typeset table a code,
+[data-md-color-scheme="slate"] .md-typeset table td code,
+[data-md-color-scheme="slate"] .md-typeset table th code {
+	background-color: #141414 !important;
+	color: #f8f8f2 !important;
+	border: 1px solid #333333 !important;
+}
+
 /* Monokai Syntax Highlighting */
 [data-md-color-scheme="slate"] .highlight .k,
 [data-md-color-scheme="slate"] .highlight .kn,
