@@ -523,6 +523,44 @@ Use these IDs with `pull`, `compile`, and `run`.
 | Google ADK | `rag_surrealdb_adk_demo` | `graphrag_surrealdb_adk_demo` |
 | DeepAgents | `rag_surrealdb_deepagents_demo` | `graphrag_surrealdb_deepagents_demo` |
 
+## Install Framework Extras
+
+Install only the framework you want to test:
+
+```bash
+python -m pip install -U "superoptix[frameworks-dspy]"
+python -m pip install -U "superoptix[frameworks-openai]"
+python -m pip install -U "superoptix[frameworks-claude-sdk]"
+python -m pip install -U "superoptix[frameworks-microsoft]"
+python -m pip install -U "superoptix[frameworks-pydantic-ai]"
+python -m pip install -U "superoptix[frameworks-google]"
+python -m pip install -U "superoptix[frameworks-deepagents]"
+```
+
+Install most supported frameworks at once:
+
+```bash
+python -m pip install -U "superoptix[frameworks]"
+```
+
+If you install SuperOptiX with `uv tool`, use:
+
+```bash
+uv tool install superoptix --with "superoptix[frameworks-dspy]"
+uv tool install superoptix --with "superoptix[frameworks-openai]"
+uv tool install superoptix --with "superoptix[frameworks-claude-sdk]"
+uv tool install superoptix --with "superoptix[frameworks-microsoft]"
+uv tool install superoptix --with "superoptix[frameworks-pydantic-ai]"
+uv tool install superoptix --with "superoptix[frameworks-google]"
+uv tool install superoptix --with "superoptix[frameworks-deepagents]"
+```
+
+Notes:
+
+- use `frameworks-google`, not `framework-google`
+- use `frameworks-pydantic-ai`, not `frameworks-pydanticai`
+- CrewAI is not bundled in `frameworks` because of dependency conflicts with DSPy
+
 ## SurrealDB Across Frameworks
 
 This section demonstrates the same SurrealDB backend across every supported framework.
@@ -557,6 +595,12 @@ For the framework demos below, the runtime examples use Google Gemini via:
 
 - `--cloud --provider google-genai --model gemini-2.5-flash`
 
+Important retrieval note:
+
+- if a framework run completes successfully but answers with "the provided context does not contain information about `NEON-FOX-742`", the framework is working but retrieval is not grounded in the seeded demo data yet
+- in that case, re-run `python -m superoptix.agents.demo.setup_surrealdb_seed`
+- then verify the agent is querying the expected SurrealDB settings: `ws://localhost:8000`, namespace `superoptix`, database `knowledge`, table `rag_documents`
+
 === "🔬 DSPy"
     Basic RAG:
 
@@ -581,11 +625,16 @@ For the framework demos below, the runtime examples use Google Gemini via:
     - both runs end with `Validation Status: ✅ PASSED`
 
 === "🤖 OpenAI"
+    Note:
+
+    - for the OpenAI Agents SDK demo, recompile with the Gemini cloud flags before running
+    - if the run log still shows `model=litellm/ollama/llama3.1:8b`, the pipeline is still using an older Ollama-compiled spec
+
     Basic RAG:
 
     ```bash
     super agent pull rag_surrealdb_openai_demo
-    super agent compile rag_surrealdb_openai_demo --framework openai
+    super agent compile rag_surrealdb_openai_demo --framework openai --cloud --provider google-genai --model gemini-2.5-flash
     super agent run rag_surrealdb_openai_demo --framework openai --cloud --provider google-genai --model gemini-2.5-flash --goal "What is NEON-FOX-742?"
     ```
 
@@ -593,7 +642,7 @@ For the framework demos below, the runtime examples use Google Gemini via:
 
     ```bash
     super agent pull graphrag_surrealdb_openai_demo
-    super agent compile graphrag_surrealdb_openai_demo --framework openai
+    super agent compile graphrag_surrealdb_openai_demo --framework openai --cloud --provider google-genai --model gemini-2.5-flash
     super agent run graphrag_surrealdb_openai_demo --framework openai --cloud --provider google-genai --model gemini-2.5-flash --goal "What capabilities does SurrealDB provide?"
     ```
 

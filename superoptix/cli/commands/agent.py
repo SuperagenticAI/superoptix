@@ -906,7 +906,15 @@ def _run_framework_agent(args, framework: str):
 
         # Instantiate and run
         init_kwargs = {}
-        if framework == "pydantic-ai":
+        if framework in {
+            "pydantic-ai",
+            "crewai",
+            "openai",
+            "google-adk",
+            "deepagents",
+            "claude-sdk",
+            "microsoft",
+        }:
             model_config = {}
             if getattr(args, "provider", None):
                 model_config["provider"] = args.provider
@@ -915,13 +923,15 @@ def _run_framework_agent(args, framework: str):
             if getattr(args, "local", False):
                 model_config.setdefault("provider", "ollama")
                 model_config.setdefault("model", "llama3.1:8b")
-            if getattr(args, "gateway", False):
+            if framework == "pydantic-ai" and getattr(args, "gateway", False):
                 model_config["runtime_mode"] = "gateway"
-            elif getattr(args, "direct", False):
+            elif framework == "pydantic-ai" and getattr(args, "direct", False):
                 model_config["runtime_mode"] = "direct"
-            if getattr(args, "gateway_url", None) or (
+            if framework == "pydantic-ai" and (
+                getattr(args, "gateway_url", None) or (
                 getattr(args, "gateway", False)
                 and getattr(args, "gateway_key_env", None)
+                )
             ):
                 model_config["runtime_mode"] = "gateway"
                 model_config["gateway"] = {}

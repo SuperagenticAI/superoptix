@@ -113,10 +113,10 @@ def build_task_description(spec_data: Dict[str, Any] | None) -> str:
     if tasks and isinstance(tasks[0], dict):
         text = str(tasks[0].get("instruction", "")).strip()
         if text:
-            return text
+            return f"{text}\n\nUser query:\n{{query}}"
     persona = dict(spec.get("persona", {}) or {})
     role = str(persona.get("role", "AI assistant")).strip() or "AI assistant"
-    return f"Complete the user request using your expertise as {role}."
+    return f"Complete the user request using your expertise as {role}.\n\nUser query:\n{{query}}"
 
 
 def _to_str_list(value: Any) -> List[str]:
