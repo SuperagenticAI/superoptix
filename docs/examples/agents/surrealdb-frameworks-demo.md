@@ -229,6 +229,8 @@ Do not close Terminal A or Terminal B while you are testing.
 - [ ] `ollama serve` is running
 - [ ] SurrealDB Docker process is running on port `8000`
 - [ ] seed command prints `SurrealDB seed complete`
+- [ ] `super init memory-demo` completed
+- [ ] you are inside the `memory-demo` directory
 - [ ] RAG run returns `NEON-FOX-742`
 - [ ] run ends with `Validation Status: PASSED`
 - [ ] graph seed prints `Edges created:` greater than `0`
@@ -331,7 +333,28 @@ Behavior to verify:
 
 Do not continue if you do not see the exact output lines above.
 
-### 4) Pull, compile, and run RAG
+### 4) Create a SuperOptiX project
+
+Before pulling any agent, create a SuperOptiX project directory.
+
+Still in Terminal C, run:
+
+```bash
+super init memory-demo
+cd memory-demo
+```
+
+What this does:
+
+- creates a valid SuperOptiX project
+- gives the CLI a working directory for pulled agents, compiled pipelines, and runtime files
+
+Behavior to verify:
+
+- the `memory-demo` directory exists
+- you are now running commands from inside `memory-demo`
+
+### 5) Pull, compile, and run RAG
 
 Still in Terminal C, run these exactly in order:
 
