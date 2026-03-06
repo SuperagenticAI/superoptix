@@ -553,6 +553,10 @@ What should stay the same across frameworks:
 - the same retrieval behavior
 - the same validation expectation
 
+For the framework demos below, the runtime examples use Google Gemini via:
+
+- `--cloud --provider google-genai --model gemini-2.5-flash`
+
 === "🔬 DSPy"
     Basic RAG:
 
@@ -582,7 +586,7 @@ What should stay the same across frameworks:
     ```bash
     super agent pull rag_surrealdb_openai_demo
     super agent compile rag_surrealdb_openai_demo --framework openai
-    super agent run rag_surrealdb_openai_demo --framework openai --goal "What is NEON-FOX-742?"
+    super agent run rag_surrealdb_openai_demo --framework openai --cloud --provider google-genai --model gemini-2.5-flash --goal "What is NEON-FOX-742?"
     ```
 
     GraphRAG:
@@ -590,7 +594,7 @@ What should stay the same across frameworks:
     ```bash
     super agent pull graphrag_surrealdb_openai_demo
     super agent compile graphrag_surrealdb_openai_demo --framework openai
-    super agent run graphrag_surrealdb_openai_demo --framework openai --goal "What capabilities does SurrealDB provide?"
+    super agent run graphrag_surrealdb_openai_demo --framework openai --cloud --provider google-genai --model gemini-2.5-flash --goal "What capabilities does SurrealDB provide?"
     ```
 
     Verify:
@@ -605,7 +609,7 @@ What should stay the same across frameworks:
     ```bash
     super agent pull rag_surrealdb_claude_sdk_demo
     super agent compile rag_surrealdb_claude_sdk_demo --framework claude-sdk
-    super agent run rag_surrealdb_claude_sdk_demo --framework claude-sdk --goal "What is NEON-FOX-742?"
+    super agent run rag_surrealdb_claude_sdk_demo --framework claude-sdk --cloud --provider google-genai --model gemini-2.5-flash --goal "What is NEON-FOX-742?"
     ```
 
     GraphRAG:
@@ -613,7 +617,7 @@ What should stay the same across frameworks:
     ```bash
     super agent pull graphrag_surrealdb_claude_sdk_demo
     super agent compile graphrag_surrealdb_claude_sdk_demo --framework claude-sdk
-    super agent run graphrag_surrealdb_claude_sdk_demo --framework claude-sdk --goal "What capabilities does SurrealDB provide?"
+    super agent run graphrag_surrealdb_claude_sdk_demo --framework claude-sdk --cloud --provider google-genai --model gemini-2.5-flash --goal "What capabilities does SurrealDB provide?"
     ```
 
     Verify:
@@ -628,7 +632,7 @@ What should stay the same across frameworks:
     ```bash
     super agent pull rag_surrealdb_microsoft_demo
     super agent compile rag_surrealdb_microsoft_demo --framework microsoft
-    super agent run rag_surrealdb_microsoft_demo --framework microsoft --goal "What is NEON-FOX-742?"
+    super agent run rag_surrealdb_microsoft_demo --framework microsoft --cloud --provider google-genai --model gemini-2.5-flash --goal "What is NEON-FOX-742?"
     ```
 
     GraphRAG:
@@ -636,7 +640,7 @@ What should stay the same across frameworks:
     ```bash
     super agent pull graphrag_surrealdb_microsoft_demo
     super agent compile graphrag_surrealdb_microsoft_demo --framework microsoft
-    super agent run graphrag_surrealdb_microsoft_demo --framework microsoft --goal "What capabilities does SurrealDB provide?"
+    super agent run graphrag_surrealdb_microsoft_demo --framework microsoft --cloud --provider google-genai --model gemini-2.5-flash --goal "What capabilities does SurrealDB provide?"
     ```
 
     Verify:
@@ -650,16 +654,16 @@ What should stay the same across frameworks:
 
     ```bash
     super agent pull rag_surrealdb_pydanticai_demo
-    super agent compile rag_surrealdb_pydanticai_demo --framework pydanticai
-    super agent run rag_surrealdb_pydanticai_demo --framework pydanticai --goal "What is NEON-FOX-742?"
+    super agent compile rag_surrealdb_pydanticai_demo --framework pydantic-ai
+    super agent run rag_surrealdb_pydanticai_demo --framework pydantic-ai --cloud --provider google-genai --model gemini-2.5-flash --goal "What is NEON-FOX-742?"
     ```
 
     GraphRAG:
 
     ```bash
     super agent pull graphrag_surrealdb_pydanticai_demo
-    super agent compile graphrag_surrealdb_pydanticai_demo --framework pydanticai
-    super agent run graphrag_surrealdb_pydanticai_demo --framework pydanticai --goal "What capabilities does SurrealDB provide?"
+    super agent compile graphrag_surrealdb_pydanticai_demo --framework pydantic-ai
+    super agent run graphrag_surrealdb_pydanticai_demo --framework pydantic-ai --cloud --provider google-genai --model gemini-2.5-flash --goal "What capabilities does SurrealDB provide?"
     ```
 
     Verify:
@@ -674,7 +678,7 @@ What should stay the same across frameworks:
     ```bash
     super agent pull rag_surrealdb_crewai_demo
     super agent compile rag_surrealdb_crewai_demo --framework crewai
-    super agent run rag_surrealdb_crewai_demo --framework crewai --goal "What is NEON-FOX-742?"
+    super agent run rag_surrealdb_crewai_demo --framework crewai --cloud --provider google-genai --model gemini-2.5-flash --goal "What is NEON-FOX-742?"
     ```
 
     GraphRAG:
@@ -682,7 +686,7 @@ What should stay the same across frameworks:
     ```bash
     super agent pull graphrag_surrealdb_crewai_demo
     super agent compile graphrag_surrealdb_crewai_demo --framework crewai
-    super agent run graphrag_surrealdb_crewai_demo --framework crewai --goal "What capabilities does SurrealDB provide?"
+    super agent run graphrag_surrealdb_crewai_demo --framework crewai --cloud --provider google-genai --model gemini-2.5-flash --goal "What capabilities does SurrealDB provide?"
     ```
 
     Verify:
@@ -697,7 +701,7 @@ What should stay the same across frameworks:
     ```bash
     super agent pull rag_surrealdb_adk_demo
     super agent compile rag_surrealdb_adk_demo --framework google-adk
-    super agent run rag_surrealdb_adk_demo --framework google-adk --goal "What is NEON-FOX-742?"
+    super agent run rag_surrealdb_adk_demo --framework google-adk --cloud --provider google-genai --model gemini-2.5-flash --goal "What is NEON-FOX-742?"
     ```
 
     GraphRAG:
@@ -705,7 +709,7 @@ What should stay the same across frameworks:
     ```bash
     super agent pull graphrag_surrealdb_adk_demo
     super agent compile graphrag_surrealdb_adk_demo --framework google-adk
-    super agent run graphrag_surrealdb_adk_demo --framework google-adk --goal "What capabilities does SurrealDB provide?"
+    super agent run graphrag_surrealdb_adk_demo --framework google-adk --cloud --provider google-genai --model gemini-2.5-flash --goal "What capabilities does SurrealDB provide?"
     ```
 
     Verify:
@@ -720,7 +724,7 @@ What should stay the same across frameworks:
     ```bash
     super agent pull rag_surrealdb_deepagents_demo
     super agent compile rag_surrealdb_deepagents_demo --framework deepagents
-    super agent run rag_surrealdb_deepagents_demo --framework deepagents --goal "What is NEON-FOX-742?"
+    super agent run rag_surrealdb_deepagents_demo --framework deepagents --cloud --provider google-genai --model gemini-2.5-flash --goal "What is NEON-FOX-742?"
     ```
 
     GraphRAG:
@@ -728,7 +732,7 @@ What should stay the same across frameworks:
     ```bash
     super agent pull graphrag_surrealdb_deepagents_demo
     super agent compile graphrag_surrealdb_deepagents_demo --framework deepagents
-    super agent run graphrag_surrealdb_deepagents_demo --framework deepagents --goal "What capabilities does SurrealDB provide?"
+    super agent run graphrag_surrealdb_deepagents_demo --framework deepagents --cloud --provider google-genai --model gemini-2.5-flash --goal "What capabilities does SurrealDB provide?"
     ```
 
     Verify:
@@ -754,7 +758,7 @@ super agent compile <demo_id> --framework <framework_name>
 3. Run:
 
 ```bash
-super agent run <demo_id> --framework <framework_name> --goal "your question"
+super agent run <demo_id> --framework <framework_name> --cloud --provider google-genai --model gemini-2.5-flash --goal "your question"
 ```
 
 ## How To Run Each Feature
