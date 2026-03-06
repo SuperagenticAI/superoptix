@@ -3,6 +3,7 @@
 This is the single SurrealDB guide for SuperOptiX.
 
 It combines the earlier beginner demo, Docker demo, and framework guide into one page so you can find everything in one place.
+It starts with the fastest way to run it, then explains the integration in a more technical way.
 
 ## What This Guide Covers
 
@@ -15,7 +16,27 @@ You will learn how to:
 - run the same SurrealDB-backed behavior across multiple frameworks
 - understand which SurrealDB features are already integrated in SuperOptiX
 
-This guide is written for beginners. If you can copy and paste terminal commands, you can run it.
+This guide is written in two layers:
+
+- the first half is a practical quickstart
+- the second half explains the runtime, data model, retrieval modes, memory behavior, and operational details
+
+## Start Here
+
+If this is your first time using SurrealDB with SuperOptiX, follow the page in this order:
+
+1. read `Time Needed` and `Before You Start`
+2. complete `Quick Start`
+3. stop only when you see `Validation Status: PASSED`
+4. then complete `GraphRAG Quick Start`
+5. only after that, use `Framework Demo IDs` and the technical sections
+
+If you are already comfortable with SuperOptiX and only want the internals, you can skip ahead to:
+
+- `Technical Architecture`
+- `Retrieval Modes Explained`
+- `Configuration Reference`
+- `Operational Notes`
 
 ## SurrealDB Feature Coverage
 
@@ -33,6 +54,144 @@ This table lists every SurrealDB capability currently integrated in SuperOptiX.
 | `surrealdb-mcp-readonly` | Read-only SurrealDB MCP tool (`surrealdb_query`) | Supported | built-in tool config |
 | `surrealdb-capability-gating` | Runtime capability detection + graceful fallback | Supported | automatic at runtime |
 
+## Technical Architecture
+
+SurrealDB is integrated at the shared runtime layer, not as one-off framework-specific code.
+
+That matters because the same SurrealDB behavior is reused across DSPy, OpenAI SDK, Claude SDK, Microsoft, PydanticAI, CrewAI, Google ADK, and DeepAgents.
+
+The runtime is split into these pieces:
+
+| Layer | Responsibility | Technical role |
+|---|---|---|
+| RAG runtime | Retrieval during agent execution | parses SurrealDB config, generates query embeddings, runs vector, hybrid, graph, or multi retrieval |
+| GEPA SurrealDB vector store | Optimizer-side retrieval adapter | exposes SurrealDB search to the GEPA RAG adapter |
+| SurrealDB memory backend | Persistent agent memory | stores key-value memory and optional temporal history |
+| Live memory subscriber | Real-time memory updates | uses `LIVE SELECT` over WebSocket |
+| MCP read-only tool | Safe query access for agents | exposes `surrealdb_query` with statement allowlist and row limits |
+| Feature detector | Version and capability probing | checks whether server features such as `RELATE` or `fn::embed` are actually available |
+
+In practice, the integration flow looks like this:
+
+1. a playbook selects `retriever_type: surrealdb`
+2. SuperOptiX compiles the same playbook into the target framework
+3. at runtime, the shared RAG layer talks to SurrealDB
+4. framework adapters receive the same retrieved context regardless of framework
+5. optional memory and MCP features can point at the same SurrealDB deployment
+
+## Data Model And Indexing
+
+The default RAG table is:
+
+- `rag_documents`
+
+Each RAG record follows this logical structure:
+
+```json
+{
+  "content": "document text",
+  "embedding": [0.123, -0.456, 0.789],
+  "metadata": {
+    "seed_id": "seed-001",
+    "source": "superoptix_surreal_seed_v1",
+    "topic": "retrieval"
+  }
+}
+```
+
+For GraphRAG seeds, SuperOptiX uses deterministic record IDs so graph traversal is stable:
+
+- `rag_documents:superoptix`
+- `rag_documents:surrealdb`
+- `rag_documents:vector_search`
+
+Those graph-oriented rows still live in `rag_documents`, but they also have:
+
+- `metadata.entity_id`
+- typed relations created with `RELATE`
+
+The seeding utility attempts to create these indexes:
+
+- HNSW index on the vector field for kNN search
+- BM25 full-text index on the content field for hybrid retrieval
+- index on `metadata.entity_id` for graph-oriented records
+
+On older SurrealDB versions, index creation may be skipped with a warning. The demos still work, but query performance and lexical ranking quality may be lower.
+
+## Retrieval Modes Explained
+
+SuperOptiX currently supports four SurrealDB retrieval modes.
+
+| Mode | What happens | Best use case |
+|---|---|---|
+| `vector` | semantic similarity over the embedding field | standard RAG |
+| `hybrid` | weighted blend of vector similarity and lexical score | user questions where exact terms matter |
+| `graph` | vector seed search first, then graph expansion through `RELATE` edges | entity and capability discovery |
+| `multi` | hybrid retrieval first, then graph expansion | mixed semantic, lexical, and relationship-heavy retrieval |
+
+Technical behavior:
+
+- `graph_depth` is clamped to `1..3`
+- `graph_relations` must be a list of lowercase relation names
+- `hybrid_alpha` is clamped to `0.0..1.0`
+- `embedding_mode` is either `client` or `server`
+
+Operationally, each mode works like this:
+
+### `vector`
+
+SuperOptiX generates a query embedding and ranks records by cosine similarity against `embedding`.
+
+### `hybrid`
+
+SuperOptiX combines:
+
+- vector similarity from the embedding field
+- lexical relevance from the full-text index on `content`
+
+`hybrid_alpha` controls the balance:
+
+- `1.0` means strongly semantic
+- `0.0` means strongly lexical
+- `0.7` is the current practical default for the demos
+
+### `graph`
+
+Graph mode is a two-step retrieval process:
+
+1. run vector retrieval to find the best seed records
+2. follow `RELATE` edges from those seed record IDs using the configured relation names and depth
+
+This is why GraphRAG only works fully when:
+
+- graph seed data was created with `--graph`
+- the SurrealDB server supports the required graph traversal behavior
+
+### `multi`
+
+Multi mode starts with hybrid retrieval, then expands the result set through graph traversal. It is the broadest retrieval mode and is useful when the question mixes keywords, semantics, and relationships.
+
+## Capability Gating And Fallbacks
+
+SuperOptiX does not assume every SurrealDB server supports every newer feature.
+
+At runtime it probes the connected server and adjusts behavior safely.
+
+Current probes cover:
+
+- graph traversal parser support for `RELATE`-style traversal
+- vector similarity support
+- full-text helper support
+- `fn::embed` availability for server-side embeddings
+- `LIVE SELECT` support based on connection type
+
+Important fallback rules:
+
+- if graph support is missing, `graph` mode falls back to `vector`
+- if graph support is missing in `multi`, the graph expansion part is skipped
+- if `fn::embed` is unavailable, `embedding_mode: server` falls back to client-side embeddings
+- live subscriptions require `ws://` or `wss://`; embedded URLs are rejected clearly
+
 ## Time Needed
 
 - First run: about 10-20 minutes
@@ -47,24 +206,68 @@ You need:
 - terminal access
 - optional for cloud models: API keys for Gemini, Anthropic, or OpenAI
 
+## Terminal Layout
+
+Using separate terminals makes this much easier to follow.
+
+Use this exact layout:
+
+- Terminal A: Ollama server
+- Terminal B: SurrealDB server
+- Terminal C: seed commands, pull, compile, and run commands
+
+Do not close Terminal A or Terminal B while you are testing.
+
+## Success Checklist
+
+- [ ] `pip install "superoptix[surrealdb]"` completed
+- [ ] `ollama pull llama3.1:8b` completed
+- [ ] `ollama serve` is running
+- [ ] SurrealDB Docker process is running on port `8000`
+- [ ] seed command prints `SurrealDB seed complete`
+- [ ] RAG run returns `NEON-FOX-742`
+- [ ] run ends with `Validation Status: PASSED`
+- [ ] graph seed prints `Edges created:` greater than `0`
+- [ ] GraphRAG run answers from connected graph data without fallback
+
 ## Quick Start
 
 This is the fastest path to a successful first run.
 
+Goal of this section:
+
+- prove that SuperOptiX can retrieve from SurrealDB
+- verify the seeded token `NEON-FOX-742` is coming from retrieval, not guesswork
+
 ### 1) Install
+
+Run this in Terminal C:
 
 ```bash
 pip install "superoptix[surrealdb]"
 ollama pull llama3.1:8b
 ```
 
+What this does:
+
+- installs SuperOptiX with SurrealDB support
+- downloads the local Ollama model used by the local DSPy path
+
+Do not move on until both commands finish.
+
 ### 2) Start services
+
+Start the model server first.
 
 Terminal A:
 
 ```bash
 ollama serve
 ```
+
+Leave this terminal open.
+
+Then start SurrealDB.
 
 Terminal B:
 
@@ -73,9 +276,19 @@ docker run --rm -p 8000:8000 --name surrealdb-demo surrealdb/surrealdb:latest \
   start --log info --user root --pass secret memory
 ```
 
-Keep both terminals open.
+Leave this terminal open too.
+
+What this does:
+
+- starts a SurrealDB server
+- exposes it on `ws://localhost:8000`
+- uses username `root` and password `secret`
+
+If Docker says port `8000` is already in use, jump to `Docker And Connection Notes` and use the alternate port example there.
 
 ### 3) Seed demo data
+
+Go back to Terminal C.
 
 Terminal C:
 
@@ -83,12 +296,27 @@ Terminal C:
 python -m superoptix.agents.demo.setup_surrealdb_seed
 ```
 
-Expected success output includes:
+This command:
+
+- reads the packaged seed dataset
+- generates embeddings
+- writes rows into `rag_documents`
+
+Exact output to look for:
 
 - `SurrealDB seed complete`
 - `Inserted: 8`
 
+Behavior to verify:
+
+- the command exits without an exception
+- the seed completes against the SurrealDB instance you started in Terminal B
+
+Do not continue if you do not see the exact output lines above.
+
 ### 4) Pull, compile, and run RAG
+
+Still in Terminal C, run these exactly in order:
 
 ```bash
 super agent pull rag_surrealdb_dspy_demo
@@ -96,21 +324,47 @@ super agent compile rag_surrealdb_dspy_demo --framework dspy
 super agent run rag_surrealdb_dspy_demo --framework dspy --goal "What is NEON-FOX-742?"
 ```
 
-Expected success signs:
+What each command does:
+
+- `pull` downloads the demo agent definition into your workspace
+- `compile` generates the framework-specific runnable pipeline
+- `run` executes the agent with SurrealDB retrieval enabled
+
+Exact output to look for:
 
 - `RAG retrieval enabled`
-- output mentions `NEON-FOX-742`
 - `Validation Status: ✅ PASSED`
+
+Behavior to verify:
+
+- output mentions `NEON-FOX-742`
+
+If the run completes but the answer does not mention `NEON-FOX-742`, treat that as a failed retrieval test and fix the seed or connection before moving on.
+
+At this point the basic SurrealDB RAG path is working.
 
 ## GraphRAG Quick Start
 
+Goal of this section:
+
+- prove the agent can retrieve not only by similarity, but also by graph relations created with `RELATE`
+
 ### 1) Seed graph data
+
+In Terminal C, run:
 
 ```bash
 python -m superoptix.agents.demo.setup_surrealdb_seed --graph
 ```
 
-Expected success output includes:
+This command:
+
+- loads the graph seed dataset
+- creates deterministic graph-oriented records
+- attempts to create indexes
+- creates `RELATE` edges when supported by the server
+
+Exact output to look for:
 
 - `GraphRAG seeding:`
 - `Nodes created:`
@@ -128,19 +382,28 @@ python -m superoptix.agents.demo.setup_surrealdb_seed --append
 
 ### 2) Pull, compile, and run GraphRAG
 
+Still in Terminal C, run:
+
 ```bash
 super agent pull graphrag_surrealdb_dspy_demo
 super agent compile graphrag_surrealdb_dspy_demo --framework dspy
 super agent run graphrag_surrealdb_dspy_demo --framework dspy --goal "What capabilities does SurrealDB provide?"
 ```
 
-Expected success signs:
+Exact output to look for:
+
+- `Validation Status: ✅ PASSED`
+
+Behavior to verify:
 
 - no fallback warning about `RELATE`
 - answer includes SurrealDB capabilities from graph-connected docs
-- `Validation Status: ✅ PASSED`
+
+If you see a message saying GraphRAG is falling back to vector mode, stop here and fix the graph seeding first. Do not assume graph retrieval is active just because the run returned an answer.
 
 ## Run With Gemini
+
+Use this path if you want a cloud model instead of the local Ollama model.
 
 Set your API key:
 
@@ -355,7 +618,9 @@ Examples:
 - graph mode falls back to vector or hybrid when `RELATE` is unavailable
 - server embedding mode falls back to client embedding when `fn::embed` is unavailable
 
-## Minimal Config Reference
+## Configuration Reference
+
+This is the smallest SurrealDB RAG configuration that works:
 
 ```yaml
 rag:
@@ -376,6 +641,223 @@ rag:
     content_field: content
     metadata_field: metadata
 ```
+
+### RAG Runtime Options
+
+| Key | Type | Meaning | Notes |
+|---|---|---|---|
+| `rag.enabled` | bool | enables retrieval | must be `true` |
+| `rag.retriever_type` | string | selects backend | use `surrealdb` |
+| `rag.config.top_k` | int | max retrieved rows | typical demo value is `5` |
+| `rag.config.retrieval_mode` | string | retrieval strategy | `vector`, `hybrid`, `graph`, `multi` |
+| `rag.config.hybrid_alpha` | float | semantic vs lexical weight | valid range `0.0..1.0` |
+| `rag.config.graph_depth` | int | graph traversal depth | clamped to `1..3` |
+| `rag.config.graph_relations` | list[str] | allowed relation names to follow | lowercase relation names such as `integrates_with` |
+| `rag.config.embedding_mode` | string | where query embeddings are computed | `client` or `server` |
+
+### Vector Store Options
+
+| Key | Type | Meaning | Notes |
+|---|---|---|---|
+| `url` | string | SurrealDB connection URL | `ws://localhost:8000` for server mode |
+| `namespace` | string | SurrealDB namespace | demo default is `superoptix` |
+| `database` | string | SurrealDB database | demo default is `knowledge` |
+| `username` | string | SurrealDB username | ignored when `skip_signin: true` |
+| `password` | string | SurrealDB password | ignored when `skip_signin: true` |
+| `skip_signin` | bool | skips explicit signin | useful for embedded transports like `memory://` or `surrealkv://` |
+| `table_name` | string | document table | demo default is `rag_documents` |
+| `vector_field` | string | embedding field | demo default is `embedding` |
+| `content_field` | string | text field used in prompts and lexical search | demo default is `content` |
+| `metadata_field` | string | metadata field | demo default is `metadata` |
+| `embedding_model` | string | client-side embedding model | demo default is `sentence-transformers/all-MiniLM-L6-v2` |
+
+### Memory Options For SurrealDBBackend
+
+If you want agent memory in SurrealDB as well as RAG, the memory backend can point to the same server.
+
+```yaml
+memory:
+  enabled: true
+  backend:
+    type: surrealdb
+    config:
+      url: ws://localhost:8000
+      namespace: superoptix
+      database: agents
+      username: root
+      password: secret
+      table_name: superoptix_memory
+  temporal:
+    enabled: true
+    max_versions_per_key: 50
+```
+
+Memory-specific notes:
+
+- the primary table stores the latest value for each key
+- temporal history is appended to a companion table named `<table_name>_versions`
+- `retrieve()` keeps latest-value semantics
+- `history()` and `retrieve_at()` read from the versions table when temporal mode is enabled
+
+### MCP Tool Configuration
+
+The `surrealdb_query` built-in tool is intended for read-only querying.
+
+```yaml
+tools:
+  built_in_tools:
+    - name: surrealdb_query
+      config:
+        url: ws://localhost:8000
+        namespace: superoptix
+        database: knowledge
+        username: root
+        password: secret
+```
+
+Runtime protection built into the tool:
+
+- only `SELECT`, `INFO`, and `RETURN` statements are allowed
+- a row limit is injected when the query does not specify one
+- the call is time-bounded to avoid hanging queries
+
+## Full Technical Example
+
+This example shows one SurrealDB deployment backing:
+
+- RAG
+- GraphRAG
+- temporal memory
+- the read-only MCP tool
+
+```yaml
+spec:
+  target_framework: dspy
+
+  language_model:
+    location: cloud
+    provider: google-genai
+    model: gemini-2.5-flash
+
+  memory:
+    enabled: true
+    backend:
+      type: surrealdb
+      config:
+        url: ws://localhost:8000
+        namespace: superoptix
+        database: agents
+        username: root
+        password: secret
+        table_name: superoptix_memory
+    temporal:
+      enabled: true
+      max_versions_per_key: 50
+
+  rag:
+    enabled: true
+    retriever_type: surrealdb
+    config:
+      top_k: 5
+      retrieval_mode: multi
+      hybrid_alpha: 0.7
+      graph_depth: 2
+      graph_relations:
+        - integrates_with
+        - provides
+        - supports
+        - enables
+      embedding_mode: client
+    vector_store:
+      url: ws://localhost:8000
+      namespace: superoptix
+      database: knowledge
+      username: root
+      password: secret
+      skip_signin: false
+      table_name: rag_documents
+      vector_field: embedding
+      content_field: content
+      metadata_field: metadata
+      embedding_model: sentence-transformers/all-MiniLM-L6-v2
+
+  tools:
+    built_in_tools:
+      - name: surrealdb_query
+        config:
+          url: ws://localhost:8000
+          namespace: superoptix
+          database: knowledge
+          username: root
+          password: secret
+```
+
+## Operational Notes
+
+### Connection Modes
+
+SurrealDB can be used in more than one way inside SuperOptiX:
+
+| Mode | Typical URL | Best use |
+|---|---|---|
+| local server | `ws://localhost:8000` | demos, Docker, live queries |
+| remote server | `wss://...` | shared or hosted deployments |
+| embedded memory | `memory` or `memory://` | quick local experiments |
+| local file store | `surrealkv://./path/to/file` | local persistent development runs |
+
+General guidance:
+
+- use `ws://` or `wss://` when you need live subscriptions
+- use embedded transports for simple local experiments
+- `skip_signin` is usually `true` for embedded modes and `false` for server modes
+
+### Seeding Behavior
+
+The seeding script does more than just insert rows.
+
+Standard seed mode:
+
+- loads JSONL documents
+- generates embeddings with the configured sentence-transformer model
+- inserts rows into `rag_documents`
+- optionally deletes previous rows from the same seed source first
+
+Graph seed mode:
+
+- validates relationship targets before writing anything
+- creates deterministic entity record IDs
+- attempts to define indexes
+- creates `RELATE` edges when the server supports them
+
+### Indexing Strategy
+
+For serious usage, the SurrealDB table should have:
+
+- a vector index for embedding search
+- a lexical index for hybrid retrieval
+- stable identifiers for graph-oriented records
+
+The demo seeder attempts to create these automatically, but production deployments should define and verify them explicitly as part of environment setup.
+
+### Performance Expectations
+
+Practical trade-offs by mode:
+
+- `vector` is the cheapest and simplest
+- `hybrid` is usually a better default when exact tokens matter
+- `graph` is more expressive but depends on good relations and graph-capable server support
+- `multi` is the broadest mode and may retrieve the richest context, but it is also the most expensive
+
+### Framework Behavior
+
+SuperOptiX does not implement separate SurrealDB logic per framework.
+
+Instead:
+
+- framework adapters compile agent code
+- the shared runtime handles SurrealDB retrieval and memory
+- that means behavior stays aligned across frameworks
+- demo playbooks differ mostly in framework syntax, not SurrealDB semantics
 
 ## Most Common Problems And Fixes
 
@@ -455,10 +937,13 @@ If the run still completes, ignore it.
 
 ### Verify basic RAG
 
-Success means:
+Exact output to look for:
+
+- `Validation Status: ✅ PASSED`
+
+Behavior to verify:
 
 - the answer contains `NEON-FOX-742`
-- the run ends with `Validation Status: ✅ PASSED`
 
 ### Verify GraphRAG really works
 
@@ -476,7 +961,12 @@ with Surreal("ws://localhost:8000") as db:
 PY
 ```
 
-If the count is non-zero and traversal returns rows, GraphRAG data is active.
+Behavior to verify:
+
+- the count is non-zero
+- the traversal query returns rows
+
+If both conditions are true, GraphRAG data is active.
 
 ## Related
 
