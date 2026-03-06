@@ -2123,15 +2123,8 @@ def add_agent(args):
             "crewai_rlm": "demo/crewai-rlm_playbook.yaml",
         }
 
-        if agent_name in alias_map:
-            source_playbook = package_root / "agents" / alias_map[agent_name]
-            target_ref = agent_name
-        else:
-            # Simplified playbook search
-            source_playbook = next(
-                package_root.rglob(f"**/agents/**/{agent_name}_playbook.yaml"), None
-            )
-            target_ref = agent_name
+        source_playbook = _find_prebuilt_playbook(package_root, agent_name, alias_map)
+        target_ref = agent_name
 
         if not source_playbook:
             console.print(f"\n[bold red]❌ Agent '{agent_name}' not found.[/]")
@@ -2304,6 +2297,49 @@ def add_agent(args):
     except Exception as e:
         console.print(f"\n[bold red]❌ Failed to add agent:[/] {e}")
         sys.exit(1)
+
+
+def _normalize_agent_ref(agent_ref: str) -> str:
+    """Normalize agent refs so hyphen/underscore variants resolve consistently."""
+    return agent_ref.strip().lower().replace("-", "").replace("_", "")
+
+
+def _find_prebuilt_playbook(
+    package_root: Path,
+    agent_name: str,
+    alias_map: dict[str, str] | None = None,
+) -> Path | None:
+    """Resolve a packaged pre-built playbook by filename stem or metadata id."""
+    agents_dir = package_root / "agents"
+    if not agents_dir.exists():
+        return None
+
+    lookup_name = agent_name.strip().lower()
+    if alias_map and lookup_name in alias_map:
+        aliased_path = agents_dir / alias_map[lookup_name]
+        return aliased_path if aliased_path.exists() else None
+
+    exact_match = next(agents_dir.rglob(f"{lookup_name}_playbook.yaml"), None)
+    if exact_match:
+        return exact_match
+
+    normalized_lookup = _normalize_agent_ref(lookup_name)
+    for playbook_path in agents_dir.rglob("*_playbook.yaml"):
+        playbook_ref = playbook_path.stem.replace("_playbook", "")
+        if _normalize_agent_ref(playbook_ref) == normalized_lookup:
+            return playbook_path
+
+        try:
+            with open(playbook_path, "r") as handle:
+                playbook = yaml.safe_load(handle) or {}
+        except Exception:
+            continue
+
+        metadata_id = str(playbook.get("metadata", {}).get("id", "")).strip().lower()
+        if metadata_id and _normalize_agent_ref(metadata_id) == normalized_lookup:
+            return playbook_path
+
+    return None
 
 
 def list_agents(args):

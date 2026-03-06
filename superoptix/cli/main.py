@@ -2683,21 +2683,7 @@ Note:
         show_version_screen(args)
         return
 
-    # Only these commands require project context
-    commands_requiring_project = [
-        "agent",
-        "ag",
-        "spec",
-        "orchestra",
-        "orch",
-        "observe",
-        "ob",
-    ]
-    if (
-        hasattr(args, "command")
-        and args.command
-        and args.command in commands_requiring_project
-    ):
+    if _requires_project_context(args):
         from superoptix.cli.utils import validate_superoptix_project
 
         validate_superoptix_project()
@@ -2719,6 +2705,20 @@ Note:
     else:
         # If no function is set, default to showing help with loader
         execute_with_loader(lambda x: parser.print_help(), args)
+
+
+def _requires_project_context(args) -> bool:
+    """Return whether the parsed command needs an initialized project."""
+    command = getattr(args, "command", None)
+    if command not in {"agent", "ag", "spec", "orchestra", "orch", "observe", "ob"}:
+        return False
+
+    if command in {"agent", "ag"}:
+        agent_command = getattr(args, "agent_command", None)
+        if agent_command in {"list", "ls", "ps"} and getattr(args, "pre_built", False):
+            return False
+
+    return True
 
 
 if __name__ == "__main__":
