@@ -3,10 +3,14 @@
 import os
 import tempfile
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
+import yaml
 
+from superoptix.cli.commands.agent import _find_prebuilt_playbook
+from superoptix.cli.main import _requires_project_context
 from superoptix.cli.utils import is_superoptix_project, validate_superoptix_project
 
 
@@ -96,3 +100,63 @@ def test_validate_superoptix_project_error_message(mock_print):
             )
         finally:
             os.chdir(original_cwd)
+
+
+def test_find_prebuilt_playbook_resolves_framework_specific_surrealdb_variant(
+    tmp_path: Path,
+):
+    package_root = tmp_path / "superoptix"
+    playbook_path = (
+        package_root / "agents" / "demo" / "rag_surrealdb_dspy_demo_playbook.yaml"
+    )
+    playbook_path.parent.mkdir(parents=True)
+    playbook_path.write_text(
+        yaml.safe_dump(
+            {
+                "metadata": {
+                    "id": "rag_surrealdb_dspy_demo",
+                    "name": "RAG SurrealDB DSPy Demo",
+                }
+            }
+        )
+    )
+
+    resolved = _find_prebuilt_playbook(package_root, "rag_surrealdb_dspy_demo")
+
+    assert resolved == playbook_path
+
+
+def test_find_prebuilt_playbook_matches_normalized_metadata_id(tmp_path: Path):
+    package_root = tmp_path / "superoptix"
+    playbook_path = (
+        package_root / "agents" / "demo" / "rag_surrealdb_openai_demo_playbook.yaml"
+    )
+    playbook_path.parent.mkdir(parents=True)
+    playbook_path.write_text(
+        yaml.safe_dump(
+            {
+                "metadata": {
+                    "id": "rag_surrealdb_openai_demo",
+                    "name": "RAG SurrealDB OpenAI Demo",
+                }
+            }
+        )
+    )
+
+    resolved = _find_prebuilt_playbook(package_root, "rag-surrealdb-openai-demo")
+
+    assert resolved == playbook_path
+
+
+def test_requires_project_context_allows_prebuilt_agent_listing():
+    args = SimpleNamespace(command="agent", agent_command="list", pre_built=True)
+
+    assert _requires_project_context(args) is False
+
+
+def test_requires_project_context_still_requires_project_for_agent_pull():
+    args = SimpleNamespace(
+        command="agent", agent_command="pull", pre_built=False, name="developer"
+    )
+
+    assert _requires_project_context(args) is True
