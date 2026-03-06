@@ -1138,8 +1138,7 @@ Use `super agent <command> --help` for more information on a specific command.
     )
     compile_parser.add_argument(
         "--gateway-key-env",
-        default="PYDANTIC_AI_GATEWAY_API_KEY",
-        help="Env var name containing gateway API key (default: PYDANTIC_AI_GATEWAY_API_KEY).",
+        help="Env var name containing gateway API key (defaults to PYDANTIC_AI_GATEWAY_API_KEY when --gateway is enabled).",
     )
     compile_parser.add_argument(
         "--explicit",
@@ -1499,8 +1498,7 @@ Use `super agent <command> --help` for more information on a specific command.
     )
     run_parser.add_argument(
         "--gateway-key-env",
-        default="PYDANTIC_AI_GATEWAY_API_KEY",
-        help="Env var name containing gateway API key (default: PYDANTIC_AI_GATEWAY_API_KEY).",
+        help="Env var name containing gateway API key (defaults to PYDANTIC_AI_GATEWAY_API_KEY when --gateway is enabled).",
     )
     run_parser.add_argument(
         "-v",

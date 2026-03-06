@@ -650,6 +650,16 @@ For the framework demos below, the runtime examples use Google Gemini via:
     - both runs complete successfully
 
 === "🐍 PydanticAI"
+    Note:
+
+    - if your installed `superoptix` incorrectly asks for `PYDANTIC_AI_GATEWAY_API_KEY` while using Gemini, force direct mode for now:
+
+    ```bash
+    super agent run graphrag_surrealdb_pydanticai_demo --framework pydantic-ai --cloud --direct --provider google-genai --model gemini-2.5-flash --gateway-key-env "" --goal "What capabilities does SurrealDB provide?"
+    ```
+
+    - direct Gemini mode should use `GOOGLE_API_KEY` or `GEMINI_API_KEY`, not `PYDANTIC_AI_GATEWAY_API_KEY`
+
     Basic RAG:
 
     ```bash
