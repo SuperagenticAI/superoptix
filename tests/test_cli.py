@@ -319,3 +319,70 @@ def test_run_framework_agent_passes_model_config_to_microsoft_pipeline(tmp_path:
         "provider": "google-genai",
         "model": "gemini-2.5-flash",
     }
+
+
+def test_run_framework_agent_passes_primary_input_field_from_playbook(tmp_path: Path):
+    project_root = tmp_path
+    (project_root / ".super").write_text("project: demo\n")
+
+    pipeline_dir = project_root / "demo" / "agents" / "demo_agent" / "pipelines"
+    pipeline_dir.mkdir(parents=True)
+    capture_path = project_root / "captured_primary_input.json"
+
+    pipeline_file = pipeline_dir / "demo_agent_microsoft_pipeline.py"
+    pipeline_file.write_text(
+        "\n".join(
+            [
+                "import json",
+                "import os",
+                "",
+                "class DemoAgentPipeline:",
+                "    def __init__(self, model_config=None):",
+                "        self.playbook = {",
+                "            'spec': {",
+                "                'input_fields': [{'name': 'knowledge_query'}],",
+                "            }",
+                "        }",
+                "",
+                "    async def run(self, query=None, knowledge_query=None, **inputs):",
+                "        capture_path = os.environ['SUPEROPTIX_CAPTURE_PRIMARY_INPUT']",
+                "        with open(capture_path, 'w', encoding='utf-8') as handle:",
+                "            json.dump({",
+                "                'query': query,",
+                "                'knowledge_query': knowledge_query,",
+                "                'inputs': inputs,",
+                "            }, handle)",
+                "        return {'retrieved_response': knowledge_query or query or ''}",
+            ]
+        )
+    )
+
+    args = SimpleNamespace(
+        name="demo_agent",
+        goal="What is NEON-FOX-742?",
+        provider="google-genai",
+        model="gemini-2.5-flash",
+        local=False,
+        gateway=False,
+        direct=False,
+        gateway_url=None,
+        gateway_key_env=None,
+    )
+
+    original_cwd = os.getcwd()
+    original_capture = os.environ.get("SUPEROPTIX_CAPTURE_PRIMARY_INPUT")
+    os.chdir(project_root)
+    os.environ["SUPEROPTIX_CAPTURE_PRIMARY_INPUT"] = str(capture_path)
+
+    try:
+        _run_framework_agent(args, "microsoft")
+    finally:
+        os.chdir(original_cwd)
+        if original_capture is None:
+            os.environ.pop("SUPEROPTIX_CAPTURE_PRIMARY_INPUT", None)
+        else:
+            os.environ["SUPEROPTIX_CAPTURE_PRIMARY_INPUT"] = original_capture
+
+    captured = yaml.safe_load(capture_path.read_text())
+    assert captured["query"] == "What is NEON-FOX-742?"
+    assert captured["knowledge_query"] == "What is NEON-FOX-742?"

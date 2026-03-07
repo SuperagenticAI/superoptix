@@ -949,16 +949,26 @@ def _run_framework_agent(args, framework: str):
 
         pipeline = pipeline_class(**init_kwargs)
 
+        run_kwargs = {"query": args.goal}
+        playbook_data = getattr(pipeline, "playbook", None)
+        if isinstance(playbook_data, dict):
+            spec_data = playbook_data.get("spec", {}) or {}
+            input_fields = spec_data.get("input_fields", []) or []
+            if input_fields and isinstance(input_fields[0], dict):
+                primary_input = str(input_fields[0].get("name", "")).strip()
+                if primary_input and primary_input not in run_kwargs:
+                    run_kwargs[primary_input] = args.goal
+
         # Check if it's an async framework
         if hasattr(pipeline, "run") and asyncio.iscoroutinefunction(pipeline.run):
             # Async pipeline (Claude SDK, Pydantic AI, etc.)
-            result = run_async(pipeline.run(query=args.goal))
+            result = run_async(pipeline.run(**run_kwargs))
         elif hasattr(pipeline, "run_sync"):
             # Sync wrapper available
-            result = pipeline.run_sync(query=args.goal)
+            result = pipeline.run_sync(**run_kwargs)
         elif hasattr(pipeline, "run"):
             # Sync pipeline
-            result = pipeline.run(query=args.goal)
+            result = pipeline.run(**run_kwargs)
         else:
             console.print(f"[bold red]❌ Pipeline class has no run() method[/]")
             return
