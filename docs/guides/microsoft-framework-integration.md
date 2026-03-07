@@ -16,6 +16,19 @@ Use it when you already have Microsoft Agent Framework projects and want to keep
 pip install superoptix[frameworks-microsoft]
 ```
 
+Important:
+
+- the published `frameworks-microsoft` extra should install a compatible prerelease `agent-framework` build
+- the Microsoft Python SDK currently exposes `Agent` in newer builds, while some earlier prerelease examples used `ChatAgent`
+- if `super agent run ... --framework microsoft` fails with `cannot import name 'ChatAgent' from 'agent_framework'`, your generated pipeline was compiled against the older API
+- reinstall the framework package with:
+
+```bash
+pip install -U --pre agent-framework azure-identity
+```
+
+- after that, recompile the Microsoft pipeline before rerunning so it regenerates against the updated template
+
 ## Basic Workflow
 
 ```bash
@@ -60,4 +73,5 @@ spec:
 ## Notes
 
 - Keep `--framework microsoft` explicit in `compile`, `run`, and `optimize`.
+- If you hit a `ChatAgent` import error, your generated pipeline is stale or your `agent-framework` install is outdated. Reinstall with `pip install -U --pre agent-framework azure-identity` and recompile.
 - If you need stronger active support for new capabilities (StackOne, RLM, fast template evolution), use one of the actively expanded frameworks.

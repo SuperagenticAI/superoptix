@@ -7,7 +7,7 @@ allow-direct-references = true
 
 [project]
 name = "superoptix"
-version = "0.2.13"
+version = "0.2.14"
 description = "Full Stack Agentic AI Optimization Framework - Universal GEPA optimizer for major frameworks"
 authors = [
     {name = "Superagentic AI", email = "hello@super-agentic.ai"},
@@ -80,7 +80,7 @@ frameworks-google = [
 
 # Microsoft Agent Framework (pre-release)
 frameworks-microsoft = [
-    "agent-framework",
+    "agent-framework>=1.0.0b260212",
     "azure-identity",
 ]
 
@@ -106,10 +106,10 @@ frameworks-claude-sdk = [
 # 
 # ⚠️ IMPORTANT: Cannot be installed together with DSPy
 # Choose ONE:
-#   - For CrewAI: pip install superoptix[frameworks-crewai] (no DSPy support)
+#   - For CrewAI: pip install superoptix && pip install crewai==1.2.0 (no DSPy support)
 #   - For DSPy: pip install superoptix[frameworks] (no CrewAI support)
 # TEMPORARILY DISABLED FOR BUILD - Conflicts with DSPy (json-repair version mismatch)
-# Users can manually install: pip install superoptix crewai==1.2.0 (without [all])
+# Users can manually install: pip install superoptix && pip install crewai==1.2.0
 # frameworks-crewai = [
 #     "crewai==1.2.0",
 # ]
@@ -128,7 +128,7 @@ frameworks = [
     "pydantic-ai",  # Pydantic AI framework
     "claude-agent-sdk",
     # NOTE: crewai==1.2.0 excluded - conflicts with DSPy
-    # For CrewAI: pip install superoptix[frameworks-crewai]
+    # For CrewAI: pip install superoptix && pip install crewai==1.2.0
 ]
 
 # MCP tool optimization (vendored from GEPA PR #105)

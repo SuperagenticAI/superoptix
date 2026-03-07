@@ -213,7 +213,7 @@ async def test_microsoft_surrealdb_rag_prompt_grounding(tmp_path: Path, monkeypa
         def __init__(self, text: str):
             self.text = text
 
-    class _FakeChatAgent:
+    class _FakeAgent:
         def __init__(self, chat_client, name: str, instructions: str, tools=None):
             self.chat_client = chat_client
             self.name = name
@@ -225,7 +225,8 @@ async def test_microsoft_surrealdb_rag_prompt_grounding(tmp_path: Path, monkeypa
             return _FakeResponse("token retrieval success")
 
     fake_agent_framework = ModuleType("agent_framework")
-    fake_agent_framework.ChatAgent = _FakeChatAgent
+    fake_agent_framework.Agent = _FakeAgent
+    fake_agent_framework.ChatAgent = _FakeAgent
     fake_agent_framework_openai = ModuleType("agent_framework.openai")
     fake_agent_framework_openai.OpenAIChatClient = _FakeOpenAIChatClient
     fake_agent_framework_azure = ModuleType("agent_framework.azure")

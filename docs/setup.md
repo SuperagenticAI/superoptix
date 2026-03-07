@@ -123,10 +123,10 @@ Customize your installation by adding only what you need:
 | **OpenAI SDK** | `uv tool install superoptix --with "superoptix[frameworks-openai]"` | openai-agents, openai SDK |
 | **Claude SDK** | `uv tool install superoptix --with "superoptix[frameworks-claude-sdk]"` | claude-agent-sdk |
 | **Google ADK** | `uv tool install superoptix --with "superoptix[frameworks-google]"` | google-adk, google-generativeai |
-| **Microsoft (Legacy)** | `uv tool install superoptix --with "superoptix[frameworks-microsoft]"` | agent-framework, azure-identity |
+| **Microsoft (Legacy)** | `uv tool install superoptix --with "superoptix[frameworks-microsoft]"` | agent-framework>=1.0.0b260212, azure-identity |
 | **DeepAgents** | `uv tool install superoptix --with "superoptix[frameworks-deepagents]"` | deepagents |
 | **Pydantic AI** | `uv tool install superoptix --with "superoptix[frameworks-pydantic-ai]"` | Pydantic AI |
-| **CrewAI** ⚠️ | `uv tool install superoptix --with "superoptix[frameworks-crewai]"` | crewai (conflicts with DSPy) |
+| **CrewAI** ⚠️ | `uv tool install superoptix --with crewai==1.2.0` | crewai (conflicts with DSPy) |
 
 ⭐ **Recommended:** DSPy for GEPA optimization  
 ⚠️ **Note:** CrewAI and DSPy cannot be installed together in the same environment.

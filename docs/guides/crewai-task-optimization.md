@@ -16,7 +16,8 @@ SuperOptiX supports **combined agent + task optimization** for CrewAI. GEPA opti
 ## 📦 Installation
 
 ```bash
-pip install superoptix[frameworks-crewai]
+pip install superoptix
+pip install crewai==1.2.0
 ```
 
 **Includes:**

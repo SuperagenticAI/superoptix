@@ -528,19 +528,19 @@ Use these IDs with `pull`, `compile`, and `run`.
 Install only the framework you want to test:
 
 ```bash
-python -m pip install -U "superoptix[frameworks-dspy]"
-python -m pip install -U "superoptix[frameworks-openai]"
-python -m pip install -U "superoptix[frameworks-claude-sdk]"
-python -m pip install -U "superoptix[frameworks-microsoft]"
-python -m pip install -U "superoptix[frameworks-pydantic-ai]"
-python -m pip install -U "superoptix[frameworks-google]"
-python -m pip install -U "superoptix[frameworks-deepagents]"
+pip install -U "superoptix[frameworks-dspy]"
+pip install -U "superoptix[frameworks-openai]"
+pip install -U "superoptix[frameworks-claude-sdk]"
+pip install -U "superoptix[frameworks-microsoft]"
+pip install -U "superoptix[frameworks-pydantic-ai]"
+pip install -U "superoptix[frameworks-google]"
+pip install -U "superoptix[frameworks-deepagents]"
 ```
 
 Install most supported frameworks at once:
 
 ```bash
-python -m pip install -U "superoptix[frameworks]"
+pip install -U "superoptix[frameworks]"
 ```
 
 If you install SuperOptiX with `uv tool`, use:
@@ -559,6 +559,7 @@ Notes:
 
 - use `frameworks-google`, not `framework-google`
 - use `frameworks-pydantic-ai`, not `frameworks-pydanticai`
+- `frameworks-microsoft` should install a compatible prerelease Microsoft SDK build; if `ChatAgent` import errors still appear, run `pip install -U --pre agent-framework azure-identity` and then recompile the Microsoft pipeline.
 - CrewAI is not bundled in `frameworks` because of dependency conflicts with DSPy
 
 ## SurrealDB Across Frameworks
@@ -595,6 +596,13 @@ For the framework demos below, the runtime examples use Google Gemini via:
 
 - `--cloud --provider google-genai --model gemini-2.5-flash`
 
+Gemini prerequisite:
+
+```bash
+export GOOGLE_API_KEY="your-google-api-key"
+# or: export GEMINI_API_KEY="your-google-api-key"
+```
+
 Important retrieval note:
 
 - if a framework run completes successfully but answers with "the provided context does not contain information about `NEON-FOX-742`", the framework is working but retrieval is not grounded in the seeded demo data yet
@@ -602,6 +610,12 @@ Important retrieval note:
 - then verify the agent is querying the expected SurrealDB settings: `ws://localhost:8000`, namespace `superoptix`, database `knowledge`, table `rag_documents`
 
 === "🔬 DSPy"
+    Install:
+
+    ```bash
+    pip install -U "superoptix[frameworks-dspy]"
+    ```
+
     Basic RAG:
 
     ```bash
@@ -627,8 +641,15 @@ Important retrieval note:
 === "🤖 OpenAI"
     Note:
 
+    - install with `pip install -U "superoptix[frameworks-openai]"`
     - for the OpenAI Agents SDK demo, recompile with the Gemini cloud flags before running
     - if the run log still shows `model=litellm/ollama/llama3.1:8b`, the pipeline is still using an older Ollama-compiled spec
+
+    Install:
+
+    ```bash
+    pip install -U "superoptix[frameworks-openai]"
+    ```
 
     Basic RAG:
 
@@ -653,6 +674,12 @@ Important retrieval note:
     - both runs complete successfully
 
 === "🧠 Claude SDK"
+    Install:
+
+    ```bash
+    pip install -U "superoptix[frameworks-claude-sdk]"
+    ```
+
     Basic RAG:
 
     ```bash
@@ -676,11 +703,24 @@ Important retrieval note:
     - both runs complete successfully
 
 === "🏢 Microsoft"
+    Note:
+
+    - `pip install -U "superoptix[frameworks-microsoft]"` should install the right Microsoft SDK dependency set for published releases
+    - if the run still fails with `cannot import name 'ChatAgent' from 'agent_framework'`, your generated pipeline is still using the older Microsoft SDK API or your env still has an older `agent-framework` build
+    - fix the env with `pip install -U --pre agent-framework azure-identity`
+    - then recompile the Microsoft demo before rerunning
+
+    Install:
+
+    ```bash
+    pip install -U "superoptix[frameworks-microsoft]"
+    ```
+
     Basic RAG:
 
     ```bash
     super agent pull rag_surrealdb_microsoft_demo
-    super agent compile rag_surrealdb_microsoft_demo --framework microsoft
+    super agent compile rag_surrealdb_microsoft_demo --framework microsoft --cloud --provider google-genai --model gemini-2.5-flash
     super agent run rag_surrealdb_microsoft_demo --framework microsoft --cloud --provider google-genai --model gemini-2.5-flash --goal "What is NEON-FOX-742?"
     ```
 
@@ -688,7 +728,7 @@ Important retrieval note:
 
     ```bash
     super agent pull graphrag_surrealdb_microsoft_demo
-    super agent compile graphrag_surrealdb_microsoft_demo --framework microsoft
+    super agent compile graphrag_surrealdb_microsoft_demo --framework microsoft --cloud --provider google-genai --model gemini-2.5-flash
     super agent run graphrag_surrealdb_microsoft_demo --framework microsoft --cloud --provider google-genai --model gemini-2.5-flash --goal "What capabilities does SurrealDB provide?"
     ```
 
@@ -701,6 +741,7 @@ Important retrieval note:
 === "🐍 PydanticAI"
     Note:
 
+    - install with `pip install -U "superoptix[frameworks-pydantic-ai]"`
     - if your installed `superoptix` incorrectly asks for `PYDANTIC_AI_GATEWAY_API_KEY` while using Gemini, force direct mode for now:
 
     ```bash
@@ -708,6 +749,12 @@ Important retrieval note:
     ```
 
     - direct Gemini mode should use `GOOGLE_API_KEY` or `GEMINI_API_KEY`, not `PYDANTIC_AI_GATEWAY_API_KEY`
+
+    Install:
+
+    ```bash
+    pip install -U "superoptix[frameworks-pydantic-ai]"
+    ```
 
     Basic RAG:
 
@@ -732,6 +779,18 @@ Important retrieval note:
     - both runs complete successfully
 
 === "👥 CrewAI"
+    Note:
+
+    - CrewAI is not bundled in `superoptix[frameworks]` because it conflicts with DSPy in the same environment
+    - install CrewAI in a separate environment if you also need DSPy
+
+    Install:
+
+    ```bash
+    pip install -U superoptix
+    pip install -U crewai==1.2.0
+    ```
+
     Basic RAG:
 
     ```bash
@@ -755,6 +814,12 @@ Important retrieval note:
     - both runs complete successfully
 
 === "🔮 Google ADK"
+    Install:
+
+    ```bash
+    pip install -U "superoptix[frameworks-google]"
+    ```
+
     Basic RAG:
 
     ```bash
@@ -778,6 +843,12 @@ Important retrieval note:
     - both runs complete successfully
 
 === "🌊 DeepAgents"
+    Install:
+
+    ```bash
+    pip install -U "superoptix[frameworks-deepagents]"
+    ```
+
     Basic RAG:
 
     ```bash
