@@ -950,14 +950,22 @@ def _run_framework_agent(args, framework: str):
         pipeline = pipeline_class(**init_kwargs)
 
         run_kwargs = {"query": args.goal}
+        primary_input = ""
         playbook_data = getattr(pipeline, "playbook", None)
         if isinstance(playbook_data, dict):
             spec_data = playbook_data.get("spec", {}) or {}
             input_fields = spec_data.get("input_fields", []) or []
             if input_fields and isinstance(input_fields[0], dict):
                 primary_input = str(input_fields[0].get("name", "")).strip()
-                if primary_input and primary_input not in run_kwargs:
-                    run_kwargs[primary_input] = args.goal
+
+        if not primary_input:
+            component = getattr(pipeline, "component", None)
+            component_inputs = getattr(component, "input_fields", []) if component else []
+            if component_inputs:
+                primary_input = str(component_inputs[0]).strip()
+
+        if primary_input and primary_input not in run_kwargs:
+            run_kwargs[primary_input] = args.goal
 
         # Check if it's an async framework
         if hasattr(pipeline, "run") and asyncio.iscoroutinefunction(pipeline.run):
