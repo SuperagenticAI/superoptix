@@ -13,6 +13,10 @@ from superoptix.cli.commands.agent import _find_prebuilt_playbook, _run_framewor
 from superoptix.cli.main import _requires_project_context
 from superoptix.cli.utils import is_superoptix_project, validate_superoptix_project
 from superoptix.runners.crewai_runtime_helpers import build_task_description
+from superoptix.runners.microsoft_runtime_helpers import (
+    GOOGLE_OPENAI_BASE_URL,
+    resolve_client_config,
+)
 
 
 def test_is_superoptix_project_with_super_file():
@@ -225,6 +229,84 @@ def test_run_framework_agent_passes_model_config_to_crewai_pipeline(tmp_path: Pa
 
     try:
         _run_framework_agent(args, "crewai")
+    finally:
+        os.chdir(original_cwd)
+        if original_capture is None:
+            os.environ.pop("SUPEROPTIX_CAPTURE_MODEL_CONFIG", None)
+        else:
+            os.environ["SUPEROPTIX_CAPTURE_MODEL_CONFIG"] = original_capture
+
+    captured = yaml.safe_load(capture_path.read_text())
+    assert captured == {
+        "provider": "google-genai",
+        "model": "gemini-2.5-flash",
+    }
+
+
+def test_resolve_microsoft_client_config_for_google_genai(monkeypatch):
+    monkeypatch.setenv("GOOGLE_API_KEY", "google-test-key")
+
+    config = resolve_client_config(
+        {"provider": "ollama", "model": "llama3.1:8b", "api_base": "http://localhost:11434"},
+        {"provider": "google-genai", "model": "gemini-2.5-flash"},
+    )
+
+    assert config == {
+        "client_type": "openai",
+        "kwargs": {
+            "api_key": "google-test-key",
+            "base_url": GOOGLE_OPENAI_BASE_URL,
+            "model_id": "gemini-2.5-flash",
+        },
+    }
+
+
+def test_run_framework_agent_passes_model_config_to_microsoft_pipeline(tmp_path: Path):
+    project_root = tmp_path
+    (project_root / ".super").write_text("project: demo\n")
+
+    pipeline_dir = project_root / "demo" / "agents" / "demo_agent" / "pipelines"
+    pipeline_dir.mkdir(parents=True)
+    capture_path = project_root / "captured_microsoft_model_config.json"
+
+    pipeline_file = pipeline_dir / "demo_agent_microsoft_pipeline.py"
+    pipeline_file.write_text(
+        "\n".join(
+            [
+                "import json",
+                "import os",
+                "",
+                "class DemoAgentPipeline:",
+                "    def __init__(self, model_config=None):",
+                "        capture_path = os.environ['SUPEROPTIX_CAPTURE_MODEL_CONFIG']",
+                "        with open(capture_path, 'w', encoding='utf-8') as handle:",
+                "            json.dump(model_config or {}, handle)",
+                "",
+                "    async def run(self, query=None, **inputs):",
+                "        return {'retrieved_response': query or inputs.get('query', '')}",
+            ]
+        )
+    )
+
+    args = SimpleNamespace(
+        name="demo_agent",
+        goal="What is NEON-FOX-742?",
+        provider="google-genai",
+        model="gemini-2.5-flash",
+        local=False,
+        gateway=False,
+        direct=False,
+        gateway_url=None,
+        gateway_key_env=None,
+    )
+
+    original_cwd = os.getcwd()
+    original_capture = os.environ.get("SUPEROPTIX_CAPTURE_MODEL_CONFIG")
+    os.chdir(project_root)
+    os.environ["SUPEROPTIX_CAPTURE_MODEL_CONFIG"] = str(capture_path)
+
+    try:
+        _run_framework_agent(args, "microsoft")
     finally:
         os.chdir(original_cwd)
         if original_capture is None:

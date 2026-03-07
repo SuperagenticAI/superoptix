@@ -21,6 +21,7 @@ Important:
 - the published `frameworks-microsoft` extra should install a compatible prerelease `agent-framework` build
 - the Microsoft Python SDK currently exposes `Agent` in newer builds, while some earlier prerelease examples used `ChatAgent`
 - if `super agent run ... --framework microsoft` fails with `cannot import name 'ChatAgent' from 'agent_framework'`, your generated pipeline was compiled against the older API
+- when running Microsoft with Gemini via `--provider google-genai`, set `GOOGLE_API_KEY` or `GEMINI_API_KEY`, not `OPENAI_API_KEY`
 - reinstall the framework package with:
 
 ```bash
