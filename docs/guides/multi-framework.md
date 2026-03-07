@@ -52,7 +52,8 @@ pip install superoptix[frameworks-deepagents]
 pip install superoptix[frameworks-pydantic-ai]
 
 # CrewAI
-pip install superoptix[frameworks-crewai]
+pip install superoptix
+pip install crewai==1.2.0
 
 # All frameworks at once
 pip install superoptix[frameworks]

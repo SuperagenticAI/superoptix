@@ -20,7 +20,8 @@ RLM support is experimental (`assist`, `replace`, `auto` modes). See [RLM (Exper
 ### Install SuperOptiX with CrewAI
 
 ```bash
-pip install superoptix[frameworks-crewai]
+pip install superoptix
+pip install crewai==1.2.0
 ```
 
 **Includes:**

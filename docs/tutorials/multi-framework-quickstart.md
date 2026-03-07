@@ -128,7 +128,7 @@ Choose from DSPy, OpenAI SDK, CrewAI, Google ADK, Microsoft, or DeepAgents
 
 === "CrewAI"
     ```bash
-    uv tool install superoptix --with "superoptix[frameworks-crewai]"
+    uv tool install superoptix --with crewai==1.2.0
     ```
     **Includes:** crewai
     

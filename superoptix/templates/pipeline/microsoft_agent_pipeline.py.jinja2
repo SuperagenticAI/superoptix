@@ -20,14 +20,19 @@ from pathlib import Path
 
 # Microsoft Agent Framework imports
 try:
-	from agent_framework import ChatAgent
+	try:
+		from agent_framework import Agent as MicrosoftAgent
+	except ImportError:
+		from agent_framework import ChatAgent as MicrosoftAgent
 	from agent_framework.openai import OpenAIChatClient
 	from agent_framework.azure import AzureOpenAIChatClient
 	MICROSOFT_FRAMEWORK_AVAILABLE = True
 except ImportError as e:
 	MICROSOFT_FRAMEWORK_AVAILABLE = False
 	print(f"⚠️  Microsoft Agent Framework not available: {e}")
-	print("⚠️  Install with: pip install agent-framework --pre")
+	print(
+		"⚠️  Install with: pip install -U --pre agent-framework azure-identity"
+	)
 
 from superoptix.core.base_component import BaseComponent
 from superoptix.core.rag_mixin import RAGMixin
@@ -54,7 +59,7 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 	"""
 	BaseComponent wrapper for Microsoft Agent Framework - {{ metadata.description }}
 	
-	This component wraps a Microsoft ChatAgent and makes it compatible with 
+	This component wraps a Microsoft Agent Framework agent and makes it compatible with 
 	SuperOptiX's Universal GEPA optimizer.
 	
 	Optimizable Variable: instructions (the agent's system prompt)
@@ -189,14 +194,14 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 		{% endif %}
 	
 	def _initialize_agent(self):
-		"""Initialize the Microsoft ChatAgent."""
+		"""Initialize the Microsoft Agent Framework agent."""
 		if self._agent is not None:
 			return
 		
 		self._initialize_chat_client()
 		
 		# Create agent with current instructions
-		self._agent = ChatAgent(
+		self._agent = MicrosoftAgent(
 			chat_client=self._chat_client,
 			name="{{ agent_name }}",
 			instructions=self.variable,  # GEPA-optimized instructions!
@@ -232,7 +237,7 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 		if not MICROSOFT_FRAMEWORK_AVAILABLE:
 			raise ImportError(
 				"Microsoft Agent Framework not available. "
-				"Install with: pip install agent-framework --pre"
+				"Install with: pip install -U --pre agent-framework azure-identity"
 			)
 		
 		# Re-initialize agent if instructions changed (after GEPA update)
