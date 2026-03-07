@@ -705,21 +705,28 @@ Important retrieval note:
 === "🏢 Microsoft"
     Note:
 
-    - `pip install -U "superoptix[frameworks-microsoft]"` should install the right Microsoft SDK dependency set for published releases
+    - `pip install -U --force-reinstall "superoptix[frameworks-microsoft]"` is the safest upgrade path for Microsoft demos
     - if the run still fails with `cannot import name 'ChatAgent' from 'agent_framework'`, your generated pipeline is still using the older Microsoft SDK API or your env still has an older `agent-framework` build
     - when using Gemini here, set `GOOGLE_API_KEY` or `GEMINI_API_KEY`; do not set only `OPENAI_API_KEY`
+    - if the run fails with `Agent.__init__() missing 1 required positional argument: 'client'`, your generated Microsoft pipeline is stale from an older SuperOptiX release
     - fix the env with `pip install -U --pre agent-framework azure-identity`
-    - then recompile the Microsoft demo before rerunning
+    - then delete the generated Microsoft pipeline files and recompile before rerunning
 
     Install:
 
     ```bash
-    pip install -U "superoptix[frameworks-microsoft]"
+    pip install -U --force-reinstall "superoptix[frameworks-microsoft]"
     ```
 
     Basic RAG:
 
     ```bash
+    export GOOGLE_API_KEY="your-google-api-key"
+    # or: export GEMINI_API_KEY="your-google-api-key"
+
+    rm -f surrealoptix/agents/rag_surrealdb_microsoft_demo/pipelines/rag_surrealdb_microsoft_demo_microsoft_pipeline.py
+    rm -f surrealoptix/agents/rag_surrealdb_microsoft_demo/pipelines/rag_surrealdb_microsoft_demo_microsoft_pipeline_compiled_spec.json
+
     super agent pull rag_surrealdb_microsoft_demo
     super agent compile rag_surrealdb_microsoft_demo --framework microsoft --cloud --provider google-genai --model gemini-2.5-flash
     super agent run rag_surrealdb_microsoft_demo --framework microsoft --cloud --provider google-genai --model gemini-2.5-flash --goal "What is NEON-FOX-742?"
@@ -728,6 +735,12 @@ Important retrieval note:
     GraphRAG:
 
     ```bash
+    export GOOGLE_API_KEY="your-google-api-key"
+    # or: export GEMINI_API_KEY="your-google-api-key"
+
+    rm -f surrealoptix/agents/graphrag_surrealdb_microsoft_demo/pipelines/graphrag_surrealdb_microsoft_demo_microsoft_pipeline.py
+    rm -f surrealoptix/agents/graphrag_surrealdb_microsoft_demo/pipelines/graphrag_surrealdb_microsoft_demo_microsoft_pipeline_compiled_spec.json
+
     super agent pull graphrag_surrealdb_microsoft_demo
     super agent compile graphrag_surrealdb_microsoft_demo --framework microsoft --cloud --provider google-genai --model gemini-2.5-flash
     super agent run graphrag_surrealdb_microsoft_demo --framework microsoft --cloud --provider google-genai --model gemini-2.5-flash --goal "What capabilities does SurrealDB provide?"

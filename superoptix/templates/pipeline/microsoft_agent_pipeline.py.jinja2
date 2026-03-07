@@ -187,7 +187,7 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 		
 		# Create agent with current instructions
 		self._agent = MicrosoftAgent(
-			chat_client=self._chat_client,
+			self._chat_client,
 			name="{{ agent_name }}",
 			instructions=self.variable,  # GEPA-optimized instructions!
 			tools=self._tools if self._tools else None,
