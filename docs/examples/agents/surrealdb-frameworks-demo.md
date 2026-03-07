@@ -5,6 +5,14 @@ This is the single SurrealDB guide for SuperOptiX.
 It combines the earlier beginner demo, Docker demo, and framework guide into one page so you can find everything in one place.
 It starts with the fastest way to run it, then explains the integration in a more technical way.
 
+If you want the companion demo repository with generated pipelines, checked-in playbooks, and recorded SuperOptiX traces, see:
+
+- https://github.com/SuperagenticAI/SurrealOptiX
+
+For the longer architectural write-up behind this integration, see:
+
+- https://super-agentic.ai/resources/super-posts/surrealdb-agent-memory-superoptix
+
 ## What This Guide Covers
 
 You will learn how to:
@@ -41,6 +49,10 @@ If you are already comfortable with SuperOptiX and only want the internals, you 
 If you want the framework-specific demo commands immediately, jump here:
 
 - [SurrealDB Across Frameworks](#surrealdb-across-frameworks)
+
+If you want the working companion project while following this guide, use:
+
+- https://github.com/SuperagenticAI/SurrealOptiX
 
 ## SurrealDB Feature Coverage
 
@@ -565,6 +577,10 @@ Notes:
 ## SurrealDB Across Frameworks
 
 This section demonstrates the same SurrealDB backend across every supported framework.
+
+The companion repository for these generated framework demos and trace files is:
+
+- https://github.com/SuperagenticAI/SurrealOptiX
 
 Use the same shared setup for all tabs:
 
