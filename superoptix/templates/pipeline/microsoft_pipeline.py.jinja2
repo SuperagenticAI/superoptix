@@ -36,6 +36,7 @@ except ImportError as e:
 
 from superoptix.core.base_component import BaseComponent
 from superoptix.core.rag_mixin import RAGMixin
+from superoptix.runners.microsoft_runtime_helpers import resolve_client_config
 
 COMPILED_SPEC_PATH = Path(__file__).resolve().parent / "{{ compiled_spec_filename }}"
 def _load_compiled_spec(path: Path) -> Dict[str, Any]:
@@ -102,6 +103,7 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 		
 		# Store tools
 		self._tools = tools or []
+		self._model_config = dict(model_config or {})
 		
 		# Lazy initialization
 		self._chat_client = None
@@ -164,34 +166,17 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 		"""Initialize the appropriate chat client based on provider."""
 		if self._chat_client is not None:
 			return
-		
-		{% if spec.language_model.provider == "azure" %}
-		# Azure OpenAI configuration
-		self._chat_client = AzureOpenAIChatClient(
-			endpoint=os.getenv("AZURE_OPENAI_ENDPOINT", "{{ spec.language_model.api_base if spec.language_model.api_base else '' }}"),
-			api_key=os.getenv("AZURE_OPENAI_API_KEY", "{{ spec.language_model.api_key if spec.language_model.api_key else '' }}"),
-			deployment_name="{{ spec.language_model.model }}",
+
+		client_config = resolve_client_config(
+			{{ spec.language_model | tojson }},
+			self._model_config,
 		)
-		{% elif spec.language_model.provider == "ollama" %}
-		# Ollama (OpenAI-compatible API)
-		self._chat_client = OpenAIChatClient(
-			api_key="ollama",  # Dummy key for Ollama
-			base_url="{{ spec.language_model.api_base if spec.language_model.api_base else 'http://localhost:11434/v1' }}",
-			model_id="{{ spec.language_model.model }}",
-		)
-		{% else %}
-		# Default: OpenAI
-		api_key = os.getenv("OPENAI_API_KEY", "{{ spec.language_model.api_key if spec.language_model.api_key else '' }}")
-		base_url = "{{ spec.language_model.api_base if spec.language_model.api_base else '' }}"
-		
-		kwargs = {"model_id": "{{ spec.language_model.model }}"}
-		if api_key:
-			kwargs["api_key"] = api_key
-		if base_url:
-			kwargs["base_url"] = base_url
-		
-		self._chat_client = OpenAIChatClient(**kwargs)
-		{% endif %}
+		client_type = client_config.get("client_type")
+		kwargs = dict(client_config.get("kwargs", {}) or {})
+		if client_type == "azure":
+			self._chat_client = AzureOpenAIChatClient(**kwargs)
+		else:
+			self._chat_client = OpenAIChatClient(**kwargs)
 	
 	def _initialize_agent(self):
 		"""Initialize the Microsoft Agent Framework agent."""

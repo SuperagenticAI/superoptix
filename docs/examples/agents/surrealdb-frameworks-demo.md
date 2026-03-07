@@ -707,6 +707,7 @@ Important retrieval note:
 
     - `pip install -U "superoptix[frameworks-microsoft]"` should install the right Microsoft SDK dependency set for published releases
     - if the run still fails with `cannot import name 'ChatAgent' from 'agent_framework'`, your generated pipeline is still using the older Microsoft SDK API or your env still has an older `agent-framework` build
+    - when using Gemini here, set `GOOGLE_API_KEY` or `GEMINI_API_KEY`; do not set only `OPENAI_API_KEY`
     - fix the env with `pip install -U --pre agent-framework azure-identity`
     - then recompile the Microsoft demo before rerunning
 
