@@ -3,8 +3,6 @@
 This module provides both mock and real MCP session implementations:
 - MockMCPSession: For demonstration and testing without actual MCP servers
 - BackgroundMCPServer: For real MCP servers running as background processes
-
-Vendored from Agenspy project and adapted for SuperOptiX architecture.
 """
 
 import logging

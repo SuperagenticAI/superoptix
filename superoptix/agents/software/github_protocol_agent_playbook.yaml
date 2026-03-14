@@ -13,7 +13,7 @@ metadata:
   author: "SuperOptiX"
   tags:
     - "protocol-first"
-    - "agenspy"
+    - "protocols"
     - "mcp"
     - "github"
     - "software"
@@ -22,7 +22,7 @@ metadata:
 
 spec:
   # PROTOCOL-FIRST CONFIGURATION
-  tool_backend: "agenspy"
+  tool_backend: "protocols"
   
   mcp_servers:
     - "mcp://localhost:8080/github"
@@ -108,4 +108,3 @@ config:
   enable_tracing: true
   protocol_timeout: 30
   auto_reconnect: true
-

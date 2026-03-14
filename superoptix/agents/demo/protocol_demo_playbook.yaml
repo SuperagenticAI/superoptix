@@ -13,11 +13,11 @@ metadata:
   tags:
   - demo
   - protocol-first
-  - agenspy
+  - protocols
   - mcp
   created_at: '2025-10-20T00:00:00Z'
 spec:
-  tool_backend: agenspy
+  tool_backend: protocols
   mcp_servers:
   - mcp://demo-server
   language_model:

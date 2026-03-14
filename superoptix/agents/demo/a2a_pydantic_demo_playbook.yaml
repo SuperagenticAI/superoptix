@@ -1,0 +1,72 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: A2A Pydantic AI Demo Agent
+  id: a2a-pydantic-demo
+  namespace: demo
+  version: 1.0.0
+  level: oracles
+  description: Pullable Pydantic AI demo agent for SuperOptiX A2A examples.
+  author: SuperOptiX
+  tags:
+    - a2a
+    - pydantic-ai
+    - demo
+    - protocol
+
+spec:
+  target_framework: pydantic-ai
+
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    temperature: 0.1
+    max_tokens: 1200
+    api_base: http://localhost:11434
+
+  persona:
+    name: FAQ Agent
+    role: FAQ Assistant
+    goal: Provide concise FAQ answers about the platform and demos.
+    instructions: |
+      Answer clearly and briefly.
+      Keep the tone factual and practical.
+
+  input_fields:
+    - name: query
+      type: str
+      description: User question
+      required: true
+
+  output_fields:
+    - name: answer
+      type: str
+      description: Final answer
+      required: true
+
+  tasks:
+    - name: answer_faq
+      instruction: Answer the user question in one short paragraph.
+      inputs:
+        - name: query
+          type: str
+          description: FAQ prompt
+          required: true
+      outputs:
+        - name: answer
+          type: str
+          description: FAQ answer
+
+  feature_specifications:
+    scenarios:
+      - name: faq_response
+        input:
+          query: What is this demo agent for?
+        expected_output:
+          answer: demo agent answer
+
+# Quick Start:
+#   super agent pull a2a-pydantic-demo
+#   super agent compile a2a-pydantic-demo --framework pydantic-ai
+#   super agent run a2a-pydantic-demo --goal "What is this demo agent for?"

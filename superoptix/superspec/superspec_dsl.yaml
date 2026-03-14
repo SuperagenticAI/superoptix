@@ -998,14 +998,42 @@ schema:
           type: string
           required: false
           default: "dspy"
-          enum: ["dspy", "agenspy"]
-          description: "Tool loading approach - dspy (tool-first, manual loading) or agenspy (protocol-first, automatic discovery)"
+          enum: ["dspy", "protocols", "agenspy"]
+          description: "Runtime approach - dspy (tool-first), protocols (native protocol runtime), or agenspy (legacy alias for protocols)"
+
+        protocols:
+          type: array
+          required: false
+          description: "Native protocol configuration for protocol-first agents"
+          items:
+            type: object
+            required: true
+            properties:
+              type:
+                type: string
+                required: true
+                enum: ["mcp", "a2a", "agent2agent"]
+              url:
+                type: string
+                required: true
+              label:
+                type: string
+                required: false
+              transport:
+                type: string
+                required: false
+          tier_restriction: "genies"
+          example:
+            - type: "mcp"
+              url: "mcp://localhost:8080/github"
+            - type: "a2a"
+              url: "https://planner.example.com"
           
         # MCP Server Configuration (Protocol-First Approach)
         mcp_servers:
           type: array
           required: false
-          description: "List of Model Context Protocol (MCP) server URIs for automatic tool discovery (protocol-first approach)"
+          description: "Legacy MCP-only protocol config. Prefer spec.protocols for new playbooks."
           items:
             type: string
             pattern: "^mcp://.*"

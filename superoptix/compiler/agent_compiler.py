@@ -8,6 +8,8 @@ import yaml
 from jinja2 import Environment, FileSystemLoader
 from rich.console import Console
 
+from superoptix.protocols.config import extract_protocol_entries, uses_protocol_runtime
+
 console = Console()
 
 
@@ -159,9 +161,8 @@ class AgentCompiler:
         # Minimal DSPy template - Signature + Module + run path only (PyTorch-like)
         self.minimal_template = "dspy_pipeline_minimal.py.jinja2"
 
-        # Protocol-first template (Agenspy approach) - automatic tool discovery via protocols
-        # This template uses protocol-first approach for automatic tool discovery from MCP servers
-        self.agenspy_template = "dspy_pipeline_agenspy.py.jinja2"
+        # Protocol-first template - automatic tool discovery and agent delegation via protocols
+        self.protocol_template = "dspy_pipeline_protocol.py.jinja2"
 
         # Optimas templates (target-specific)
         self.optimas_templates = {
@@ -220,6 +221,9 @@ class AgentCompiler:
 
         spec = playbook_snake_case.get("spec", {})
         self._apply_dspy_superspec_overrides(spec)
+        protocol_entries = extract_protocol_entries(spec)
+        if protocol_entries:
+            spec["protocols"] = protocol_entries
         spec["persona"] = _normalize_persona(spec.get("persona", {}))
 
         # Resolve signature fields from SuperSpec first, then fallback to first task.
@@ -566,21 +570,22 @@ class AgentCompiler:
                 # Explicitly disable all tool paths.
                 spec["tool_backend"] = "dspy"
                 spec.pop("mcp_servers", None)
+                spec.pop("protocols", None)
                 spec["tool_calling"] = {
                     "enabled": False,
                     "available_tools": [],
                 }
             elif mode == "mcp":
-                # Use protocol-first path for MCP tool discovery.
-                spec["tool_backend"] = "agenspy"
-                if "mcp_servers" in tools_cfg and isinstance(
-                    tools_cfg.get("mcp_servers"), list
-                ):
+                # Use native protocol-first path for MCP tool discovery.
+                spec["tool_backend"] = "protocols"
+                if "mcp_servers" in tools_cfg and isinstance(tools_cfg.get("mcp_servers"), list):
                     spec["mcp_servers"] = tools_cfg.get("mcp_servers")
+                    spec["protocols"] = extract_protocol_entries(spec)
             elif mode == "stackone":
                 # Runner/template will fetch + convert StackOne tools at runtime.
                 spec["tool_backend"] = "dspy"
                 spec.pop("mcp_servers", None)
+                spec.pop("protocols", None)
                 existing_tool_calling = spec.get("tool_calling", {})
                 if not isinstance(existing_tool_calling, dict):
                     existing_tool_calling = {}
@@ -592,6 +597,7 @@ class AgentCompiler:
                 builtin_tools = tools_cfg.get("builtin_tools", [])
                 spec["tool_backend"] = "dspy"
                 spec.pop("mcp_servers", None)
+                spec.pop("protocols", None)
                 if isinstance(builtin_tools, list) and builtin_tools:
                     spec["tool_calling"] = {
                         "enabled": True,
@@ -675,7 +681,7 @@ class AgentCompiler:
     ) -> str:
         """Select unified DSPy template (tierless OSS model)."""
         if use_protocol_first:
-            return self.agenspy_template
+            return self.protocol_template
         return self.minimal_template
 
     def compile(
@@ -742,9 +748,8 @@ class AgentCompiler:
 
             # Detect tool backend (protocol-first vs tool-first)
             spec = context.get("spec", {})
-            tool_backend = spec.get("tool_backend", "dspy")  # Default to tool-first
-            mcp_servers = spec.get("mcp_servers", [])
-            use_protocol_first = (tool_backend == "agenspy") or (len(mcp_servers) > 0)
+            protocol_entries = extract_protocol_entries(spec)
+            use_protocol_first = uses_protocol_runtime(spec)
 
             # Choose template
             effective_tier = context["tier_level"]
@@ -763,7 +768,7 @@ class AgentCompiler:
 
             # Show compilation message with unified pipeline approach details
             if use_protocol_first:
-                mode_text = "Protocol-First DSPy pipeline (Agenspy + MCP discovery)"
+                mode_text = "Protocol-First DSPy pipeline (native protocols)"
             elif compile_profile == "optimized":
                 mode_text = "Unified DSPy pipeline (minimal code + GEPA optimization via runner)"
             else:
@@ -778,22 +783,23 @@ class AgentCompiler:
                     "[cyan]🧠 Optimas Target: Generating pipeline wired to Optimas adapters[/]"
                 )
             elif use_protocol_first:
-                # NEW: Protocol-first template
                 console.print(
-                    "[cyan]🔌 Protocol-First Approach: Automatic tool discovery from MCP servers[/]"
+                    "[cyan]🔌 Protocol-First Approach: Native protocol runtime for MCP and A2A[/]"
                 )
                 console.print(
-                    "[green]🤖 Agenspy Integration: Vendored protocol-first components[/]"
+                    "[bright_yellow]🛠️  Protocol Runtime: No Agenspy shim, protocols are first-class[/]"
                 )
                 console.print(
-                    "[bright_yellow]🛠️  Auto Tool Discovery: No manual tool loading or registration[/]"
+                    "[magenta]🎯 Key Differentiator: Protocol-level orchestration + agent interoperability[/]"
                 )
-                console.print(
-                    "[magenta]🎯 Key Differentiator: Protocol-level optimization + session management[/]"
-                )
-                if mcp_servers:
+                if protocol_entries:
+                    protocol_summary = {}
+                    for entry in protocol_entries:
+                        protocol_summary[entry["type"]] = (
+                            protocol_summary.get(entry["type"], 0) + 1
+                        )
                     console.print(
-                        f"[bright_cyan]📡 MCP Servers: {len(mcp_servers)} configured ({', '.join(mcp_servers[:2])}{'...' if len(mcp_servers) > 2 else ''})[/]"
+                        f"[bright_cyan]📡 Protocols: {len(protocol_entries)} configured ({', '.join(f'{name}={count}' for name, count in sorted(protocol_summary.items()))})[/]"
                     )
             else:
                 console.print(
@@ -807,7 +813,7 @@ class AgentCompiler:
             pipeline_path.write_text(full_pipeline_code)
 
             if use_protocol_first:
-                approach_note = " (protocol-first/agenspy)"
+                approach_note = " (protocol-first/native)"
             elif compile_profile == "optimized":
                 approach_note = " (optimized/unified)"
             else:
@@ -820,22 +826,21 @@ class AgentCompiler:
             # Show guidance based on approach (only in verbose mode)
             if getattr(args, "verbose", False):
                 if use_protocol_first:
-                    # NEW: Protocol-first guidance
                     console.print("\n[dim]💡 Protocol-first pipeline features:[/]")
                     console.print(
-                        "[dim]   • Automatic tool discovery from MCP servers[/]"
+                        "[dim]   • Native protocol runtime for MCP and A2A[/]"
                     )
                     console.print(
-                        "[dim]   • No manual tool loading or registration required[/]"
+                        "[dim]   • No Agenspy dependency or branding in generated code[/]"
                     )
                     console.print(
-                        "[dim]   • Protocol-level optimization compatible with GEPA[/]"
+                        "[dim]   • Protocol-aware agent orchestration[/]"
                     )
                     console.print(
                         "[dim]   • Session management for stateful interactions[/]"
                     )
                     console.print(
-                        "[dim]   • Foundation for Agent2Agent protocol (future)[/]"
+                        "[dim]   • Foundation for exposing agents over A2A[/]"
                     )
                     console.print(
                         "[dim]   • Key differentiator: SuperOptiX protocol-first approach[/]"

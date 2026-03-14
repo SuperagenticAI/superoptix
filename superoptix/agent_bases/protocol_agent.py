@@ -2,8 +2,6 @@
 
 This module provides the foundation for building protocol-first agents that
 treat communication protocols (like MCP) as first-class primitives.
-
-Vendored from Agenspy project and adapted for SuperOptiX architecture.
 """
 
 import logging

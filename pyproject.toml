@@ -136,6 +136,18 @@ mcp = [
     "mcp",
 ]
 
+# A2A protocol support (client + optional HTTP server exposure)
+a2a = [
+    "a2a-sdk[http-server]==0.3.25",
+    "uvicorn>=0.35.0",
+]
+
+# Backward-compatible alias while integrations settle
+protocols-a2a = [
+    "a2a-sdk[http-server]==0.3.25",
+    "uvicorn>=0.35.0",
+]
+
 # RLM providers (optional, opt-in)
 # native: current `from rlm import RLM` implementation
 rlm-native = [

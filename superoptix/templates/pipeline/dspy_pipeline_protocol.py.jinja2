@@ -2,16 +2,16 @@
 {{ agent_name | to_pascal_case }} Agent - Protocol-First DSPy Implementation
 
 Auto-generated from SuperSpec playbook using SuperOptiX compiler.
-Framework: DSPy + Agenspy (Protocol-First)
+Framework: DSPy + Native Protocol Runtime
 Generated: {{ timestamp }}
 
-This is PROTOCOL-FIRST DSPy code using Agenspy's approach!
-Instead of manually loading tools, protocols (like MCP) are used as
-first-class primitives for automatic tool discovery.
+This is PROTOCOL-FIRST DSPy code using SuperOptiX's native protocol runtime.
+Instead of manually loading tools, protocols like MCP and A2A are treated as
+first-class primitives.
 
 Key Differentiator:
 - Traditional DSPy: Tool-first (manual tool loading)
-- SuperOptiX Agenspy: Protocol-first (automatic discovery)
+- SuperOptiX Protocol Runtime: Protocol-first orchestration and interoperability
 
 Metadata:
   Name: {{ metadata.name }}
@@ -27,9 +27,8 @@ from pathlib import Path
 from typing import Dict, Any, List, Optional
 from datetime import datetime
 
-# SuperOptiX Protocol-First imports (vendored Agenspy)
+# SuperOptiX Protocol-First imports
 from superoptix.protocols import ProtocolType, registry
-from superoptix.protocols.mcp import MCPClient
 from superoptix.agent_bases import ProtocolAgent
 from dspy.adapters.types.tool import Tool
 
@@ -39,6 +38,26 @@ logging.basicConfig(
 	format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+COMPILED_SPEC_PATH = Path(__file__).resolve().parent / "{{ compiled_spec_filename }}"
+
+
+def _load_compiled_spec(path: Path) -> Dict[str, Any]:
+	try:
+		with path.open("r", encoding="utf-8") as spec_file:
+			return json.load(spec_file)
+	except FileNotFoundError as exc:
+		raise FileNotFoundError(
+			f"Compiled spec file not found at {path}. Recompile this agent to regenerate pipeline artifacts."
+		) from exc
+	except json.JSONDecodeError as exc:
+		raise ValueError(
+			f"Compiled spec file is invalid JSON at {path}. Recompile this agent to regenerate pipeline artifacts."
+		) from exc
+
+
+_COMPILED_SPEC = _load_compiled_spec(COMPILED_SPEC_PATH)
+PROTOCOL_SPECS = list(_COMPILED_SPEC.get("protocols", []) or [])
 
 {% if spec.rag and spec.rag.enabled %}
 # RAG-specific imports
@@ -116,10 +135,11 @@ class {{ agent_name | to_pascal_case }}Signature(dspy.Signature):
 
 class {{ agent_name | to_pascal_case }}Agent(ProtocolAgent):
 	"""
-	Protocol-first agent using automatic tool discovery from MCP servers.
+	Protocol-first agent using native SuperOptiX protocols.
 
-	This agent connects to protocol servers (like MCP) and automatically
-	discovers available tools, eliminating manual tool configuration.
+	This agent connects to protocol peers like MCP and A2A. MCP peers can
+	contribute DSPy tools automatically, while A2A peers are registered as
+	delegation-capable agent endpoints.
 
 	Key Features:
 	- Automatic tool discovery via protocols
@@ -128,50 +148,66 @@ class {{ agent_name | to_pascal_case }}Agent(ProtocolAgent):
 	- Session management for stateful interactions
 	"""
 
-	def __init__(self, mcp_servers: Optional[List[str]] = None):
+	def __init__(self, protocols: Optional[List[Dict[str, Any]]] = None):
 		"""
 		Initialize protocol-first agent.
 
 		Args:
-			mcp_servers: List of MCP server URIs (e.g., ['mcp://localhost:8080/math'])
+			protocols: List of normalized protocol entries from compiled spec
 		"""
 		super().__init__(agent_id="{{ agent_name }}")
 
-		# Connect to MCP servers and discover tools automatically
 		self.protocol_tools = []
+		self.delegation_peers = []
 
-		if mcp_servers:
-			logger.info(f"🔌 Connecting to {len(mcp_servers)} MCP server(s)...")
+		if protocols:
+			logger.info(f"🔌 Connecting to {len(protocols)} protocol peer(s)...")
 
-			for server_uri in mcp_servers:
+			for protocol_cfg in protocols:
+				protocol_type = str(protocol_cfg.get("type", "")).strip().lower()
+				protocol_url = str(protocol_cfg.get("url", "")).strip()
+				if not protocol_url:
+					continue
 				try:
-					# Create MCP protocol client
-					protocol = registry.create_protocol(
-						ProtocolType.MCP,
-						server_url=server_uri
-					)
+					if protocol_type == "mcp":
+						protocol = registry.create_protocol(
+							ProtocolType.MCP,
+							server_url=protocol_url
+						)
+					elif protocol_type in {"a2a", "agent2agent"}:
+						protocol = registry.create_protocol(
+							ProtocolType.AGENT2AGENT,
+							agent_url=protocol_url
+						)
+					else:
+						logger.warning(f"Skipping unsupported protocol type: {protocol_type}")
+						continue
 
-					# Connect to server
 					if protocol.connect():
 						self.add_protocol(protocol)
 
-						# Discover tools automatically
-						tools = self._discover_tools_from_protocol(protocol)
-						self.protocol_tools.extend(tools)
+						if protocol_type == "mcp":
+							tools = self._discover_tools_from_protocol(protocol)
+							self.protocol_tools.extend(tools)
+							logger.info(
+								f"✅ Connected to {protocol_url}: discovered {len(tools)} tools"
+							)
+						else:
+							self.delegation_peers.append(protocol_url)
+							logger.info(
+								f"✅ Connected to {protocol_url}: A2A peer ready for delegation"
+							)
 
-						logger.info(
-							f"✅ Connected to {server_uri}: "
-							f"discovered {len(tools)} tools"
-						)
 					else:
-						logger.warning(f"❌ Failed to connect to {server_uri}")
+						logger.warning(f"❌ Failed to connect to {protocol_url}")
 
 				except Exception as e:
-					logger.error(f"Error connecting to {server_uri}: {e}")
+					logger.error(f"Error connecting to {protocol_url}: {e}")
 
 			logger.info(
 				f"🛠️  Total tools discovered: {len(self.protocol_tools)} "
-				f"from {len(self.protocols)} protocol(s)"
+				f"from {len(self.protocols)} protocol(s); "
+				f"{len(self.delegation_peers)} delegation peer(s) available"
 			)
 
 {% if spec.reasoning and spec.reasoning.method == 'react' or spec.tools and spec.tools.enabled %}
@@ -193,9 +229,9 @@ class {{ agent_name | to_pascal_case }}Agent(ProtocolAgent):
 		logger.info("✅ ChainOfThought initialized (Oracles tier)")
 {% endif %}
 
-	def _discover_tools_from_protocol(self, protocol: MCPClient) -> List[Tool]:
+	def _discover_tools_from_protocol(self, protocol) -> List[Tool]:
 		"""
-		Discover and convert tools from MCP protocol to DSPy Tools.
+		Discover and convert MCP protocol tools to DSPy Tools.
 
 		This is the protocol-first magic: tools are discovered automatically
 		from the protocol server, not manually configured!
@@ -236,7 +272,7 @@ class {{ agent_name | to_pascal_case }}Agent(ProtocolAgent):
 
 		return dspy_tools
 
-	def _execute_protocol_tool(self, protocol: MCPClient, tool_name: str, args: Dict[str, Any]) -> str:
+	def _execute_protocol_tool(self, protocol, tool_name: str, args: Dict[str, Any]) -> str:
 		"""
 		Execute a tool via the protocol.
 
@@ -287,14 +323,14 @@ class {{ agent_name | to_pascal_case }}Pipeline:
 	Protocol-first pipeline for {{ metadata.name }}.
 
 	This pipeline uses the protocol-first approach where tools are
-	automatically discovered from MCP servers rather than manually loaded.
+	automatically discovered from configured protocols rather than manually loaded.
 
 	Key Differentiators from Tool-First:
 	- Automatic tool discovery
 	- Protocol-level optimization
 	- Session management
 	- No manual tool configuration
-	- Future-ready for Agent2Agent protocol
+	- Native A2A interoperability
 
 	Features:
 	- Playbook loading from YAML
@@ -324,7 +360,7 @@ class {{ agent_name | to_pascal_case }}Pipeline:
 		with open(playbook_path) as f:
 			self.playbook = yaml.safe_load(f)
 
-		self.spec = self.playbook.get("spec", {})
+		self.spec = dict(_COMPILED_SPEC or self.playbook.get("spec", {}) or {})
 		self.config = self.playbook.get("config", {})
 		self.metadata = self.playbook.get("metadata", {})
 
@@ -428,23 +464,25 @@ class {{ agent_name | to_pascal_case }}Pipeline:
 		# ======================================================================
 		# PROTOCOL CONNECTION SETUP (Protocol-First Approach!)
 		# ======================================================================
-		mcp_servers = self.spec.get("mcp_servers", [])
+		protocols = list(self.spec.get("protocols", []) or PROTOCOL_SPECS)
 
-		if not mcp_servers:
+		if not protocols:
 			logger.warning(
-				"⚠️  No MCP servers configured in playbook. "
-				"Add 'mcp_servers' to spec for protocol-first tool discovery."
+				"⚠️  No protocols configured in playbook. "
+				"Add 'protocols' to spec for MCP/A2A integration."
 			)
 			logger.info(
 				"   Example:\n"
 				"   spec:\n"
-				"     mcp_servers:\n"
-				"       - mcp://localhost:8080/math\n"
-				"       - mcp://localhost:8080/github"
+				"     protocols:\n"
+				"       - type: mcp\n"
+				"         url: mcp://localhost:8080/math\n"
+				"       - type: a2a\n"
+				"         url: https://planner.example.com"
 			)
 
 		# Initialize protocol-first agent
-		self.agent = {{ agent_name | to_pascal_case }}Agent(mcp_servers=mcp_servers)
+		self.agent = {{ agent_name | to_pascal_case }}Agent(protocols=protocols)
 
 		# Create references for CLI compatibility
 		self.module = self.agent
@@ -453,6 +491,7 @@ class {{ agent_name | to_pascal_case }}Pipeline:
 		print(f"✅ {{ agent_name | to_pascal_case }} protocol-first pipeline initialized")
 		print(f"   Protocols connected: {len(self.agent.protocols)}")
 		print(f"   Tools discovered: {len(self.agent.protocol_tools)}")
+		print(f"   A2A peers available: {len(self.agent.delegation_peers)}")
 
 	# ==========================================================================
 	# BDD SCENARIO LOADING
@@ -563,6 +602,7 @@ class {{ agent_name | to_pascal_case }}Pipeline:
 				"agent_id": self.agent.agent_id,
 				"protocols_used": [p.protocol_type.value for p in self.agent.protocols],
 				"tools_available": len(self.agent.protocol_tools),
+				"delegation_peers": list(self.agent.delegation_peers),
 				"timestamp": datetime.now().isoformat()
 			}
 
@@ -577,8 +617,8 @@ class {{ agent_name | to_pascal_case }}Pipeline:
 			return {
 				"error": str(e),
 				"metadata": {
-					"agent_id": self.agent.agent_id,
-					"timestamp": datetime.now().isoformat()
+				"agent_id": self.agent.agent_id,
+				"timestamp": datetime.now().isoformat()
 				}
 			}
 
@@ -657,7 +697,8 @@ class {{ agent_name | to_pascal_case }}Pipeline:
 				"agent_id": self.agent.agent_id,
 				"timestamp": datetime.now().isoformat(),
 				"protocols": [p.protocol_type.value for p in self.agent.protocols],
-				"tools_count": len(self.agent.protocol_tools)
+				"tools_count": len(self.agent.protocol_tools),
+				"delegation_peers": list(self.agent.delegation_peers)
 			}
 		}
 

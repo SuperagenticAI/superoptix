@@ -8,17 +8,17 @@ metadata:
   stage: stable
   level: genies
   agent_type: Autonomous
-  description: Protocol-first agent using Agenspy approach for automatic tool discovery - explicit DSPy code
+  description: Protocol-first agent using SuperOptiX native protocol runtime for automatic tool discovery - explicit DSPy code
   author: SuperOptiX
   tags:
   - protocol-first
-  - agenspy
+  - protocols
   - mcp
   - explicit-dspy
   - genies
   created_at: '2025-10-20T00:00:00Z'
 spec:
-  tool_backend: agenspy
+  tool_backend: protocols
   mcp_servers:
   - mcp://demo-server
   language_model:
