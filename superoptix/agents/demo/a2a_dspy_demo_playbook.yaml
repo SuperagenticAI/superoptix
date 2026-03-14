@@ -1,0 +1,77 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: A2A DSPy Demo Agent
+  id: a2a-dspy-demo
+  namespace: demo
+  version: 1.0.0
+  level: oracles
+  description: Pullable DSPy demo agent for SuperOptiX A2A examples.
+  author: SuperOptiX
+  tags:
+    - a2a
+    - dspy
+    - demo
+    - protocol
+
+spec:
+  target_framework: dspy
+  tool_backend: protocols
+
+  language_model:
+    location: local
+    provider: ollama
+    model: llama3.1:8b
+    temperature: 0.2
+    max_tokens: 1200
+    api_base: http://localhost:11434
+
+  persona:
+    name: Research Brief Agent
+    role: Research Analyst
+    goal: Produce concise research briefs and next steps.
+    instructions: |
+      Answer in a compact research-brief style.
+      Give one summary, two key facts, and one recommended next step.
+
+  input_fields:
+    - name: query
+      type: str
+      description: User question for research briefing
+      required: true
+
+  output_fields:
+    - name: response
+      type: str
+      description: Concise research brief
+      required: true
+
+  tasks:
+    - name: research_brief
+      instruction: Create a short research brief for the user query.
+      inputs:
+        - name: query
+          type: str
+          description: Research prompt
+          required: true
+      outputs:
+        - name: response
+          type: str
+          description: Brief answer
+
+  feature_specifications:
+    scenarios:
+      - name: research_summary
+        input:
+          query: Summarize why A2A matters for agent interoperability.
+        expected_output:
+          expected_keywords:
+            - interoperability
+            - agent
+            - protocol
+
+# Quick Start:
+#   super agent pull a2a-dspy-demo
+#   super agent compile a2a-dspy-demo
+#   super agent run a2a-dspy-demo --goal "Summarize A2A in one paragraph"
+

@@ -2150,6 +2150,12 @@ def add_agent(args):
             # CrewAI RLM demo
             "crewai-rlm": "demo/crewai-rlm_playbook.yaml",
             "crewai_rlm": "demo/crewai-rlm_playbook.yaml",
+            # A2A DSPy demo
+            "a2a-dspy-demo": "demo/a2a_dspy_demo_playbook.yaml",
+            "a2a_dspy_demo": "demo/a2a_dspy_demo_playbook.yaml",
+            # A2A Pydantic AI demo
+            "a2a-pydantic-demo": "demo/a2a_pydantic_demo_playbook.yaml",
+            "a2a_pydantic_demo": "demo/a2a_pydantic_demo_playbook.yaml",
         }
 
         source_playbook = _find_prebuilt_playbook(package_root, agent_name, alias_map)

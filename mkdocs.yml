@@ -144,6 +144,11 @@ nav:
       - '🤖 Agent Development': guides/agent-development.md
       - '🔧 Tool Development': guides/tool-development.md
       - '🏛️ Technical Architecture': guides/technical-architecture.md
+  - 🤝 A2A:
+      - '🤝 Introduction': guides/a2a-introduction.md
+      - '📘 A2A Guide': guides/a2a-guide.md
+      - '🧭 Integration Checklist': guides/a2a-integration-checklist.md
+      - '🧪 A2A Demo Guide': guides/a2a-demo-guide.md
   - Evaluate:
       - 'Evaluation & Testing': guides/evaluation-testing.md
       - '🎭 RSpec-Style BDD Testing': guides/bdd.md

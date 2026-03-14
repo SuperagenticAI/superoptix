@@ -1,9 +1,7 @@
 """Protocol registry for SuperOptiX.
 
 This module provides a central registry for managing protocol implementations.
-Users can register custom protocols or use built-in protocols (MCP).
-
-Vendored from Agenspy project and adapted for SuperOptiX architecture.
+Users can register custom protocols or use built-in protocols (MCP, A2A).
 """
 
 import logging
@@ -144,12 +142,14 @@ def register_builtin_protocols() -> None:
     """Register built-in protocol implementations.
 
     This function is called automatically on import to register
-    all built-in protocols (currently only MCP).
+    all built-in protocols.
     """
     try:
+        from superoptix.protocols.a2a.client import A2AClient
         from superoptix.protocols.mcp.client import MCPClient
 
         registry.register_protocol(ProtocolType.MCP, MCPClient)
+        registry.register_protocol(ProtocolType.AGENT2AGENT, A2AClient)
         logger.debug("Built-in protocols registered successfully")
     except ImportError as e:
         logger.warning(f"Failed to register built-in protocols: {e}")

@@ -1,7 +1,6 @@
 """Base protocol interface for SuperOptiX.
 
 This module provides the foundation for protocol-first agent development in SuperOptiX.
-Vendored from Agenspy project and adapted for SuperOptiX architecture.
 
 Protocol-first agents use communication protocols (like MCP) as first-class primitives,
 enabling automatic tool discovery, session management, and protocol-level optimization.
@@ -19,7 +18,7 @@ class ProtocolType(Enum):
 
     Attributes:
         MCP: Model Context Protocol - for tool and context sharing
-        AGENT2AGENT: Direct agent-to-agent communication (future)
+        AGENT2AGENT: Direct agent-to-agent communication (A2A)
         CUSTOM: User-defined custom protocols
     """
 

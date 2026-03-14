@@ -4,8 +4,6 @@ This module provides Model Context Protocol (MCP) client for protocol-first agen
 Implements both mock and real MCP clients:
 - MCPClient: Mock MCP for testing and demonstration
 - RealMCPClient: Real MCP with background server management
-
-Vendored from Agenspy project and adapted for SuperOptiX architecture.
 """
 
 import logging

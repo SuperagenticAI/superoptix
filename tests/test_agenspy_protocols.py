@@ -1,4 +1,4 @@
-"""Unit tests for vendored Agenspy protocol components.
+"""Unit tests for native SuperOptiX protocol components.
 
 Tests cover:
 - BaseProtocol interface
@@ -11,6 +11,7 @@ import pytest
 
 from superoptix.agent_bases import ProtocolAgent
 from superoptix.protocols import BaseProtocol, ProtocolType, registry
+from superoptix.protocols.a2a import A2AClient
 from superoptix.protocols.mcp import MCPClient, MockMCPSession
 
 
@@ -147,6 +148,34 @@ class TestMCPClient:
         assert peers[0] == "mcp://test"
 
 
+class TestA2AClient:
+    """Test A2A client implementation."""
+
+    def test_client_initialization(self):
+        client = A2AClient(agent_url="https://agent.example.com")
+
+        assert client.agent_url == "https://agent.example.com"
+        assert client.protocol_type == ProtocolType.AGENT2AGENT
+        assert client._connected is False
+
+    def test_client_connect_with_mock_card(self):
+        client = A2AClient(
+            agent_url="https://agent.example.com",
+            mock_agent_card={
+                "name": "Mock Agent",
+                "protocol_version": "0.3.0",
+                "capabilities": {"streaming": True},
+                "skills": [{"id": "research"}],
+            },
+        )
+
+        assert client.connect() is True
+        caps = client.get_capabilities()
+        assert caps["protocol"] == "a2a"
+        assert caps["skills"] == ["research"]
+        assert caps["streaming"] is True
+
+
 class TestProtocolAgent:
     """Test ProtocolAgent base class."""
 
@@ -227,10 +256,11 @@ class TestProtocolRegistry:
         assert isinstance(registry, type(registry))
 
     def test_builtin_protocols_registered(self):
-        """Test that MCP is auto-registered."""
+        """Test that built-in protocols are auto-registered."""
         protocols = registry.get_available_protocols()
 
         assert ProtocolType.MCP in protocols
+        assert ProtocolType.AGENT2AGENT in protocols
 
     def test_create_protocol(self):
         """Test creating protocol via registry."""
@@ -239,15 +269,21 @@ class TestProtocolRegistry:
         assert isinstance(protocol, MCPClient)
         assert protocol.server_url == "mcp://test"
 
-    def test_create_unregistered_protocol_fails(self):
-        """Test creating unregistered protocol raises error."""
-        with pytest.raises(ValueError, match="not registered"):
-            registry.create_protocol(ProtocolType.AGENT2AGENT, server_url="a2a://test")
+    def test_create_a2a_protocol(self):
+        """Test creating A2A protocol via registry."""
+        protocol = registry.create_protocol(
+            ProtocolType.AGENT2AGENT,
+            agent_url="https://agent.example.com",
+            mock_agent_card={"skills": []},
+        )
+
+        assert isinstance(protocol, A2AClient)
+        assert protocol.agent_url == "https://agent.example.com"
 
     def test_is_registered(self):
         """Test checking if protocol is registered."""
         assert registry.is_registered(ProtocolType.MCP) is True
-        assert registry.is_registered(ProtocolType.AGENT2AGENT) is False
+        assert registry.is_registered(ProtocolType.AGENT2AGENT) is True
 
     def test_registry_cleanup(self):
         """Test registry cleanup."""

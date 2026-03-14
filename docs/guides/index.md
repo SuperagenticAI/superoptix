@@ -7,6 +7,7 @@ SuperOptiX lets you define agents once in SuperSpec YAML and compile them into m
 - 🧪 [RLM (Experimental)](rlm-experimental.md)
 - 🗂️ [StackOne Connectors](stackone-integration.md)
 - 🧬 [GEPA Optimization](gepa-optimization.md)
+- 🤝 [A2A Introduction](a2a-introduction.md)
 
 ## Start Here
 
@@ -14,6 +15,7 @@ SuperOptiX lets you define agents once in SuperSpec YAML and compile them into m
 - [Multi-Framework Guide](multi-framework.md)
 - [Golden Workflow](golden-workflow.md)
 - [CLI Complete Guide](cli-complete-guide.md)
+- [A2A Guide](a2a-guide.md)
 
 ## Framework Guides
 
@@ -31,6 +33,7 @@ SuperOptiX lets you define agents once in SuperSpec YAML and compile them into m
 
 - [StackOne Integration](stackone-integration.md)
 - [StackOne + Claude SDK](stackone-claude-sdk.md)
+- [A2A Demo Guide](a2a-demo-guide.md)
 
 ## Optimization and Evaluation
 

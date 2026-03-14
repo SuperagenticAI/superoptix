@@ -248,6 +248,9 @@ class SuperSpecXValidator:
         if "optimization" in spec:
             self._validate_optimization_config(spec["optimization"])
 
+        if "protocols" in spec:
+            self._validate_protocols(spec["protocols"])
+
     def _validate_language_model(self, lm_config: Dict[str, Any]):
         """Validate language model configuration."""
         required_fields = ["provider", "model"]
@@ -354,6 +357,27 @@ class SuperSpecXValidator:
             temp = lm_config["temperature"]
             if not isinstance(temp, (int, float)) or temp < 0 or temp > 2:
                 self.errors.append(f"Temperature must be between 0 and 2, got: {temp}")
+
+    def _validate_protocols(self, protocols: Any):
+        """Validate native protocol configuration."""
+        if not isinstance(protocols, list):
+            self.errors.append("spec.protocols must be a list")
+            return
+
+        valid_types = {"mcp", "a2a", "agent2agent"}
+        for idx, protocol in enumerate(protocols):
+            prefix = f"spec.protocols[{idx}]"
+            if not isinstance(protocol, dict):
+                self.errors.append(f"{prefix} must be an object")
+                continue
+            protocol_type = protocol.get("type")
+            if protocol_type not in valid_types:
+                self.errors.append(
+                    f"{prefix}.type must be one of {', '.join(sorted(valid_types))}"
+                )
+            url = protocol.get("url")
+            if not isinstance(url, str) or not url.strip():
+                self.errors.append(f"{prefix}.url must be a non-empty string")
 
         # Validate max_tokens
         if "max_tokens" in lm_config:

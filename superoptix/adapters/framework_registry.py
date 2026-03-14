@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Type
 
 from ..core.base_component import BaseComponent
+from ..protocols.config import uses_protocol_runtime
 
 
 def _write_compiled_spec_sidecar(output_path: str, spec: Dict[str, Any]) -> str:
@@ -163,11 +164,9 @@ class DSPyFrameworkAdapter(FrameworkAdapter):
             agent_name = to_snake_case(agent_name)
 
         spec = playbook.get("spec", {}) or {}
-        tool_backend = str(spec.get("tool_backend", "dspy")).strip().lower()
-        mcp_servers = spec.get("mcp_servers", [])
-        use_protocol_first = (tool_backend == "agenspy") or bool(mcp_servers)
+        use_protocol_first = uses_protocol_runtime(spec)
         template_name = (
-            "dspy_pipeline_agenspy.py.jinja2"
+            "dspy_pipeline_protocol.py.jinja2"
             if use_protocol_first
             else "dspy_pipeline_minimal.py.jinja2"
         )
