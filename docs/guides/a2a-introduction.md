@@ -10,6 +10,19 @@ In SuperOptiX, A2A is the protocol layer used to:
 
 This matters because SuperOptiX already supports multiple agent frameworks. A2A gives those agents a common interoperability surface without forcing them into the same framework runtime.
 
+## A2A v1 Changes In SuperOptiX
+
+In plain terms, SuperOptiX now speaks the newer A2A v1 protocol shape.
+
+That means:
+
+- SuperOptiX agents can introduce themselves using the newer v1 Agent Card format
+- SuperOptiX can call other A2A agents using the newer v1 method names
+- task states and message roles now follow the v1 naming model
+- the CLI and demo flows use the same v1 A2A bridge
+
+So if you are using A2A with SuperOptiX today, you are using the core A2A v1 interoperability model, not the older 0.3-style protocol shape.
+
 ## What A2A Means in SuperOptiX
 
 SuperOptiX treats A2A as a protocol, not as a framework.
@@ -57,26 +70,31 @@ MCP and A2A are complementary:
 
 ## Design Rules in This Repo
 
-SuperOptiX keeps A2A design references under `reference/`, but those files are documentation-only.
-
 Runtime A2A support in SuperOptiX follows these rules:
 
-- no runtime imports from `reference/`
-- no vendored A2A implementation copied from `reference/`
+- no vendored A2A implementation
 - A2A support comes through the external dependency `a2a-sdk`
-- SuperOptiX owns the adapter layer on top of that SDK
+- SuperOptiX owns the protocol adapter layer on top of that dependency boundary
 
 See the decision record:
 
 - [ADR 0001: A2A Integration Boundary](../adrs/0001-a2a-integration-boundary.md)
 
-## Supported SDK Version
+## A2A v1 Protocol And SDK Version
 
-Current MVP support is pinned to:
+SuperOptiX now targets the A2A `1.0` protocol at the adapter boundary.
+
+Official A2A v1 release announcement:
+
+- [Announcing A2A 1.0](https://a2a-protocol.org/latest/announcing-1.0/)
+
+The optional dependency remains pinned to:
 
 ```text
 a2a-sdk[http-server]==0.3.25
 ```
+
+This split exists because the published Python SDK release line still lags the latest protocol spec, so SuperOptiX normalizes protocol `1.0` shapes in its own adapter layer.
 
 This is exposed through the optional package extra:
 
@@ -98,7 +116,7 @@ Available now:
 
 Not complete yet:
 
-- CLI-first serving via `super agent serve --protocol a2a`
+- richer Agent Card security and signatures
 - full cross-framework demo with DSPy + Pydantic AI + CrewAI + ADK talking to each other
 - advanced streaming and push notification demo flows
 
@@ -118,4 +136,3 @@ Relevant modules:
 
 - [A2A Guide](a2a-guide.md)
 - [A2A Demo Guide](a2a-demo-guide.md)
-

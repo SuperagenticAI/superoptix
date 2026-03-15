@@ -2,22 +2,23 @@
 
 This page maps the A2A protocol and Python SDK surfaces to SuperOptiX integration points.
 
-It is based on analysis of the vendored material under `reference/`, which is treated as documentation only. SuperOptiX must integrate A2A through the declared external dependency, not by importing or copying code from `reference/`.
+It is based on analysis of the official A2A protocol and Python SDK materials. SuperOptiX integrates A2A through declared external dependencies, not vendored protocol source code.
 
 ## Scope
 
 Current implementation target:
 
-- A2A Python SDK: `a2a-sdk[http-server]==0.3.25`
+- A2A protocol target: `1.0`
+- Optional Python dependency: `a2a-sdk[http-server]==0.3.25`
 - SuperOptiX A2A dependency boundary: external SDK only
 
-Reference sources reviewed:
+Official sources reviewed:
 
-- `reference/A2A-main/docs/specification.md`
-- `reference/A2A-main/docs/whats-new-v1.md`
-- `reference/a2a-python-main/src/a2a/client/*`
-- `reference/a2a-python-main/src/a2a/server/*`
-- `reference/a2a-python-main/src/a2a/types.py`
+- A2A specification
+- A2A v1 release notes
+- A2A Python SDK client surface
+- A2A Python SDK server surface
+- A2A Python SDK type models
 
 ## Status Legend
 
@@ -29,45 +30,46 @@ Reference sources reviewed:
 
 | Area | Status | Current SuperOptiX Integration | Gap / Next Work |
 | --- | --- | --- | --- |
-| A2A dependency boundary | `done` | ADR and packaging pin the integration to external `a2a-sdk[http-server]==0.3.25` | Keep this boundary enforced during future work |
+| A2A dependency boundary | `done` | ADR and packaging keep A2A behind an external dependency boundary | Keep this boundary enforced during future work |
 | Neutral protocol config | `done` | `spec.protocols[]` exists and legacy Agenspy config is translated | Keep deprecating old Agenspy terminology |
-| Framework-neutral runtime layer | `partial` | `AgentRuntime` provides `invoke`, `metadata`, `capabilities` | Add `stream`, `cancel`, and task-aware context methods |
+| Framework-neutral runtime layer | `done` | `AgentRuntime` now provides `invoke`, `stream`, `cancel`, `metadata`, `capabilities`, plus structured runtime context | Keep the contract stable as more frameworks adopt it |
 | Runtime adapter registry | `done` | Runtime registry exists and is independent of A2A | Add more concrete framework adapters |
 | Compiled pipeline runtime adapter | `done` | Compiled pipeline wrapper works as the first runtime bridge | Keep as generic fallback |
-| Dedicated DSPy runtime adapter | `missing` | No DSPy-specific runtime adapter yet | Add a DSPy adapter if streaming/cancel need DSPy-specific behavior |
-| Dedicated Pydantic AI runtime adapter | `missing` | Demo exists, but not a dedicated runtime adapter layer | Add framework-specific adapter |
-| Dedicated CrewAI runtime adapter | `missing` | None | Add adapter |
-| Dedicated Google ADK runtime adapter | `missing` | None | Add adapter |
+| Dedicated DSPy runtime adapter | `done` | DSPy runtime adapter is registered and selected by the A2A serve flow | Expand once DSPy-native streaming/cancel semantics are added |
+| Dedicated Pydantic AI runtime adapter | `done` | Pydantic AI runtime adapter is registered and selected by the A2A serve flow | Expand if deeper Pydantic AI streaming integration is needed |
+| Dedicated CrewAI runtime adapter | `done` | CrewAI runtime adapter is registered and selected by the A2A serve flow | Expand if CrewAI-specific streaming/cancel behavior needs custom handling |
+| Dedicated Google ADK runtime adapter | `done` | Google ADK runtime adapter is registered and selected by the A2A serve flow | Expand if ADK-specific task/session features need custom handling |
 | Dedicated Microsoft runtime adapter | `missing` | None | Add adapter |
 | Dedicated DeepAgents runtime adapter | `missing` | None | Add adapter |
-| Inbound A2A server bridge | `partial` | SuperOptiX can expose a pipeline through `create_a2a_fastapi_app` | Server wiring is MVP only and needs more SDK hooks exposed |
-| SDK `AgentExecutor` bridge | `partial` | `SuperOptiXA2AExecutor` maps blocking runtime calls into task updates | No runtime-native streaming, resume, or real cancellation |
+| Inbound A2A server bridge | `partial` | SuperOptiX exposes A2A `1.0` card, REST, and JSON-RPC endpoints through `create_a2a_fastapi_app` | Task persistence, richer artifacts, and multi-tenant features are still missing |
+| Runtime execution bridge | `partial` | The server bridge passes runtime context and supports blocking, background, cancel, and streaming execution | Resume and richer task artifact streaming are still missing |
 | Task persistence | `partial` | Uses in-memory task store | Expose persistent task-store options |
 | Request context propagation | `partial` | Basic message text extraction exists | Pass richer task, context, metadata, and tenant info into runtimes |
-| Streaming task updates | `partial` | Status updates are emitted through SDK event queue | No artifact streaming or runtime-native stream support yet |
-| Cancel task | `partial` | A cancel path exists in executor | Runtime contract does not yet support real cancellation |
-| Resubscribe / task resume | `missing` | No SuperOptiX wrapper around this yet | Add support through runtime and server bridge |
+| Streaming task updates | `partial` | Status updates are emitted from the SuperOptiX bridge and can come from runtime `stream(...)` hooks | No artifact streaming mapper yet |
+| Cancel task | `partial` | Runtime `cancel(...)` hook exists and is called by the bridge | Most frameworks still do not implement true cooperative cancellation |
+| Resubscribe / task resume | `partial` | `SubscribeToTask` exists for non-terminal in-flight tasks | Persisted resume and richer replay behavior are still missing |
 | Push notification config | `missing` | Not exposed in SuperOptiX bridge | Wire SDK push config store and sender into server setup |
-| Authenticated extended card | `missing` | Agent cards always declare this as false | Add optional extended-card support |
-| Agent Card generation | `partial` | Name, description, skills, capabilities, provider, JSON-RPC interface are built | Add security, signatures, docs URL, icon URL, extensions, richer interfaces |
+| Authenticated extended card | `missing` | Agent cards currently declare `capabilities.extendedAgentCard: false` | Add optional extended-card support |
+| Agent Card generation | `partial` | Name, description, skills, capabilities, provider, and v1 `supportedInterfaces[]` are built | Add security, signatures, docs URL, icon URL, extensions, richer interfaces |
 | Card security declarations | `missing` | No `security` or `security_schemes` emission | Map auth config into card fields |
 | Card signature support | `missing` | No signature generation or verification policies | Add signing and validation hooks |
-| Outbound A2A client connect/discovery | `done` | Connects to remote card URL and fetches card | Expand configuration surface |
-| Outbound send message | `done` | Sends a message through SDK and captures returned events | Improve result parsing and task-aware orchestration |
-| Outbound get task | `missing` | Not wrapped yet | Add SDK `get_task` support |
-| Outbound cancel task | `missing` | Not wrapped yet | Add SDK `cancel_task` support |
-| Outbound resubscribe | `missing` | Not wrapped yet | Add SDK `resubscribe` support |
+| Outbound A2A client connect/discovery | `done` | Connects to remote card URL, fetches the well-known Agent Card, and normalizes legacy cards | Expand configuration surface |
+| Outbound send message | `done` | Sends `SendMessage` over HTTP+JSON or JSON-RPC v1 bindings | Improve result parsing and task-aware orchestration |
+| Outbound get task | `done` | Wraps `GetTask` | Extend result shaping if richer task rendering is needed |
+| Outbound list tasks | `done` | Wraps `ListTasks` / `GET /tasks` | Add pagination helpers |
+| Outbound cancel task | `done` | Wraps `CancelTask` | Improve terminal-state handling as more runtimes implement true cancellation |
+| Outbound resubscribe | `done` | Wraps `SubscribeToTask` with SSE parsing | Improve event rendering once richer artifact streaming is added |
 | Outbound push callback config | `missing` | Not wrapped yet | Add `set_task_callback` and `get_task_callback` support |
-| Client transport negotiation | `partial` | SDK factory handles transport negotiation internally | Expose client transport preferences in SuperSpec and CLI |
+| Client transport negotiation | `partial` | SuperOptiX selects from `supportedInterfaces[]` with HTTP+JSON / JSON-RPC preference order | Expose client transport preferences in SuperSpec and CLI |
 | Client middleware / auth interceptors | `missing` | No SuperOptiX API for SDK middleware yet | Add auth/interceptor configuration |
 | Extensions negotiation | `missing` | No extension support surfaced in client or card builder | Add extension declaration and opt-in configuration |
 | Observability / tracing | `missing` | No bridge-level A2A telemetry yet | Trace task ID, context ID, remote URL, skill, latency, terminal state |
-| CLI serve flow | `missing` | No `super agent serve --protocol a2a` yet | Add packaged serve command |
+| CLI serve flow | `done` | Compiled agents can be exposed with `super agent serve <name> --protocol a2a` | Expand serve flow as more framework adapters land |
 | CLI card inspection | `missing` | No `super agent inspect-card` yet | Add card inspection command |
 | Packaged demos | `done` | DSPy and Pydantic AI demos exist as packaged modules | Add more frameworks and orchestrated demo |
 | Pullable A2A demos | `done` | `super agent pull` supports A2A DSPy and Pydantic demos | Add more demo aliases as coverage expands |
 | Cross-framework A2A demo | `missing` | No DSPy + Pydantic AI + CrewAI + ADK interop demo yet | Build a single orchestrated multi-agent demo |
-| Spec v1 migration boundary | `partial` | Current implementation is consciously aligned to SDK `0.3.25` | Add explicit compatibility layer for v1 changes |
+| Spec v1 migration boundary | `done` | SuperOptiX now emits and consumes A2A `1.0` shapes while preserving legacy-card normalization | Upgrade to an official `1.x` SDK release once available |
 
 ## Current SuperOptiX Integration Points
 
@@ -103,7 +105,7 @@ From the A2A Python SDK and spec, these are the main surfaces SuperOptiX should 
 - send streaming message
 - get task
 - cancel task
-- resubscribe to task
+- subscribe to task
 - optional push notification configuration
 - task persistence
 - task history
@@ -134,29 +136,36 @@ From the A2A Python SDK and spec, these are the main surfaces SuperOptiX should 
 2. Add real framework adapters for DSPy and Pydantic AI.
 3. Add `super agent serve --protocol a2a`.
 4. Expose persistent task-store and request-context hooks in the server bridge.
-5. Upgrade the A2A client wrapper with `get_task`, `cancel_task`, and `resubscribe`.
+5. Add persistent task store and richer task replay behavior.
 6. Add richer Agent Card support: security, extensions, signatures, extended card.
 7. Add observability at the SuperOptiX bridge layer.
 8. Build the multi-framework interop demo.
-9. Add a v1 compatibility adapter once the SDK support story is ready.
+9. Upgrade to an official `1.x` SDK release once the SDK support story is ready.
 
-## Immediate Acceptance Bar
+## Core Support Acceptance Bar
 
-The A2A integration should not be considered complete until all of the following are true:
+SuperOptiX can reasonably claim core A2A support when all of the following are true:
 
-- no SuperOptiX product code imports from `reference/`
+- no vendored A2A protocol code in SuperOptiX product modules
 - A2A support works only through declared external dependencies
 - inbound A2A serving works from the CLI
 - outbound A2A client supports task follow-up operations, not just initial send
 - at least one DSPy agent and one non-DSPy agent are servable over A2A
+
+## Advanced Completion Bar
+
+The broader A2A integration can be considered more complete later when the following are also true:
+
 - a multi-framework A2A interop demo exists
 - A2A bridge telemetry is visible in SuperOptiX observability
+- richer Agent Card security, signatures, and extensions are implemented
+- persistent task storage and richer replay behavior are available
 
 ## Version Note
 
-The current SuperOptiX integration is built around the pinned Python SDK `0.3.25`.
+The current SuperOptiX integration emits and consumes the A2A `1.0` protocol model.
 
-The A2A protocol reference in `reference/A2A-main` is already at `1.0.0`, and that release introduces breaking changes around:
+The optional Python SDK dependency is still pinned to `0.3.25`, so SuperOptiX carries the protocol compatibility layer itself. The `1.0.0` protocol release introduces breaking changes around:
 
 - operation names
 - event payload shapes
@@ -164,4 +173,4 @@ The A2A protocol reference in `reference/A2A-main` is already at `1.0.0`, and th
 - per-interface protocol versioning
 - task listing and multi-tenancy
 
-SuperOptiX should therefore keep the A2A layer behind a compatibility boundary, so the runtime bridge, CLI, and playbook schema do not need to be redesigned when the product upgrades from the `0.3.x` SDK line to the `1.0` protocol model.
+SuperOptiX should therefore keep the A2A layer behind a compatibility boundary, so the runtime bridge, CLI, and playbook schema do not need to be redesigned when the product later upgrades from the `0.3.x` SDK line to an official `1.x` SDK release.

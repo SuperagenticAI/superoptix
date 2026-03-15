@@ -163,8 +163,14 @@ class TestA2AClient:
             agent_url="https://agent.example.com",
             mock_agent_card={
                 "name": "Mock Agent",
-                "protocol_version": "0.3.0",
-                "capabilities": {"streaming": True},
+                "supportedInterfaces": [
+                    {
+                        "url": "https://agent.example.com",
+                        "protocolBinding": "HTTP+JSON",
+                        "protocolVersion": "1.0",
+                    }
+                ],
+                "capabilities": {"streaming": True, "pushNotifications": False},
                 "skills": [{"id": "research"}],
             },
         )
@@ -174,6 +180,37 @@ class TestA2AClient:
         assert caps["protocol"] == "a2a"
         assert caps["skills"] == ["research"]
         assert caps["streaming"] is True
+
+    def test_client_mock_send_and_follow_up_task_methods(self):
+        client = A2AClient(
+            agent_url="https://agent.example.com",
+            mock_agent_card={
+                "name": "Mock Agent",
+                "supportedInterfaces": [
+                    {
+                        "url": "https://agent.example.com",
+                        "protocolBinding": "HTTP+JSON",
+                        "protocolVersion": "1.0",
+                    }
+                ],
+                "capabilities": {"streaming": True, "pushNotifications": False},
+                "skills": [{"id": "research"}],
+            },
+        )
+
+        assert client.connect() is True
+
+        send_result = client.send_message("hello")
+        task_id = send_result["task_id"]
+        task_payload = client.get_task(task_id)
+        events = client.resubscribe(task_id)
+        cancelled = client.cancel_task(task_id)
+
+        assert task_id.startswith("mock-task-")
+        assert task_payload["status"]["state"] == "TASK_STATE_COMPLETED"
+        assert events["task_id"] == task_id
+        assert len(events["events"]) == 1
+        assert cancelled["status"]["state"] == "TASK_STATE_CANCELED"
 
 
 class TestProtocolAgent:

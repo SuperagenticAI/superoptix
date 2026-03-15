@@ -2,6 +2,9 @@
 
 This folder contains a minimal end-to-end A2A demo for SuperOptiX.
 
+The demo uses the A2A `1.0` protocol shape at the SuperOptiX adapter boundary.
+So the demo servers expose a v1-style Agent Card and v1 operations such as `SendMessage`, `GetTask`, `CancelTask`, and `SubscribeToTask`.
+
 It proves:
 
 - a DSPy-style SuperOptiX pipeline can be exposed as an A2A server
@@ -21,7 +24,7 @@ Not included yet:
 - CrewAI A2A demo
 - Google ADK A2A demo
 - multi-agent cross-framework conversation where DSPy, Pydantic AI, CrewAI, and ADK agents all talk to each other over A2A
-- CLI command like `super agent serve --protocol a2a`
+- full multi-framework orchestrated A2A showcase
 
 So the answer today is: we have DSPy and Pydantic AI A2A demos, but we do not yet have the full multi-framework A2A conversation demo for DSPy + Pydantic AI + CrewAI + ADK.
 
@@ -33,11 +36,7 @@ Install the A2A extra and the Pydantic AI extra:
 pip install -e ".[a2a,frameworks-pydantic-ai]"
 ```
 
-Run all commands from the repository root:
-
-```bash
-cd /path/to/superoptix
-```
+Run all commands from the repository root.
 
 If you are using the installed package and want the demo playbooks inside your project, initialize a SuperOptiX project first and pull the demo agents:
 
@@ -198,7 +197,7 @@ pip install -e ".[a2a,frameworks-pydantic-ai]"
 ## Notes
 
 - These demos focus on blocking request/response and basic task lifecycle.
-- They intentionally avoid imports from `reference/`.
+- They intentionally avoid vendored protocol source code.
 - They use the external `a2a-sdk` through `superoptix[a2a]`.
 
 ## Next Demo To Build

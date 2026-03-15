@@ -1,4 +1,4 @@
-"""Helpers for building A2A Agent Card payloads from SuperSpec playbooks."""
+"""Helpers for building A2A v1 Agent Card payloads from SuperSpec playbooks."""
 
 from __future__ import annotations
 
@@ -18,9 +18,9 @@ def build_a2a_agent_card_payload(
     spec: Dict[str, Any],
     agent_url: str,
     rpc_url: str = "/a2a/jsonrpc",
-    protocol_version: str = "0.3.0",
+    protocol_version: str = "1.0",
 ) -> Dict[str, Any]:
-    """Create a minimal A2A Agent Card payload from SuperSpec metadata."""
+    """Create a minimal A2A v1 Agent Card payload from SuperSpec metadata."""
     tasks = list(spec.get("tasks", []) or [])
     persona = spec.get("persona", {}) or {}
 
@@ -49,36 +49,40 @@ def build_a2a_agent_card_payload(
                 ).strip(),
                 "tags": ["superoptix", "task"],
                 "examples": _skill_examples(task),
-                "input_modes": ["text"],
-                "output_modes": ["text", "task-status"],
+                "inputModes": ["text/plain"],
+                "outputModes": ["text/plain"],
             }
         )
+
+    base_url = agent_url.rstrip("/")
 
     return {
         "name": str(metadata.get("name") or metadata.get("id") or "SuperOptiX Agent"),
         "description": description,
-        "url": f"{agent_url.rstrip('/')}{rpc_url}",
         "version": str(metadata.get("version") or "1.0.0"),
-        "protocol_version": protocol_version,
-        "default_input_modes": ["text"],
-        "default_output_modes": ["text", "task-status"],
+        "supportedInterfaces": [
+            {
+                "url": base_url,
+                "protocolBinding": "HTTP+JSON",
+                "protocolVersion": protocol_version,
+            },
+            {
+                "url": f"{base_url}{rpc_url}",
+                "protocolBinding": "JSONRPC",
+                "protocolVersion": protocol_version,
+            },
+        ],
+        "defaultInputModes": ["text/plain"],
+        "defaultOutputModes": ["text/plain"],
         "capabilities": {
             "streaming": True,
-            "push_notifications": False,
-            "state_transition_history": True,
+            "pushNotifications": False,
+            "stateTransitionHistory": True,
+            "extendedAgentCard": False,
         },
         "skills": skills,
-        "preferred_transport": "JSONRPC",
-        "additional_interfaces": [
-            {
-                "url": f"{agent_url.rstrip('/')}{rpc_url}",
-                "transport": "JSONRPC",
-            }
-        ],
         "provider": {
             "organization": "SuperOptiX",
             "url": "https://super-agentic.ai",
         },
-        "supports_authenticated_extended_card": False,
     }
-
