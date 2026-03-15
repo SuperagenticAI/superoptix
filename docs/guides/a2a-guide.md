@@ -132,6 +132,12 @@ Current packaged demos:
 - Pydantic AI A2A demo
 - Google ADK A2A demo
 
+Important demo note:
+
+- the Google ADK A2A demo requires `GOOGLE_API_KEY`
+- the DSPy and Pydantic AI packaged demos do not require model API keys
+- the full install, terminal layout, and end-to-end run steps are documented in the A2A demo guide
+
 Current pullable demo playbooks:
 
 - `a2a-dspy-demo`
