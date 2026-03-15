@@ -140,6 +140,12 @@ For the full packaged demo set:
 pip install "superoptix[a2a,frameworks-pydantic-ai,frameworks-google]"
 ```
 
+For demo details:
+
+- DSPy demo: no model API key required
+- Pydantic AI demo: no model API key required
+- Google ADK demo: requires `GOOGLE_API_KEY`
+
 Read more:
 
 - A2A introduction: https://superagenticai.github.io/superoptix/guides/a2a-introduction/
