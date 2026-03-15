@@ -5,6 +5,22 @@ All notable changes to SuperOptiX will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.19] - 2026-03-15
+
+### 🚀 Added
+- Core A2A v1 support as a native SuperOptiX protocol capability.
+- `super agent serve <name> --protocol a2a` for exposing compiled agents over A2A.
+- A2A client and server bridges with Agent Card generation and task-oriented interoperability.
+- Packaged A2A demos for DSPy and Pydantic AI, plus pullable demo agents.
+
+### 🔄 Changed
+- Replaced the old Agenspy-oriented protocol path with a neutral runtime and protocol architecture.
+- Updated the website and docs to present A2A as a first-class top-level SuperOptiX capability.
+
+### 📚 Documentation
+- Added dedicated A2A v1 introduction, guide, demo guide, and integration checklist documentation.
+- Added website navigation and landing page coverage for A2A support.
+
 ## [0.2.12] - 2026-03-04
 
 ### 🚀 Added
