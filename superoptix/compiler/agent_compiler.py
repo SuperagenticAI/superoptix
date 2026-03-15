@@ -578,7 +578,9 @@ class AgentCompiler:
             elif mode == "mcp":
                 # Use native protocol-first path for MCP tool discovery.
                 spec["tool_backend"] = "protocols"
-                if "mcp_servers" in tools_cfg and isinstance(tools_cfg.get("mcp_servers"), list):
+                if "mcp_servers" in tools_cfg and isinstance(
+                    tools_cfg.get("mcp_servers"), list
+                ):
                     spec["mcp_servers"] = tools_cfg.get("mcp_servers")
                     spec["protocols"] = extract_protocol_entries(spec)
             elif mode == "stackone":
@@ -833,9 +835,7 @@ class AgentCompiler:
                     console.print(
                         "[dim]   • No Agenspy dependency or branding in generated code[/]"
                     )
-                    console.print(
-                        "[dim]   • Protocol-aware agent orchestration[/]"
-                    )
+                    console.print("[dim]   • Protocol-aware agent orchestration[/]")
                     console.print(
                         "[dim]   • Session management for stateful interactions[/]"
                     )

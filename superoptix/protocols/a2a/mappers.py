@@ -62,9 +62,11 @@ def normalize_agent_card(card: Dict[str, Any]) -> Dict[str, Any]:
                 or "0.3.0",
             }
         )
-        for interface in payload.get("additionalInterfaces") or payload.get(
-            "additional_interfaces"
-        ) or []:
+        for interface in (
+            payload.get("additionalInterfaces")
+            or payload.get("additional_interfaces")
+            or []
+        ):
             normalized = normalize_a2a_payload(interface)
             if isinstance(normalized, dict):
                 supported_interfaces.append(
@@ -83,7 +85,10 @@ def normalize_agent_card(card: Dict[str, Any]) -> Dict[str, Any]:
     capabilities = dict(payload.get("capabilities") or {})
     if "pushNotifications" not in capabilities and "push_notifications" in capabilities:
         capabilities["pushNotifications"] = bool(capabilities.get("push_notifications"))
-    if "stateTransitionHistory" not in capabilities and "state_transition_history" in capabilities:
+    if (
+        "stateTransitionHistory" not in capabilities
+        and "state_transition_history" in capabilities
+    ):
         capabilities["stateTransitionHistory"] = bool(
             capabilities.get("state_transition_history")
         )

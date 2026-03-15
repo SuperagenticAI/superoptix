@@ -956,9 +956,10 @@ def _run_framework_agent(args, framework: str):
             elif framework == "pydantic-ai" and getattr(args, "direct", False):
                 model_config["runtime_mode"] = "direct"
             if framework == "pydantic-ai" and (
-                getattr(args, "gateway_url", None) or (
-                getattr(args, "gateway", False)
-                and getattr(args, "gateway_key_env", None)
+                getattr(args, "gateway_url", None)
+                or (
+                    getattr(args, "gateway", False)
+                    and getattr(args, "gateway_key_env", None)
                 )
             ):
                 model_config["runtime_mode"] = "gateway"
@@ -988,7 +989,9 @@ def _run_framework_agent(args, framework: str):
 
         if not primary_input:
             component = getattr(pipeline, "component", None)
-            component_inputs = getattr(component, "input_fields", []) if component else []
+            component_inputs = (
+                getattr(component, "input_fields", []) if component else []
+            )
             if component_inputs:
                 primary_input = str(component_inputs[0]).strip()
 
@@ -1295,8 +1298,7 @@ def serve_agent(args):
         from superoptix.protocols.a2a import create_a2a_fastapi_app
     except ImportError as exc:
         console.print(
-            "[bold red]❌ A2A serve requires optional dependencies.[/]\n"
-            "Install:"
+            "[bold red]❌ A2A serve requires optional dependencies.[/]\nInstall:"
         )
         console.print('pip install "superoptix[a2a]"', markup=False)
         console.print(str(exc), style="dim", markup=False)

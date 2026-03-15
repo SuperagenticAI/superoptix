@@ -133,7 +133,9 @@ class A2AClient(BaseProtocol):
                     return dict(interface)
         return dict(interfaces[0]) if interfaces else {}
 
-    def _make_message(self, message_text: str, *, task_id: str | None = None) -> Dict[str, Any]:
+    def _make_message(
+        self, message_text: str, *, task_id: str | None = None
+    ) -> Dict[str, Any]:
         return {
             "messageId": str(uuid.uuid4()),
             "taskId": task_id,
@@ -336,7 +338,9 @@ class A2AClient(BaseProtocol):
             self.task_cache[str(task_id)] = payload
         return payload
 
-    def get_task(self, task_id: str, history_length: int | None = None) -> Dict[str, Any]:
+    def get_task(
+        self, task_id: str, history_length: int | None = None
+    ) -> Dict[str, Any]:
         if self.mock_agent_card is not None:
             payload = dict(self.task_cache.get(task_id, {}))
             if not payload:
@@ -351,7 +355,11 @@ class A2AClient(BaseProtocol):
                 {"id": task_id, "historyLength": history_length},
             )
         else:
-            params = {"historyLength": history_length} if history_length is not None else None
+            params = (
+                {"historyLength": history_length}
+                if history_length is not None
+                else None
+            )
             payload = self._rest_request("GET", f"/tasks/{task_id}", params=params)
         return self._cache_task(payload)
 
@@ -428,10 +436,7 @@ class A2AClient(BaseProtocol):
 
     def _handle_request(self, **kwargs) -> dspy.Prediction:
         message_text = str(
-            kwargs.get("message")
-            or kwargs.get("query")
-            or kwargs.get("task")
-            or ""
+            kwargs.get("message") or kwargs.get("query") or kwargs.get("task") or ""
         ).strip()
         if not message_text:
             message_text = "No message provided"

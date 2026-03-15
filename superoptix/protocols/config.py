@@ -96,4 +96,3 @@ def uses_protocol_runtime(spec: Dict[str, Any]) -> bool:
     return tool_backend in LEGACY_PROTOCOL_BACKENDS or bool(
         extract_protocol_entries(spec)
     )
-

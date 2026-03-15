@@ -1,2 +1,1 @@
 """Packaged demos for SuperOptiX."""
-
