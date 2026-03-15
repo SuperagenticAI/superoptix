@@ -3,6 +3,7 @@ import asyncio
 import copy
 import inspect
 import importlib
+import importlib.resources
 import importlib.util
 import json
 import os
@@ -2439,8 +2440,8 @@ def add_agent(args):
         with open(project_root / ".super") as f:
             system_name = yaml.safe_load(f).get("project")
 
-        # Get the correct path to agents directory
-        package_root = Path(__file__).parent.parent.parent
+        # Resolve packaged assets from the installed distribution, not the repo root.
+        package_root = _resolve_package_root()
 
         # Support Optimas demo aliases mapped to testing playbooks
         alias_map = {
@@ -2673,6 +2674,11 @@ def add_agent(args):
 def _normalize_agent_ref(agent_ref: str) -> str:
     """Normalize agent refs so hyphen/underscore variants resolve consistently."""
     return agent_ref.strip().lower().replace("-", "").replace("_", "")
+
+
+def _resolve_package_root() -> Path:
+    """Resolve packaged SuperOptiX assets from the installed distribution."""
+    return Path(str(importlib.resources.files("superoptix")))
 
 
 def _find_prebuilt_playbook(
