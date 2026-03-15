@@ -18,6 +18,18 @@
     <img src="https://img.shields.io/badge/frameworks-8-purple.svg" alt="8 Frameworks" />
   </div>
 
+  <div style="margin: 16px 0 10px 0;">
+    <a href="https://superoptix.ai">
+      <img src="https://img.shields.io/badge/Website-superoptix.ai-111827?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Website" />
+    </a>
+    <a href="https://superagenticai.github.io/superoptix/">
+      <img src="https://img.shields.io/badge/Docs-Open%20Documentation-0f766e?style=for-the-badge&logo=gitbook&logoColor=white" alt="Docs" />
+    </a>
+    <a href="https://superagenticai.github.io/superoptix/guides/a2a-guide/">
+      <img src="https://img.shields.io/badge/A2A-v1%20Guide-0ea5e9?style=for-the-badge&logo=bookstack&logoColor=white" alt="A2A v1 Guide" />
+    </a>
+  </div>
+
   <p style="font-size: 1.0em; margin: 10px 0;">
     Evaluation-first workflow, framework-native pipelines, and GEPA optimization.
   </p>
