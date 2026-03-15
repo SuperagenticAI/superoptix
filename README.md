@@ -126,11 +126,18 @@ That includes:
 - v1 method surface such as `SendMessage`, `GetTask`, `CancelTask`, and `SubscribeToTask`
 - serving compiled agents over A2A with `super agent serve <name> --protocol a2a`
 - calling remote A2A agents through the SuperOptiX A2A client
+- packaged A2A demos for DSPy, Pydantic AI, and Google ADK
 
 Install the optional A2A extra:
 
 ```bash
 pip install "superoptix[a2a]"
+```
+
+For the full packaged demo set:
+
+```bash
+pip install "superoptix[a2a,frameworks-pydantic-ai,frameworks-google]"
 ```
 
 Read more:

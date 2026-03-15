@@ -1,0 +1,75 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: A2A Google ADK Demo Agent
+  id: a2a-adk-demo
+  namespace: demo
+  version: 1.0.0
+  level: oracles
+  description: Pullable Google ADK demo agent for SuperOptiX A2A examples.
+  author: SuperOptiX
+  tags:
+    - a2a
+    - google-adk
+    - demo
+    - protocol
+
+spec:
+  target_framework: google-adk
+
+  language_model:
+    location: cloud
+    provider: google
+    model: gemini-2.5-flash
+    temperature: 0.2
+    max_tokens: 1200
+
+  persona:
+    name: Integration Planner
+    role: Integration Architect
+    goal: Produce concise rollout plans for agent interoperability work.
+    instructions: |
+      Answer in a concise planning style.
+      Give one recommendation, two implementation notes, and one operational caution.
+
+  input_fields:
+    - name: query
+      type: str
+      description: User request for an integration plan
+      required: true
+
+  output_fields:
+    - name: response
+      type: str
+      description: Concise planning answer
+      required: true
+
+  tasks:
+    - name: integration_plan
+      instruction: Create a short integration plan for the user query.
+      inputs:
+        - name: query
+          type: str
+          description: Planning prompt
+          required: true
+      outputs:
+        - name: response
+          type: str
+          description: Planning answer
+
+  feature_specifications:
+    scenarios:
+      - name: adk_planning_response
+        input:
+          query: Outline a rollout plan for A2A support in an enterprise agent platform.
+        expected_output:
+          expected_keywords:
+            - rollout
+            - integration
+            - agent
+
+# Quick Start:
+#   export GOOGLE_API_KEY=your_google_api_key
+#   super agent pull a2a-adk-demo
+#   super agent compile a2a-adk-demo --framework google-adk
+#   super agent run a2a-adk-demo --framework google-adk --goal "Plan an A2A rollout"

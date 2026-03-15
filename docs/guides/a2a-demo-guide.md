@@ -11,7 +11,8 @@ The current demo proves:
 
 1. a DSPy-style agent can be exposed over A2A
 2. a Pydantic AI agent can be exposed over A2A
-3. the SuperOptiX A2A client wrapper can call either agent by URL
+3. a Google ADK agent can be exposed over A2A
+4. the SuperOptiX A2A client wrapper can call any of those agents by URL
 
 It does not yet prove:
 
@@ -25,7 +26,7 @@ This is the best path for users who installed SuperOptiX as a package.
 ### Install
 
 ```bash
-pip install "superoptix[a2a,frameworks-pydantic-ai]"
+pip install "superoptix[a2a,frameworks-pydantic-ai,frameworks-google]"
 ```
 
 ### Start the DSPy A2A demo server
@@ -56,6 +57,22 @@ http://127.0.0.1:8102/a2a/jsonrpc
 
 The Pydantic AI demo uses `pydantic_ai.models.test.TestModel`, so it does not require model API keys.
 
+### Start the Google ADK A2A demo server
+
+The ADK demo requires `GOOGLE_API_KEY` because it uses a real Google ADK + Gemini path.
+
+```bash
+export GOOGLE_API_KEY=your_google_api_key
+python -m superoptix.demos.a2a.google_adk_server_demo --port 8103
+```
+
+Endpoints:
+
+```text
+http://127.0.0.1:8103/.well-known/agent-card.json
+http://127.0.0.1:8103/a2a/jsonrpc
+```
+
 ### Call the DSPy demo
 
 ```bash
@@ -72,6 +89,14 @@ python -m superoptix.demos.a2a.call_remote_a2a_agent \
   --message "What is this FAQ agent for?"
 ```
 
+### Call the Google ADK demo
+
+```bash
+python -m superoptix.demos.a2a.call_remote_a2a_agent \
+  --url http://127.0.0.1:8103 \
+  --message "Outline an enterprise rollout plan for A2A support."
+```
+
 ## Option 2: Pull the Demo Playbooks Into Your Project
 
 If you want the demo playbooks inside a normal SuperOptiX project:
@@ -81,6 +106,7 @@ super init a2a-demo
 cd a2a-demo
 super agent pull a2a-dspy-demo
 super agent pull a2a-pydantic-demo
+super agent pull a2a-adk-demo
 ```
 
 Then compile them like normal agents:
@@ -88,6 +114,7 @@ Then compile them like normal agents:
 ```bash
 super agent compile a2a-dspy-demo
 super agent compile a2a-pydantic-demo --framework pydantic-ai
+super agent compile a2a-adk-demo --framework google-adk
 ```
 
 This gives you local playbooks you can inspect and customize.
@@ -104,6 +131,7 @@ Example with explicit host and port:
 
 ```bash
 super agent serve a2a-pydantic-demo --protocol a2a --framework pydantic-ai --host 127.0.0.1 --port 8102
+super agent serve a2a-adk-demo --protocol a2a --framework google-adk --host 127.0.0.1 --port 8103
 ```
 
 ## Source Checkout Example Scripts
@@ -112,6 +140,7 @@ If you are working from the source tree, the same demos also exist under:
 
 - `examples/a2a/dspy_server_demo.py`
 - `examples/a2a/pydantic_ai_server_demo.py`
+- `examples/a2a/google_adk_server_demo.py`
 - `examples/a2a/call_remote_a2a_agent.py`
 
 Those are useful for development inside the repository, but package users should prefer the `python -m superoptix.demos.a2a...` form.
@@ -133,12 +162,19 @@ python -m superoptix.demos.a2a.pydantic_ai_server_demo --port 8102
 Terminal 3:
 
 ```bash
+export GOOGLE_API_KEY=your_google_api_key
+python -m superoptix.demos.a2a.google_adk_server_demo --port 8103
+```
+
+Terminal 4:
+
+```bash
 python -m superoptix.demos.a2a.call_remote_a2a_agent \
   --url http://127.0.0.1:8101 \
   --message "Create a short research brief about A2A support in SuperOptiX."
 ```
 
-Terminal 4:
+Terminal 5:
 
 ```bash
 python -m superoptix.demos.a2a.call_remote_a2a_agent \
@@ -146,12 +182,19 @@ python -m superoptix.demos.a2a.call_remote_a2a_agent \
   --message "What is this FAQ agent for?"
 ```
 
+Terminal 6:
+
+```bash
+python -m superoptix.demos.a2a.call_remote_a2a_agent \
+  --url http://127.0.0.1:8103 \
+  --message "Outline an enterprise rollout plan for A2A support."
+```
+
 ## Current Limitations
 
 Current demo limitations:
 
 - no CrewAI A2A demo yet
-- no Google ADK A2A demo yet
 - no single orchestrator demo that routes work among multiple framework agents
 
 ## Next Demo Milestone

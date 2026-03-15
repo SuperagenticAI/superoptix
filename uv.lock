@@ -7914,7 +7914,7 @@ wheels = [
 
 [[package]]
 name = "superoptix"
-version = "0.2.18"
+version = "0.2.19"
 source = { editable = "." }
 dependencies = [
     { name = "accelerate" },
@@ -7941,6 +7941,7 @@ a2a = [
     { name = "uvicorn" },
 ]
 all = [
+    { name = "a2a-sdk", extra = ["http-server"] },
     { name = "agent-framework" },
     { name = "azure-identity" },
     { name = "chromadb" },
@@ -8164,6 +8165,7 @@ web = [
 [package.metadata]
 requires-dist = [
     { name = "a2a-sdk", extras = ["http-server"], marker = "extra == 'a2a'", specifier = "==0.3.25" },
+    { name = "a2a-sdk", extras = ["http-server"], marker = "extra == 'all'", specifier = "==0.3.25" },
     { name = "a2a-sdk", extras = ["http-server"], marker = "extra == 'protocols-a2a'", specifier = "==0.3.25" },
     { name = "accelerate" },
     { name = "agent-framework", marker = "extra == 'all'" },

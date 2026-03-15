@@ -2493,6 +2493,9 @@ def add_agent(args):
             # A2A Pydantic AI demo
             "a2a-pydantic-demo": "demo/a2a_pydantic_demo_playbook.yaml",
             "a2a_pydantic_demo": "demo/a2a_pydantic_demo_playbook.yaml",
+            # A2A Google ADK demo
+            "a2a-adk-demo": "demo/a2a_adk_demo_playbook.yaml",
+            "a2a_adk_demo": "demo/a2a_adk_demo_playbook.yaml",
         }
 
         source_playbook = _find_prebuilt_playbook(package_root, agent_name, alias_map)

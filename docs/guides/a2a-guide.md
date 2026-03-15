@@ -10,10 +10,10 @@ Install the A2A extra:
 pip install "superoptix[a2a]"
 ```
 
-If you want to run the packaged Pydantic AI A2A demo too:
+If you want to run the full packaged demo set:
 
 ```bash
-pip install "superoptix[a2a,frameworks-pydantic-ai]"
+pip install "superoptix[a2a,frameworks-pydantic-ai,frameworks-google]"
 ```
 
 ## A2A in the Architecture
@@ -130,11 +130,13 @@ Current packaged demos:
 
 - DSPy A2A demo
 - Pydantic AI A2A demo
+- Google ADK A2A demo
 
 Current pullable demo playbooks:
 
 - `a2a-dspy-demo`
 - `a2a-pydantic-demo`
+- `a2a-adk-demo`
 
 Current non-demo status:
 
@@ -150,6 +152,7 @@ super init a2a-demo
 cd a2a-demo
 super agent pull a2a-dspy-demo
 super agent pull a2a-pydantic-demo
+super agent pull a2a-adk-demo
 ```
 
 Then inspect or compile them:
@@ -157,6 +160,7 @@ Then inspect or compile them:
 ```bash
 super agent compile a2a-dspy-demo
 super agent compile a2a-pydantic-demo --framework pydantic-ai
+super agent compile a2a-adk-demo --framework google-adk
 ```
 
 ## Protocol Config
