@@ -111,6 +111,33 @@ super agent optimize developer --framework dspy --auto light
 - StackOne connector integrations for SaaS tools
 - GEPA optimization flow across frameworks
 - Minimal runtime pipelines by default with optional optimization lifecycle
+- Core A2A v1 agent-to-agent interoperability
+
+---
+
+## A2A v1 Support
+
+SuperOptiX implements the core A2A `1.0` protocol shape.
+
+That includes:
+
+- v1 Agent Cards with `supportedInterfaces[]`
+- v1 task and message semantics
+- v1 method surface such as `SendMessage`, `GetTask`, `CancelTask`, and `SubscribeToTask`
+- serving compiled agents over A2A with `super agent serve <name> --protocol a2a`
+- calling remote A2A agents through the SuperOptiX A2A client
+
+Install the optional A2A extra:
+
+```bash
+pip install "superoptix[a2a]"
+```
+
+Read more:
+
+- A2A introduction: https://superagenticai.github.io/superoptix/guides/a2a-introduction/
+- A2A guide: https://superagenticai.github.io/superoptix/guides/a2a-guide/
+- A2A demo guide: https://superagenticai.github.io/superoptix/guides/a2a-demo-guide/
 
 ---
 

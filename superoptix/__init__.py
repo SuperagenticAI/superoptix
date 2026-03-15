@@ -147,7 +147,7 @@ warnings.filterwarnings(
 # VERSION
 # ============================================================================
 
-__version__ = "0.2.18"
+__version__ = "0.2.19"
 
 # ============================================================================
 # FINAL SAFETY: Re-apply filters after all imports (defense in depth)
