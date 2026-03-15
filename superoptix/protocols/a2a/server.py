@@ -38,8 +38,10 @@ except ImportError:  # pragma: no cover - exercised in live use
 
 
 def _iso8601_now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace(
-        "+00:00", "Z"
+    return (
+        datetime.now(timezone.utc)
+        .isoformat(timespec="milliseconds")
+        .replace("+00:00", "Z")
     )
 
 
@@ -136,7 +138,9 @@ class _A2ATaskStore:
             tasks = [task for task in tasks if task.get("contextId") == context_id]
         if status:
             tasks = [
-                task for task in tasks if (task.get("status") or {}).get("state") == status
+                task
+                for task in tasks
+                if (task.get("status") or {}).get("state") == status
             ]
         total_size = len(tasks)
         size = page_size or total_size
@@ -432,7 +436,9 @@ class _A2ATaskStore:
                 }
             }
 
-    async def cancel(self, task_id: str, *, request: Any | None = None) -> Dict[str, Any]:
+    async def cancel(
+        self, task_id: str, *, request: Any | None = None
+    ) -> Dict[str, Any]:
         task = await self.get(task_id)
         if not task:
             raise KeyError(task_id)
@@ -554,7 +560,9 @@ def create_a2a_fastapi_app(
         return {"task": task}
 
     @app.post("/message:stream")
-    async def stream_message(payload: Dict[str, Any], request: Request) -> StreamingResponse:
+    async def stream_message(
+        payload: Dict[str, Any], request: Request
+    ) -> StreamingResponse:
         iterator = tasks.stream_message(
             message=payload.get("message") or {},
             request=request,
@@ -590,7 +598,9 @@ def create_a2a_fastapi_app(
             raise HTTPException(status_code=404, detail="Task not found")
         state = str((current.get("status") or {}).get("state"))
         if _terminal_state(state):
-            raise HTTPException(status_code=409, detail=f"Task {task_id} is already terminal")
+            raise HTTPException(
+                status_code=409, detail=f"Task {task_id} is already terminal"
+            )
         return _sse_stream(tasks.subscribe(task_id))
 
     @app.post(rpc_url)

@@ -59,9 +59,7 @@ def _call_with_supported_kwargs(
         return func(**kwargs)
 
     accepted = {
-        name: value
-        for name, value in kwargs.items()
-        if name in signature.parameters
+        name: value for name, value in kwargs.items() if name in signature.parameters
     }
     return func(**accepted)
 

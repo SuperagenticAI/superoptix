@@ -24,4 +24,3 @@ def serve_pipeline(
 
     app = create_a2a_fastapi_app(pipeline=pipeline, agent_url=agent_url)
     uvicorn.run(app, host=host, port=port, log_level="info")
-
