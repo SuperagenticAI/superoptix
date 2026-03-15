@@ -178,6 +178,7 @@ from superoptix.cli.commands.agent import (
     optimize_agent,
     remove_agent,
     run_agent,
+    serve_agent,
     show_tier_status,
     test_agent_bdd,
 )
@@ -1507,6 +1508,96 @@ Use `super agent <command> --help` for more information on a specific command.
         help="Show detailed guidance and next steps",
     )
     run_parser.set_defaults(func=run_agent)
+
+    # super agent serve
+    serve_parser = agent_subparsers.add_parser(
+        "serve",
+        aliases=["sv"],
+        help="Serve a compiled agent over A2A.",
+        description="Loads a compiled agent pipeline and exposes it as an A2A server endpoint.",
+        formatter_class=RawDescriptionHelpFormatter,
+    )
+    serve_parser.add_argument("name", help="The name of the agent to serve.")
+    serve_parser.add_argument(
+        "--protocol",
+        choices=["a2a"],
+        default="a2a",
+        help="Protocol to expose (currently only a2a).",
+    )
+    serve_parser.add_argument(
+        "--framework",
+        "-f",
+        choices=[
+            "dspy",
+            "microsoft",
+            "openai",
+            "deepagents",
+            "crewai",
+            "google-adk",
+            "pydantic-ai",
+            "claude-sdk",
+        ],
+        default="dspy",
+        help="Compiled framework to serve (default: dspy). Must match the compiled pipeline.",
+    )
+    serve_parser.add_argument(
+        "--host",
+        default="127.0.0.1",
+        help="Bind host for the server (default: 127.0.0.1).",
+    )
+    serve_parser.add_argument(
+        "--port",
+        type=int,
+        default=8101,
+        help="Bind port for the server (default: 8101).",
+    )
+    serve_parser.add_argument(
+        "--agent-url",
+        help="Public base URL to publish in the Agent Card. Defaults to http://<host>:<port>.",
+    )
+    serve_parser.add_argument(
+        "--rpc-url",
+        default="/a2a/jsonrpc",
+        help="RPC path exposed by the A2A server (default: /a2a/jsonrpc).",
+    )
+    serve_parser.add_argument(
+        "--log-level",
+        choices=["critical", "error", "warning", "info", "debug", "trace"],
+        default="info",
+        help="Server log level (default: info).",
+    )
+    serve_parser.add_argument(
+        "--local",
+        action="store_true",
+        help="Use local provider defaults when the compiled framework accepts runtime model config.",
+    )
+    serve_parser.add_argument(
+        "--provider",
+        help="Override model provider when the compiled framework accepts runtime model config.",
+    )
+    serve_parser.add_argument(
+        "--model",
+        help="Override model id when the compiled framework accepts runtime model config.",
+    )
+    serve_parser.add_argument(
+        "--direct",
+        action="store_true",
+        help="Pydantic AI: use direct provider runtime mode.",
+    )
+    serve_parser.add_argument(
+        "--gateway",
+        action="store_true",
+        help="Pydantic AI: use gateway runtime mode.",
+    )
+    serve_parser.add_argument(
+        "--gateway-url",
+        help="Pydantic AI gateway base URL.",
+    )
+    serve_parser.add_argument(
+        "--gateway-key-env",
+        help="Pydantic AI gateway API key env var name.",
+    )
+    serve_parser.set_defaults(func=serve_agent)
 
     # super agent evaluate
     test_parser = agent_subparsers.add_parser(

@@ -41,6 +41,34 @@ from superoptix.optimizers import UniversalGEPA
 
 console = Console()
 
+_FRAMEWORK_PIPELINE_NAMES = {
+    "microsoft",
+    "openai",
+    "crewai",
+    "google-adk",
+    "deepagents",
+    "pydantic-ai",
+    "claude-sdk",
+}
+
+_FRAMEWORK_DISPLAY_NAMES = {
+    "claude-sdk": "Claude Agent SDK",
+    "crewai": "CrewAI",
+    "pydantic-ai": "Pydantic AI",
+    "openai": "OpenAI Agents SDK",
+    "google-adk": "Google ADK",
+    "microsoft": "Microsoft Agent Framework",
+    "deepagents": "DeepAgents (LangGraph)",
+    "dspy": "DSPy",
+}
+
+_FRAMEWORK_RUNTIME_ADAPTERS = {
+    "crewai": "crewai",
+    "dspy": "dspy",
+    "google-adk": "google_adk",
+    "pydantic-ai": "pydantic_ai",
+}
+
 
 class _MinimalDSPyBDDEvaluator:
     """Compatibility adapter for minimal DSPy modules exposing build_program()."""
@@ -1210,6 +1238,120 @@ def run_agent(args):
         tracer.export_traces()
 
 
+def serve_agent(args):
+    """Serve a compiled agent over a protocol endpoint."""
+    protocol = str(getattr(args, "protocol", "a2a") or "a2a").strip().lower()
+    if protocol != "a2a":
+        console.print(
+            f"[bold red]❌ Unsupported protocol '{protocol}'. Only A2A is available today.[/]"
+        )
+        return
+
+    project_root = Path.cwd()
+    project_name = _load_project_name(project_root)
+    if not project_name:
+        return
+
+    agent_name = args.name.lower()
+    framework = getattr(args, "framework", "dspy")
+    agent_dir = project_root / project_name / "agents" / agent_name
+    framework, pipeline_path = _resolve_framework_pipeline(
+        agent_dir, agent_name, framework, args=args
+    )
+    if not framework or not pipeline_path:
+        return
+
+    if not pipeline_path.exists():
+        console.print(
+            f"\n[bold red]❌ Pipeline not found for agent '{agent_name}'. "
+            f"Run 'super agent compile {agent_name} --framework {framework}' first.[/bold red]"
+        )
+        console.print(f"   Expected: {pipeline_path}")
+        return
+
+    try:
+        module = _import_module_from_path(
+            f"{agent_name}_{framework.replace('-', '_')}_serve",
+            pipeline_path,
+        )
+        pipeline = _instantiate_pipeline_from_module(
+            module,
+            agent_name=agent_name,
+            agent_dir=agent_dir,
+            framework=framework,
+            args=args,
+        )
+    except Exception as exc:
+        console.print(
+            f"\n[bold red]❌ Failed to load compiled pipeline for serving:[/] {exc}"
+        )
+        import traceback
+
+        console.print(traceback.format_exc())
+        return
+
+    try:
+        import uvicorn
+        from superoptix.protocols.a2a import create_a2a_fastapi_app
+    except ImportError as exc:
+        console.print(
+            "[bold red]❌ A2A serve requires optional dependencies.[/]\n"
+            "Install:"
+        )
+        console.print('pip install "superoptix[a2a]"', markup=False)
+        console.print(str(exc), style="dim", markup=False)
+        return
+
+    public_host = args.host
+    if public_host in {"0.0.0.0", "::"}:
+        public_host = "127.0.0.1"
+
+    agent_url = getattr(args, "agent_url", None) or f"http://{public_host}:{args.port}"
+    if getattr(args, "agent_url", None) is None and args.host in {"0.0.0.0", "::"}:
+        console.print(
+            f"[dim]Using {agent_url} for the Agent Card URL. "
+            "Override with --agent-url if clients should use a different address.[/]"
+        )
+
+    console.print(
+        f"🤝 [bold cyan]Serving agent '[yellow]{agent_name}[/]' over A2A using "
+        f"{_FRAMEWORK_DISPLAY_NAMES.get(framework, framework)}...[/]"
+    )
+    console.print(f"[dim]Bind:[/] http://{args.host}:{args.port}")
+    console.print(f"[dim]Agent Card:[/] {agent_url}/.well-known/agent-card.json")
+    console.print(f"[dim]RPC:[/] {agent_url}{args.rpc_url}")
+    console.print()
+
+    try:
+        runtime_adapter = _FRAMEWORK_RUNTIME_ADAPTERS.get(
+            framework, "compiled_pipeline"
+        )
+        app = create_a2a_fastapi_app(
+            pipeline=pipeline,
+            agent_url=agent_url,
+            rpc_url=args.rpc_url,
+            runtime_adapter=runtime_adapter,
+        )
+        uvicorn.run(
+            app,
+            host=args.host,
+            port=args.port,
+            log_level=args.log_level,
+        )
+    except KeyboardInterrupt:
+        console.print("\n[yellow]🛑 Stopped A2A server.[/]")
+    except ImportError as exc:
+        console.print("\n[bold red]❌ Failed to start A2A server.[/]")
+        console.print("Install:", markup=False)
+        console.print('pip install "superoptix[a2a]"', markup=False)
+        console.print(str(exc), style="dim", markup=False)
+    except Exception as exc:
+        console.print(f"\n[bold red]❌ Failed to start A2A server:[/] {exc}")
+        import traceback
+
+        console.print(traceback.format_exc())
+
+
 def test_agent_bdd(args):
     """Handles BDD specification testing of an agent with professional test runner UI."""
     agent_name = args.name.lower()
@@ -2081,7 +2223,6 @@ def design_agent(args):
             except subprocess.TimeoutExpired:
                 process.kill()
             console.print("[green]✅ Designer stopped.[/]")
-
     except Exception as e:
         console.print(f"\n[bold red]❌ Error launching designer:[/] {e}")
         import traceback
@@ -2090,6 +2231,199 @@ def design_agent(args):
         if "process" in locals() and process.poll() is None:
             process.kill()
         sys.exit(1)
+
+
+class _MinimalDSPyServePipeline:
+    """Compatibility wrapper for minimal DSPy programs when serving over A2A."""
+
+    def __init__(self, pipeline_module, playbook_path: Path):
+        self._pipeline_module = pipeline_module
+        self._program = pipeline_module.build_program()
+        self.playbook_path = Path(playbook_path)
+        self.playbook = self._load_playbook()
+        self.spec = self.playbook.get("spec", {}) or {}
+        self.metadata = self.playbook.get("metadata", {}) or {}
+
+    def _load_playbook(self) -> dict:
+        if not self.playbook_path.exists():
+            raise FileNotFoundError(
+                f"Playbook not found for minimal DSPy pipeline: {self.playbook_path}"
+            )
+
+        with open(self.playbook_path, "r") as f:
+            return yaml.safe_load(f) or {}
+
+    def _default_output_field(self) -> str:
+        output_fields = self.spec.get("output_fields", []) or []
+        if output_fields and isinstance(output_fields[0], dict):
+            return str(output_fields[0].get("name") or "response").strip() or "response"
+        return "response"
+
+    def _normalize_result(self, result) -> dict:
+        if isinstance(result, dict):
+            return result
+        if isinstance(result, str):
+            return {"response": result}
+        if hasattr(result, "toDict") and callable(result.toDict):
+            try:
+                payload = result.toDict()
+                if isinstance(payload, dict):
+                    return payload
+            except Exception:
+                pass
+
+        output_field = self._default_output_field()
+        if hasattr(result, output_field):
+            return {output_field: getattr(result, output_field)}
+        if hasattr(result, "response"):
+            return {"response": getattr(result, "response")}
+        return {"response": str(result)}
+
+    def run(self, **inputs) -> dict:
+        if callable(self._program):
+            result = self._program(**inputs)
+        elif hasattr(self._program, "forward") and callable(self._program.forward):
+            result = self._program.forward(**inputs)
+        else:
+            raise TypeError("build_program() returned a non-callable program")
+        return self._normalize_result(result)
+
+
+def _load_project_name(project_root: Path) -> str | None:
+    super_file = project_root / ".super"
+    if not super_file.exists():
+        console.print(
+            "\n[bold red]❌ Not a valid super project. Run 'super init <project_name>' to get started.[/bold red]"
+        )
+        return None
+
+    with open(super_file) as f:
+        config = yaml.safe_load(f) or {}
+    return config.get("project")
+
+
+def _pipeline_path_for(agent_dir: Path, agent_name: str, framework_name: str) -> Path:
+    if framework_name in _FRAMEWORK_PIPELINE_NAMES:
+        suffix = framework_name.replace("-", "_")
+        return agent_dir / "pipelines" / f"{agent_name}_{suffix}_pipeline.py"
+    return agent_dir / "pipelines" / f"{agent_name}_pipeline.py"
+
+
+def _resolve_framework_pipeline(
+    agent_dir: Path,
+    agent_name: str,
+    framework: str,
+    args=None,
+) -> tuple[str, Path] | tuple[None, None]:
+    pipeline_path = _pipeline_path_for(agent_dir, agent_name, framework)
+
+    if framework == "dspy" and not pipeline_path.exists():
+        candidates = [
+            "pydantic-ai",
+            "crewai",
+            "openai",
+            "google-adk",
+            "microsoft",
+            "deepagents",
+            "claude-sdk",
+        ]
+        found = [
+            fw
+            for fw in candidates
+            if _pipeline_path_for(agent_dir, agent_name, fw).exists()
+        ]
+        if len(found) == 1:
+            framework = found[0]
+            pipeline_path = _pipeline_path_for(agent_dir, agent_name, framework)
+            if args is not None:
+                args.framework = framework
+            console.print(f"[dim]Auto-detected compiled framework: {framework}[/]")
+        elif len(found) > 1:
+            console.print(
+                "[yellow]Multiple compiled framework pipelines found. "
+                "Use --framework to choose one explicitly.[/]"
+            )
+            for fw in found:
+                console.print(
+                    f"   - {fw}: {_pipeline_path_for(agent_dir, agent_name, fw)}"
+                )
+            return None, None
+
+    return framework, pipeline_path
+
+
+def _import_module_from_path(module_name: str, module_path: Path):
+    spec = importlib.util.spec_from_file_location(module_name, str(module_path))
+    if not spec or not spec.loader:
+        raise ImportError(f"Unable to import module from {module_path}")
+
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _find_pipeline_class(module):
+    for name, obj in module.__dict__.items():
+        if name.endswith("Pipeline") and isinstance(obj, type):
+            return obj
+    return None
+
+
+def _build_framework_model_config(args, framework: str) -> dict:
+    model_config = {}
+    if getattr(args, "provider", None):
+        model_config["provider"] = args.provider
+    if getattr(args, "model", None):
+        model_config["model"] = args.model
+    if getattr(args, "local", False):
+        model_config.setdefault("provider", "ollama")
+        model_config.setdefault("model", "llama3.1:8b")
+    if framework == "pydantic-ai" and getattr(args, "gateway", False):
+        model_config["runtime_mode"] = "gateway"
+    elif framework == "pydantic-ai" and getattr(args, "direct", False):
+        model_config["runtime_mode"] = "direct"
+    if framework == "pydantic-ai" and (
+        getattr(args, "gateway_url", None)
+        or (getattr(args, "gateway", False) and getattr(args, "gateway_key_env", None))
+    ):
+        model_config["runtime_mode"] = "gateway"
+        model_config["gateway"] = {}
+        if getattr(args, "gateway_url", None):
+            model_config["gateway"]["base_url"] = args.gateway_url
+        if getattr(args, "gateway_key_env", None):
+            model_config["gateway"]["api_key_env"] = args.gateway_key_env
+    return model_config
+
+
+def _instantiate_pipeline_from_module(
+    module,
+    *,
+    agent_name: str,
+    agent_dir: Path,
+    framework: str,
+    args,
+):
+    pipeline_class = _find_pipeline_class(module)
+    if pipeline_class:
+        init_kwargs = {}
+        params = inspect.signature(pipeline_class).parameters
+
+        if framework in _FRAMEWORK_PIPELINE_NAMES:
+            model_config = _build_framework_model_config(args, framework)
+            if "model_config" in params and model_config:
+                init_kwargs["model_config"] = model_config
+
+        if "playbook_path" in params:
+            playbook_path = agent_dir / "playbook" / f"{agent_name}_playbook.yaml"
+            init_kwargs["playbook_path"] = str(playbook_path)
+
+        return pipeline_class(**init_kwargs)
+
+    if framework == "dspy" and hasattr(module, "build_program"):
+        playbook_path = agent_dir / "playbook" / f"{agent_name}_playbook.yaml"
+        return _MinimalDSPyServePipeline(module, playbook_path)
+
+    raise ValueError("No Pipeline class or supported DSPy build_program() found")
 
 
 def add_agent(args):
