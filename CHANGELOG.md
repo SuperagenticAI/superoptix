@@ -5,6 +5,16 @@ All notable changes to SuperOptiX will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.20] - 2026-03-15
+
+### 🚀 Added
+- Packaged Google ADK A2A demo assets and pull alias support for `a2a-adk-demo`.
+- Packaged Google ADK A2A server demo module for installed-package usage.
+
+### 🔄 Changed
+- Updated A2A docs and README to reflect DSPy, Pydantic AI, and Google ADK demo coverage.
+- Prepared the follow-up package release so installed users can pull the Google ADK A2A demo without a source checkout.
+
 ## [0.2.19] - 2026-03-15
 
 ### 🚀 Added

@@ -17,7 +17,8 @@ Available now:
 
 - DSPy-style agent served over A2A
 - Pydantic AI agent served over A2A
-- SuperOptiX A2A client calling either server by URL
+- Google ADK agent served over A2A
+- SuperOptiX A2A client calling those servers by URL
 
 Not included yet:
 
@@ -33,7 +34,7 @@ So the answer today is: we have DSPy and Pydantic AI A2A demos, but we do not ye
 Install the A2A extra and the Pydantic AI extra:
 
 ```bash
-pip install -e ".[a2a,frameworks-pydantic-ai]"
+pip install -e ".[a2a,frameworks-pydantic-ai,frameworks-google]"
 ```
 
 Run all commands from the repository root.
@@ -45,6 +46,7 @@ super init a2a-demo
 cd a2a-demo
 super agent pull a2a-dspy-demo
 super agent pull a2a-pydantic-demo
+super agent pull a2a-adk-demo
 ```
 
 These pulled agents are useful for inspection, customization, compile, and run flows.
@@ -56,8 +58,11 @@ If you installed SuperOptiX as a package, you can run the packaged demo modules 
 ```bash
 python -m superoptix.demos.a2a.dspy_server_demo --port 8101
 python -m superoptix.demos.a2a.pydantic_ai_server_demo --port 8102
+export GOOGLE_API_KEY=your_google_api_key
+python -m superoptix.demos.a2a.google_adk_server_demo --port 8103
 python -m superoptix.demos.a2a.call_remote_a2a_agent --url http://127.0.0.1:8101 --message "Create a short research brief about A2A support in SuperOptiX."
 python -m superoptix.demos.a2a.call_remote_a2a_agent --url http://127.0.0.1:8102 --message "What is this FAQ agent for?"
+python -m superoptix.demos.a2a.call_remote_a2a_agent --url http://127.0.0.1:8103 --message "Outline an enterprise rollout plan for A2A support."
 ```
 
 This path does not require the source checkout examples directory.
@@ -100,7 +105,26 @@ What this server does:
 - exposes a small Pydantic AI FAQ-style agent through the same A2A bridge
 - uses Pydantic AI's local test model so it can run without OpenAI or Anthropic credentials
 
-## 3. Call a remote A2A agent
+## 3. Start the Google ADK demo server
+
+```bash
+export GOOGLE_API_KEY=your_google_api_key
+python examples/a2a/google_adk_server_demo.py --port 8103
+```
+
+Endpoint:
+
+```text
+http://127.0.0.1:8103/.well-known/agent-card.json
+http://127.0.0.1:8103/a2a/jsonrpc
+```
+
+What this server does:
+
+- exposes a real Google ADK agent through the same SuperOptiX A2A bridge
+- uses Gemini through Google ADK, so it requires `GOOGLE_API_KEY`
+
+## 4. Call a remote A2A agent
 
 Call the DSPy demo:
 
@@ -116,6 +140,14 @@ Call the Pydantic AI demo:
 python examples/a2a/call_remote_a2a_agent.py \
   --url http://127.0.0.1:8102 \
   --message "What is this FAQ agent for?"
+```
+
+Call the Google ADK demo:
+
+```bash
+python examples/a2a/call_remote_a2a_agent.py \
+  --url http://127.0.0.1:8103 \
+  --message "Outline an enterprise rollout plan for A2A support."
 ```
 
 The caller script will:
@@ -143,17 +175,32 @@ python examples/a2a/pydantic_ai_server_demo.py --port 8102
 Terminal 3:
 
 ```bash
-python examples/a2a/call_remote_a2a_agent.py \
-  --url http://127.0.0.1:8101 \
-  --message "Create a short research brief about A2A support in SuperOptiX."
+export GOOGLE_API_KEY=your_google_api_key
+python examples/a2a/google_adk_server_demo.py --port 8103
 ```
 
 Terminal 4:
 
 ```bash
 python examples/a2a/call_remote_a2a_agent.py \
+  --url http://127.0.0.1:8101 \
+  --message "Create a short research brief about A2A support in SuperOptiX."
+```
+
+Terminal 5:
+
+```bash
+python examples/a2a/call_remote_a2a_agent.py \
   --url http://127.0.0.1:8102 \
   --message "What is this FAQ agent for?"
+```
+
+Terminal 6:
+
+```bash
+python examples/a2a/call_remote_a2a_agent.py \
+  --url http://127.0.0.1:8103 \
+  --message "Outline an enterprise rollout plan for A2A support."
 ```
 
 ## Pullable Demo Agents
@@ -163,6 +210,7 @@ Built-in pullable demo IDs:
 ```bash
 super agent pull a2a-dspy-demo
 super agent pull a2a-pydantic-demo
+super agent pull a2a-adk-demo
 ```
 
 After pulling, you can inspect or compile them like normal agents:
@@ -170,6 +218,7 @@ After pulling, you can inspect or compile them like normal agents:
 ```bash
 super agent compile a2a-dspy-demo
 super agent compile a2a-pydantic-demo --framework pydantic-ai
+super agent compile a2a-adk-demo --framework google-adk
 ```
 
 These pulled playbooks are packaged with SuperOptiX, so users do not need the repository source tree just to fetch the demo agents.
@@ -188,10 +237,16 @@ If the Pydantic AI demo fails to import:
 pip install -e ".[frameworks-pydantic-ai]"
 ```
 
+If the Google ADK demo fails to import:
+
+```bash
+pip install -e ".[frameworks-google]"
+```
+
 If both are needed:
 
 ```bash
-pip install -e ".[a2a,frameworks-pydantic-ai]"
+pip install -e ".[a2a,frameworks-pydantic-ai,frameworks-google]"
 ```
 
 ## Notes
@@ -206,8 +261,8 @@ The next meaningful example should be:
 
 1. DSPy agent served over A2A
 2. Pydantic AI agent served over A2A
-3. CrewAI agent served over A2A
-4. Google ADK agent served over A2A
+3. Google ADK agent served over A2A
+4. CrewAI agent served over A2A
 5. one orchestrator agent that discovers all four Agent Cards and delegates work between them
 
 That would be the first true cross-framework A2A conversation demo for SuperOptiX.
