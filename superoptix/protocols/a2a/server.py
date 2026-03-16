@@ -24,7 +24,7 @@ from superoptix.runtime.registry import runtime_registry
 logger = logging.getLogger(__name__)
 
 try:
-    from fastapi import FastAPI, HTTPException, Request
+    from fastapi import Body, FastAPI, HTTPException, Request
     from fastapi.responses import JSONResponse, StreamingResponse
 
     FASTAPI_AVAILABLE = True
@@ -551,7 +551,7 @@ def create_a2a_fastapi_app(
         raise HTTPException(status_code=400, detail="Extended agent card not supported")
 
     @app.post("/message:send")
-    async def send_message(payload: Dict[str, Any], request: Request) -> Dict[str, Any]:
+    async def send_message(request: Request, payload: Dict[str, Any] = Body()) -> Dict[str, Any]:
         task = await tasks.send_message(
             message=payload.get("message") or {},
             configuration=payload.get("configuration") or {},
@@ -561,7 +561,7 @@ def create_a2a_fastapi_app(
 
     @app.post("/message:stream")
     async def stream_message(
-        payload: Dict[str, Any], request: Request
+        request: Request, payload: Dict[str, Any] = Body()
     ) -> StreamingResponse:
         iterator = tasks.stream_message(
             message=payload.get("message") or {},
@@ -604,7 +604,7 @@ def create_a2a_fastapi_app(
         return _sse_stream(tasks.subscribe(task_id))
 
     @app.post(rpc_url)
-    async def jsonrpc(payload: Dict[str, Any], request: Request) -> Any:
+    async def jsonrpc(request: Request, payload: Dict[str, Any] = Body()) -> Any:
         method = str(payload.get("method") or "")
         request_id = payload.get("id")
         params = normalize_a2a_payload(payload.get("params") or {})
