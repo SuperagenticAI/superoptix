@@ -28,6 +28,19 @@ pip install superoptix[vectordb]
 - GenericRAGAdapter for RAG optimization
 - All vector databases (ChromaDB, LanceDB, Weaviate, Qdrant, Milvus)
 
+**Optional TurboAgents integration:**
+
+```bash
+pip install "superoptix[turboagents]"
+```
+
+This enables `turboagents`-backed GEPA vector stores for FAISS, LanceDB, and
+SurrealDB, plus the matching `rag.retriever_type` values:
+
+- `turboagents-faiss`
+- `turboagents-lancedb`
+- `turboagents-surrealdb`
+
 **Requirements:**
 - Python 3.11+
 - Git (for DSPy dependency)

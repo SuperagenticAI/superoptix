@@ -305,9 +305,10 @@ def load_surreal_vector_store(playbook_path: Path) -> dict[str, Any]:
         playbook = yaml.safe_load(handle) or {}
     spec = playbook.get("spec", {}) or {}
     rag = spec.get("rag", {}) or {}
-    if str(rag.get("retriever_type", "")).strip().lower() != "surrealdb":
+    retriever_type = str(rag.get("retriever_type", "")).strip().lower()
+    if retriever_type not in {"surrealdb", "turboagents-surrealdb"}:
         raise ValueError(
-            f"Playbook {playbook_path} is not configured with retriever_type: surrealdb"
+            f"Playbook {playbook_path} is not configured with retriever_type: surrealdb or turboagents-surrealdb"
         )
     vector_store = dict(rag.get("vector_store", {}) or {})
     if not vector_store:

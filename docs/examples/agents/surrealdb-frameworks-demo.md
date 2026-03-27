@@ -23,6 +23,7 @@ You will learn how to:
 - run GraphRAG
 - run the same SurrealDB-backed behavior across multiple frameworks
 - understand which SurrealDB features are already integrated in SuperOptiX
+- understand where `turboagents-surrealdb` now fits into the SuperOptiX retrieval story
 
 This guide is written in two layers:
 
@@ -69,6 +70,21 @@ This table lists every SurrealDB capability currently integrated in SuperOptiX.
 | `surrealdb-live-memory` | Live memory stream utility (`LIVE SELECT`) | Supported utility | `superoptix.memory.LiveMemorySubscriber` |
 | `surrealdb-mcp-readonly` | Read-only SurrealDB MCP tool (`surrealdb_query`) | Supported | built-in tool config |
 | `surrealdb-capability-gating` | Runtime capability detection + graceful fallback | Supported | automatic at runtime |
+| `turboagents-surrealdb-rag` | TurboAgents-backed SurrealDB compressed retrieval | Supported | `rag_surrealdb_demo` with `retriever_type: turboagents-surrealdb` |
+
+## TurboAgents-SurrealDB Path
+
+The standard SuperOptiX SurrealDB integration is still available, but the main
+demo playbook now uses the `turboagents-surrealdb` retriever path.
+
+That means:
+
+- SuperOptiX still uses its normal RAG configuration surface
+- SurrealDB remains the storage and candidate-search backend
+- TurboAgents provides the compressed retrieval and rerank layer under the same agent flow
+
+This is the current recommended path if you want to evaluate TurboAgents inside
+SuperOptiX without leaving the standard playbook model.
 
 ## Technical Architecture
 
@@ -89,7 +105,7 @@ The runtime is split into these pieces:
 
 In practice, the integration flow looks like this:
 
-1. a playbook selects `retriever_type: surrealdb`
+1. a standard RAG playbook selects `retriever_type: turboagents-surrealdb`
 2. SuperOptiX compiles the same playbook into the target framework
 3. at runtime, the shared RAG layer talks to SurrealDB
 4. framework adapters receive the same retrieved context regardless of framework
@@ -268,16 +284,20 @@ Run this in Terminal C:
 With `uv`:
 
 ```bash
-uv pip install "superoptix[surrealdb]"
+uv pip install "superoptix[turboagents]"
 ollama pull llama3.1:8b
 ```
 
 Or with `pip`:
 
 ```bash
-pip install "superoptix[surrealdb]"
+pip install "superoptix[turboagents]"
 ollama pull llama3.1:8b
 ```
+
+If you want the older native-only SurrealDB path, `superoptix[surrealdb]` still
+works. The TurboAgents integration path uses the new extra because it pulls in
+`turboagents[rag]` as well.
 
 What this does:
 
@@ -1043,11 +1063,14 @@ This is the smallest SurrealDB RAG configuration that works:
 ```yaml
 rag:
   enabled: true
-  retriever_type: surrealdb
+  retriever_type: turboagents-surrealdb
   config:
     top_k: 5
     retrieval_mode: vector
   vector_store:
+    embedding_model: sentence-transformers/all-MiniLM-L6-v2
+    embedding_dimension: 64
+    bits: 3.5
     url: ws://localhost:8000
     namespace: superoptix
     database: knowledge

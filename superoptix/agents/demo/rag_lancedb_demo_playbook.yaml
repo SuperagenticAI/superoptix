@@ -132,7 +132,7 @@ spec:
       max_episodes: 50
   rag:
     enabled: true
-    retriever_type: lancedb
+    retriever_type: turboagents-lancedb
     config:
       top_k: 10
       chunk_size: 1024
@@ -140,8 +140,11 @@ spec:
       similarity_threshold: 0.75
     vector_store:
       embedding_model: sentence-transformers/all-MiniLM-L6-v2
+      embedding_dimension: 64
+      bits: 3.5
+      rerank_top: 16
       table_name: lancedb_demo_table
-      database_path: ./data/lancedb
+      uri: ./data/lancedb
   evaluation:
     builtin_metrics:
     - name: retrieval_speed

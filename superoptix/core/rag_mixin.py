@@ -8,12 +8,15 @@ This mixin provides RAG capabilities to DSPy pipelines, supporting:
 - Integration with DSPy ReAct agents
 """
 
+import asyncio
 import json
 import logging
 import time
 from typing import Dict, Any, List, Optional
 from pathlib import Path
 from urllib.parse import urlparse
+
+import numpy as np
 
 try:
     import dspy  # noqa: F401
@@ -79,6 +82,12 @@ try:
     SURREALDB_AVAILABLE = True
 except ImportError:
     SURREALDB_AVAILABLE = False
+
+
+def _turboagents_available() -> bool:
+    import importlib.util
+
+    return importlib.util.find_spec("turboagents") is not None
 
 logger = logging.getLogger(__name__)
 
@@ -193,10 +202,25 @@ class RAGMixin:
                     self._print_dependency_help("surrealdb", "SurrealDB")
                     return None
                 return self._setup_surrealdb(vector_store)
+            elif retriever_type == "turboagents-faiss":
+                if not _turboagents_available():
+                    self._print_dependency_help("turboagents[rag]", "TurboAgents FAISS")
+                    return None
+                return self._setup_turboagents_faiss(vector_store)
+            elif retriever_type == "turboagents-lancedb":
+                if not _turboagents_available():
+                    self._print_dependency_help("turboagents[rag]", "TurboAgents LanceDB")
+                    return None
+                return self._setup_turboagents_lancedb(vector_store)
+            elif retriever_type == "turboagents-surrealdb":
+                if not _turboagents_available():
+                    self._print_dependency_help("turboagents[rag]", "TurboAgents SurrealDB")
+                    return None
+                return self._setup_turboagents_surrealdb(vector_store)
             else:
                 logger.error(f"❌ Unsupported retriever type: {retriever_type}")
                 logger.error(
-                    "Supported types: chroma, lancedb, faiss, weaviate, qdrant, milvus, pinecone, surrealdb"
+                    "Supported types: chroma, lancedb, faiss, weaviate, qdrant, milvus, pinecone, surrealdb, turboagents-faiss, turboagents-lancedb, turboagents-surrealdb"
                 )
                 return None
 
@@ -559,6 +583,139 @@ class RAGMixin:
             logger.error(f"SurrealDB setup failed: {e}")
             return None
 
+    def _get_turboagents_dim(self, config: Dict[str, Any]) -> int:
+        raw_dim = config.get(
+            "embedding_dimension", config.get("dim", config.get("head_dim", 128))
+        )
+        try:
+            dim = int(raw_dim)
+        except (TypeError, ValueError):
+            raise ValueError(f"Invalid turboagents dimension: {raw_dim!r}") from None
+        if dim not in {64, 128, 256}:
+            raise ValueError(
+                f"TurboAgents requires embedding_dimension/head_dim of 64, 128, or 256; got {dim}."
+            )
+        return dim
+
+    def _get_turboagents_embedder(self, config: Dict[str, Any]):
+        from sentence_transformers import SentenceTransformer
+
+        model_name = config.get("embedding_model", "all-MiniLM-L6-v2")
+        dim = self._get_turboagents_dim(config)
+
+        cache = getattr(self, "_rag_embedding_models", None)
+        if cache is None:
+            cache = {}
+            self._rag_embedding_models = cache
+
+        model = cache.get(model_name)
+        if model is None:
+            model = SentenceTransformer(model_name)
+            cache[model_name] = model
+
+        def embed(text: str) -> list[float]:
+            encoded = model.encode(text)
+            if hasattr(encoded, "tolist"):
+                encoded = encoded.tolist()
+            vector = [float(value) for value in list(encoded)]
+            if len(vector) >= dim:
+                return vector[:dim]
+            return vector + ([0.0] * (dim - len(vector)))
+
+        return embed
+
+    def _prepare_turboagents_documents(
+        self, documents: List[Dict[str, Any]], embed
+    ) -> tuple[list[list[float]], list[Dict[str, Any]]]:
+        embeddings: list[list[float]] = []
+        metadata: list[Dict[str, Any]] = []
+        for i, doc in enumerate(documents):
+            content = str(doc.get("content", ""))
+            meta = dict(doc.get("metadata", {}))
+            meta.setdefault("id", doc.get("id", f"doc_{i}"))
+            meta.setdefault("content", content)
+            embeddings.append(embed(content))
+            metadata.append(meta)
+        return embeddings, metadata
+
+    def _extract_turboagents_content(self, result: Dict[str, Any]) -> str:
+        metadata = result.get("metadata", {})
+        if isinstance(metadata, dict):
+            content = metadata.get("content")
+            if content is not None:
+                return str(content)
+        return str(result.get("content", ""))
+
+    def _setup_turboagents_faiss(self, config: Dict[str, Any]):
+        from turboagents.rag import TurboFAISS
+
+        dim = self._get_turboagents_dim(config)
+        bits = float(config.get("bits", 3.5))
+        seed = int(config.get("seed", 0))
+        rerank_top = int(
+            config.get("rerank_top", max(int(config.get("top_k", 5)), 8))
+        )
+        return {
+            "type": "turboagents-faiss",
+            "store": TurboFAISS(dim=dim, bits=bits, seed=seed),
+            "embed": self._get_turboagents_embedder(config),
+            "rerank_top": rerank_top,
+            "config": config,
+        }
+
+    def _setup_turboagents_lancedb(self, config: Dict[str, Any]):
+        from turboagents.rag import TurboLanceDB
+
+        dim = self._get_turboagents_dim(config)
+        bits = float(config.get("bits", 3.5))
+        seed = int(config.get("seed", 0))
+        uri = config.get(
+            "uri", config.get("db_path", ".superoptix/turboagents-lancedb")
+        )
+        table_name = config.get(
+            "table_name", config.get("collection_name", "documents")
+        )
+        rerank_top = int(
+            config.get("rerank_top", max(int(config.get("top_k", 5)), 8))
+        )
+        return {
+            "type": "turboagents-lancedb",
+            "store": TurboLanceDB(uri, dim=dim, bits=bits, seed=seed),
+            "embed": self._get_turboagents_embedder(config),
+            "rerank_top": rerank_top,
+            "table_name": table_name,
+            "table_created": False,
+            "config": config,
+        }
+
+    def _setup_turboagents_surrealdb(self, config: Dict[str, Any]):
+        from turboagents.rag import TurboSurrealDB
+
+        dim = self._get_turboagents_dim(config)
+        bits = float(config.get("bits", 3.5))
+        seed = int(config.get("seed", 0))
+        rerank_top = int(
+            config.get("rerank_top", max(int(config.get("top_k", 5)), 8))
+        )
+        return {
+            "type": "turboagents-surrealdb",
+            "store": TurboSurrealDB(
+                url=self._normalize_surrealdb_url(config.get("url", "ws://localhost:8000")),
+                namespace=config.get("namespace", "test"),
+                database=config.get("database", "test"),
+                dim=dim,
+                bits=bits,
+                seed=seed,
+                metric=config.get("metric", "COSINE"),
+                auth=config.get("auth"),
+            ),
+            "embed": self._get_turboagents_embedder(config),
+            "rerank_top": rerank_top,
+            "table_name": config.get("table_name", "documents"),
+            "collection_created": False,
+            "config": config,
+        }
+
     def _surrealdb_default_skip_signin(self, url: str) -> bool:
         """Default signin behavior based on SurrealDB URL scheme."""
         parsed = urlparse(url)
@@ -819,6 +976,12 @@ class RAGMixin:
                 return await self._query_pinecone(query, top_k)
             elif db_type == "surrealdb":
                 return await self._query_surrealdb(query, top_k)
+            elif db_type == "turboagents-faiss":
+                return await self._query_turboagents_faiss(query, top_k)
+            elif db_type == "turboagents-lancedb":
+                return await self._query_turboagents_lancedb(query, top_k)
+            elif db_type == "turboagents-surrealdb":
+                return await self._query_turboagents_surrealdb(query, top_k)
             else:
                 logger.warning(f"Unknown vector database type: {db_type}")
                 return []
@@ -1175,6 +1338,50 @@ class RAGMixin:
             logger.error(f"SurrealDB query failed: {e}")
             return []
 
+    async def _query_turboagents_faiss(self, query: str, top_k: int) -> List[str]:
+        try:
+            embed = self.vector_db["embed"]
+            store = self.vector_db["store"]
+            results = store.search(
+                np.asarray(embed(query), dtype=np.float32),
+                k=top_k,
+                rerank_top=self.vector_db.get("rerank_top"),
+            )
+            return [self._extract_turboagents_content(result) for result in results]
+        except Exception as e:
+            logger.error(f"TurboAgents FAISS query failed: {e}")
+            return []
+
+    async def _query_turboagents_lancedb(self, query: str, top_k: int) -> List[str]:
+        try:
+            embed = self.vector_db["embed"]
+            store = self.vector_db["store"]
+            results = store.search(
+                np.asarray(embed(query), dtype=np.float32),
+                k=top_k,
+                rerank_top=self.vector_db.get("rerank_top"),
+            )
+            return [self._extract_turboagents_content(result) for result in results]
+        except Exception as e:
+            logger.error(f"TurboAgents LanceDB query failed: {e}")
+            return []
+
+    async def _query_turboagents_surrealdb(
+        self, query: str, top_k: int
+    ) -> List[str]:
+        try:
+            embed = self.vector_db["embed"]
+            store = self.vector_db["store"]
+            results = await store.search(
+                np.asarray(embed(query), dtype=np.float32),
+                k=top_k,
+                rerank_top=self.vector_db.get("rerank_top"),
+            )
+            return [self._extract_turboagents_content(result) for result in results]
+        except Exception as e:
+            logger.error(f"TurboAgents SurrealDB query failed: {e}")
+            return []
+
     def _query_surrealdb_graph(
         self,
         *,
@@ -1313,6 +1520,12 @@ class RAGMixin:
                 return self._add_documents_pinecone(documents)
             elif db_type == "surrealdb":
                 return self._add_documents_surrealdb(documents)
+            elif db_type == "turboagents-faiss":
+                return self._add_documents_turboagents_faiss(documents)
+            elif db_type == "turboagents-lancedb":
+                return self._add_documents_turboagents_lancedb(documents)
+            elif db_type == "turboagents-surrealdb":
+                return self._add_documents_turboagents_surrealdb(documents)
             else:
                 logger.warning(f"Unknown vector database type: {db_type}")
                 return False
@@ -1470,6 +1683,62 @@ class RAGMixin:
             return True
         except Exception as e:
             logger.error(f"SurrealDB add documents failed: {e}")
+            return False
+
+    def _add_documents_turboagents_faiss(self, documents: List[Dict[str, Any]]) -> bool:
+        try:
+            embeddings, metadata = self._prepare_turboagents_documents(
+                documents, self.vector_db["embed"]
+            )
+            self.vector_db["store"].add(
+                np.asarray(embeddings, dtype=np.float32), metadata=metadata
+            )
+            logger.info(f"Added {len(documents)} documents to TurboAgents FAISS")
+            return True
+        except Exception as e:
+            logger.error(f"TurboAgents FAISS add documents failed: {e}")
+            return False
+
+    def _add_documents_turboagents_lancedb(
+        self, documents: List[Dict[str, Any]]
+    ) -> bool:
+        try:
+            embeddings, metadata = self._prepare_turboagents_documents(
+                documents, self.vector_db["embed"]
+            )
+            embedding_array = np.asarray(embeddings, dtype=np.float32)
+            store = self.vector_db["store"]
+            if not self.vector_db.get("table_created", False):
+                store.create_table(
+                    self.vector_db["table_name"], embedding_array, metadata=metadata
+                )
+                self.vector_db["table_created"] = True
+            else:
+                store.add(embedding_array, metadata=metadata)
+            logger.info(f"Added {len(documents)} documents to TurboAgents LanceDB")
+            return True
+        except Exception as e:
+            logger.error(f"TurboAgents LanceDB add documents failed: {e}")
+            return False
+
+    def _add_documents_turboagents_surrealdb(
+        self, documents: List[Dict[str, Any]]
+    ) -> bool:
+        try:
+            embeddings, metadata = self._prepare_turboagents_documents(
+                documents, self.vector_db["embed"]
+            )
+            store = self.vector_db["store"]
+            if not self.vector_db.get("collection_created", False):
+                asyncio.run(store.create_collection(self.vector_db["table_name"]))
+                self.vector_db["collection_created"] = True
+            asyncio.run(
+                store.add(np.asarray(embeddings, dtype=np.float32), metadata=metadata)
+            )
+            logger.info(f"Added {len(documents)} documents to TurboAgents SurrealDB")
+            return True
+        except Exception as e:
+            logger.error(f"TurboAgents SurrealDB add documents failed: {e}")
             return False
 
     def get_rag_status(self) -> Dict[str, Any]:

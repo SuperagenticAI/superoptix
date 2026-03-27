@@ -637,6 +637,9 @@ class SuperSpecXValidator:
                 "milvus",
                 "pinecone",
                 "surrealdb",
+                "turboagents-faiss",
+                "turboagents-lancedb",
+                "turboagents-surrealdb",
                 "colbertv2",
                 "custom",
             }
@@ -664,6 +667,9 @@ class SuperSpecXValidator:
                 "milvus",
                 "pinecone",
                 "surrealdb",
+                "turboagents-faiss",
+                "turboagents-lancedb",
+                "turboagents-surrealdb",
                 "colbertv2",
                 "custom",
             }

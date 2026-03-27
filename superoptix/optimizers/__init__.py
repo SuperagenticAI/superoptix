@@ -49,6 +49,9 @@ try:
         WeaviateVectorStore,
         RAGEvaluationMetrics,
         SurrealDBVectorStore,
+        TurboFAISSVectorStore,
+        TurboLanceDBVectorStore,
+        TurboSurrealDBVectorStore,
     )
 
     _RAG_ADAPTER_AVAILABLE = True
@@ -64,6 +67,9 @@ except ImportError:
     WeaviateVectorStore = None
     RAGEvaluationMetrics = None
     SurrealDBVectorStore = None
+    TurboFAISSVectorStore = None
+    TurboLanceDBVectorStore = None
+    TurboSurrealDBVectorStore = None
 
 __all__ = [
     "UniversalGEPA",
@@ -86,5 +92,8 @@ __all__ = [
     "ChromaVectorStore",
     "WeaviateVectorStore",
     "SurrealDBVectorStore",
+    "TurboFAISSVectorStore",
+    "TurboLanceDBVectorStore",
+    "TurboSurrealDBVectorStore",
     "RAGEvaluationMetrics",
 ]

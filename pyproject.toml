@@ -246,6 +246,11 @@ faiss = [
     "sentence-transformers",
 ]
 
+turboagents = [
+    "turboagents[rag]>=0.1.0a0",
+    "sentence-transformers",
+]
+
 weaviate = [
     "weaviate-client",
     "sentence-transformers",
@@ -275,6 +280,7 @@ vectordb = [
     "qdrant-client",
     "pymilvus",
     "surrealdb",
+    "turboagents[rag]>=0.1.0a0",
     "sentence-transformers",
 ]
 

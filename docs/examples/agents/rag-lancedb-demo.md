@@ -1,5 +1,7 @@
 # 🚀 RAG LanceDB Demo Agent
 
+This demo now uses the `turboagents-lancedb` retriever path inside SuperOptiX.
+
 The RAG LanceDB Demo Agent showcases **high-performance RAG** capabilities with LanceDB vector database in SuperOptiX. This demo focuses specifically on how to configure and use RAG with LanceDB for scalable, production-ready knowledge retrieval.
 
 ## 🎯 **What This Demo Shows**
@@ -30,6 +32,9 @@ ollama serve
 ### **3. Pull and Run the Demo**
 
 ```bash
+# Install the TurboAgents-backed RAG path
+uv pip install "superoptix[turboagents]"
+
 # Pull the RAG LanceDB demo agent
 super agent pull rag_lancedb_demo
 
@@ -59,7 +64,7 @@ language_model:
 ```yaml
 rag:
   enabled: true
-  retriever_type: lancedb
+  retriever_type: turboagents-lancedb
   config:
     top_k: 5
     chunk_size: 512
@@ -67,21 +72,41 @@ rag:
     similarity_threshold: 0.7
   vector_store:
     embedding_model: sentence-transformers/all-MiniLM-L6-v2
+    embedding_dimension: 64
+    bits: 3.5
+    rerank_top: 16
     table_name: lancedb_demo_table
-    database_path: ./data/lancedb
+    uri: ./data/lancedb
 ```
 
 **Key RAG Configuration Points**:
 
 - **`enabled: true`**: Enables RAG functionality
-- 🗄️ **`retriever_type: lancedb`**: Uses LanceDB as vector database
+- 🗄️ **`retriever_type: turboagents-lancedb`**: Uses TurboAgents over LanceDB as the retrieval path
 - 🔝 **`top_k: 5`**: Retrieves top 5 most similar documents
 - 📄 **`chunk_size: 512`**: Document chunk size for processing
 - 🔗 **`chunk_overlap: 50`**: Overlap between chunks for context
 - 🎯 **`similarity_threshold: 0.7`**: Minimum similarity score for retrieval
 - 🧠 **`embedding_model`**: Sentence transformers for embeddings
+- 📐 **`embedding_dimension: 64`**: TurboAgents-compatible compressed dimension
+- 🪶 **`bits: 3.5`**: Current default compression setting for the demo
+- 🧮 **`rerank_top: 16`**: Candidate pool reranked by TurboAgents before final selection
 - 📋 **`table_name`**: LanceDB table name
-- 💾 **`database_path`**: Local storage directory
+- 💾 **`uri`**: LanceDB storage directory
+
+## 🧩 Why This Uses TurboAgents
+
+This SuperOptiX demo now exercises the real TurboAgents integration path instead
+of only the native LanceDB path.
+
+That means:
+
+- LanceDB still stores and serves the candidate set
+- SuperOptiX selects the `turboagents-lancedb` retriever
+- TurboAgents handles compressed retrieval and reranking inside the SuperOptiX RAG flow
+
+This gives you a concrete integration story to compare against the older native
+retriever behavior.
 
 
 
