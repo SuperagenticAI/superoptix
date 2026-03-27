@@ -130,7 +130,7 @@ spec:
       max_episodes: 50
   rag:
     enabled: true
-    retriever_type: surrealdb
+    retriever_type: turboagents-surrealdb
     config:
       top_k: 5
       chunk_size: 512
@@ -138,6 +138,9 @@ spec:
       similarity_threshold: 0.7
     vector_store:
       embedding_model: sentence-transformers/all-MiniLM-L6-v2
+      embedding_dimension: 64
+      bits: 3.5
+      rerank_top: 16
       url: surrealkv://./.superoptix/surreal.db
       namespace: test
       database: test

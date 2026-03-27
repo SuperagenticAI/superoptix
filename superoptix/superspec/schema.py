@@ -110,6 +110,9 @@ class SuperSpecXSchema:
         "Pinecone",
         "FAISS",
         "SurrealDB",
+        "TurboAgents-FAISS",
+        "TurboAgents-LanceDB",
+        "TurboAgents-SurrealDB",
         "Custom",
     ]
     VALID_TOOL_SELECTION_STRATEGIES = ["automatic", "manual", "hybrid"]

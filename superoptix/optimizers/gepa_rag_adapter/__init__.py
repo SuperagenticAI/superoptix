@@ -52,6 +52,17 @@ try:
 except ImportError:
     _SURREALDB_AVAILABLE = False
 
+try:
+    from .vector_stores.turboagents_store import (
+        TurboFAISSVectorStore,
+        TurboLanceDBVectorStore,
+        TurboSurrealDBVectorStore,
+    )
+
+    _TURBOAGENTS_AVAILABLE = True
+except ImportError:
+    _TURBOAGENTS_AVAILABLE = False
+
 __all__ = [
     "GenericRAGAdapter",
     "RAGDataInst",
@@ -73,3 +84,11 @@ if _LANCEDB_AVAILABLE:
     __all__.append("LanceDBVectorStore")
 if _SURREALDB_AVAILABLE:
     __all__.append("SurrealDBVectorStore")
+if _TURBOAGENTS_AVAILABLE:
+    __all__.extend(
+        [
+            "TurboFAISSVectorStore",
+            "TurboLanceDBVectorStore",
+            "TurboSurrealDBVectorStore",
+        ]
+    )

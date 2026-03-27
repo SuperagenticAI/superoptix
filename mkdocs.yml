@@ -191,6 +191,7 @@ nav:
   - 🔌 Integrations:
       - '⚡ Optimas': examples/agents/optimas-examples.md
       - '⚡ Optimas Guide': guides/optimas-integration.md
+      - '🧩 TurboAgents': guides/turboagents-integration.md
       - '🗂️ StackOne Integration': guides/stackone-integration.md
       - '🗂️ StackOne + Claude SDK': guides/stackone-claude-sdk.md
       - '🚥 ChromaDB': examples/agents/rag-chroma-demo.md

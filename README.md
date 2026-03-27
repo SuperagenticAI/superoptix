@@ -122,6 +122,7 @@ super agent optimize developer --framework dspy --auto light
 - RLM support (experimental)
 - StackOne connector integrations for SaaS tools
 - GEPA optimization flow across frameworks
+- TurboAgents-backed GEPA vector stores for FAISS, LanceDB, and SurrealDB
 - Minimal runtime pipelines by default with optional optimization lifecycle
 - Core A2A v1 agent-to-agent interoperability
 
@@ -171,6 +172,7 @@ Read more:
 - Docs home: https://superagenticai.github.io/superoptix/
 - Golden workflow: https://superagenticai.github.io/superoptix/guides/golden-workflow/
 - Framework feature matrix: https://superagenticai.github.io/superoptix/guides/framework-feature-matrix/
+- TurboAgents integration: https://superagenticai.github.io/superoptix/guides/turboagents-integration/
 - StackOne integration: https://superagenticai.github.io/superoptix/guides/stackone-integration/
 - RLM (experimental): https://superagenticai.github.io/superoptix/guides/rlm-experimental/
 - Troubleshooting by symptom: https://superagenticai.github.io/superoptix/guides/troubleshooting-by-symptom/
