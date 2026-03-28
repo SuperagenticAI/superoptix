@@ -59,9 +59,7 @@ def resolve_model(
     model_config: Optional[Dict[str, Any]] = None,
 ) -> str:
     cfg = dict(model_config or {})
-    model = str(
-        cfg.get("model") or language_model.get("model") or "qwen3.5:9b"
-    ).strip()
+    model = str(cfg.get("model") or language_model.get("model") or "qwen3.5:9b").strip()
     provider = _normalize_provider(
         cfg.get("provider") or language_model.get("provider") or "ollama"
     )

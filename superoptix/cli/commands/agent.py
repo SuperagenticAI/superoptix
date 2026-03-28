@@ -2541,9 +2541,7 @@ def add_agent(args):
                 "max_tokens": 2000,
                 "api_base": "http://localhost:11434",
             }
-            console.print(
-                "[green]  ✅ Model configured for Genies tier: qwen3.5:9b[/]"
-            )
+            console.print("[green]  ✅ Model configured for Genies tier: qwen3.5:9b[/]")
 
             # Set task type to react
             if "tasks" in spec and spec["tasks"]:

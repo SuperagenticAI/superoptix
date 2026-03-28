@@ -16,7 +16,9 @@ def _turboagents_available() -> bool:
     return importlib.util.find_spec("turboagents") is not None
 
 
-def _coerce_metadata(value: Any, *, fallback_id: str | None = None) -> tuple[str, dict[str, Any]]:
+def _coerce_metadata(
+    value: Any, *, fallback_id: str | None = None
+) -> tuple[str, dict[str, Any]]:
     if isinstance(value, dict):
         content = str(value.get("content") or value.get("text") or "")
         metadata = dict(value.get("metadata", value))
@@ -58,7 +60,8 @@ class _TurboAgentsBaseStore(VectorStoreInterface):
         for result in results:
             index = result.get("index")
             content, metadata = _coerce_metadata(
-                result.get("metadata"), fallback_id=str(index) if index is not None else None
+                result.get("metadata"),
+                fallback_id=str(index) if index is not None else None,
             )
             formatted.append(
                 {
@@ -119,7 +122,9 @@ class TurboChromaVectorStore(_TurboAgentsBaseStore):
     ) -> list[str]:
         if len(documents) != len(embeddings):
             raise ValueError("Number of documents must match number of embeddings")
-        resolved_ids = ids or [f"doc_{self._doc_count + i}" for i in range(len(documents))]
+        resolved_ids = ids or [
+            f"doc_{self._doc_count + i}" for i in range(len(documents))
+        ]
         metadata = []
         for doc_id, doc in zip(resolved_ids, documents, strict=False):
             content, doc_metadata = _coerce_metadata(doc, fallback_id=doc_id)
@@ -139,7 +144,9 @@ class TurboChromaVectorStore(_TurboAgentsBaseStore):
         filters: dict[str, Any] | None = None,
     ) -> list[dict[str, Any]]:
         if filters:
-            raise NotImplementedError("TurboChromaVectorStore does not support metadata filtering yet")
+            raise NotImplementedError(
+                "TurboChromaVectorStore does not support metadata filtering yet"
+            )
         results = self._store.search(
             np.asarray(query_vector, dtype=np.float32),
             k=k,
@@ -177,7 +184,9 @@ class TurboFAISSVectorStore(_TurboAgentsBaseStore):
     ) -> list[str]:
         if len(documents) != len(embeddings):
             raise ValueError("Number of documents must match number of embeddings")
-        resolved_ids = ids or [f"doc_{self._doc_count + i}" for i in range(len(documents))]
+        resolved_ids = ids or [
+            f"doc_{self._doc_count + i}" for i in range(len(documents))
+        ]
         metadata = []
         for doc_id, doc in zip(resolved_ids, documents, strict=False):
             content, doc_metadata = _coerce_metadata(doc, fallback_id=doc_id)
@@ -194,7 +203,9 @@ class TurboFAISSVectorStore(_TurboAgentsBaseStore):
         filters: dict[str, Any] | None = None,
     ) -> list[dict[str, Any]]:
         if filters:
-            raise NotImplementedError("TurboFAISSVectorStore does not support metadata filtering yet")
+            raise NotImplementedError(
+                "TurboFAISSVectorStore does not support metadata filtering yet"
+            )
         results = self._store.search(
             np.asarray(query_vector, dtype=np.float32),
             k=k,
@@ -243,7 +254,9 @@ class TurboLanceDBVectorStore(_TurboAgentsBaseStore):
     ) -> list[str]:
         if len(documents) != len(embeddings):
             raise ValueError("Number of documents must match number of embeddings")
-        resolved_ids = ids or [f"doc_{self._doc_count + i}" for i in range(len(documents))]
+        resolved_ids = ids or [
+            f"doc_{self._doc_count + i}" for i in range(len(documents))
+        ]
         metadata = []
         for doc_id, doc in zip(resolved_ids, documents, strict=False):
             content, doc_metadata = _coerce_metadata(doc, fallback_id=doc_id)
@@ -251,7 +264,9 @@ class TurboLanceDBVectorStore(_TurboAgentsBaseStore):
             metadata.append(doc_metadata)
         embedding_array = np.asarray(embeddings, dtype=np.float32)
         if not self._table_ready:
-            self._store.create_table(self._table_name, embedding_array, metadata=metadata)
+            self._store.create_table(
+                self._table_name, embedding_array, metadata=metadata
+            )
             self._table_ready = True
         else:
             self._store.add(embedding_array, metadata=metadata)
@@ -265,7 +280,9 @@ class TurboLanceDBVectorStore(_TurboAgentsBaseStore):
         filters: dict[str, Any] | None = None,
     ) -> list[dict[str, Any]]:
         if filters:
-            raise NotImplementedError("TurboLanceDBVectorStore does not support metadata filtering yet")
+            raise NotImplementedError(
+                "TurboLanceDBVectorStore does not support metadata filtering yet"
+            )
         results = self._store.search(
             np.asarray(query_vector, dtype=np.float32),
             k=k,
@@ -331,7 +348,9 @@ class TurboSurrealDBVectorStore(_TurboAgentsBaseStore):
     ) -> list[str]:
         if len(documents) != len(embeddings):
             raise ValueError("Number of documents must match number of embeddings")
-        resolved_ids = ids or [f"doc_{self._doc_count + i}" for i in range(len(documents))]
+        resolved_ids = ids or [
+            f"doc_{self._doc_count + i}" for i in range(len(documents))
+        ]
         metadata = []
         for doc_id, doc in zip(resolved_ids, documents, strict=False):
             content, doc_metadata = _coerce_metadata(doc, fallback_id=doc_id)
@@ -340,7 +359,9 @@ class TurboSurrealDBVectorStore(_TurboAgentsBaseStore):
         if not self._collection_ready:
             self._run(self._store.create_collection(self._table_name))
             self._collection_ready = True
-        self._run(self._store.add(np.asarray(embeddings, dtype=np.float32), metadata=metadata))
+        self._run(
+            self._store.add(np.asarray(embeddings, dtype=np.float32), metadata=metadata)
+        )
         self._doc_count += len(documents)
         return resolved_ids
 
@@ -351,7 +372,9 @@ class TurboSurrealDBVectorStore(_TurboAgentsBaseStore):
         filters: dict[str, Any] | None = None,
     ) -> list[dict[str, Any]]:
         if filters:
-            raise NotImplementedError("TurboSurrealDBVectorStore does not support metadata filtering yet")
+            raise NotImplementedError(
+                "TurboSurrealDBVectorStore does not support metadata filtering yet"
+            )
         results = self._run(
             self._store.search(
                 np.asarray(query_vector, dtype=np.float32),

@@ -41,9 +41,7 @@ def resolve_model(
     provider = _normalize_provider(
         runtime_cfg.get("provider") or lm_cfg.get("provider") or "ollama"
     )
-    model = str(
-        runtime_cfg.get("model") or lm_cfg.get("model") or "qwen3.5:9b"
-    ).strip()
+    model = str(runtime_cfg.get("model") or lm_cfg.get("model") or "qwen3.5:9b").strip()
     api_base = runtime_cfg.get("api_base") or lm_cfg.get("api_base")
 
     # normalize prefix model forms

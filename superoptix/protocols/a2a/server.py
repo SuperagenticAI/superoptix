@@ -551,7 +551,9 @@ def create_a2a_fastapi_app(
         raise HTTPException(status_code=400, detail="Extended agent card not supported")
 
     @app.post("/message:send")
-    async def send_message(request: Request, payload: Dict[str, Any] = Body()) -> Dict[str, Any]:
+    async def send_message(
+        request: Request, payload: Dict[str, Any] = Body()
+    ) -> Dict[str, Any]:
         task = await tasks.send_message(
             message=payload.get("message") or {},
             configuration=payload.get("configuration") or {},
