@@ -89,6 +89,7 @@ def _turboagents_available() -> bool:
 
     return importlib.util.find_spec("turboagents") is not None
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -204,7 +205,9 @@ class RAGMixin:
                 return self._setup_surrealdb(vector_store)
             elif retriever_type == "turboagents-chroma":
                 if not _turboagents_available():
-                    self._print_dependency_help("turboagents[rag]", "TurboAgents Chroma")
+                    self._print_dependency_help(
+                        "turboagents[rag]", "TurboAgents Chroma"
+                    )
                     return None
                 return self._setup_turboagents_chroma(vector_store)
             elif retriever_type == "turboagents-faiss":
@@ -214,12 +217,16 @@ class RAGMixin:
                 return self._setup_turboagents_faiss(vector_store)
             elif retriever_type == "turboagents-lancedb":
                 if not _turboagents_available():
-                    self._print_dependency_help("turboagents[rag]", "TurboAgents LanceDB")
+                    self._print_dependency_help(
+                        "turboagents[rag]", "TurboAgents LanceDB"
+                    )
                     return None
                 return self._setup_turboagents_lancedb(vector_store)
             elif retriever_type == "turboagents-surrealdb":
                 if not _turboagents_available():
-                    self._print_dependency_help("turboagents[rag]", "TurboAgents SurrealDB")
+                    self._print_dependency_help(
+                        "turboagents[rag]", "TurboAgents SurrealDB"
+                    )
                     return None
                 return self._setup_turboagents_surrealdb(vector_store)
             else:
@@ -668,9 +675,7 @@ class RAGMixin:
         dim = self._get_turboagents_dim(config)
         bits = float(config.get("bits", 3.5))
         seed = int(config.get("seed", 0))
-        rerank_top = int(
-            config.get("rerank_top", max(int(config.get("top_k", 5)), 8))
-        )
+        rerank_top = int(config.get("rerank_top", max(int(config.get("top_k", 5)), 8)))
         return {
             "type": "turboagents-faiss",
             "store": TurboFAISS(dim=dim, bits=bits, seed=seed),
@@ -685,11 +690,11 @@ class RAGMixin:
         dim = self._get_turboagents_dim(config)
         bits = float(config.get("bits", 3.5))
         seed = int(config.get("seed", 0))
-        rerank_top = int(
-            config.get("rerank_top", max(int(config.get("top_k", 5)), 8))
-        )
+        rerank_top = int(config.get("rerank_top", max(int(config.get("top_k", 5)), 8)))
         collection_name = config.get("collection_name", "documents")
-        persist_directory = config.get("persist_directory", ".superoptix/turboagents-chroma")
+        persist_directory = config.get(
+            "persist_directory", ".superoptix/turboagents-chroma"
+        )
         store = TurboChroma(
             path=persist_directory,
             collection_name=collection_name,
@@ -726,9 +731,7 @@ class RAGMixin:
         table_name = config.get(
             "table_name", config.get("collection_name", "documents")
         )
-        rerank_top = int(
-            config.get("rerank_top", max(int(config.get("top_k", 5)), 8))
-        )
+        rerank_top = int(config.get("rerank_top", max(int(config.get("top_k", 5)), 8)))
         store = TurboLanceDB(uri, dim=dim, bits=bits, seed=seed)
         table_created = False
         try:
@@ -754,9 +757,7 @@ class RAGMixin:
         dim = self._get_turboagents_dim(config)
         bits = float(config.get("bits", 3.5))
         seed = int(config.get("seed", 0))
-        rerank_top = int(
-            config.get("rerank_top", max(int(config.get("top_k", 5)), 8))
-        )
+        rerank_top = int(config.get("rerank_top", max(int(config.get("top_k", 5)), 8)))
         table_name = config.get("table_name", "documents")
         skip_signin = bool(
             config.get("skip_signin", self._surrealdb_default_skip_signin(url))
@@ -1454,9 +1455,7 @@ class RAGMixin:
             logger.error(f"TurboAgents LanceDB query failed: {e}")
             return []
 
-    async def _query_turboagents_surrealdb(
-        self, query: str, top_k: int
-    ) -> List[str]:
+    async def _query_turboagents_surrealdb(self, query: str, top_k: int) -> List[str]:
         try:
             embed = self.vector_db["embed"]
             store = self.vector_db["store"]
@@ -1789,7 +1788,9 @@ class RAGMixin:
             logger.error(f"TurboAgents FAISS add documents failed: {e}")
             return False
 
-    def _add_documents_turboagents_chroma(self, documents: List[Dict[str, Any]]) -> bool:
+    def _add_documents_turboagents_chroma(
+        self, documents: List[Dict[str, Any]]
+    ) -> bool:
         try:
             embeddings, metadata = self._prepare_turboagents_documents(
                 documents, self.vector_db["embed"]

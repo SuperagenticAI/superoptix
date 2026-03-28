@@ -41,9 +41,7 @@ def resolve_client_config(
     provider = _normalize_provider(
         runtime_cfg.get("provider") or lm_cfg.get("provider") or "ollama"
     )
-    model = str(
-        runtime_cfg.get("model") or lm_cfg.get("model") or "qwen3.5:9b"
-    ).strip()
+    model = str(runtime_cfg.get("model") or lm_cfg.get("model") or "qwen3.5:9b").strip()
     runtime_provider = _normalize_provider(runtime_cfg.get("provider") or "")
     lm_provider = _normalize_provider(lm_cfg.get("provider") or "")
     provider_switched = bool(runtime_provider and runtime_provider != lm_provider)

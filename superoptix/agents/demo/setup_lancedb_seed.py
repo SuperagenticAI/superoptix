@@ -51,9 +51,7 @@ def load_seed_documents(dataset_path: Path) -> list[dict[str, Any]]:
             doc_id = str(row.get("id", f"seed-{line_no:03d}")).strip()
             metadata.setdefault("seed_id", doc_id)
             metadata.setdefault("source", "superoptix_lancedb_seed_v1")
-            documents.append(
-                {"id": doc_id, "content": content, "metadata": metadata}
-            )
+            documents.append({"id": doc_id, "content": content, "metadata": metadata})
     if not documents:
         raise ValueError(f"No seed documents found in {dataset_path}")
     return documents
@@ -120,8 +118,10 @@ def main() -> int:
     documents = load_seed_documents(dataset_path)
 
     harness = _Harness()
-    vector_store = ((spec.get("rag", {}) or {}).get("vector_store", {}) or {})
-    uri = str(vector_store.get("uri", vector_store.get("database_path", "./data/lancedb")))
+    vector_store = (spec.get("rag", {}) or {}).get("vector_store", {}) or {}
+    uri = str(
+        vector_store.get("uri", vector_store.get("database_path", "./data/lancedb"))
+    )
     _reset_local_lancedb_store(uri)
     if not harness.setup_rag(spec):
         raise RuntimeError(f"Failed to set up RAG for {playbook_path}")
@@ -131,7 +131,9 @@ def main() -> int:
     print("LanceDB seed complete")
     print(f"   Playbook: {playbook_path}")
     print(f"   Dataset:  {dataset_path}")
-    print(f"   URI:      {vector_store.get('uri', vector_store.get('database_path', './data/lancedb'))}")
+    print(
+        f"   URI:      {vector_store.get('uri', vector_store.get('database_path', './data/lancedb'))}"
+    )
     print(f"   Table:    {vector_store.get('table_name', 'documents')}")
     print(f"   Inserted: {len(documents)}")
     print("")

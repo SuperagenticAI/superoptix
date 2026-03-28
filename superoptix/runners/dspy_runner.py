@@ -743,9 +743,7 @@ class DSPyRunner:
             max_tokens = reasoning_cfg.get("max_tokens")
 
         local_task_default = os.getenv("SUPEROPTIX_DSPY_TASK_MODEL", "qwen3.5:9b")
-        local_teacher_default = os.getenv(
-            "SUPEROPTIX_DSPY_TEACHER_MODEL", "qwen3.5:9b"
-        )
+        local_teacher_default = os.getenv("SUPEROPTIX_DSPY_TEACHER_MODEL", "qwen3.5:9b")
         cloud_task_default = os.getenv(
             "SUPEROPTIX_DSPY_CLOUD_TASK_MODEL", "gemini-2.5-flash-lite"
         )
