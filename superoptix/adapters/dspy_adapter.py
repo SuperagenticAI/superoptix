@@ -28,7 +28,7 @@ class DSPyAdapter:
         if "provider" not in self.config["llm"]:
             self.config["llm"]["provider"] = "ollama"
         if "model" not in self.config["llm"]:
-            self.config["llm"]["model"] = "llama3.2:1b"
+            self.config["llm"]["model"] = "qwen3.5:2b"
         if "api_base" not in self.config["llm"]:
             self.config["llm"]["api_base"] = "http://localhost:11434"
         self._setup_lm()

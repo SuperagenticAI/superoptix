@@ -742,9 +742,9 @@ class DSPyRunner:
         ):
             max_tokens = reasoning_cfg.get("max_tokens")
 
-        local_task_default = os.getenv("SUPEROPTIX_DSPY_TASK_MODEL", "llama3.1:8b")
+        local_task_default = os.getenv("SUPEROPTIX_DSPY_TASK_MODEL", "qwen3.5:9b")
         local_teacher_default = os.getenv(
-            "SUPEROPTIX_DSPY_TEACHER_MODEL", "llama3.1:8b"
+            "SUPEROPTIX_DSPY_TEACHER_MODEL", "qwen3.5:9b"
         )
         cloud_task_default = os.getenv(
             "SUPEROPTIX_DSPY_CLOUD_TASK_MODEL", "gemini-2.5-flash-lite"
@@ -816,9 +816,11 @@ class DSPyRunner:
             model_name = (
                 model if model.startswith("ollama_chat/") else f"ollama_chat/{model}"
             )
+            api_base = str(lm_config.get("api_base", "")).strip() or None
             return {
                 "model_name": model_name,
                 "api_key": "",
+                "api_base": api_base,
                 "temperature": temperature,
                 "max_tokens": max_tokens,
             }
@@ -890,6 +892,7 @@ class DSPyRunner:
         lm = dspy.LM(
             model=lm_params["model_name"],
             api_key=lm_params["api_key"],
+            api_base=lm_params.get("api_base"),
             temperature=lm_params["temperature"],
             max_tokens=lm_params["max_tokens"],
         )
@@ -2175,7 +2178,7 @@ class DSPyRunner:
                         "   - OpenAI models (gpt-3.5-turbo, gpt-4) support structured output"
                     )
                     console.print(
-                        "   - For Ollama, try models like llama3:70b or mixtral:8x7b"
+                        "   - For Ollama, try models like qwen3.5:9b or gpt-oss:20b"
                     )
                     console.print(
                         "2. [bold]Update your playbook[/] to use a compatible model:"

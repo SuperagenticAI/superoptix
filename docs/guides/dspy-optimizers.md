@@ -535,7 +535,7 @@ super agent optimize my_agent
 # Ollama (Local)
 language_model:
   provider: ollama
-  model: llama3.1:8b
+  model: qwen3.5:9b
   
 optimization:
   optimizer:
@@ -585,7 +585,7 @@ optimization:
 
 ## Performance Benchmarks
 
-Based on testing with llama3.1:8b on M4 Max (128GB):
+Based on testing with qwen3.5:9b on M4 Max (128GB):
 
 | Optimizer | Training Time | Memory Peak | Accuracy Gain | Best Use Case |
 |-----------|---------------|-------------|---------------|---------------|

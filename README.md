@@ -122,9 +122,36 @@ super agent optimize developer --framework dspy --auto light
 - RLM support (experimental)
 - StackOne connector integrations for SaaS tools
 - GEPA optimization flow across frameworks
-- TurboAgents-backed GEPA vector stores for FAISS, LanceDB, and SurrealDB
+- TurboAgents-backed GEPA vector stores for Chroma, FAISS, LanceDB, and SurrealDB
 - Minimal runtime pipelines by default with optional optimization lifecycle
 - Core A2A v1 agent-to-agent interoperability
+
+---
+
+## TurboAgents Reference Integration
+
+SuperOptiX is now the first full reference integration for `turboagents`.
+
+Current validated state:
+
+- `turboagents-chroma` is wired into the shared RAG layer and covered by focused runtime tests
+- `turboagents-lancedb` is validated through the real `rag_lancedb_demo` flow
+- `turboagents-surrealdb` is validated through the real OpenAI Agents and Pydantic AI SurrealDB demo flows
+- the DSPy SurrealDB path is still blocked by a local LiteLLM and Ollama compatibility issue, not by the TurboAgents retrieval layer itself
+
+Current backends exposed through SuperOptiX are:
+
+- `turboagents-chroma`
+- `turboagents-faiss`
+- `turboagents-lancedb`
+- `turboagents-surrealdb`
+
+Read more:
+
+- TurboAgents integration guide: https://superagenticai.github.io/superoptix/guides/turboagents-integration/
+- Chroma demo: https://superagenticai.github.io/superoptix/examples/agents/rag-chroma-demo/
+- LanceDB demo: https://superagenticai.github.io/superoptix/examples/agents/rag-lancedb-demo/
+- SurrealDB frameworks guide: https://superagenticai.github.io/superoptix/examples/agents/surrealdb-frameworks-demo/
 
 ---
 

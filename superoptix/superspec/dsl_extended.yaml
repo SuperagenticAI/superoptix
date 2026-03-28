@@ -139,7 +139,7 @@ examples:
     spec:
       language_model:
         provider: "ollama"
-        model: "llama3.2:1b"
+        model: "qwen3.5:2b"
       persona:
         role: "Question Answering Assistant"
       tasks:
@@ -161,7 +161,7 @@ examples:
     spec:
       language_model:
         provider: "ollama"
-        model: "llama3.2:3b"
+        model: "qwen3.5:2b"
       persona:
         role: "Intelligent Assistant with Tools"
       tasks:

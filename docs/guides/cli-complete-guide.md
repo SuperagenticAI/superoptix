@@ -315,23 +315,23 @@ super model list
 super model list --all
 
 # Install model
-super model install llama3.1:8b
-super model install llama3.1:8b --backend ollama
+super model install qwen3.5:9b
+super model install qwen3.5:9b --backend ollama
 
 # Install with specific backend
-super model install llama3.1:8b --backend mlx       # Apple Silicon
-super model install llama3.1:8b --backend huggingface
-super model install llama3.1:8b --backend lmstudio
+super model install qwen3.5:9b --backend mlx       # Apple Silicon
+super model install qwen3.5:9b --backend huggingface
+super model install qwen3.5:9b --backend lmstudio
 
 # Get model info
-super model info llama3.1:8b
+super model info qwen3.5:9b
 
 # Start model server
 super model server --port 11434
 super model serve --backend ollama
 
 # Remove model
-super model remove llama3.1:8b
+super model remove qwen3.5:9b
 ```
 
 ---
@@ -438,7 +438,7 @@ super agent run sentiment_analyzer
 ```bash
 # Set model configuration
 export SUPER_MODEL_PROVIDER=ollama
-export SUPER_MODEL_NAME=llama3.1:8b
+export SUPER_MODEL_NAME=qwen3.5:9b
 export SUPER_API_BASE=http://localhost:11434
 
 # Set optimization settings
@@ -612,7 +612,7 @@ auto_mode: medium
 # Model settings
 model:
   provider: ollama
-  default_model: llama3.1:8b
+  default_model: qwen3.5:9b
   api_base: http://localhost:11434
 
 # Optimization settings

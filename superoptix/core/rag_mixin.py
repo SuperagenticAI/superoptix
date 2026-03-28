@@ -202,6 +202,11 @@ class RAGMixin:
                     self._print_dependency_help("surrealdb", "SurrealDB")
                     return None
                 return self._setup_surrealdb(vector_store)
+            elif retriever_type == "turboagents-chroma":
+                if not _turboagents_available():
+                    self._print_dependency_help("turboagents[rag]", "TurboAgents Chroma")
+                    return None
+                return self._setup_turboagents_chroma(vector_store)
             elif retriever_type == "turboagents-faiss":
                 if not _turboagents_available():
                     self._print_dependency_help("turboagents[rag]", "TurboAgents FAISS")
@@ -220,7 +225,7 @@ class RAGMixin:
             else:
                 logger.error(f"❌ Unsupported retriever type: {retriever_type}")
                 logger.error(
-                    "Supported types: chroma, lancedb, faiss, weaviate, qdrant, milvus, pinecone, surrealdb, turboagents-faiss, turboagents-lancedb, turboagents-surrealdb"
+                    "Supported types: chroma, lancedb, faiss, weaviate, qdrant, milvus, pinecone, surrealdb, turboagents-chroma, turboagents-faiss, turboagents-lancedb, turboagents-surrealdb"
                 )
                 return None
 
@@ -230,6 +235,17 @@ class RAGMixin:
 
     def _print_dependency_help(self, package_name: str, db_name: str):
         """Print helpful installation instructions for missing dependencies."""
+        extra_name = {
+            "chromadb": "chromadb",
+            "lancedb": "lancedb",
+            "faiss-cpu": "faiss",
+            "weaviate-client": "weaviate",
+            "qdrant-client": "qdrant",
+            "pymilvus": "milvus",
+            "pinecone-client": "vectordb",
+            "surrealdb": "surrealdb",
+            "turboagents[rag]": "turboagents",
+        }.get(package_name, package_name.replace("-", ""))
         print(f"\n❌ {db_name} is not installed!")
         print(f"🔧 To enable RAG with {db_name}, install the required dependencies:")
         print("")
@@ -237,7 +253,7 @@ class RAGMixin:
         print(f"   pip install {package_name} sentence-transformers")
         print("")
         print("   # Option 2: Install via SuperOptiX extras")
-        print(f"   pip install superoptix[{package_name.replace('-', '')}]")
+        print(f"   pip install superoptix[{extra_name}]")
         print("")
         print("   # Option 3: Install all vector databases")
         print("   pip install superoptix[vectordb]")
@@ -663,6 +679,41 @@ class RAGMixin:
             "config": config,
         }
 
+    def _setup_turboagents_chroma(self, config: Dict[str, Any]):
+        from turboagents.rag import TurboChroma
+
+        dim = self._get_turboagents_dim(config)
+        bits = float(config.get("bits", 3.5))
+        seed = int(config.get("seed", 0))
+        rerank_top = int(
+            config.get("rerank_top", max(int(config.get("top_k", 5)), 8))
+        )
+        collection_name = config.get("collection_name", "documents")
+        persist_directory = config.get("persist_directory", ".superoptix/turboagents-chroma")
+        store = TurboChroma(
+            path=persist_directory,
+            collection_name=collection_name,
+            dim=dim,
+            bits=bits,
+            seed=seed,
+            metric=config.get("metric", "cosine"),
+        )
+        collection_created = False
+        try:
+            store.open_collection(collection_name)
+            collection_created = True
+        except Exception:
+            collection_created = False
+        return {
+            "type": "turboagents-chroma",
+            "store": store,
+            "embed": self._get_turboagents_embedder(config),
+            "rerank_top": rerank_top,
+            "collection_name": collection_name,
+            "collection_created": collection_created,
+            "config": config,
+        }
+
     def _setup_turboagents_lancedb(self, config: Dict[str, Any]):
         from turboagents.rag import TurboLanceDB
 
@@ -678,41 +729,62 @@ class RAGMixin:
         rerank_top = int(
             config.get("rerank_top", max(int(config.get("top_k", 5)), 8))
         )
+        store = TurboLanceDB(uri, dim=dim, bits=bits, seed=seed)
+        table_created = False
+        try:
+            store.open_table(table_name)
+            table_created = True
+        except Exception:
+            # Fresh projects won't have a persisted table yet.
+            table_created = False
         return {
             "type": "turboagents-lancedb",
-            "store": TurboLanceDB(uri, dim=dim, bits=bits, seed=seed),
+            "store": store,
             "embed": self._get_turboagents_embedder(config),
             "rerank_top": rerank_top,
             "table_name": table_name,
-            "table_created": False,
+            "table_created": table_created,
             "config": config,
         }
 
     def _setup_turboagents_surrealdb(self, config: Dict[str, Any]):
         from turboagents.rag import TurboSurrealDB
 
+        url = self._normalize_surrealdb_url(config.get("url", "ws://localhost:8000"))
         dim = self._get_turboagents_dim(config)
         bits = float(config.get("bits", 3.5))
         seed = int(config.get("seed", 0))
         rerank_top = int(
             config.get("rerank_top", max(int(config.get("top_k", 5)), 8))
         )
+        table_name = config.get("table_name", "documents")
+        skip_signin = bool(
+            config.get("skip_signin", self._surrealdb_default_skip_signin(url))
+        )
+        auth = config.get("auth")
+        if auth is None and not skip_signin:
+            auth = {
+                "username": config.get("username", "root"),
+                "password": config.get("password", "root"),
+            }
+        store = TurboSurrealDB(
+            url=url,
+            namespace=config.get("namespace", "test"),
+            database=config.get("database", "test"),
+            dim=dim,
+            bits=bits,
+            seed=seed,
+            metric=config.get("metric", "COSINE"),
+            auth=auth,
+        )
+        store.collection = table_name
         return {
             "type": "turboagents-surrealdb",
-            "store": TurboSurrealDB(
-                url=self._normalize_surrealdb_url(config.get("url", "ws://localhost:8000")),
-                namespace=config.get("namespace", "test"),
-                database=config.get("database", "test"),
-                dim=dim,
-                bits=bits,
-                seed=seed,
-                metric=config.get("metric", "COSINE"),
-                auth=config.get("auth"),
-            ),
+            "store": store,
             "embed": self._get_turboagents_embedder(config),
             "rerank_top": rerank_top,
-            "table_name": config.get("table_name", "documents"),
-            "collection_created": False,
+            "table_name": table_name,
+            "collection_created": True,
             "config": config,
         }
 
@@ -976,6 +1048,8 @@ class RAGMixin:
                 return await self._query_pinecone(query, top_k)
             elif db_type == "surrealdb":
                 return await self._query_surrealdb(query, top_k)
+            elif db_type == "turboagents-chroma":
+                return await self._query_turboagents_chroma(query, top_k)
             elif db_type == "turboagents-faiss":
                 return await self._query_turboagents_faiss(query, top_k)
             elif db_type == "turboagents-lancedb":
@@ -1352,6 +1426,20 @@ class RAGMixin:
             logger.error(f"TurboAgents FAISS query failed: {e}")
             return []
 
+    async def _query_turboagents_chroma(self, query: str, top_k: int) -> List[str]:
+        try:
+            embed = self.vector_db["embed"]
+            store = self.vector_db["store"]
+            results = store.search(
+                np.asarray(embed(query), dtype=np.float32),
+                k=top_k,
+                rerank_top=self.vector_db.get("rerank_top"),
+            )
+            return [self._extract_turboagents_content(result) for result in results]
+        except Exception as e:
+            logger.error(f"TurboAgents Chroma query failed: {e}")
+            return []
+
     async def _query_turboagents_lancedb(self, query: str, top_k: int) -> List[str]:
         try:
             embed = self.vector_db["embed"]
@@ -1489,7 +1577,7 @@ class RAGMixin:
                             }
                         )
             except Exception as e:
-                # Graph expansion failures are non-fatal — log and continue
+                # Graph expansion failures are non-fatal; log and continue.
                 logger.debug("Graph expansion from %s failed: %s", sid, e)
 
         # Merge: seed rows first (higher relevance), then graph-expanded
@@ -1520,6 +1608,8 @@ class RAGMixin:
                 return self._add_documents_pinecone(documents)
             elif db_type == "surrealdb":
                 return self._add_documents_surrealdb(documents)
+            elif db_type == "turboagents-chroma":
+                return self._add_documents_turboagents_chroma(documents)
             elif db_type == "turboagents-faiss":
                 return self._add_documents_turboagents_faiss(documents)
             elif db_type == "turboagents-lancedb":
@@ -1697,6 +1787,22 @@ class RAGMixin:
             return True
         except Exception as e:
             logger.error(f"TurboAgents FAISS add documents failed: {e}")
+            return False
+
+    def _add_documents_turboagents_chroma(self, documents: List[Dict[str, Any]]) -> bool:
+        try:
+            embeddings, metadata = self._prepare_turboagents_documents(
+                documents, self.vector_db["embed"]
+            )
+            store = self.vector_db["store"]
+            if not self.vector_db.get("collection_created", False):
+                store.create_collection(self.vector_db["collection_name"])
+                self.vector_db["collection_created"] = True
+            store.add(np.asarray(embeddings, dtype=np.float32), metadata=metadata)
+            logger.info(f"Added {len(documents)} documents to TurboAgents Chroma")
+            return True
+        except Exception as e:
+            logger.error(f"TurboAgents Chroma add documents failed: {e}")
             return False
 
     def _add_documents_turboagents_lancedb(

@@ -95,7 +95,7 @@ super agent pull research_agent_deepagents
 super agent compile research_agent_deepagents --framework deepagents
 super agent run research_agent_deepagents --framework deepagents --goal "What is LangGraph?"
 super agent evaluate research_agent_deepagents
-super agent optimize research_agent_deepagents --auto medium --framework deepagents --reflection-lm ollama:llama3.1:8b
+super agent optimize research_agent_deepagents --auto medium --framework deepagents --reflection-lm ollama:qwen3.5:9b
 
 # Done! Agent optimized with local Ollama
 ```
@@ -593,7 +593,7 @@ Overall: 2/3 PASS (66.7%)
 ### Step 5: Optimize with GEPA
 
 ```bash
-super agent optimize research_agent_deepagents --auto medium --framework deepagents --reflection-lm ollama:llama3.1:8b
+super agent optimize research_agent_deepagents --auto medium --framework deepagents --reflection-lm ollama:qwen3.5:9b
 ```
 
 **What happens:**
@@ -922,18 +922,18 @@ A: Coming soon! We're extending the same pattern to CrewAI, Microsoft, OpenAI SD
 
 - 📖 **[Backend Reference Guide](deepagents-backends.md)** - Complete configuration reference
 - 🎓 **[Backends Tutorial](../tutorials/deepagents-backends-tutorial.md)** - 6 hands-on tutorials  
-- 📝 **[Integration Summary](../../DEEPAGENTS_0.2.0_COMPLETE.md)** - What's new and how to use
+- 📝 **[Integration Summary](../DEEPAGENTS_0.2.0_COMPLETE.md)** - What's new and how to use
 
 ### Model Configuration
 
-- 🔧 **[Gemini Configuration Guide](../../GEMINI_CONFIGURATION_GUIDE.md)** - Gemini 2.5 setup
-- 🧪 **[Gemini Testing Guide](../../DEEPAGENTS_GEMINI_TEST.md)** - Complete testing workflow
+- 🔧 **[Gemini Configuration Guide](../GEMINI_CONFIGURATION_GUIDE.md)** - Gemini 2.5 setup
+- 🧪 **[Gemini Testing Guide](../DEEPAGENTS_GEMINI_TEST.md)** - Complete testing workflow
 
 ### Technical Details
 
-- 🔍 **[Technical Analysis](../../DEEPAGENTS_ANALYSIS.md)** - Why Ollama doesn't work
-- 🐛 **[Fixes Summary](../../DEEPAGENTS_FIXES_SUMMARY.md)** - Bug fixes applied
-- 🚀 **[Integration Plan](../../DEEPAGENTS_0.2.0_INTEGRATION.md)** - Implementation details
+- 🔍 **[Technical Analysis](../DEEPAGENTS_ANALYSIS.md)** - Why Ollama doesn't work
+- 🐛 **[Fixes Summary](../DEEPAGENTS_FIXES_SUMMARY.md)** - Bug fixes applied
+- 🚀 **[Integration Plan](../DEEPAGENTS_0.2.0_INTEGRATION.md)** - Implementation details
 
 ### Demo Agents
 

@@ -122,7 +122,7 @@ Each agent now includes **8 comprehensive test scenarios**:
 spec:
   language_model:
     provider: ollama
-    model: ollama/llama3.1:8b  # Change to your preferred model
+    model: ollama/qwen3.5:9b  # Change to your preferred model
     base_url: http://localhost:11434  # ✅ NEW: No /v1 prefix needed
     api_key: ollama
 ```
@@ -169,7 +169,7 @@ tasks:
 ollama list
 
 # Pull the model if needed
-ollama pull llama3.2:1b
+ollama pull qwen3.5:2b
 
 # Verify project setup
 pwd  # Should show /path/to/your/project
@@ -178,7 +178,7 @@ ls -la .super  # Should show project config file
 
 ### **Performance Tips**
 - **Start with CrewAI target** for fastest iteration
-- **Use small models** during development (llama3.2:1b)
+- **Use small models** during development (qwen3.5:2b)
 - **✅ Templates are fixed** - Pipelines now work correctly from the start
 - **✅ All targets functional** - 100% success rate across all frameworks
 

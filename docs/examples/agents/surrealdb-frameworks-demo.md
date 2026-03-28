@@ -74,17 +74,39 @@ This table lists every SurrealDB capability currently integrated in SuperOptiX.
 
 ## TurboAgents-SurrealDB Path
 
-The standard SuperOptiX SurrealDB integration is still available, but the main
-demo playbook now uses the `turboagents-surrealdb` retriever path.
+The standard SuperOptiX SurrealDB integration is still available, but the main standard RAG demos now use the `turboagents-surrealdb` retriever path.
 
 That means:
 
-- SuperOptiX still uses its normal RAG configuration surface
+- SuperOptiX still uses the normal RAG configuration surface
 - SurrealDB remains the storage and candidate-search backend
-- TurboAgents provides the compressed retrieval and rerank layer under the same agent flow
+- TurboAgents provides compressed retrieval and reranking under the same agent flow
 
-This is the current recommended path if you want to evaluate TurboAgents inside
-SuperOptiX without leaving the standard playbook model.
+This is the current recommended path if you want to evaluate TurboAgents inside SuperOptiX without leaving the standard playbook model.
+
+## Validation Matrix
+
+Current local framework validation for `turboagents-surrealdb` is:
+
+| Framework | Status | Validation |
+| --- | --- | --- |
+| OpenAI Agents | Passed | `rag_surrealdb_openai_demo --framework openai --goal "What is NEON-FOX-742?"` returned the seeded token explanation |
+| Pydantic AI | Passed | `rag_surrealdb_pydanticai_demo --framework pydantic-ai --goal "What is NEON-FOX-742?"` returned the seeded token explanation |
+| DSPy | Blocked | Local LiteLLM and Ollama path still fails on `qwen3.5:9b` with `invalid model name`; retrieval is not the blocker |
+
+Seed helper details:
+
+- `superoptix.agents.demo.setup_surrealdb_seed` now understands `turboagents-surrealdb` directly
+- the helper writes TurboAgents-compatible SurrealDB payloads
+- sentence-transformer embeddings are trimmed or padded to the configured TurboAgents dimension during seeding so seeded data matches runtime behavior
+
+Recommended local validation flow:
+
+```bash
+uv run python superoptix/agents/demo/setup_surrealdb_seed.py
+super agent run rag_surrealdb_openai_demo --framework openai --goal "What is NEON-FOX-742?"
+super agent run rag_surrealdb_pydanticai_demo --framework pydantic-ai --goal "What is NEON-FOX-742?"
+```
 
 ## Technical Architecture
 
@@ -253,7 +275,7 @@ Do not close Terminal A or Terminal B while you are testing.
 ## Success Checklist
 
 - [ ] `pip install "superoptix[surrealdb]"` completed
-- [ ] `ollama pull llama3.1:8b` completed
+- [ ] `ollama pull qwen3.5:9b` completed
 - [ ] `ollama serve` is running
 - [ ] SurrealDB Docker process is running on port `8000`
 - [ ] seed command prints `SurrealDB seed complete`
@@ -285,14 +307,14 @@ With `uv`:
 
 ```bash
 uv pip install "superoptix[turboagents]"
-ollama pull llama3.1:8b
+ollama pull qwen3.5:9b
 ```
 
 Or with `pip`:
 
 ```bash
 pip install "superoptix[turboagents]"
-ollama pull llama3.1:8b
+ollama pull qwen3.5:9b
 ```
 
 If you want the older native-only SurrealDB path, `superoptix[surrealdb]` still
@@ -391,9 +413,9 @@ Behavior to verify:
 Still in Terminal C, run these exactly in order:
 
 ```bash
-super agent pull rag_surrealdb_dspy_demo
-super agent compile rag_surrealdb_dspy_demo --framework dspy
-super agent run rag_surrealdb_dspy_demo --framework dspy --goal "What is NEON-FOX-742?"
+super agent pull rag_surrealdb_openai_demo
+super agent compile rag_surrealdb_openai_demo --framework openai
+super agent run rag_surrealdb_openai_demo --framework openai --goal "What is NEON-FOX-742?"
 ```
 
 What each command does:
@@ -405,7 +427,7 @@ What each command does:
 Exact output to look for:
 
 - `RAG retrieval enabled`
-- `Validation Status: ✅ PASSED`
+- `Validation Status: PASSED`
 
 Behavior to verify:
 
@@ -457,14 +479,10 @@ python -m superoptix.agents.demo.setup_surrealdb_seed --append
 Still in Terminal C, run:
 
 ```bash
-super agent pull graphrag_surrealdb_dspy_demo
-super agent compile graphrag_surrealdb_dspy_demo --framework dspy
-super agent run graphrag_surrealdb_dspy_demo --framework dspy --goal "What capabilities does SurrealDB provide?"
+super agent pull graphrag_surrealdb_openai_demo
+super agent compile graphrag_surrealdb_openai_demo --framework openai
+super agent run graphrag_surrealdb_openai_demo --framework openai --goal "What capabilities does SurrealDB provide?"
 ```
-
-Exact output to look for:
-
-- `Validation Status: ✅ PASSED`
 
 Behavior to verify:
 
@@ -488,13 +506,13 @@ export GOOGLE_API_KEY=your_key_here
 Run standard RAG:
 
 ```bash
-super agent run rag_surrealdb_dspy_demo --framework dspy --cloud --provider google-genai --model gemini-2.5-flash --goal "What is NEON-FOX-742?"
+super agent run rag_surrealdb_openai_demo --framework openai --cloud --provider google-genai --model gemini-2.5-flash --goal "What is NEON-FOX-742?"
 ```
 
 Run GraphRAG:
 
 ```bash
-super agent run graphrag_surrealdb_dspy_demo --framework dspy --cloud --provider google-genai --model gemini-2.5-flash --goal "What capabilities does SurrealDB provide?"
+super agent run graphrag_surrealdb_openai_demo --framework openai --cloud --provider google-genai --model gemini-2.5-flash --goal "What capabilities does SurrealDB provide?"
 ```
 
 ## Docker And Connection Notes
@@ -652,6 +670,12 @@ Important retrieval note:
     pip install -U "superoptix[frameworks-dspy]"
     ```
 
+    Current local status:
+
+    - the DSPy SurrealDB path is implemented but not part of the current passing local validation matrix
+    - the known blocker is the local LiteLLM and Ollama path for `qwen3.5:9b`, which currently fails with `invalid model name`
+    - use the OpenAI Agents or Pydantic AI tabs below for the currently validated local route
+
     Basic RAG:
 
     ```bash
@@ -668,18 +692,12 @@ Important retrieval note:
     super agent run graphrag_surrealdb_dspy_demo --framework dspy --goal "What capabilities does SurrealDB provide?"
     ```
 
-    Verify:
-
-    - basic RAG answer mentions `NEON-FOX-742`
-    - GraphRAG run does not fall back to vector mode
-    - both runs end with `Validation Status: ✅ PASSED`
-
 === "🤖 OpenAI"
     Note:
 
     - install with `pip install -U "superoptix[frameworks-openai]"`
     - for the OpenAI Agents SDK demo, recompile with the Gemini cloud flags before running
-    - if the run log still shows `model=litellm/ollama/llama3.1:8b`, the pipeline is still using an older Ollama-compiled spec
+    - if the run log still shows `model=litellm/ollama/qwen3.5:9b`, the pipeline is still using an older Ollama-compiled spec
 
     Install:
 
@@ -946,9 +964,9 @@ super agent run <demo_id> --framework <framework_name> --cloud --provider google
 ### Feature: Vector RAG (`surrealdb-vector-rag`)
 
 ```bash
-super agent pull rag_surrealdb_dspy_demo
-super agent compile rag_surrealdb_dspy_demo --framework dspy
-super agent run rag_surrealdb_dspy_demo --framework dspy --goal "What is NEON-FOX-742?"
+super agent pull rag_surrealdb_openai_demo
+super agent compile rag_surrealdb_openai_demo --framework openai
+super agent run rag_surrealdb_openai_demo --framework openai --goal "What is NEON-FOX-742?"
 ```
 
 ### Feature: Hybrid RAG (`surrealdb-hybrid-rag`)
@@ -968,9 +986,9 @@ Then compile and run as normal.
 
 ```bash
 python -m superoptix.agents.demo.setup_surrealdb_seed --graph
-super agent pull graphrag_surrealdb_dspy_demo
-super agent compile graphrag_surrealdb_dspy_demo --framework dspy
-super agent run graphrag_surrealdb_dspy_demo --framework dspy --goal "What capabilities does SurrealDB provide?"
+super agent pull graphrag_surrealdb_openai_demo
+super agent compile graphrag_surrealdb_openai_demo --framework openai
+super agent run graphrag_surrealdb_openai_demo --framework openai --goal "What capabilities does SurrealDB provide?"
 ```
 
 ### Feature: Multi Retrieval (`surrealdb-multi-rag`)
@@ -1088,7 +1106,7 @@ rag:
 | Key | Type | Meaning | Notes |
 |---|---|---|---|
 | `rag.enabled` | bool | enables retrieval | must be `true` |
-| `rag.retriever_type` | string | selects backend | use `surrealdb` |
+| `rag.retriever_type` | string | selects backend | use `turboagents-surrealdb` |
 | `rag.config.top_k` | int | max retrieved rows | typical demo value is `5` |
 | `rag.config.retrieval_mode` | string | retrieval strategy | `vector`, `hybrid`, `graph`, `multi` |
 | `rag.config.hybrid_alpha` | float | semantic vs lexical weight | valid range `0.0..1.0` |
@@ -1197,7 +1215,7 @@ spec:
 
   rag:
     enabled: true
-    retriever_type: surrealdb
+    retriever_type: turboagents-surrealdb
     config:
       top_k: 5
       retrieval_mode: multi
@@ -1342,7 +1360,7 @@ Meaning: wrong model string was passed.
 Fix:
 
 ```bash
-super agent run rag_surrealdb_dspy_demo --framework dspy --local --provider ollama --model llama3.1:8b --goal "What is NEON-FOX-742?"
+super agent run rag_surrealdb_dspy_demo --framework dspy --local --provider ollama --model qwen3.5:9b --goal "What is NEON-FOX-742?"
 ```
 
 ### Problem: Gemini says `API_KEY_INVALID` or `API Key not found`

@@ -177,7 +177,7 @@ spec:
   
   language_model:
     provider: ollama
-    model: llama3.1:8b
+    model: qwen3.5:9b
   
   persona:
     role: Documentation Assistant

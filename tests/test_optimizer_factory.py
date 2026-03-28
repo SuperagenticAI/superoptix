@@ -63,10 +63,10 @@ class TestDSPyOptimizerFactory:
         params = {
             "metric": "answer_exact_match",
             "auto": "light",
-            "reflection_lm": "llama3.1:8b",
+            "reflection_lm": "qwen3.5:9b",
         }
 
-        lm_config = {"model": "llama3.2:1b", "provider": "ollama"}
+        lm_config = {"model": "qwen3.5:2b", "provider": "ollama"}
 
         try:
             optimizer = DSPyOptimizerFactory.create_optimizer(

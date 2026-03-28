@@ -138,7 +138,7 @@ metadata:
   id: test_agent
 spec:
   language_model:
-    model: llama3.1:8b
+    model: qwen3.5:9b
   input_fields:
   - {name: text, type: string}
   output_fields:

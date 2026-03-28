@@ -12,9 +12,9 @@ title: Quick Start - SuperOptiX
 
 !!! abstract "Choose Your Path"
 
-    **Part 1 – Sentiment Analyzer Demo:** A lightweight project that walks through evaluation and GEPA optimization in minutes.
+    **Part 1 - Sentiment Analyzer Demo:** A lightweight project that walks through evaluation and GEPA optimization in minutes.
 
-    **Part 2 – SWE Orchestration:** A full multi-agent software engineering workflow that showcases the orchestration features.
+    **Part 2 - SWE Orchestration:** A full multi-agent software engineering workflow that showcases the orchestration features.
 
 !!! tip "Getting Started"
     You can complete Part 1 on its own, then move on to Part 2 when you're ready to build larger teams.
@@ -65,7 +65,7 @@ We recommend using `uv` for fast, reliable installation.
 
 ---
 
-## 🎨 Part 1 — Sentiment Analyzer Demo (Evaluation & Optimization)
+## 🎨 Part 1 - Sentiment Analyzer Demo (Evaluation & Optimization)
 
 !!! info "Overview"
     This mini-project validates that your environment is ready. You'll initialize a project, pull a sample dataset, run the agent, evaluate it, and apply GEPA optimization.
@@ -107,7 +107,7 @@ super agent run sentiment_analyzer \
 
 ??? info "What Happened"
     - The pipeline (`agents/sentiment_analyzer/pipelines/sentiment_analyzer_pipeline.py`) executed end-to-end with your goal.
-    - DSPy configured the local Ollama model `llama3.1:8b` (temperature 0.3, max 512 tokens).
+    - DSPy configured the local Ollama model `qwen3.5:9b` (temperature 0.3, max 512 tokens).
     - The ReAct chain generated both the structured fields (`sentiment`, `confidence`) and the reasoning trace.
     - Output is shown in the terminal and the pipeline remains inspectable under `agents/sentiment_analyzer/pipelines/`.
 
@@ -150,7 +150,7 @@ super agent evaluate sentiment_analyzer
 
 ---
 
-## 🏗️ Part 2 — SWE Multi-Agent Orchestration
+## 🏗️ Part 2 - SWE Multi-Agent Orchestration
 
 !!! info "Overview"
     In this section you'll build an end-to-end software development workflow with multiple cooperating agents.

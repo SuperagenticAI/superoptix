@@ -54,6 +54,7 @@ except ImportError:
 
 try:
     from .vector_stores.turboagents_store import (
+        TurboChromaVectorStore,
         TurboFAISSVectorStore,
         TurboLanceDBVectorStore,
         TurboSurrealDBVectorStore,
@@ -87,6 +88,7 @@ if _SURREALDB_AVAILABLE:
 if _TURBOAGENTS_AVAILABLE:
     __all__.extend(
         [
+            "TurboChromaVectorStore",
             "TurboFAISSVectorStore",
             "TurboLanceDBVectorStore",
             "TurboSurrealDBVectorStore",

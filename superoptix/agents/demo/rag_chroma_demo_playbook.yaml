@@ -13,7 +13,7 @@ spec:
   language_model:
     location: local
     provider: ollama
-    model: llama3.1:8b
+    model: qwen3.5:9b
     api_base: http://localhost:11434
     temperature: 0.7
     max_tokens: 2048
@@ -130,7 +130,7 @@ spec:
       max_episodes: 50
   rag:
     enabled: true
-    retriever_type: chroma
+    retriever_type: turboagents-chroma
     config:
       top_k: 5
       chunk_size: 512
@@ -138,8 +138,9 @@ spec:
       similarity_threshold: 0.7
     vector_store:
       embedding_model: sentence-transformers/all-MiniLM-L6-v2
+      embedding_dimension: 64
       collection_name: rag_demo_knowledge
-      persist_directory: ./data/chromadb
+      persist_directory: ./.superoptix/turboagents-chroma
   evaluation:
     builtin_metrics:
     - name: retrieval_accuracy
@@ -194,7 +195,7 @@ spec:
       params:
         metric: tool_use_accuracy
         auto: light
-        reflection_lm: llama3.1:8b
+        reflection_lm: qwen3.5:9b
         max_full_evals: 5
         skip_perfect_score: true
         reflection_minibatch_size: 3

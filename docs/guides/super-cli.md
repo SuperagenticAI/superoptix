@@ -190,7 +190,7 @@ SuperOptiX › /clear
 ### Built-in Support for Multiple Providers
 
 **Local Models (Ollama):**
-- `llama3.2:1b`, `llama3.2:3b`
+- `qwen3.5:2b`, `qwen3.5:2b`
 - `gpt-oss:20b`, `gpt-oss:120b`
 - `qwen2.5-coder:7b`
 - Any Ollama model
@@ -214,7 +214,7 @@ SuperOptiX › /model list
 🤖 Available Models
 
 Local Models (Ollama):
-  • llama3.2:1b           Fast, lightweight
+  • qwen3.5:2b           Fast, lightweight
   • gpt-oss:120b         Powerful reasoning
   • qwen2.5-coder:7b     Code specialist
 
@@ -789,9 +789,9 @@ Super CLI is in beta - we want your input!
 ## 📖 Related Documentation
 
 - [CLI Complete Guide](cli-complete-guide.md) - Traditional CLI reference
-- [MCP Tools Guide](mcp-tools.md) - MCP integration details
+- [MCP Tools Guide](protocol-first-agents.md) - MCP integration details
 - [GEPA Optimization](gepa-optimization.md) - Optimization strategies
-- [Agent Development](../tutorials/first-agent.md) - Building agents
+- [Agent Development](../tutorials/genies-agent.md) - Building agents
 
 ---
 

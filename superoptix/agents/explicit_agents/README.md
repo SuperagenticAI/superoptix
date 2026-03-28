@@ -3,7 +3,7 @@
 **Category**: Explicit Code Generation Examples
 **Purpose**: Reference agents demonstrating transparent DSPy code generation
 **Status**: ✅ Production-ready marketplace agents
-**Model**: All use Ollama local models (llama3.2:1b)
+**Model**: All use Ollama local models (qwen3.5:2b)
 
 ---
 
@@ -37,7 +37,7 @@ These agents demonstrate SuperOptiX's **explicit DSPy code generation** approach
 curl -fsSL https://ollama.com/install.sh | sh
 
 # Pull the model
-ollama pull llama3.2:1b
+ollama pull qwen3.5:2b
 
 # For RAG assistant, install vector DB
 pip install chromadb sentence-transformers
@@ -102,7 +102,7 @@ import yaml
 class MyAgentPipeline:
     def __init__(self):
         # All model setup visible
-        self.lm = dspy.LM(model="llama3.2:1b", temperature=0.7)
+        self.lm = dspy.LM(model="qwen3.5:2b", temperature=0.7)
         dspy.configure(lm=self.lm)
 
         # All scenario loading visible
@@ -218,13 +218,13 @@ spec:
   language_model:
     location: local
     provider: ollama
-    model: llama3.2:1b        # Fast, lightweight
+    model: qwen3.5:2b        # Fast, lightweight
     temperature: 0.7
     max_tokens: 2000-3000
     api_base: http://localhost:11434
 ```
 
-**Why llama3.2:1b?**
+**Why qwen3.5:2b?**
 - ✅ Fast responses (~2-3 sec on MacBook)
 - ✅ Low memory usage (~2GB RAM)
 - ✅ Good enough for demos
@@ -232,8 +232,7 @@ spec:
 
 **Want better quality?** Change model in playbook:
 ```yaml
-model: llama3.1:8b    # Better quality
-model: llama3.1:70b   # Best quality (needs more RAM)
+model: qwen3.5:9b    # Better quality
 ```
 
 ---
@@ -246,7 +245,7 @@ Edit playbook:
 ```yaml
 spec:
   language_model:
-    model: llama3.1:8b  # Upgrade to larger model
+    model: qwen3.5:9b  # Upgrade to larger model
 ```
 
 ### Add Tools (MCP Agent)

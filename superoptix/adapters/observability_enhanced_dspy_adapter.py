@@ -353,7 +353,7 @@ class ObservabilityEnhancedDSPyAdapter:
 
             if provider == "ollama":
                 lm = self.dspy.LM(
-                    f"ollama_chat/{self.config['llm'].get('model', 'llama3.2:1b')}",
+                    f"ollama_chat/{self.config['llm'].get('model', 'qwen3.5:2b')}",
                     api_base=self.config["llm"].get(
                         "api_base", "http://localhost:11434"
                     ),

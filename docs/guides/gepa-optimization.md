@@ -160,11 +160,11 @@ super agent optimize <agent_name> --auto medium
 
 # Examples for each framework:
 super agent optimize sentiment_analyzer --auto medium        # DSPy (uses native GEPA)
-super agent optimize assistant_openai --auto medium --framework openai --reflection-lm ollama:llama3.1:8b          # OpenAI SDK
-super agent optimize researcher_crew --auto medium --framework crewai --reflection-lm ollama:llama3.1:8b           # CrewAI
-super agent optimize assistant_adk --auto medium --framework google-adk --reflection-lm ollama:llama3.1:8b             # Google ADK
-super agent optimize assistant_microsoft --auto medium --framework microsoft --reflection-lm ollama:llama3.1:8b       # Microsoft
-super agent optimize research_agent_deepagents --auto medium --framework deepagents --reflection-lm ollama:llama3.1:8b # DeepAgents
+super agent optimize assistant_openai --auto medium --framework openai --reflection-lm ollama:qwen3.5:9b          # OpenAI SDK
+super agent optimize researcher_crew --auto medium --framework crewai --reflection-lm ollama:qwen3.5:9b           # CrewAI
+super agent optimize assistant_adk --auto medium --framework google-adk --reflection-lm ollama:qwen3.5:9b             # Google ADK
+super agent optimize assistant_microsoft --auto medium --framework microsoft --reflection-lm ollama:qwen3.5:9b       # Microsoft
+super agent optimize research_agent_deepagents --auto medium --framework deepagents --reflection-lm ollama:qwen3.5:9b # DeepAgents
 ```
 
 ### GEPA API Mode (Default + Opt-In)
@@ -178,13 +178,13 @@ Use CLI flag:
 
 ```bash
 # Default behavior (legacy)
-super agent optimize my_agent --framework openai --auto light --reflection-lm ollama:llama3.1:8b
+super agent optimize my_agent --framework openai --auto light --reflection-lm ollama:qwen3.5:9b
 
 # Explicit legacy
-super agent optimize my_agent --framework openai --auto light --reflection-lm ollama:llama3.1:8b --gepa-api legacy
+super agent optimize my_agent --framework openai --auto light --reflection-lm ollama:qwen3.5:9b --gepa-api legacy
 
 # Opt in to optimize_anything
-super agent optimize my_agent --framework openai --auto light --reflection-lm ollama:llama3.1:8b --gepa-api optimize_anything
+super agent optimize my_agent --framework openai --auto light --reflection-lm ollama:qwen3.5:9b --gepa-api optimize_anything
 ```
 
 Use playbook params:
@@ -196,7 +196,7 @@ spec:
       name: GEPA
       params:
         auto: light
-        reflection_lm: llama3.1:8b
+        reflection_lm: qwen3.5:9b
         gepa_api: optimize_anything  # optional; default is legacy
 ```
 
@@ -208,7 +208,7 @@ Compatibility note:
 
 The `--reflection-lm` parameter specifies which model GEPA uses to analyze evaluation results and suggest prompt improvements. We typically recommend using a **smaller, faster model** for reflection:
 
-**Why use a smaller reflection model (e.g., llama3.1:8b)?**
+**Why use a smaller reflection model (e.g., qwen3.5:9b)?**
 - **Speed**: GEPA runs the reflection model many times (10-50+ iterations). Smaller models make optimization 5-10x faster
 - **Resources**: Reduces memory and compute requirements significantly
 - **Good Enough**: The reflection task (analyzing results, suggesting improvements) is simpler than the agent's actual task
@@ -216,8 +216,8 @@ The `--reflection-lm` parameter specifies which model GEPA uses to analyze evalu
 **Example:**
 ```bash
 # Your agent uses gpt-oss:20b (20B parameters)
-# But reflection uses llama3.1:8b (8B parameters) - much faster!
-super agent optimize my_agent --auto medium --reflection-lm ollama:llama3.1:8b
+# But reflection uses qwen3.5:9b (9B parameters) - much faster!
+super agent optimize my_agent --auto medium --reflection-lm ollama:qwen3.5:9b
 ```
 
 **You can use a larger reflection model if needed:**
@@ -273,7 +273,7 @@ super agent optimize <agent_name> --auto light --fresh
 # With custom reflection model
 super agent optimize developer \
   --auto medium \
-  --reflection-lm llama3.1:8b \
+  --reflection-lm qwen3.5:9b \
   --fresh
 ```
 
@@ -369,7 +369,7 @@ spec:
   language_model:
     location: local
     provider: ollama
-    model: llama3.1:8b        # Main model (~8GB)
+    model: qwen3.5:9b        # Main model (~8GB)
     temperature: 0.1
   optimization:
     optimizer:
@@ -428,7 +428,7 @@ Use different models for main processing and reflection to get diverse perspecti
 ```yaml
 spec:
   language_model:
-    model: llama3.1:8b  # Main processing
+    model: qwen3.5:9b  # Main processing
   optimization:
     optimizer:
       reflection_lm: qwen3:8b  # Different architecture for reflection
@@ -662,7 +662,7 @@ optimizer = DSPyOptimizerFactory.create_optimizer(
         "skip_perfect_score": True
     },
     lm_config={
-        "model": "llama3.1:8b",
+        "model": "qwen3.5:9b",
         "provider": "ollama",
         "temperature": 0.1
     }
@@ -803,7 +803,7 @@ spec:
   language_model:
     location: local
     provider: ollama
-    model: llama3.1:8b  # Free local optimization
+    model: qwen3.5:9b  # Free local optimization
 ```
 
 #### Invest in Quality Training Data
@@ -968,7 +968,7 @@ optimization:
 
 ### Prerequisites
 - SuperOptiX installation with GEPA support
-- Local models: `llama3.1:8b` and `qwen3:8b`
+- Local models: `qwen3.5:9b` and `qwen3:8b`
 - At least 16GB available memory
 - 3-5 quality BDD scenarios for training
 

@@ -34,9 +34,10 @@ pip install superoptix[vectordb]
 pip install "superoptix[turboagents]"
 ```
 
-This enables `turboagents`-backed GEPA vector stores for FAISS, LanceDB, and
-SurrealDB, plus the matching `rag.retriever_type` values:
+This enables `turboagents`-backed GEPA vector stores for Chroma, FAISS,
+LanceDB, and SurrealDB, plus the matching `rag.retriever_type` values:
 
+- `turboagents-chroma`
 - `turboagents-faiss`
 - `turboagents-lancedb`
 - `turboagents-surrealdb`

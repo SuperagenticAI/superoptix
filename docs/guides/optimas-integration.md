@@ -208,7 +208,7 @@ name: optimas_openai
 description: OpenAI SDK integration with Optimas
 language_model:
   provider: ollama
-  model: llama3.2:1b
+  model: qwen3.5:2b
   base_url: http://localhost:11434
   api_key: ""
 
@@ -240,7 +240,7 @@ name: optimas_crewai
 description: CrewAI integration with Optimas
 language_model:
   provider: ollama
-  model: llama3.2:1b
+  model: qwen3.5:2b
   base_url: http://localhost:11434
   api_key: ""
 
@@ -273,11 +273,11 @@ name: optimas_autogen
 description: AutoGen integration with Optimas
 language_model:
   provider: ollama
-  model: llama3.2:1b
+  model: qwen3.5:2b
   base_url: http://localhost:11434
   api_key: ""
   model_info:
-    model_name: "llama3.2:1b"
+    model_name: "qwen3.5:2b"
     max_tokens: 4096
     temperature: 0.7
     top_p: 0.9
@@ -309,7 +309,7 @@ name: optimas_dspy
 description: DSPy integration with Optimas
 language_model:
   provider: ollama
-  model: llama3.2:1b
+  model: qwen3.5:2b
   base_url: http://localhost:11434
   api_key: ""
 

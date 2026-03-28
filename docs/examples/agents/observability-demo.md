@@ -17,7 +17,7 @@ This demo demonstrates:
 
 ```bash
 # Install the Ollama model used in this demo
-super model install llama3.2:8b
+super model install qwen3.5:9b
 ```
 
 ### **2. Start Ollama Server**
@@ -49,7 +49,7 @@ The Observability demo showcases how to configure observability in the agent pla
 language_model:
   location: local
   provider: ollama
-  model: llama3.2:8b
+  model: qwen3.5:9b
   api_base: http://localhost:11434
   temperature: 0.7
   max_tokens: 2048
@@ -165,10 +165,10 @@ super agent --help
 
 ## 📚 Related Documentation
 
-- [Observability Guide](../guides/observability) - Complete observability setup and usage
-- [Debugging Guide](../debugging-guide) - Debugging techniques and tools
-- [Agent Development](../guides/agent-development.md) - Building custom agents
+- [Observability Guide](../../guides/observability.md) - Complete observability setup and usage
+- [Debugging Guide](../../debugging-guide.md) - Debugging techniques and tools
+- [Agent Development](../../guides/agent-development.md) - Building custom agents
 
 ## 🔗 Next Steps
 
-1. **Try Other Framework Features**: Explore [Tools](tools-demo) or [Memory](memory-demo) demos 
+1. **Try Other Framework Features**: Explore [Tools](tools-demo.md) or [Memory](memory-demo.md) demos 

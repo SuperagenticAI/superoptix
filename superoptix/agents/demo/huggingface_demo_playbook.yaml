@@ -193,7 +193,7 @@ spec:
       params:
         metric: tool_use_accuracy
         auto: light
-        reflection_lm: llama3.1:8b
+        reflection_lm: qwen3.5:9b
         max_full_evals: 5
         skip_perfect_score: true
         reflection_minibatch_size: 3

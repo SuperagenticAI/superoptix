@@ -1530,14 +1530,14 @@ super agent pull researcher_hybrid          # CompositeBackend
 
 ### Official Documentation
 
-- [DeepAgents Integration Guide](deepagents-integration.md) - Complete guide
-- [Backend Configuration Reference](deepagents-backends.md) - All backend types
+- [DeepAgents Integration Guide](../guides/deepagents-integration.md) - Complete guide
+- [Backend Configuration Reference](../guides/deepagents-backends.md) - All backend types
 - [Backend Tutorial](deepagents-backends-tutorial.md) - 6 hands-on tutorials
 
 ### Configuration Guides
 
-- [Gemini Configuration Guide](../../GEMINI_CONFIGURATION_GUIDE.md) - Model setup
-- [Quick Reference](../../DEEPAGENTS_QUICK_REFERENCE.md) - Command cheat sheet
+- [Gemini Configuration Guide](../GEMINI_CONFIGURATION_GUIDE.md) - Model setup
+- [Quick Reference](../DEEPAGENTS_QUICK_REFERENCE.md) - Command cheat sheet
 
 ### External Resources
 
@@ -1622,7 +1622,7 @@ By the end of this tutorial, you should be able to:
 3. Build your first custom agent
 
 ### This Week
-4. Read the complete [Backend Reference](deepagents-backends.md)
+4. Read the complete [Backend Reference](../guides/deepagents-backends.md)
 5. Follow the [Backend Tutorial](deepagents-backends-tutorial.md)
 6. Optimize your agents with GEPA
 

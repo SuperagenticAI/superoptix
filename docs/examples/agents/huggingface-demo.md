@@ -148,9 +148,9 @@ super model server --help
 
 ## 📚 **Related Resources**
 
-- [HuggingFace Setup Guide](../llm-setup.md#huggingface) - Complete HuggingFace setup instructions
-- [Model Management](../guides/model-management.md) - Managing HuggingFace models
-- [Agent Development](../guides/agent-development.md) - Building custom agents
+- [HuggingFace Setup Guide](../../llm-setup.md#huggingface) - Complete HuggingFace setup instructions
+- [Model Management](../../guides/model-management.md) - Managing HuggingFace models
+- [Agent Development](../../guides/agent-development.md) - Building custom agents
 
 ## 🎉 **Next Steps**
 

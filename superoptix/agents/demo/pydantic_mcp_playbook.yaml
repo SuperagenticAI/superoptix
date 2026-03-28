@@ -21,7 +21,7 @@ spec:
   language_model:
     location: local
     provider: ollama
-    model: llama3.1:8b  # Works well with MCP tools in plain text mode
+    model: qwen3.5:9b  # Works well with MCP tools in plain text mode
     max_tokens: 4000  # Increased for detailed responses
     top_p: 0.9
     api_base: http://localhost:11434
@@ -149,7 +149,7 @@ spec:
       name: GEPA
       params:
         auto: light  # Start with light optimization for faster iteration
-        reflection_lm: ollama/llama3.1:8b  # Smaller model for reflection (LiteLLM format)
+        reflection_lm: ollama/qwen3.5:9b  # Smaller model for reflection (LiteLLM format)
         max_full_evals: 3
         skip_perfect_score: true
     metric: answer_substring_match

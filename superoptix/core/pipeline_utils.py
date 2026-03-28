@@ -214,7 +214,7 @@ class ModelSetupMixin:
         """Robustly configure a reflection LM from a config dict (model, provider, etc)."""
         from dspy import LM
 
-        model_name = lm_config.get("model", "llama3.1:8b")
+        model_name = lm_config.get("model", "qwen3.5:9b")
         provider = lm_config.get("provider", "ollama")
         temperature = lm_config.get("temperature", 0.0)
         max_tokens = lm_config.get("max_tokens", 32000)
@@ -248,11 +248,11 @@ class ModelSetupMixin:
     def _get_default_model(self, tier: str) -> str:
         """Get default model for tier."""
         defaults = {
-            "oracles": "llama3.2:1b",
-            "genies": "llama3.1:8b",
-            "sage": "llama3.1:70b",
+            "oracles": "qwen3.5:2b",
+            "genies": "qwen3.5:9b",
+            "sage": "qwen3.5:9b",
         }
-        return defaults.get(tier, "llama3.1:8b")
+        return defaults.get(tier, "qwen3.5:9b")
 
     def _get_default_temperature(self, tier: str) -> float:
         """Get default temperature for tier."""
@@ -1278,7 +1278,7 @@ class BDDTestMixin:
         # Suggest model upgrades based on performance
         suggested_upgrade = "None needed"
         if avg_score < 0.6:
-            suggested_upgrade = "Consider llama3.1:8b or gpt-4 for better performance"
+            suggested_upgrade = "Consider qwen3.5:9b or gpt-4 for better performance"
         elif avg_score < 0.4:
             suggested_upgrade = (
                 "Strongly recommend gpt-4 or claude-3 for reliable results"
@@ -1353,7 +1353,7 @@ class BDDTestMixin:
                 "Strong recommendation: Run optimization before production use."
             )
             recommendations.append(
-                "Consider using a more capable model (llama3.1:8b or gpt-4)."
+                "Consider using a more capable model (qwen3.5:9b or gpt-4)."
             )
             recommendations.append("Review scenario complexity vs model capabilities.")
 
@@ -1731,7 +1731,7 @@ class PipelineUtilities:
 
     @staticmethod
     def setup_language_model_quick(
-        model_name: str = "llama3.1:8b",
+        model_name: str = "qwen3.5:9b",
         provider: str = "ollama",
         temperature: float = 0.1,
     ) -> dspy.LM:
@@ -1790,7 +1790,7 @@ class PipelineUtilities:
         lm_config = None
         if lm is not None:
             lm_config = {
-                "model": getattr(lm, "model", "llama3.1:8b"),
+                "model": getattr(lm, "model", "qwen3.5:9b"),
                 "provider": "ollama",
             }
 

@@ -272,7 +272,7 @@ class SlashCommandHandler:
             self.console.print("  [cyan]/model set <model>[/cyan] - Switch model\n")
             self.console.print("Traditional CLI:")
             self.console.print("  [cyan]super model list[/cyan]")
-            self.console.print("  [cyan]super model install llama3.1:8b[/cyan]\n")
+            self.console.print("  [cyan]super model install qwen3.5:9b[/cyan]\n")
 
         else:
             self.console.print(f"\n[yellow]No help available for:[/yellow] {topic}")
@@ -362,7 +362,7 @@ class SlashCommandHandler:
                     self.console.print("[yellow]No models installed yet[/yellow]")
 
                 self.console.print("\n[dim]Popular models to install:[/dim]")
-                self.console.print("  • llama3.1:8b (4.7GB) - Fast, good quality")
+                self.console.print("  • qwen3.5:9b (4.7GB) - Fast, good quality")
                 self.console.print("  • qwen2.5:14b (8.9GB) - Better quality")
                 self.console.print("  • deepseek-coder:33b (19GB) - Best for coding")
                 self.console.print("  • mistral:7b (4.1GB) - Fast alternative")

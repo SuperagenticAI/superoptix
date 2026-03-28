@@ -115,18 +115,18 @@ super model recommend --memory "16GB"
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━┓
 ┃ Model                                    ┃    Backend     ┃ Performance  ┃  Size   ┃   Task    ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━┩
-│ llama3.2:8b                              │   🦙 ollama    │   ⭐⭐⭐⭐⭐   │ medium  │   chat    │
+│ qwen3.5:9b                              │   🦙 ollama    │   ⭐⭐⭐⭐⭐   │ medium  │   chat    │
 │ mlx-community/phi-2                      │     🍎 mlx     │   ⭐⭐⭐⭐    │  small  │   chat    │
 │ microsoft/Phi-4                          │ 🤗 huggingface │   ⭐⭐⭐⭐    │  small  │   chat    │
 └──────────────────────────────────────────┴────────────────┴──────────────┴─────────┴───────────┘
 
 💡 Installation commands:
-  super model install llama3.2:8b
+  super model install qwen3.5:9b
   super model install -b mlx mlx-community/phi-2
   super model install -b huggingface microsoft/Phi-4
 
 📊 Performance Analysis:
-  • llama3.2:8b: Best for complex code generation, requires 8GB RAM
+  • qwen3.5:9b: Best for complex code generation, requires 8GB RAM
   • mlx-community/phi-2: Fast inference on Apple Silicon, 4GB RAM
   • microsoft/Phi-4: Good balance of speed and quality, 6GB RAM
 ```
@@ -174,9 +174,9 @@ super model discover --task embedding
   • Large Models (13B+): Best performance, high resources
 
 🎯 Task-Specific Recommendations:
-  • Chat: llama3.2:3b, phi-2, DialoGPT-small
-  • Code: llama3.2:8b, codellama:7b, phi-2
-  • Reasoning: llama3.2:8b, qwen2.5:7b, mistral:7b
+  • Chat: qwen3.5:2b, phi-2, DialoGPT-small
+  • Code: qwen3.5:9b, codellama:7b, phi-2
+  • Reasoning: qwen3.5:9b, qwen2.5:7b, mistral:7b
   • Embedding: nomic-embed-text, all-MiniLM-L6-v2
 ```
 
@@ -186,29 +186,29 @@ Install models with smart dependency management and progress tracking:
 
 ```bash
 # Install with automatic backend detection
-super model install llama3.2:3b
+super model install qwen3.5:2b
 
 # Install with specific backend
 super model install -b mlx mlx-community/phi-2
 super model install -b huggingface microsoft/Phi-4
-super model install -b lmstudio llama-3.2-1b-instruct
+super model install -b lmstudio qwen2.5-3b-instruct
 
 # Install with performance optimization
-super model install llama3.2:8b --optimize
+super model install qwen3.5:9b --optimize
 super model install -b mlx mlx-community/phi-2 --optimize
 
 # Force reinstall if needed
-super model install llama3.2:3b --force
+super model install qwen3.5:2b --force
 ```
 
 **Example Installation Output:**
 ```
-🚀 SuperOptiX Model Intelligence - Installing llama3.2:3b
+🚀 SuperOptiX Model Intelligence - Installing qwen3.5:2b
 ═══════════════════════════════════════════════════════════════════════════════════
 
 🔍 Analyzing requirements...
   • Backend: Ollama (auto-detected)
-  • Size: 3B parameters
+  • Size: 2B parameters
   • Memory: ~4GB RAM required
   • Disk: ~2GB storage
 
@@ -216,7 +216,7 @@ super model install llama3.2:3b --force
   Ollama CLI detected
   Server status: Running on port 11434
 
-🦙 Pulling model llama3.2:3b from Ollama...
+🦙 Pulling model qwen3.5:2b from Ollama...
 ⏳ Progress: [██████████████████████████████████████████████] 100%
   • Downloaded: 2.0 GB
   • Verified: SHA256 checksum
@@ -230,17 +230,17 @@ super model install llama3.2:3b --force
 Installation completed successfully!
 
 📊 Model Details:
-  • Name: llama3.2:3b
+  • Name: qwen3.5:2b
   • Backend: Ollama
-  • Size: Small (3B parameters)
+  • Size: Small (2B parameters)
   • Task: Chat/Conversation
   • Memory: 3.2GB RAM
   • Performance: ⭐⭐⭐⭐
 
 💡 Next Steps:
-  • Start using: super model info llama3.2:3b
-  • Test performance: super model test llama3.2:3b
-  • Optimize further: super model optimize llama3.2:3b
+  • Start using: super model info qwen3.5:2b
+  • Test performance: super model test qwen3.5:2b
+  • Optimize further: super model optimize qwen3.5:2b
 ```
 
 ---
@@ -291,11 +291,11 @@ super model list --verbose
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━┓
 ┃ Model                                    ┃    Backend     ┃    Status    ┃  Size   ┃   Task    ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━┩
-│ llama-3.2-1b-instruct                    │  🎮 lmstudio   │ installed │  small  │   chat    │
-│ llama-3.3-70b-instruct                   │  🎮 lmstudio   │ installed │  large  │   chat    │
+│ qwen2.5-3b-instruct                      │  🎮 lmstudio   │ installed │  small  │   chat    │
+│ qwen2.5-7b-instruct                      │  🎮 lmstudio   │ installed │ medium  │   chat    │
 │ llama-4-scout-17b-16e-instruct           │  🎮 lmstudio   │ installed │ medium  │   chat    │
-│ llama3.1:8b                              │   🦙 ollama    │ installed │ medium  │   chat    │
-│ llama3.2:1b                              │   🦙 ollama    │ installed │  tiny   │   chat    │
+│ qwen3.5:9b                              │   🦙 ollama    │ installed │ medium  │   chat    │
+│ qwen3.5:2b                              │   🦙 ollama    │ installed │  tiny   │   chat    │
 │ microsoft/DialoGPT-small                 │ 🤗 huggingface │ installed │  small  │   chat    │
 │ microsoft/Phi-4                          │ 🤗 huggingface │ installed │  small  │   chat    │
 │ mlx-community_Llama-3.2-3B-Instruct-4bit │     🍎 mlx     │ installed │  small  │   chat    │
@@ -319,19 +319,19 @@ Get comprehensive information about specific models:
 
 ```bash
 # Get detailed model information
-super model info llama3.2:3b
+super model info qwen3.5:2b
 super model info mlx-community/phi-2
 super model info microsoft/Phi-4
-super model info llama-3.2-1b-instruct
+super model info qwen2.5-3b-instruct
 ```
 
 **Example Output:**
 ```
-📊 Model Information: llama3.2:3b
+📊 Model Information: qwen3.5:2b
 ═══════════════════════════════════════════════════════════════════════════════════
 
 🔍 Basic Information:
-  • Name: llama3.2:3b
+  • Name: qwen3.5:2b
   • Backend: Ollama
   • Status: Installed
   • Size: Small (3B parameters)
@@ -340,7 +340,7 @@ super model info llama-3.2-1b-instruct
 📦 Installation Details:
   • Install Date: 2024-01-15 14:30:22
   • Disk Size: 2.1 GB
-  • Location: ~/.ollama/models/llama3.2:3b
+  • Location: ~/.ollama/models/qwen3.5:2b
   • Version: latest
 
 ⚡ Performance Metrics:
@@ -369,7 +369,7 @@ super model info llama-3.2-1b-instruct
 
 💡 Recommendations:
   • Best for: General conversation, text analysis
-  • Consider upgrading to: llama3.2:8b for better reasoning
+  • Consider upgrading to: qwen3.5:9b for better reasoning
   • Alternative: phi-2 for faster inference
 ```
 
@@ -379,23 +379,23 @@ Test and benchmark your models:
 
 ```bash
 # Test model performance
-super model test llama3.2:3b
+super model test qwen3.5:2b
 super model test mlx-community/phi-2
 
 # Test with specific prompts
-super model test llama3.2:3b --prompt "Write a Python function to sort a list"
+super model test qwen3.5:2b --prompt "Write a Python function to sort a list"
 super model test mlx-community/phi-2 --prompt "Explain quantum computing"
 
 # Benchmark multiple models
-super model benchmark llama3.2:3b phi-2 microsoft/Phi-4
+super model benchmark qwen3.5:2b phi-2 microsoft/Phi-4
 
 # Performance analysis
-super model analyze llama3.2:3b
+super model analyze qwen3.5:2b
 ```
 
 **Example Test Output:**
 ```
-🧪 Model Performance Test: llama3.2:3b
+🧪 Model Performance Test: qwen3.5:2b
 ═══════════════════════════════════════════════════════════════════════════════════
 
 📝 Test Prompt: "Write a Python function to sort a list"
@@ -422,14 +422,14 @@ super model analyze llama3.2:3b
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━┓
 ┃ Model                                    ┃ Response Time  ┃ Quality Score┃ Memory   ┃ Tokens/sec┃
 ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━┩
-│ llama3.2:3b                              │     2.1s      │     ⭐⭐⭐⭐   │ 3.2GB   │   74.3    │
+│ qwen3.5:2b                              │     2.1s      │     ⭐⭐⭐⭐   │ 3.2GB   │   74.3    │
 │ phi-2                                    │     1.8s      │     ⭐⭐⭐    │ 2.8GB   │   86.7    │
 │ microsoft/Phi-4                          │     2.5s      │     ⭐⭐⭐⭐   │ 4.1GB   │   62.4    │
 └──────────────────────────────────────────┴────────────────┴──────────────┴─────────┴───────────┘
 
 💡 Recommendations:
   • For speed: Use phi-2 (1.8s vs 2.1s)
-  • For quality: Use llama3.2:3b or Phi-4
+  • For quality: Use qwen3.5:2b or Phi-4
   • For memory efficiency: Use phi-2 (2.8GB vs 3.2GB)
 ```
 
@@ -443,21 +443,21 @@ Optimize your models for better performance:
 
 ```bash
 # Optimize model performance
-super model optimize llama3.2:3b
+super model optimize qwen3.5:2b
 super model optimize mlx-community/phi-2
 
 # Optimize with specific targets
-super model optimize llama3.2:3b --target speed
-super model optimize llama3.2:3b --target memory
-super model optimize llama3.2:3b --target quality
+super model optimize qwen3.5:2b --target speed
+super model optimize qwen3.5:2b --target memory
+super model optimize qwen3.5:2b --target quality
 
 # Compare before/after optimization
-super model optimize llama3.2:3b --compare
+super model optimize qwen3.5:2b --compare
 ```
 
 **Example Optimization Output:**
 ```
-⚡ Model Optimization: llama3.2:3b
+⚡ Model Optimization: qwen3.5:2b
 ═══════════════════════════════════════════════════════════════════════════════════
 
 🔍 Pre-Optimization Analysis:
@@ -493,11 +493,11 @@ Monitor and manage model resources:
 
 ```bash
 # Monitor model resource usage
-super model monitor llama3.2:3b
+super model monitor qwen3.5:2b
 super model monitor --all
 
 # Get resource recommendations
-super model resources llama3.2:3b
+super model resources qwen3.5:2b
 super model resources --recommendations
 
 # Clean up unused models
@@ -517,7 +517,7 @@ Run multiple model servers simultaneously:
 # Start multiple servers on different ports
 super model server mlx phi-2 --port 8000
 super model server huggingface microsoft/Phi-4 --port 8001
-super model server lmstudio llama-3.2-1b-instruct --port 1234
+super model server lmstudio qwen2.5-3b-instruct --port 1234
 
 # Monitor all servers
 super model servers --status
@@ -559,16 +559,16 @@ Optimize models for specific use cases:
 
 ```bash
 # Optimize for code generation
-super model optimize llama3.2:8b --use-case code-generation
+super model optimize qwen3.5:9b --use-case code-generation
 
 # Optimize for text analysis
 super model optimize phi-2 --use-case text-analysis
 
 # Optimize for conversation
-super model optimize llama3.2:3b --use-case conversation
+super model optimize qwen3.5:2b --use-case conversation
 
 # Optimize for reasoning
-super model optimize llama3.2:8b --use-case reasoning
+super model optimize qwen3.5:9b --use-case reasoning
 ```
 
 ### **Workload-Specific Tuning**
@@ -577,16 +577,16 @@ Tune models for different workloads:
 
 ```bash
 # Tune for high-throughput
-super model tune llama3.2:3b --workload high-throughput
+super model tune qwen3.5:2b --workload high-throughput
 
 # Tune for low-latency
-super model tune llama3.2:3b --workload low-latency
+super model tune qwen3.5:2b --workload low-latency
 
 # Tune for memory-constrained
-super model tune llama3.2:3b --workload memory-constrained
+super model tune qwen3.5:2b --workload memory-constrained
 
 # Tune for quality-focused
-super model tune llama3.2:3b --workload quality-focused
+super model tune qwen3.5:2b --workload quality-focused
 ```
 
 ---
@@ -599,19 +599,19 @@ Manage model configurations:
 
 ```bash
 # Save custom configuration
-super model config save llama3.2:3b --name "my-config"
+super model config save qwen3.5:2b --name "my-config"
 
 # Load configuration
-super model config load llama3.2:3b --name "my-config"
+super model config load qwen3.5:2b --name "my-config"
 
 # List configurations
 super model config list
 
 # Export configuration
-super model config export llama3.2:3b --file config.yaml
+super model config export qwen3.5:2b --file config.yaml
 
 # Import configuration
-super model config import llama3.2:3b --file config.yaml
+super model config import qwen3.5:2b --file config.yaml
 ```
 
 ### **Backend-Specific Features**
@@ -621,7 +621,7 @@ Leverage backend-specific capabilities:
 ```bash
 # Ollama-specific features
 super model ollama --features
-super model ollama --optimize llama3.2:3b
+super model ollama --optimize qwen3.5:2b
 
 # MLX-specific features
 super model mlx --features
@@ -633,7 +633,7 @@ super model huggingface --optimize microsoft/Phi-4
 
 # LM Studio-specific features
 super model lmstudio --features
-super model lmstudio --optimize llama-3.2-1b-instruct
+super model lmstudio --optimize qwen2.5-3b-instruct
 ```
 
 ---
@@ -646,16 +646,16 @@ Track model usage and performance:
 
 ```bash
 # Get usage analytics
-super model analytics --model llama3.2:3b
+super model analytics --model qwen3.5:2b
 super model analytics --all
 
 # Performance trends
 super model analytics --trends
-super model analytics --trends --model llama3.2:3b
+super model analytics --trends --model qwen3.5:2b
 
 # Resource utilization
 super model analytics --resources
-super model analytics --resources --model llama3.2:3b
+super model analytics --resources --model qwen3.5:2b
 ```
 
 ### **Performance Insights**
@@ -664,14 +664,14 @@ Get detailed performance insights:
 
 ```bash
 # Performance insights
-super model insights llama3.2:3b
+super model insights qwen3.5:2b
 super model insights --all
 
 # Bottleneck analysis
-super model analyze --bottlenecks llama3.2:3b
+super model analyze --bottlenecks qwen3.5:2b
 
 # Optimization opportunities
-super model analyze --opportunities llama3.2:3b
+super model analyze --opportunities qwen3.5:2b
 ```
 
 ---
@@ -683,7 +683,7 @@ super model analyze --opportunities llama3.2:3b
 ```bash
 # Run comprehensive diagnostics
 super model diagnose
-super model diagnose --model llama3.2:3b
+super model diagnose --model qwen3.5:2b
 
 # Check system compatibility
 super model check --system
@@ -691,7 +691,7 @@ super model check --compatibility
 
 # Validate installation
 super model validate
-super model validate --model llama3.2:3b
+super model validate --model qwen3.5:2b
 ```
 
 ### **Common Issues & Solutions**
@@ -699,13 +699,13 @@ super model validate --model llama3.2:3b
 ```bash
 # Fix common issues
 super model fix --common
-super model fix --model llama3.2:3b
+super model fix --model qwen3.5:2b
 
 # Reset model configuration
-super model reset llama3.2:3b
+super model reset qwen3.5:2b
 
 # Repair corrupted models
-super model repair llama3.2:3b
+super model repair qwen3.5:2b
 ```
 
 ---

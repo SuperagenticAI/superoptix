@@ -188,18 +188,19 @@ nav:
       - '🔌 MCP Protocol': guides/protocol-first-agents.md
       - '📊 Dataset Import': guides/dataset-import.md
       - '🧠 Memory Systems': guides/memory.md
+  - 🧩 TurboAgents:
+      - 'Overview': guides/turboagents-integration.md
+      - 'Chroma': examples/agents/rag-chroma-demo.md
+      - 'LanceDB': examples/agents/rag-lancedb-demo.md
+      - 'SurrealDB': examples/agents/surrealdb-frameworks-demo.md
   - 🔌 Integrations:
       - '⚡ Optimas': examples/agents/optimas-examples.md
       - '⚡ Optimas Guide': guides/optimas-integration.md
-      - '🧩 TurboAgents': guides/turboagents-integration.md
       - '🗂️ StackOne Integration': guides/stackone-integration.md
       - '🗂️ StackOne + Claude SDK': guides/stackone-claude-sdk.md
-      - '🚥 ChromaDB': examples/agents/rag-chroma-demo.md
-      - '🍀 LanceDB': examples/agents/rag-lancedb-demo.md
       - '🔰 Weaviate': examples/agents/weaviate-demo.md
       - '🔸 Qdrant': examples/agents/qdrant-demo.md
       - '👁️ Milvus': examples/agents/milvus-demo.md
-      - '🟣 SurrealDB': examples/agents/surrealdb-frameworks-demo.md
       - '🛠️ Tools': examples/agents/tools-demo.md
       - '🧠 Memory': examples/agents/memory-demo.md
       - '📊 Observability': examples/agents/observability-demo.md

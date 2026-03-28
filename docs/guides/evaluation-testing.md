@@ -553,7 +553,7 @@ NEEDS WORK - 30% pass rate
 
 💡 Solutions:
 • Run optimization: super agent optimize developer
-• Upgrade model: Use llama3.1:8b or GPT-4
+• Upgrade model: Use qwen3.5:9b or GPT-4
 • Review specification complexity vs model capabilities
 • Improve agent prompts and training data
 ```

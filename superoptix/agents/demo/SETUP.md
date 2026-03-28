@@ -165,7 +165,7 @@ pip install chromadb sentence-transformers
 
 ### **"Ollama model not found" error**
 ```bash
-ollama pull llama3.1:8b
+ollama pull qwen3.5:9b
 ```
 
 ---

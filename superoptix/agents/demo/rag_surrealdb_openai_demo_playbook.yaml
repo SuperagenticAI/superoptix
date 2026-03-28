@@ -20,7 +20,7 @@ spec:
   language_model:
     location: local
     provider: ollama
-    model: ollama:llama3.1:8b
+    model: ollama:qwen3.5:9b
     api_base: http://localhost:11434
     temperature: 0.2
     max_tokens: 1800

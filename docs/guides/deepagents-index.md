@@ -85,7 +85,7 @@
 
 ## 🔧 Setup & Configuration
 
-### **[Gemini Configuration Guide](../../GEMINI_CONFIGURATION_GUIDE.md)**
+### **[Gemini Configuration Guide](../GEMINI_CONFIGURATION_GUIDE.md)**
 
 **Complete Gemini 2.5 model configuration guide**
 
@@ -101,7 +101,7 @@
 
 ---
 
-### **[Gemini Testing Guide](../../DEEPAGENTS_GEMINI_TEST.md)**
+### **[Gemini Testing Guide](../DEEPAGENTS_GEMINI_TEST.md)**
 
 **Step-by-step Gemini testing workflow**
 
@@ -119,7 +119,7 @@
 
 ## 📖 Reference Materials
 
-### **[Quick Reference Card](../../DEEPAGENTS_QUICK_REFERENCE.md)**
+### **[Quick Reference Card](../DEEPAGENTS_QUICK_REFERENCE.md)**
 
 **One-page cheat sheet** (print and keep handy!)
 
@@ -135,7 +135,7 @@
 
 ## 🔍 Technical Deep Dives
 
-### **[Integration Summary](../../DEEPAGENTS_0.2.0_COMPLETE.md)**
+### **[Integration Summary](../DEEPAGENTS_0.2.0_COMPLETE.md)**
 
 **What's new in 0.2.0 integration**
 
@@ -148,7 +148,7 @@
 
 ---
 
-### **[Technical Analysis](../../DEEPAGENTS_ANALYSIS.md)**
+### **[Technical Analysis](../DEEPAGENTS_ANALYSIS.md)**
 
 **Why Ollama doesn't work with DeepAgents**
 
@@ -162,7 +162,7 @@
 
 ---
 
-### **[Bug Fixes Summary](../../DEEPAGENTS_FIXES_SUMMARY.md)**
+### **[Bug Fixes Summary](../DEEPAGENTS_FIXES_SUMMARY.md)**
 
 **All bugs that were fixed**
 
@@ -228,8 +228,8 @@ super agent pull researcher_hybrid
 | [Integration Guide](deepagents-integration.md) | Reference | Very Long | Intermediate | 1 hour | Complete reference |
 | [Backend Reference](deepagents-backends.md) | Reference | Long | Intermediate | 45 min | Backend deep dive |
 | [Backend Tutorial](../tutorials/deepagents-backends-tutorial.md) | Tutorial | Long | Intermediate | 2 hours | Hands-on practice |
-| [Gemini Config](../../GEMINI_CONFIGURATION_GUIDE.md) | Guide | Medium | Beginner | 15 min | Model setup |
-| [Quick Reference](../../DEEPAGENTS_QUICK_REFERENCE.md) | Cheat Sheet | Short | All | 5 min | Quick lookup |
+| [Gemini Config](../GEMINI_CONFIGURATION_GUIDE.md) | Guide | Medium | Beginner | 15 min | Model setup |
+| [Quick Reference](../DEEPAGENTS_QUICK_REFERENCE.md) | Cheat Sheet | Short | All | 5 min | Quick lookup |
 
 ---
 
@@ -248,10 +248,10 @@ super agent pull researcher_hybrid
 → [Complete Workflow - Step 7](../tutorials/deepagents-complete-workflow.md#step-7-optimize-with-gepa-the-magic)
 
 ### "Why can't I use Ollama?"
-→ [Technical Analysis](../../DEEPAGENTS_ANALYSIS.md)
+→ [Technical Analysis](../DEEPAGENTS_ANALYSIS.md)
 
 ### "How do I set up Gemini?"
-→ [Gemini Testing Guide](../../DEEPAGENTS_GEMINI_TEST.md#step-1-get-your-free-gemini-api-key)
+→ [Gemini Testing Guide](../DEEPAGENTS_GEMINI_TEST.md)
 
 ---
 
@@ -289,7 +289,7 @@ super agent pull researcher_hybrid
 
 1. Check [Troubleshooting Section](../tutorials/deepagents-complete-workflow.md#troubleshooting)
 2. Read [FAQ](deepagents-integration.md#faq)
-3. Check [Common Issues](../../DEEPAGENTS_FIXES_SUMMARY.md)
+3. Check [Common Issues](../DEEPAGENTS_FIXES_SUMMARY.md)
 
 ### Still Stuck?
 

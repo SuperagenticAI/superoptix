@@ -31,7 +31,7 @@ super agent optimize <agent_id> --framework <framework> --auto light
 
 ```bash
 # Local
-super agent run <agent_id> --framework <framework> --local --provider ollama --model llama3.1:8b --goal "..."
+super agent run <agent_id> --framework <framework> --local --provider ollama --model qwen3.5:9b --goal "..."
 
 # Cloud (Google)
 super agent run <agent_id> --framework <framework> --cloud --provider google-genai --model gemini-2.5-flash --goal "..."

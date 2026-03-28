@@ -297,7 +297,7 @@ llm = LLM(
 |-------|------|----------|
 | `gpt-oss:20b` | 20B | **Recommended** - Excellent quality |
 | `gpt-oss:120b` | 120B | Maximum quality (requires 80GB+ RAM) |
-| `llama3.1:8b` | 8B | Fast, good for testing |
+| `qwen3.5:9b` | 9B | Fast, good for testing |
 | `qwen2.5:14b` | 14B | Good balance |
 
 ### Example Configuration

@@ -766,7 +766,7 @@ spec:
 - [DeepAgents 0.2.0 Announcement](https://blog.langchain.com/doubling-down-on-deepagents/)
 - [DeepAgents GitHub](https://github.com/langchain-ai/deepagents)
 - [SuperOptiX DeepAgents Integration Guide](deepagents-integration.md)
-- [Gemini Configuration Guide](../../GEMINI_CONFIGURATION_GUIDE.md)
+- [Gemini Configuration Guide](../GEMINI_CONFIGURATION_GUIDE.md)
 
 ---
 

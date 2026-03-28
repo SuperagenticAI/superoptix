@@ -337,7 +337,7 @@ metadata:
   id: sentiment_analyzer
 spec:
   language_model:
-    model: llama3.1:8b
+    model: qwen3.5:9b
   
   input_fields:
   - name: text
@@ -556,7 +556,7 @@ metadata:
 spec:
   language_model:
     provider: ollama
-    model: llama3.1:8b
+    model: qwen3.5:9b
     temperature: 0.3
   
   input_fields:
@@ -624,7 +624,7 @@ spec:
       name: GEPA
       params:
         auto: medium  # More data = use medium budget
-        reflection_lm: llama3.1:8b
+        reflection_lm: qwen3.5:9b
 ```
 
 **Result**: 15,002 total examples (15,000 from datasets + 2 BDD scenarios)!

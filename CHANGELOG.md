@@ -5,6 +5,28 @@ All notable changes to SuperOptiX will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [0.2.22] - 2026-03-28
+
+### Added
+- TurboAgents-backed Chroma retrieval support in the shared RAG path and GEPA vector-store layer.
+- TurboAgents integration docs and demo coverage for Chroma, LanceDB, and SurrealDB.
+- Source-checkout guidance for validating TurboAgents-backed RAG flows across SuperOptiX frameworks.
+
+### Changed
+- SuperOptiX demo playbooks now prefer Qwen local models for the current TurboAgents validation path.
+- SurrealDB seed tooling now writes TurboAgents-compatible payloads and matches runtime embedding truncation.
+- TurboAgents docs now describe SuperOptiX as the first full reference integration.
+
+### Fixed
+- TurboAgents SurrealDB auth is preserved in the shared RAG setup path.
+- DSPy runner and minimal pipeline template now pass `api_base` through to DSPy LM setup.
+- Dependency metadata now excludes compromised LiteLLM releases `1.82.7` and `1.82.8`.
+
+### Security
+- SuperOptiX now blocks LiteLLM `1.82.7` and `1.82.8` in dependency resolution after the March 2026 PyPI compromise advisory.
+
 ## [0.2.20] - 2026-03-15
 
 ### 🚀 Added
@@ -153,44 +175,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Apple Silicon Guide**: Updated documentation to reflect GPT-OSS support via MLX-LM and Ollama backends
 - **Performance Comparison**: Added performance metrics comparing MLX-LM vs Ollama vs HuggingFace backends
 
-## [Unreleased]
-
-### 🚀 Added
-- Initial foundation for agentic AI orchestration
-- DSPy-native agent development framework
-- Multi-tier orchestration system (Oracle → Sage → SuperAgent)
-- BDD-driven agent testing and validation
-- Memory systems with multi-layered architecture
-- Comprehensive observability and tracing
-- Enterprise-ready agent deployment patterns
-- SurrealDB GraphRAG demo playbooks for all supported frameworks (DSPy, OpenAI, Claude SDK, Microsoft, PydanticAI, CrewAI, Google ADK, DeepAgents)
-- Lean SurrealDB parity checks in test matrix for both RAG and GraphRAG playbooks
-
-### 🔄 Changed
-- Established project structure and core modules
-- Defined API contracts for agent development
-- Set up development workflow and contribution guidelines
-- SurrealDB framework docs now use source-independent seeding commands via `python -m superoptix.agents.demo.setup_surrealdb_seed`
-- SurrealDB docs now include explicit GraphRAG validation commands and parser-compatibility troubleshooting
-
-### 🐛 Fixed
-- Bug fixes in development
-- DSPy SurrealDB runtime compile/run parity for demo flow
-- SurrealDB GraphRAG feature detection compatibility (RELATE probe parsing)
-- SurrealDB Graph traversal query compatibility for parser variants that reject wildcard `->*` traversal syntax
-
-### 📚 Documentation
-- Updated SurrealDB framework guide with:
-  - full RAG + GraphRAG demo ID matrix across frameworks
-  - no-source seeding workflow
-  - GraphRAG fallback and parser compatibility troubleshooting
-  - Gemini/Ollama model configuration troubleshooting
-- Updated SurrealDB embedded and Docker demo pages to align with current demo IDs and seeding workflow
-
-### 🔒 Security
-- Implemented secure agent execution sandboxing
-- Added input validation and sanitization
-- Established security best practices for agent development
 
 ## [0.1.0b11] - 2025-01-06
 

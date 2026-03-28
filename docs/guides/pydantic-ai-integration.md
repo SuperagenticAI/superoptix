@@ -100,14 +100,14 @@ If your playbook/runtime is gateway-mode and the key is missing, run will fail e
 spec:
   language_model:
     provider: ollama
-    model: llama3.1:8b  # Pydantic AI auto-adds 'ollama:' prefix if needed
+    model: qwen3.5:9b  # Pydantic AI auto-adds 'ollama:' prefix if needed
     api_base: http://localhost:11434
 ```
 
 Run:
 ```bash
 brew install ollama  # macOS
-ollama pull llama3.1:8b
+ollama pull qwen3.5:9b
 super agent compile developer --framework pydantic-ai
 super agent run developer --framework pydantic-ai --direct --goal "Implement a user registration API endpoint with email validation"
 ```
@@ -154,7 +154,7 @@ metadata:
 spec:
   language_model:
     provider: ollama
-    model: llama3.1:8b
+    model: qwen3.5:9b
     api_base: http://localhost:11434
   
   input_fields:
@@ -187,7 +187,7 @@ spec:
     optimizer:
       name: GEPA
       params:
-        reflection_lm: llama3.1:8b
+        reflection_lm: qwen3.5:9b
         auto: medium
 ```
 
@@ -207,7 +207,7 @@ spec:
 ```
 
 **Plain Text Mode (Default):**
-The agent returns natural text responses, which works reliably with smaller models like `llama3.1:8b`. The output is mapped to your defined fields.
+The agent returns natural text responses, which works reliably with smaller models like `qwen3.5:9b`. The output is mapped to your defined fields.
 
 **Example Output:**
 ```
@@ -230,7 +230,7 @@ Configure generation parameters (excluding `temperature` as it's deprecated by O
 spec:
   language_model:
     provider: ollama
-    model: llama3.1:8b
+    model: qwen3.5:9b
     max_tokens: 4000  # Default: 4000 (supports detailed responses)
     top_p: 0.9        # Optional: Nucleus sampling (0.0-1.0)
     frequency_penalty: 0.0  # Optional: Reduce repetition (-2.0 to 2.0)
@@ -464,7 +464,7 @@ When you run `super agent optimize`, SuperOptiX performs **two sequential optimi
 > ⚠️ **Before Running:**
 > - Ensure you have **high-end GPU** or cloud GPU access
 > - Understand that optimization makes **many LLM API calls**
-> - Use **local Ollama models** (e.g., `ollama/llama3.1:8b`) to minimize costs
+> - Use **local Ollama models** (e.g., `ollama/qwen3.5:9b`) to minimize costs
 > - Cloud models (GPT-4, Claude) will incur **significant API charges**
 
 ```bash
@@ -473,15 +473,15 @@ When you run `super agent optimize`, SuperOptiX performs **two sequential optimi
 super agent optimize developer \
   --framework pydantic-ai \
   --max-metric-calls 20 \
-  --reflection-lm ollama/llama3.1:8b
+  --reflection-lm ollama/qwen3.5:9b
 
 # Light mode for better results (~5-10 minutes, ~50-100 API calls)
-# Use local Ollama: --reflection-lm ollama/llama3.1:8b
+# Use local Ollama: --reflection-lm ollama/qwen3.5:9b
 # Cloud models (costly): --reflection-lm openai/gpt-4o
 super agent optimize developer \
   --framework pydantic-ai \
   --auto light \
-  --reflection-lm ollama/llama3.1:8b
+  --reflection-lm ollama/qwen3.5:9b
 ```
 
 **What You'll See:**
@@ -517,7 +517,7 @@ You don't need to manually apply the optimizations - the pipeline handles it aut
 spec:
   language_model:
     provider: ollama
-    model: llama3.1:8b  # Works great with plain text output mode
+    model: qwen3.5:9b  # Works great with plain text output mode
   
   mcp:
     enabled: true
@@ -541,7 +541,7 @@ spec:
       name: GEPA
       params:
         auto: light
-        reflection_lm: ollama/llama3.1:8b  # Use forward slash for LiteLLM
+        reflection_lm: ollama/qwen3.5:9b  # Use forward slash for LiteLLM
 ```
 
 #### Best Practices
@@ -563,13 +563,13 @@ spec:
 
 3. **Reflection Model**: Use a smaller, faster model for reflection (GEPA runs it many times):
    ```bash
-   --reflection-lm ollama/llama3.1:8b  # Fast, good enough for reflection, FREE!
+   --reflection-lm ollama/qwen3.5:9b  # Fast, good enough for reflection, FREE!
    ```
    ⚠️ **Avoid cloud models** (GPT-4, Claude) unless you understand the costs - they can cost $5-100+ per optimization run!
 
 4. **Task Model**: Use a larger model for the actual agent (better quality):
    ```yaml
-   model: llama3.1:8b  # Works well with plain text mode (local, free)
+   model: qwen3.5:9b  # Works well with plain text mode (local, free)
    # or gpt-oss:120b for better quality (requires GPU)
    ```
 
@@ -618,7 +618,7 @@ The optimizer queries the MCP server directly, which returns unprefixed tool nam
 **Quick Solutions**:
 - **Super Light**: Use `--max-metric-calls 20` for fastest test (~1-2 minutes)
 - **Light Mode**: Use `--auto light` for balanced speed/quality (~5-10 minutes)
-- Use smaller reflection model: `--reflection-lm ollama/llama3.1:8b`
+- Use smaller reflection model: `--reflection-lm ollama/qwen3.5:9b`
 - Reduce number of tools to optimize
 
 ---
@@ -629,7 +629,7 @@ For a complete step-by-step demo of MCP with Pydantic AI, including:
 - Quick start with `pydantic-mcp` demo agent
 - Setting up filesystem MCP server
 - Testing file operations (read, write, list)
-- Verified working examples with `llama3.1:8b`
+- Verified working examples with `qwen3.5:9b`
 - Troubleshooting common issues
 
 See: [**Pydantic AI MCP Demo Guide**](pydantic-ai-mcp-demo.md)
@@ -658,7 +658,7 @@ super agent run pydantic-mcp --goal "List all files in /private/tmp"  # Use /pri
 > - Can consume significant **GPU memory** and **compute resources**
 > - Cloud API costs can add up quickly (especially with GPT-4, Claude, etc.)
 > 
-> **For local testing:** Use `--max-metric-calls 20` with `ollama/llama3.1:8b` to minimize resource usage.
+> **For local testing:** Use `--max-metric-calls 20` with `ollama/qwen3.5:9b` to minimize resource usage.
 
 ### What Gets Optimized
 
@@ -714,7 +714,7 @@ GEPA typically expands the instructions to be more explicit and structured, whic
 > - **Heavy**: ~300-600 API calls (~$20-100+ with cloud models)
 > 
 > **Recommendations:**
-> - Use **local Ollama models** (`ollama/llama3.1:8b`) to avoid API costs
+> - Use **local Ollama models** (`ollama/qwen3.5:9b`) to avoid API costs
 > - Only optimize when you have **high-end GPU** or cloud GPU access
 > - Start with `--max-metric-calls 20` to test
 > - Avoid cloud models (GPT-4, Claude) unless you understand the costs
@@ -732,19 +732,19 @@ For fastest optimization to test if it works:
 super agent optimize my_agent \
   --framework pydantic-ai \
   --max-metric-calls 3 \
-  --reflection-lm ollama/llama3.1:8b
+  --reflection-lm ollama/qwen3.5:9b
 
 # Quick test: 10 metric calls (~1-2 minutes)
 super agent optimize my_agent \
   --framework pydantic-ai \
   --max-metric-calls 10 \
-  --reflection-lm ollama/llama3.1:8b
+  --reflection-lm ollama/qwen3.5:9b
 
 # Light optimization: 20 metric calls (~2-3 minutes)
 super agent optimize my_agent \
   --framework pydantic-ai \
   --max-metric-calls 20 \
-  --reflection-lm ollama/llama3.1:8b
+  --reflection-lm ollama/qwen3.5:9b
 ```
 
 **Use this when:**
@@ -756,7 +756,7 @@ super agent optimize my_agent \
 
 > **Note:** `--max-metric-calls 20` limits total evaluations more precisely than `--max-full-evals 1`, ensuring faster completion.
 > 
-> **Cost Tip:** Use local `ollama/llama3.1:8b` for reflection_lm to avoid API costs. Cloud models (GPT-4, Claude) will incur charges.
+> **Cost Tip:** Use local `ollama/qwen3.5:9b` for reflection_lm to avoid API costs. Cloud models (GPT-4, Claude) will incur charges.
 
 #### Recommended (Balanced)
 
@@ -764,7 +764,7 @@ super agent optimize my_agent \
 super agent optimize my_agent \
   --framework pydantic-ai \
   --auto light \
-  --reflection-lm ollama/llama3.1:8b
+  --reflection-lm ollama/qwen3.5:9b
 ```
 
 **Budget Options:**
@@ -858,7 +858,7 @@ spec:
       name: GEPA
       params:
         auto: light
-        reflection_lm: ollama/llama3.1:8b
+        reflection_lm: ollama/qwen3.5:9b
 ```
 
 **Important Notes:**
@@ -873,13 +873,13 @@ spec:
 super agent optimize developer \
   --framework pydantic-ai \
   --max-metric-calls 20 \
-  --reflection-lm ollama/llama3.1:8b
+  --reflection-lm ollama/qwen3.5:9b
 
 # Light mode (~5-10 minutes)
 super agent optimize developer \
   --framework pydantic-ai \
   --auto light \
-  --reflection-lm ollama/llama3.1:8b
+  --reflection-lm ollama/qwen3.5:9b
 ```
 
 **What You'll See:**
@@ -1010,7 +1010,7 @@ spec:
   
   language_model:
     provider: ollama
-    model: llama3.1:70b  # Larger model recommended for structured output
+    model: qwen3.5:9b  # Larger model recommended for structured output
     api_base: http://localhost:11434
   
   output_fields:
@@ -1025,7 +1025,7 @@ spec:
       name: GEPA
       params:
         auto: light
-        reflection_lm: ollama/llama3.1:8b
+        reflection_lm: ollama/qwen3.5:9b
 ```
 
 ### How It Works
@@ -1127,7 +1127,7 @@ super agent compile developer --framework pydantic-ai
 ### Baseline Performance
 
 **Task:** Code generation and explanation
-**Model:** Ollama llama3.1:8b
+**Model:** Ollama qwen3.5:9b
 **Framework:** Pydantic AI
 
 Pydantic AI achieves good baseline performance with local Ollama models. Results vary based on:
@@ -1197,7 +1197,7 @@ Generated Python Pipeline
 spec:
   language_model:
     provider: ollama
-    model: llama3.1:8b  # or llama3.1:70b for better quality
+    model: qwen3.5:9b
     api_base: http://localhost:11434
     max_tokens: 4000  # Adjust based on response length needs (default: 4000)
     top_p: 0.9  # Optional: Control output diversity
@@ -1210,7 +1210,7 @@ brew install ollama  # macOS
 # or download from https://ollama.com
 
 # Pull model
-ollama pull llama3.1:8b
+ollama pull qwen3.5:9b
 
 # Set environment (optional, auto-configured by pipeline)
 # Note: The pipeline automatically sets these if api_base is provided in playbook
@@ -1277,7 +1277,7 @@ spec:
 **Symptom:** `Unknown provider: llama3.1` or `ModelHTTPError: 404`
 
 **Solutions:**
-1. Ensure model string has provider prefix: `ollama:llama3.1:8b`
+1. Ensure model string has provider prefix: `ollama:qwen3.5:9b`
 2. Check `OLLAMA_BASE_URL` includes `/v1`: `http://localhost:11434/v1`
 3. Verify Ollama is running: `curl http://localhost:11434/api/tags`
 4. Check model is downloaded: `ollama list`
@@ -1292,7 +1292,7 @@ The pipeline auto-detects Ollama models, but explicit prefix is safer.
 1. Check BDD scenario keywords are realistic
 2. Lower threshold in evaluate() method (default is 0.6)
 3. Run GEPA optimization to improve instructions
-4. Try different model (llama3.1:70b for more capability)
+4. Try different model (qwen3.5:9b for more capability)
 5. Adjust model settings in playbook:
    ```yaml
    spec:
@@ -1343,19 +1343,19 @@ pip install pydantic-ai==1.31.0
 1. **Ultra Fast (~30s-1m, ~3 API calls)**: Minimal metric calls for quick verification:
    ```bash
    # Use local Ollama to avoid API costs
-   super agent optimize developer --framework pydantic-ai --max-metric-calls 3 --reflection-lm ollama/llama3.1:8b
+   super agent optimize developer --framework pydantic-ai --max-metric-calls 3 --reflection-lm ollama/qwen3.5:9b
    ```
 
 2. **Super Light (~1-2 minutes, ~10 API calls)**: Limit total metric calls:
    ```bash
    # Use local Ollama to avoid API costs
-   super agent optimize developer --framework pydantic-ai --max-metric-calls 10 --reflection-lm ollama/llama3.1:8b
+   super agent optimize developer --framework pydantic-ai --max-metric-calls 10 --reflection-lm ollama/qwen3.5:9b
    ```
 
 3. **Light Mode (Recommended - ~5-10 minutes, ~50-100 API calls)**:
    ```bash
    # Use local Ollama for cost-free optimization
-   super agent optimize developer --framework pydantic-ai --auto light --reflection-lm ollama/llama3.1:8b
+   super agent optimize developer --framework pydantic-ai --auto light --reflection-lm ollama/qwen3.5:9b
    ```
    
    **Cloud models are costly:**
@@ -1371,10 +1371,10 @@ pip install pydantic-ai==1.31.0
      optimizer:
        params:
          max_metric_calls: 20  # Limit total evaluations
-         reflection_lm: ollama/llama3.1:8b
+         reflection_lm: ollama/qwen3.5:9b
    ```
 
-4. Use smaller reflection model: `--reflection-lm ollama/llama3.1:8b`
+4. Use smaller reflection model: `--reflection-lm ollama/qwen3.5:9b`
 5. Reduce training dataset size (fewer BDD scenarios)
 
 ### JSON Metadata Instead of Content
@@ -1418,7 +1418,7 @@ The pipeline uses Pydantic AI's `infer_model()` for automatic model creation:
 from pydantic_ai.models import infer_model
 
 # Auto-detects provider from model string
-model = infer_model("ollama:llama3.1:8b")
+model = infer_model("ollama:qwen3.5:9b")
 # or
 model = infer_model("openai:gpt-4o")
 ```
@@ -1545,7 +1545,7 @@ super agent optimize my_agent --framework pydantic-ai --auto light  # Recommende
 3. **Optimize (Optional):** Run GEPA optimization to improve performance
    - ⚠️ **Only run if:** You have high-end GPU AND understand the costs
    - ⚠️ **Resource Warning:** Makes many LLM API calls (20-600+ depending on settings)
-   - ⚠️ **Cost Warning:** Use local `ollama/llama3.1:8b` to avoid API charges ($0 vs $5-100+)
+   - ⚠️ **Cost Warning:** Use local `ollama/qwen3.5:9b` to avoid API charges ($0 vs $5-100+)
    - Ultra fast: `--max-metric-calls 3` (~30s-1m, ~3 API calls)
    - Quick test: `--max-metric-calls 10` (~1-2 minutes, ~10 API calls)
    - Recommended: `--auto light` (~5-10 minutes, ~50-100 API calls)
@@ -1569,7 +1569,7 @@ super agent optimize my_agent --framework pydantic-ai --auto light  # Recommende
 > - Medium: ~$5-50.00
 > - Heavy: ~$20-100+
 > 
-> 💡 **Save money:** Use `--reflection-lm ollama/llama3.1:8b` for **free** local optimization!
+> 💡 **Save money:** Use `--reflection-lm ollama/qwen3.5:9b` for **free** local optimization!
 
 ---
 

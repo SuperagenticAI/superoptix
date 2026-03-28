@@ -157,11 +157,11 @@ super agent run optimas_autogen --engine optimas --target optimas-autogen --goal
 # Requires detailed model_info for non-OpenAI models
 language_model:
   provider: ollama
-  model: llama3.2:1b
+  model: qwen3.5:2b
   base_url: http://localhost:11434
   api_key: ""
   model_info:
-    model_name: "llama3.2:1b"
+    model_name: "qwen3.5:2b"
     max_tokens: 4096
     temperature: 0.7
     top_p: 0.9
@@ -308,9 +308,9 @@ super agent optimize <agent> --engine optimas --target <target>
 
 ## 🔗 Next Steps
 
-- **Start Here**: [Optimas Integration Guide](../guides/optimas-integration.md)
-- **CLI Reference**: [Command Reference](../reference/cli.md)
-- **Agent Development**: [Building Custom Agents](../guides/agent-development.md)
-- **Troubleshooting**: [Common Issues & Solutions](../guides/optimas-integration.md#troubleshooting)
+- **Start Here**: [Optimas Integration Guide](../../guides/optimas-integration.md)
+- **CLI Reference**: [Command Reference](../../reference/cli.md)
+- **Agent Development**: [Building Custom Agents](../../guides/agent-development.md)
+- **Troubleshooting**: [Common Issues & Solutions](../../guides/optimas-integration.md#troubleshooting)
 
 

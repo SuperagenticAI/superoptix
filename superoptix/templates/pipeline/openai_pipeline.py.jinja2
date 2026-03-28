@@ -130,7 +130,7 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 		if not isinstance(config, dict):
 			config = {}
 
-		model_str = config.get("model", "ollama:llama3.1:8b")
+		model_str = config.get("model", "ollama:qwen3.5:9b")
 		self._actual_model_name = model_str  # Store for display
 
 		# Check if using Ollama
@@ -150,7 +150,7 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 			print(f"✅ OpenAI Agents SDK initialized with Ollama: {model_name}")
 		else:
 			# Use default OpenAI model (or None to use SDK default)
-			self._model = model_str if model_str != "ollama:llama3.1:8b" else None
+			self._model = model_str if model_str != "ollama:qwen3.5:9b" else None
 			print(f"✅ OpenAI Agents SDK initialized with model: {model_str}")
 	
 	def _initialize_agent(self):
@@ -307,7 +307,7 @@ class {{ agent_name | to_pascal_case }}Pipeline:
 		if "language_model" in self.spec:
 			lm = self.spec["language_model"]
 			model_config = {
-				"model": lm.get("model", "ollama:llama3.1:8b"),
+				"model": lm.get("model", "ollama:qwen3.5:9b"),
 				"provider": lm.get("provider", "ollama"),
 				"api_base": lm.get("api_base"),
 				"temperature": lm.get("temperature"),
@@ -556,7 +556,7 @@ class {{ agent_name | to_pascal_case }}Pipeline:
 			},
 			"model_analysis": {
 				"framework": "OpenAI Agents SDK",
-				"model": "{{ spec.language_model.model | default('ollama:llama3.1:8b') }}",
+				"model": "{{ spec.language_model.model | default('ollama:qwen3.5:9b') }}",
 			},
 			"recommendations": [],
 		}

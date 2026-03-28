@@ -18,7 +18,7 @@ spec:
   language_model:
     location: local
     provider: ollama
-    model: llama3.1:8b
+    model: qwen3.5:9b
     temperature: 0.7
     max_tokens: 3000
     api_base: http://localhost:11434
@@ -135,7 +135,7 @@ spec:
       params:
         metric: answer_relevance
         auto: medium
-        reflection_lm: llama3.2:1b
+        reflection_lm: qwen3.5:2b
         max_full_evals: 5
     metric: answer_relevance
     metric_threshold: 0.85

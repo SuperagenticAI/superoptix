@@ -58,17 +58,17 @@ SuperOptiX supports multiple local model backends, each optimized for different 
 
 ```bash
 # Install recommended models by tier
-super model install llama3.2:1b      # Oracles tier - Small tasks, fast responses
-super model install llama3.2:8b      # Genies tier - Complex reasoning, tools, memory
-super model install llama3.2:3b      # Alternative small model
+super model install qwen3.5:2b      # Oracles tier - Small tasks, fast responses
+super model install qwen3.5:9b      # Genies tier - Complex reasoning, tools, memory
+super model install qwen3.5:2b      # Alternative small model
 super model install qwen2.5:7b       # Great all-rounder
 ```
 
 <details><summary><strong>Show Output</strong></summary>
 
 ```
-🚀 SuperOptiX Model Intelligence - Installing llama3.2:3b
-🦙 Pulling model llama3.2:3b from Ollama...
+🚀 SuperOptiX Model Intelligence - Installing qwen3.5:2b
+🦙 Pulling model qwen3.5:2b from Ollama...
 ⏳ This may take a few minutes depending on your internet connection and model size.
 
 pulling manifest 
@@ -84,7 +84,7 @@ success
 Model pulled successfully!
 
 💡 You can now use it with SuperOptiX:
-  super model dspy ollama/llama3.2:3b
+  super model dspy ollama/qwen3.5:2b
 
 📊 Model details:
   • Size: small
@@ -106,7 +106,7 @@ Model pulled successfully!
 ollama serve
 
 # Or simply use a model - server starts automatically
-ollama run llama3.2:1b
+ollama run qwen3.5:2b
 ```
 
 **🔧 Custom Configuration**: Only start the server manually if you need:
@@ -129,15 +129,15 @@ super model list --backend ollama
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━┓
 ┃ Model                   ┃  Backend  ┃    Status    ┃  Size   ┃   Task    ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━┩
-│ llama3.1:8b             │ 🦙 ollama │ installed │ medium  │   chat    │
-│ llama3.2:1b             │ 🦙 ollama │ installed │  tiny   │   chat    │
+│ qwen3.5:9b             │ 🦙 ollama │ installed │ medium  │   chat    │
+│ qwen3.5:2b             │ 🦙 ollama │ installed │  tiny   │   chat    │
 │ nomic-embed-text:latest │ 🦙 ollama │ installed │ Unknown │ embedding │
 └─────────────────────────┴───────────┴──────────────┴─────────┴───────────┘
 ```
 
 ```bash
 # Get model information
-super model info llama3.2:3b
+super model info qwen3.5:2b
 
 # List all available models
 super model list --all
@@ -581,8 +581,8 @@ super model info mlx-community_Llama-3.2-3B-Instruct-4bit
 
 ```bash
 # Install models (use the name from LM Studio)
-super model install -b lmstudio llama-3.2-1b-instruct
-super model install -b lmstudio llama-3.2-3b
+super model install -b lmstudio qwen2.5-3b-instruct
+super model install -b lmstudio qwen2.5-7b-instruct
 super model install -b lmstudio your-model-name
 ```
 
@@ -590,14 +590,14 @@ super model install -b lmstudio your-model-name
 
 ```bash
 # Start server with specific model
-super model server lmstudio llama-3.2-1b-instruct --port 1234
-super model server lmstudio llama-3.2-3b --port 1234
+super model server lmstudio qwen2.5-3b-instruct --port 1234
+super model server lmstudio qwen2.5-7b-instruct --port 1234
 ```
 
 **Example Output:**
 ```
 🎮 LM Studio Local Server
-Starting LM Studio server for llama-3.2-1b-instruct on port 1234...
+Starting LM Studio server for qwen2.5-3b-instruct on port 1234...
 🚀 Starting LM Studio server...
 📡 Server will be available at: http://localhost:1234
 💡 Use this URL in your playbook's api_base configuration
@@ -606,7 +606,7 @@ Starting LM Studio server for llama-3.2-1b-instruct on port 1234...
 📋 Example playbook configuration:
    language_model:
      provider: lmstudio
-     model: llama-3.2-1b-instruct
+     model: qwen2.5-3b-instruct
      api_base: http://localhost:1234
 ⏳ Server is starting... (Press Ctrl+C to stop)
 ```
@@ -624,15 +624,15 @@ super model list --backend lmstudio
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━┓
 ┃ Model                          ┃   Backend   ┃    Status    ┃  Size  ┃ Task ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━┩
-│ llama-3.2-1b-instruct          │ 🎮 lmstudio │ installed │ small  │ chat │
-│ llama-3.3-70b-instruct         │ 🎮 lmstudio │ installed │ large  │ chat │
+│ qwen2.5-3b-instruct            │ 🎮 lmstudio │ installed │ small  │ chat │
+│ qwen2.5-7b-instruct            │ 🎮 lmstudio │ installed │ medium │ chat │
 │ llama-4-scout-17b-16e-instruct │ 🎮 lmstudio │ installed │ medium │ chat │
 └────────────────────────────────┴─────────────┴──────────────┴────────┴──────┘
 ```
 
 ```bash
 # Get model information
-super model info llama-3.2-1b-instruct
+super model info qwen2.5-3b-instruct
 
 # Models are ready to use with SuperOptiX agents
 ```
@@ -733,7 +733,7 @@ usage: super model server [-h] [--port PORT] {mlx,huggingface,lmstudio} model_na
 🚀 Start local model servers for MLX, HuggingFace, or LM Studio. Examples: 
 super model server mlx mlx-community/Llama-3.2-3B-Instruct-4bit 
 super model server huggingface microsoft/DialoGPT-small --port 8001
-super model server lmstudio llama-3.2-1b-instruct 
+super model server lmstudio qwen2.5-3b-instruct 
 
 Backends: 
 mlx Apple Silicon optimized (default: port 8000) 
@@ -764,11 +764,11 @@ super model list
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━┓
 ┃ Model                                    ┃    Backend     ┃    Status    ┃  Size   ┃   Task    ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━┩
-│ llama-3.2-1b-instruct                    │  🎮 lmstudio   │ installed │  small  │   chat    │
-│ llama-3.3-70b-instruct                   │  🎮 lmstudio   │ installed │  large  │   chat    │
+│ qwen2.5-3b-instruct                      │  🎮 lmstudio   │ installed │  small  │   chat    │
+│ qwen2.5-7b-instruct                      │  🎮 lmstudio   │ installed │ medium  │   chat    │
 │ llama-4-scout-17b-16e-instruct           │  🎮 lmstudio   │ installed │ medium  │   chat    │
-│ llama3.1:8b                              │   🦙 ollama    │ installed │ medium  │   chat    │
-│ llama3.2:1b                              │   🦙 ollama    │ installed │  tiny   │   chat    │
+│ qwen3.5:9b                              │   🦙 ollama    │ installed │ medium  │   chat    │
+│ qwen3.5:2b                              │   🦙 ollama    │ installed │  tiny   │   chat    │
 │ microsoft/DialoGPT-small                 │ 🤗 huggingface │ installed │  small  │   chat    │
 │ microsoft/Phi-4                          │ 🤗 huggingface │ installed │  small  │   chat    │
 │ mlx-community_Llama-3.2-3B-Instruct-4bit │     🍎 mlx     │ installed │  small  │   chat    │
@@ -797,10 +797,10 @@ super model list --verbose
 
 ```bash
 # Get detailed model info
-super model info llama3.2:3b
+super model info qwen3.5:2b
 super model info mlx-community/phi-2
 super model info microsoft/Phi-4
-super model info llama-3.2-1b-instruct
+super model info qwen2.5-3b-instruct
 ```
 
 
@@ -816,7 +816,7 @@ curl -fsSL https://ollama.ai/install.sh | sh
 pip install superoptix
 
 # Install a model
-super model install llama3.2:3b
+super model install qwen3.5:2b
 
 # Models are ready to use with SuperOptiX agents
 ```
@@ -889,7 +889,7 @@ super model server huggingface microsoft/Phi-4 --port 8001
 # Models are ready to use with SuperOptiX agents
 
 # Terminal 4: LM Studio model
-super model server lmstudio llama-3.2-1b-instruct --port 1234
+super model server lmstudio qwen2.5-3b-instruct --port 1234
 # Models are ready to use with SuperOptiX agents
 ```
 
@@ -909,7 +909,7 @@ super model server lmstudio llama-3.2-1b-instruct --port 1234
     super model list --all
     
     # Use correct model name
-    super model install llama3.2:3b  # Correct
+    super model install qwen3.5:2b  # Correct
     super model install llama3.2     # Wrong
     ```
 
@@ -944,8 +944,8 @@ super model server lmstudio llama-3.2-1b-instruct --port 1234
     **Solution:**
     ```bash
     # Use Ollama instead
-    super model install llama3.2:3b
-    super model dspy ollama/llama3.2:3b
+    super model install qwen3.5:2b
+    super model dspy ollama/qwen3.5:2b
     ```
 
 === "Missing Python Packages"
@@ -1005,14 +1005,14 @@ super model server lmstudio llama-3.2-1b-instruct --port 1234
 
 Now that you have your local models set up:
 
-1. **🚀 [Quick Start Guide](../quick-start/)** - Build your first agent with local models
-2. **🤖 [Create Your First Genies Agent](../tutorials/genies-agent/)** - Step-by-step tutorial
-3. **🏪 [Marketplace](../guides/marketplace.md)** - Discover pre-built agents
-4. **🔍 [Model Intelligence Guide](../guides/model-intelligence.md)** - Advanced model management
+1. **🚀 [Quick Start Guide](quick-start.md)** - Build your first agent with local models
+2. **🤖 [Create Your First Genies Agent](tutorials/genies-agent.md)** - Step-by-step tutorial
+3. **🏪 [Marketplace](guides/marketplace.md)** - Discover pre-built agents
+4. **🔍 [Model Intelligence Guide](guides/model-intelligence.md)** - Advanced model management
 
 ## 💬 Need Help?
 
-- **📖 [Documentation](../)** - Comprehensive guides
+- **📖 [Documentation](index.md)** - Comprehensive guides
 - **🐛 [Support Portal](https://support.super-agentic.ai)** - Report bugs
 
 ---

@@ -547,7 +547,7 @@ Prompt: "Reference similar past findings when identifying patterns"
 1. Check RSpec-style BDD scenarios are specific enough
 2. Ensure datasets have diverse examples
 3. Increase iterations: `--auto intensive`
-4. Add reflection_lm: `--reflection-lm llama3.1:8b`
+4. Add reflection_lm: `--reflection-lm qwen3.5:9b`
 
 ### Issue: Prompts Too Long
 

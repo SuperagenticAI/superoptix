@@ -78,7 +78,7 @@ super agent pull developer
 Expected output:
 ```
 🚀 Enhancing agent 'developer' for Genies tier...
-  Model configured for Genies tier: llama3.1:8b
+  Model configured for Genies tier: qwen3.5:9b
   ReAct configuration added
   Default toolset added (calculator, text_analyzer, file_reader)
   Memory system configured
@@ -173,7 +173,7 @@ def test_langfuse_integration():
             metadata={
                 "agent_type": "developer",
                 "tier": "genies",
-                "model": "llama3.1:8b"
+                "model": "qwen3.5:9b"
             }
         ) as trace:
             
@@ -182,7 +182,7 @@ def test_langfuse_integration():
             # Create a generation span for model call
             with langfuse.start_as_current_generation(
                 name="llm_call",
-                model="llama3.1:8b",
+                model="qwen3.5:9b",
                 input={
                     "prompt": "Write a Python function to calculate factorial",
                     "temperature": 0.1
@@ -311,8 +311,8 @@ Expected output:
 🚀 Running agent 'developer'...
 🔍 Tracing enabled for agent developer_20250714_212620
 📁 Traces will be stored in: /Users/local/superagentic/SuperOptiX/langfuse_demo/.superoptix/traces
-🚀 Configuring llama3.1:8b with ollama for genies-tier capabilities
-Model connection successful: ollama/llama3.1:8b
+🚀 Configuring qwen3.5:9b with ollama for genies-tier capabilities
+Model connection successful: ollama/qwen3.5:9b
 3 tools configured successfully
 ReAct agent configured with 3 tools
 📋 Loaded 5 BDD specifications for execution
@@ -700,11 +700,11 @@ observability:
         - name: "baseline"
           config:
             temperature: 0.7
-            model: "llama3.1:8b"
+            model: "qwen3.5:9b"
         - name: "optimized"
           config:
             temperature: 0.5
-            model: "llama3.1:70b"
+            model: "qwen3.5:9b"
 ```
 
 ## 🚀 Production Deployment

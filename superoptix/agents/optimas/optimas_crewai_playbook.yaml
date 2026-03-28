@@ -11,7 +11,7 @@ metadata:
 spec:
   language_model:
     provider: ollama
-    model: ollama/llama3.2:1b
+    model: ollama/qwen3.5:2b
     base_url: http://localhost:11434/v1
     api_key: ollama
   input_fields:
@@ -92,7 +92,7 @@ spec:
       params:
         metric: answer_exact_match
         auto: light
-        reflection_lm: llama3.1:8b
+        reflection_lm: qwen3.5:9b
         max_full_evals: 3
         skip_perfect_score: true
     metric: answer_exact_match

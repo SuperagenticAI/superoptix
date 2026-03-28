@@ -7,7 +7,7 @@ allow-direct-references = true
 
 [project]
 name = "superoptix"
-version = "0.2.21"
+version = "0.2.22"
 description = "Full Stack Agentic AI Optimization Framework - Universal GEPA optimizer for major frameworks"
 authors = [
     {name = "Superagentic AI", email = "hello@super-agentic.ai"},
@@ -50,7 +50,7 @@ dependencies = [
     "torch",
     "accelerate",
     "dspy",  # Required for GEPA optimization (transitional - will be optional in future)
-    "litellm",  # Required for LLM inference in CLI and agents
+    "litellm!=1.82.7,!=1.82.8",  # Block compromised March 2026 releases
     "pydantic",  # Required for data validation
     "python-dotenv",  # Required for environment variables
     "mcp",  # Required for Super CLI MCP client functionality
@@ -232,7 +232,7 @@ ui = [
 
 # Vector database dependencies
 chromadb = [
-    "chromadb",
+    "chromadb>=1.5.5",
     "sentence-transformers",
 ]
 
@@ -247,7 +247,8 @@ faiss = [
 ]
 
 turboagents = [
-    "turboagents[rag]>=0.1.0a0",
+    "turboagents[rag]>=0.1.0a2",
+    "chromadb>=1.5.5",
     "sentence-transformers",
 ]
 
@@ -273,14 +274,14 @@ surrealdb = [
 
 # All vector databases
 vectordb = [
-    "chromadb",
+    "chromadb>=1.5.5",
     "lancedb",
     "faiss-cpu",
     "weaviate-client",
     "qdrant-client",
     "pymilvus",
     "surrealdb",
-    "turboagents[rag]>=0.1.0a0",
+    "turboagents[rag]>=0.1.0a2",
     "sentence-transformers",
 ]
 

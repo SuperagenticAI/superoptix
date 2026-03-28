@@ -232,7 +232,7 @@ Demonstration agents showing different DSPy optimizers:
 - Learn pure DSPy patterns
 - See transparent code generation
 - Understand SuperOptiX without vendor lock-in
-- Run locally with Ollama (llama3.2:1b)
+- Run locally with Ollama (qwen3.5:2b)
 
 **Why explicit?**:
 - ✅ All logic inline and visible

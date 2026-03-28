@@ -9,7 +9,7 @@ Welcome to the SuperOptiX tutorials! These step-by-step guides will take you fro
 
 ## 🚀 Getting Started Tutorials
 
-### 🎯 [Quick Start Workflow](../quick-start)
+### 🎯 [Quick Start Workflow](../quick-start.md)
 
 **Perfect for beginners.** Build your first agent and run compile/evaluate/optimize.
 
@@ -23,7 +23,7 @@ Welcome to the SuperOptiX tutorials! These step-by-step guides will take you fro
 **Difficulty:** Beginner  
 **Prerequisites:** None
 
-### 🔧 [OpenAI SDK + GEPA Optimization](openai-sdk-gepa-optimization)
+### 🔧 [OpenAI SDK + GEPA Optimization](openai-sdk-gepa-optimization.md)
 
 **Build custom agents with native OpenAI SDK.** Create a code reviewer using official OpenAI Agents SDK patterns and optimize it with GEPA.
 
@@ -38,7 +38,7 @@ Welcome to the SuperOptiX tutorials! These step-by-step guides will take you fro
 **Difficulty:** Intermediate
 **Prerequisites:** Basic Python, Ollama installed
 
-### 🎭 [Multi-Agent Orchestra](first-orchestra)
+### 🎭 [Multi-Agent Orchestra](first-orchestra.md)
 
 **Advanced tutorial** - Coordinate multiple agents to solve complex problems.
 
@@ -56,7 +56,7 @@ Welcome to the SuperOptiX tutorials! These step-by-step guides will take you fro
 
 Before starting the tutorials, ensure you have:
 
-1. **SuperOptix installed** - See our [Setup Guide](../setup)
+1. **SuperOptix installed** - See our [Setup Guide](../setup.md)
 2. **Python 3.8+** - Latest stable version recommended
 3. **Basic Python knowledge** - Familiarity with functions and classes
 4. **Text editor** - VS Code, PyCharm, or any code editor
@@ -85,15 +85,15 @@ Before starting the tutorials, ensure you have:
 
 After completing the tutorials, explore:
 
-- [Core Concepts](../guides/index) - Deep dive into SuperOptix fundamentals
-- [Guides](../guides/index) - Techniques and integrations
-- [Reference](../reference/index) - API documentation and CLI reference
+- [Core Concepts](../guides/index.md) - Deep dive into SuperOptix fundamentals
+- [Guides](../guides/index.md) - Techniques and integrations
+- [Reference](../reference/index.md) - API documentation and CLI reference
 
 ## 🆘 Need Help?
 
-- **Stuck?** Check our [Troubleshooting Guide](../troubleshooting)
-- **Questions?** Visit our [FAQ](../faq)
+- **Stuck?** Check our [Troubleshooting Guide](../guides/troubleshooting-by-symptom.md)
+- **Questions?** Visit our [FAQ](../faq.md)
 
 ---
 
-Ready to build your first AI agent? Start with the [Quick Start](../quick-start) 🚀
+Ready to build your first AI agent? Start with the [Quick Start](../quick-start.md) 🚀

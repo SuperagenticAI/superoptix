@@ -146,9 +146,9 @@ super model server --help
 
 ## 📚 Related Documentation
 
-- [Model Management](../guides/model-management.md) - Managing MLX models
-- [Agent Development](../guides/agent-development.md) - Building custom agents
+- [Model Management](../../guides/model-management.md) - Managing MLX models
+- [Agent Development](../../guides/agent-development.md) - Building custom agents
 
 ## 🔗 Next Steps
 
-1. **Try Other Model Backends**: Explore [Ollama](ollama-demo), [HuggingFace](huggingface-demo), or [LM Studio](lmstudio-demo) demos 
+1. **Try Other Model Backends**: Explore [Ollama](ollama-demo.md), [HuggingFace](huggingface-demo.md), or [LM Studio](lmstudio-demo.md) demos 

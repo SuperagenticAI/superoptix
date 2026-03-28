@@ -10,7 +10,7 @@ spec:
   language_model:
     location: local
     provider: ollama
-    model: llama3.1:8b
+    model: qwen3.5:9b
     temperature: 0.1
     max_tokens: 32000
   input_fields:
@@ -60,7 +60,7 @@ spec:
       params:
         metric: answer_exact_match
         auto: light
-        reflection_lm: llama3.1:8b
+        reflection_lm: qwen3.5:9b
         reflection_minibatch_size: 3
         skip_perfect_score: true
         add_format_failure_as_feedback: true

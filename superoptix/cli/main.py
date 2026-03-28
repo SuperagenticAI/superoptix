@@ -316,7 +316,7 @@ def show_comprehensive_docs(args):
     console.print(
         "     • Install Ollama: Visit [cyan]https://ollama.com[/cyan] or run [cyan]curl -fsSL https://ollama.com/install.sh | sh[/]"
     )
-    console.print("     • Download a model: [cyan]ollama pull llama3.2[/]")
+    console.print("     • Download a model: [cyan]ollama pull qwen3.5:2b[/]")
     console.print("     • No API keys needed! Free and private!")
     console.print()
     console.print("   🌐 [bold]Option B - Cloud Models (For Production):[/]")
@@ -345,7 +345,7 @@ def show_comprehensive_docs(args):
     console.print()
     console.print("   📦 [bold]Install Models Across Backends:[/]")
     console.print(
-        "     [cyan]super model install llama3.2:3b[/] - Install Ollama model (default)"
+        "     [cyan]super model install qwen3.5:2b[/] - Install Ollama model (default)"
     )
     console.print(
         "     [cyan]super model install -b huggingface microsoft/Phi-4[/] - Install HuggingFace model"
@@ -362,12 +362,12 @@ def show_comprehensive_docs(args):
         "     [cyan]super model server huggingface microsoft/Phi-4 --port 8001[/] - Start HF server"
     )
     console.print(
-        "     [cyan]super model server lmstudio llama3.2:3b --port 1234[/] - Start LM Studio server"
+        "     [cyan]super model server lmstudio qwen3.5:2b --port 1234[/] - Start LM Studio server"
     )
     console.print()
     console.print("   🔗 [bold]Create DSPy Clients:[/]")
     console.print(
-        "     [cyan]super model dspy ollama/llama3.2:3b[/] - Create Ollama DSPy client"
+        "     [cyan]super model dspy ollama/qwen3.5:2b[/] - Create Ollama DSPy client"
     )
     console.print("     [cyan]super model dspy mlx/phi-2[/] - Create MLX DSPy client")
     console.print(
@@ -864,10 +864,10 @@ Core Commands:
 
 Model Management Examples:
 • `super model list`                           - List installed models
-• `super model install llama3.2:3b -b ollama` - Install Ollama model
+• `super model install qwen3.5:2b -b ollama` - Install Ollama model
 • `super model install mlx-community/phi-2 -b mlx` - Install MLX model
 • `super model server mlx phi-2 --port 8000`  - Start MLX server
-• `super model dspy ollama/llama3.2:3b`       - Create DSPy client
+• `super model dspy ollama/qwen3.5:2b`       - Create DSPy client
 
 Use `super <command> --help` for more information on a specific command.
 
@@ -1131,7 +1131,7 @@ Use `super agent <command> --help` for more information on a specific command.
     )
     compile_parser.add_argument(
         "--model",
-        help="Override model id at compile time (e.g. llama3.1:8b, gpt-4o-mini, gemini-2.5-flash-lite).",
+        help="Override model id at compile time (e.g. qwen3.5:9b, gpt-4o-mini, gemini-2.5-flash-lite).",
     )
     compile_parser.add_argument(
         "--gateway-url",
@@ -1280,7 +1280,7 @@ Use `super agent <command> --help` for more information on a specific command.
     )
     optimize_parser.add_argument(
         "--model",
-        help="Model override for optimization task model (e.g. llama3.1:8b, gemini-2.5-flash-lite).",
+        help="Model override for optimization task model (e.g. qwen3.5:9b, gemini-2.5-flash-lite).",
     )
     optimize_parser.add_argument(
         "--optimizer",
@@ -2323,17 +2323,17 @@ Focus on models you actually have installed, with guidance on how to get more.
 ✨ Quick Examples:
   super model list                           # List installed models
   super model discover                       # Model discovery guide
-  super model install llama3.2:3b           # Install Ollama model (default)
-  super model info llama3.2:3b               # Get model details
+  super model install qwen3.5:2b           # Install Ollama model (default)
+  super model info qwen3.5:2b               # Get model details
   super model backends                       # Check backend status
-  super model dspy ollama/llama3.2:3b        # Create DSPy client
+  super model dspy ollama/qwen3.5:2b        # Create DSPy client
 
 🔧 Supported Backends & Examples:
 
 🦙 Ollama (Local Models - Default):
-  • Install: super model install llama3.2:3b (auto-pulls with ollama)
+  • Install: super model install qwen3.5:2b (auto-pulls with ollama)
   • Serve: ollama serve (runs on localhost:11434)
-  • Use: super model dspy ollama/llama3.2:3b
+  • Use: super model dspy ollama/qwen3.5:2b
 
 🍎 MLX (Apple Silicon):
   • Install: super model install -b mlx mlx-community/Llama-3.2-3B-Instruct-4bit
@@ -2416,7 +2416,7 @@ Focus on models you actually have installed, with guidance on how to get more.
 📥 Install SuperOptiX models across different backends.
 
 Examples:
-  • Ollama: super model install llama3.2:3b (default backend)
+  • Ollama: super model install qwen3.5:2b (default backend)
   • MLX: super model install -b mlx mlx-community/Llama-3.2-3B-Instruct-4bit
   • HuggingFace: super model install -b huggingface microsoft/Phi-4
   • LM Studio: super model install -b lmstudio your-model-name
@@ -2482,7 +2482,7 @@ Other backends may require additional setup steps.
 🧠 Create DSPy-compatible clients for SuperOptiX models. EXPERIMENTAL FEATURE.
 
 Examples:
-  • Ollama: super model dspy ollama/llama3.2:3b
+  • Ollama: super model dspy ollama/qwen3.5:2b
   • MLX: super model dspy mlx-community/Llama-3.2-3B-Instruct-4bit
   • HuggingFace: super model dspy microsoft/Phi-4
   • LM Studio: super model dspy lmstudio/your-model-name
@@ -2514,7 +2514,7 @@ The client will be configured with the model's backend and settings.
 Examples:
   super model server mlx mlx-community/Llama-3.2-3B-Instruct-4bit
   super model server huggingface microsoft/DialoGPT-small --port 8001
-  super model server lmstudio llama-3.2-1b-instruct
+  super model server lmstudio qwen2.5-1.5b-instruct
 
 Backends:
   mlx          Apple Silicon optimized (default: port 8000)

@@ -24,14 +24,14 @@ This demo demonstrates:
 
 ```bash
 # Install the LM Studio model used in this demo
-super model install -b lmstudio llama-3.2-8b-instruct
+super model install -b lmstudio qwen2.5-7b-instruct
 ```
 
 ### **3. Start LM Studio Server**
 
 ```bash
 # Start LM Studio server on port 1234
-super model server lmstudio llama-3.2-8b-instruct --port 1234
+super model server lmstudio qwen2.5-7b-instruct --port 1234
 ```
 
 ### **4. Pull and Run the Demo**
@@ -56,7 +56,7 @@ The LM Studio demo showcases how to configure LM Studio models in the agent play
 language_model:
   location: local
   provider: lmstudio
-  model: llama-3.2-8b-instruct
+  model: qwen2.5-7b-instruct
   api_base: http://localhost:1234
   temperature: 0.7
   max_tokens: 2048
@@ -90,7 +90,7 @@ Edit `agents/lmstudio_demo/playbook/lmstudio_demo_playbook.yaml`:
 
 ```yaml
 language_model:
-  model: llama-3.2-1b-instruct  # Different LM Studio model
+  model: qwen2.5-3b-instruct  # Different LM Studio model
   api_base: http://localhost:1234
 ```
 
@@ -117,7 +117,7 @@ language_model:
    curl http://localhost:1234/v1/models
    
    # Start LM Studio server
-   super model server lmstudio llama3.2:8b --port 1234
+   super model server lmstudio qwen3.5:9b --port 1234
    ```
 
 2. **Model Not Installed**
@@ -126,7 +126,7 @@ language_model:
    super model list --backend lmstudio
    
    # Install the required model
-   super model install -b lmstudio llama3.2:8b
+   super model install -b lmstudio qwen3.5:9b
    ```
 
 3. **Performance Issues**
@@ -148,13 +148,13 @@ super model server --help
 
 ## 📚 **Related Resources**
 
-- [LM Studio Setup Guide](../llm-setup.md#lm-studio) - Complete LM Studio setup instructions
-- [Model Management](../guides/model-management.md) - Managing LM Studio models
-- [Agent Development](../guides/agent-development.md) - Building custom agents
+- [LM Studio Setup Guide](../../llm-setup.md#lm-studio) - Complete LM Studio setup instructions
+- [Model Management](../../guides/model-management.md) - Managing LM Studio models
+- [Agent Development](../../guides/agent-development.md) - Building custom agents
 
 ## 🔗 Next Steps
 
-1. **Try Other Model Backends**: Explore [MLX](mlx-demo), [Ollama](ollama-demo), or [HuggingFace](huggingface-demo) demos
+1. **Try Other Model Backends**: Explore [MLX](mlx-demo.md), [Ollama](ollama-demo.md), or [HuggingFace](huggingface-demo.md) demos
 
 ---
 

@@ -247,7 +247,7 @@ def test_resolve_microsoft_client_config_for_google_genai(monkeypatch):
     monkeypatch.setenv("GOOGLE_API_KEY", "google-test-key")
 
     config = resolve_client_config(
-        {"provider": "ollama", "model": "llama3.1:8b", "api_base": "http://localhost:11434"},
+        {"provider": "ollama", "model": "qwen3.5:9b", "api_base": "http://localhost:11434"},
         {"provider": "google-genai", "model": "gemini-2.5-flash"},
     )
 

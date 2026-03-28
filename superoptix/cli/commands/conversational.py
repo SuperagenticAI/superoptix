@@ -225,7 +225,7 @@ def run_setup_wizard(console: Console) -> dict:
                 else:
                     console.print("\n[yellow]No models installed yet.[/yellow]")
                     console.print(
-                        "Install llama3.1:8b (recommended)? This will take a few minutes."
+                        "Install qwen3.5:9b (recommended)? This will take a few minutes."
                     )
 
                     if Confirm.ask("Install now?", default=True):
@@ -233,18 +233,18 @@ def run_setup_wizard(console: Console) -> dict:
 
                         # Show loading animation
                         show_loading_animation(
-                            "🚀 Installing llama3.1:8b...", duration=0.5
+                            "🚀 Installing qwen3.5:9b...", duration=0.5
                         )
 
                         console.print(
                             "[cyan]Downloading model (this may take a few minutes)...[/cyan]"
                         )
-                        console.print("[dim]Run: ollama pull llama3.1:8b[/dim]\n")
+                        console.print("[dim]Run: ollama pull qwen3.5:9b[/dim]\n")
 
                         import subprocess
 
                         result = subprocess.run(
-                            ["ollama", "pull", "llama3.1:8b"], capture_output=False
+                            ["ollama", "pull", "qwen3.5:9b"], capture_output=False
                         )
 
                         if result.returncode == 0:
@@ -252,21 +252,21 @@ def run_setup_wizard(console: Console) -> dict:
                             console.print(
                                 Panel(
                                     "[bold green]✅ Model installed successfully![/bold green]\n\n"
-                                    "[cyan]llama3.1:8b[/cyan] is ready to use!",
+                                    "[cyan]qwen3.5:9b[/cyan] is ready to use!",
                                     border_style="green",
                                     title="[bold]🎉 Success[/bold]",
                                 )
                             )
                             console.print()
-                            model = "llama3.1:8b"
+                            model = "qwen3.5:9b"
                         else:
                             console.print("\n[red]Failed to install model.[/red]")
                             console.print(
-                                "Please run: [cyan]ollama pull llama3.1:8b[/cyan]"
+                                "Please run: [cyan]ollama pull qwen3.5:9b[/cyan]"
                             )
-                            model = "llama3.1:8b"
+                            model = "qwen3.5:9b"
                     else:
-                        model = "llama3.1:8b"
+                        model = "qwen3.5:9b"
 
                 config = {
                     "provider": "ollama",
@@ -280,7 +280,7 @@ def run_setup_wizard(console: Console) -> dict:
             console.print("To use Ollama:")
             console.print("1. Install: https://ollama.com")
             console.print("2. Run: ollama serve")
-            console.print("3. Install model: ollama pull llama3.1:8b\n")
+            console.print("3. Install model: ollama pull qwen3.5:9b\n")
 
             console.print("For now, using mock mode (limited functionality)")
             config = {"provider": "mock", "model": "mock", "api_base": "mock"}

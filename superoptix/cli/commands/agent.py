@@ -304,7 +304,7 @@ class _MinimalDSPyBDDEvaluator:
             "capability_assessment": capability,
             "suggested_upgrade": "None needed"
             if avg_score >= 0.6
-            else "Consider llama3.1:8b or gpt-4 for better performance",
+            else "Consider qwen3.5:9b or gpt-4 for better performance",
             "performance_category": "excellent"
             if avg_score >= 0.8
             else "good"
@@ -335,7 +335,7 @@ class _MinimalDSPyBDDEvaluator:
         return [
             f"Poor performance. {len(failed)} scenarios failing.",
             "Strong recommendation: Run optimization before production use.",
-            "Consider using a more capable model (llama3.1:8b or gpt-4).",
+            "Consider using a more capable model (qwen3.5:9b or gpt-4).",
         ]
 
     def run_bdd_test_suite(self, auto_tune: bool = False, ignore_checks: bool = False):
@@ -951,7 +951,7 @@ def _run_framework_agent(args, framework: str):
                 model_config["model"] = args.model
             if getattr(args, "local", False):
                 model_config.setdefault("provider", "ollama")
-                model_config.setdefault("model", "llama3.1:8b")
+                model_config.setdefault("model", "qwen3.5:9b")
             if framework == "pydantic-ai" and getattr(args, "gateway", False):
                 model_config["runtime_mode"] = "gateway"
             elif framework == "pydantic-ai" and getattr(args, "direct", False):
@@ -2380,7 +2380,7 @@ def _build_framework_model_config(args, framework: str) -> dict:
         model_config["model"] = args.model
     if getattr(args, "local", False):
         model_config.setdefault("provider", "ollama")
-        model_config.setdefault("model", "llama3.1:8b")
+        model_config.setdefault("model", "qwen3.5:9b")
     if framework == "pydantic-ai" and getattr(args, "gateway", False):
         model_config["runtime_mode"] = "gateway"
     elif framework == "pydantic-ai" and getattr(args, "direct", False):
@@ -2536,13 +2536,13 @@ def add_agent(args):
             # Update model for Genies tier (keeping same model for simplicity)
             spec["language_model"] = {
                 "provider": "ollama",
-                "model": "llama3.1:8b",
+                "model": "qwen3.5:9b",
                 "temperature": 0.1,
                 "max_tokens": 2000,
                 "api_base": "http://localhost:11434",
             }
             console.print(
-                "[green]  ✅ Model configured for Genies tier: llama3.1:8b[/]"
+                "[green]  ✅ Model configured for Genies tier: qwen3.5:9b[/]"
             )
 
             # Set task type to react
@@ -3285,7 +3285,7 @@ def _run_universal_gepa_optimization(args, agent_name, project_root, playbook):
                     reflection_lm.startswith(f"{p}:") for p in known_providers
                 )
 
-                # If no prefix and model contains ':' (like llama3.1:8b), assume Ollama
+                # If no prefix and model contains ':' (like qwen3.5:9b), assume Ollama
                 if not has_provider_prefix and ":" in reflection_lm:
                     ollama_indicators = [
                         ":8b",
@@ -3351,15 +3351,15 @@ def _run_universal_gepa_optimization(args, agent_name, project_root, playbook):
 
     if not reflection_lm:
         console.print("\n[red]❌ GEPA requires --reflection-lm parameter[/]")
-        console.print("   Either provide via CLI: --reflection-lm ollama:llama3.1:8b")
+        console.print("   Either provide via CLI: --reflection-lm ollama:qwen3.5:9b")
         console.print("   Or configure in playbook YAML:")
         console.print("   optimization:")
         console.print("     optimizer:")
         console.print("       name: GEPA")
         console.print("       params:")
-        console.print("         reflection_lm: ollama:llama3.1:8b")
+        console.print("         reflection_lm: ollama:qwen3.5:9b")
         console.print(
-            "\n   Supported models: gpt-4o, gpt-4o-mini, claude-3-5-sonnet, ollama:llama3.1:8b, etc."
+            "\n   Supported models: gpt-4o, gpt-4o-mini, claude-3-5-sonnet, ollama:qwen3.5:9b, etc."
         )
         return False
 
@@ -3733,7 +3733,7 @@ def _optimize_field_descriptions(
         # So convert "ollama/model" to "ollama:model" if needed
         fixed_reflection_lm = reflection_lm
         if reflection_lm and reflection_lm.startswith("ollama/"):
-            # Convert "ollama/llama3.1:8b" to "ollama:llama3.1:8b" for UniversalGEPA
+            # Convert "ollama/qwen3.5:9b" to "ollama:qwen3.5:9b" for UniversalGEPA
             fixed_reflection_lm = reflection_lm.replace("ollama/", "ollama:", 1)
             console.print(
                 f"   [dim]Converted reflection model format: {reflection_lm} -> {fixed_reflection_lm}[/]"

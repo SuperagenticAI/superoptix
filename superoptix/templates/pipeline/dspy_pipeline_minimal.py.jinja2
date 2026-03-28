@@ -51,8 +51,8 @@ MODEL_OVERRIDE = None
 GEPA_CONFIG = {
     "enabled": True,
     "auto": "{{ opt_params.get('auto', 'light') }}",
-    "task_model": "{{ opt_params.get('task_model', 'llama3.1:8b') }}",
-    "teacher_model": "{{ opt_params.get('teacher_model', 'llama3.1:8b') }}",
+    "task_model": "{{ opt_params.get('task_model', 'qwen3.5:9b') }}",
+    "teacher_model": "{{ opt_params.get('teacher_model', 'qwen3.5:9b') }}",
     "reflection_lm": "{{ opt_params.get('reflection_lm', '') }}",
     "candidate_selection_strategy": "{{ opt_params.get('candidate_selection_strategy', 'pareto') }}",
     "skip_perfect_score": {{ opt_params.get('skip_perfect_score', True) }},
@@ -105,18 +105,21 @@ OUTPUT_FIELD_TYPES = {
 }
 
 
-def setup_lm(model_name, api_key, temperature, max_tokens):
+def setup_lm(model_name, api_key, temperature, max_tokens, api_base=None):
     """
     Canonical DSPy setup pattern:
         lm = dspy.LM(...)
         dspy.configure(lm=lm)
     """
-    lm = dspy.LM(
-        model=model_name,
-        api_key=api_key,
-        temperature=temperature,
-        max_tokens=max_tokens,
-    )
+    lm_kwargs = {
+        "model": model_name,
+        "api_key": api_key,
+        "temperature": temperature,
+        "max_tokens": max_tokens,
+    }
+    if api_base:
+        lm_kwargs["api_base"] = api_base
+    lm = dspy.LM(**lm_kwargs)
     dspy.configure(lm=lm)
     return lm
 

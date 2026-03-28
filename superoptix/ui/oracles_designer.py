@@ -582,7 +582,7 @@ def main():
         with col2:
             model = st.text_input(
                 "Model Name",
-                value="llama3.2:1b" if provider == "ollama" else "",
+                value="qwen3.5:2b" if provider == "ollama" else "",
                 help="Specific model identifier",
             )
 

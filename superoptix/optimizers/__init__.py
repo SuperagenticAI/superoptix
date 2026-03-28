@@ -49,6 +49,7 @@ try:
         WeaviateVectorStore,
         RAGEvaluationMetrics,
         SurrealDBVectorStore,
+        TurboChromaVectorStore,
         TurboFAISSVectorStore,
         TurboLanceDBVectorStore,
         TurboSurrealDBVectorStore,
@@ -67,6 +68,7 @@ except ImportError:
     WeaviateVectorStore = None
     RAGEvaluationMetrics = None
     SurrealDBVectorStore = None
+    TurboChromaVectorStore = None
     TurboFAISSVectorStore = None
     TurboLanceDBVectorStore = None
     TurboSurrealDBVectorStore = None
@@ -92,6 +94,7 @@ __all__ = [
     "ChromaVectorStore",
     "WeaviateVectorStore",
     "SurrealDBVectorStore",
+    "TurboChromaVectorStore",
     "TurboFAISSVectorStore",
     "TurboLanceDBVectorStore",
     "TurboSurrealDBVectorStore",

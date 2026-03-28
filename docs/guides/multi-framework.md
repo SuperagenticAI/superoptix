@@ -124,8 +124,8 @@ super agent compile my_agent --framework <framework> --cloud --provider google-g
 super agent run my_agent --framework <framework> --cloud --provider google-genai --model gemini-2.5-flash --goal "your goal"
 
 # Local Ollama
-super agent compile my_agent --framework <framework> --local --provider ollama --model llama3.1:8b
-super agent run my_agent --framework <framework> --local --provider ollama --model llama3.1:8b --goal "your goal"
+super agent compile my_agent --framework <framework> --local --provider ollama --model qwen3.5:9b
+super agent run my_agent --framework <framework> --local --provider ollama --model qwen3.5:9b --goal "your goal"
 ```
 
 Notes:
@@ -172,7 +172,7 @@ spec:
   target_framework: dspy  # or omit for default
   language_model:
     provider: ollama
-    model: llama3.1:8b
+    model: qwen3.5:9b
     api_base: http://localhost:11434
   persona:
     role: Research Assistant
@@ -203,7 +203,7 @@ super agent pull assistant_openai
 
 # Install Ollama (if not already installed)
 brew install ollama
-ollama pull llama3.1:8b
+ollama pull qwen3.5:9b
 
 # Compile & Run (no API keys needed!)
 super agent compile assistant_openai --framework openai
@@ -213,7 +213,7 @@ super agent run assistant_openai --goal "Hello!"
 super agent evaluate assistant_openai
 
 # Optimize
-super agent optimize assistant_openai --auto medium --framework openai --reflection-lm ollama:llama3.1:8b
+super agent optimize assistant_openai --auto medium --framework openai --reflection-lm ollama:qwen3.5:9b
 ```
 
 #### Configuration
@@ -226,7 +226,7 @@ spec:
   language_model:
     location: local
     provider: ollama
-    model: ollama:llama3.1:8b  # FREE, fast and efficient!
+    model: ollama:qwen3.5:9b  # FREE, fast and efficient!
     api_base: http://localhost:11434
 ```
 
@@ -268,7 +268,7 @@ super agent compile researcher_crew --framework crewai
 super agent evaluate researcher_crew
 
 # Optimize
-super agent optimize content_creator_crew --auto medium --framework crewai --reflection-lm ollama:llama3.1:8b
+super agent optimize content_creator_crew --auto medium --framework crewai --reflection-lm ollama:qwen3.5:9b
 
 # Run
 super agent run researcher_crew
@@ -282,7 +282,7 @@ spec:
   target_framework: crewai
   language_model:
     provider: ollama
-    model: llama3.1:8b
+    model: qwen3.5:9b
   persona:
     role: Research Analyst
     goal: Conduct thorough research on topics
@@ -340,7 +340,7 @@ super agent compile assistant_adk --framework google-adk
 super agent evaluate assistant_adk
 
 # Optimize
-super agent optimize assistant_adk --auto medium --framework google-adk --reflection-lm ollama:llama3.1:8b
+super agent optimize assistant_adk --auto medium --framework google-adk --reflection-lm ollama:qwen3.5:9b
 
 # Run
 super agent run assistant_adk
@@ -382,7 +382,7 @@ super agent compile assistant_microsoft --framework microsoft
 super agent evaluate assistant_microsoft
 
 # Optimize
-super agent optimize assistant_microsoft --auto medium --framework microsoft --reflection-lm ollama:llama3.1:8b
+super agent optimize assistant_microsoft --auto medium --framework microsoft --reflection-lm ollama:qwen3.5:9b
 
 # Run
 super agent run assistant_microsoft
@@ -434,7 +434,7 @@ super agent compile research_agent_deepagents --framework deepagents
 super agent evaluate research_agent_deepagents
 
 # Optimize
-super agent optimize research_agent_deepagents --auto medium --framework deepagents --reflection-lm ollama:llama3.1:8b
+super agent optimize research_agent_deepagents --auto medium --framework deepagents --reflection-lm ollama:qwen3.5:9b
 
 # Run
 super agent run research_agent_deepagents
@@ -447,7 +447,7 @@ spec:
   target_framework: deepagents
   language_model:
     provider: ollama
-    model: llama3.1:8b
+    model: qwen3.5:9b
   persona:
     system_prompt: |
       You are a research agent that plans and executes complex research tasks.

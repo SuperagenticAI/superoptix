@@ -9,33 +9,33 @@ The examples are organized into three main categories:
 ### **🤖 Model Backend Demos**
 Learn how to configure and use different local model backends:
 
-- **[🍎 MLX Demo](agents/mlx-demo)** - Apple Silicon optimization with MLX models
-- **[🦙 Ollama Demo](agents/ollama-demo)** - Easy local model management with Ollama
-- **[🤗 HuggingFace Demo](agents/huggingface-demo)** - Advanced NLP with HuggingFace models
-- **[🎮 LM Studio Demo](agents/lmstudio-demo)** - GUI-based model management with LM Studio
+- **[🍎 MLX Demo](agents/mlx-demo.md)** - Apple Silicon optimization with MLX models
+- **[🦙 Ollama Demo](agents/ollama-demo.md)** - Easy local model management with Ollama
+- **[🤗 HuggingFace Demo](agents/huggingface-demo.md)** - Advanced NLP with HuggingFace models
+- **[🎮 LM Studio Demo](agents/lmstudio-demo.md)** - GUI-based model management with LM Studio
 
 ### **🔍 RAG Technology Demos**
 Explore Retrieval-Augmented Generation capabilities:
 
-- **[🔍 RAG ChromaDB Demo](agents/rag-chroma-demo)** - RAG with ChromaDB vector database
-- **[🚀 RAG LanceDB Demo](agents/rag-lancedb-demo)** - High-performance RAG with LanceDB
-- **[🗄️ Weaviate Demo](agents/weaviate-demo)** - Advanced semantic search with Weaviate
-- **[🎯 Qdrant Demo](agents/qdrant-demo)** - Lightning-fast vector search with Qdrant
-- **[🏗️ Milvus Demo](agents/milvus-demo)** - Enterprise-scale vector database with Milvus
-- **[🟣 SurrealDB](agents/surrealdb-frameworks-demo)** - Complete SurrealDB setup and feature guide: vector, hybrid, GraphRAG, multi mode, temporal memory, server embeddings, live utility, and MCP across all supported frameworks
+- **[🔍 RAG ChromaDB Demo](agents/rag-chroma-demo.md)** - RAG with ChromaDB vector database
+- **[🚀 RAG LanceDB Demo](agents/rag-lancedb-demo.md)** - High-performance RAG with LanceDB
+- **[🗄️ Weaviate Demo](agents/weaviate-demo.md)** - Advanced semantic search with Weaviate
+- **[🎯 Qdrant Demo](agents/qdrant-demo.md)** - Lightning-fast vector search with Qdrant
+- **[🏗️ Milvus Demo](agents/milvus-demo.md)** - Enterprise-scale vector database with Milvus
+- **[🟣 SurrealDB](agents/surrealdb-frameworks-demo.md)** - Complete SurrealDB setup and feature guide: vector, hybrid, GraphRAG, multi mode, temporal memory, server embeddings, live utility, and MCP across all supported frameworks
 
 ### **🛠️ Framework Feature Demos**
 Discover core framework capabilities:
 
-- **[🛠️ Tools Demo](agents/tools-demo)** - Comprehensive tool integration across 20+ categories
-- **[🧠 Memory Demo](agents/memory-demo)** - Multi-layered memory system (short-term, long-term, episodic)
-- **[📊 Observability Demo](agents/observability-demo)** - Monitoring, tracing, and debugging capabilities
+- **[🛠️ Tools Demo](agents/tools-demo.md)** - Comprehensive tool integration across 20+ categories
+- **[🧠 Memory Demo](agents/memory-demo.md)** - Multi-layered memory system (short-term, long-term, episodic)
+- **[📊 Observability Demo](agents/observability-demo.md)** - Monitoring, tracing, and debugging capabilities
 
 ### **🔌 Observability Integrations**
 Integrate with external observability platforms:
 
-- **[🧪 MLFlow Integration](agents/mlflow-integration)** - Experiment tracking and model monitoring
-- **[🔍 LangFuse Integration](agents/langfuse-integration)** - LLM observability and performance tracking
+- **[🧪 MLFlow Integration](agents/mlflow-integration.md)** - Experiment tracking and model monitoring
+- **[🔍 LangFuse Integration](agents/langfuse-integration.md)** - LLM observability and performance tracking
 
 ## 🎯 **Technology Focus Matrix**
 

@@ -42,7 +42,7 @@ def resolve_client_config(
         runtime_cfg.get("provider") or lm_cfg.get("provider") or "ollama"
     )
     model = str(
-        runtime_cfg.get("model") or lm_cfg.get("model") or "llama3.1:8b"
+        runtime_cfg.get("model") or lm_cfg.get("model") or "qwen3.5:9b"
     ).strip()
     runtime_provider = _normalize_provider(runtime_cfg.get("provider") or "")
     lm_provider = _normalize_provider(lm_cfg.get("provider") or "")

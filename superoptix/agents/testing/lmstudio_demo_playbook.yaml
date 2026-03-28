@@ -12,7 +12,7 @@ metadata:
 spec:
   language_model:
     provider: lmstudio
-    model: llama-3.2-3b
+    model: qwen2.5-3b-instruct
     api_base: http://localhost:1234
     temperature: 0.7
     max_tokens: 512
@@ -152,22 +152,22 @@ spec:
       description: Comprehensive problem solution
   model_configs:
     general_purpose:
-      model: llama-3.2-3b
+      model: qwen2.5-3b-instruct
       temperature: 0.7
       max_tokens: 512
       description: Good for general tasks and conversations
     code_generation:
-      model: codellama-7b
+      model: qwen2.5-coder-7b-instruct
       temperature: 0.2
       max_tokens: 2048
       description: Optimized for code generation and analysis
     reasoning:
-      model: llama-3.2-7b
+      model: qwen2.5-7b-instruct
       temperature: 0.3
       max_tokens: 1024
       description: Better for complex reasoning tasks
     creative:
-      model: llama-3.2-3b
+      model: qwen2.5-3b-instruct
       temperature: 0.8
       max_tokens: 1500
       description: Optimized for creative writing and brainstorming
@@ -191,7 +191,7 @@ spec:
       params:
         metric: tool_use_accuracy
         auto: light
-        reflection_lm: llama3.1:8b
+        reflection_lm: qwen3.5:9b
         max_full_evals: 5
         skip_perfect_score: true
         reflection_minibatch_size: 3

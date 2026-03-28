@@ -68,7 +68,7 @@ class ThreadSafeDSPyLM:
 						# Fallback to basic configuration if there are issues
 						print(f"Warning: Could not configure DSPy LM with {self.model_name}: {e}")
 						self._lm = dspy.LM(
-							model="ollama/llama3.2:1b",
+							model="ollama/qwen3.5:2b",
 							api_base="http://localhost:11434",
 							api_key="ollama"
 						)
@@ -83,7 +83,7 @@ def build_optimas_system() -> CompoundAISystem:
 	"""Construct a CompoundAISystem by wrapping DSPy signatures as components."""
 
 	# Get configuration from environment or use defaults
-	model_name = os.getenv("DSPY_MODEL", "ollama/llama3.2:1b")
+	model_name = os.getenv("DSPY_MODEL", "ollama/qwen3.5:2b")
 	api_base = os.getenv("DSPY_API_BASE", "http://localhost:11434")
 	api_key = os.getenv("DSPY_API_KEY", "ollama")
 	

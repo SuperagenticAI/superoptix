@@ -83,7 +83,7 @@ spec:
   language_model:
     location: local
     provider: ollama
-    model: llama3.1:8b  # Free local model
+    model: qwen3.5:9b  # Free local model
     temperature: 0.7
     max_tokens: 2000
 ```
@@ -140,7 +140,7 @@ spec:
   language_model:
     location: local
     provider: ollama
-    model: llama3.1:8b  # Lower environmental impact
+    model: qwen3.5:9b  # Lower environmental impact
     temperature: 0.7
     max_tokens: 2000
 ```

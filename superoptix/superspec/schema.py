@@ -110,6 +110,7 @@ class SuperSpecXSchema:
         "Pinecone",
         "FAISS",
         "SurrealDB",
+        "TurboAgents-Chroma",
         "TurboAgents-FAISS",
         "TurboAgents-LanceDB",
         "TurboAgents-SurrealDB",

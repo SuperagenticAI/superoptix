@@ -65,7 +65,7 @@ super agent run huggingface_demo_playbook.yaml
 ```yaml
 language_model:
   provider: "lmstudio"
-  model: "llama-3.2-3b"  # Replace with your loaded model
+  model: "qwen2.5-3b-instruct"  # Replace with your loaded model
   api_base: "http://localhost:1234"
   temperature: 0.7
   max_tokens: 512

@@ -70,7 +70,7 @@ dataset = [
 adapter = MCPAdapter(
     server_params=server_params,
     tool_names=["read_file", "write_file", "list_files"],  # Multiple tools for selection
-    task_model="ollama/llama3.2:1b",  # Local model via Ollama, replace with your model 
+    task_model="ollama/qwen3.5:2b",  # Local model via Ollama, replace with your model 
     metric_fn=lambda item, output: 1.0 if item["reference_answer"] in output else 0.0,
 )
 
@@ -80,7 +80,7 @@ result = gepa.optimize(
     trainset=dataset[:20],
     valset=dataset[20:],
     adapter=adapter,
-    reflection_lm="ollama/llama3.1:8b",  # Larger local model for reflection replace with our choice 
+    reflection_lm="ollama/qwen3.5:9b",  # Larger local model for reflection replace with our choice 
     max_metric_calls=150,
 )
 
@@ -93,8 +93,8 @@ print("Optimized tool description:", result.best_candidate["tool_description"])
 Install Ollama: https://ollama.com
 
 # Pull models
-ollama pull llama3.1:8b
-ollama pull llama3.2:1b
+ollama pull qwen3.5:9b
+ollama pull qwen3.5:2b
 ```
 
 ### Option 2: OpenAI API 

@@ -18,7 +18,7 @@ This is a **production-ready agent** that demonstrates the power of Oracle-tier 
 Before starting this tutorial, ensure you have:
 
 - **Python 3.8+** installed
-- **SuperOptiX** installed (see [Installation Guide](../setup))
+- **SuperOptiX** installed (see [Installation Guide](../setup.md))
 
 ---
 
@@ -249,9 +249,9 @@ super agent evaluate developer
 
 🔍 Tracing enabled for agent developer_20250711_182321
 📁 Traces will be stored in: /Users/super/swe 18-15-10-253/.superoptix/traces
-🚀 Configuring llama3.2:1b with ollama for oracles-tier capabilities
+🚀 Configuring qwen3.5:2b with ollama for oracles-tier capabilities
 📝 Using ChatAdapter for optimal local model compatibility
-Model connection successful: ollama/llama3.2:1b
+Model connection successful: ollama/qwen3.5:2b
 📋 Loaded 5 BDD specifications for execution
 DeveloperPipeline (Oracle tier) initialized with 5 BDD scenarios
 Pipeline loaded
@@ -286,7 +286,7 @@ FFFFF
 ╭────────────────────────────────────── 🔴 Specification Results Summary ──────────────────────────────────────╮
 │                                                                                                              │
 │  📊 Total Specs:         5                🎯 Pass Rate:         0.0%                                         │
-│  Passed:              0                🤖 Model:             ollama_chat/llama3.2:1b                      │
+│  Passed:              0                🤖 Model:             ollama_chat/qwen3.5:2b                      │
 │  Failed:              5                💪 Capability:        0.26                                         │
 │  🏆 Quality Gate:        NEEDS WORK    🚀 Status:            🚀 Optimized                                 │
 │                                                                                                              │
@@ -314,7 +314,7 @@ Affected Specifications:
 │                                                                                                              │
 │  💡 Poor performance. 5 scenarios failing.                                                                   │
 │  💡 Strong recommendation: Run optimization before production use.                                           │
-│  💡 Consider using a more capable model (llama3.1:8b or gpt-4).                                              │
+│  💡 Consider using a more capable model (qwen3.5:9b or gpt-4).                                              │
 │  💡 Review scenario complexity vs model capabilities.                                                        │
 │  💡 Fix semantic relevance in 5 scenario(s) - improve response clarity.                                      │
 │                                                                                                              │
@@ -369,7 +369,7 @@ Affected Specifications:
     The evaluation shows that your Oracle agent needs optimization:
 
     - **🎯 Pass Rate**: 0.0% (0/5 specifications passed)
-    - **🤖 Model**: Using `ollama/llama3.2:1b` (Oracle tier model)
+    - **🤖 Model**: Using `ollama/qwen3.5:2b` (Oracle tier model)
     - **💪 Capability Score**: 0.26 (needs improvement)
     - **🏆 Quality Gate**: NEEDS WORK
     - **🚀 Status**: 🚀 Optimized (optimization was already applied)
@@ -594,7 +594,7 @@ Loading pipeline... ━━━━━━━━━━━━━━━━━━━━
 
 Looking for pipeline at: /Users/super/swe 
 18-15-10-253/swe/agents/developer/pipelines/developer_pipeline.py
-Model connection successful: ollama/llama3.2:1b
+Model connection successful: ollama/qwen3.5:2b
 📋 Loaded 5 BDD specifications for execution
 DeveloperPipeline (Oracle tier) initialized with 5 BDD scenarios
 Loading pipeline... ━━━━━━━━━━━━━━━━╺━━━━━━━━━━━━━━━━━━━━━━━  40% -:--:--
@@ -634,7 +634,7 @@ Loading pipeline... ━━━━━━━━━━━━━━━━╺━━━
 │                │ projects or those requiring high performance, FP is often preferred due to its emphasis on  │
 │                │ immutability and readability.                                                               │
 │ Trained        │ False                                                                                       │
-│ Usage          │ {'ollama_chat/llama3.2:1b': {'completion_tokens': 655, 'prompt_tokens': 572,                │
+│ Usage          │ {'ollama_chat/qwen3.5:2b': {'completion_tokens': 655, 'prompt_tokens': 572,                │
 │                │ 'total_tokens': 1227, 'completion_tokens_details': 0, 'prompt_tokens_details': 0}}          │
 │ Agent_Id       │ developer_20250711_182446                                                                   │
 │ Tier           │ oracles                                                                                     │
@@ -726,7 +726,7 @@ Validation Warnings: []
     The Oracle agent executed successfully with impressive performance:
 
     - **🎯 Task**: Complex programming paradigm analysis
-    - **🤖 Model**: `ollama/llama3.2:1b` (Oracle tier)
+    - **🤖 Model**: `ollama/qwen3.5:2b` (Oracle tier)
     - **📊 Token Usage**: 1,227 total tokens (572 prompt + 655 completion)
     - **⚡ Execution Time**: ~1 second
     - **Validation Status**: PASSED
@@ -811,4 +811,4 @@ Your Oracle agent is ready for real-world deployment and can handle complex reas
 
 ---
 
-Continue with the [Agent with Tools & RAG Tutorial](genies-agent) to learn about advanced tool integration and RAG systems, or the [Orchestra Tutorial](first-orchestra) to build multi-agent systems! 
+Continue with the [Agent with Tools & RAG Tutorial](genies-agent.md) to learn about advanced tool integration and RAG systems, or the [Orchestra Tutorial](first-orchestra.md) to build multi-agent systems! 

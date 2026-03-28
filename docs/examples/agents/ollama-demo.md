@@ -26,7 +26,7 @@ curl -fsSL https://ollama.ai/install.sh | sh
 
 ```bash
 # Install the Ollama model used in this demo
-super model install llama3.2:8b
+super model install qwen3.5:9b
 ```
 
 ### **3. Start Ollama Server**
@@ -58,7 +58,7 @@ The Ollama demo showcases how to configure Ollama models in the agent playbook:
 language_model:
   location: local
   provider: ollama
-  model: llama3.2:8b
+  model: qwen3.5:9b
   api_base: http://localhost:11434
   temperature: 0.7
   max_tokens: 2048
@@ -92,7 +92,7 @@ Edit `agents/ollama_demo/playbook/ollama_demo_playbook.yaml`:
 
 ```yaml
 language_model:
-  model: llama3.2:3b  # Different Ollama model
+  model: qwen3.5:2b  # Different Ollama model
   api_base: http://localhost:11434
 ```
 
@@ -128,7 +128,7 @@ language_model:
    super model list --backend ollama
    
    # Install the required model
-   super model install llama3.2:8b
+   super model install qwen3.5:9b
    ```
 
 3. **Performance Issues**
@@ -150,10 +150,10 @@ ollama --help
 
 ## 📚 **Related Resources**
 
-- [Ollama Setup Guide](../llm-setup.md#ollama-recommended) - Complete Ollama setup instructions
-- [Model Management](../guides/model-management.md) - Managing Ollama models
-- [Agent Development](../guides/agent-development.md) - Building custom agents
+- [Ollama Setup Guide](../../llm-setup.md#ollama-recommended) - Complete Ollama setup instructions
+- [Model Management](../../guides/model-management.md) - Managing Ollama models
+- [Agent Development](../../guides/agent-development.md) - Building custom agents
 
 ## 🔗 Next Steps
 
-1. **Try Other Model Backends**: Explore [MLX](mlx-demo), [HuggingFace](huggingface-demo), or [LM Studio](lmstudio-demo) demos 
+1. **Try Other Model Backends**: Explore [MLX](mlx-demo.md), [HuggingFace](huggingface-demo.md), or [LM Studio](lmstudio-demo.md) demos 
