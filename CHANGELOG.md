@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.23] - 2026-03-28
+
+### Fixed
+- DSPy Ollama model normalization now strips `ollama:` and `ollama/` prefixes before constructing LiteLLM-compatible `ollama_chat/...` model names.
+- DSPy local Qwen playbooks no longer fail immediately with invalid model names when using Ollama-backed runtimes.
+
 ## [0.2.22] - 2026-03-28
 
 ### Added

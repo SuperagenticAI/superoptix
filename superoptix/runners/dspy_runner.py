@@ -811,9 +811,15 @@ class DSPyRunner:
             )
 
         if provider == "ollama":
-            model_name = (
-                model if model.startswith("ollama_chat/") else f"ollama_chat/{model}"
-            )
+            normalized_model = model.strip()
+            if normalized_model.startswith("ollama_chat/"):
+                model_name = normalized_model
+            else:
+                if normalized_model.startswith("ollama:"):
+                    normalized_model = normalized_model.split(":", 1)[1]
+                elif normalized_model.startswith("ollama/"):
+                    normalized_model = normalized_model.split("/", 1)[1]
+                model_name = f"ollama_chat/{normalized_model}"
             api_base = str(lm_config.get("api_base", "")).strip() or None
             return {
                 "model_name": model_name,
@@ -1366,11 +1372,15 @@ class DSPyRunner:
                         or gepa_cfg.get("teacher_model")
                     )
                     if teacher_model_override:
-                        teacher_params["model_name"] = (
-                            teacher_model_override
-                            if teacher_model_override.startswith("ollama_chat/")
-                            else f"ollama_chat/{teacher_model_override}"
-                        )
+                        normalized_teacher_model = str(teacher_model_override).strip()
+                        if normalized_teacher_model.startswith("ollama_chat/"):
+                            teacher_params["model_name"] = normalized_teacher_model
+                        else:
+                            if normalized_teacher_model.startswith("ollama:"):
+                                normalized_teacher_model = normalized_teacher_model.split(":", 1)[1]
+                            elif normalized_teacher_model.startswith("ollama/"):
+                                normalized_teacher_model = normalized_teacher_model.split("/", 1)[1]
+                            teacher_params["model_name"] = f"ollama_chat/{normalized_teacher_model}"
                 else:
                     teacher_params = self._resolve_dspy_lm_params(
                         spec_data,
