@@ -55,7 +55,7 @@ def test_surrealdb_graphrag_framework_playbook_matrix_exists():
 
 
 def test_surrealdb_framework_playbooks_are_wired_for_rag():
-    """Canonical playbooks must use SurrealDB retriever with vector store config."""
+    """Canonical playbooks must use the supported SurrealDB RAG retriever path."""
     for framework, filename in FRAMEWORK_PLAYBOOKS.items():
         playbook = _load_playbook(filename)
         spec = playbook.get("spec", {})
@@ -63,8 +63,9 @@ def test_surrealdb_framework_playbooks_are_wired_for_rag():
         rag = spec.get("rag", {})
         assert rag.get("enabled") is True, f"{framework}: rag.enabled should be true"
         assert (
-            str(rag.get("retriever_type", "")).strip().lower() == "surrealdb"
-        ), f"{framework}: rag.retriever_type must be surrealdb"
+            str(rag.get("retriever_type", "")).strip().lower()
+            in {"surrealdb", "turboagents-surrealdb"}
+        ), f"{framework}: rag.retriever_type must be surrealdb or turboagents-surrealdb"
 
         config = rag.get("config", {})
         assert isinstance(config.get("top_k", 0), int) and config.get("top_k", 0) > 0
