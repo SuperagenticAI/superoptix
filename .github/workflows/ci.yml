@@ -5,36 +5,42 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ["3.11", "3.12"]
-    
+
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Setup uv
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Set up uv
         uses: astral-sh/setup-uv@v1
         with:
           version: "latest"
-      
+
       - name: Install dependencies
-        run: |
-          # Keep CI resilient when lock refresh is pending.
-          uv sync --extra dev --extra testing --extra vectordb --extra observability --extra web --extra ml-cross-platform
+        run: uv sync --frozen --extra dev --extra testing --extra turboagents
 
       - name: Run Ruff
         run: |
-          uv run ruff check .
-          uv run ruff format --check .
-      
+          uv run --no-sync ruff check .
+          uv run --no-sync ruff format --check .
+
       - name: Run tests
         run: |
-          PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run pytest -p pytest_asyncio.plugin tests/
-      
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run --no-sync pytest -p pytest_asyncio.plugin tests/
+
       - name: Run type checking
         run: |
-          uv run mypy superoptix/ --no-error-summary || echo "Type checking completed with warnings" 
+          uv run --no-sync mypy superoptix/ --no-error-summary || echo "Type checking completed with warnings"
         
