@@ -108,7 +108,7 @@ metadata:
 spec:
   language_model:
     provider: "ollama"
-    model: "llama3.2:1b"
+    model: "qwen3.5:2b"
   persona:
     role: "Mathematics Teacher"
     goal: "Help students learn mathematics concepts"
@@ -562,7 +562,7 @@ sequenceDiagram
 ```bash
 # Single machine setup
 super init my_project
-super model install llama3.1:8b -b ollama
+super model install qwen3.5:9b -b ollama
 super agent run my_agent
 ```
 

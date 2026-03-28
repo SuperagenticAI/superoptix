@@ -407,7 +407,7 @@ super agent run my_agent --observe langfuse --tags ["traces"]
 
 ## 🔗 Related Resources
 
-- [Weights & Biases Integration Guide](../guides/weights-biases-integration.md)
-- [Enhanced Observability Guide](../guides/enhanced-observability.md)
-- [GEPA Optimization Guide](../guides/gepa-optimization.md)
-- [Multi-Framework Guide](../guides/multi-framework.md)
+- [Weights & Biases Integration Guide](../../guides/weights-biases-integration.md)
+- [Enhanced Observability Guide](../../guides/enhanced-observability.md)
+- [GEPA Optimization Guide](../../guides/gepa-optimization.md)
+- [Multi-Framework Guide](../../guides/multi-framework.md)

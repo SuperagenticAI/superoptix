@@ -18,7 +18,7 @@ spec:
   language_model:
     location: local
     provider: ollama
-    model: llama3.1:8b
+    model: qwen3.5:9b
     temperature: 0.4
     max_tokens: 16000
     cache: true

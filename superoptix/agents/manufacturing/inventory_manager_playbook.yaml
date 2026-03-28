@@ -12,7 +12,7 @@ spec:
   language_model:
     location: local
     provider: ollama
-    model: llama3.1:8b
+    model: qwen3.5:9b
     api_base: http://localhost:11434
   input_fields:
   - name: current_inventory
@@ -118,7 +118,7 @@ spec:
       params:
         metric: answer_exact_match
         auto: light
-        reflection_lm: llama3.1:8b
+        reflection_lm: qwen3.5:9b
         max_full_evals: 3
         skip_perfect_score: true
     metric: answer_exact_match

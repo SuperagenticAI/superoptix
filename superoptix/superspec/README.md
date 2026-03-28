@@ -144,7 +144,7 @@ metadata:
 spec:
   language_model:
     provider: "ollama"
-    model: "llama3.2:1b"
+    model: "qwen3.5:2b"
   persona:
     role: "Assistant Role"
     goal: "Agent objective"

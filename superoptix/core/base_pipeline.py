@@ -131,9 +131,9 @@ class SuperOptixPipeline(dspy.Module, ABC, metaclass=SuperOptixMeta):
         """Auto-setup language model with tier-appropriate defaults."""
         with self.tracer.trace_operation("model_init", "pipeline"):
             tier_models = {
-                "oracles": "llama3.2:1b",
-                "genies": "llama3.1:8b",
-                "sage": "llama3.1:70b",
+                "oracles": "qwen3.5:2b",
+                "genies": "qwen3.5:9b",
+                "sage": "qwen3.5:9b",
             }
 
             model_name = self.config.get("model", tier_models[self.tier_level])

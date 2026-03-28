@@ -205,7 +205,7 @@ SuperOptiX CLI Commands Reference:
 
 - super model install <model>
   Install new model via Ollama
-  Example: super model install llama3.1:8b
+  Example: super model install qwen3.5:9b
 
 📂 PROJECT:
 - super init <name>

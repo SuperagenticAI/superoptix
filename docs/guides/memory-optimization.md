@@ -894,7 +894,7 @@ memory.get_optimized_context(
 
 **Related Guides:**
 - [Memory System Guide](memory.md)
-- [RAG Optimization](rag-optimization.md)
+- [RAG Optimization](../tutorials/rag-optimization.md)
 - [GEPA Optimization](gepa-optimization.md)
 - [Full-Stack Optimization](multi-framework.md)
 

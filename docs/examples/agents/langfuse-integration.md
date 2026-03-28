@@ -129,7 +129,7 @@ SuperOptiX automatically captures detailed LLM interactions:
   "metadata": {
     "agent_type": "developer",
     "tier": "genies",
-    "model": "llama3.1:8b"
+    "model": "qwen3.5:9b"
   }
 }
 ```
@@ -207,11 +207,11 @@ observability:
         - name: "baseline"
           config:
             temperature: 0.7
-            model: "llama3.1:8b"
+            model: "qwen3.5:9b"
         - name: "optimized"
           config:
             temperature: 0.5
-            model: "llama3.1:70b"
+            model: "qwen3.5:9b"
 ```
 
 ## 📈 Monitoring and Analysis
@@ -404,10 +404,10 @@ observability:
 
 ## 📚 Related Resources
 
-- **[Observability Guide](../guides/observability.md)** - Complete observability overview
-- **[Agent Development](../guides/agent-development.md)** - Build custom agents
+- **[Observability Guide](../../guides/observability.md)** - Complete observability overview
+- **[Agent Development](../../guides/agent-development.md)** - Build custom agents
 - **[LangFuse Documentation](https://langfuse.com/docs)** - Official LangFuse docs
-- **[SuperOptiX CLI Reference](../reference/cli.md)** - CLI commands reference
+- **[SuperOptiX CLI Reference](../../reference/cli.md)** - CLI commands reference
 
 ## 🎯 Next Steps
 

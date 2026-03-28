@@ -19,11 +19,11 @@ spec:
   target_framework: openai
   
   # MODEL CONFIGURATION: Ollama (FREE local model)
-  # Works with: gpt-oss:20b, gpt-oss:120b, llama3.1:8b, etc.
+  # Works with: gpt-oss:20b, gpt-oss:120b, qwen3.5:9b, etc.
   language_model:
     location: local
     provider: ollama
-    model: ollama:llama3.1:8b
+    model: ollama:qwen3.5:9b
     temperature: 0.7
     max_tokens: 2000
     api_base: http://localhost:11434
@@ -123,7 +123,7 @@ spec:
       params:
         metric: response_accuracy
         auto: medium
-        reflection_lm: ollama:llama3.1:8b  # Use same model for reflection
+        reflection_lm: ollama:qwen3.5:9b  # Use same model for reflection
         max_full_evals: 5
         skip_perfect_score: true
     metric: response_accuracy

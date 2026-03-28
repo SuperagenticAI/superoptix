@@ -18,8 +18,8 @@ This is a **production-ready multi-agent system** that demonstrates the power of
 Before starting this tutorial, ensure you have:
 
 - **Python 3.8+** installed
-- **SuperOptiX** installed (see [Installation Guide](../setup))
-- Completed the [Your First Agent](../tutorials/genies-agent) tutorial (recommended)
+- **SuperOptiX** installed (see [Installation Guide](../setup.md))
+- Completed the [Your First Agent](genies-agent.md) tutorial (recommended)
 
 ---
 
@@ -453,7 +453,7 @@ Tier validation passed!
 
 🔄 Task 1/3: implement_feature
 🚀 Using pre-optimized pipeline from developer_optimized.json
-Model connection successful: ollama/llama3.2:1b
+Model connection successful: ollama/qwen3.5:2b
 📋 Loaded 5 BDD specifications for execution
 DeveloperPipeline (Oracle tier) initialized with 5 BDD scenarios
 
@@ -530,7 +530,7 @@ DeveloperPipeline (Oracle tier) initialized with 5 BDD scenarios
 │                │ const beanstalkClient = new beanstalk();                                                    │
 │                │ const rdsClient = new rds();                                                                │
 │ Trained        │ False                                                                                       │
-│ Usage          │ {'ollama_chat/llama3.2:1b': {'completion_tokens': 1844, 'prompt_tokens': 580,               │
+│ Usage          │ {'ollama_chat/qwen3.5:2b': {'completion_tokens': 1844, 'prompt_tokens': 580,               │
 │                │ 'total_tokens': 2424, 'completion_tokens_details': 0, 'prompt_tokens_details': 0}}          │
 │ Agent_Id       │ developer_20250711_185510                                                                   │
 │ Tier           │ oracles                                                                                     │
@@ -540,7 +540,7 @@ Task implement_feature completed in 11.16s
 
 🔄 Task 2/3: configure_ci_pipeline
 📝 Using base pipeline (no optimization available)
-Model connection successful: ollama/llama3.2:1b
+Model connection successful: ollama/qwen3.5:2b
 📋 Loaded 5 BDD specifications for execution
 DevopsEngineerPipeline (Oracle tier) initialized with 5 BDD scenarios
 
@@ -559,7 +559,7 @@ DevopsEngineerPipeline (Oracle tier) initialized with 5 BDD scenarios
 │                 │ and Socket.IO.                                                                             │
 │ Pipeline_Config │ ['docker', 'aws', 'maven']                                                                │
 │ Trained         │ False                                                                                      │
-│ Usage           │ {'ollama_chat/llama3.2:1b': {'completion_tokens': 1345, 'prompt_tokens': 2478,             │
+│ Usage           │ {'ollama_chat/qwen3.5:2b': {'completion_tokens': 1345, 'prompt_tokens': 2478,             │
 │                 │ 'total_tokens': 3823, 'completion_tokens_details': 0, 'prompt_tokens_details': 0}}         │
 │ Agent_Id        │ devops_engineer_20250711_185521                                                            │
 │ Tier            │ oracles                                                                                    │
@@ -569,7 +569,7 @@ Task configure_ci_pipeline completed in 9.05s
 
 🔄 Task 3/3: create_test_plan
 📝 Using base pipeline (no optimization available)
-Model connection successful: ollama/llama3.2:1b
+Model connection successful: ollama/qwen3.5:2b
 📋 Loaded 5 BDD specifications for execution
 QaEngineerPipeline (Oracle tier) initialized with 5 BDD scenarios
 
@@ -594,7 +594,7 @@ QaEngineerPipeline (Oracle tier) initialized with 5 BDD scenarios
 │                 │ 4. WebSocket tests: Test the integration of the WebSocket endpoint with Node.js and        │
 │                 │ Socket.IO.                                                                                 │
 │ Trained         │ False                                                                                      │
-│ Usage           │ {'ollama_chat/llama3.2:1b': {'completion_tokens': 214, 'prompt_tokens': 735,               │
+│ Usage           │ {'ollama_chat/qwen3.5:2b': {'completion_tokens': 214, 'prompt_tokens': 735,               │
 │                 │ 'total_tokens': 949, 'completion_tokens_details': None, 'prompt_tokens_details': None}}    │
 │ Agent_Id        │ qa_engineer_20250711_185530                                                                │
 │ Tier            │ oracles                                                                                    │
@@ -656,7 +656,7 @@ Task create_test_plan completed in 1.40s
 
     **💾 Resource Usage:**
     - **🔤 Total Tokens**: 7,196 tokens across all agents
-    - **🧠 Model**: llama3.2:1b (local Ollama)
+    - **🧠 Model**: qwen3.5:2b (local Ollama)
     - **📁 Workspace**: Created dedicated workspace for coordination
 
     #### 🎯 **Key Insights**
@@ -782,19 +782,19 @@ super orchestra create education_team
 
 ### 📚 **Recommended Learning Path**
 
-1. **💎 [SuperSpec Guide](../guides/superspec)**: Master declarative agent specifications
-2. **🧪 [BDD Guide](../guides/bdd)**: Learn behavior-driven development for agents
-3. **⚙️ [Optimization Guide](../guides/optimization)**: Understand DSPy-powered optimization
-4. **🎭 [Multi-Agent Guide](../guides/orchestra-development)**: Build advanced orchestration patterns
-5. **🏭 [Production Guide](../guides/agent-development)**: Deploy and monitor in production
+1. **💎 [SuperSpec Guide](../guides/superspec.md)**: Master declarative agent specifications
+2. **🧪 [BDD Guide](../guides/bdd.md)**: Learn behavior-driven development for agents
+3. **⚙️ [Optimization Guide](../guides/optimization.md)**: Understand DSPy-powered optimization
+4. **🎭 [Multi-Agent Guide](../guides/orchestra-development.md)**: Build advanced orchestration patterns
+5. **🏭 [Production Guide](../guides/agent-development.md)**: Deploy and monitor in production
 
 ### 🎯 **Advanced Topics**
 
-- **🔍 [Agent Discovery](../guides/agent-discovery)**: Find the perfect agents for your use case
-- **🛠️ [Tool Development](../guides/tool-development)**: Create custom tools for your agents
-- **🧠 [Memory Systems](../guides/memory)**: Add persistent memory to your orchestras
-- **🔍 [RAG Integration](../guides/rag)**: Add knowledge retrieval capabilities
-- **📊 [Observability](../guides/observability)**: Monitor and debug your orchestras
+- **🔍 [Agent Discovery](../guides/agent-discovery.md)**: Find the perfect agents for your use case
+- **🛠️ [Tool Development](../guides/tool-development.md)**: Create custom tools for your agents
+- **🧠 [Memory Systems](../guides/memory.md)**: Add persistent memory to your orchestras
+- **🔍 [RAG Integration](../guides/rag.md)**: Add knowledge retrieval capabilities
+- **📊 [Observability](../guides/observability.md)**: Monitor and debug your orchestras
 
 ### 🏪 **Explore the Marketplace**
 

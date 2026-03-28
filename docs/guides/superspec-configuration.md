@@ -404,7 +404,7 @@ spec:
   language_model:
     location: local
     provider: ollama
-    model: llama3.2:1b
+    model: qwen3.5:2b
     temperature: 0.0
     max_tokens: 2048
     
@@ -451,7 +451,7 @@ spec:
   language_model:
     location: local
     provider: ollama
-    model: llama3.1:8b
+    model: qwen3.5:9b
     temperature: 0.7
     max_tokens: 2048
     

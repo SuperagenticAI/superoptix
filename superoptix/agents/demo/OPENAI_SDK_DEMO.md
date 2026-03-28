@@ -310,7 +310,7 @@ language_model:
 |-----------|-------|-----------|------|-------|
 | **OpenAI SDK** | gpt-oss:120b | **100%** 🏆 | Free | Perfect baseline! Most capable! |
 | **OpenAI SDK** | gpt-oss:20b | **100%** 🏆 | Free | Faster alternative |
-| **DSPy** | llama3.1:8b | 37.5% | Free | Needs optimization |
+| **DSPy** | qwen3.5:9b | 37.5% | Free | Needs optimization |
 | **DSPy** | gpt-4 | 85% | $$$ | Better but costly |
 | **DeepAgents** | Claude | N/A | $$ | Can't test with Ollama |
 
@@ -346,7 +346,7 @@ language_model:
 
 - **gpt-oss:120b**: Most capable, recommended default (100% pass rate!)
 - **gpt-oss:20b**: Faster, good balance
-- **llama3.1:8b**: Fastest, less capable (~50% pass rate)
+- **qwen3.5:9b**: Fastest, less capable (~50% pass rate)
 
 ### 3. Start Simple
 

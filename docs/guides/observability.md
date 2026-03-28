@@ -242,7 +242,7 @@ SuperOptiX generates comprehensive trace data in JSONL format. Each trace event 
   "event_type": "model_initialized",
   "component": "pipeline",
   "data": {
-    "model": "llama3.1:8b",
+    "model": "qwen3.5:9b",
     "provider": "ollama",
     "tier": "genies",
     "adapter": "ChatAdapter"
@@ -331,7 +331,7 @@ super agent run developer --goal "Write a simple Python function to calculate th
 
 **Result**: Agent executed successfully with:
 - **Agent ID**: `developer_20250714_200501`
-- **Model**: `llama3.1:8b` (Ollama backend)
+- **Model**: `qwen3.5:9b` (Ollama backend)
 - **Tools**: 3 tools configured (calculator, text_analyzer, file_reader)
 - **Execution Time**: 10.27 seconds
 - **Status**: Success 

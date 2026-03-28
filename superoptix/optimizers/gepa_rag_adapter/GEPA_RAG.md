@@ -37,7 +37,7 @@ pip install litellm qdrant-client               # For Qdrant
 
 # Setup local Ollama models for examples
 ollama pull qwen3:8b          # Default for ChromaDB/Weaviate/Qdrant
-ollama pull llama3.1:8b       # Default for LanceDB/Milvus
+ollama pull qwen3.5:9b       # Default for LanceDB/Milvus
 ollama pull nomic-embed-text:latest  # Embedding model
 ```
 
@@ -55,7 +55,7 @@ vector_store = ChromaVectorStore.create_local("./knowledge_base", "documents")
 # 2. Create the RAG adapter
 adapter = GenericRAGAdapter(
     vector_store=vector_store,
-    llm_model="ollama/llama3.2:1b",  # Memory-friendly local model
+    llm_model="ollama/qwen3.5:2b",  # Memory-friendly local model
     # llm_model="gpt-4",  # For cloud-based models (requires API key)
     rag_config={
         "retrieval_strategy": "similarity",
@@ -87,7 +87,7 @@ result = gepa.optimize(
     valset=validation_data,
     adapter=adapter,
     max_metric_calls=10,  # Small number for local testing
-    reflection_llm_model="ollama/llama3.1:8b"  # Memory-friendly reflection model
+    reflection_llm_model="ollama/qwen3.5:9b"  # Memory-friendly reflection model
     # reflection_llm_model="gpt-4"  # For cloud-based optimization
 )
 
@@ -275,14 +275,14 @@ class MyVectorStore(VectorStoreInterface):
 # Memory-friendly options
 adapter = GenericRAGAdapter(
     vector_store=vector_store,
-    llm_model="ollama/llama3.2:1b",  # ~1GB RAM - Fast inference
+    llm_model="ollama/qwen3.5:2b",  # Smaller local default
     rag_config=config
 )
 
 # Higher quality local models
 adapter = GenericRAGAdapter(
     vector_store=vector_store,
-    llm_model="ollama/llama3.1:8b",  # ~5GB RAM - Better quality
+    llm_model="ollama/qwen3.5:9b",  # Larger local default
     rag_config=config
 )
 
@@ -293,7 +293,7 @@ result = gepa.optimize(
     valset=validation_data,
     adapter=adapter,
     max_metric_calls=5,  # Small for local testing
-    reflection_llm_model="ollama/llama3.1:8b"
+    reflection_llm_model="ollama/qwen3.5:9b"
 )
 ```
 
@@ -345,7 +345,7 @@ rag_config = {
 
 adapter = GenericRAGAdapter(
     vector_store=vector_store,
-    llm_model="ollama/llama3.2:1b",  # Local model for testing
+    llm_model="ollama/qwen3.5:2b",  # Local model for testing
     # llm_model="gpt-4o",  # For cloud-based usage
     rag_config=rag_config
 )
@@ -492,7 +492,7 @@ def create_rag_adapter(env: str):
     if env == "development":
         vector_store = ChromaVectorStore.create_local("./local_kb", "docs")
         config = {"retrieval_strategy": "similarity", "top_k": 3}
-        llm_model = "ollama/llama3.2:1b"  # Memory-friendly for local dev
+        llm_model = "ollama/qwen3.5:2b"  # Memory-friendly for local dev
     elif env == "production":
         vector_store = WeaviateVectorStore.create_cloud(
             cluster_url=os.getenv("WEAVIATE_URL"),

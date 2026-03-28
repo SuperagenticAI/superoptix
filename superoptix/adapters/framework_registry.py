@@ -1211,7 +1211,7 @@ class PydanticAIFrameworkAdapter(FrameworkAdapter):
         model_config = {}
         if "language_model" in spec:
             lm = spec["language_model"]
-            model_str = lm.get("model", "llama3.1:8b")
+            model_str = lm.get("model", "qwen3.5:9b")
             provider = lm.get("provider", "ollama").lower()
 
             # Ensure model has ollama: prefix if provider is ollama or model lacks prefix

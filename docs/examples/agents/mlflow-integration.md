@@ -137,7 +137,7 @@ SuperOptiX automatically logs the following to MLFlow:
   "parameters": {
     "agent_name": "developer",
     "tier": "genies",
-    "model": "llama3.1:8b",
+    "model": "qwen3.5:9b",
     "temperature": 0.7,
     "max_tokens": 2048
   },
@@ -345,10 +345,10 @@ spec:
 
 ## 📚 Related Resources
 
-- **[Observability Guide](../guides/observability.md)** - Complete observability overview
-- **[Agent Development](../guides/agent-development.md)** - Build custom agents
+- **[Observability Guide](../../guides/observability.md)** - Complete observability overview
+- **[Agent Development](../../guides/agent-development.md)** - Build custom agents
 - **[MLFlow Documentation](https://mlflow.org/docs/latest/index.html)** - Official MLFlow docs
-- **[SuperOptiX CLI Reference](../reference/cli.md)** - CLI commands reference
+- **[SuperOptiX CLI Reference](../../reference/cli.md)** - CLI commands reference
 
 ## 🎯 Next Steps
 

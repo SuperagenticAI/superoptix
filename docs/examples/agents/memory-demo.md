@@ -17,7 +17,7 @@ This demo demonstrates:
 
 ```bash
 # Install the Ollama model used in this demo
-super model install llama3.2:8b
+super model install qwen3.5:9b
 ```
 
 ### **2. Start Ollama Server**
@@ -49,7 +49,7 @@ The Memory demo showcases how to configure memory systems in the agent playbook:
 language_model:
   location: local
   provider: ollama
-  model: llama3.2:8b
+  model: qwen3.5:9b
   api_base: http://localhost:11434
   temperature: 0.7
   max_tokens: 2048
@@ -179,4 +179,4 @@ super agent --help
 
 ## 📚 Related Documentation
 
-- [Agent Development](../guides/agent-development.md) - Building custom agents
+- [Agent Development](../../guides/agent-development.md) - Building custom agents

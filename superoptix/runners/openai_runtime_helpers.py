@@ -46,7 +46,7 @@ def resolve_model(
         runtime_cfg.get("provider") or lm_cfg.get("provider") or "ollama"
     )
     model = str(
-        runtime_cfg.get("model") or lm_cfg.get("model") or "llama3.1:8b"
+        runtime_cfg.get("model") or lm_cfg.get("model") or "qwen3.5:9b"
     ).strip()
     api_base = runtime_cfg.get("api_base") or lm_cfg.get("api_base")
 

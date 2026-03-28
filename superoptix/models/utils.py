@@ -231,7 +231,7 @@ def get_superoptix_model_discovery_guide() -> Dict[str, Dict[str, str]]:
             "description": "Local models with easy installation",
             "install_cmd": "1. Install Ollama: Visit https://ollama.com\n2. Pull model: ollama pull <model_name>",
             "browse_url": "https://ollama.com/library",
-            "popular_models": "llama3.2:3b, codellama:7b, mistral:7b, qwen2.5:7b",
+            "popular_models": "qwen3.5:2b, codellama:7b, mistral:7b, qwen2.5:7b",
             "benefits": "• No API keys needed\n• Run completely offline\n• Fast local inference\n• Privacy-focused",
             "requirements": "Ollama installed locally (visit https://ollama.com)",
         },

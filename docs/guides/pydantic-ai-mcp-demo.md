@@ -8,7 +8,7 @@ This demo shows how to:
 3. Compile and run a Pydantic AI agent with MCP tools
 4. Optimize MCP tool descriptions with GEPA
 
-**Tested and Working with `llama3.1:8b` on local Ollama!** 🎉
+**Tested and Working with `qwen3.5:9b` on local Ollama!** 🎉
 
 ---
 
@@ -26,7 +26,7 @@ node --version  # Should be 18+
 npx --version   # Required for running MCP servers
 
 # Ollama (for local model inference)
-ollama pull llama3.1:8b
+ollama pull qwen3.5:9b
 ```
 
 ---
@@ -52,7 +52,7 @@ super agent run pydantic-mcp --goal "List all files in /private/tmp"
 
 **Expected Output:**
 ```
-Using model: llama3.1:8b
+Using model: qwen3.5:9b
 🛠️  Initialized MCP stdio server: filesystem
 Initialized 1 MCP server(s)
 🚀 Running agent with input: List all files in /tmp
@@ -105,7 +105,7 @@ The `pydantic_mcp_playbook.yaml` includes:
 spec:
   language_model:
     provider: ollama
-    model: llama3.1:8b  # Works great with 8b models!
+    model: qwen3.5:9b  # Works great with 8b models!
     api_base: http://localhost:11434
   
   # MCP Integration
@@ -213,7 +213,7 @@ metadata:
 spec:
   language_model:
     provider: ollama
-    model: llama3.1:8b
+    model: qwen3.5:9b
     api_base: http://localhost:11434
   
   input_fields:
@@ -362,7 +362,7 @@ feature_specifications:
 > - Requires **high-end GPU** or cloud GPU access
 > - Makes **many LLM API calls** (20-100+ depending on settings)
 > - Can incur **significant costs** with cloud models (GPT-4, Claude)
-> - **RECOMMENDED:** Use local `ollama/llama3.1:8b` to avoid API charges
+> - **RECOMMENDED:** Use local `ollama/qwen3.5:9b` to avoid API charges
 > 
 > **MCP optimization runs TWO phases**, effectively doubling resource usage.
 
@@ -372,7 +372,7 @@ feature_specifications:
 super agent optimize developer \
   --framework pydantic-ai \
   --max-metric-calls 20 \
-  --reflection-lm ollama/llama3.1:8b
+  --reflection-lm ollama/qwen3.5:9b
 ```
 
 > **Note:** Use `--max-metric-calls 20` instead of `--max-full-evals 1` for more precise control over total evaluations.
@@ -383,7 +383,7 @@ super agent optimize developer \
 super agent optimize developer \
   --framework pydantic-ai \
   --auto light \
-  --reflection-lm ollama/llama3.1:8b
+  --reflection-lm ollama/qwen3.5:9b
 ```
 
 **What happens:**
@@ -413,7 +413,7 @@ metadata:
 spec:
   language_model:
     provider: ollama
-    model: llama3.1:8b
+    model: qwen3.5:9b
     api_base: http://localhost:11434
   
   input_fields:
@@ -458,7 +458,7 @@ spec:
     optimizer:
       name: GEPA
       params:
-        reflection_lm: ollama/llama3.1:8b  # Use forward slash for LiteLLM
+        reflection_lm: ollama/qwen3.5:9b  # Use forward slash for LiteLLM
         auto: light
 ```
 
@@ -508,7 +508,7 @@ super agent evaluate developer_mcp
 super agent optimize developer_mcp \
   --framework pydantic-ai \
   --max-metric-calls 20 \
-  --reflection-lm ollama/llama3.1:8b
+  --reflection-lm ollama/qwen3.5:9b
 ```
 
 > **Note:** `--max-metric-calls 20` provides more precise control than `--max-full-evals 1`.
@@ -521,7 +521,7 @@ super agent optimize developer_mcp \
 super agent optimize developer_mcp \
   --framework pydantic-ai \
   --auto light \
-  --reflection-lm ollama/llama3.1:8b  # Use forward slash for LiteLLM
+  --reflection-lm ollama/qwen3.5:9b  # Use forward slash for LiteLLM
 ```
 
 ---
@@ -641,22 +641,22 @@ tool_names: ["read_file", "write_file", "list_directory"]
 
 ### LiteLLM Provider Error
 
-**Error:** `LLM Provider NOT provided. You passed model=ollama:llama3.1:8b`
+**Error:** `LLM Provider NOT provided. You passed model=ollama:qwen3.5:9b`
 
 **Solution:** Use forward slash instead of colon for the reflection LM:
 ```bash
 # Wrong
---reflection-lm ollama:llama3.1:8b
+--reflection-lm ollama:qwen3.5:9b
 
 # Correct
---reflection-lm ollama/llama3.1:8b
+--reflection-lm ollama/qwen3.5:9b
 ```
 
 ---
 
 ## Verified Working Examples
 
-These commands were tested and work with `llama3.1:8b`:
+These commands were tested and work with `qwen3.5:9b`:
 
 ```bash
 # List directory contents (use /private/tmp on macOS, /tmp on Linux)
@@ -690,7 +690,7 @@ cat /private/tmp/hello.txt  # Verify: "Hello World"
 | Feature | Status | Notes |
 |---------|--------|-------|
 | MCP with Pydantic AI | Working | Full integration |
-| Local 8b models | Working | `llama3.1:8b` tested |
+| Local 8b models | Working | `qwen3.5:9b` tested |
 | Filesystem operations | Working | Read, write, list |
 | Plain text output | Working | No JSON metadata |
 | Tool optimization | Working | GEPA support (use unprefixed tool names) |

@@ -87,7 +87,7 @@ spec:
   language_model:
     location: local|self-hosted|cloud
     provider: ollama|openai|anthropic|...
-    model: llama3.2:1b|gpt-4|claude-3-sonnet
+    model: qwen3.5:2b|gpt-4|claude-3-sonnet
     temperature: 0.0
     max_tokens: 2048
     cache: true
@@ -97,9 +97,9 @@ spec:
 
 | Use Case | Recommended Model | Reasoning |
 |----------|------------------|-----------|
-| **Development/Testing** | `llama3.2:1b` | Fast, local, cost-effective |
-| **Production (Oracles)** | `llama3.1:8b` | Good balance of speed/quality |
-| **Production (Genies)** | `llama3.1:70b` | High-quality reasoning |
+| **Development/Testing** | `qwen3.5:2b` | Fast, local, cost-effective |
+| **Production (Oracles)** | `qwen3.5:9b` | Good balance of speed/quality |
+| **Production (Genies)** | `qwen3.5:9b` | High-quality local reasoning |
 | **Cloud Production** | `gpt-4` or `claude-3-sonnet` | Best performance |
 
 ### **3. Persona Definition**
@@ -220,7 +220,7 @@ spec:
   language_model:
     location: local
     provider: ollama
-    model: llama3.1:8b
+    model: qwen3.5:9b
     temperature: 0.7
     max_tokens: 2048
 ```
@@ -376,7 +376,7 @@ spec:
   language_model:
     location: local
     provider: ollama
-    model: llama3.2:1b
+    model: qwen3.5:2b
     temperature: 0.0
     max_tokens: 1024
 
@@ -444,7 +444,7 @@ spec:
   language_model:
     location: local
     provider: ollama
-    model: llama3.1:8b
+    model: qwen3.5:9b
     temperature: 0.7
     max_tokens: 2048
 
@@ -582,7 +582,7 @@ spec:
   language_model:
     location: local
     provider: ollama
-    model: llama3.2:1b
+    model: qwen3.5:2b
 
   # Simple persona
   persona:

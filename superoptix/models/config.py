@@ -280,7 +280,7 @@ def get_superoptix_model_discovery_settings() -> Dict[str, Any]:
                     "4. Use with SuperOptiX: super model dspy ollama/<model_name>",
                 ],
                 "popular_models": [
-                    "llama3.2:3b - Great for beginners",
+                    "qwen3.5:2b - Great for beginners",
                     "codellama:7b - Perfect for coding",
                     "mistral:7b - Excellent reasoning",
                     "qwen2.5:7b - Multilingual support",

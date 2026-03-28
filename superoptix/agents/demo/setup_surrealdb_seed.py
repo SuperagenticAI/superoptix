@@ -159,7 +159,7 @@ def _define_indexes(
         try:
             db.query(stmt)
         except Exception as e:
-            # Index creation may fail on older SurrealDB versions — non-fatal
+            # Index creation may fail on older SurrealDB versions; non-fatal.
             print(f"   Warning: Index creation skipped: {e}")
 
 
@@ -311,6 +311,7 @@ def load_surreal_vector_store(playbook_path: Path) -> dict[str, Any]:
             f"Playbook {playbook_path} is not configured with retriever_type: surrealdb or turboagents-surrealdb"
         )
     vector_store = dict(rag.get("vector_store", {}) or {})
+    vector_store["retriever_type"] = retriever_type
     if not vector_store:
         raise ValueError(f"Playbook {playbook_path} is missing spec.rag.vector_store")
 
@@ -383,6 +384,93 @@ def seed_surrealdb_documents(
     return inserted
 
 
+def seed_turboagents_surrealdb_documents(
+    *,
+    vector_store: dict[str, Any],
+    documents: list[dict[str, Any]],
+    replace_existing_seed_docs: bool = True,
+) -> int:
+    try:
+        import asyncio
+
+        import numpy as np
+        from sentence_transformers import SentenceTransformer
+        from turboagents.rag import TurboSurrealDB
+    except ImportError as exc:
+        raise ImportError(
+            "Required packages missing. Install with: pip install surrealdb sentence-transformers turboagents[rag]"
+        ) from exc
+
+    url = str(vector_store["url"])
+    namespace = str(vector_store["namespace"])
+    database = str(vector_store["database"])
+    username = str(vector_store["username"])
+    password = str(vector_store["password"])
+    skip_signin = bool(vector_store.get("skip_signin", False))
+    table_name = str(vector_store["table_name"])
+    metadata_field = str(vector_store["metadata_field"])
+    embedding_model = str(vector_store["embedding_model"])
+    embedding_dimension = int(vector_store.get("embedding_dimension", 384))
+    bits = float(vector_store.get("bits", 3.5))
+    seed = int(vector_store.get("seed", 0))
+    metric = str(vector_store.get("metric", "COSINE"))
+
+    model = SentenceTransformer(embedding_model)
+    auth = None if skip_signin else {"username": username, "password": password}
+
+    async def _seed() -> int:
+        store = TurboSurrealDB(
+            url=url,
+            namespace=namespace,
+            database=database,
+            dim=embedding_dimension,
+            bits=bits,
+            seed=seed,
+            metric=metric,
+            auth=auth,
+        )
+        store.collection = table_name
+        client = await store._ensure_client()
+        await client.query(f"DEFINE TABLE {table_name} SCHEMALESS;")
+        try:
+            await client.query(
+                f"DEFINE INDEX {table_name}_embedding_idx ON {table_name} "
+                f"FIELDS embedding HNSW DIMENSION {embedding_dimension} DIST {metric.upper()} TYPE F32 EFC 150 M 8;"
+            )
+        except Exception:
+            pass
+
+        if replace_existing_seed_docs:
+            await client.query(
+                f"DELETE {table_name} WHERE {metadata_field}.source = $source;",
+                {"source": "superoptix_surreal_seed_v1"},
+            )
+            store._next_id = 0
+
+        embeddings = []
+        metadata = []
+        for i, doc in enumerate(documents):
+            content = str(doc.get("content", ""))
+            meta = dict(doc.get("metadata", {}))
+            meta.setdefault("id", doc.get("id", f"seed-{i:03d}"))
+            meta.setdefault("content", content)
+            encoded = model.encode(content)
+            if hasattr(encoded, "tolist"):
+                encoded = encoded.tolist()
+            vector = [float(value) for value in list(encoded)]
+            if len(vector) >= embedding_dimension:
+                vector = vector[:embedding_dimension]
+            else:
+                vector = vector + ([0.0] * (embedding_dimension - len(vector)))
+            embeddings.append(vector)
+            metadata.append(meta)
+
+        await store.add(np.asarray(embeddings, dtype=np.float32), metadata=metadata)
+        return len(documents)
+
+    return asyncio.run(_seed())
+
+
 def parse_args() -> argparse.Namespace:
     default_playbook = _script_dir() / "rag_surrealdb_openai_demo_playbook.yaml"
     default_dataset = _script_dir() / "surrealdb_seed_dataset.jsonl"
@@ -435,11 +523,18 @@ def main() -> int:
     vector_store = load_surreal_vector_store(playbook_path)
     documents = load_seed_documents(dataset_path)
 
-    inserted = seed_surrealdb_documents(
-        vector_store=vector_store,
-        documents=documents,
-        replace_existing_seed_docs=not args.append,
-    )
+    if vector_store.get("retriever_type") == "turboagents-surrealdb":
+        inserted = seed_turboagents_surrealdb_documents(
+            vector_store=vector_store,
+            documents=documents,
+            replace_existing_seed_docs=not args.append,
+        )
+    else:
+        inserted = seed_surrealdb_documents(
+            vector_store=vector_store,
+            documents=documents,
+            replace_existing_seed_docs=not args.append,
+        )
 
     print("SurrealDB seed complete")
     print(f"   Playbook: {playbook_path}")

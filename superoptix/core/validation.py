@@ -185,6 +185,7 @@ def validate_rag_config(rag_config: Dict[str, Any]) -> bool:
             "pinecone",
             "faiss",
             "surrealdb",
+            "turboagents-chroma",
             "turboagents-faiss",
             "turboagents-lancedb",
             "turboagents-surrealdb",
@@ -327,7 +328,7 @@ def validate_model_compatibility(provider: str, model: str, tier_level: str) -> 
     # Basic compatibility checks
     if tier_level == "oracle":
         # Oracle tier should use smaller models
-        small_models = ["gpt-4o-mini", "llama3.2:1b", "llama3.2:3b", "claude-3-haiku"]
+        small_models = ["gpt-4o-mini", "qwen3.5:2b", "qwen3.5:2b", "claude-3-haiku"]
         if provider == "openai" and model not in small_models:
             logger.warning(f"Model {model} may be expensive for oracle tier")
 

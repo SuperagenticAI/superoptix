@@ -17,7 +17,7 @@ metadata:
 spec:
   language_model:
     provider: openai|ollama|anthropic|google|...
-    model: string              # e.g., "gpt-3.5-turbo" or "llama3.1:8b"
+    model: string              # e.g., "gpt-3.5-turbo" or "qwen3.5:9b"
     temperature: 0.1           # Lower temperature for more consistent responses
     max_tokens: 2000           # Reasonable token limit
 

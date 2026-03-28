@@ -45,7 +45,7 @@ spec:
   # Language Model
   language_model:
     provider: ollama
-    model: llama3.1:8b
+    model: qwen3.5:9b
   
   # Layer 1: Prompts (always optimized)
   persona:

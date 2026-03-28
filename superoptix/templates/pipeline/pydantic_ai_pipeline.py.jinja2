@@ -397,7 +397,7 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 		If provider is 'ollama' or api_base is set, it automatically adds 'ollama:' prefix.
 		
 		For Ollama models:
-		- Model string format: 'ollama:model_name' (e.g., 'ollama:llama3.1:8b')
+		- Model string format: 'ollama:model_name' (e.g., 'ollama:qwen3.5:9b')
 		- OLLAMA_BASE_URL environment variable should be set (e.g., 'http://localhost:11434/v1')
 		- OLLAMA_API_KEY is optional (defaults to 'api-key-not-set' if not provided)
 		"""
@@ -415,9 +415,9 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 		# Note: Structured output works with 8b models when proper JSON instructions are provided
 		model_str = config.get("model")
 		if not model_str:
-			# Default to llama3.1:8b for fast inference on local machines
+			# Default to qwen3.5:9b for fast inference on local machines
 			# Users can specify larger models in playbook for better quality
-			model_str = "llama3.1:8b"
+			model_str = "qwen3.5:9b"
 			print(f"⚠️  No model specified, using default: {model_str}")
 		else:
 			print(f"✅ Using model: {model_str}")
@@ -460,7 +460,7 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 		
 		# Use Pydantic AI's infer_model() to automatically create the correct model instance
 		# This handles all providers (ollama, openai, anthropic, etc.) automatically
-		# Format: 'provider:model_name' (e.g., 'ollama:llama3.1:8b', 'ollama:gpt-oss:120b', 'openai:gpt-4o')
+		# Format: 'provider:model_name' (e.g., 'ollama:qwen3.5:9b', 'ollama:gpt-oss:120b', 'openai:gpt-4o')
 		# For cloud models, API keys should be set via environment variables:
 		# - OPENAI_API_KEY for OpenAI models
 		# - ANTHROPIC_API_KEY for Anthropic models
@@ -941,7 +941,7 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 				else:
 					print("⚠️  No tool calls detected in response - agent may be hallucinating")
 					print("   This can happen if:")
-					print("   - Model is too small to handle tool calling (try llama3.1:70b)")
+					print("   - Model is too small to handle tool calling (try qwen3.5:9b)")
 					print("   - Instructions don't encourage tool usage")
 					print("   - Tool descriptions aren't clear enough")
 			else:
@@ -1163,14 +1163,14 @@ class {{ agent_name | to_pascal_case }}Pipeline:
 			self.spec = {}
 			self.metadata = {}
 
-		# Get model config from spec - default to llama3.1:8b for local machines
+		# Get model config from spec - default to qwen3.5:9b for local machines
 		spec_model_config = {}
 		if "language_model" in self.spec:
 			lm = self.spec["language_model"]
 			model_from_spec = lm.get("model")
-			# Default to llama3.1:8b for fast inference on local machines
+			# Default to qwen3.5:9b for fast inference on local machines
 			if not model_from_spec:
-				model_from_spec = "llama3.1:8b"
+				model_from_spec = "qwen3.5:9b"
 				print(f"⚠️  No model specified in playbook, using default: {model_from_spec}")
 			
 			spec_model_config = {

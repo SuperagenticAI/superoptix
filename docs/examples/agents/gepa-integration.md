@@ -16,7 +16,7 @@ spec:
   language_model:
     location: local
     provider: ollama
-    model: llama3.1:8b
+    model: qwen3.5:9b
     temperature: 0.1
   persona:
     role: "Mathematics Specialist"
@@ -158,7 +158,7 @@ For systems with memory constraints:
 ```yaml
 spec:
   language_model:
-    model: llama3.1:8b        # ~8GB
+    model: qwen3.5:9b        # ~8GB
   optimization:
     optimizer:
       reflection_lm: qwen3:8b  # ~8GB, different model
@@ -323,6 +323,6 @@ super agent evaluate your_agent  # Compare improvement
 
 ## Related Documentation
 
-- [GEPA Optimization Guide](../guides/gepa-optimization.md) - Complete GEPA reference
-- [Optimization Guide](../guides/optimization.md) - General optimization techniques
-- [Agent Development Guide](../guides/agent-development.md) - Development workflow
+- [GEPA Optimization Guide](../../guides/gepa-optimization.md) - Complete GEPA reference
+- [Optimization Guide](../../guides/optimization.md) - General optimization techniques
+- [Agent Development Guide](../../guides/agent-development.md) - Development workflow

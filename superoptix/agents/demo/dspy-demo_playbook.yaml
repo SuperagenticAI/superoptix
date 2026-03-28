@@ -23,7 +23,7 @@ spec:
   language_model:
     location: local
     provider: ollama
-    model: llama3.1:8b
+    model: qwen3.5:9b
     temperature: 0.2
     max_tokens: 1800
 
@@ -94,8 +94,8 @@ spec:
     gepa:
       enabled: true
       auto: light
-      task_model: ollama/llama3.1:8b
-      reflection_lm: ollama/llama3.1:8b
+      task_model: ollama/qwen3.5:9b
+      reflection_lm: ollama/qwen3.5:9b
       candidate_selection_strategy: pareto
       reflection_minibatch_size: 3
       skip_perfect_score: true
@@ -204,4 +204,4 @@ spec:
 #   super agent compile dspy-demo --cloud --provider google-genai --model gemini-2.5-flash
 #
 # Local explicit:
-#   super agent compile dspy-demo --local --provider ollama --model llama3.1:8b
+#   super agent compile dspy-demo --local --provider ollama --model qwen3.5:9b

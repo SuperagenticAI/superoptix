@@ -1,0 +1,4 @@
+{"id":"seed-001","content":"LANCE-TURBO-314 is a seeded retrieval token used for grounding checks in the SuperOptiX TurboAgents LanceDB demo.","metadata":{"source":"superoptix_lancedb_seed_v1","topic":"validation"}}
+{"id":"seed-002","content":"TurboAgents over LanceDB in SuperOptiX uses compressed retrieval and reranking for local RAG demos.","metadata":{"source":"superoptix_lancedb_seed_v1","topic":"integration"}}
+{"id":"seed-003","content":"The current LanceDB validation run stores candidate vectors in LanceDB and reranks them with TurboAgents at 3.5 bits.","metadata":{"source":"superoptix_lancedb_seed_v1","topic":"benchmarking"}}
+{"id":"seed-004","content":"SuperOptiX can select the turboagents-lancedb retriever type in a standard playbook.","metadata":{"source":"superoptix_lancedb_seed_v1","topic":"configuration"}}

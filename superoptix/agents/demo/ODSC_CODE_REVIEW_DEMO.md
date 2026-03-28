@@ -39,8 +39,8 @@ cp /path/to/swe/data/code_review_dataset.csv ./data/
 
 ### 3. Ensure Ollama is Running
 ```bash
-ollama list  # Verify llama3.1:8b is installed
-ollama pull llama3.1:8b  # If not installed
+ollama list  # Verify qwen3.5:9b is installed
+ollama pull qwen3.5:9b  # If not installed
 ```
 
 ### 4. Test Compile (5 min before talk)
@@ -479,7 +479,7 @@ Thank you!"
 vim agents/code_review_assistant/playbook/code_review_assistant_playbook.yaml
 
 # Point out:
-# - Can change model (llama3.1:8b → llama3.1:70b)
+# - Can change model (qwen3.5:2b -> qwen3.5:9b)
 # - Can add more knowledge sources
 # - Can adjust optimization parameters
 ```
@@ -546,7 +546,7 @@ Thank you!"
 
 ### **1 Hour Before**:
 - [ ] Start Ollama
-- [ ] Verify llama3.1:8b is loaded
+- [ ] Verify qwen3.5:9b is loaded
 - [ ] Do a quick test compile
 - [ ] Clear terminal history
 - [ ] Set terminal font size (big!)
@@ -595,4 +595,3 @@ If network fails, show the generated code and explain what would happen
 **TOTAL TIME**: 10 minutes  
 **COMPLEXITY**: Medium  
 **IMPACT**: 🔥🔥🔥🔥🔥 (Maximum!)
-

@@ -11,7 +11,7 @@ spec:
   language_model:
     location: local
     provider: ollama
-    model: llama3.1:8b
+    model: qwen3.5:9b
     temperature: 0.1
     max_tokens: 32000
   input_fields:

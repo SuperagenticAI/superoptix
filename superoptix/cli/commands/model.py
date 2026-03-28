@@ -172,7 +172,7 @@ def _parse_backend(
         # Assume HuggingFace for most models with "/"
         return SuperOptiXBackendType.HUGGINGFACE
     else:
-        # Default to Ollama for simple model names (like "llama3.2:1b")
+        # Default to Ollama for simple model names (like "qwen3.5:2b")
         return SuperOptiXBackendType.OLLAMA
 
 
@@ -501,7 +501,7 @@ def start_server(
     Examples:
       super model server mlx mlx-community/Llama-3.2-3B-Instruct-4bit
       super model server huggingface microsoft/DialoGPT-small --port 8001
-      super model server lmstudio llama-3.2-1b-instruct
+      super model server lmstudio qwen2.5-3b-instruct
 
     Backends:
       mlx          Apple Silicon optimized (default: port 8000)
@@ -530,7 +530,7 @@ def start_server(
                 style="white",
             )
             help_text.append(
-                "  super model server lmstudio llama-3.2-1b-instruct\n\n", style="white"
+                "  super model server lmstudio qwen2.5-3b-instruct\n\n", style="white"
             )
             help_text.append("Backends:\n", style="bold yellow")
             help_text.append(
@@ -556,7 +556,7 @@ def start_server(
             print(
                 "  super model server huggingface microsoft/DialoGPT-small --port 8001"
             )
-            print("  super model server lmstudio llama-3.2-1b-instruct\n")
+            print("  super model server lmstudio qwen2.5-3b-instruct\n")
             print("Backends:")
             print("  mlx         Apple Silicon (default: 8000)")
             print("  huggingface Transformers (default: 8001)")
@@ -1541,7 +1541,7 @@ def start_lmstudio_server(model_name: str, port: int = 1234):
         console.print("💡 [bold]To use a specific model:[/bold]")
         console.print("  • Use the exact model name from the list above")
         console.print(
-            "  • Example: [bold green]super model server lmstudio llama-3.2-1b-instruct[/bold green]"
+            "  • Example: [bold green]super model server lmstudio qwen2.5-3b-instruct[/bold green]"
         )
         console.print()
         console.print("🔍 [bold]Fuzzy matching examples:[/bold]")
@@ -1619,9 +1619,9 @@ def _show_discovery_guide():
     console.print("  [yellow]Install Ollama:[/yellow]")
     console.print("    curl -fsSL https://ollama.com/install.sh | sh")
     console.print("  [yellow]Install a model:[/yellow]")
-    console.print("    ollama pull llama3.2:3b")
+    console.print("    ollama pull qwen3.5:2b")
     console.print("  [yellow]Use with SuperOptiX:[/yellow]")
-    console.print("    super model dspy ollama/llama3.2:3b")
+    console.print("    super model dspy ollama/qwen3.5:2b")
     console.print()
 
     # MLX Examples

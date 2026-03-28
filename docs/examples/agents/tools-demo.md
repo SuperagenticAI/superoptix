@@ -17,7 +17,7 @@ This demo demonstrates:
 
 ```bash
 # Install the Ollama model used in this demo
-super model install llama3.2:8b
+super model install qwen3.5:9b
 ```
 
 ### **2. Start Ollama Server**
@@ -49,7 +49,7 @@ The Tools demo showcases how to configure tools in the agent playbook:
 language_model:
   location: local
   provider: ollama
-  model: llama3.2:8b
+  model: qwen3.5:9b
   api_base: http://localhost:11434
   temperature: 0.7
   max_tokens: 2048
@@ -180,10 +180,10 @@ super agent --help
 
 ## 📚 Related Documentation
 
-- [Tool Development](../guides/tool-development.md) - Building custom tools
-- [Tool Categories](../reference/tools) - Available tool categories
-- [Agent Development](../guides/agent-development.md) - Building custom agents
+- [Tool Development](../../guides/tool-development.md) - Building custom tools
+- [Tool Categories](../../reference/api/tools.md) - Available tool categories
+- [Agent Development](../../guides/agent-development.md) - Building custom agents
 
 ## 🔗 Next Steps
 
-1. **Try Other Framework Features**: Explore [Memory](memory-demo) or [Observability](observability-demo) demos 
+1. **Try Other Framework Features**: Explore [Memory](memory-demo.md) or [Observability](observability-demo.md) demos 

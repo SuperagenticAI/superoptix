@@ -192,7 +192,7 @@ metadata:
 spec:
   language_model:
     provider: ollama
-    model: llama3.2:1b
+    model: qwen3.5:2b
     api_base: http://localhost:11434
   persona:
     name: DevBot

@@ -8,13 +8,13 @@ The easiest way to use models is with the `super model run` command:
 
 ```bash
 # Run a model with auto-installation
-super model run llama3.2:3b "Write a Python function to add two numbers"
+super model run qwen3.5:2b "Write a Python function to add two numbers"
 
 # Specify backend explicitly
-super model run llama3.2:3b "Write a hello world program" --backend ollama
+super model run qwen3.5:2b "Write a hello world program" --backend ollama
 
 # Interactive mode
-super model run llama3.2:3b "" --interactive
+super model run qwen3.5:2b "" --interactive
 ```
 
 ## Installing Models
@@ -23,7 +23,7 @@ super model run llama3.2:3b "" --interactive
 
 ```bash
 # Install Ollama model (default backend)
-super model install llama3.2:3b --backend ollama
+super model install qwen3.5:2b --backend ollama
 
 # Install MLX model
 super model install mlx-community/Llama-3.2-3B-Instruct-4bit --backend mlx
@@ -68,7 +68,7 @@ Each backend has different installation methods:
 super model run <model_name> "<prompt>"
 
 # Examples
-super model run llama3.2:3b "Write a Python function to calculate fibonacci"
+super model run qwen3.5:2b "Write a Python function to calculate fibonacci"
 super model run mlx-community/phi-2 "Explain quantum computing in simple terms"
 super model run microsoft/phi-1_5 "Write a simple calculator program"
 ```
@@ -80,16 +80,16 @@ super model run microsoft/phi-1_5 "Write a simple calculator program"
 super model run <model_name> "" --interactive
 
 # Example
-super model run llama3.2:3b "Write a story" --interactive
+super model run qwen3.5:2b "Write a story" --interactive
 ```
 
 ### Advanced Parameters
 
 ```bash
 # Control generation parameters
-super model run llama3.2:3b "Write a story" --temperature 0.9
-super model run llama3.2:3b "Explain AI" --max-tokens 500
-super model run llama3.2:3b "Write a poem" --temperature 0.8 --max-tokens 200
+super model run qwen3.5:2b "Write a story" --temperature 0.9
+super model run qwen3.5:2b "Explain AI" --max-tokens 500
+super model run qwen3.5:2b "Write a poem" --temperature 0.8 --max-tokens 200
 ```
 
 ### Backend-Specific Examples
@@ -197,7 +197,7 @@ Models are automatically installed when they're not found:
 
 ```bash
 # Ollama models
-super model run llama3.2:3b "Hello world"
+super model run qwen3.5:2b "Hello world"
 
 # MLX models
 super model run mlx-community/Llama-3.2-3B-Instruct-4bit "Hello world"
@@ -230,20 +230,20 @@ super model list --task code
 
 ```bash
 # Remove from specific backend
-super model remove llama3.2:3b --backend ollama
+super model remove qwen3.5:2b --backend ollama
 
 # Remove from all backends
-super model remove llama3.2:3b --all-backends
+super model remove qwen3.5:2b --all-backends
 
 # Auto-detect backend
-super model remove llama3.2:3b
+super model remove qwen3.5:2b
 ```
 
 ### Getting Model Information
 
 ```bash
 # Get detailed model info
-super model info llama3.2:3b
+super model info qwen3.5:2b
 
 # Get info for specific backend
 super model info microsoft/phi-1_5 --backend huggingface
@@ -979,16 +979,16 @@ super model run model "prompt" --max-tokens 100 --temperature 0.7
 super model discover
 
 # Install model
-super model install llama3.2:3b --backend ollama
+super model install qwen3.5:2b --backend ollama
 
 # Run model
-super model run llama3.2:3b "Write a Python function to sort a list"
+super model run qwen3.5:2b "Write a Python function to sort a list"
 
 # Try different model
 super model run microsoft/phi-1_5 "Write a JavaScript function to validate email"
 
 # Interactive session
-super model run llama3.2:3b "Write a blog post about AI trends"
+super model run qwen3.5:2b "Write a blog post about AI trends"
 
 # Try MLX model
 super model run mlx-community/phi-2 "Write a short story about a robot"
@@ -997,7 +997,7 @@ super model run mlx-community/phi-2 "Write a short story about a robot"
 super model run microsoft/phi-1_5 "Analyze this text: [your text here]"
 
 # Educational
-super model run llama3.2:3b "Explain machine learning in simple terms"
+super model run qwen3.5:2b "Explain machine learning in simple terms"
 ``` 
 
 ### Testing MLX Features

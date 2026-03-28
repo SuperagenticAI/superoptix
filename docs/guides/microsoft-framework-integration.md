@@ -70,7 +70,7 @@ spec:
   target_framework: microsoft
   language_model:
     provider: ollama
-    model: llama3.1:8b
+    model: qwen3.5:9b
     api_base: http://localhost:11434
   persona:
     role: Helpful Assistant

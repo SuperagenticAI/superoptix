@@ -49,7 +49,7 @@ Once configured, just type `super` to enter conversational mode:
 $ super
 
 Welcome to SuperOptiX!
-Using: ollama (llama3.1:8b)
+Using: ollama (qwen3.5:9b)
 
 Type /help for slash commands or just tell me what to do.
 
@@ -108,7 +108,7 @@ Slash commands provide quick access to SuperOptiX features:
 $ super
 
 Welcome to SuperOptiX!
-Using: ollama (llama3.1:8b)
+Using: ollama (qwen3.5:9b)
 
 SuperOptiX> /help
 
@@ -119,7 +119,7 @@ SuperOptiX> /model list
 Available AI Models
 
 🏠 LOCAL MODELS (via Ollama):
-llama3.1:8b (current)
+qwen3.5:9b (current)
 qwen2.5:14b
 
 ☁️  CLOUD MODELS:
@@ -182,7 +182,7 @@ SuperOptiX> /model
 Current Model Configuration
 
 • Provider: ollama
-• Model: llama3.1:8b
+• Model: qwen3.5:9b
 • API Base: http://localhost:11434
 • Status: Connected
 ```
@@ -212,7 +212,7 @@ Available AI Models
 🏠 LOCAL MODELS (via Ollama):
 
 Installed:
-  llama3.1:8b (current)
+  qwen3.5:9b (current)
   qwen2.5:14b
 
 Available to install:
@@ -389,7 +389,7 @@ Currently in development! For now, use:
 **Solution:**
 1. Install Ollama: https://ollama.com
 2. Run: `ollama serve`
-3. Install model: `ollama pull llama3.1:8b`
+3. Install model: `ollama pull qwen3.5:9b`
 
 ### "Not in a SuperOptiX project"
 

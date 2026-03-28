@@ -41,7 +41,7 @@ class TestPipelineIntegration:
             "spec": {
                 "language_model": {
                     "provider": "ollama",
-                    "model": "llama3.2:1b",
+                    "model": "qwen3.5:2b",
                     "temperature": 0.1,
                     "max_tokens": 32000,
                 },
@@ -88,7 +88,7 @@ class TestPipelineIntegration:
             "spec": {
                 "language_model": {
                     "provider": "ollama",
-                    "model": "llama3.1:8b",
+                    "model": "qwen3.5:9b",
                     "temperature": 0.1,
                     "max_tokens": 32000,
                 },
@@ -109,7 +109,7 @@ class TestPipelineIntegration:
                         "params": {
                             "metric": "answer_exact_match",
                             "auto": "light",
-                            "reflection_lm": "llama3.1:8b",
+                            "reflection_lm": "qwen3.5:9b",
                         },
                     }
                 },
@@ -147,7 +147,7 @@ class TestPipelineIntegration:
 
         # Test that configuration is properly structured
         assert lm_config["provider"] == "ollama"
-        assert lm_config["model"] == "llama3.2:1b"
+        assert lm_config["model"] == "qwen3.5:2b"
         assert lm_config["temperature"] == 0.1
         assert lm_config["max_tokens"] == 32000
 
@@ -204,7 +204,7 @@ class TestPipelineIntegration:
 
         assert optimizer_config["name"] == "GEPA"
         assert "reflection_lm" in optimizer_config["params"]
-        assert optimizer_config["params"]["reflection_lm"] == "llama3.1:8b"
+        assert optimizer_config["params"]["reflection_lm"] == "qwen3.5:9b"
         assert optimizer_config["params"]["auto"] == "light"
 
     def test_tier_based_optimization(self):

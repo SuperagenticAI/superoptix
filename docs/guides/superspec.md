@@ -141,7 +141,7 @@ SuperSpec supports 6 major agent frameworks. Select based on your needs:
       target_framework: dspy  # Pure DSPy mode
       language_model:
         provider: ollama
-        model: llama3.1:8b
+        model: qwen3.5:9b
     ```
     **Best For**: Complex reasoning, 10+ optimizable variables
 
@@ -161,7 +161,7 @@ SuperSpec supports 6 major agent frameworks. Select based on your needs:
       target_framework: crewai  # Multi-agent collaboration
       language_model:
         provider: ollama
-        model: llama3.1:8b
+        model: qwen3.5:9b
     ```
     **Best For**: Multi-agent teams, role-based agents
 
@@ -191,7 +191,7 @@ SuperSpec supports 6 major agent frameworks. Select based on your needs:
       target_framework: deepagents  # Complex planning
       language_model:
         provider: ollama
-        model: llama3.1:8b
+        model: qwen3.5:9b
     ```
     **Best For**: LangGraph planning, advanced reasoning
 
@@ -302,7 +302,7 @@ spec:
   language_model:
     location: local
     provider: ollama
-    model: llama3.2:1b
+    model: qwen3.5:2b
     api_base: http://localhost:11434
     temperature: 0.0
     max_tokens: 2048
@@ -314,7 +314,7 @@ spec:
   language_model:
     location: local
     provider: ollama
-    model: llama3.1:8b
+    model: qwen3.5:9b
     api_base: http://localhost:11434
     temperature: 0.7
     max_tokens: 2048
@@ -1147,7 +1147,7 @@ spec:
   language_model:
     location: local
     provider: ollama
-    model: llama3.2:1b
+    model: qwen3.5:2b
     
   # Simple persona
   persona:
@@ -1194,7 +1194,7 @@ spec:
   language_model:
     location: local
     provider: ollama
-    model: llama3.1:8b
+    model: qwen3.5:9b
     temperature: 0.7
     max_tokens: 2048
     
@@ -1452,7 +1452,7 @@ spec:
   language_model:
     location: local
     provider: ollama
-    model: llama3.2:1b
+    model: qwen3.5:2b
     api_base: http://localhost:11434
     temperature: 0.0
     max_tokens: 2048
@@ -1533,7 +1533,7 @@ spec:
   language_model:
     location: local
     provider: ollama
-    model: llama3.1:8b
+    model: qwen3.5:9b
     api_base: http://localhost:11434
     temperature: 0.7
     max_tokens: 2048
@@ -1713,7 +1713,7 @@ spec:
   language_model:
     location: local
     provider: ollama
-    model: llama3.1:8b
+    model: qwen3.5:9b
     api_base: http://localhost:11434
     temperature: 0.3
     max_tokens: 2048
@@ -1828,7 +1828,7 @@ spec:
   language_model:
     location: local
     provider: ollama
-    model: llama3.1:8b
+    model: qwen3.5:9b
     api_base: http://localhost:11434
     temperature: 0.7
     max_tokens: 2048
@@ -1968,7 +1968,7 @@ spec:
   language_model:
     location: local
     provider: ollama
-    model: llama3.1:8b
+    model: qwen3.5:9b
     api_base: http://localhost:11434
     temperature: 0.5
     max_tokens: 2048

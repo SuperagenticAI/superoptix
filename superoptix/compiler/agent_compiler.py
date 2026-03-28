@@ -731,7 +731,7 @@ class AgentCompiler:
             if is_local_mode and not provider_override:
                 provider_override = "ollama"
             if is_local_mode and not model_override:
-                model_override = "llama3.1:8b"
+                model_override = "qwen3.5:9b"
 
             context["runtime_mode"] = runtime_mode
             context["provider_override"] = provider_override
@@ -993,7 +993,7 @@ class AgentCompiler:
         if is_local_mode and not provider_override:
             lm["provider"] = "ollama"
         if is_local_mode and not model_override:
-            lm["model"] = "llama3.1:8b"
+            lm["model"] = "qwen3.5:9b"
 
         # Pydantic-AI gateway/direct runtime controls.
         if framework == "pydantic-ai":

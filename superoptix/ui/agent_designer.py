@@ -333,7 +333,7 @@ def initialize_session_state(agent_name: str, level: str):
                 "components": {
                     "llms": {
                         "provider": "ollama",
-                        "model": "llama3.2:1b",
+                        "model": "qwen3.5:2b",
                         "location": "local",
                         "config": {
                             "temperature": 0.7,
@@ -739,9 +739,9 @@ For local: ollama, vllm, lmstudio"""
         with col2:
             st.text_input(
                 "Model Name *",
-                value="llama3.2:1b",
+                value="qwen3.5:2b",
                 key="model_name",
-                help="Enter model name (e.g., llama3.2:1b)",
+                help="Enter model name (e.g., qwen3.5:2b)",
             )
 
             st.slider(

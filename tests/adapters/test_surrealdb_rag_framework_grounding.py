@@ -344,7 +344,7 @@ async def test_pydantic_ai_surrealdb_rag_prompt_grounding(tmp_path: Path, monkey
 
     fake_pydantic_helpers.run_agent_with_optional_rlm = _fake_run_agent_with_optional_rlm
     fake_pydantic_helpers.resolve_model = (
-        lambda language_model, model_config=None: "ollama:llama3.1:8b"  # noqa: ARG005
+        lambda language_model, model_config=None: "ollama:qwen3.5:9b"  # noqa: ARG005
     )
     monkeypatch.setitem(
         sys.modules, "superoptix.runners.pydantic_runtime_helpers", fake_pydantic_helpers
@@ -406,7 +406,7 @@ def test_crewai_surrealdb_rag_prompt_grounding(tmp_path: Path, monkeypatch):
     )
     fake_crewai_helpers.extract_crewai_output = lambda result: "token retrieval success"  # noqa: ARG005
     fake_crewai_helpers.resolve_model = (
-        lambda language_model, model_config=None: "ollama/llama3.1:8b"  # noqa: ARG005
+        lambda language_model, model_config=None: "ollama/qwen3.5:9b"  # noqa: ARG005
     )
     monkeypatch.setitem(
         sys.modules, "superoptix.runners.crewai_runtime_helpers", fake_crewai_helpers

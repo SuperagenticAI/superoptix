@@ -7,10 +7,43 @@ import types
 import pytest
 
 from superoptix.optimizers.gepa_rag_adapter.vector_stores.turboagents_store import (
+    TurboChromaVectorStore,
     TurboFAISSVectorStore,
     TurboLanceDBVectorStore,
     TurboSurrealDBVectorStore,
 )
+
+
+class FakeTurboChroma:
+    def __init__(
+        self,
+        *,
+        path: str | None,
+        collection_name: str | None,
+        dim: int,
+        bits: float,
+        seed: int,
+        metric: str,
+    ):
+        self.init = {
+            "path": path,
+            "collection_name": collection_name,
+            "dim": dim,
+            "bits": bits,
+            "seed": seed,
+            "metric": metric,
+        }
+        self.created = None
+        self.add_calls: list[tuple[object, list[dict[str, object]] | None]] = []
+
+    def create_collection(self, name: str, data=None, metadata=None):
+        self.created = {"name": name, "data": data, "metadata": metadata}
+
+    def add(self, vectors, metadata=None):
+        self.add_calls.append((vectors, metadata))
+
+    def search(self, query, k=10, rerank_top=None):
+        return [{"index": 0, "score": 0.91, "metadata": {"content": "chroma doc", "source": "kb"}}]
 
 
 class FakeTurboFAISS:
@@ -84,6 +117,7 @@ def fake_turboagents(monkeypatch):
     monkeypatch.setattr(importlib.util, "find_spec", lambda name: object() if name == "turboagents" else None)
     module = types.ModuleType("turboagents")
     rag = types.ModuleType("turboagents.rag")
+    rag.TurboChroma = FakeTurboChroma
     rag.TurboFAISS = FakeTurboFAISS
     rag.TurboLanceDB = FakeTurboLanceDB
     rag.TurboSurrealDB = FakeTurboSurrealDB
@@ -108,6 +142,28 @@ def test_turbo_faiss_vector_store_formats_results_and_tracks_count():
     assert results[0]["score"] == pytest.approx(0.99)
     assert info["document_count"] == 1
     assert info["vector_store_type"] == "turboagents-faiss"
+
+
+def test_turbo_chroma_vector_store_creates_collection_and_queries():
+    store = TurboChromaVectorStore(
+        path="/tmp/superoptix-chroma",
+        collection_name="docs",
+        dim=64,
+        rerank_top=8,
+    )
+
+    ids = store.add_documents(
+        [{"content": "first", "metadata": {"source": "kb"}}],
+        [[0.1] * 64],
+    )
+    results = store.vector_search([0.2] * 64, k=1)
+
+    assert ids == ["doc_0"]
+    assert store._store.created["name"] == "docs"
+    assert len(store._store.add_calls) == 1
+    assert results[0]["content"] == "chroma doc"
+    assert results[0]["score"] == pytest.approx(0.91)
+    assert store.get_collection_info()["vector_store_type"] == "turboagents-chroma"
 
 
 def test_turbo_lancedb_vector_store_creates_table_then_adds():

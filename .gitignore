@@ -48,6 +48,7 @@ htmlcov/
 # Documentation
 docs/_build/
 site/
+data/
 
 # Logs
 *.log

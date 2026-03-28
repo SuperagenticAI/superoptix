@@ -61,7 +61,7 @@ class SuperSpecXGenerator:
                 "language_model": {
                     "location": "local",
                     "provider": "ollama",
-                    "model": "llama3.2:1b",
+                    "model": "qwen3.5:2b",
                     "api_base": "http://localhost:11434",
                     "temperature": 0.0,
                     "max_tokens": 4000,
@@ -184,7 +184,7 @@ class SuperSpecXGenerator:
                 "language_model": {
                     "location": "local",
                     "provider": "ollama",
-                    "model": "llama3.2:3b",
+                    "model": "qwen3.5:2b",
                     "api_base": "http://localhost:11434",
                     "temperature": 0.1,
                     "max_tokens": 4000,
@@ -1036,7 +1036,7 @@ class SuperSpecXGenerator:
             # Model configuration (required for explicit DSPy template)
             "model": {
                 "provider": "ollama",  # Default to ollama for local development
-                "model": "llama3.2:1b",  # Fast, lightweight model (changed from model_name to model)
+                "model": "qwen3.5:2b",  # Fast, lightweight model (changed from model_name to model)
                 "temperature": 0.7,  # Balanced creativity
                 "max_tokens": 4000,  # Standard context
                 "api_base": "http://localhost:11434",  # Ollama default

@@ -19,7 +19,7 @@ This document provides a comprehensive overview of all the demo agents created f
 #### 2. **Ollama Demo** (`ollama_demo_playbook.yaml`)
 - **Purpose**: Demonstrates Ollama local model capabilities with easy model management
 - **Key Features**: Creative writing, conversation, knowledge assistance, Ollama-specific capabilities
-- **Model**: `llama3.2:3b`
+- **Model**: `qwen3.5:2b`
 - **Pull Command**: `super agent pull ollama_demo`
 - **Use Case**: Local development with easy model management
 - **Framework Features**: Tools, Memory, RAG, Evaluation, Optimization
@@ -35,7 +35,7 @@ This document provides a comprehensive overview of all the demo agents created f
 #### 4. **LM Studio Demo** (`lmstudio_demo_playbook.yaml`)
 - **Purpose**: Demonstrates LM Studio local model capabilities with GUI management
 - **Key Features**: Logical reasoning, data analysis, research assistance, LM Studio-specific capabilities
-- **Model**: `llama3.2:3b`
+- **Model**: `qwen3.5:2b`
 - **Pull Command**: `super agent pull lmstudio_demo`
 - **Use Case**: Local development with GUI model management
 - **Framework Features**: Tools, Memory, RAG, Evaluation, Optimization
@@ -171,7 +171,7 @@ language_model:
 language_model:
   location: local
   provider: ollama
-  model: llama3.2:3b
+  model: qwen3.5:2b
   api_base: http://localhost:11434
   temperature: 0.7
   max_tokens: 2048

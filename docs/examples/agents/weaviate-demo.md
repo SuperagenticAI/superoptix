@@ -48,7 +48,7 @@ docker run -d \
 ### Install and Serve Model
 ```bash
 # Install a model (if not already installed)
-super model install llama3.1:8b
+super model install qwen3.5:9b
 
 # Start Ollama server (if using Ollama backend)
 ollama serve
@@ -157,9 +157,9 @@ vector_store:
 ## Related Resources
 
 - [Weaviate Documentation](https://weaviate.io/developers/weaviate)
-- [SuperOptiX RAG Guide](../guides/rag.md)
-- [RAG Integration Guide](../guides/rag.md) - Vector database setup and configuration
-- [Model Management](../guides/model-management.md)
+- [SuperOptiX RAG Guide](../../guides/rag.md)
+- [RAG Integration Guide](../../guides/rag.md) - Vector database setup and configuration
+- [Model Management](../../guides/model-management.md)
 
 ---
 

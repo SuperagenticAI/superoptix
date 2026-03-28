@@ -313,7 +313,7 @@ Color-coded quality gates with detailed metrics:
 ╭──────────────────────────────────────── 🟡 Specification Results Summary ─────────────────────────────────────────╮
 │                                                                                                                    │
 │  📊 Total Specs:         5                🎯 Pass Rate:         60.0%                                              │
-│  Passed:              3                🤖 Model:             llama3.1:8b                                        │
+│  Passed:              3                🤖 Model:             qwen3.5:9b                                        │
 │  Failed:              2                💪 Capability:        0.68                                               │
 │  🏆 Quality Gate:        ⚠️  GOOD         🚀 Status:            🚀 Optimized                                      │
 │                                                                                                                    │
@@ -473,7 +473,7 @@ Progress: 🧪 Running 5 BDD specifications...
 ╭──────────────────────────────────────── 🟡 Specification Results Summary ─────────────────────────────────────────╮
 │                                                                                                                    │
 │  📊 Total Specs:         5                🎯 Pass Rate:         60.0%                                              │
-│  Passed:              3                🤖 Model:             llama3.1:8b                                        │
+│  Passed:              3                🤖 Model:             qwen3.5:9b                                        │
 │  Failed:              2                💪 Capability:        0.68                                               │
 │  🏆 Quality Gate:        ⚠️  GOOD         🚀 Status:            🚀 Optimized                                      │
 │                                                                                                                    │
@@ -504,7 +504,7 @@ super agent evaluate developer
 ╭──────────────────────────────────────── 🟢 Specification Results Summary ─────────────────────────────────────────╮
 │                                                                                                                    │
 │  📊 Total Specs:         5                🎯 Pass Rate:         80.0%                                              │
-│  Passed:              4                🤖 Model:             llama3.1:8b                                        │
+│  Passed:              4                🤖 Model:             qwen3.5:9b                                        │
 │  Failed:              1                💪 Capability:        0.82                                               │
 │  🏆 Quality Gate:        🎉 EXCELLENT    🚀 Status:            🚀 Optimized                                      │
 │                                                                                                                    │

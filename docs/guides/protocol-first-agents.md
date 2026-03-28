@@ -527,7 +527,7 @@ super agent evaluate my_protocol_agent
 
 ## 📖 Related Documentation
 
-- [Examples: protocol_agent_basic.yaml](../../examples/protocol_agent_basic.yaml)
+- `examples/protocol_agent_basic.yaml`
 - [API Reference: Protocols](../reference/api/protocols.md)
 - [SuperSpec DSL](../reference/api/superspec.md)
 - [GEPA Optimization](./gepa-optimization.md)
@@ -536,7 +536,7 @@ super agent evaluate my_protocol_agent
 
 **Questions or feedback?** Open an issue on GitHub or join our Discord!
 
-**Want to contribute?** Check out our [Contributing Guide](../../CONTRIBUTING.md)
+**Want to contribute?** Check out our [Contributing Guide](../contributing.md)
 
 ---
 

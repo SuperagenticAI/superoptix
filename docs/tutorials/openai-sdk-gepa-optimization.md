@@ -4,7 +4,7 @@
 
 This comprehensive tutorial demonstrates how to create production-ready AI agents using the official OpenAI Agents SDK, integrate them with SuperOptiX, and achieve measurable performance improvements through GEPA (Genetic Evaluation-based Prompt Augmentation) optimization.
 
-> **Hands-on first:** Clone the live example repo and follow along step by step — every snippet in this guide comes straight from [`superoptix-lite-openai`](https://github.com/SuperagenticAI/superoptix-lite-openai). Use it as your working playground while you read.
+> **Hands-on first:** Clone the live example repo and follow along step by step. Every snippet in this guide comes straight from [`superoptix-lite-openai`](https://github.com/SuperagenticAI/superoptix-lite-openai). Use it as your working playground while you read.
 
 ---
 
@@ -54,7 +54,7 @@ python3 --version
 
 # Ollama with models
 ollama pull gpt-oss:20b      # Primary model (20B parameters)
-ollama pull llama3.1:8b       # Reflection model (8B parameters)
+ollama pull qwen3.5:9b       # Reflection model (9B parameters)
 
 # SuperOptiX with OpenAI SDK support
 pip install "superoptix[frameworks-openai]"
@@ -63,7 +63,7 @@ pip install "superoptix[frameworks-openai]"
 **💡 Why use different model sizes?**
 
 - **Primary model (gpt-oss:20b)**: Handles the actual agent task (code review). Larger models provide better analysis and more detailed feedback.
-- **Reflection model (llama3.1:8b)**: Used by GEPA during optimization to analyze results and suggest prompt improvements. This runs many times during optimization, so a smaller model:
+- **Reflection model (qwen3.5:9b)**: Used by GEPA during optimization to analyze results and suggest prompt improvements. This runs many times during optimization, so a smaller model:
   - Significantly speeds up optimization (5-10x faster)
   - Reduces memory usage and resource consumption
   - Provides "good enough" reflections for prompt improvement
@@ -1281,7 +1281,7 @@ python -c "from agents import Agent; print('OK')"
 ```yaml
 # In playbook.yaml
 language_model:
-  model: ollama:llama3.1:8b     # Faster, smaller
+  model: ollama:qwen3.5:9b     # Faster, smaller
   # or
   model: ollama:gpt-oss:120b    # Larger, more accurate
 ```
@@ -1424,4 +1424,4 @@ A production-ready code reviewer agent that:
 
 👉 Keep iterating in the [`superoptix-lite-openai`](https://github.com/SuperagenticAI/superoptix-lite-openai) repository. It tracks this tutorial line-for-line, giving you a ready-made playground for experiments, upgrades, and commits you can bring back into your full SuperOptiX projects.
 
-Ready to build more? Check out our [other tutorials](/tutorials/)!
+Ready to build more? Check out our [other tutorials](index.md)!

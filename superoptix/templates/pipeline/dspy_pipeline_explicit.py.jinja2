@@ -1652,7 +1652,7 @@ class {{ agent_name | to_pascal_case }}Pipeline:
         # Suggest model upgrades based on performance
         suggested_upgrade = "None needed"
         if avg_score < 0.6:
-            suggested_upgrade = "Consider llama3.1:8b or gpt-4 for better performance"
+            suggested_upgrade = "Consider qwen3.5:9b or gpt-4 for better performance"
         elif avg_score < 0.4:
             suggested_upgrade = (
                 "Strongly recommend gpt-4 or claude-3 for reliable results"
@@ -1727,7 +1727,7 @@ class {{ agent_name | to_pascal_case }}Pipeline:
                 "Strong recommendation: Run optimization before production use."
             )
             recommendations.append(
-                "Consider using a more capable model (llama3.1:8b or gpt-4)."
+                "Consider using a more capable model (qwen3.5:9b or gpt-4)."
             )
             recommendations.append("Review scenario complexity vs model capabilities.")
 

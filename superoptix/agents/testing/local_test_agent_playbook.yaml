@@ -7,11 +7,11 @@ metadata:
   version: 1.0.0
   agent_type: Interactive
   level: genies
-description: A test agent using Ollama llama3.1:8b for Genie-tier ReAct capabilities
+description: A test agent using Ollama qwen3.5:9b for Genie-tier ReAct capabilities
 spec:
   language_model:
     provider: ollama
-    model: llama3.1:8b
+    model: qwen3.5:9b
     temperature: 0.1
     max_tokens: 2000
     api_base: http://localhost:11434
@@ -180,7 +180,7 @@ spec:
       params:
         metric: answer_exact_match
         auto: light
-        reflection_lm: llama3.1:8b
+        reflection_lm: qwen3.5:9b
         max_full_evals: 5
         skip_perfect_score: true
         reflection_minibatch_size: 3

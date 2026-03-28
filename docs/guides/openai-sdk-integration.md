@@ -55,13 +55,13 @@ super agent pull assistant_openai
 
 **Uses Ollama by Default!** (FREE, no API keys needed!)
 
-The `assistant_openai` agent now defaults to Ollama `llama3.1:8b`:
+The `assistant_openai` agent now defaults to Ollama `qwen3.5:9b`:
 
 ```yaml
 language_model:
   location: local
   provider: ollama
-  model: ollama:llama3.1:8b  # Fast and efficient model
+  model: ollama:qwen3.5:9b  # Fast and efficient model
   temperature: 0.7
   api_base: http://localhost:11434
 ```
@@ -69,7 +69,7 @@ language_model:
 **Just install Ollama and run:**
 ```bash
 brew install ollama  # macOS
-ollama pull llama3.1:8b
+ollama pull qwen3.5:9b
 super agent run assistant_openai --framework openai --goal "Hello!"
 ```
 
@@ -100,7 +100,7 @@ super agent compile assistant_openai --framework openai
 super agent evaluate assistant_openai
 
 # Optimize with GEPA
-super agent optimize assistant_openai --auto medium --framework openai --reflection-lm ollama:llama3.1:8b
+super agent optimize assistant_openai --auto medium --framework openai --reflection-lm ollama:qwen3.5:9b
 
 # Run
 super agent run assistant_openai --framework openai --goal "What is Python?"
@@ -267,7 +267,7 @@ Overall: 4/4 PASS (100.0%)
 ### Step 5: Optimize
 
 ```bash
-super agent optimize assistant_openai --auto medium --framework openai --reflection-lm ollama:llama3.1:8b
+super agent optimize assistant_openai --auto medium --framework openai --reflection-lm ollama:qwen3.5:9b
 ```
 
 **What GEPA optimizes:**
@@ -519,7 +519,7 @@ guardrails:
 1. Check BDD scenario keywords are realistic
 2. Lower threshold to 0.4 or 0.5
 3. Run GEPA optimization to improve instructions
-4. Try different model (llama3.1:70b or gpt-oss:120b for more capability)
+4. Try different model (qwen3.5:9b or gpt-oss:120b for more capability)
 
 ### Import Error
 
@@ -652,7 +652,7 @@ language_model:
 - Good baseline performance
 
 **Supported Ollama Models:**
-- `ollama:llama3.1:8b` (default, fast and efficient)
+- `ollama:qwen3.5:9b` (default, fast and efficient)
 - `ollama:gpt-oss:120b` (most capable, larger model)
 - `ollama:gpt-oss:20b` (faster alternative)
 - `ollama:qwen3:8b` (alternative)
@@ -977,7 +977,7 @@ A: Performance varies by use case, model, and hardware. OpenAI SDK typically has
 - **Ollama Setup**: `/docs/llm-setup.md`
 - **Multi-Framework Guide**: `/docs/guides/multi-framework.md`
 - **Universal GEPA**: `/plan/MULTI_FRAMEWORK_GEPA_STRATEGY.md`
-- **Hands-on Repo**: [`superoptix-lite-openai`](https://github.com/SuperagenticAI/superoptix-lite-openai) — clone this MIT-licensed companion project to try the OpenAI Agents SDK with SuperOptiX Lite and follow our Code Reviewer tutorial step by step.
+- **Hands-on Repo**: [`superoptix-lite-openai`](https://github.com/SuperagenticAI/superoptix-lite-openai) - clone this MIT-licensed companion project to try the OpenAI Agents SDK with SuperOptiX Lite and follow our Code Reviewer tutorial step by step.
 
 ---
 
@@ -1030,7 +1030,7 @@ Run **GEPA optimization** to automatically improve agent prompts
 Implement **automatic optimization loading** for deployment deployment
 
 **Example project:** Code Reviewer Agent that detects security vulnerabilities
-**Hands-on repo:** [`superoptix-lite-openai`](https://github.com/SuperagenticAI/superoptix-lite-openai) — clone it to follow the tutorial with a fully wired SuperOptiX Lite playground.
+**Hands-on repo:** [`superoptix-lite-openai`](https://github.com/SuperagenticAI/superoptix-lite-openai) - clone it to follow the tutorial with a fully wired SuperOptiX Lite playground.
 
 **Time:** 30-45 minutes | **Difficulty:** Intermediate | **Prerequisites:** Python, Ollama, Git access to the repo above
 

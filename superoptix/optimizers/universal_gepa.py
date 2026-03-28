@@ -585,7 +585,7 @@ class UniversalGEPA:
             normalized.startswith(f"{p}:") for p in known_providers
         )
 
-        # If no prefix and model contains ':' (like llama3.1:8b), assume Ollama
+        # If no prefix and model contains ':' (like qwen3.5:9b), assume Ollama
         if not has_provider_prefix and ":" in normalized:
             ollama_indicators = [
                 ":8b",

@@ -454,7 +454,7 @@ super agent run sentiment_analyzer \
       target_framework: dspy  # or openai, crewai, google-adk, microsoft, deepagents
       language_model:
         provider: ollama
-        model: llama3.1:8b
+        model: qwen3.5:9b
       persona:
         role: Data Analyst
         goal: Analyze data and provide insights

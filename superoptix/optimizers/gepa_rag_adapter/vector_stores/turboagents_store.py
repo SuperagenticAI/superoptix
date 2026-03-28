@@ -78,6 +78,76 @@ class _TurboAgentsBaseStore(VectorStoreInterface):
         }
 
 
+class TurboChromaVectorStore(_TurboAgentsBaseStore):
+    """SuperOptiX GEPA wrapper over turboagents TurboChroma."""
+
+    vector_store_type = "turboagents-chroma"
+
+    def __init__(
+        self,
+        *,
+        path: str | None,
+        collection_name: str,
+        dim: int,
+        bits: float = 3.5,
+        seed: int = 0,
+        embedding_function=None,
+        rerank_top: int | None = None,
+        metric: str = "cosine",
+    ):
+        super().__init__(embedding_function=embedding_function, rerank_top=rerank_top)
+        from turboagents.rag import TurboChroma
+
+        self.dim = dim
+        self.name = collection_name
+        self._collection_ready = False
+        self._store = TurboChroma(
+            path=path,
+            collection_name=collection_name,
+            dim=dim,
+            bits=bits,
+            seed=seed,
+            metric=metric,
+        )
+        self._collection_name = collection_name
+
+    def add_documents(
+        self,
+        documents: list[dict[str, Any]],
+        embeddings: list[list[float]],
+        ids: list[str] | None = None,
+    ) -> list[str]:
+        if len(documents) != len(embeddings):
+            raise ValueError("Number of documents must match number of embeddings")
+        resolved_ids = ids or [f"doc_{self._doc_count + i}" for i in range(len(documents))]
+        metadata = []
+        for doc_id, doc in zip(resolved_ids, documents, strict=False):
+            content, doc_metadata = _coerce_metadata(doc, fallback_id=doc_id)
+            doc_metadata.setdefault("content", content)
+            metadata.append(doc_metadata)
+        if not self._collection_ready:
+            self._store.create_collection(self._collection_name)
+            self._collection_ready = True
+        self._store.add(np.asarray(embeddings, dtype=np.float32), metadata=metadata)
+        self._doc_count += len(documents)
+        return resolved_ids
+
+    def vector_search(
+        self,
+        query_vector: list[float],
+        k: int = 5,
+        filters: dict[str, Any] | None = None,
+    ) -> list[dict[str, Any]]:
+        if filters:
+            raise NotImplementedError("TurboChromaVectorStore does not support metadata filtering yet")
+        results = self._store.search(
+            np.asarray(query_vector, dtype=np.float32),
+            k=k,
+            rerank_top=self.rerank_top,
+        )
+        return self._format_results(results)
+
+
 class TurboFAISSVectorStore(_TurboAgentsBaseStore):
     """SuperOptiX GEPA wrapper over turboagents TurboFAISS."""
 
