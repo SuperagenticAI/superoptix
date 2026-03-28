@@ -1,74 +1,87 @@
 name: Release to PyPI
 
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Python package version to release
+        required: true
+      tag:
+        description: Git tag to create for this release, for example v0.2.22
+        required: true
 
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
-    
+    permissions:
+      contents: write
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-    
-    - name: Install build dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install build twine cython numpy
-    
-    - name: Install project dependencies
-      run: |
-        pip install --pre -e ".[dev]"
-    
-    - name: Run tests
-      run: |
-        pytest tests/ -v
-    
-    - name: Build protected package
-      run: |
-        python build_protected.py
-      env:
-        PYTHONPATH: ${{ github.workspace }}
-    
-    - name: Upload to PyPI
-      run: |
-        twine upload dist/*
-      env:
-        TWINE_USERNAME: __token__
-        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-    
-    - name: Create GitHub Release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        body: |
-          ## SuperOptiX ${{ github.ref_name }}
-          
-          ### 🔒 Protected Release
-          This release includes compiled modules for enhanced security.
-          
-          ### 📦 Installation
-          ```bash
-          pip install superoptix
-          ```
-          
-          ### 🔗 Documentation
-          - [Documentation](https://docs.super-agentic.ai)
-          - [Support](https://support.super-agentic.ai)
-          
-          ### 📄 License
-          This is open source software. See LICENCE file for details.
-        draft: false
-        prerelease: false 
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v1
+        with:
+          version: "latest"
+
+      - name: Validate requested version
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          version = "${{ inputs.version }}"
+          pyproject = Path("pyproject.toml").read_text()
+          match = re.search(r'^version = "([^"]+)"$', pyproject, re.MULTILINE)
+          if not match:
+              raise SystemExit("Could not find project version in pyproject.toml")
+          project_version = match.group(1)
+          if project_version != version:
+              raise SystemExit(
+                  f"Workflow input version {version!r} does not match pyproject.toml version {project_version!r}"
+              )
+          print(f"Releasing SuperOptiX {project_version}")
+          PY
+
+      - name: Install release dependencies
+        run: uv sync --frozen --extra dev --extra testing --extra turboagents
+
+      - name: Run tests
+        run: PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run --no-sync pytest -p pytest_asyncio.plugin tests/
+
+      - name: Build package
+        run: uv build
+
+      - name: Publish to PyPI
+        env:
+          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+        run: uv publish dist/*
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag }}
+          name: SuperOptiX ${{ inputs.version }}
+          generate_release_notes: true
+          files: |
+            dist/*
+          body: |
+            SuperOptiX ${{ inputs.version }}
+
+            Install:
+            ```bash
+            uv add superoptix
+            uv add "superoptix[turboagents]"
+            ```
+
+            Links:
+            - Docs: https://docs.super-agentic.ai
+            - PyPI: https://pypi.org/project/superoptix/${{ inputs.version }}/
+            - TurboAgents: https://pypi.org/project/turboagents/
