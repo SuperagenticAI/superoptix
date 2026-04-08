@@ -93,7 +93,9 @@ class EnhancedSuperOptixTracer(SuperOptixTracer):
         self,
         agent_id: str,
         enable_external_tracing: bool = False,
-        observability_backend: Optional[str] = None,  # mlflow, langfuse, phoenix, wandb, all
+        observability_backend: Optional[
+            str
+        ] = None,  # mlflow, langfuse, phoenix, wandb, all
         auto_load: bool = True,
     ):
         """Initialize enhanced tracer.

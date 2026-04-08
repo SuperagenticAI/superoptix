@@ -1382,10 +1382,16 @@ class DSPyRunner:
                             teacher_params["model_name"] = normalized_teacher_model
                         else:
                             if normalized_teacher_model.startswith("ollama:"):
-                                normalized_teacher_model = normalized_teacher_model.split(":", 1)[1]
+                                normalized_teacher_model = (
+                                    normalized_teacher_model.split(":", 1)[1]
+                                )
                             elif normalized_teacher_model.startswith("ollama/"):
-                                normalized_teacher_model = normalized_teacher_model.split("/", 1)[1]
-                            teacher_params["model_name"] = f"ollama_chat/{normalized_teacher_model}"
+                                normalized_teacher_model = (
+                                    normalized_teacher_model.split("/", 1)[1]
+                                )
+                            teacher_params["model_name"] = (
+                                f"ollama_chat/{normalized_teacher_model}"
+                            )
                 else:
                     teacher_params = self._resolve_dspy_lm_params(
                         spec_data,
