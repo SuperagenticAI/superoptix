@@ -18,6 +18,11 @@ from rich.console import Console
 from rich.live import Live
 from rich.panel import Panel
 from rich.table import Table
+from superoptix.observability.phoenix import (
+    instrument_framework_with_phoenix,
+    phoenix_session_span,
+    setup_phoenix_for_spec,
+)
 from superoptix.runners.dspy_runtime_helpers import set_tool_trace_emitter
 
 try:
@@ -1755,6 +1760,12 @@ class DSPyRunner:
                     playbook = yaml.safe_load(f) or {}
 
             spec_data = playbook.get("spec", playbook)
+            phoenix_handle = setup_phoenix_for_spec(
+                agent_id=self.agent_name,
+                spec_data=spec_data,
+                default_project_name=f"SuperOptiX-{self.agent_name}",
+            )
+            instrument_framework_with_phoenix(phoenix_handle, "dspy")
             memory_enabled = self._ensure_memory_initialized(spec_data)
             if memory_enabled:
                 self._start_memory_interaction(query)
@@ -1894,23 +1905,51 @@ class DSPyRunner:
                         except Exception:
                             return
 
-                    with Live(
-                        self._render_tool_trace_panel(events),
-                        console=console,
-                        transient=True,
-                        refresh_per_second=8,
-                    ) as live:
-                        set_tool_trace_emitter(_emit_tool_event)
-                        try:
-                            prediction = self._run_program_with_timeout(
-                                program, {input_field: query_for_program}
-                            )
-                        finally:
-                            set_tool_trace_emitter(None)
+                    with phoenix_session_span(
+                        phoenix_handle,
+                        span_name="superoptix.dspy.run",
+                        session_id=f"{self.agent_name}:{int(time.time() * 1000)}",
+                        attributes={
+                            "superoptix.framework": "dspy",
+                            "superoptix.agent_name": self.agent_name,
+                        },
+                        input_data=query_for_program,
+                    ) as phoenix_span:
+                        with Live(
+                            self._render_tool_trace_panel(events),
+                            console=console,
+                            transient=True,
+                            refresh_per_second=8,
+                        ) as live:
+                            set_tool_trace_emitter(_emit_tool_event)
+                            try:
+                                prediction = self._run_program_with_timeout(
+                                    program, {input_field: query_for_program}
+                                )
+                            finally:
+                                set_tool_trace_emitter(None)
+                        if phoenix_span is not None and hasattr(
+                            phoenix_span, "set_output"
+                        ):
+                            phoenix_span.set_output({"status": "success"})
                 else:
-                    prediction = self._run_program_with_timeout(
-                        program, {input_field: query_for_program}
-                    )
+                    with phoenix_session_span(
+                        phoenix_handle,
+                        span_name="superoptix.dspy.run",
+                        session_id=f"{self.agent_name}:{int(time.time() * 1000)}",
+                        attributes={
+                            "superoptix.framework": "dspy",
+                            "superoptix.agent_name": self.agent_name,
+                        },
+                        input_data=query_for_program,
+                    ) as phoenix_span:
+                        prediction = self._run_program_with_timeout(
+                            program, {input_field: query_for_program}
+                        )
+                        if phoenix_span is not None and hasattr(
+                            phoenix_span, "set_output"
+                        ):
+                            phoenix_span.set_output({"status": "success"})
 
                 if tool_trace_enabled and trace_events:
                     console.print("[dim]Tool trace summary:[/]")
@@ -2117,10 +2156,34 @@ class DSPyRunner:
                     # Check if run() is async
                     import inspect
 
-                    if inspect.iscoroutinefunction(pipeline.run):
-                        result = await pipeline.run(query=query)
-                    else:
-                        result = pipeline.run(query=query)
+                    with phoenix_session_span(
+                        phoenix_handle,
+                        span_name="superoptix.framework_pipeline.run",
+                        session_id=f"{self.agent_name}:{int(time.time() * 1000)}",
+                        attributes={
+                            "superoptix.framework": str(
+                                getattr(
+                                    pipeline,
+                                    "framework",
+                                    getattr(
+                                        getattr(pipeline, "component", None),
+                                        "framework",
+                                        "pipeline",
+                                    ),
+                                )
+                            ),
+                            "superoptix.agent_name": self.agent_name,
+                        },
+                        input_data=query,
+                    ) as phoenix_span:
+                        if inspect.iscoroutinefunction(pipeline.run):
+                            result = await pipeline.run(query=query)
+                        else:
+                            result = pipeline.run(query=query)
+                        if phoenix_span is not None and hasattr(
+                            phoenix_span, "set_output"
+                        ):
+                            phoenix_span.set_output({"status": "success"})
                 elif callable(pipeline):
                     # DSPy pipelines are callable
                     result = await pipeline(query)

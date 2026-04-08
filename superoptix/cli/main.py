@@ -1427,7 +1427,7 @@ Use `super agent <command> --help` for more information on a specific command.
     )
     run_parser.add_argument(
         "--observe",
-        choices=["superoptix", "mlflow", "langfuse", "wandb", "all"],
+        choices=["superoptix", "mlflow", "langfuse", "phoenix", "wandb", "all"],
         default="superoptix",
         help="Observability backend to use (default: superoptix - local storage)",
     )

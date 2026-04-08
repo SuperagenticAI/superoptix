@@ -204,6 +204,7 @@ nav:
       - '🛠️ Tools': examples/agents/tools-demo.md
       - '🧠 Memory': examples/agents/memory-demo.md
       - '📊 Observability': examples/agents/observability-demo.md
+      - '🛰️ Arize Phoenix': examples/agents/arize-phoenix-demo.md
       - '🧿 MLFlow': examples/agents/mlflow-integration.md
       - '🧬 LangFuse': examples/agents/langfuse-integration.md
       - '🚀 GEPA': examples/agents/gepa-integration.md
@@ -237,6 +238,7 @@ nav:
       - '🛠️ Tools': examples/agents/tools-demo.md
       - '🧠 Memory': examples/agents/memory-demo.md
       - '📊 Observability': examples/agents/observability-demo.md
+      - '🛰️ Arize Phoenix': examples/agents/arize-phoenix-demo.md
       - '🧿 MLFlow Integration': examples/agents/mlflow-integration.md
       - '🧬 LangFuse Integration': examples/agents/langfuse-integration.md
       - '📈 Weights & Biases': examples/agents/weights-biases-demo.md

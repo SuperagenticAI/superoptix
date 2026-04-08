@@ -7,7 +7,7 @@ allow-direct-references = true
 
 [project]
 name = "superoptix"
-version = "0.2.23"
+version = "0.2.24"
 description = "Full Stack Agentic AI Optimization Framework - Universal GEPA optimizer for major frameworks"
 authors = [
     {name = "Superagentic AI", email = "hello@super-agentic.ai"},
@@ -164,6 +164,18 @@ rlm-code = [
 # LogFire requires opentelemetry-sdk>=1.39.0 while google-adk requires opentelemetry-sdk==1.37.0
 logfire = [
     "logfire",
+]
+
+# Phoenix observability via OpenTelemetry/OpenInference
+phoenix = [
+    "arize-phoenix-otel>=0.15.0",
+    "openinference-instrumentation>=0.1.44",
+    "openinference-instrumentation-crewai",
+    "openinference-instrumentation-dspy",
+    "openinference-instrumentation-google-adk",
+    "openinference-instrumentation-openai",
+    "openinference-instrumentation-openai-agents",
+    "openinference-instrumentation-pydantic-ai",
 ]
 
 # ============================================================================

@@ -9,6 +9,11 @@ import inspect
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
+from superoptix.observability.phoenix import (
+    instrument_framework_with_phoenix,
+    phoenix_session_span,
+    setup_phoenix_for_spec,
+)
 from superoptix.runners.rlm_mode_utils import resolve_effective_rlm_mode
 
 
@@ -316,6 +321,11 @@ def create_agent_runner(
     model = resolve_model(
         spec_data.get("language_model", {}) or {}, model_config=model_config
     )
+    setup_phoenix_for_spec(
+        agent_id=agent_name,
+        spec_data=spec_data,
+        default_project_name=f"SuperOptiX-{agent_name}",
+    )
     instruction = build_instructions(spec_data)
     description = str(
         (spec_data.get("metadata", {}) or {}).get("description", "")
@@ -446,26 +456,59 @@ async def run_agent_with_optional_rlm(
     - replace: RLM only
     - auto: choose direct/assist/replace from prompt size thresholds
     """
+    phoenix_handle = setup_phoenix_for_spec(
+        agent_id=str(getattr(agent, "name", "google_adk_agent") or "google_adk_agent"),
+        spec_data=spec_data,
+        default_project_name=f"SuperOptiX-{str(getattr(agent, 'name', 'google_adk_agent') or 'google_adk_agent')}",
+    )
+    instrument_framework_with_phoenix(phoenix_handle, "google_adk")
+    session_id = f"{user_id}:{int(time.time() * 1000)}"
+    span_attributes = {
+        "superoptix.framework": "google_adk",
+        "superoptix.agent_name": str(getattr(agent, "name", "google_adk_agent") or "google_adk_agent"),
+        "superoptix.model_name": model_name,
+        "superoptix.app_name": app_name,
+    }
     cfg = get_google_adk_rlm_config(spec_data)
     if not cfg.get("enabled", False):
-        return await run_agent_query(
-            agent=agent,
-            runner=runner,
-            prompt=prompt,
-            app_name=app_name,
-            user_id=user_id,
-        )
+        with phoenix_session_span(
+            phoenix_handle,
+            span_name="superoptix.google_adk.run",
+            session_id=session_id,
+            attributes=span_attributes,
+            input_data=prompt,
+        ) as span:
+            result = await run_agent_query(
+                agent=agent,
+                runner=runner,
+                prompt=prompt,
+                app_name=app_name,
+                user_id=user_id,
+            )
+            if span is not None and hasattr(span, "set_output"):
+                span.set_output({"status": "success"})
+            return result
 
     mode, mode_reason = resolve_effective_rlm_mode(prompt=prompt, config=cfg)
     if mode == "direct":
         print(f"🧠 RLM auto mode selected direct execution ({mode_reason})")
-        return await run_agent_query(
-            agent=agent,
-            runner=runner,
-            prompt=prompt,
-            app_name=app_name,
-            user_id=user_id,
-        )
+        with phoenix_session_span(
+            phoenix_handle,
+            span_name="superoptix.google_adk.run",
+            session_id=session_id,
+            attributes={**span_attributes, "superoptix.rlm_mode": "direct"},
+            input_data=prompt,
+        ) as span:
+            result = await run_agent_query(
+                agent=agent,
+                runner=runner,
+                prompt=prompt,
+                app_name=app_name,
+                user_id=user_id,
+            )
+            if span is not None and hasattr(span, "set_output"):
+                span.set_output({"status": "success", "rlm_mode": "direct"})
+            return result
 
     provider = _normalize_rlm_provider(cfg.get("provider", "native"))
     if provider == "rlm_code":
@@ -558,13 +601,23 @@ async def run_agent_with_optional_rlm(
             "RLM draft reasoning (use as guidance, verify with tools when needed):\n"
             f"{rlm_text}\n"
         )
-        return await run_agent_query(
-            agent=agent,
-            runner=runner,
-            prompt=augmented_prompt,
-            app_name=app_name,
-            user_id=user_id,
-        )
+        with phoenix_session_span(
+            phoenix_handle,
+            span_name="superoptix.google_adk.run",
+            session_id=session_id,
+            attributes={**span_attributes, "superoptix.rlm_mode": mode},
+            input_data=augmented_prompt,
+        ) as span:
+            result = await run_agent_query(
+                agent=agent,
+                runner=runner,
+                prompt=augmented_prompt,
+                app_name=app_name,
+                user_id=user_id,
+            )
+            if span is not None and hasattr(span, "set_output"):
+                span.set_output({"status": "success", "rlm_mode": mode})
+            return result
     finally:
         if span is not None:
             span.__exit__(None, None, None)

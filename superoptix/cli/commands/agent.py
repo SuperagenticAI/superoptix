@@ -915,6 +915,9 @@ def _run_framework_agent(args, framework: str):
         return
 
     try:
+        os.environ["SUPEROPTIX_OBSERVE_BACKEND"] = str(
+            getattr(args, "observe", "superoptix")
+        ).strip().lower()
         # Dynamically import the pipeline module
         spec = importlib.util.spec_from_file_location(
             f"{args.name}_{suffix}_pipeline", str(pipeline_path)
@@ -2467,6 +2470,11 @@ def add_agent(args):
             # DSPy automation demo
             "dspy-demo": "demo/dspy-demo_playbook.yaml",
             "dspy_demo": "demo/dspy-demo_playbook.yaml",
+            # Arize Phoenix DSPy demo
+            "arize-phoenix-demo": "demo/arize-phoenix-demo_playbook.yaml",
+            "arize_phoenix_demo": "demo/arize-phoenix-demo_playbook.yaml",
+            "phoenix-demo": "demo/arize-phoenix-demo_playbook.yaml",
+            "phoenix_demo": "demo/arize-phoenix-demo_playbook.yaml",
             # Google ADK RLM demo
             "adk-rlm": "demo/adk-rlm_playbook.yaml",
             "adk_rlm": "demo/adk-rlm_playbook.yaml",

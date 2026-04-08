@@ -10,6 +10,11 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List
 
+from superoptix.observability.phoenix import (
+    instrument_framework_with_phoenix,
+    phoenix_session_span,
+    setup_phoenix_for_spec,
+)
 from superoptix.runners.rlm_code_runtime import run_rlm_code_completion
 from superoptix.runners.rlm_mode_utils import resolve_effective_rlm_mode
 
@@ -441,14 +446,48 @@ async def run_with_optional_rlm(
     """
     from agents import Runner
 
+    agent_name = str(getattr(agent, "name", "openai_agent") or "openai_agent")
+    phoenix_handle = setup_phoenix_for_spec(
+        agent_id=agent_name,
+        spec_data=spec_data,
+        default_project_name=f"SuperOptiX-{agent_name}",
+    )
+    instrument_framework_with_phoenix(phoenix_handle, "openai_agents")
+    session_id = f"{agent_name}:{int(time.time() * 1000)}"
+    span_attributes = {
+        "superoptix.framework": "openai_agents",
+        "superoptix.agent_name": agent_name,
+        "superoptix.model_name": model_name,
+    }
+
     cfg = get_openai_rlm_config(spec_data)
     if not cfg.get("enabled", False):
-        return await Runner.run(agent, input=prompt)
+        with phoenix_session_span(
+            phoenix_handle,
+            span_name="superoptix.openai_agents.run",
+            session_id=session_id,
+            attributes=span_attributes,
+            input_data=prompt,
+        ) as span:
+            result = await Runner.run(agent, input=prompt)
+            if span is not None and hasattr(span, "set_output"):
+                span.set_output({"status": "success"})
+            return result
 
     mode, mode_reason = resolve_effective_rlm_mode(prompt=prompt, config=cfg)
     if mode == "direct":
         print(f"🧠 RLM auto mode selected direct execution ({mode_reason})")
-        return await Runner.run(agent, input=prompt)
+        with phoenix_session_span(
+            phoenix_handle,
+            span_name="superoptix.openai_agents.run",
+            session_id=session_id,
+            attributes={**span_attributes, "superoptix.rlm_mode": "direct"},
+            input_data=prompt,
+        ) as span:
+            result = await Runner.run(agent, input=prompt)
+            if span is not None and hasattr(span, "set_output"):
+                span.set_output({"status": "success", "rlm_mode": "direct"})
+            return result
 
     provider = _normalize_rlm_provider(cfg.get("provider", "native"))
     if provider == "rlm_code":
@@ -476,7 +515,17 @@ async def run_with_optional_rlm(
                 "RLM draft reasoning (use as guidance, verify with tools when needed):\n"
                 f"{rlm_text}\n"
             )
-            return await Runner.run(agent, input=augmented_prompt)
+            with phoenix_session_span(
+                phoenix_handle,
+                span_name="superoptix.openai_agents.run",
+                session_id=session_id,
+                attributes={**span_attributes, "superoptix.rlm_mode": mode},
+                input_data=augmented_prompt,
+            ) as span:
+                result = await Runner.run(agent, input=augmented_prompt)
+                if span is not None and hasattr(span, "set_output"):
+                    span.set_output({"status": "success", "rlm_mode": mode})
+                return result
 
         print(
             "⚠️ openai_agent.rlm.provider=rlm_code failed; "
@@ -551,4 +600,14 @@ async def run_with_optional_rlm(
         "RLM draft reasoning (use as guidance, verify with tools when needed):\n"
         f"{rlm_text}\n"
     )
-    return await Runner.run(agent, input=augmented_prompt)
+    with phoenix_session_span(
+        phoenix_handle,
+        span_name="superoptix.openai_agents.run",
+        session_id=session_id,
+        attributes={**span_attributes, "superoptix.rlm_mode": mode},
+        input_data=augmented_prompt,
+    ) as span:
+        result = await Runner.run(agent, input=augmented_prompt)
+        if span is not None and hasattr(span, "set_output"):
+            span.set_output({"status": "success", "rlm_mode": mode})
+        return result
