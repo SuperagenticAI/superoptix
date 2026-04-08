@@ -465,7 +465,9 @@ async def run_agent_with_optional_rlm(
     session_id = f"{user_id}:{int(time.time() * 1000)}"
     span_attributes = {
         "superoptix.framework": "google_adk",
-        "superoptix.agent_name": str(getattr(agent, "name", "google_adk_agent") or "google_adk_agent"),
+        "superoptix.agent_name": str(
+            getattr(agent, "name", "google_adk_agent") or "google_adk_agent"
+        ),
         "superoptix.model_name": model_name,
         "superoptix.app_name": app_name,
     }

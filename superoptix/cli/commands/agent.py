@@ -915,9 +915,9 @@ def _run_framework_agent(args, framework: str):
         return
 
     try:
-        os.environ["SUPEROPTIX_OBSERVE_BACKEND"] = str(
-            getattr(args, "observe", "superoptix")
-        ).strip().lower()
+        os.environ["SUPEROPTIX_OBSERVE_BACKEND"] = (
+            str(getattr(args, "observe", "superoptix")).strip().lower()
+        )
         # Dynamically import the pipeline module
         spec = importlib.util.spec_from_file_location(
             f"{args.name}_{suffix}_pipeline", str(pipeline_path)

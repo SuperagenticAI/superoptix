@@ -171,9 +171,7 @@ def setup_phoenix(
         using_session = None
 
     phoenix_project = (
-        project_name
-        or os.getenv("PHOENIX_PROJECT_NAME")
-        or f"SuperOptiX-{agent_id}"
+        project_name or os.getenv("PHOENIX_PROJECT_NAME") or f"SuperOptiX-{agent_id}"
     )
     phoenix_endpoint = normalize_phoenix_endpoint(
         endpoint or os.getenv("PHOENIX_COLLECTOR_ENDPOINT"), protocol=protocol
@@ -243,7 +241,9 @@ def setup_phoenix_for_spec(
 
     api_key_env = str(cfg.get("api_key_env", "PHOENIX_API_KEY")).strip()
     api_key = os.getenv(api_key_env, "").strip() or None
-    project_name = cfg.get("project_name") or default_project_name or f"SuperOptiX-{agent_id}"
+    project_name = (
+        cfg.get("project_name") or default_project_name or f"SuperOptiX-{agent_id}"
+    )
 
     cache_key = (
         agent_id,
@@ -379,9 +379,7 @@ def log_phoenix_event(handle: Dict[str, Any], agent_id: str, event: Any) -> None
 
     using_session = handle.get("using_session")
     session_context = (
-        using_session(session_id=agent_id)
-        if callable(using_session)
-        else nullcontext()
+        using_session(session_id=agent_id) if callable(using_session) else nullcontext()
     )
     span_name = f"{getattr(event, 'component', 'unknown')}.{getattr(event, 'event_type', 'event')}"
     attributes = _event_attributes(agent_id=agent_id, event=event)
