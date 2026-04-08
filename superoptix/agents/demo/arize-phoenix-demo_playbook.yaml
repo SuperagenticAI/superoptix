@@ -1,0 +1,125 @@
+apiVersion: agent/v1
+kind: AgentSpec
+metadata:
+  name: Arize Phoenix Trace Demo
+  id: arize-phoenix-demo
+  namespace: demo
+  version: 1.0.0
+  level: oracles
+  description: Minimal DSPy demo agent for generating Arize Phoenix traces from a single run.
+  author: SuperOptiX
+  tags:
+    - dspy
+    - phoenix
+    - arize
+    - observability
+    - tracing
+    - demo
+
+spec:
+  target_framework: dspy
+
+  language_model:
+    location: cloud
+    provider: google-genai
+    model: gemini-2.5-flash
+    temperature: 0.2
+    max_tokens: 1200
+
+  dspy:
+    module: chain_of_thought
+    signature:
+      output_mode: structured
+    assertions:
+      enabled: true
+      mode: warn_only
+      required_fields:
+        - summary
+        - trace_notes
+      non_empty:
+        - summary
+        - trace_notes
+
+  phoenix:
+    enabled: true
+    project_name: superoptix-phoenix-demo
+    endpoint: http://127.0.0.1:6006
+    protocol: http/protobuf
+    batch: false
+    auto_instrument: true
+
+  persona:
+    name: TraceDemo
+    role: Summarization Assistant
+    goal: Produce a short summary and a concise explanation of what happened during the run.
+    backstory: You are a tiny demo agent used to verify that SuperOptiX emits Phoenix traces correctly.
+    traits:
+      - concise
+      - structured
+      - reliable
+    instructions: |
+      Keep the response short and concrete.
+      Summarize the user's request in plain language.
+      Mention the main steps taken to answer, without inventing tools that were not used.
+
+  input_fields:
+    - name: request
+      type: str
+      description: Short text to summarize for the Phoenix trace demo
+      required: true
+
+  output_fields:
+    - name: summary
+      type: str
+      description: Brief summary of the request
+      required: true
+    - name: trace_notes
+      type: list[str]
+      description: Short notes describing the execution path that should appear in traces
+      required: true
+
+  tasks:
+    - name: summarize_for_trace_demo
+      instruction: |
+        Summarize the request in 2 to 4 sentences.
+        Then provide a short list of execution notes describing how the answer was produced.
+      inputs:
+        - name: request
+          type: str
+          description: Text that needs a concise summary
+          required: true
+      outputs:
+        - name: summary
+          type: str
+          description: Concise summary
+        - name: trace_notes
+          type: list[str]
+          description: Execution notes
+
+  constraints:
+    - Keep the answer under 120 words
+    - Do not mention evaluation or optimization
+    - Do not invent external data sources
+
+  feature_specifications:
+    scenarios:
+      - name: short_summary_request
+        description: Agent should summarize a short request and describe the execution path.
+        input:
+          request: |
+            Summarize why teams use tracing for AI agents and mention one debugging benefit.
+        expected_output:
+          expected_keywords:
+            - tracing
+            - debug
+            - summary
+            - execution
+
+# Usage:
+#   super agent pull arize-phoenix-demo
+#   super agent compile arize-phoenix-demo
+#   super agent run arize-phoenix-demo --goal "Summarize why tracing helps debug AI agents."
+#
+# Local Phoenix setup example:
+#   python -m phoenix.server.main serve
+#   export PHOENIX_COLLECTOR_ENDPOINT=http://127.0.0.1:6006

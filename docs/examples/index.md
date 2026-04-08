@@ -34,6 +34,7 @@ Discover core framework capabilities:
 ### **🔌 Observability Integrations**
 Integrate with external observability platforms:
 
+- **[🛰️ Arize Phoenix Demo](agents/arize-phoenix-demo.md)** - Minimal DSPy tracing demo for Phoenix
 - **[🧪 MLFlow Integration](agents/mlflow-integration.md)** - Experiment tracking and model monitoring
 - **[🔍 LangFuse Integration](agents/langfuse-integration.md)** - LLM observability and performance tracking
 
@@ -54,6 +55,7 @@ Integrate with external observability platforms:
 | **Tools** | Tool Integration | 20+ categories, specialized tools | Enhanced agent capabilities |
 | **Memory** | Context Retention | Multi-layered, persistent storage | Conversational AI |
 | **Observability** | Monitoring & Debugging | Tracing, metrics, dashboard | Production monitoring |
+| **Arize Phoenix** | OTEL Trace Export | Phoenix spans, OpenInference instrumentation | External trace inspection |
 | **MLFlow** | Experiment Tracking | Model monitoring, metrics, artifacts | ML lifecycle management |
 | **LangFuse** | LLM Observability | Token tracking, cost monitoring, feedback | LLM application monitoring |
 
@@ -181,6 +183,7 @@ super agent --help
 - **[Memory Guide](../guides/memory.md)** - Memory system guide
 - **[Observability Guide](../guides/observability.md)** - Monitoring and debugging
 - **[MLFlow Integration](agents/mlflow-integration.md)** - MLFlow integration guide
+- **[Arize Phoenix Demo](agents/arize-phoenix-demo.md)** - Phoenix tracing demo
 - **[LangFuse Integration](agents/langfuse-integration.md)** - LangFuse integration guide
 
 ## 🎉 **Next Steps**

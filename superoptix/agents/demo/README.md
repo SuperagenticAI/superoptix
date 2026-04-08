@@ -99,6 +99,24 @@ super agent pull dspy-demo
 
 ---
 
+### Arize Phoenix Trace Demo
+**Framework:** DSPy  
+**Features:** Phoenix tracing, OpenInference auto-instrumentation, minimal structured output  
+**ID:** `arize-phoenix-demo`  
+**Use Case:** Generate a clean Arize Phoenix trace from a single DSPy run
+
+```bash
+super agent pull arize-phoenix-demo
+```
+
+**Highlights:**
+- 🔭 Minimal DSPy playbook focused on trace generation
+- 🔌 Built-in Phoenix config (`spec.phoenix`) with local collector default
+- 🧪 Useful for demos where you only need to see traces, not eval or optimization
+- 📥 Pull with `super agent pull arize-phoenix-demo`
+
+---
+
 ### DSPy StackOne Calendly Demo
 **Framework:** DSPy  
 **Features:** StackOne connector tools (Calendly provider)  

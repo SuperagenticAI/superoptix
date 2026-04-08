@@ -31,6 +31,7 @@ except ImportError as e:
   print("⚠️  Set GOOGLE_API_KEY environment variable")
 
 from superoptix.core.base_component import BaseComponent
+from superoptix.observability.phoenix import setup_phoenix_for_spec as superoptix_setup_phoenix_for_spec
 from superoptix.runners.google_adk_runtime_helpers import (
   get_google_adk_rlm_config as superoptix_get_google_adk_rlm_config,
   run_agent_with_optional_rlm as superoptix_run_agent_with_optional_rlm,
@@ -168,6 +169,11 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
     model_str = config.get("model", "gemini-2.0-flash")
     description = config.get("description", "AI Agent")
     tools = config.get("tools", [])
+    self._phoenix = superoptix_setup_phoenix_for_spec(
+      agent_id="{{ agent_name }}",
+      spec_data=FULL_SPEC,
+      default_project_name="SuperOptiX-{{ agent_name }}",
+    )
     
     # Create Google ADK Agent
     self._agent = Agent(

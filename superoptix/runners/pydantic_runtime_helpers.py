@@ -8,6 +8,11 @@ import time
 from pathlib import Path
 from typing import Any, Dict, Optional
 
+from superoptix.observability.phoenix import (
+    instrument_framework_with_phoenix,
+    phoenix_session_span,
+    setup_phoenix_for_spec,
+)
 from superoptix.runners.rlm_code_runtime import run_rlm_code_completion
 from superoptix.runners.rlm_mode_utils import resolve_effective_rlm_mode
 
@@ -439,14 +444,47 @@ async def run_agent_with_optional_rlm(
     - replace: RLM only (returns string)
     - auto: choose direct/assist/replace from prompt size thresholds
     """
+    agent_name = str(getattr(agent, "name", "pydantic_ai_agent") or "pydantic_ai_agent")
+    phoenix_handle = setup_phoenix_for_spec(
+        agent_id=agent_name,
+        spec_data=spec_data,
+        default_project_name=f"SuperOptiX-{agent_name}",
+    )
+    instrument_framework_with_phoenix(phoenix_handle, "pydantic_ai")
+    session_id = f"{agent_name}:{int(time.time() * 1000)}"
+    span_attributes = {
+        "superoptix.framework": "pydantic_ai",
+        "superoptix.agent_name": agent_name,
+        "superoptix.model_name": model_name,
+    }
     cfg = get_pydantic_rlm_config(spec_data)
     if not cfg.get("enabled", False):
-        return await agent.run(prompt)
+        with phoenix_session_span(
+            phoenix_handle,
+            span_name="superoptix.pydantic_ai.run",
+            session_id=session_id,
+            attributes=span_attributes,
+            input_data=prompt,
+        ) as span:
+            result = await agent.run(prompt)
+            if span is not None and hasattr(span, "set_output"):
+                span.set_output({"status": "success"})
+            return result
 
     mode, mode_reason = resolve_effective_rlm_mode(prompt=prompt, config=cfg)
     if mode == "direct":
         print(f"🧠 RLM auto mode selected direct execution ({mode_reason})")
-        return await agent.run(prompt)
+        with phoenix_session_span(
+            phoenix_handle,
+            span_name="superoptix.pydantic_ai.run",
+            session_id=session_id,
+            attributes={**span_attributes, "superoptix.rlm_mode": "direct"},
+            input_data=prompt,
+        ) as span:
+            result = await agent.run(prompt)
+            if span is not None and hasattr(span, "set_output"):
+                span.set_output({"status": "success", "rlm_mode": "direct"})
+            return result
 
     provider = _normalize_rlm_provider(cfg.get("provider", "native"))
     if provider == "rlm_code":
@@ -479,7 +517,17 @@ async def run_agent_with_optional_rlm(
                     "RLM draft reasoning (use as guidance, verify with tools when needed):\n"
                     f"{rlm_text}\n"
                 )
-                return await agent.run(augmented_prompt)
+                with phoenix_session_span(
+                    phoenix_handle,
+                    span_name="superoptix.pydantic_ai.run",
+                    session_id=session_id,
+                    attributes={**span_attributes, "superoptix.rlm_mode": mode},
+                    input_data=augmented_prompt,
+                ) as span:
+                    result = await agent.run(augmented_prompt)
+                    if span is not None and hasattr(span, "set_output"):
+                        span.set_output({"status": "success", "rlm_mode": mode})
+                    return result
 
             print(
                 "⚠️ pydantic_ai.rlm.provider=rlm_code failed; "
@@ -567,7 +615,17 @@ async def run_agent_with_optional_rlm(
             "RLM draft reasoning (use as guidance, verify with tools when needed):\n"
             f"{rlm_text}\n"
         )
-        return await agent.run(augmented_prompt)
+        with phoenix_session_span(
+            phoenix_handle,
+            span_name="superoptix.pydantic_ai.run",
+            session_id=session_id,
+            attributes={**span_attributes, "superoptix.rlm_mode": mode},
+            input_data=augmented_prompt,
+        ) as span:
+            result = await agent.run(augmented_prompt)
+            if span is not None and hasattr(span, "set_output"):
+                span.set_output({"status": "success", "rlm_mode": mode})
+            return result
     finally:
         if span is not None:
             span.__exit__(None, None, None)

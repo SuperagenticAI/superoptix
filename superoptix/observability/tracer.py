@@ -10,6 +10,8 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from superoptix.observability.phoenix import log_phoenix_event
+
 
 @dataclass
 class TraceEvent:
@@ -232,6 +234,15 @@ class SuperOptixTracer:
                 )
             except Exception as e:
                 print(f"Warning: Langfuse logging failed: {e}")
+
+        # Phoenix integration
+        if "phoenix" in self.external_tracers:
+            try:
+                log_phoenix_event(
+                    self.external_tracers["phoenix"], self.agent_id, event
+                )
+            except Exception as e:
+                print(f"Warning: Phoenix logging failed: {e}")
 
     def _update_performance_stats(self, component: str, duration: float, success: bool):
         """Update performance statistics."""

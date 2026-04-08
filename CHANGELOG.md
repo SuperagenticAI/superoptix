@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.24] - 2026-04-08
+
+### Added
+- Arize Phoenix observability integration for SuperOptiX framework runtimes via the shared Phoenix helper path.
+- Pullable DSPy demo agent `arize-phoenix-demo` for trace-first Phoenix demos with `super agent pull arize-phoenix-demo`.
+
+### Changed
+- Demo and examples navigation now includes a dedicated Arize Phoenix example page.
+- Observability docs now include a user-facing Phoenix walkthrough covering both `super agent pull arize-phoenix-demo` and adapting `super agent pull developer` with `spec.phoenix`.
+
+### Fixed
+- Phoenix session span setup now tolerates tracers that do not expose OpenInference-style `set_input`, avoiding runtime failure during traced DSPy runs.
+
+### Documentation
+- Added a detailed Arize Phoenix demo guide with setup, pull, compile, run, and troubleshooting steps.
+- Expanded observability documentation to show how to configure `spec.phoenix` in a pulled agent playbook.
+
 ## [0.2.23] - 2026-03-28
 
 ### Fixed

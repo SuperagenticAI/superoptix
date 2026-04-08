@@ -20,6 +20,7 @@ class ObservabilityBackend(Enum):
     SUPEROPTIX = "superoptix"  # Local-first default
     MLFLOW = "mlflow"
     LANGFUSE = "langfuse"
+    PHOENIX = "phoenix"
     WANDB = "wandb"
     ALL = "all"  # Log to all backends
 
@@ -28,7 +29,7 @@ class UnifiedObservability:
     """Unified interface for all observability backends.
 
     This class provides a single, simple API for logging to any observability
-    backend (MLFlow, LangFuse, W&B, or SuperOptiX local storage).
+    backend (MLFlow, LangFuse, Phoenix, W&B, or SuperOptiX local storage).
 
     Examples:
             >>> # Use SuperOptiX local storage
@@ -77,7 +78,7 @@ class UnifiedObservability:
 
         Args:
                 agent_id: Unique identifier for the agent
-                backend: Backend to use (superoptix, mlflow, langfuse, wandb, all)
+                backend: Backend to use (superoptix, mlflow, langfuse, phoenix, wandb, all)
                 enable_external: Enable external tracing systems
                 auto_load: Auto-load existing traces
         """
@@ -342,7 +343,7 @@ def get_observability(
 
     Args:
             agent_id: Unique identifier for the agent
-            backend: Backend to use (superoptix, mlflow, langfuse, wandb, all)
+            backend: Backend to use (superoptix, mlflow, langfuse, phoenix, wandb, all)
             enable_external: Enable external tracing
 
     Returns:

@@ -15,6 +15,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from superoptix.observability.phoenix import setup_phoenix
 from superoptix.observability.tracer import SuperOptixTracer
 
 logger = logging.getLogger(__name__)
@@ -92,7 +93,7 @@ class EnhancedSuperOptixTracer(SuperOptixTracer):
         self,
         agent_id: str,
         enable_external_tracing: bool = False,
-        observability_backend: Optional[str] = None,  # mlflow, langfuse, wandb, all
+        observability_backend: Optional[str] = None,  # mlflow, langfuse, phoenix, wandb, all
         auto_load: bool = True,
     ):
         """Initialize enhanced tracer.
@@ -100,7 +101,7 @@ class EnhancedSuperOptixTracer(SuperOptixTracer):
         Args:
             agent_id: Unique identifier for the agent
             enable_external_tracing: Enable external tracing systems
-            observability_backend: Specific backend to use (mlflow, langfuse, wandb, all)
+            observability_backend: Specific backend to use (mlflow, langfuse, phoenix, wandb, all)
             auto_load: Auto-load existing traces
         """
         # Set backend BEFORE calling super().__init__
@@ -155,6 +156,18 @@ class EnhancedSuperOptixTracer(SuperOptixTracer):
                 )
             except Exception:
                 logger.warning("⚠️  Langfuse authentication failed - check credentials")
+
+        # Phoenix integration
+        if backend in ["phoenix", "all"]:
+            phoenix_handle = setup_phoenix(
+                agent_id=self.agent_id,
+                project_name=f"SuperOptiX-{self.agent_id}",
+                batch=True,
+                auto_instrument=False,
+            )
+            if phoenix_handle is not None:
+                self.external_tracers["phoenix"] = phoenix_handle
+                logger.info(f"✅ Phoenix tracing enabled for agent {self.agent_id}")
 
     def _setup_wandb(self):
         """Setup Weights & Biases integration."""

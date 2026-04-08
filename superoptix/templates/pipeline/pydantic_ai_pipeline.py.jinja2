@@ -58,6 +58,7 @@ MCP_AVAILABLE = False
 {% endif %}
 
 from superoptix.core.base_component import BaseComponent
+from superoptix.observability.phoenix import setup_phoenix_for_spec as superoptix_setup_phoenix_for_spec
 from superoptix.runners.pydantic_runtime_helpers import (
 	build_stackone_tools as superoptix_build_stackone_tools,
 	get_pydantic_rlm_config as superoptix_get_pydantic_rlm_config,
@@ -578,6 +579,11 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 			print("ℹ️  No MCP toolsets configured")
 		
 		self._agent = Agent(**agent_kwargs)
+		self._phoenix = superoptix_setup_phoenix_for_spec(
+			agent_id="{{ agent_name }}",
+			spec_data=self.spec,
+			default_project_name="SuperOptiX-{{ agent_name }}",
+		)
 		
 		# Optional LogFire instrumentation (user-controlled, graceful fallback)
 		# Users can install and configure LogFire themselves if they want observability

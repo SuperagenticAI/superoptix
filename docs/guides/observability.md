@@ -60,6 +60,39 @@ super observe dashboard --auto-open
 super observe analyze developer_20250714_200501 --days 1
 ```
 
+## 🛰️ Arize Phoenix Demo
+
+If you want to send SuperOptiX traces to Arize Phoenix instead of only using the built-in trace store, use the dedicated pullable demo:
+
+```bash
+super init swe
+cd swe
+
+super agent pull arize-phoenix-demo
+super agent compile arize-phoenix-demo
+super agent run arize-phoenix-demo --goal "Summarize why tracing helps debug AI agents."
+```
+
+You can also take an existing pulled agent and add a `spec.phoenix` block to its playbook:
+
+```bash
+super agent pull developer
+```
+
+Then add:
+
+```yaml
+phoenix:
+  enabled: true
+  project_name: swe-developer-phoenix-demo
+  endpoint: http://127.0.0.1:6006
+  protocol: http/protobuf
+  batch: false
+  auto_instrument: true
+```
+
+For the full user-facing walkthrough, including Phoenix server setup and pull-based demos, see [Arize Phoenix Demo](../examples/agents/arize-phoenix-demo.md).
+
 ## 📋 Available Commands
 
 ### `super observe list` - List Agents with Traces

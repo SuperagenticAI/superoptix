@@ -6,6 +6,11 @@ import os
 from pathlib import Path
 from typing import Any, Dict, List
 
+from superoptix.observability.phoenix import (
+    instrument_framework_with_phoenix,
+    phoenix_session_span,
+    setup_phoenix_for_spec,
+)
 from superoptix.runners.rlm_mode_utils import resolve_effective_rlm_mode
 
 
@@ -386,16 +391,56 @@ def run_with_optional_rlm(
     - replace: RLM-only response
     - auto: choose direct/assist/replace from prompt size thresholds
     """
+    crew_name = str(
+        getattr(crew, "name", "")
+        or getattr(getattr(crew, "agents", [None])[0], "role", "")
+        or "crewai_agent"
+    )
+    phoenix_handle = setup_phoenix_for_spec(
+        agent_id=crew_name,
+        spec_data=spec_data,
+        default_project_name=f"SuperOptiX-{crew_name}",
+    )
+    instrument_framework_with_phoenix(phoenix_handle, "crewai")
+    session_id = f"{crew_name}:{os.getpid()}"
+    span_attributes = {
+        "superoptix.framework": "crewai",
+        "superoptix.agent_name": crew_name,
+        "superoptix.model_name": model_name,
+    }
+
     cfg = get_crewai_rlm_config(spec_data)
     if not cfg.get("enabled", False):
-        result = crew.kickoff(inputs={"query": prompt})
-        return extract_crewai_output(result)
+        with phoenix_session_span(
+            phoenix_handle,
+            span_name="superoptix.crewai.run",
+            session_id=session_id,
+            attributes=span_attributes,
+            input_data=prompt,
+        ) as span:
+            result = crew.kickoff(inputs={"query": prompt})
+            output = extract_crewai_output(result)
+            if span is not None and hasattr(span, "set_output"):
+                span.set_output({"status": "success", "output": output})
+            return output
 
     mode, mode_reason = resolve_effective_rlm_mode(prompt=prompt, config=cfg)
     if mode == "direct":
         print(f"🧠 RLM auto mode selected direct execution ({mode_reason})")
-        result = crew.kickoff(inputs={"query": prompt})
-        return extract_crewai_output(result)
+        with phoenix_session_span(
+            phoenix_handle,
+            span_name="superoptix.crewai.run",
+            session_id=session_id,
+            attributes={**span_attributes, "superoptix.rlm_mode": "direct"},
+            input_data=prompt,
+        ) as span:
+            result = crew.kickoff(inputs={"query": prompt})
+            output = extract_crewai_output(result)
+            if span is not None and hasattr(span, "set_output"):
+                span.set_output(
+                    {"status": "success", "rlm_mode": "direct", "output": output}
+                )
+            return output
 
     provider = _normalize_rlm_provider(cfg.get("provider", "native"))
     if provider == "rlm_code":
@@ -463,8 +508,21 @@ def run_with_optional_rlm(
             return str(rlm(task_prompt)).strip()
         except Exception as exc:
             print(f"⚠️ RLM execution failed, falling back to CrewAI: {exc}")
-            result = crew.kickoff(inputs={"query": prompt})
-            return extract_crewai_output(result)
+            with phoenix_session_span(
+                phoenix_handle,
+                span_name="superoptix.crewai.run",
+                session_id=session_id,
+                attributes={
+                    **span_attributes,
+                    "superoptix.rlm_mode": "replace_fallback",
+                },
+                input_data=prompt,
+            ) as span:
+                result = crew.kickoff(inputs={"query": prompt})
+                output = extract_crewai_output(result)
+                if span is not None and hasattr(span, "set_output"):
+                    span.set_output({"status": "success", "output": output})
+                return output
 
     print(
         f"🧠 CrewAI RLM provider={cfg.get('provider')} mode=assist "
@@ -484,5 +542,17 @@ def run_with_optional_rlm(
             "Produce the final answer."
         )
 
-    result = crew.kickoff(inputs={"query": augmented})
-    return extract_crewai_output(result)
+    with phoenix_session_span(
+        phoenix_handle,
+        span_name="superoptix.crewai.run",
+        session_id=session_id,
+        attributes={**span_attributes, "superoptix.rlm_mode": "assist"},
+        input_data=augmented,
+    ) as span:
+        result = crew.kickoff(inputs={"query": augmented})
+        output = extract_crewai_output(result)
+        if span is not None and hasattr(span, "set_output"):
+            span.set_output(
+                {"status": "success", "rlm_mode": "assist", "output": output}
+            )
+        return output

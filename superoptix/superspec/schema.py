@@ -1299,6 +1299,45 @@ class SuperSpecXSchema:
                             },
                             "description": "LogFire observability configuration. Requires logfire package to be installed and configured (logfire.configure() or logfire auth). Defaults to enabled if LogFire is available.",
                         },
+                        "phoenix": {
+                            "type": "object",
+                            "properties": {
+                                "enabled": {
+                                    "type": "boolean",
+                                    "default": False,
+                                    "description": "Enable Arize Phoenix tracing for this agent.",
+                                },
+                                "project_name": {
+                                    "type": "string",
+                                    "description": "Phoenix project name used to group traces. Defaults to SuperOptiX-{agent_id}.",
+                                },
+                                "endpoint": {
+                                    "type": "string",
+                                    "description": "Phoenix collector endpoint or base URL. HTTP endpoints are normalized to /v1/traces automatically.",
+                                },
+                                "api_key_env": {
+                                    "type": "string",
+                                    "default": "PHOENIX_API_KEY",
+                                    "description": "Environment variable name containing the Phoenix API key.",
+                                },
+                                "protocol": {
+                                    "type": "string",
+                                    "enum": ["http/protobuf", "grpc"],
+                                    "description": "OTLP transport protocol for Phoenix.",
+                                },
+                                "batch": {
+                                    "type": "boolean",
+                                    "default": True,
+                                    "description": "Use batched OTLP export when sending traces to Phoenix.",
+                                },
+                                "auto_instrument": {
+                                    "type": "boolean",
+                                    "default": False,
+                                    "description": "Enable Phoenix/OpenInference auto-instrumentation when supported dependencies are installed.",
+                                },
+                            },
+                            "description": "Arize Phoenix tracing configuration. Requires phoenix OTEL dependencies to be installed.",
+                        },
                         "optimization": {
                             "type": "object",
                             "description": "Optional optimization configuration",

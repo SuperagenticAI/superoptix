@@ -10,6 +10,11 @@ Provides comprehensive observability with:
 
 from .callbacks import SuperOptixCallback
 from .debugger import InteractiveDebugger
+from .phoenix import (
+    instrument_framework_with_phoenix,
+    normalize_phoenix_endpoint,
+    setup_phoenix,
+)
 from .tracer import SuperOptixTracer, TraceEvent
 
 # Enhanced tracer with agent-specific metrics
@@ -39,6 +44,9 @@ __all__ = [
     "TraceEvent",
     "SuperOptixCallback",
     "InteractiveDebugger",
+    "instrument_framework_with_phoenix",
+    "normalize_phoenix_endpoint",
+    "setup_phoenix",
     "ObservabilityEnhancedDSPyAdapter",
 ]
 
