@@ -11,6 +11,28 @@ from superoptix.runners import openai_runtime_helpers as openai_helpers
 from superoptix.runners import pydantic_runtime_helpers as pydantic_helpers
 
 
+def test_build_openai_agent_sandbox_unavailable_falls_back(monkeypatch):
+    class _Agent:
+        def __init__(self, **kwargs):  # noqa: ANN003
+            self.kwargs = kwargs
+
+    fake_agents = ModuleType("agents")
+    fake_agents.Agent = _Agent
+    monkeypatch.setitem(sys.modules, "agents", fake_agents)
+
+    agent = openai_helpers.build_openai_agent(
+        name="demo",
+        instructions="test",
+        model="gpt-4o-mini",
+        tools=[],
+        spec_data={"openai_agent": {"sandbox": {"enabled": True}}},
+    )
+
+    assert isinstance(agent, _Agent)
+    assert agent.kwargs["name"] == "demo"
+    assert agent.kwargs["instructions"] == "test"
+
+
 @pytest.mark.asyncio
 async def test_openai_rlm_code_replace_skips_framework_runner(monkeypatch):
     async def _fake_rlm_code_completion(*, prompt, config, model_name):  # noqa: ARG001
@@ -247,3 +269,35 @@ async def test_pydantic_native_provider_does_not_route_to_rlm_code(monkeypatch):
 
     assert result == "native-rlm-final"
     assert calls["rlm_code"] == 0
+
+
+@pytest.mark.asyncio
+async def test_openai_run_passes_sandbox_run_config_when_available(monkeypatch):
+    sentinel_run_config = object()
+    monkeypatch.setattr(
+        openai_helpers,
+        "build_openai_run_config",
+        lambda spec_data, default_workflow_name="": sentinel_run_config,  # noqa: ARG005
+    )
+
+    calls = {"run_config": None}
+
+    class _Runner:
+        @staticmethod
+        async def run(agent, input, **kwargs):  # noqa: ARG001
+            calls["run_config"] = kwargs.get("run_config")
+            return "runner-with-sandbox"
+
+    fake_agents = ModuleType("agents")
+    fake_agents.Runner = _Runner
+    monkeypatch.setitem(sys.modules, "agents", fake_agents)
+
+    result = await openai_helpers.run_with_optional_rlm(
+        agent=object(),
+        prompt="sandbox prompt",
+        spec_data={"openai_agent": {"sandbox": {"enabled": True}}},
+        model_name="gpt-4o-mini",
+    )
+
+    assert result == "runner-with-sandbox"
+    assert calls["run_config"] is sentinel_run_config

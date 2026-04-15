@@ -6,6 +6,37 @@
 
 RLM support is experimental (`assist`, `replace`, `auto` modes). See [RLM (Experimental)](rlm-experimental.md).
 
+## 🧪 Native Sandbox Harness (OpenAI SDK)
+
+SuperOptiX now supports OpenAI SDK native sandbox wiring through `spec.openai_agent.sandbox`.
+
+```yaml
+spec:
+  openai_agent:
+    sandbox:
+      enabled: true
+      client: unix_local           # unix_local | docker
+      # docker_image: python:3.14-slim
+      workflow_name: "SuperOptiX sandbox run"
+      manifest:
+        root: /workspace
+        local_dirs:
+          - path: data
+            src: ./data
+        local_files:
+          - path: task.md
+            src: ./task.md
+        git_repos:
+          - path: sdk
+            url: https://github.com/openai/openai-agents-python.git
+            ref: main
+```
+
+Behavior:
+- When enabled, compiled OpenAI pipelines create a `SandboxAgent` with `default_manifest`.
+- Runs are executed with `RunConfig(sandbox=SandboxRunConfig(...))`.
+- If sandbox runtime dependencies are unavailable, SuperOptiX falls back to standard `Agent` execution with warnings.
+
 > **Hands-on demo:** Clone the MIT-licensed companion repo [`superoptix-lite-openai`](https://github.com/SuperagenticAI/superoptix-lite-openai) to try the OpenAI Agents SDK with SuperOptiX Lite right away. The Code Reviewer example in that project mirrors this guide step by step.
 
 ---
@@ -32,7 +63,7 @@ pip install superoptix[frameworks-openai]
 ```
 
 **Includes:**
-- openai-agents 0.4.1
+- openai-agents (latest; sandbox mode requires newer SDK versions that include `agents.sandbox`)
 - openai SDK (latest)
 - SuperOptiX core with GEPA 0.0.17
 

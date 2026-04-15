@@ -68,7 +68,7 @@ frameworks-dspy = [
 
 # OpenAI Agents SDK
 frameworks-openai = [
-    "openai-agents",
+    "openai-agents>=0.14.0",
     "openai",
 ]
 
@@ -118,7 +118,7 @@ frameworks-claude-sdk = [
 # NOTE: DSPy and CrewAI conflict - choose one or the other
 frameworks = [
     "dspy",  # DSPy framework
-    "openai-agents",
+    "openai-agents>=0.14.0",
     "openai",
     "google-adk",
     "google-generativeai",
@@ -372,7 +372,7 @@ docs = [
 all = [
     # Framework dependencies (NEW in 0.2.0)
     "dspy",  # DSPy framework
-    "openai-agents",
+    "openai-agents>=0.14.0",
     "openai",
     "google-adk",
     "google-generativeai",
@@ -415,7 +415,7 @@ all = [
 all-with-mlx = [
     # Framework dependencies (NEW in 0.2.0)
     "dspy",  # DSPy framework
-    "openai-agents",
+    "openai-agents>=0.14.0",
     "openai",
     "google-adk",
     "google-generativeai",

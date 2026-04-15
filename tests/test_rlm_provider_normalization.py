@@ -5,7 +5,10 @@ import pytest
 from superoptix.runners.crewai_runtime_helpers import get_crewai_rlm_config
 from superoptix.runners.deepagents_runtime_helpers import get_deepagents_rlm_config
 from superoptix.runners.google_adk_runtime_helpers import get_google_adk_rlm_config
-from superoptix.runners.openai_runtime_helpers import get_openai_rlm_config
+from superoptix.runners.openai_runtime_helpers import (
+    get_openai_rlm_config,
+    get_openai_sandbox_config,
+)
 from superoptix.runners.pydantic_runtime_helpers import get_pydantic_rlm_config
 from superoptix.superspec.validator import SuperSpecXValidator
 
@@ -140,5 +143,118 @@ def test_validator_rejects_invalid_auto_mode_fields(method_name, label):
     )
     assert any(
         err == f"{label}.rlm.auto_short_context_mode must be one of: direct, assist"
+        for err in validator.errors
+    )
+
+
+def test_openai_sandbox_config_defaults_disabled():
+    cfg = get_openai_sandbox_config({})
+    assert cfg["enabled"] is False
+    assert cfg["client"] == "unix_local"
+    assert cfg["docker_image"] == "python:3.14-slim"
+    assert cfg["manifest_local_dirs"] == []
+    assert cfg["manifest_local_files"] == []
+    assert cfg["manifest_git_repos"] == []
+
+
+def test_openai_sandbox_config_normalizes_manifest_entries():
+    cfg = get_openai_sandbox_config(
+        {
+            "openai_agent": {
+                "sandbox": {
+                    "enabled": True,
+                    "client": "unix-local",
+                    "manifest": {
+                        "root": "/workspace",
+                        "local_dirs": [
+                            {"path": "data", "src": "./data"},
+                            {"path": "", "src": "./skip"},
+                        ],
+                        "local_files": [
+                            {"path": "README.md", "src": "./README.md"},
+                        ],
+                        "git_repos": [
+                            {
+                                "path": "sdk",
+                                "url": "https://github.com/openai/openai-agents-python.git",
+                                "ref": "main",
+                            }
+                        ],
+                    },
+                }
+            }
+        }
+    )
+    assert cfg["enabled"] is True
+    assert cfg["client"] == "unix_local"
+    assert cfg["manifest_root"] == "/workspace"
+    assert cfg["manifest_local_dirs"] == [{"path": "data", "src": "./data"}]
+    assert cfg["manifest_local_files"] == [{"path": "README.md", "src": "./README.md"}]
+    assert cfg["manifest_git_repos"] == [
+        {
+            "path": "sdk",
+            "url": "https://github.com/openai/openai-agents-python.git",
+            "ref": "main",
+        }
+    ]
+
+
+def test_openai_validator_accepts_sandbox_config():
+    validator = SuperSpecXValidator()
+    validator.errors = []
+    validator._validate_openai_agent_config(
+        {
+            "sandbox": {
+                "enabled": True,
+                "client": "docker",
+                "docker_image": "python:3.14-slim",
+                "workflow_name": "sandbox workflow",
+                "manifest": {
+                    "root": "/workspace",
+                    "local_dirs": [{"path": "data", "src": "./data"}],
+                    "local_files": [{"path": "task.md", "src": "./task.md"}],
+                    "git_repos": [
+                        {
+                            "path": "repo",
+                            "url": "https://github.com/openai/openai-agents-python.git",
+                            "ref": "main",
+                        }
+                    ],
+                },
+            }
+        }
+    )
+    assert validator.errors == []
+
+
+def test_openai_validator_rejects_unknown_sandbox_client():
+    validator = SuperSpecXValidator()
+    validator.errors = []
+    validator._validate_openai_agent_config(
+        {"sandbox": {"enabled": True, "client": "unknown"}}
+    )
+    assert (
+        "openai_agent.sandbox.client must be one of: unix_local, docker"
+        in validator.errors
+    )
+
+
+def test_openai_validator_rejects_bad_manifest_entries():
+    validator = SuperSpecXValidator()
+    validator.errors = []
+    validator._validate_openai_agent_config(
+        {
+            "sandbox": {
+                "enabled": True,
+                "manifest": {"local_dirs": [{"path": "", "src": ""}]},
+            }
+        }
+    )
+    assert any(
+        err.startswith("openai_agent.sandbox.manifest.local_dirs[0].path")
+        for err in validator.errors
+    )
+    assert any(
+        err.startswith("openai_agent.sandbox.manifest.local_dirs[0].src")
         for err in validator.errors
     )

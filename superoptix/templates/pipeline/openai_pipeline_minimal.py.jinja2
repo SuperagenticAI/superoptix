@@ -21,6 +21,8 @@ from superoptix.observability.phoenix import (
     setup_phoenix_for_spec as superoptix_setup_phoenix_for_spec,
 )
 from superoptix.runners.openai_runtime_helpers import (
+    build_openai_agent as superoptix_build_openai_agent,
+    build_openai_run_config as superoptix_build_openai_run_config,
     build_instructions as superoptix_build_instructions,
     resolve_model as superoptix_resolve_model,
 {% set tools_cfg = (spec.get("tools", {}) or {}) %}
@@ -84,11 +86,12 @@ class {{ agent_name | to_pascal_case }}Pipeline:
 {% else %}
         self._tools = []
 {% endif %}
-        self.agent = Agent(
+        self.agent = superoptix_build_openai_agent(
             name={{ metadata.name | default(agent_name) | tojson }},
             instructions=self._resolved_instructions,
             model=self._resolved_model,
             tools=self._tools,
+            spec_data=FULL_SPEC,
         )
         self._phoenix = superoptix_setup_phoenix_for_spec(
             agent_id={{ agent_name | tojson }},
@@ -163,6 +166,13 @@ class {{ agent_name | to_pascal_case }}Pipeline:
             model_name=self._resolved_model,
         )
 {% else %}
+        _run_config = superoptix_build_openai_run_config(
+            FULL_SPEC,
+            default_workflow_name="SuperOptiX OpenAI run ({{ agent_name }})",
+        )
+        _run_kwargs = {}
+        if _run_config is not None:
+            _run_kwargs["run_config"] = _run_config
         with superoptix_phoenix_session_span(
             self._phoenix,
             span_name="superoptix.openai_agents.run",
@@ -174,7 +184,7 @@ class {{ agent_name | to_pascal_case }}Pipeline:
             },
             input_data=prompt,
         ) as _phoenix_span:
-            result = await Runner.run(self.agent, input=prompt)
+            result = await Runner.run(self.agent, input=prompt, **_run_kwargs)
             if _phoenix_span is not None and hasattr(_phoenix_span, "set_output"):
                 _phoenix_span.set_output({"status": "success"})
 {% endif %}

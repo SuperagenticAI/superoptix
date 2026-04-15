@@ -980,6 +980,69 @@ class SuperSpecXSchema:
                             },
                         },
                     },
+                },
+                "sandbox": {
+                    "type": "object",
+                    "description": "Optional native sandbox execution for OpenAI Agents SDK runs",
+                    "properties": {
+                        "enabled": {"type": "boolean", "default": False},
+                        "client": {
+                            "type": "string",
+                            "enum": ["unix_local", "docker"],
+                            "default": "unix_local",
+                            "description": "Sandbox backend client",
+                        },
+                        "docker_image": {
+                            "type": "string",
+                            "default": "python:3.14-slim",
+                            "description": "Docker image when client=docker",
+                        },
+                        "workflow_name": {
+                            "type": "string",
+                            "description": "Optional workflow name override for RunConfig",
+                        },
+                        "manifest": {
+                            "type": "object",
+                            "description": "Declarative workspace staging for fresh sandbox sessions",
+                            "properties": {
+                                "root": {
+                                    "type": "string",
+                                    "description": "Optional workspace root path",
+                                },
+                                "local_dirs": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "path": {"type": "string"},
+                                            "src": {"type": "string"},
+                                        },
+                                    },
+                                },
+                                "local_files": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "path": {"type": "string"},
+                                            "src": {"type": "string"},
+                                        },
+                                    },
+                                },
+                                "git_repos": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "path": {"type": "string"},
+                                            "url": {"type": "string"},
+                                            "ref": {"type": "string"},
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
                 }
             },
         }

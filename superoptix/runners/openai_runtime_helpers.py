@@ -428,6 +428,240 @@ def get_openai_rlm_config(spec_data: Dict[str, Any] | None) -> Dict[str, Any]:
     }
 
 
+def _normalize_openai_sandbox_client(client: Any) -> str:
+    value = str(client or "").strip().lower()
+    if value in {"unix-local", "unixlocal"}:
+        return "unix_local"
+    if value in {"docker"}:
+        return value
+    return "unix_local"
+
+
+def _normalize_manifest_entries(
+    entries: Any, *, required_fields: tuple[str, ...]
+) -> List[Dict[str, str]]:
+    normalized: List[Dict[str, str]] = []
+    if not isinstance(entries, list):
+        return normalized
+    for item in entries:
+        if not isinstance(item, dict):
+            continue
+        payload: Dict[str, str] = {}
+        valid = True
+        for field in required_fields:
+            value = str(item.get(field, "") or "").strip()
+            if not value:
+                valid = False
+                break
+            payload[field] = value
+        if not valid:
+            continue
+        optional_ref = str(item.get("ref", "") or "").strip()
+        if optional_ref:
+            payload["ref"] = optional_ref
+        normalized.append(payload)
+    return normalized
+
+
+def get_openai_sandbox_config(spec_data: Dict[str, Any] | None) -> Dict[str, Any]:
+    """Resolve OpenAI sandbox config from spec.openai_agent.sandbox."""
+    spec = dict(spec_data or {})
+    openai_cfg = spec.get("openai_agent")
+    sandbox_cfg: Dict[str, Any] = {}
+    if isinstance(openai_cfg, dict) and isinstance(openai_cfg.get("sandbox"), dict):
+        sandbox_cfg = dict(openai_cfg.get("sandbox") or {})
+
+    manifest_cfg = sandbox_cfg.get("manifest")
+    if not isinstance(manifest_cfg, dict):
+        manifest_cfg = {}
+
+    return {
+        "enabled": bool(sandbox_cfg.get("enabled", False)),
+        "client": _normalize_openai_sandbox_client(
+            sandbox_cfg.get("client", "unix_local")
+        ),
+        "docker_image": str(
+            sandbox_cfg.get("docker_image", "python:3.14-slim") or "python:3.14-slim"
+        ).strip(),
+        "workflow_name": str(sandbox_cfg.get("workflow_name", "") or "").strip(),
+        "manifest_root": str(manifest_cfg.get("root", "") or "").strip(),
+        "manifest_local_dirs": _normalize_manifest_entries(
+            manifest_cfg.get("local_dirs"), required_fields=("path", "src")
+        ),
+        "manifest_local_files": _normalize_manifest_entries(
+            manifest_cfg.get("local_files"), required_fields=("path", "src")
+        ),
+        "manifest_git_repos": _normalize_manifest_entries(
+            manifest_cfg.get("git_repos"), required_fields=("path", "url")
+        ),
+    }
+
+
+def _parse_git_repo_url(url: str) -> tuple[str, str] | None:
+    cleaned = str(url or "").strip()
+    if not cleaned:
+        return None
+
+    # Accept https://host/owner/repo(.git), ssh://git@host/owner/repo(.git), git@host:owner/repo(.git)
+    match = re.match(
+        r"^(?:https?://|ssh://(?:[^@]+@)?|(?:[^@]+@))(?P<host>[^/:]+)[:/](?P<repo>.+?)(?:\.git)?/?$",
+        cleaned,
+    )
+    if match:
+        return match.group("host"), match.group("repo")
+
+    # Accept host/owner/repo(.git)
+    match = re.match(r"^(?P<host>[^/]+)/(?P<repo>.+?)(?:\.git)?/?$", cleaned)
+    if match:
+        return match.group("host"), match.group("repo")
+    return None
+
+
+def _build_openai_manifest_from_config(config: Dict[str, Any]) -> Any:
+    try:
+        from agents.sandbox import Manifest
+        from agents.sandbox.entries import GitRepo, LocalDir, LocalFile
+    except Exception:
+        return None
+
+    entries: Dict[str, Any] = {}
+    for item in config.get("manifest_local_dirs", []):
+        try:
+            entries[str(item["path"])] = LocalDir(src=Path(item["src"]))
+        except Exception as exc:
+            print(f"⚠️ Skipping sandbox local_dir entry {item}: {exc}")
+    for item in config.get("manifest_local_files", []):
+        try:
+            entries[str(item["path"])] = LocalFile(src=Path(item["src"]))
+        except Exception as exc:
+            print(f"⚠️ Skipping sandbox local_file entry {item}: {exc}")
+    for item in config.get("manifest_git_repos", []):
+        try:
+            parsed = _parse_git_repo_url(item["url"])
+            if parsed is None:
+                raise ValueError(
+                    "git_repos.url must be parseable as host/repo or a full git URL"
+                )
+            host, repo = parsed
+            ref = str(item.get("ref", "main") or "main").strip() or "main"
+            entries[str(item["path"])] = GitRepo(host=host, repo=repo, ref=ref)
+        except Exception as exc:
+            print(f"⚠️ Skipping sandbox git_repo entry {item}: {exc}")
+
+    manifest_kwargs: Dict[str, Any] = {"entries": entries}
+    root = str(config.get("manifest_root", "") or "").strip()
+    if root:
+        manifest_kwargs["root"] = root
+
+    try:
+        return Manifest(**manifest_kwargs)
+    except Exception as exc:
+        print(f"⚠️ Failed to build sandbox manifest; using SDK defaults. ({exc})")
+        return None
+
+
+def build_openai_agent(
+    *,
+    name: str,
+    instructions: str,
+    model: Any,
+    tools: List[Any] | None,
+    spec_data: Dict[str, Any] | None,
+) -> Any:
+    """Build Agent or SandboxAgent from OpenAI + sandbox config."""
+    from agents import Agent
+
+    sandbox_cfg = get_openai_sandbox_config(spec_data)
+    if not sandbox_cfg.get("enabled", False):
+        return Agent(
+            name=name,
+            instructions=instructions,
+            model=model,
+            tools=tools or [],
+        )
+
+    try:
+        from agents.sandbox import SandboxAgent
+    except Exception:
+        print(
+            "⚠️ openai_agent.sandbox.enabled=true but sandbox classes are unavailable. "
+            "Install a newer openai-agents package (>=0.14.0). Falling back to Agent."
+        )
+        return Agent(
+            name=name,
+            instructions=instructions,
+            model=model,
+            tools=tools or [],
+        )
+
+    manifest = _build_openai_manifest_from_config(sandbox_cfg)
+    return SandboxAgent(
+        name=name,
+        instructions=instructions,
+        model=model,
+        tools=tools or [],
+        default_manifest=manifest,
+    )
+
+
+def build_openai_run_config(
+    spec_data: Dict[str, Any] | None,
+    *,
+    default_workflow_name: str = "",
+) -> Any | None:
+    """Build RunConfig with SandboxRunConfig when sandbox mode is enabled."""
+    sandbox_cfg = get_openai_sandbox_config(spec_data)
+    if not sandbox_cfg.get("enabled", False):
+        return None
+
+    try:
+        from agents.run import RunConfig
+        from agents.sandbox import SandboxRunConfig
+        from agents.sandbox.sandboxes.unix_local import UnixLocalSandboxClient
+    except Exception:
+        print(
+            "⚠️ openai_agent.sandbox.enabled=true but sandbox runtime imports failed. "
+            "Install a newer openai-agents package (>=0.14.0)."
+        )
+        return None
+
+    workflow_name = str(
+        sandbox_cfg.get("workflow_name") or default_workflow_name or "SuperOptiX OpenAI run"
+    ).strip()
+    client_name = str(sandbox_cfg.get("client") or "unix_local").strip().lower()
+
+    client: Any = None
+    sandbox_options: Any = None
+    if client_name == "docker":
+        try:
+            from docker import from_env as docker_from_env
+            from agents.sandbox.sandboxes.docker import (
+                DockerSandboxClient,
+                DockerSandboxClientOptions,
+            )
+
+            client = DockerSandboxClient(docker_from_env())
+            image = str(sandbox_cfg.get("docker_image") or "python:3.14-slim").strip()
+            sandbox_options = DockerSandboxClientOptions(image=image)
+        except Exception as exc:
+            print(
+                "⚠️ docker sandbox requested but Docker runtime is unavailable; "
+                f"falling back to unix_local. ({exc})"
+            )
+            client = UnixLocalSandboxClient()
+    else:
+        client = UnixLocalSandboxClient()
+
+    sandbox_kwargs: Dict[str, Any] = {"client": client}
+    if sandbox_options is not None:
+        sandbox_kwargs["options"] = sandbox_options
+
+    return RunConfig(
+        sandbox=SandboxRunConfig(**sandbox_kwargs),
+        workflow_name=workflow_name,
+    )
+
+
 async def run_with_optional_rlm(
     *,
     agent: Any,
@@ -460,6 +694,14 @@ async def run_with_optional_rlm(
         "superoptix.model_name": model_name,
     }
 
+    run_kwargs: Dict[str, Any] = {}
+    openai_run_config = build_openai_run_config(
+        spec_data,
+        default_workflow_name=f"SuperOptiX OpenAI run ({agent_name})",
+    )
+    if openai_run_config is not None:
+        run_kwargs["run_config"] = openai_run_config
+
     cfg = get_openai_rlm_config(spec_data)
     if not cfg.get("enabled", False):
         with phoenix_session_span(
@@ -469,7 +711,7 @@ async def run_with_optional_rlm(
             attributes=span_attributes,
             input_data=prompt,
         ) as span:
-            result = await Runner.run(agent, input=prompt)
+            result = await Runner.run(agent, input=prompt, **run_kwargs)
             if span is not None and hasattr(span, "set_output"):
                 span.set_output({"status": "success"})
             return result
@@ -484,7 +726,7 @@ async def run_with_optional_rlm(
             attributes={**span_attributes, "superoptix.rlm_mode": "direct"},
             input_data=prompt,
         ) as span:
-            result = await Runner.run(agent, input=prompt)
+            result = await Runner.run(agent, input=prompt, **run_kwargs)
             if span is not None and hasattr(span, "set_output"):
                 span.set_output({"status": "success", "rlm_mode": "direct"})
             return result
@@ -522,7 +764,7 @@ async def run_with_optional_rlm(
                 attributes={**span_attributes, "superoptix.rlm_mode": mode},
                 input_data=augmented_prompt,
             ) as span:
-                result = await Runner.run(agent, input=augmented_prompt)
+                result = await Runner.run(agent, input=augmented_prompt, **run_kwargs)
                 if span is not None and hasattr(span, "set_output"):
                     span.set_output({"status": "success", "rlm_mode": mode})
                 return result
@@ -544,7 +786,7 @@ async def run_with_optional_rlm(
         from rlm import RLM  # type: ignore
     except Exception:
         print("⚠️ RLM enabled but package not installed. Install with: pip install rlms")
-        return await Runner.run(agent, input=prompt)
+        return await Runner.run(agent, input=prompt, **run_kwargs)
 
     logger_obj = None
     if cfg.get("logger_enabled", False):
@@ -607,7 +849,7 @@ async def run_with_optional_rlm(
         attributes={**span_attributes, "superoptix.rlm_mode": mode},
         input_data=augmented_prompt,
     ) as span:
-        result = await Runner.run(agent, input=augmented_prompt)
+        result = await Runner.run(agent, input=augmented_prompt, **run_kwargs)
         if span is not None and hasattr(span, "set_output"):
             span.set_output({"status": "success", "rlm_mode": mode})
         return result

@@ -1256,109 +1256,172 @@ class SuperSpecXValidator:
             return
 
         rlm_cfg = openai_cfg.get("rlm")
-        if rlm_cfg is None:
-            return
-        if not isinstance(rlm_cfg, dict):
-            self.errors.append("openai_agent.rlm must be an object")
-            return
-
-        if "enabled" in rlm_cfg and not isinstance(rlm_cfg["enabled"], bool):
-            self.errors.append("openai_agent.rlm.enabled must be a boolean")
-
-        provider = rlm_cfg.get("provider")
-        if provider is not None:
-            if not isinstance(provider, str):
-                self.errors.append("openai_agent.rlm.provider must be a string")
-            elif str(provider).strip().lower() not in {
-                "native",
-                "rlm_code",
-                "legacy",
-            }:
-                self.errors.append(
-                    "openai_agent.rlm.provider must be one of: native, rlm_code, legacy"
-                )
-
-        mode = rlm_cfg.get("mode")
-        if mode is not None and mode not in {"assist", "replace", "auto"}:
-            self.errors.append(
-                "openai_agent.rlm.mode must be one of: assist, replace, auto"
-            )
-
-        auto_long_context_chars = rlm_cfg.get("auto_long_context_chars")
-        if auto_long_context_chars is not None and (
-            not isinstance(auto_long_context_chars, int) or auto_long_context_chars < 1
-        ):
-            self.errors.append(
-                "openai_agent.rlm.auto_long_context_chars must be an integer >= 1"
-            )
-
-        auto_short_context_mode = rlm_cfg.get("auto_short_context_mode")
-        if auto_short_context_mode is not None and auto_short_context_mode not in {
-            "direct",
-            "assist",
-        }:
-            self.errors.append(
-                "openai_agent.rlm.auto_short_context_mode must be one of: direct, assist"
-            )
-
-        backend = rlm_cfg.get("backend")
-        if backend is not None and not isinstance(backend, str):
-            self.errors.append("openai_agent.rlm.backend must be a string")
-
-        environment = rlm_cfg.get("environment")
-        if environment is not None and not isinstance(environment, str):
-            self.errors.append("openai_agent.rlm.environment must be a string")
-
-        max_iterations = rlm_cfg.get("max_iterations")
-        if max_iterations is not None and (
-            not isinstance(max_iterations, int)
-            or max_iterations < 1
-            or max_iterations > 50
-        ):
-            self.errors.append(
-                "openai_agent.rlm.max_iterations must be an integer between 1 and 50"
-            )
-
-        max_depth = rlm_cfg.get("max_depth")
-        if max_depth is not None and (
-            not isinstance(max_depth, int) or max_depth < 1 or max_depth > 4
-        ):
-            self.errors.append(
-                "openai_agent.rlm.max_depth must be an integer between 1 and 4"
-            )
-
-        for bool_key in ("verbose", "persistent"):
-            if bool_key in rlm_cfg and not isinstance(rlm_cfg.get(bool_key), bool):
-                self.errors.append(f"openai_agent.rlm.{bool_key} must be a boolean")
-
-        for str_key in ("task_model", "api_key_env", "api_base"):
-            if (
-                str_key in rlm_cfg
-                and rlm_cfg.get(str_key) is not None
-                and not isinstance(rlm_cfg.get(str_key), str)
-            ):
-                self.errors.append(f"openai_agent.rlm.{str_key} must be a string")
-
-        logger_cfg = rlm_cfg.get("logger")
-        if logger_cfg is not None:
-            if not isinstance(logger_cfg, dict):
-                self.errors.append("openai_agent.rlm.logger must be an object")
+        if rlm_cfg is not None:
+            if not isinstance(rlm_cfg, dict):
+                self.errors.append("openai_agent.rlm must be an object")
             else:
-                if "enabled" in logger_cfg and not isinstance(
-                    logger_cfg.get("enabled"), bool
+                if "enabled" in rlm_cfg and not isinstance(rlm_cfg["enabled"], bool):
+                    self.errors.append("openai_agent.rlm.enabled must be a boolean")
+
+                provider = rlm_cfg.get("provider")
+                if provider is not None:
+                    if not isinstance(provider, str):
+                        self.errors.append("openai_agent.rlm.provider must be a string")
+                    elif str(provider).strip().lower() not in {
+                        "native",
+                        "rlm_code",
+                        "legacy",
+                    }:
+                        self.errors.append(
+                            "openai_agent.rlm.provider must be one of: native, rlm_code, legacy"
+                        )
+
+                mode = rlm_cfg.get("mode")
+                if mode is not None and mode not in {"assist", "replace", "auto"}:
+                    self.errors.append(
+                        "openai_agent.rlm.mode must be one of: assist, replace, auto"
+                    )
+
+                auto_long_context_chars = rlm_cfg.get("auto_long_context_chars")
+                if auto_long_context_chars is not None and (
+                    not isinstance(auto_long_context_chars, int)
+                    or auto_long_context_chars < 1
                 ):
                     self.errors.append(
-                        "openai_agent.rlm.logger.enabled must be a boolean"
+                        "openai_agent.rlm.auto_long_context_chars must be an integer >= 1"
                     )
-                for key in ("log_dir", "file_name"):
+
+                auto_short_context_mode = rlm_cfg.get("auto_short_context_mode")
+                if auto_short_context_mode is not None and auto_short_context_mode not in {
+                    "direct",
+                    "assist",
+                }:
+                    self.errors.append(
+                        "openai_agent.rlm.auto_short_context_mode must be one of: direct, assist"
+                    )
+
+                backend = rlm_cfg.get("backend")
+                if backend is not None and not isinstance(backend, str):
+                    self.errors.append("openai_agent.rlm.backend must be a string")
+
+                environment = rlm_cfg.get("environment")
+                if environment is not None and not isinstance(environment, str):
+                    self.errors.append("openai_agent.rlm.environment must be a string")
+
+                max_iterations = rlm_cfg.get("max_iterations")
+                if max_iterations is not None and (
+                    not isinstance(max_iterations, int)
+                    or max_iterations < 1
+                    or max_iterations > 50
+                ):
+                    self.errors.append(
+                        "openai_agent.rlm.max_iterations must be an integer between 1 and 50"
+                    )
+
+                max_depth = rlm_cfg.get("max_depth")
+                if max_depth is not None and (
+                    not isinstance(max_depth, int) or max_depth < 1 or max_depth > 4
+                ):
+                    self.errors.append(
+                        "openai_agent.rlm.max_depth must be an integer between 1 and 4"
+                    )
+
+                for bool_key in ("verbose", "persistent"):
+                    if bool_key in rlm_cfg and not isinstance(rlm_cfg.get(bool_key), bool):
+                        self.errors.append(f"openai_agent.rlm.{bool_key} must be a boolean")
+
+                for str_key in ("task_model", "api_key_env", "api_base"):
                     if (
-                        key in logger_cfg
-                        and logger_cfg.get(key) is not None
-                        and not isinstance(logger_cfg.get(key), str)
+                        str_key in rlm_cfg
+                        and rlm_cfg.get(str_key) is not None
+                        and not isinstance(rlm_cfg.get(str_key), str)
                     ):
+                        self.errors.append(f"openai_agent.rlm.{str_key} must be a string")
+
+                logger_cfg = rlm_cfg.get("logger")
+                if logger_cfg is not None:
+                    if not isinstance(logger_cfg, dict):
+                        self.errors.append("openai_agent.rlm.logger must be an object")
+                    else:
+                        if "enabled" in logger_cfg and not isinstance(
+                            logger_cfg.get("enabled"), bool
+                        ):
+                            self.errors.append(
+                                "openai_agent.rlm.logger.enabled must be a boolean"
+                            )
+                        for key in ("log_dir", "file_name"):
+                            if (
+                                key in logger_cfg
+                                and logger_cfg.get(key) is not None
+                                and not isinstance(logger_cfg.get(key), str)
+                            ):
+                                self.errors.append(
+                                    f"openai_agent.rlm.logger.{key} must be a string"
+                                )
+
+        sandbox_cfg = openai_cfg.get("sandbox")
+        if sandbox_cfg is None:
+            return
+        if not isinstance(sandbox_cfg, dict):
+            self.errors.append("openai_agent.sandbox must be an object")
+            return
+
+        if "enabled" in sandbox_cfg and not isinstance(sandbox_cfg.get("enabled"), bool):
+            self.errors.append("openai_agent.sandbox.enabled must be a boolean")
+
+        client = sandbox_cfg.get("client")
+        if client is not None:
+            if not isinstance(client, str):
+                self.errors.append("openai_agent.sandbox.client must be a string")
+            elif str(client).strip().lower() not in {"unix_local", "docker"}:
+                self.errors.append(
+                    "openai_agent.sandbox.client must be one of: unix_local, docker"
+                )
+
+        for str_key in ("docker_image", "workflow_name"):
+            if (
+                str_key in sandbox_cfg
+                and sandbox_cfg.get(str_key) is not None
+                and not isinstance(sandbox_cfg.get(str_key), str)
+            ):
+                self.errors.append(f"openai_agent.sandbox.{str_key} must be a string")
+
+        manifest_cfg = sandbox_cfg.get("manifest")
+        if manifest_cfg is None:
+            return
+        if not isinstance(manifest_cfg, dict):
+            self.errors.append("openai_agent.sandbox.manifest must be an object")
+            return
+
+        root = manifest_cfg.get("root")
+        if root is not None and not isinstance(root, str):
+            self.errors.append("openai_agent.sandbox.manifest.root must be a string")
+
+        def _validate_manifest_entries(
+            key: str, required_fields: tuple[str, ...]
+        ) -> None:
+            entries = manifest_cfg.get(key)
+            prefix = f"openai_agent.sandbox.manifest.{key}"
+            if entries is None:
+                return
+            if not isinstance(entries, list):
+                self.errors.append(f"{prefix} must be an array")
+                return
+            for idx, item in enumerate(entries):
+                item_prefix = f"{prefix}[{idx}]"
+                if not isinstance(item, dict):
+                    self.errors.append(f"{item_prefix} must be an object")
+                    continue
+                for field in required_fields:
+                    value = item.get(field)
+                    if not isinstance(value, str) or not value.strip():
                         self.errors.append(
-                            f"openai_agent.rlm.logger.{key} must be a string"
+                            f"{item_prefix}.{field} must be a non-empty string"
                         )
+
+        _validate_manifest_entries("local_dirs", ("path", "src"))
+        _validate_manifest_entries("local_files", ("path", "src"))
+        _validate_manifest_entries("git_repos", ("path", "url"))
 
     def _validate_google_adk_config(self, adk_cfg: Dict[str, Any]):
         """Validate spec.google_adk configuration block."""

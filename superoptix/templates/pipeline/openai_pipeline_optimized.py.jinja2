@@ -20,6 +20,8 @@ from agents import Agent, Runner
 from superoptix.core.base_component import BaseComponent
 from superoptix.core.rag_mixin import RAGMixin
 from superoptix.runners.openai_runtime_helpers import (
+    build_openai_agent as superoptix_build_openai_agent,
+    build_openai_run_config as superoptix_build_openai_run_config,
     build_instructions as superoptix_build_instructions,
     resolve_model as superoptix_resolve_model,
 {% set tools_cfg = (spec.get("tools", {}) or {}) %}
@@ -146,11 +148,12 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 
     def _build_agent(self) -> Agent:
         if self._agent is None:
-            self._agent = Agent(
+            self._agent = superoptix_build_openai_agent(
                 name={{ metadata.name | default(agent_name) | tojson }},
                 instructions=self.variable,
                 model=self._model,
                 tools=self._tools,
+                spec_data=FULL_SPEC,
             )
         return self._agent
 
@@ -192,7 +195,14 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
             model_name=self._model,
         )
 {% else %}
-        result = await Runner.run(agent, input=prompt)
+        _run_config = superoptix_build_openai_run_config(
+            FULL_SPEC,
+            default_workflow_name="SuperOptiX OpenAI run ({{ agent_name }})",
+        )
+        _run_kwargs = {}
+        if _run_config is not None:
+            _run_kwargs["run_config"] = _run_config
+        result = await Runner.run(agent, input=prompt, **_run_kwargs)
 {% endif %}
         if isinstance(result, str):
             return result
