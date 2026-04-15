@@ -626,7 +626,9 @@ def build_openai_run_config(
         return None
 
     workflow_name = str(
-        sandbox_cfg.get("workflow_name") or default_workflow_name or "SuperOptiX OpenAI run"
+        sandbox_cfg.get("workflow_name")
+        or default_workflow_name
+        or "SuperOptiX OpenAI run"
     ).strip()
     client_name = str(sandbox_cfg.get("client") or "unix_local").strip().lower()
 

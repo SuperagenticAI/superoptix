@@ -1292,10 +1292,14 @@ class SuperSpecXValidator:
                     )
 
                 auto_short_context_mode = rlm_cfg.get("auto_short_context_mode")
-                if auto_short_context_mode is not None and auto_short_context_mode not in {
-                    "direct",
-                    "assist",
-                }:
+                if (
+                    auto_short_context_mode is not None
+                    and auto_short_context_mode
+                    not in {
+                        "direct",
+                        "assist",
+                    }
+                ):
                     self.errors.append(
                         "openai_agent.rlm.auto_short_context_mode must be one of: direct, assist"
                     )
@@ -1327,8 +1331,12 @@ class SuperSpecXValidator:
                     )
 
                 for bool_key in ("verbose", "persistent"):
-                    if bool_key in rlm_cfg and not isinstance(rlm_cfg.get(bool_key), bool):
-                        self.errors.append(f"openai_agent.rlm.{bool_key} must be a boolean")
+                    if bool_key in rlm_cfg and not isinstance(
+                        rlm_cfg.get(bool_key), bool
+                    ):
+                        self.errors.append(
+                            f"openai_agent.rlm.{bool_key} must be a boolean"
+                        )
 
                 for str_key in ("task_model", "api_key_env", "api_base"):
                     if (
@@ -1336,7 +1344,9 @@ class SuperSpecXValidator:
                         and rlm_cfg.get(str_key) is not None
                         and not isinstance(rlm_cfg.get(str_key), str)
                     ):
-                        self.errors.append(f"openai_agent.rlm.{str_key} must be a string")
+                        self.errors.append(
+                            f"openai_agent.rlm.{str_key} must be a string"
+                        )
 
                 logger_cfg = rlm_cfg.get("logger")
                 if logger_cfg is not None:
@@ -1366,7 +1376,9 @@ class SuperSpecXValidator:
             self.errors.append("openai_agent.sandbox must be an object")
             return
 
-        if "enabled" in sandbox_cfg and not isinstance(sandbox_cfg.get("enabled"), bool):
+        if "enabled" in sandbox_cfg and not isinstance(
+            sandbox_cfg.get("enabled"), bool
+        ):
             self.errors.append("openai_agent.sandbox.enabled must be a boolean")
 
         client = sandbox_cfg.get("client")
