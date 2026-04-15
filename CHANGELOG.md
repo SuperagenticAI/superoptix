@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.25] - 2026-04-15
+
+### Added
+- **OpenAI Agents SDK Support** - Full adoption of the new OpenAI Agents SDK as a first-class framework target alongside DSPy, Claude SDK, Pydantic AI, CrewAI, Google ADK, and DeepAgents.
+- New CLI command `super agent pull --framework openai-agents` to pull agents compatible with the OpenAI Agents SDK.
+- New CLI command `super agent compile <agent> --framework openai-agents` to compile SuperSpecs into OpenAI Agents SDK pipelines.
+- SuperSpec schema extensions for OpenAI Agents SDK configuration (`spec.openai_agents`).
+- New validators for OpenAI Agents SDK-specific settings including tracing, tracingoff, maxTurns, and handoffs.
+- Jinja2 pipeline templates for OpenAI Agents SDK: `openai_pipeline_minimal.py.jinja2` and `openai_pipeline_optimized.py.jinja2`.
+
+### Changed
+- OpenAI SDK integration docs now clarify the distinction between the legacy OpenAI SDK and the new OpenAI Agents SDK.
+- Feature matrix updated to show OpenAI Agents SDK as a supported framework target.
+
+### Documentation
+- Added ADR (Architecture Decision Record) for OpenAI Harness Sandbox Adoption.
+- Added OpenAI Agents SDK adoption summary guide with migration details.
+
 ## [0.2.24] - 2026-04-08
 
 ### Added
