@@ -1043,7 +1043,7 @@ class SuperSpecXSchema:
                             },
                         },
                     },
-                }
+                },
             },
         }
 
