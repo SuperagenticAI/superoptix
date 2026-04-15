@@ -98,6 +98,8 @@ spec:                                  # REQUIRED - Agent specification
   language_model:                      # REQUIRED - LLM configuration
   openai_agent|pydantic_ai|google_adk|deepagents|crewai:
     rlm:                               # OPTIONAL - Framework-specific RLM settings (experimental)
+  openai_agent:
+    sandbox:                           # OPTIONAL - OpenAI SDK native sandbox harness
   persona:                             # OPTIONAL - Agent personality
   tasks:                               # REQUIRED - Agent capabilities (framework-specific)
   agentflow:                           # OPTIONAL - Execution flow
@@ -128,6 +130,30 @@ Notes:
 - `legacy` is an alias of `native`.
 - `rlm_code` is an opt-in provider. Prefer `native` first, then enable `rlm_code` only where your framework/runtime path supports it.
 - See full details: [RLM (Experimental)](rlm-experimental.md).
+
+### **OpenAI Sandbox Block**
+
+```yaml
+spec:
+  openai_agent:
+    sandbox:
+      enabled: true
+      client: unix_local           # unix_local | docker
+      docker_image: python:3.14-slim
+      workflow_name: "Sandbox workflow"
+      manifest:
+        root: /workspace
+        local_dirs:
+          - path: data
+            src: ./data
+        local_files:
+          - path: task.md
+            src: ./task.md
+        git_repos:
+          - path: sdk
+            url: https://github.com/openai/openai-agents-python.git
+            ref: main
+```
 
 ## 🔧 **Multi-Framework Support**
 

@@ -128,6 +128,8 @@ class _MinimalDSPyBDDEvaluator:
         if isinstance(result, str):
             return result.strip()
         if isinstance(result, dict):
+            if len(result) == 1:
+                return str(next(iter(result.values()))).strip()
             return json.dumps(result, sort_keys=True, ensure_ascii=True)
         if hasattr(result, "toDict") and callable(result.toDict):
             try:
@@ -431,6 +433,32 @@ class _MinimalDSPyBDDEvaluator:
             "model_analysis": model_analysis,
             "recommendations": recommendations,
         }
+
+
+class _GenericPipelineBDDEvaluator(_MinimalDSPyBDDEvaluator):
+    """Compatibility adapter for framework pipelines exposing run()."""
+
+    def __init__(self, pipeline, playbook_path: Path):
+        self._pipeline = pipeline
+        self.playbook_path = Path(playbook_path)
+        self.test_examples = self._load_scenarios()
+
+    def run(self, **inputs):
+        if not hasattr(self._pipeline, "run") or not callable(self._pipeline.run):
+            raise TypeError("Pipeline does not expose a callable run() method")
+
+        result = self._pipeline.run(**inputs)
+        if inspect.isawaitable(result):
+            result = run_async(result)
+        return result
+
+    def load_optimized(self, optimized_path: str):
+        if hasattr(self._pipeline, "load_optimized") and callable(
+            self._pipeline.load_optimized
+        ):
+            self._pipeline.load_optimized(str(optimized_path))
+            return
+        raise AttributeError("Pipeline does not support .load_optimized()")
 
 
 def _optimize_crewai_component(component, trainset, llm_model, temperature, max_tokens):
@@ -1544,6 +1572,17 @@ def test_agent_bdd(args):
                 f"   Expected: Class ending with 'Pipeline' in {runner.pipeline_path}"
             )
             return
+
+        if not (
+            hasattr(pipeline, "test_examples")
+            and hasattr(pipeline, "run_bdd_test_suite")
+            and callable(getattr(pipeline, "run_bdd_test_suite", None))
+        ):
+            if hasattr(pipeline, "run") and callable(getattr(pipeline, "run", None)):
+                pipeline = _GenericPipelineBDDEvaluator(pipeline, runner.playbook_path)
+                console.print(
+                    "[dim]Using generic pipeline compatibility path for BDD evaluation.[/]"
+                )
 
         # Step 2: Optimization Check (no spinner)
         optimization_status = (

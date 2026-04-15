@@ -699,6 +699,73 @@ schema:
                       type: string
                       required: false
                       default: "openai_rlm"
+            sandbox:
+              type: object
+              required: false
+              description: "Optional native sandbox execution for OpenAI Agents SDK"
+              properties:
+                enabled:
+                  type: boolean
+                  required: false
+                  default: false
+                client:
+                  type: string
+                  required: false
+                  default: "unix_local"
+                  enum: ["unix_local", "docker"]
+                docker_image:
+                  type: string
+                  required: false
+                  default: "python:3.14-slim"
+                workflow_name:
+                  type: string
+                  required: false
+                manifest:
+                  type: object
+                  required: false
+                  properties:
+                    root:
+                      type: string
+                      required: false
+                    local_dirs:
+                      type: array
+                      required: false
+                      items:
+                        type: object
+                        properties:
+                          path:
+                            type: string
+                            required: true
+                          src:
+                            type: string
+                            required: true
+                    local_files:
+                      type: array
+                      required: false
+                      items:
+                        type: object
+                        properties:
+                          path:
+                            type: string
+                            required: true
+                          src:
+                            type: string
+                            required: true
+                    git_repos:
+                      type: array
+                      required: false
+                      items:
+                        type: object
+                        properties:
+                          path:
+                            type: string
+                            required: true
+                          url:
+                            type: string
+                            required: true
+                          ref:
+                            type: string
+                            required: false
 
         google_adk:
           type: object

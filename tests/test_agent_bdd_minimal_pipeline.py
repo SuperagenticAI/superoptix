@@ -3,7 +3,10 @@ from types import SimpleNamespace
 
 import yaml
 
-from superoptix.cli.commands.agent import _MinimalDSPyBDDEvaluator
+from superoptix.cli.commands.agent import (
+    _GenericPipelineBDDEvaluator,
+    _MinimalDSPyBDDEvaluator,
+)
 
 
 class _ProgramEcho:
@@ -67,3 +70,42 @@ def test_minimal_dspy_bdd_evaluator_loads_optimized_weights(tmp_path: Path):
     evaluator.load_optimized(str(tmp_path / "developer_optimized.json"))
 
     assert program.loaded_path is not None
+
+
+class _AsyncPipeline:
+    async def run(self, **inputs):
+        requirement = str(inputs.get("feature_requirement", "")).strip()
+        return {"response": f"Implemented: {requirement}"}
+
+
+def test_generic_pipeline_bdd_evaluator_runs_async_pipeline(tmp_path: Path):
+    playbook_path = tmp_path / "developer_playbook.yaml"
+    playbook_path.write_text(
+        yaml.safe_dump(
+            {
+                "spec": {
+                    "feature_specifications": {
+                        "scenarios": [
+                            {
+                                "name": "async_pipeline",
+                                "description": "Handles async framework pipeline",
+                                "input": {"feature_requirement": "add retry support"},
+                                "expected_output": {
+                                    "implementation": "Implemented: add retry support"
+                                },
+                            }
+                        ]
+                    }
+                }
+            }
+        )
+    )
+
+    evaluator = _GenericPipelineBDDEvaluator(_AsyncPipeline(), playbook_path)
+
+    results = evaluator.run_bdd_test_suite()
+
+    assert results["success"] is True
+    assert results["summary"]["total"] == 1
+    assert results["summary"]["passed"] == 1
+    assert results["summary"]["failed"] == 0
