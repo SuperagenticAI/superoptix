@@ -4,8 +4,6 @@
 
 **Works great with FREE Ollama (No API Keys Needed!)**
 
-RLM support is experimental (`assist`, `replace`, `auto` modes). See [RLM (Experimental)](rlm-experimental.md).
-
 ## 🧪 Native Sandbox Harness (OpenAI SDK)
 
 SuperOptiX now supports OpenAI SDK native sandbox wiring through `spec.openai_agent.sandbox`.
@@ -37,19 +35,48 @@ Behavior:
 - Runs are executed with `RunConfig(sandbox=SandboxRunConfig(...))`.
 - If sandbox runtime dependencies are unavailable, SuperOptiX falls back to standard `Agent` execution with warnings.
 
-> **Hands-on demo:** Clone the MIT-licensed companion repo [`superoptix-lite-openai`](https://github.com/SuperagenticAI/superoptix-lite-openai) to try the OpenAI Agents SDK with SuperOptiX Lite right away. The Code Reviewer example in that project mirrors this guide step by step.
+> **Hands-on demo:** Try the built-in OpenAI Agents SDK demo agent:
+> ```bash
+> super agent pull assistant_openai
+> super agent compile assistant_openai --framework openai
+> super agent run assistant_openai --framework openai --goal "Write a hello world function"
 
 ---
 
 ## 🎯 What is OpenAI Agents SDK?
 
-OpenAI Agents SDK is a lightweight yet powerful framework for building multi-agent workflows. Key features:
+OpenAI Agents SDK (v0.14+) is a production-grade agent framework with a **harness + sandbox** architecture. It's not an RLM (Recursive Language Model) implementation, but shares the "harness engineering" spirit - separating orchestration from compute.
+
+### Harness + Sandbox Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    HARNESS (Orchestration)                  │
+│  • Instructions, tools (including MCP)                     │
+│  • Tracing, approvals, handoffs                             │
+│  • Memory management, resume bookkeeping                   │
+│  • Codex-trained model behavior                            │
+└─────────────────────────────────────────────────────────────┘
+                           │
+                           ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   SANDBOX (Execution)                       │
+│  • Real workspace with files, commands, packages            │
+│  • Manifest-based data staging (mount dirs, repos, S3)     │
+│  • Built-in snapshotting + rehydration                     │
+│  • Isolation for security                                   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Key Features
 
 - 🌐 **Provider-Agnostic**: Works with OpenAI, Ollama, and 100+ LLMs
 - 🔄 **Multi-Agent**: Built-in handoffs for agent collaboration
 - 🛡️ **Guardrails**: Input/output validation
 - 💾 **Sessions**: Automatic conversation history
 - 📊 **Tracing**: Built-in execution tracking
+- 🏗️ **Sandbox Partners**: Cloudflare, E2B, Modal, BlaxelAI, Daytona, Vercel
+- 🔄 **Durability**: Snapshotting + rehydration for long-running agents
 - **Works with Ollama!**: Unlike DeepAgents, no function-calling limitations
 
 Perfect for simple to moderate complexity tasks with local models!
@@ -139,36 +166,28 @@ super agent run assistant_openai --framework openai --goal "What is Python?"
 
 ---
 
-## 🌩️ Simplified Cloud/Local Model Switching
+## 🌩️ Using Cloud and Local Models
 
-The [`superoptix-lite-openai`](https://github.com/SuperagenticAI/superoptix-lite-openai) companion repo includes simplified scripts for easy switching between local and cloud models:
+SuperOptiX supports both local (Ollama) and cloud models (OpenAI, Anthropic, Google) out of the box:
 
-### Local Models (FREE)
 ```bash
-python demo_local.py        # Run demo with Ollama
-python optimize_local.py    # GEPA optimization with Ollama
-```
+# Local (FREE - Ollama)
+super agent run assistant_openai --framework openai --local --provider ollama --model qwen3.5:9b --goal "Write hello"
 
-### Cloud Models (OpenAI, Anthropic, Google)
-```bash
-# Set API key (choose one)
-export OPENAI_API_KEY=sk-...        # Uses gpt-5
-export ANTHROPIC_API_KEY=sk-ant-... # Uses claude-sonnet-4.5
-export GOOGLE_API_KEY=...           # Uses gemini-pro-2.5
+# Cloud - OpenAI
+super agent run assistant_openai --framework openai --cloud --provider openai --model gpt-4.1 --goal "Write hello"
 
-# Run cloud scripts (auto-detects provider)
-python demo_cloud.py        # Demo with cloud models
-python optimize_cloud.py    # GEPA optimization with cloud models
+# Cloud - Anthropic
+super agent run assistant_openai --framework openai --cloud --provider anthropic --model claude-sonnet-4.20250514 --goal "Write hello"
+
+# Cloud - Google
+super agent run assistant_openai --framework openai --cloud --provider google-genai --model gemini-2.0-flash --goal "Write hello"
 ```
 
 **Features:**
-- Auto-detects cloud provider from API key
-- Uses latest models (gpt-5, claude-sonnet-4.5, gemini-pro-2.5)
-- Separate scripts for local vs cloud (no complex switching)
-- Includes cost warnings (optimization uses APIs)
-- .env file support for API keys
-
-See the [repo README](https://github.com/SuperagenticAI/superoptix-lite-openai) for complete documentation.
+- Built-in model routing with `--local` / `--cloud` flags
+- Auto-detects provider from model name
+- Full GEPA optimization support for both local and cloud
 
 ---
 
@@ -1008,19 +1027,20 @@ A: Performance varies by use case, model, and hardware. OpenAI SDK typically has
 - **Ollama Setup**: `/docs/llm-setup.md`
 - **Multi-Framework Guide**: `/docs/guides/multi-framework.md`
 - **Universal GEPA**: `/plan/MULTI_FRAMEWORK_GEPA_STRATEGY.md`
-- **Hands-on Repo**: [`superoptix-lite-openai`](https://github.com/SuperagenticAI/superoptix-lite-openai) - clone this MIT-licensed companion project to try the OpenAI Agents SDK with SuperOptiX Lite and follow our Code Reviewer tutorial step by step.
+- **Demo Agent**: `super agent pull assistant_openai`
 
 ---
 
-## 🌐 Multi-Framework Summary
+## 🎯 Supported Frameworks
 
-**SuperOptiX supports 6 agent frameworks:**
-1. DSPy (maximum optimization, Ollama compatible)
-2. OpenAI SDK (simple API, excellent Ollama support)
-3. CrewAI (multi-agent teams, role-based collaboration)
-4. Google ADK (Gemini integration)
-5. Microsoft (Azure OpenAI, enterprise)
-6. DeepAgents (complex planning, Claude/GPT-4)
+**SuperOptiX supports 7 agent frameworks:**
+1. **DSPy** (maximum optimization, Ollama compatible)
+2. **OpenAI Agents SDK** (simple API, excellent Ollama support)
+3. **Claude SDK** (Anthropic's official SDK)
+4. **Pydantic AI** (type-safe, validation-first)
+5. **CrewAI** (multi-agent teams, role-based collaboration)
+6. **Google ADK** (Gemini integration)
+7. **DeepAgents** (complex planning, Claude/GPT-4)
 
 **All frameworks share:**
 - Same SuperSpec YAML format
@@ -1058,11 +1078,17 @@ Write agents using **official OpenAI Agents SDK patterns** (Agent, Runner, OpenA
 Integrate your native SDK code with **SuperOptiX** for GEPA compatibility
 Define **BDD test scenarios** for measurable evaluation metrics
 Run **GEPA optimization** to automatically improve agent prompts
-Implement **automatic optimization loading** for deployment deployment
+Implement **automatic optimization loading** for deployment
 
-**Example project:** Code Reviewer Agent that detects security vulnerabilities
-**Hands-on repo:** [`superoptix-lite-openai`](https://github.com/SuperagenticAI/superoptix-lite-openai) - clone it to follow the tutorial with a fully wired SuperOptiX Lite playground.
+**Example:** Build a Code Reviewer Agent that detects security vulnerabilities using the built-in demo:
+```bash
+super agent pull assistant_openai
+super agent compile assistant_openai --framework openai
+super agent evaluate assistant_openai --framework openai
+super agent optimize assistant_openai --framework openai --auto light
+super agent run assistant_openai --framework openai --goal "Review this code for security issues"
+```
 
-**Time:** 30-45 minutes | **Difficulty:** Intermediate | **Prerequisites:** Python, Ollama, Git access to the repo above
+**Time:** 20-30 minutes | **Difficulty:** Beginner | **Prerequisites:** Python, Ollama
 
 👉 **[Start the tutorial now](../tutorials/openai-sdk-gepa-optimization.md)**
