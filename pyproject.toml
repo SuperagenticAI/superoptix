@@ -84,9 +84,9 @@ frameworks-microsoft = [
     "azure-identity",
 ]
 
-# DeepAgents (LangChain) - 0.2.0 with pluggable backends
+# DeepAgents (LangChain) - 0.5.6+ with pluggable backends
 frameworks-deepagents = [
-    "deepagents",  # Requires 0.2.0+ for backend abstraction
+    "deepagents>=0.5.6,<0.6.0",  # Requires 0.5.6+ for current backend abstraction
 ]
 
 # Pydantic AI - Type-safe agent framework (full package)
@@ -124,7 +124,7 @@ frameworks = [
     "google-generativeai",
     "agent-framework",
     "azure-identity",
-    "deepagents",  # 0.2.0+ required for backend abstraction
+    "deepagents>=0.5.6,<0.6.0",  # 0.5.6+ required for backend abstraction
     "pydantic-ai",  # Pydantic AI framework
     "claude-agent-sdk",
     # NOTE: crewai==1.2.0 excluded - conflicts with DSPy
@@ -378,7 +378,7 @@ all = [
     "google-generativeai",
     "agent-framework",
     "azure-identity",
-    "deepagents",  # 0.2.0+ required for backend abstraction
+    "deepagents>=0.5.6,<0.6.0",  # 0.5.6+ required for backend abstraction
     "pydantic-ai",  # Pydantic AI framework
     "claude-agent-sdk",
     # Protocol integrations
@@ -421,7 +421,7 @@ all-with-mlx = [
     "google-generativeai",
     "agent-framework",
     "azure-identity",
-    "deepagents",  # 0.2.0+ required for backend abstraction
+    "deepagents>=0.5.6,<0.6.0",  # 0.5.6+ required for backend abstraction
     "pydantic-ai",  # Pydantic AI framework
     "claude-agent-sdk",
     # crewai==1.2.0 - EXCLUDED (conflicts with DSPy)

@@ -59,7 +59,7 @@ _FRAMEWORK_DISPLAY_NAMES = {
     "openai": "OpenAI Agents SDK",
     "google-adk": "Google ADK",
     "microsoft": "Microsoft Agent Framework",
-    "deepagents": "DeepAgents (LangGraph)",
+    "deepagents": "DeepAgents",
     "dspy": "DSPy",
 }
 
@@ -715,7 +715,7 @@ def _compile_single_agent(agent_name: str, args, tier_level: str = None):
             "dspy": "DSPy",
             "microsoft": "Microsoft Agent Framework",
             "openai": "OpenAI Agents SDK",
-            "deepagents": "DeepAgents (LangGraph)",
+            "deepagents": "DeepAgents",
             "crewai": "CrewAI",
             "google-adk": "Google ADK",
             "pydantic-ai": "Pydantic AI",
@@ -926,7 +926,7 @@ def _run_framework_agent(args, framework: str):
         "openai": "OpenAI Agents SDK",
         "google-adk": "Google ADK",
         "microsoft": "Microsoft Agent Framework",
-        "deepagents": "DeepAgents (LangGraph)",
+        "deepagents": "DeepAgents",
     }.get(framework, framework.upper())
 
     console.print(

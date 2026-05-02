@@ -308,6 +308,7 @@ def create_agent_runner(
     spec_data: Dict[str, Any],
     agent_name: str,
     model_config: Dict[str, Any] | None = None,
+    extra_tools: List[Any] | None = None,
 ) -> Tuple[Any, Any, Dict[str, Any]]:
     """Create Google ADK Agent and runner from SuperSpec."""
     try:
@@ -332,7 +333,7 @@ def create_agent_runner(
     ).strip()
     if not description:
         description = f"{agent_name} agent"
-    tools = build_stackone_tools(spec_data)
+    tools = [*build_stackone_tools(spec_data), *(extra_tools or [])]
 
     agent_kwargs: Dict[str, Any] = {
         "name": agent_name.replace("-", "_"),
