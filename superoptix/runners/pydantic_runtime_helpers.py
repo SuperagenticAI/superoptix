@@ -434,6 +434,7 @@ async def run_agent_with_optional_rlm(
     spec_data: Dict[str, Any] | None,
     model_name: str,
     logfire_enabled: bool = False,
+    run_kwargs: Dict[str, Any] | None = None,
 ) -> Any:
     """
     Execute a Pydantic AI Agent run, optionally routing through RLM first.
@@ -445,6 +446,7 @@ async def run_agent_with_optional_rlm(
     - auto: choose direct/assist/replace from prompt size thresholds
     """
     agent_name = str(getattr(agent, "name", "pydantic_ai_agent") or "pydantic_ai_agent")
+    effective_run_kwargs = dict(run_kwargs or {})
     phoenix_handle = setup_phoenix_for_spec(
         agent_id=agent_name,
         spec_data=spec_data,
@@ -466,7 +468,7 @@ async def run_agent_with_optional_rlm(
             attributes=span_attributes,
             input_data=prompt,
         ) as span:
-            result = await agent.run(prompt)
+            result = await agent.run(prompt, **effective_run_kwargs)
             if span is not None and hasattr(span, "set_output"):
                 span.set_output({"status": "success"})
             return result
@@ -481,7 +483,7 @@ async def run_agent_with_optional_rlm(
             attributes={**span_attributes, "superoptix.rlm_mode": "direct"},
             input_data=prompt,
         ) as span:
-            result = await agent.run(prompt)
+            result = await agent.run(prompt, **effective_run_kwargs)
             if span is not None and hasattr(span, "set_output"):
                 span.set_output({"status": "success", "rlm_mode": "direct"})
             return result
@@ -524,7 +526,10 @@ async def run_agent_with_optional_rlm(
                     attributes={**span_attributes, "superoptix.rlm_mode": mode},
                     input_data=augmented_prompt,
                 ) as span:
-                    result = await agent.run(augmented_prompt)
+                    result = await agent.run(
+                        augmented_prompt,
+                        **effective_run_kwargs,
+                    )
                     if span is not None and hasattr(span, "set_output"):
                         span.set_output({"status": "success", "rlm_mode": mode})
                     return result
@@ -549,7 +554,7 @@ async def run_agent_with_optional_rlm(
         from rlm import RLM  # type: ignore
     except Exception:
         print("⚠️ RLM enabled but package not installed. Install with: pip install rlms")
-        return await agent.run(prompt)
+        return await agent.run(prompt, **effective_run_kwargs)
 
     logger_obj = None
     if cfg.get("logger_enabled", False):
@@ -622,7 +627,7 @@ async def run_agent_with_optional_rlm(
             attributes={**span_attributes, "superoptix.rlm_mode": mode},
             input_data=augmented_prompt,
         ) as span:
-            result = await agent.run(augmented_prompt)
+            result = await agent.run(augmented_prompt, **effective_run_kwargs)
             if span is not None and hasattr(span, "set_output"):
                 span.set_output({"status": "success", "rlm_mode": mode})
             return result
