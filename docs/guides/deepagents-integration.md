@@ -143,7 +143,7 @@ super agent evaluate research_agent_deepagents
 super agent optimize research_agent_deepagents \
   --framework deepagents \
   --auto medium \
-  --reflection-lm google-genai:gemini-2.5-pro
+  --reflection-lm google-genai:gemini-3.1-pro-preview
 
 # Test optimized version
 super agent evaluate research_agent_deepagents  # automatically loads optimized weights
@@ -707,7 +707,7 @@ NotImplementedError
 ```yaml
 language_model:
   provider: anthropic
-  model: anthropic:claude-sonnet-4-20250514
+  model: anthropic:claude-sonnet-5
 ```
 
 ### Agent Initialization Failed
@@ -716,7 +716,7 @@ language_model:
 
 **Checklist:**
 1. API key set? (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`)
-2. Model string correct? (e.g., `anthropic:claude-sonnet-4-20250514`)
+2. Model string correct? (e.g., `anthropic:claude-sonnet-5`)
 3. LangChain dependencies installed? (`pip install langchain langchain-anthropic`)
 
 ### No BDD Specifications Found

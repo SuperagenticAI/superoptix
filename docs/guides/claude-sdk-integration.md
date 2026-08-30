@@ -50,7 +50,7 @@ spec:
 
   language_model:
     provider: anthropic
-    model: claude-sonnet-4-5
+    model: claude-sonnet-5
 
   input_fields:
     - name: question
@@ -117,7 +117,7 @@ options = ClaudeAgentOptions(
     system_prompt="You are an HR assistant with HRIS access.",
     mcp_servers={"stackone": mcp_server},
     allowed_tools=tool_names,
-    model="claude-sonnet-4-5",
+    model="claude-sonnet-5",
 )
 
 # Execute query

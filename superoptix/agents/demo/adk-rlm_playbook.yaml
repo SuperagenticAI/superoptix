@@ -19,7 +19,7 @@ spec:
   language_model:
     location: cloud
     provider: google
-    model: gemini-2.5-flash
+    model: gemini-3.7-flash
 
   input_fields:
     - name: query
@@ -61,7 +61,7 @@ spec:
       max_depth: 1
       verbose: false
       persistent: false
-      task_model: gemini-2.5-flash
+      task_model: gemini-3.7-flash
       logger:
         enabled: false
         log_dir: .superoptix/logs/rlm

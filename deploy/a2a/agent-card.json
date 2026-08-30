@@ -1,0 +1,106 @@
+{
+  "name": "SuperOptiX",
+  "description": "The A2A interoperability layer for agent frameworks. Reports A2A readiness for DSPy, OpenAI Agents SDK, Claude Agent SDK, Pydantic AI, Google ADK, CrewAI, DeepAgents and Microsoft Agent Framework, and reviews Agent Cards for conformance and discoverability",
+  "version": "1.0",
+  "protocolVersion": "1.0",
+  "url": "https://superoptix.onrender.com",
+  "preferredTransport": "JSONRPC",
+  "supportedInterfaces": [
+    {
+      "url": "https://superoptix.onrender.com/a2a/jsonrpc",
+      "protocolBinding": "JSONRPC",
+      "protocolVersion": "1.0"
+    },
+    {
+      "url": "https://superoptix.onrender.com",
+      "protocolBinding": "HTTP+JSON",
+      "protocolVersion": "1.0"
+    },
+    {
+      "url": "https://superoptix.onrender.com/a2a/jsonrpc",
+      "protocolBinding": "JSONRPC",
+      "protocolVersion": "0.3"
+    }
+  ],
+  "defaultInputModes": [
+    "text/plain"
+  ],
+  "defaultOutputModes": [
+    "text/plain"
+  ],
+  "capabilities": {
+    "streaming": true,
+    "pushNotifications": false,
+    "stateTransitionHistory": true,
+    "extendedAgentCard": false
+  },
+  "skills": [
+    {
+      "id": "framework-a2a-readiness",
+      "name": "Framework A2A Readiness",
+      "description": "Report whether a named agent framework supports the A2A protocol, which spec line it targets, and what is missing for A2A 1.0 interoperability. Covers DSPy, OpenAI Agents SDK, Claude Agent SDK, Pydantic AI, Google ADK, CrewAI, DeepAgents and Microsoft Agent Framework. Answers from published package metadata, not opinion",
+      "tags": [
+        "a2a",
+        "interoperability",
+        "frameworks",
+        "discovery",
+        "compatibility"
+      ],
+      "examples": [
+        "Does CrewAI support A2A?",
+        "Which agent frameworks have no A2A support at all?",
+        "What spec version does Google ADK target?",
+        "Is DSPy reachable over A2A?"
+      ],
+      "inputModes": [
+        "text/plain"
+      ],
+      "outputModes": [
+        "text/plain",
+        "application/json"
+      ]
+    },
+    {
+      "id": "agent-card-review",
+      "name": "Agent Card Review",
+      "description": "Review an A2A Agent Card for conformance and discoverability. Returns a scored list of findings covering protocol version, card signing, security schemes, interface bindings and the quality of each skill description as a calling agent would read it. Submit the card as JSON",
+      "tags": [
+        "a2a",
+        "agent-card",
+        "conformance",
+        "discoverability",
+        "review"
+      ],
+      "examples": [
+        "Review this agent card: {\"name\": \"my-agent\", \"skills\": []}",
+        "Why are other agents not discovering my agent?",
+        "Is my agent card A2A 1.0 conformant?"
+      ],
+      "inputModes": [
+        "text/plain",
+        "application/json"
+      ],
+      "outputModes": [
+        "text/plain",
+        "application/json"
+      ]
+    }
+  ],
+  "provider": {
+    "organization": "Superagentic AI",
+    "url": "https://super-agentic.ai"
+  },
+  "securitySchemes": {
+    "bearer": {
+      "type": "http",
+      "scheme": "bearer",
+      "description": "Bearer token issued by the SuperOptiX operator. The public catalogue skills are readable without one.",
+      "httpAuthSecurityScheme": {
+        "scheme": "bearer",
+        "description": "Bearer token issued by the SuperOptiX operator"
+      }
+    }
+  },
+  "iconUrl": "https://super-agentic.ai/uploads/superoptix.png",
+  "documentationUrl": "https://github.com/SuperagenticAI/superoptix"
+}

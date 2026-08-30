@@ -34,7 +34,7 @@ super agent optimize <agent_id> --framework <framework> --auto light
 super agent run <agent_id> --framework <framework> --local --provider ollama --model qwen3.5:9b --goal "..."
 
 # Cloud (Google)
-super agent run <agent_id> --framework <framework> --cloud --provider google-genai --model gemini-2.5-flash --goal "..."
+super agent run <agent_id> --framework <framework> --cloud --provider google-genai --model gemini-3.7-flash --goal "..."
 ```
 
 ## Required API Keys

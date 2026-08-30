@@ -20,7 +20,7 @@ spec:
   language_model:
     location: cloud
     provider: anthropic
-    model: claude-sonnet-4-20250514
+    model: claude-sonnet-5
     temperature: 0.2
     max_tokens: 1800
 
@@ -100,6 +100,6 @@ spec:
 
 # Quick Start:
 #   export ANTHROPIC_API_KEY=your_key
-#   super agent compile graphrag_surrealdb_deepagents_demo --framework deepagents --cloud --provider anthropic --model claude-sonnet-4-20250514
-#   super agent run graphrag_surrealdb_deepagents_demo --framework deepagents --cloud --provider anthropic --model claude-sonnet-4-20250514 \
+#   super agent compile graphrag_surrealdb_deepagents_demo --framework deepagents --cloud --provider anthropic --model claude-sonnet-5
+#   super agent run graphrag_surrealdb_deepagents_demo --framework deepagents --cloud --provider anthropic --model claude-sonnet-5 \
 #     --goal "What capabilities does SurrealDB provide?"

@@ -64,14 +64,22 @@ uv tool install superoptix --with "superoptix[frameworks-pydantic-ai]"
 # DeepAgents
 uv tool install superoptix --with "superoptix[frameworks-deepagents]"
 
-# Microsoft Agent Framework (legacy support)
+# Microsoft Agent Framework
 uv tool install superoptix --with "superoptix[frameworks-microsoft]"
-
-# CrewAI (see note below)
-uv tool install superoptix --with "superoptix[frameworks-crewai]"
 ```
 
-CrewAI and DSPy have dependency constraints that may require separate environments in some setups.
+### CrewAI
+
+CrewAI installs alongside SuperOptiX rather than as an extra:
+
+```bash
+pip install superoptix "crewai>=1.15"
+```
+
+Use a CrewAI-only environment for this: CrewAI requires `chromadb~=1.1.0`, while
+SuperOptiX's `chromadb` / `turboagents` / `vectordb` extras require `chromadb>=1.5.5`.
+The older DSPy/CrewAI `json-repair` conflict no longer applies — CrewAI 1.15+ and
+DSPy 3.3 co-install cleanly.
 
 ### Alternative with `pip`
 
@@ -87,14 +95,23 @@ Requirements: Python 3.11+
 
 SuperOptiX supports compiling and running agents across:
 
-- DSPy
-- OpenAI Agents SDK
-- Claude Agent SDK
-- Pydantic AI
-- CrewAI
-- Google ADK
-- DeepAgents
-- Microsoft Agent Framework (legacy support)
+| Framework | Minimum version | Extra |
+|---|---|---|
+| DSPy | 3.3+ | included in core |
+| OpenAI Agents SDK | 0.20.x | `frameworks-openai` |
+| Claude Agent SDK | 0.2+ | `frameworks-claude-sdk` |
+| Pydantic AI | 2.31.x | `frameworks-pydantic-ai` |
+| Google ADK | 2.7+ | `frameworks-google` |
+| DeepAgents | 0.7.x | `frameworks-deepagents` |
+| Microsoft Agent Framework | 1.16+ (1.0 GA) | `frameworks-microsoft` |
+| CrewAI | 1.15+ | separate install (see above) |
+
+Two upper bounds are upstream constraints, not choices:
+
+- **OpenAI Agents SDK is held at `<0.21`.** 0.22+ requires `openai>=3.0`, while
+  LiteLLM (a DSPy dependency) still requires `openai<3.0`.
+- **Pydantic AI is held at `<2.32`.** 2.36 requires `opentelemetry-api==1.44`,
+  while Google ADK 2.x caps it at `<=1.42.1`.
 
 ---
 
@@ -173,6 +190,9 @@ Install the optional A2A extra:
 ```bash
 pip install "superoptix[a2a]"
 ```
+
+> SuperOptiX implements the A2A v1 wire shape directly over FastAPI rather than
+> wrapping the `a2a-sdk` package. The extra installs the HTTP server stack only.
 
 For the full packaged demo set:
 

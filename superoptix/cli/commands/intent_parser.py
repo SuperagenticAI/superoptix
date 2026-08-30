@@ -74,7 +74,7 @@ class IntentRecognition(dspy.Signature):
     - namespace: software, healthcare, finance, etc.
     - goal: the task to run agent on (for "run" action)
     - auto: optimization level - low, medium, high
-    - reflection_lm: model for GEPA reflection (gpt-4o, gpt-4o-mini, claude-3-5-sonnet) - default to "gpt-4o-mini"
+    - reflection_lm: model for GEPA reflection (gpt-5.6-terra, gpt-5.6-luna, claude-sonnet-5) - default to "gpt-5.6-luna"
     - framework: dspy, langchain, crewai (for compile)
 
     ## Examples:

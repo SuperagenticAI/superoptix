@@ -48,7 +48,7 @@ async def main():
     if os.getenv("OPENAI_API_KEY"):
         service_id = "default"
         kernel.add_service(
-            OpenAIChatCompletion(service_id=service_id, ai_model_id="gpt-4o-mini")
+            OpenAIChatCompletion(service_id=service_id, ai_model_id="gpt-5.6-luna")
         )
 
     # 4. Register Functions as a Plugin

@@ -7,6 +7,76 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Dependency modernization.** All framework integrations moved onto their current
+  upstream releases after ~4 months of drift:
+
+  | Framework | Was | Now |
+  |---|---|---|
+  | DSPy | 3.1.2 (no floor) | 3.3.1 (`>=3.3`) |
+  | OpenAI Agents SDK | 0.14.1 | 0.20.0 |
+  | Google ADK | 1.14.1 | 2.7.0 |
+  | Pydantic AI | 1.22.0 | 2.31.1 |
+  | DeepAgents | 0.5.6 (capped `<0.6.0`) | 0.7.11 |
+  | Claude Agent SDK | 0.1.31 | 0.2.148 |
+  | Microsoft Agent Framework | 1.0.0rc3 (beta pin) | 1.16.0 (1.0 GA) |
+  | LiteLLM | 1.81.6 | 1.100.x |
+
+- **Refreshed default model IDs across playbooks, templates, docs, and examples**
+  (~380 references). `gpt-4o*` → `gpt-5.6-terra` / `gpt-5.6-luna`,
+  `gemini-2.x` → `gemini-3.7-flash` / `gemini-3.1-pro-preview` / `gemini-3.5-flash-lite`,
+  `claude-3.x` and `claude-*-4*` → `claude-sonnet-5` / `claude-opus-5` / `claude-haiku-4-5-20251001`.
+
+- CrewAI documentation corrected. The historical DSPy `json-repair` conflict is
+  resolved upstream (CrewAI 1.15+ requires `json-repair~=0.60.1`, satisfying DSPy 3.3).
+  The live constraint is `chromadb~=1.1.0` vs SuperOptiX's `chromadb>=1.5.5` extras,
+  so CrewAI installs as `pip install superoptix "crewai>=1.15"` in its own environment.
+
+### Removed
+- **`torch`, `transformers` and `accelerate` are no longer core dependencies.**
+  Only `superoptix/models/backends/huggingface*.py` imports them, always lazily,
+  and they were already declared in the `huggingface` and `ml-cross-platform`
+  extras. They added ~545 MB to every install (torch alone is 491 MB) for an
+  optional local-inference backend. `pip install "superoptix[a2a]"` drops from
+  ~650 MB to ~219 MB. Install `superoptix[huggingface]` to use that backend.
+
+### Added
+- **Public A2A endpoint and Agent Card** (`superoptix/protocols/a2a/public/`).
+  Two deterministic, vendor-neutral skills served over A2A — no model calls, no
+  user code, no credentials:
+  - `framework-a2a-readiness` — A2A support and spec line for each of the eight
+    supported agent frameworks, answered from published package metadata.
+  - `agent-card-review` — scores an A2A Agent Card for 1.0 conformance and
+    discoverability.
+  Deployable as an ASGI app (`superoptix.protocols.a2a.public.app:app`); see
+  `deploy/a2a/` for the Render blueprint and publishing guide.
+- Agent Card builder now emits the full A2A 1.0 field set: top-level
+  `protocolVersion` and `url`, `preferredTransport`, `securitySchemes`,
+  `iconUrl`, `documentationUrl`, and optional dual advertisement of the 0.3 line
+  so pre-1.0 clients can still negotiate.
+
+### Fixed
+- **`__version__` no longer drifts from the release version.** It read `0.2.24`
+  while `pyproject.toml` declared `0.2.25`; it is now derived from installed
+  package metadata.
+- **`superoptix[a2a]` no longer depends on `a2a-sdk`.** The package was declared in
+  three extras but never imported — SuperOptiX implements the A2A v1 wire shape
+  directly over FastAPI. The extra had been supplying FastAPI transitively via
+  `a2a-sdk[http-server]`; `fastapi` and `sse-starlette` are now declared explicitly,
+  and the obsolete `a2a-sdk==0.3.25` pin (the pre-1.0 SDK line) is gone.
+- Removed `google-generativeai` from the Google extra. It is deprecated upstream
+  (superseded by `google-genai`) and was never imported.
+- Repaired 13 dead documentation navigation links. The entire API Reference nav
+  subtree pointed at `docs/reference/**` files that do not exist.
+- Surfaced previously orphaned documentation in the nav: the harness & sandbox
+  guide, memory & context optimization guide, the three ADRs, glossary, changelog,
+  and contributing guide.
+
+### Removed
+- Internal DeepAgents/Gemini working notes moved out of `docs/` into `dev-notes/`
+  so they are no longer published to the documentation site.
+- Stray `research_agent_deepagents_playbook.yaml.bak` removed from version control.
+
 ## [0.2.25] - 2026-04-15
 
 ### Added

@@ -118,17 +118,17 @@ super agent run developer --framework pydantic-ai --direct --goal "Implement a u
 spec:
   language_model:
     provider: google-genai
-    model: gemini-2.5-flash
+    model: gemini-3.7-flash
     # Set: export GOOGLE_API_KEY="..."
 ```
 
 ### Run the Workflow
 
 ```bash
-super agent compile developer --framework pydantic-ai --cloud --provider google-genai --model gemini-2.5-flash
+super agent compile developer --framework pydantic-ai --cloud --provider google-genai --model gemini-3.7-flash
 
 # Run (direct mode)
-super agent run developer --framework pydantic-ai --direct --cloud --provider google-genai --model gemini-2.5-flash --goal "Your task here"
+super agent run developer --framework pydantic-ai --direct --cloud --provider google-genai --model gemini-3.7-flash --goal "Your task here"
 
 # Optional optimize loop
 super agent compile developer --framework pydantic-ai --optimize
@@ -477,7 +477,7 @@ super agent optimize developer \
 
 # Light mode for better results (~5-10 minutes, ~50-100 API calls)
 # Use local Ollama: --reflection-lm ollama/qwen3.5:9b
-# Cloud models (costly): --reflection-lm openai/gpt-4o
+# Cloud models (costly): --reflection-lm openai/gpt-5.6-terra
 super agent optimize developer \
   --framework pydantic-ai \
   --auto light \
@@ -1229,7 +1229,7 @@ The pipeline automatically:
 spec:
   language_model:
     provider: openai
-    model: gpt-4o
+    model: gpt-5.6-terra
     max_tokens: 4000  # Adjust as needed (default: 4000)
     top_p: 0.9  # Optional
 ```
@@ -1247,7 +1247,7 @@ Pydantic AI automatically detects OpenAI from the model string or provider field
 spec:
   language_model:
     provider: anthropic
-    model: claude-3-5-sonnet
+    model: claude-sonnet-5
     max_tokens: 4000  # Adjust as needed (default: 4000)
     top_p: 0.9  # Optional (Anthropic may ignore this)
 ```
@@ -1361,7 +1361,7 @@ pip install pydantic-ai==1.31.0
    **Cloud models are costly:**
    ```bash
    # NOT RECOMMENDED - Expensive!
-   super agent optimize developer --framework pydantic-ai --auto light --reflection-lm openai/gpt-4o
+   super agent optimize developer --framework pydantic-ai --auto light --reflection-lm openai/gpt-5.6-terra
    # This can cost $5-20+ per optimization run!
    ```
 
@@ -1420,7 +1420,7 @@ from pydantic_ai.models import infer_model
 # Auto-detects provider from model string
 model = infer_model("ollama:qwen3.5:9b")
 # or
-model = infer_model("openai:gpt-4o")
+model = infer_model("openai:gpt-5.6-terra")
 ```
 
 For Ollama, it automatically:

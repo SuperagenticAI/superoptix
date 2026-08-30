@@ -302,14 +302,14 @@ result = gepa.optimize(
 # OpenAI models
 adapter = GenericRAGAdapter(
     vector_store=vector_store,
-    llm_model="gpt-4o",  # Requires OPENAI_API_KEY
+    llm_model="gpt-5.6-terra",  # Requires OPENAI_API_KEY
     rag_config=config
 )
 
 # Anthropic models
 adapter = GenericRAGAdapter(
     vector_store=vector_store,
-    llm_model="claude-3-5-sonnet-20241022",  # Requires ANTHROPIC_API_KEY
+    llm_model="claude-sonnet-5",  # Requires ANTHROPIC_API_KEY
     rag_config=config
 )
 
@@ -320,7 +320,7 @@ result = gepa.optimize(
     valset=validation_data,
     adapter=adapter,
     max_metric_calls=50,  # Higher for production optimization
-    reflection_llm_model="gpt-4o"
+    reflection_llm_model="gpt-5.6-terra"
 )
 ```
 
@@ -346,7 +346,7 @@ rag_config = {
 adapter = GenericRAGAdapter(
     vector_store=vector_store,
     llm_model="ollama/qwen3.5:2b",  # Local model for testing
-    # llm_model="gpt-4o",  # For cloud-based usage
+    # llm_model="gpt-5.6-terra",  # For cloud-based usage
     rag_config=rag_config
 )
 ```
@@ -505,7 +505,7 @@ def create_rag_adapter(env: str):
             "top_k": 5,
             "filters": {"status": "approved"}
         }
-        llm_model = os.getenv("LLM_MODEL", "gpt-4o")  # Cloud models for production
+        llm_model = os.getenv("LLM_MODEL", "gpt-5.6-terra")  # Cloud models for production
 
     return GenericRAGAdapter(
         vector_store=vector_store,

@@ -18,7 +18,7 @@ The MCP adapter supports both single-tool and multi-tool scenarios:
 ```python
 adapter = MCPAdapter(
     tool_names="read_file",  # Single tool as string
-    task_model="gpt-4o-mini", # Change as per you model choice
+    task_model="gpt-5.6-luna", # Change as per you model choice
     metric_fn=my_metric,
 )
 ```
@@ -27,7 +27,7 @@ adapter = MCPAdapter(
 ```python
 adapter = MCPAdapter(
     tool_names=["read_file", "write_file", "list_files"],  # Multiple tools as list
-    task_model="gpt-4o-mini", # Change as per you model choice
+    task_model="gpt-5.6-luna", # Change as per you model choice
     metric_fn=my_metric,
 )
 ```
@@ -104,7 +104,7 @@ ollama pull qwen3.5:2b
 adapter = MCPAdapter(
     server_params=server_params,
     tool_names=["read_file", "write_file", "list_files"],  # Multiple tools for selection
-    task_model="openai/gpt-4o-mini",  # OpenAI API,  replace with your model choice 
+    task_model="openai/gpt-5.6-luna",  # OpenAI API,  replace with your model choice 
     metric_fn=lambda item, output: 1.0 if item["reference_answer"] in output else 0.0,
 )
 
@@ -131,7 +131,7 @@ Connect to thousands of public MCP servers via SSE or StreamableHTTP:
 # Remote SSE server
 adapter = MCPAdapter(
     tool_names=["search_web", "analyze_data", "summarize_text"],  # Multiple tools for selection
-    task_model="openai/gpt-4o-mini",
+    task_model="openai/gpt-5.6-luna",
     metric_fn=lambda item, output: 1.0 if item["reference_answer"] in output else 0.0,
     remote_url="https://mcp-server.com/sse",
     remote_transport="sse",
@@ -140,7 +140,7 @@ adapter = MCPAdapter(
 # Remote HTTP server with authentication
 adapter = MCPAdapter(
     tool_names=["analyze_data", "visualize_data", "export_data"],  # Multiple tools for selection
-    task_model="openai/gpt-4o-mini",
+    task_model="openai/gpt-5.6-luna",
     metric_fn=my_metric,
     remote_url="https://mcp-server.com/mcp",
     remote_transport="streamable_http",
@@ -153,7 +153,7 @@ result = gepa.optimize(
     trainset=dataset[:20],
     valset=dataset[20:],
     adapter=adapter,
-    reflection_lm="openai/gpt-4o",
+    reflection_lm="openai/gpt-5.6-terra",
     max_metric_calls=150,
 )
 ```
@@ -287,7 +287,7 @@ def llm_judge(item, output):
         "content": f"Rate this answer (0-1):\nQuestion: {item['user_query']}\n"
                    f"Reference: {item['reference_answer']}\nAnswer: {output}"
     }]
-    response = litellm.completion(model="openai/gpt-4o", messages=messages)
+    response = litellm.completion(model="openai/gpt-5.6-terra", messages=messages)
     return float(response.choices[0].message.content)
 ```
 
@@ -308,7 +308,7 @@ server_params = StdioServerParameters(
 adapter = MCPAdapter(
     server_params=server_params,
     tool_name="read_file",
-    task_model="openai/gpt-4o-mini",
+    task_model="openai/gpt-5.6-luna",
     metric_fn=exact_match,
 )
 ```
@@ -341,7 +341,7 @@ server_params = StdioServerParameters(
 adapter = MCPAdapter(
     server_params=server_params,
     tool_name="search_docs",
-    task_model="openai/gpt-4o-mini",
+    task_model="openai/gpt-5.6-luna",
     metric_fn=custom_metric,
 )
 ```
@@ -353,7 +353,7 @@ adapter = MCPAdapter(
 ```python
 adapter = MCPAdapter(
     tool_name="search_web",
-    task_model="openai/gpt-4o-mini",
+    task_model="openai/gpt-5.6-luna",
     metric_fn=my_metric,
     remote_url="https://public-mcp.example.com/sse",
     remote_transport="sse",
@@ -365,7 +365,7 @@ adapter = MCPAdapter(
 ```python
 adapter = MCPAdapter(
     tool_name="company_data",
-    task_model="openai/gpt-4o-mini",
+    task_model="openai/gpt-5.6-luna",
     metric_fn=my_metric,
     remote_url="https://internal-mcp.company.com/mcp",
     remote_transport="streamable_http",
@@ -410,7 +410,7 @@ For simpler scenarios, disable the two-pass workflow:
 adapter = MCPAdapter(
     server_params=server_params,
     tool_name="my_tool",
-    task_model="openai/gpt-4o-mini",
+    task_model="openai/gpt-5.6-luna",
     metric_fn=my_metric,
     enable_two_pass=False,  # Single-pass only
 )
@@ -421,7 +421,7 @@ adapter = MCPAdapter(
 ```python
 adapter = MCPAdapter(
     tool_name="my_tool",
-    task_model="openai/gpt-4o-mini",
+    task_model="openai/gpt-5.6-luna",
     metric_fn=my_metric,
 
     # Remote server settings
@@ -449,7 +449,7 @@ Configure failure scores for robustness:
 adapter = MCPAdapter(
     server_params=server_params,
     tool_name="my_tool",
-    task_model="openai/gpt-4o-mini",
+    task_model="openai/gpt-5.6-luna",
     metric_fn=my_metric,
     failure_score=0.0,  # Score for failed executions
 )

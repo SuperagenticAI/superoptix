@@ -31,16 +31,16 @@ spec:
   # ❌ Not supported: Ollama (LangChain limitation - bind_tools() not implemented)
   language_model:
     provider: google-genai
-    model: google-genai:gemini-2.5-flash
+    model: google-genai:gemini-3.7-flash
     temperature: 0.7
     max_tokens: 8192
     # Alternative models:
     # Latest Gemini (faster):
-    # model: google-genai:gemini-2.5-flash-preview
+    # model: google-genai:gemini-3.7-flash
     # 
     # For Claude:
     # provider: anthropic
-    # model: anthropic:claude-sonnet-4-20250514
+    # model: anthropic:claude-sonnet-5
     # 
     # For GPT-4:
     # provider: openai
@@ -139,12 +139,12 @@ spec:
       params:
         metric: response_accuracy
         auto: medium
-        reflection_lm: google-genai:gemini-2.5-pro  # More capable model for better reflection
+        reflection_lm: google-genai:gemini-3.1-pro-preview  # More capable model for better reflection
         max_full_evals: 5
         # Alternative reflection models:
-        # reflection_lm: google-genai:gemini-2.5-flash  # Faster, still good
-        # reflection_lm: gpt-4o-mini  # If using OpenAI
-        # reflection_lm: anthropic:claude-sonnet-4-20250514  # If using Claude
+        # reflection_lm: google-genai:gemini-3.7-flash  # Faster, still good
+        # reflection_lm: gpt-5.6-luna  # If using OpenAI
+        # reflection_lm: anthropic:claude-sonnet-5  # If using Claude
     metric: response_accuracy
     metric_threshold: 0.85
 

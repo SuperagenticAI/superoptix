@@ -40,7 +40,7 @@ def _build_agent(name: str, system_message: str, model: str, base_url: str = "",
 		base_url = None  # Use default OpenAI endpoints
 	
 	client = OpenAIChatCompletionClient(
-		model=model or "gpt-4o-mini",
+		model=model or "gpt-5.6-luna",
 		base_url=base_url,
 		api_key=api_key or None,
 		model_info=model_info or None,
@@ -55,7 +55,7 @@ def _build_agent(name: str, system_message: str, model: str, base_url: str = "",
 
 def build_optimas_system() -> CompoundAISystem:
 	components: Dict[str, Any] = {}
-	model_name = "{{ spec.get('language_model', {}).get('model', 'gpt-4o-mini') }}"
+	model_name = "{{ spec.get('language_model', {}).get('model', 'gpt-5.6-luna') }}"
 	base_url = "{{ spec.get('language_model', {}).get('base_url', '') }}"
 	api_key = "{{ spec.get('language_model', {}).get('api_key', '') }}"
 	model_info = {{ spec.get('language_model', {}).get('model_info', {}) }}

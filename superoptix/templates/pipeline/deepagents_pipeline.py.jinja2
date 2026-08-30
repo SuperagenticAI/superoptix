@@ -52,7 +52,7 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
         system_prompt: Optional[str] = None,
         tools: Optional[List] = None,
         subagents: Optional[List] = None,
-        model: str = "{{ spec.language_model.model | default('anthropic:claude-sonnet-4-20250514') }}",
+        model: str = "{{ spec.language_model.model | default('anthropic:claude-sonnet-5') }}",
         model_provider: Optional[str] = "{{ spec.language_model.provider | default('') }}",
         **kwargs
     ):
@@ -63,7 +63,7 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
             system_prompt: Main agent instruction (optimizable by GEPA)
             tools: List of tools for the agent
             subagents: List of specialized subagents
-            model: Model identifier (e.g., "anthropic:claude-sonnet-4-20250514")
+            model: Model identifier (e.g., "anthropic:claude-sonnet-5")
             model_provider: Model provider (e.g., "anthropic", "google-genai", "openai")
             **kwargs: Additional configuration
         """
@@ -208,7 +208,7 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
         if DEEPAGENTS_AVAILABLE:
             try:
                 # Get model configuration
-                model_str = config.get("model", "anthropic:claude-sonnet-4-20250514")
+                model_str = config.get("model", "anthropic:claude-sonnet-5")
                 model_provider = config.get("model_provider")
                 model_name = model_str
                 known_providers = {
@@ -501,7 +501,7 @@ def _create_subagents() -> List[Dict[str, Any]]:
 # Factory function for easy instantiation
 def create_{{ agent_name }}_agent(
     system_prompt: Optional[str] = None,
-    model: str = "{{ spec.language_model.model | default('anthropic:claude-sonnet-4-20250514') }}",
+    model: str = "{{ spec.language_model.model | default('anthropic:claude-sonnet-5') }}",
     model_provider: Optional[str] = "{{ spec.language_model.provider | default('') }}",
     **kwargs
 ) -> {{ agent_name | to_pascal_case }}Component:
@@ -856,7 +856,7 @@ class {{ agent_name | to_pascal_case }}Pipeline:
             optimizer = UniversalGEPA(
                 metric=eval_metric,
                 auto=auto,
-                reflection_lm="gpt-4o-mini",
+                reflection_lm="gpt-5.6-luna",
             )
             
             result = optimizer.compile(

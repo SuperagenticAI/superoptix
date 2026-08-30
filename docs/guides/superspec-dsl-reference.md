@@ -152,7 +152,7 @@ spec:
 spec:
   language_model:
     provider: openai
-    model: gpt-4o-mini
+    model: gpt-5.6-luna
     api_key: ${OPENAI_API_KEY}
     temperature: 0.7
     max_tokens: 1000
@@ -164,7 +164,7 @@ spec:
 spec:
   language_model:
     provider: google
-    model: gemini-2.0-flash
+    model: gemini-3.7-flash
     api_key: ${GOOGLE_API_KEY}
     temperature: 0.7
 ```

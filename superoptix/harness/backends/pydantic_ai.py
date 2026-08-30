@@ -138,9 +138,7 @@ def _build_usage_limits(model_config: dict[str, Any] | None) -> Any | None:
         "response_tokens_limit",
     }
     limits = {
-        key: raw_limits[key]
-        for key in limit_keys
-        if raw_limits.get(key) is not None
+        key: raw_limits[key] for key in limit_keys if raw_limits.get(key) is not None
     }
     if not limits:
         return None

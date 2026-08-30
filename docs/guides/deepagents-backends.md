@@ -58,7 +58,7 @@ spec:
   
   language_model:
     provider: google-genai
-    model: gemini-2.5-flash
+    model: gemini-3.7-flash
   
   # No backend config = uses StateBackend (default)
 ```
@@ -73,7 +73,7 @@ spec:
   
   language_model:
     provider: google-genai
-    model: gemini-2.5-flash
+    model: gemini-3.7-flash
   
   # Enable persistent storage
   backend:
@@ -214,7 +214,7 @@ spec:
   
   language_model:
     provider: google-genai
-    model: gemini-2.5-flash
+    model: gemini-3.7-flash
     temperature: 0.7
   
   # Persistent memory across all conversations
@@ -277,7 +277,7 @@ spec:
   
   language_model:
     provider: google-genai
-    model: gemini-2.5-pro  # Pro for better analysis
+    model: gemini-3.1-pro-preview  # Pro for better analysis
     temperature: 0.3
   
   # Access real project files
@@ -351,7 +351,7 @@ spec:
   
   language_model:
     provider: google-genai
-    model: gemini-2.5-flash
+    model: gemini-3.7-flash
     temperature: 0.7
   
   # Hybrid storage strategy
@@ -567,7 +567,7 @@ spec:
   
   language_model:
     provider: google-genai
-    model: gemini-2.5-flash
+    model: gemini-3.7-flash
   
   # Backend configuration (NEW in 0.2.0)
   backend:
@@ -742,13 +742,13 @@ backend:
 spec:
   target_framework: deepagents
   language_model:
-    model: gemini-2.5-flash
+    model: gemini-3.7-flash
 
 # New (with persistence)
 spec:
   target_framework: deepagents
   language_model:
-    model: gemini-2.5-flash
+    model: gemini-3.7-flash
   backend:
     type: store  # Add this!
 ```

@@ -134,7 +134,7 @@ SuperOptiX › /ask how does GEPA optimization work?
 SuperOptiX › /model list
 
 # Switch models
-SuperOptiX › /model set gpt-4o-mini
+SuperOptiX › /model set gpt-5.6-luna
 
 # Show configuration
 SuperOptiX › /config
@@ -196,11 +196,11 @@ SuperOptiX › /clear
 - Any Ollama model
 
 **Cloud Models (OpenAI):**
-- `gpt-4o`, `gpt-4o-mini`
+- `gpt-5.6-terra`, `gpt-5.6-luna`
 - `gpt-3.5-turbo`
 
 **Cloud Models (Anthropic):**
-- `claude-3-5-sonnet-20241022`
+- `claude-sonnet-5`
 - `claude-3-opus-20240229`
 
 ### List Available Models
@@ -219,11 +219,11 @@ Local Models (Ollama):
   • qwen2.5-coder:7b     Code specialist
 
 Cloud Models (OpenAI):
-  • gpt-4o-mini          Cost-effective, fast
-  • gpt-4o               Most capable
+  • gpt-5.6-luna          Cost-effective, fast
+  • gpt-5.6-terra               Most capable
 
 Cloud Models (Anthropic):
-  • claude-3-5-sonnet    Best for complex tasks
+  • claude-sonnet-5    Best for complex tasks
 ```
 
 ### Switch Models
@@ -233,7 +233,7 @@ Cloud Models (Anthropic):
 SuperOptiX › /model set gpt-oss:120b
 
 # Switch to cloud model
-SuperOptiX › /model set gpt-4o-mini
+SuperOptiX › /model set gpt-5.6-luna
 ```
 
 **Notes:**
@@ -381,9 +381,9 @@ SuperOptiX › /config
 
 ```bash
 # Switch model anytime
-SuperOptiX › /model set gpt-4o-mini
+SuperOptiX › /model set gpt-5.6-luna
 
-Switched to: gpt-4o-mini
+Switched to: gpt-5.6-luna
    Provider: openai
 ```
 
@@ -615,8 +615,8 @@ Evaluated!
 
 **For CLI Conversation:**
 - **Local (Ollama):** `gpt-oss:120b` - Great balance of speed and capability
-- **Cloud (OpenAI):** `gpt-4o-mini` - Fast and cost-effective
-- **Cloud (Anthropic):** `claude-3-5-sonnet` - Best for complex reasoning
+- **Cloud (OpenAI):** `gpt-5.6-luna` - Fast and cost-effective
+- **Cloud (Anthropic):** `claude-sonnet-5` - Best for complex reasoning
 
 **For Agents:**
 - Configure in playbook YAML

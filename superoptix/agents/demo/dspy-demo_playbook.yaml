@@ -201,7 +201,7 @@ spec:
 #   dspy.module: chain_of_thought | react | rlm | predict | program_of_thought | parallel
 #
 # Optional cloud run:
-#   super agent compile dspy-demo --cloud --provider google-genai --model gemini-2.5-flash
+#   super agent compile dspy-demo --cloud --provider google-genai --model gemini-3.7-flash
 #
 # Local explicit:
 #   super agent compile dspy-demo --local --provider ollama --model qwen3.5:9b

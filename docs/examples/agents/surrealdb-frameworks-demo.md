@@ -506,13 +506,13 @@ export GOOGLE_API_KEY=your_key_here
 Run standard RAG:
 
 ```bash
-super agent run rag_surrealdb_openai_demo --framework openai --cloud --provider google-genai --model gemini-2.5-flash --goal "What is NEON-FOX-742?"
+super agent run rag_surrealdb_openai_demo --framework openai --cloud --provider google-genai --model gemini-3.7-flash --goal "What is NEON-FOX-742?"
 ```
 
 Run GraphRAG:
 
 ```bash
-super agent run graphrag_surrealdb_openai_demo --framework openai --cloud --provider google-genai --model gemini-2.5-flash --goal "What capabilities does SurrealDB provide?"
+super agent run graphrag_surrealdb_openai_demo --framework openai --cloud --provider google-genai --model gemini-3.7-flash --goal "What capabilities does SurrealDB provide?"
 ```
 
 ## Docker And Connection Notes
@@ -648,7 +648,7 @@ What should stay the same across frameworks:
 
 For the framework demos below, the runtime examples use Google Gemini via:
 
-- `--cloud --provider google-genai --model gemini-2.5-flash`
+- `--cloud --provider google-genai --model gemini-3.7-flash`
 
 Gemini prerequisite:
 
@@ -709,16 +709,16 @@ Important retrieval note:
 
     ```bash
     super agent pull rag_surrealdb_openai_demo
-    super agent compile rag_surrealdb_openai_demo --framework openai --cloud --provider google-genai --model gemini-2.5-flash
-    super agent run rag_surrealdb_openai_demo --framework openai --cloud --provider google-genai --model gemini-2.5-flash --goal "What is NEON-FOX-742?"
+    super agent compile rag_surrealdb_openai_demo --framework openai --cloud --provider google-genai --model gemini-3.7-flash
+    super agent run rag_surrealdb_openai_demo --framework openai --cloud --provider google-genai --model gemini-3.7-flash --goal "What is NEON-FOX-742?"
     ```
 
     GraphRAG:
 
     ```bash
     super agent pull graphrag_surrealdb_openai_demo
-    super agent compile graphrag_surrealdb_openai_demo --framework openai --cloud --provider google-genai --model gemini-2.5-flash
-    super agent run graphrag_surrealdb_openai_demo --framework openai --cloud --provider google-genai --model gemini-2.5-flash --goal "What capabilities does SurrealDB provide?"
+    super agent compile graphrag_surrealdb_openai_demo --framework openai --cloud --provider google-genai --model gemini-3.7-flash
+    super agent run graphrag_surrealdb_openai_demo --framework openai --cloud --provider google-genai --model gemini-3.7-flash --goal "What capabilities does SurrealDB provide?"
     ```
 
     Verify:
@@ -739,7 +739,7 @@ Important retrieval note:
     ```bash
     super agent pull rag_surrealdb_claude_sdk_demo
     super agent compile rag_surrealdb_claude_sdk_demo --framework claude-sdk
-    super agent run rag_surrealdb_claude_sdk_demo --framework claude-sdk --cloud --provider google-genai --model gemini-2.5-flash --goal "What is NEON-FOX-742?"
+    super agent run rag_surrealdb_claude_sdk_demo --framework claude-sdk --cloud --provider google-genai --model gemini-3.7-flash --goal "What is NEON-FOX-742?"
     ```
 
     GraphRAG:
@@ -747,7 +747,7 @@ Important retrieval note:
     ```bash
     super agent pull graphrag_surrealdb_claude_sdk_demo
     super agent compile graphrag_surrealdb_claude_sdk_demo --framework claude-sdk
-    super agent run graphrag_surrealdb_claude_sdk_demo --framework claude-sdk --cloud --provider google-genai --model gemini-2.5-flash --goal "What capabilities does SurrealDB provide?"
+    super agent run graphrag_surrealdb_claude_sdk_demo --framework claude-sdk --cloud --provider google-genai --model gemini-3.7-flash --goal "What capabilities does SurrealDB provide?"
     ```
 
     Verify:
@@ -782,8 +782,8 @@ Important retrieval note:
     rm -f surrealoptix/agents/rag_surrealdb_microsoft_demo/pipelines/rag_surrealdb_microsoft_demo_microsoft_pipeline_compiled_spec.json
 
     super agent pull rag_surrealdb_microsoft_demo
-    super agent compile rag_surrealdb_microsoft_demo --framework microsoft --cloud --provider google-genai --model gemini-2.5-flash
-    super agent run rag_surrealdb_microsoft_demo --framework microsoft --cloud --provider google-genai --model gemini-2.5-flash --goal "What is NEON-FOX-742?"
+    super agent compile rag_surrealdb_microsoft_demo --framework microsoft --cloud --provider google-genai --model gemini-3.7-flash
+    super agent run rag_surrealdb_microsoft_demo --framework microsoft --cloud --provider google-genai --model gemini-3.7-flash --goal "What is NEON-FOX-742?"
     ```
 
     GraphRAG:
@@ -796,8 +796,8 @@ Important retrieval note:
     rm -f surrealoptix/agents/graphrag_surrealdb_microsoft_demo/pipelines/graphrag_surrealdb_microsoft_demo_microsoft_pipeline_compiled_spec.json
 
     super agent pull graphrag_surrealdb_microsoft_demo
-    super agent compile graphrag_surrealdb_microsoft_demo --framework microsoft --cloud --provider google-genai --model gemini-2.5-flash
-    super agent run graphrag_surrealdb_microsoft_demo --framework microsoft --cloud --provider google-genai --model gemini-2.5-flash --goal "What capabilities does SurrealDB provide?"
+    super agent compile graphrag_surrealdb_microsoft_demo --framework microsoft --cloud --provider google-genai --model gemini-3.7-flash
+    super agent run graphrag_surrealdb_microsoft_demo --framework microsoft --cloud --provider google-genai --model gemini-3.7-flash --goal "What capabilities does SurrealDB provide?"
     ```
 
     Verify:
@@ -813,7 +813,7 @@ Important retrieval note:
     - if your installed `superoptix` incorrectly asks for `PYDANTIC_AI_GATEWAY_API_KEY` while using Gemini, force direct mode for now:
 
     ```bash
-    super agent run graphrag_surrealdb_pydanticai_demo --framework pydantic-ai --cloud --direct --provider google-genai --model gemini-2.5-flash --gateway-key-env "" --goal "What capabilities does SurrealDB provide?"
+    super agent run graphrag_surrealdb_pydanticai_demo --framework pydantic-ai --cloud --direct --provider google-genai --model gemini-3.7-flash --gateway-key-env "" --goal "What capabilities does SurrealDB provide?"
     ```
 
     - direct Gemini mode should use `GOOGLE_API_KEY` or `GEMINI_API_KEY`, not `PYDANTIC_AI_GATEWAY_API_KEY`
@@ -829,7 +829,7 @@ Important retrieval note:
     ```bash
     super agent pull rag_surrealdb_pydanticai_demo
     super agent compile rag_surrealdb_pydanticai_demo --framework pydantic-ai
-    super agent run rag_surrealdb_pydanticai_demo --framework pydantic-ai --cloud --provider google-genai --model gemini-2.5-flash --goal "What is NEON-FOX-742?"
+    super agent run rag_surrealdb_pydanticai_demo --framework pydantic-ai --cloud --provider google-genai --model gemini-3.7-flash --goal "What is NEON-FOX-742?"
     ```
 
     GraphRAG:
@@ -837,7 +837,7 @@ Important retrieval note:
     ```bash
     super agent pull graphrag_surrealdb_pydanticai_demo
     super agent compile graphrag_surrealdb_pydanticai_demo --framework pydantic-ai
-    super agent run graphrag_surrealdb_pydanticai_demo --framework pydantic-ai --cloud --provider google-genai --model gemini-2.5-flash --goal "What capabilities does SurrealDB provide?"
+    super agent run graphrag_surrealdb_pydanticai_demo --framework pydantic-ai --cloud --provider google-genai --model gemini-3.7-flash --goal "What capabilities does SurrealDB provide?"
     ```
 
     Verify:
@@ -864,7 +864,7 @@ Important retrieval note:
     ```bash
     super agent pull rag_surrealdb_crewai_demo
     super agent compile rag_surrealdb_crewai_demo --framework crewai
-    super agent run rag_surrealdb_crewai_demo --framework crewai --cloud --provider google-genai --model gemini-2.5-flash --goal "What is NEON-FOX-742?"
+    super agent run rag_surrealdb_crewai_demo --framework crewai --cloud --provider google-genai --model gemini-3.7-flash --goal "What is NEON-FOX-742?"
     ```
 
     GraphRAG:
@@ -872,7 +872,7 @@ Important retrieval note:
     ```bash
     super agent pull graphrag_surrealdb_crewai_demo
     super agent compile graphrag_surrealdb_crewai_demo --framework crewai
-    super agent run graphrag_surrealdb_crewai_demo --framework crewai --cloud --provider google-genai --model gemini-2.5-flash --goal "What capabilities does SurrealDB provide?"
+    super agent run graphrag_surrealdb_crewai_demo --framework crewai --cloud --provider google-genai --model gemini-3.7-flash --goal "What capabilities does SurrealDB provide?"
     ```
 
     Verify:
@@ -893,7 +893,7 @@ Important retrieval note:
     ```bash
     super agent pull rag_surrealdb_adk_demo
     super agent compile rag_surrealdb_adk_demo --framework google-adk
-    super agent run rag_surrealdb_adk_demo --framework google-adk --cloud --provider google-genai --model gemini-2.5-flash --goal "What is NEON-FOX-742?"
+    super agent run rag_surrealdb_adk_demo --framework google-adk --cloud --provider google-genai --model gemini-3.7-flash --goal "What is NEON-FOX-742?"
     ```
 
     GraphRAG:
@@ -901,7 +901,7 @@ Important retrieval note:
     ```bash
     super agent pull graphrag_surrealdb_adk_demo
     super agent compile graphrag_surrealdb_adk_demo --framework google-adk
-    super agent run graphrag_surrealdb_adk_demo --framework google-adk --cloud --provider google-genai --model gemini-2.5-flash --goal "What capabilities does SurrealDB provide?"
+    super agent run graphrag_surrealdb_adk_demo --framework google-adk --cloud --provider google-genai --model gemini-3.7-flash --goal "What capabilities does SurrealDB provide?"
     ```
 
     Verify:
@@ -922,7 +922,7 @@ Important retrieval note:
     ```bash
     super agent pull rag_surrealdb_deepagents_demo
     super agent compile rag_surrealdb_deepagents_demo --framework deepagents
-    super agent run rag_surrealdb_deepagents_demo --framework deepagents --cloud --provider google-genai --model gemini-2.5-flash --goal "What is NEON-FOX-742?"
+    super agent run rag_surrealdb_deepagents_demo --framework deepagents --cloud --provider google-genai --model gemini-3.7-flash --goal "What is NEON-FOX-742?"
     ```
 
     GraphRAG:
@@ -930,7 +930,7 @@ Important retrieval note:
     ```bash
     super agent pull graphrag_surrealdb_deepagents_demo
     super agent compile graphrag_surrealdb_deepagents_demo --framework deepagents
-    super agent run graphrag_surrealdb_deepagents_demo --framework deepagents --cloud --provider google-genai --model gemini-2.5-flash --goal "What capabilities does SurrealDB provide?"
+    super agent run graphrag_surrealdb_deepagents_demo --framework deepagents --cloud --provider google-genai --model gemini-3.7-flash --goal "What capabilities does SurrealDB provide?"
     ```
 
     Verify:
@@ -956,7 +956,7 @@ super agent compile <demo_id> --framework <framework_name>
 3. Run:
 
 ```bash
-super agent run <demo_id> --framework <framework_name> --cloud --provider google-genai --model gemini-2.5-flash --goal "your question"
+super agent run <demo_id> --framework <framework_name> --cloud --provider google-genai --model gemini-3.7-flash --goal "your question"
 ```
 
 ## How To Run Each Feature
@@ -1196,7 +1196,7 @@ spec:
   language_model:
     location: cloud
     provider: google-genai
-    model: gemini-2.5-flash
+    model: gemini-3.7-flash
 
   memory:
     enabled: true

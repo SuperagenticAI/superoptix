@@ -330,7 +330,7 @@ class UniversalGEPA:
         optimizer = UniversalGEPA(
             metric=metric,
             auto="light",  # or "medium", "heavy"
-            reflection_lm="gpt-4o",  # for reflection
+            reflection_lm="gpt-5.6-terra",  # for reflection
         )
 
         result = optimizer.compile(

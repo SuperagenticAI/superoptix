@@ -115,7 +115,7 @@ class StackOneBridge:
         self,
         dataset: List[Dict[str, Any]],
         metric: Any,
-        reflection_lm: str = "gpt-4o-mini",
+        reflection_lm: str = "gpt-5.6-luna",
         max_iterations: int = 5,
     ) -> List[Any]:
         """

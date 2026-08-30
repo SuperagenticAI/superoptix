@@ -1458,7 +1458,7 @@ class ClaudeAgentSDKFrameworkAdapter(FrameworkAdapter):
         if "language_model" in spec_data:
             lm = spec_data["language_model"]
             model_config = {
-                "model": lm.get("model", "claude-sonnet-4-5"),
+                "model": lm.get("model", "claude-sonnet-5"),
                 "provider": lm.get("provider", "anthropic"),
             }
 

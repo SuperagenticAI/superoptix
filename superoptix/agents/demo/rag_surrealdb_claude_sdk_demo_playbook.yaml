@@ -20,7 +20,7 @@ spec:
   language_model:
     location: cloud
     provider: anthropic
-    model: claude-sonnet-4-5
+    model: claude-sonnet-5
 
   input_fields:
     - name: knowledge_query
@@ -92,5 +92,5 @@ spec:
 # Quick Start:
 #   super agent pull rag_surrealdb_claude_sdk_demo
 #   export ANTHROPIC_API_KEY=your_key
-#   super agent compile rag_surrealdb_claude_sdk_demo --framework claude-sdk --cloud --provider anthropic --model claude-sonnet-4-5
-#   super agent run rag_surrealdb_claude_sdk_demo --framework claude-sdk --cloud --provider anthropic --model claude-sonnet-4-5 --goal "What is NEON-FOX-742?"
+#   super agent compile rag_surrealdb_claude_sdk_demo --framework claude-sdk --cloud --provider anthropic --model claude-sonnet-5
+#   super agent run rag_surrealdb_claude_sdk_demo --framework claude-sdk --cloud --provider anthropic --model claude-sonnet-5 --goal "What is NEON-FOX-742?"

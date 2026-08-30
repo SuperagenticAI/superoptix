@@ -207,7 +207,9 @@ class HarnessSession:
                 raise KeyError(
                     f"Role '{role_name}' not found. Available roles: {available}"
                 )
-            parts.append(f"<role name=\"{selected.name}\">\n{selected.instructions}\n</role>")
+            parts.append(
+                f'<role name="{selected.name}">\n{selected.instructions}\n</role>'
+            )
         return "\n\n".join(part for part in parts if part).strip()
 
     def _resolve_model(self, *, role: str | None = None) -> str | None:

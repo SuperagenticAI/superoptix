@@ -328,7 +328,12 @@ def validate_model_compatibility(provider: str, model: str, tier_level: str) -> 
     # Basic compatibility checks
     if tier_level == "oracle":
         # Oracle tier should use smaller models
-        small_models = ["gpt-4o-mini", "qwen3.5:2b", "qwen3.5:2b", "claude-3-haiku"]
+        small_models = [
+            "gpt-5.6-luna",
+            "qwen3.5:2b",
+            "qwen3.5:2b",
+            "claude-haiku-4-5-20251001",
+        ]
         if provider == "openai" and model not in small_models:
             logger.warning(f"Model {model} may be expensive for oracle tier")
 

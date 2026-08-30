@@ -20,7 +20,7 @@ spec:
 
   language_model:
     provider: google-genai
-    model: google-genai:gemini-2.5-flash
+    model: google-genai:gemini-3.7-flash
     temperature: 0.1
     max_tokens: 2200
 
@@ -96,5 +96,5 @@ spec:
 #   export STACKONE_API_KEY="..."
 #   export STACKONE_ACCOUNT_IDS="acc_123"
 #   super agent pull crewai-stackone
-#   super agent compile crewai-stackone --framework crewai --cloud --provider google-genai --model gemini-2.5-flash
-#   super agent run crewai-stackone --cloud --provider google-genai --model gemini-2.5-flash --goal "What is my Calendly username?"
+#   super agent compile crewai-stackone --framework crewai --cloud --provider google-genai --model gemini-3.7-flash
+#   super agent run crewai-stackone --cloud --provider google-genai --model gemini-3.7-flash --goal "What is my Calendly username?"

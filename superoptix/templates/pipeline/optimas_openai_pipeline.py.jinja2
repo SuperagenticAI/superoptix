@@ -49,7 +49,7 @@ def _build_openai_callable(model: str, system_prompt: str, base_url: str | None 
         if sys_msg:
             messages.append({"role": "system", "content": sys_msg})
         messages.append({"role": "user", "content": user})
-        resp = client.chat.completions.create(model=model or "gpt-4o-mini", messages=messages)
+        resp = client.chat.completions.create(model=model or "gpt-5.6-luna", messages=messages)
         text = resp.choices[0].message.content if resp and resp.choices else ""
         return {"response": text}
 
@@ -59,7 +59,7 @@ def _build_openai_callable(model: str, system_prompt: str, base_url: str | None 
 def build_optimas_system() -> CompoundAISystem:
 	components: Dict[str, Any] = {}
 	# Jinja renders model at compile time to avoid runtime dependency on playbook
-	model_name = "{{ spec.get('language_model', {}).get('model', 'gpt-4o-mini') }}"
+	model_name = "{{ spec.get('language_model', {}).get('model', 'gpt-5.6-luna') }}"
 	lm_base_url = "{{ spec.get('language_model', {}).get('base_url', '') }}"
 	lm_api_key = "{{ spec.get('language_model', {}).get('api_key', '') }}"
 

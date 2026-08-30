@@ -111,7 +111,9 @@ def _create_harness_agent(args) -> HarnessAgent | None:
         skills=discovered.skills,
         roles=discovered.roles,
     )
-    state_dir = _resolve_state_dir(project_root, agent_name, getattr(args, "state_dir", None))
+    state_dir = _resolve_state_dir(
+        project_root, agent_name, getattr(args, "state_dir", None)
+    )
     spec_data = _build_spec_data(playbook)
 
     return HarnessAgent(

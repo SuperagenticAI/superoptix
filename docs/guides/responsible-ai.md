@@ -96,7 +96,7 @@ spec:
   language_model:
     location: cloud
     provider: openai
-    model: gpt-4o-mini  # Cheaper alternative
+    model: gpt-5.6-luna  # Cheaper alternative
     temperature: 0.7
     max_tokens: 1000    # Limit output
     cache: true         # Enable caching
@@ -153,7 +153,7 @@ spec:
   language_model:
     location: cloud
     provider: openai
-    model: gpt-4o-mini  # Smaller, more efficient model
+    model: gpt-5.6-luna  # Smaller, more efficient model
     temperature: 0.7
     max_tokens: 1000    # Limit output to reduce computation
     cache: true         # Cache responses to avoid redundant calls

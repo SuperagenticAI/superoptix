@@ -122,7 +122,7 @@ super agent evaluate assistant_openai
 ### Step 2: Optimize with GEPA
 
 ```bash
-super agent optimize assistant_openai --auto medium --fresh --reflection-lm gpt-4o-mini
+super agent optimize assistant_openai --auto medium --fresh --reflection-lm gpt-5.6-luna
 ```
 
 **What happens:**
@@ -439,7 +439,7 @@ super agent run assistant_openai --query "Explain what SuperOptiX does"
 
 3. **Optimize**:
    ```bash
-   super agent optimize assistant_openai --auto medium --reflection-lm gpt-4o-mini
+   super agent optimize assistant_openai --auto medium --reflection-lm gpt-5.6-luna
    super agent evaluate assistant_openai
    ```
 

@@ -45,7 +45,7 @@ def resolve_model(
         runtime_cfg.get("provider") or lm_cfg.get("provider") or "google"
     )
     model = str(
-        runtime_cfg.get("model") or lm_cfg.get("model") or "gemini-2.5-flash"
+        runtime_cfg.get("model") or lm_cfg.get("model") or "gemini-3.7-flash"
     ).strip()
 
     # ADK examples expect bare Gemini model names. Normalize provider-prefixed aliases.
@@ -60,7 +60,7 @@ def resolve_model(
         os.environ.setdefault("OLLAMA_BASE_URL", str(api_base).rstrip("/"))
         os.environ.setdefault("OLLAMA_API_KEY", "ollama")
 
-    return model or "gemini-2.5-flash"
+    return model or "gemini-3.7-flash"
 
 
 def build_instructions(spec_data: Dict[str, Any] | None) -> str:

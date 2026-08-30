@@ -33,7 +33,7 @@ class DemoGoogleADKPipeline:
         "language_model": {
             "location": "cloud",
             "provider": "google",
-            "model": "gemini-2.5-flash",
+            "model": "gemini-3.7-flash",
         },
         "persona": {
             "role": "Integration Architect",
@@ -68,7 +68,7 @@ class DemoGoogleADKPipeline:
             runner=self.runner,
             prompt=query,
             spec_data=self.spec,
-            model_name=str(self.runtime.get("model", "gemini-2.5-flash")),
+            model_name=str(self.runtime.get("model", "gemini-3.7-flash")),
             app_name=str(self.runtime.get("app_name", "superoptix_a2a_adk_demo")),
             logfire_enabled=False,
         )

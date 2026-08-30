@@ -39,6 +39,8 @@ ENV/
 .claude
 
 # Testing
+.ruff_cache/
+.benchmarks/
 .coverage
 coverage.xml
 htmlcov/
@@ -81,3 +83,6 @@ sample_training_data.jsonl
 reference/
 plan/
 NoCode/
+
+# SuperOptiX runtime state written into the working directory
+.superoptix/

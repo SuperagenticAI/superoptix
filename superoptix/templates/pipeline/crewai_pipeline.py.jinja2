@@ -210,7 +210,7 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
     if not isinstance(config, dict):
       config = {}
     
-    model_str = config.get("model", "gpt-4o-mini")
+    model_str = config.get("model", "gpt-5.6-luna")
     provider = config.get("provider", "openai")
     
     # Initialize LLM
@@ -417,7 +417,7 @@ class {{ agent_name | to_pascal_case }}Pipeline:
     if "language_model" in self.spec:
       lm = self.spec["language_model"]
       model_config = {
-        "model": lm.get("model", "gpt-4o-mini"),
+        "model": lm.get("model", "gpt-5.6-luna"),
         "provider": lm.get("provider", "openai"),
         "api_base": lm.get("api_base"),
         "temperature": lm.get("temperature"),
@@ -657,7 +657,7 @@ class {{ agent_name | to_pascal_case }}Pipeline:
       },
       "model_analysis": {
         "framework": "CrewAI",
-        "model": "{{ spec.language_model.model | default('gpt-4o-mini') }}",
+        "model": "{{ spec.language_model.model | default('gpt-5.6-luna') }}",
       },
       "recommendations": [],
     }
@@ -732,7 +732,7 @@ class {{ agent_name | to_pascal_case }}Pipeline:
       optimizer = UniversalGEPA(
         metric=eval_metric,
         auto=auto,
-        reflection_lm="gpt-4o-mini",
+        reflection_lm="gpt-5.6-luna",
       )
       
       result = optimizer.compile(

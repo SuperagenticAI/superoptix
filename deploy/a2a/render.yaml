@@ -1,0 +1,25 @@
+# Render blueprint for the public SuperOptiX A2A endpoint.
+#
+# The service exposes only the deterministic catalogue skills, so it needs no
+# model provider keys and no persistent storage. Deploy with:
+#   render blueprint launch   (or point Render at this file from the dashboard)
+services:
+  - type: web
+    name: superoptix-a2a
+    runtime: python
+    plan: free
+    region: oregon
+    branch: main
+    rootDir: .
+    buildCommand: pip install --upgrade pip && pip install ".[a2a]"
+    startCommand: uvicorn superoptix.protocols.a2a.public.app:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /.well-known/agent-card.json
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12"
+      # Must match the public URL Render assigns, or the card will advertise an
+      # address callers cannot reach.
+      - key: SUPEROPTIX_A2A_PUBLIC_URL
+        value: https://superoptix.onrender.com
+      - key: SUPEROPTIX_TELEMETRY
+        value: "false"

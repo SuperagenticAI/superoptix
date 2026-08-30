@@ -78,7 +78,7 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
         self,
         instructions: Optional[str] = None,
         tools: Optional[List] = None,
-        model: str = "gpt-4o-mini",
+        model: str = "gpt-5.6-luna",
     ):
         """
         Initialize the OpenAI agent component.
@@ -86,7 +86,7 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
         Args:
             instructions: Agent instructions (optimizable by GEPA)
             tools: List of tool functions
-            model: Model name (e.g., "gpt-4o-mini", "gpt-4o")
+            model: Model name (e.g., "gpt-5.6-luna", "gpt-5.6-terra")
         """
         # Default instructions from playbook
         default_instructions = """{{ spec.persona.role | default('You are a helpful AI assistant.') }}
@@ -207,14 +207,14 @@ class {{ agent_name | to_pascal_case }}Pipeline:
 
     def __init__(
         self,
-        model: str = "gpt-4o-mini",
+        model: str = "gpt-5.6-luna",
         enable_tracing: bool = True,
     ):
         """
         Initialize the pipeline.
 
         Args:
-            model: OpenAI model name (e.g., "gpt-4o-mini", "gpt-4o")
+            model: OpenAI model name (e.g., "gpt-5.6-luna", "gpt-5.6-terra")
             enable_tracing: Enable observability tracing
         """
         self.model = model
@@ -313,7 +313,7 @@ async def main():
 
     # Initialize pipeline
     pipeline = {{ agent_name | to_pascal_case }}Pipeline(
-        model="gpt-4o-mini",
+        model="gpt-5.6-luna",
     )
 
     # Test query

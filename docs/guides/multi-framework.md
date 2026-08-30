@@ -120,8 +120,8 @@ Cloud/local routing (common pattern):
 
 ```bash
 # Cloud Google
-super agent compile my_agent --framework <framework> --cloud --provider google-genai --model gemini-2.5-flash
-super agent run my_agent --framework <framework> --cloud --provider google-genai --model gemini-2.5-flash --goal "your goal"
+super agent compile my_agent --framework <framework> --cloud --provider google-genai --model gemini-3.7-flash
+super agent run my_agent --framework <framework> --cloud --provider google-genai --model gemini-3.7-flash --goal "your goal"
 
 # Local Ollama
 super agent compile my_agent --framework <framework> --local --provider ollama --model qwen3.5:9b
@@ -238,7 +238,7 @@ spec:
   language_model:
     location: cloud
     provider: openai
-    model: openai:gpt-4o
+    model: openai:gpt-5.6-terra
     # Set: export OPENAI_API_KEY="sk-..."
 ```
 
@@ -353,7 +353,7 @@ spec:
   target_framework: google-adk
   language_model:
     provider: google
-    model: gemini-2.0-flash  # Free access!
+    model: gemini-3.7-flash  # Free access!
   persona:
     instructions: |
       You are a helpful AI assistant powered by Google's Gemini.

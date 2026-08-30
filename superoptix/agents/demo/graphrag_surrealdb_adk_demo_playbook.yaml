@@ -20,7 +20,7 @@ spec:
   language_model:
     location: cloud
     provider: google
-    model: gemini-2.5-flash
+    model: gemini-3.7-flash
 
   input_fields:
     - name: knowledge_query
@@ -98,6 +98,6 @@ spec:
 
 # Quick Start:
 #   export GOOGLE_API_KEY=your_key
-#   super agent compile graphrag_surrealdb_adk_demo --framework google-adk --cloud --provider google --model gemini-2.5-flash
-#   super agent run graphrag_surrealdb_adk_demo --framework google-adk --cloud --provider google --model gemini-2.5-flash \
+#   super agent compile graphrag_surrealdb_adk_demo --framework google-adk --cloud --provider google --model gemini-3.7-flash
+#   super agent run graphrag_surrealdb_adk_demo --framework google-adk --cloud --provider google --model gemini-3.7-flash \
 #     --goal "What capabilities does SurrealDB provide?"

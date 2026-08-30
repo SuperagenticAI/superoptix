@@ -25,7 +25,7 @@ def _build_agent(role: str, goal: str, backstory: str, llm_config: Dict[str, Any
 	"""Create a CrewAI Agent from playbook persona and LLM config."""
 	_require_crewai()
 	# Prefer CrewAI's LLM wrapper when base_url/api_key provided (LiteLLM under the hood)
-	model = llm_config.get("model", "gpt-4o-mini")
+	model = llm_config.get("model", "gpt-5.6-luna")
 	base_url = llm_config.get("base_url")
 	api_key = llm_config.get("api_key")
 	llm: Any = model

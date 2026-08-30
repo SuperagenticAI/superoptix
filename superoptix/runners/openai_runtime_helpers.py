@@ -57,7 +57,7 @@ def resolve_model(
     if model.startswith("litellm/"):
         return model
 
-    # Accept provider-prefixed model formats like "openai:gpt-4o-mini".
+    # Accept provider-prefixed model formats like "openai:gpt-5.6-luna".
     if ":" in model:
         prefix, suffix = model.split(":", 1)
         prefix_norm = _normalize_provider(prefix)

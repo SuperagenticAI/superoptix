@@ -47,7 +47,9 @@ class LocalSandbox:
         self._require_read()
         target = self.resolve(path)
         if target.is_dir():
-            return "\n".join(sorted(item.name for item in target.iterdir())) or "(empty)"
+            return (
+                "\n".join(sorted(item.name for item in target.iterdir())) or "(empty)"
+            )
         if not target.exists():
             raise FileNotFoundError(path)
 
@@ -86,7 +88,11 @@ class LocalSandbox:
                 f"Found {count} occurrences in {path}; set replace_all=true "
                 "or provide a more specific old_text."
             )
-        updated = content.replace(old_text, new_text) if replace_all else content.replace(old_text, new_text, 1)
+        updated = (
+            content.replace(old_text, new_text)
+            if replace_all
+            else content.replace(old_text, new_text, 1)
+        )
         target.write_text(updated, encoding="utf-8")
         replaced = count if replace_all else 1
         return f"Replaced {replaced} occurrence(s) in {self.relative(target)}"
@@ -105,13 +111,17 @@ class LocalSandbox:
         root = self.resolve(path)
         regex = re.compile(pattern)
         matches: list[str] = []
-        files = [root] if root.is_file() else [p for p in root.rglob("*") if p.is_file()]
+        files = (
+            [root] if root.is_file() else [p for p in root.rglob("*") if p.is_file()]
+        )
         for file_path in files:
             rel = self.relative(file_path)
             if include and not fnmatch.fnmatch(rel, include):
                 continue
             try:
-                lines = file_path.read_text(encoding="utf-8", errors="replace").splitlines()
+                lines = file_path.read_text(
+                    encoding="utf-8", errors="replace"
+                ).splitlines()
             except OSError:
                 continue
             for line_no, line in enumerate(lines, start=1):
@@ -212,4 +222,3 @@ class LocalSandbox:
     def _require_shell(self) -> None:
         if not self.policy.allow_shell:
             raise PermissionError("Sandbox shell access is disabled.")
-

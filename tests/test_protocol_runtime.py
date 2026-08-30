@@ -55,11 +55,33 @@ def test_build_a2a_agent_card_payload_from_playbook():
     )
 
     assert payload["name"] == "Research Agent"
+    # The preferred transport is advertised first.
+    assert payload["preferredTransport"] == "JSONRPC"
     assert payload["supportedInterfaces"][0]["protocolVersion"] == "1.0"
-    assert payload["supportedInterfaces"][0]["protocolBinding"] == "HTTP+JSON"
+    assert payload["supportedInterfaces"][0]["protocolBinding"] == "JSONRPC"
+    bindings = {i["protocolBinding"] for i in payload["supportedInterfaces"]}
+    assert bindings == {"JSONRPC", "HTTP+JSON"}
+    assert payload["protocolVersion"] == "1.0"
     assert payload["skills"][0]["id"] == "research"
     assert payload["skills"][0]["examples"] == ["Investigate the user request"]
     assert payload["capabilities"]["extendedAgentCard"] is False
+
+
+def test_build_a2a_agent_card_payload_advertises_legacy_line():
+    """A card may advertise 0.3 alongside 1.0 so pre-1.0 clients still negotiate."""
+    payload = build_a2a_agent_card_payload(
+        metadata={"name": "Dual Agent"},
+        spec={},
+        agent_url="https://agents.example.com/dual",
+        legacy_protocol_version="0.3",
+        security_schemes={"bearer": {"type": "http", "scheme": "bearer"}},
+        documentation_url="https://example.com/docs",
+    )
+
+    versions = {i["protocolVersion"] for i in payload["supportedInterfaces"]}
+    assert versions == {"1.0", "0.3"}
+    assert payload["securitySchemes"]["bearer"]["scheme"] == "bearer"
+    assert payload["documentationUrl"] == "https://example.com/docs"
 
 
 def test_normalize_agent_card_upgrades_legacy_shape():

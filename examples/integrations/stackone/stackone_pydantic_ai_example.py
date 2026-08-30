@@ -50,7 +50,7 @@ async def main():
     # 4. Initialize Pydantic AI Agent with the tools
     # Note: Using a lightweight model for the demo
     agent = Agent(
-        "openai:gpt-4o-mini",
+        "openai:gpt-5.6-luna",
         tools=pai_tools,
         system_prompt="You are a helpful HR assistant. Use the provided tools to answer queries.",
     )
