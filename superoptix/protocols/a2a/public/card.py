@@ -14,7 +14,7 @@ from superoptix.protocols.a2a.public.skills import PUBLIC_SKILL_DEFINITIONS
 
 DEFAULT_SERVICE_URL = "https://superoptix.onrender.com"
 DOCUMENTATION_URL = "https://github.com/SuperagenticAI/superoptix"
-ICON_URL = "https://super-agentic.ai/uploads/superoptix.png"
+ICON_URL = "https://superoptix.ai/uploads/logo.png"
 
 SECURITY_SCHEMES: Dict[str, Any] = {
     "bearer": {

@@ -36,6 +36,40 @@ class TestFrameworkReadinessSkill:
         result = framework_a2a_readiness("what about adk")
         assert result["data"]["frameworks"][0]["framework"] == "google-adk"
 
+    @pytest.mark.parametrize(
+        "query",
+        [
+            "Which agent frameworks have no A2A support?",
+            "which frameworks support a2a",
+            "list every agent framework",
+        ],
+    )
+    def test_generic_questions_do_not_collapse_to_one_framework(self, query):
+        """The word "framework" must not resolve to the agent-framework package.
+
+        Regression: "Which agent frameworks have no A2A support?" — the most
+        likely question asked of this skill — matched only Microsoft Agent
+        Framework via substring matching.
+        """
+        result = framework_a2a_readiness(query)
+        assert len(result["data"]["frameworks"]) == len(FRAMEWORK_A2A_STATUS)
+
+    @pytest.mark.parametrize(
+        ("query", "expected"),
+        [
+            ("does microsoft agent framework support a2a", "agent-framework"),
+            ("is semantic kernel supported", "agent-framework"),
+            ("tell me about pydantic ai", "pydantic-ai"),
+            ("openai agents sdk", "openai-agents"),
+            ("claude agent sdk", "claude-agent-sdk"),
+            ("langchain deepagents", "deepagents"),
+            ("Is DSPy reachable over A2A?", "dspy"),
+        ],
+    )
+    def test_named_frameworks_resolve_precisely(self, query, expected):
+        result = framework_a2a_readiness(query)
+        assert [f["framework"] for f in result["data"]["frameworks"]] == [expected]
+
     def test_no_framework_claims_native_1_0(self):
         """The core selling point: none of the eight reach A2A 1.0 alone."""
         for info in FRAMEWORK_A2A_STATUS.values():
@@ -65,7 +99,9 @@ class TestAgentCardReviewSkill:
             "name": "x",
             "skills": [{"id": "s", "description": "agent"}],
         }
-        fields = {f["field"] for f in agent_card_review(json.dumps(card))["data"]["findings"]}
+        fields = {
+            f["field"] for f in agent_card_review(json.dumps(card))["data"]["findings"]
+        }
         assert "skills.s.description" in fields
         assert "skills.s.examples" in fields
 
