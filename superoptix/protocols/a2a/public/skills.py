@@ -78,46 +78,61 @@ FRAMEWORK_A2A_STATUS: Dict[str, Dict[str, Any]] = {
     },
 }
 
-_ALIASES = {
-    "crew": "crewai",
-    "crew-ai": "crewai",
-    "adk": "google-adk",
-    "google": "google-adk",
-    "googleadk": "google-adk",
-    "pydantic": "pydantic-ai",
-    "pydanticai": "pydantic-ai",
-    "openai": "openai-agents",
-    "openai-agents-sdk": "openai-agents",
-    "claude": "claude-agent-sdk",
-    "claude-sdk": "claude-agent-sdk",
-    "anthropic": "claude-agent-sdk",
-    "microsoft": "agent-framework",
-    "msaf": "agent-framework",
-    "semantic-kernel": "agent-framework",
-    "autogen": "agent-framework",
-    "deep-agents": "deepagents",
-    "langchain": "deepagents",
+# Trigger patterns per framework. These are matched with word boundaries rather
+# than substrings: "which agent frameworks support A2A" must not resolve to the
+# `agent-framework` package just because the generic word "framework" appears.
+_TRIGGERS: Dict[str, List[str]] = {
+    "crewai": [r"crew\s*-?\s*ai", r"\bcrew\b"],
+    "google-adk": [
+        r"\badk\b",
+        r"google\s*-?\s*adk",
+        r"\bgoogle\b",
+        r"agent development kit",
+    ],
+    "pydantic-ai": [r"pydantic\s*-?\s*ai", r"\bpydantic\b"],
+    "dspy": [r"\bdspy\b", r"\bds\s*py\b"],
+    "openai-agents": [
+        r"openai\s*-?\s*agents?(\s*-?\s*sdk)?",
+        r"\bopenai\b",
+        r"\bgpt\b",
+    ],
+    "claude-agent-sdk": [r"claude(\s*-?\s*agent)?(\s*-?\s*sdk)?", r"\banthropic\b"],
+    "deepagents": [r"deep\s*-?\s*agents?", r"\blangchain\b", r"\blanggraph\b"],
+    # Never triggered by the bare word "framework": that appears in almost every
+    # general question about this topic.
+    "agent-framework": [
+        r"\bmicrosoft\b",
+        r"\bmsaf\b",
+        r"semantic\s*-?\s*kernel",
+        r"\bautogen\b",
+        # Hyphenated only: that is the package name. Bare "agent framework"
+        # is how people refer to the category ("list every agent framework").
+        r"agent-framework\b",
+    ],
 }
+
+# Phrases that mean "tell me about all of them" rather than naming one.
+_ASK_ALL = re.compile(
+    r"\b(all|every|which|what|list|compare|any|none|no)\b", re.IGNORECASE
+)
 
 
 def _match_frameworks(query: str) -> List[str]:
-    """Return framework keys named in the query, or all of them."""
-    text = re.sub(r"[^a-z0-9\-\s]", " ", (query or "").lower())
-    tokens = {t for t in re.split(r"\s+", text) if t}
-    joined = " ".join(sorted(tokens))
+    """Return framework keys explicitly named in the query, or all of them."""
+    text = (query or "").lower()
 
     hits: List[str] = []
-    for key in FRAMEWORK_A2A_STATUS:
-        if (
-            key in joined.replace(" ", "-")
-            or key in text
-            or key.replace("-", "") in tokens
-        ):
+    for key, patterns in _TRIGGERS.items():
+        if any(re.search(pattern, text) for pattern in patterns):
             hits.append(key)
-    for alias, key in _ALIASES.items():
-        if (alias in tokens or alias in text) and key not in hits:
-            hits.append(key)
-    return hits or list(FRAMEWORK_A2A_STATUS)
+
+    # A general question that also happens to name one framework still answers
+    # about that framework; only a question naming none falls back to the set.
+    if hits:
+        return hits
+    if _ASK_ALL.search(text) or not text.strip():
+        return list(FRAMEWORK_A2A_STATUS)
+    return list(FRAMEWORK_A2A_STATUS)
 
 
 def framework_a2a_readiness(query: str) -> Dict[str, Any]:
