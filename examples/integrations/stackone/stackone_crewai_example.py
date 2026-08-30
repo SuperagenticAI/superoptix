@@ -69,7 +69,7 @@ def stackone_crewai_integration():
     print("\n🤖 Step 3: Creating CrewAI Agent...")
 
     # Initialize LLM (uses OpenAI by default)
-    llm = LLM(model="gpt-4o-mini")
+    llm = LLM(model="gpt-5.6-luna")
 
     hr_agent = Agent(
         role="HR Assistant",
@@ -148,7 +148,7 @@ def stackone_crewai_with_discovery():
     print(f"   ✅ Created {len(discovery_tools)} meta-tools (search + execute)")
 
     # 3. Create an agent that can dynamically find and use tools
-    llm = LLM(model="gpt-4o-mini")
+    llm = LLM(model="gpt-5.6-luna")
 
     discovery_agent = Agent(
         role="Smart HR & Recruiting Assistant",

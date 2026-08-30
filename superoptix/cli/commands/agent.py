@@ -737,7 +737,7 @@ def _compile_single_agent(agent_name: str, args, tier_level: str = None):
                     "[yellow]⚠️  DeepAgents requires cloud function-calling models.[/]\n"
                     "[dim]Update playbook `spec.language_model` to Google/Anthropic/OpenAI "
                     "(for example: `provider: google-genai`, "
-                    "`model: google-genai:gemini-2.5-flash`) and recompile.[/]"
+                    "`model: google-genai:gemini-3.7-flash`) and recompile.[/]"
                 )
             else:
                 console.print(
@@ -1463,7 +1463,7 @@ def test_agent_bdd(args):
                 import dspy
 
                 # Configure a minimal client; no calls will be made in our evaluation path
-                dspy.settings.configure(lm=dspy.LiteLLM(model="gpt-4o-mini"))
+                dspy.settings.configure(lm=dspy.LiteLLM(model="gpt-5.6-luna"))
             except Exception:
                 pass
         spec.loader.exec_module(module)
@@ -3390,7 +3390,7 @@ def _run_universal_gepa_optimization(args, agent_name, project_root, playbook):
         console.print("     --max-full-evals <number>")
         console.print("     --max-metric-calls <number>")
         console.print(
-            "\n   Example: super agent optimize my_agent --framework crewai --auto medium --reflection-lm gpt-4o"
+            "\n   Example: super agent optimize my_agent --framework crewai --auto medium --reflection-lm gpt-5.6-terra"
         )
         return False
 
@@ -3404,7 +3404,7 @@ def _run_universal_gepa_optimization(args, agent_name, project_root, playbook):
         console.print("       params:")
         console.print("         reflection_lm: ollama:qwen3.5:9b")
         console.print(
-            "\n   Supported models: gpt-4o, gpt-4o-mini, claude-3-5-sonnet, ollama:qwen3.5:9b, etc."
+            "\n   Supported models: gpt-5.6-terra, gpt-5.6-luna, claude-sonnet-5, ollama:qwen3.5:9b, etc."
         )
         return False
 
@@ -4361,7 +4361,7 @@ def optimize_agent(args):
             optimizer_choice = getattr(args, "optimizer", "opro")
 
             # Configure OPRO to use local Ollama via OpenAI-compatible API if specified in playbook
-            opro_llm_model = "gpt-4o-mini"
+            opro_llm_model = "gpt-5.6-luna"
             try:
                 lm_cfg = (
                     spec_data.get("language_model", {})
@@ -4990,9 +4990,9 @@ def _optimize_dspy_component(comp, trainset, opro_llm_model, temperature, max_to
             llm_model=opro_llm_model,
             temperature=temperature,
             max_new_tokens=max_tokens,
-            metric=lambda e,
-            p,
-            trace=None: 1.0,  # Simple metric to avoid complex evaluation
+            metric=lambda e, p, trace=None: (
+                1.0
+            ),  # Simple metric to avoid complex evaluation
             num_prompt_candidates=1,  # Reduce complexity
             max_sample_workers=max_workers,  # Use environment variable
             meta_prompt_preamble=f"This component is meant to handle the task:\n{comp.description}\nWe want to refine its instructions to improve performance on coding tasks.",

@@ -57,7 +57,7 @@ class MCPAdapter(GEPAAdapter[MCPDataInst, MCPTrajectory, MCPOutput]):
         >>> from mcp import StdioServerParameters
         >>> adapter = MCPAdapter(
         ...     tool_name="read_file",
-        ...     task_model="gpt-4o-mini",
+        ...     task_model="gpt-5.6-luna",
         ...     metric_fn=lambda item, output: 1.0 if item["reference_answer"] in output else 0.0,
         ...     server_params=StdioServerParameters(
         ...         command="python",
@@ -68,7 +68,7 @@ class MCPAdapter(GEPAAdapter[MCPDataInst, MCPTrajectory, MCPOutput]):
     Example (Remote):
         >>> adapter = MCPAdapter(
         ...     tool_name="search_web",
-        ...     task_model="gpt-4o-mini",
+        ...     task_model="gpt-5.6-luna",
         ...     metric_fn=lambda item, output: 1.0 if item["reference_answer"] in output else 0.0,
         ...     remote_url="https://mcp-server.com/sse",
         ...     remote_transport="sse",

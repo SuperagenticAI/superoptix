@@ -163,7 +163,7 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
         if self._spec_data and "language_model" in self._spec_data:
             lm = self._spec_data["language_model"]
             self._model_config = {
-                "model": lm.get("model", "claude-sonnet-4-5"),
+                "model": lm.get("model", "claude-sonnet-5"),
                 "provider": lm.get("provider", "anthropic"),
             }
 
@@ -175,7 +175,7 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
         users should edit the playbook and recompile.
         """
         provider = str(self._model_config.get("provider", "anthropic")).lower()
-        model = str(self._model_config.get("model", "claude-sonnet-4-5")).strip()
+        model = str(self._model_config.get("model", "claude-sonnet-5")).strip()
 
         # Third-party auth toggles supported by Claude SDK
         use_bedrock = os.getenv("CLAUDE_CODE_USE_BEDROCK") == "1"
@@ -210,7 +210,7 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
                 "Claude SDK pipeline expects an Anthropic Claude model when "
                 "provider='anthropic'. Got model: "
                 f"'{model}'. Update 'spec.language_model.model' to a current Claude model "
-                "(for example: 'claude-opus-4-5', 'claude-sonnet-4-5', or "
+                "(for example: 'claude-opus-5', 'claude-sonnet-5', or "
                 "'claude-haiku-4-5'), "
                 "then recompile."
             )
@@ -278,7 +278,7 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
         {% endif %}
 
         # Get model from config
-        model = self._model_config.get("model", "claude-sonnet-4-5")
+        model = self._model_config.get("model", "claude-sonnet-5")
 
         return ClaudeAgentOptions(
             system_prompt=self.variable,  # GEPA optimizes this!

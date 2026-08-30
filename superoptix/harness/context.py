@@ -146,4 +146,3 @@ def _load_role_file(path: Path, *, default_name: str) -> Role:
         model=str(metadata.get("model") or "").strip() or None,
         path=path,
     )
-

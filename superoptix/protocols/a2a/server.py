@@ -10,7 +10,7 @@ from collections import defaultdict
 from collections.abc import AsyncIterator
 from contextlib import suppress
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Dict
 
 from superoptix.protocols.a2a.card_builder import build_a2a_agent_card_payload
 from superoptix.protocols.a2a.mappers import (
@@ -524,21 +524,29 @@ def create_a2a_fastapi_app(
     agent_url: str,
     rpc_url: str = "/a2a/jsonrpc",
     runtime_adapter: str = "compiled_pipeline",
+    agent_card: Dict[str, Any] | None = None,
 ) -> Any:
-    """Create an A2A v1 FastAPI app exposing a compiled SuperOptiX pipeline."""
+    """Create an A2A v1 FastAPI app exposing a compiled SuperOptiX pipeline.
+
+    Args:
+        agent_card: serve this card verbatim instead of deriving one from the
+            runtime's metadata. Used by the published public endpoint, which
+            advertises hand-written skills rather than SuperSpec tasks.
+    """
     if not FASTAPI_AVAILABLE:
         raise ImportError(
             "A2A server dependencies are not installed. Install superoptix[a2a]."
         )
 
     runtime = runtime_registry.create(runtime_adapter, pipeline)
-    metadata = asyncio.run(runtime.metadata())
-    agent_card = build_a2a_agent_card_payload(
-        metadata=metadata.get("metadata", {}),
-        spec=metadata.get("spec", {}),
-        agent_url=agent_url,
-        rpc_url=rpc_url,
-    )
+    if agent_card is None:
+        metadata = asyncio.run(runtime.metadata())
+        agent_card = build_a2a_agent_card_payload(
+            metadata=metadata.get("metadata", {}),
+            spec=metadata.get("spec", {}),
+            agent_url=agent_url,
+            rpc_url=rpc_url,
+        )
     tasks = _A2ATaskStore(runtime)
     app = FastAPI(title="SuperOptiX A2A", version="1.0")
 

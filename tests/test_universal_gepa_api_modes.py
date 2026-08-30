@@ -78,7 +78,11 @@ def test_optimize_anything_opt_in_falls_back_to_legacy_when_unavailable(monkeypa
         return _FakeGEPAResult(candidate_text="legacy fallback prompt", score=0.77)
 
     monkeypatch.setattr(ug, "optimize", _fake_legacy_optimize)
-    monkeypatch.delitem(sys.modules, "gepa.optimize_anything", raising=False)
+    # Force `from gepa.optimize_anything import ...` to raise ImportError.
+    # Deleting the entry is no longer enough: gepa 0.1.4+ ships the module, so a
+    # delitem simply lets the import succeed again. Binding the name to None makes
+    # the import machinery raise, which is what "unavailable" means here.
+    monkeypatch.setitem(sys.modules, "gepa.optimize_anything", None)
 
     optimizer = ug.UniversalGEPA(
         metric=_metric,

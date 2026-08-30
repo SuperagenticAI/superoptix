@@ -206,7 +206,7 @@ Each example shows the same agent specification adapted for different frameworks
       
       language_model:
         provider: google
-        model: gemini-2.0-flash
+        model: gemini-3.7-flash
         api_key: ${GOOGLE_API_KEY}
       
       persona:
@@ -846,7 +846,7 @@ spec:
         prompt: |
           Rate the factual accuracy of the response on a scale of 0-100.
           Consider: correctness, precision, completeness.
-        judge_model: gpt-4o-mini
+        judge_model: gpt-5.6-luna
       
       - name: response_length
         type: python
@@ -1029,7 +1029,7 @@ spec:
     custom_metrics:
       - name: citation_quality
         type: llm_judge
-        judge_model: gpt-4o-mini
+        judge_model: gpt-5.6-luna
       - name: response_relevance
         type: embedding_similarity
         threshold: 0.8

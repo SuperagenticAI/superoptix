@@ -381,19 +381,19 @@ class SlashCommandHandler:
         self.console.print("[bold cyan]☁️  CLOUD MODELS[/bold cyan]\n")
 
         self.console.print("[bold]OpenAI[/bold] (Requires OPENAI_API_KEY):")
-        self.console.print("  • gpt-4o - Best overall")
-        self.console.print("  • gpt-4o-mini - Fast and affordable")
+        self.console.print("  • gpt-5.6-terra - Best overall")
+        self.console.print("  • gpt-5.6-luna - Fast and affordable")
         self.console.print("  • gpt-4-turbo - Longer context")
 
         self.console.print("\n[bold]Anthropic[/bold] (Requires ANTHROPIC_API_KEY):")
-        self.console.print("  • claude-3.5-sonnet - Best for coding")
-        self.console.print("  • claude-3.5-haiku - Fast and affordable")
+        self.console.print("  • claude-sonnet-5 - Best for coding")
+        self.console.print("  • claude-haiku-4-5-20251001 - Fast and affordable")
 
         self.console.print(
             "\n[dim]Set API key: [cyan]/config set OPENAI_API_KEY sk-...[/cyan][/dim]"
         )
         self.console.print(
-            "[dim]Switch provider: [cyan]/model set gpt-4o[/cyan][/dim]\n"
+            "[dim]Switch provider: [cyan]/model set gpt-5.6-terra[/cyan][/dim]\n"
         )
 
     def _set_model(self, model_name: str):

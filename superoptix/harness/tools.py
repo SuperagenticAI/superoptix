@@ -33,7 +33,10 @@ def create_builtin_tools(sandbox: LocalSandbox) -> list[HarnessTool]:
             parameters={
                 "type": "object",
                 "properties": {
-                    "path": {"type": "string", "description": "File or directory path."},
+                    "path": {
+                        "type": "string",
+                        "description": "File or directory path.",
+                    },
                     "offset": {
                         "type": "integer",
                         "description": "Optional 1-indexed starting line for files.",

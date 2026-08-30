@@ -750,10 +750,10 @@ class DSPyRunner:
         local_task_default = os.getenv("SUPEROPTIX_DSPY_TASK_MODEL", "qwen3.5:9b")
         local_teacher_default = os.getenv("SUPEROPTIX_DSPY_TEACHER_MODEL", "qwen3.5:9b")
         cloud_task_default = os.getenv(
-            "SUPEROPTIX_DSPY_CLOUD_TASK_MODEL", "gemini-2.5-flash-lite"
+            "SUPEROPTIX_DSPY_CLOUD_TASK_MODEL", "gemini-3.5-flash-lite"
         )
         cloud_teacher_default = os.getenv(
-            "SUPEROPTIX_DSPY_CLOUD_TEACHER_MODEL", "gemini-2.5-flash"
+            "SUPEROPTIX_DSPY_CLOUD_TEACHER_MODEL", "gemini-3.7-flash"
         )
 
         if provider_override:
@@ -1367,7 +1367,7 @@ class DSPyRunner:
                     return optimization_result
 
                 # GEPA teacher/reflection LM defaults:
-                # - Cloud: gemini-2.5-flash
+                # - Cloud: gemini-3.7-flash
                 # - Local ollama: same task model unless user overrides via env
                 if task_params["model_name"].startswith("ollama_chat/"):
                     teacher_params = dict(task_params)

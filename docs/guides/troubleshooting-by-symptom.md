@@ -7,7 +7,7 @@ Use this page when you have an error and want the fastest fix path.
 | Symptom | Likely Cause | Fix |
 |---|---|---|
 | `Pipeline not found` | Agent not compiled for that framework | Run `super agent compile <agent> --framework <framework>` |
-| `OPENAI_API_KEY is required` while using Google | Runtime/provider mismatch | Pass `--cloud --provider google-genai --model gemini-2.5-flash` on both compile and run |
+| `OPENAI_API_KEY is required` while using Google | Runtime/provider mismatch | Pass `--cloud --provider google-genai --model gemini-3.7-flash` on both compile and run |
 | `DefaultCredentialsError` from Vertex | Model/provider path resolved to Vertex instead of Google GenAI API-key flow | Ensure provider/model pair is `google-genai` + Gemini model and `GOOGLE_API_KEY` is set |
 | `name 'false' is not defined` | JSON boolean leaked into generated Python | Recompile with latest templates, then rerun |
 | `Exceeded maximum retries for output validation` | Structured output too strict for current model response | Increase retries, reduce strictness, or switch to stronger model |
@@ -28,12 +28,12 @@ echo $STACKONE_ACCOUNT_IDS
 
 ```bash
 # Recompile cleanly for target framework
-super agent compile <agent_id> --framework <framework> --cloud --provider google-genai --model gemini-2.5-flash
+super agent compile <agent_id> --framework <framework> --cloud --provider google-genai --model gemini-3.7-flash
 ```
 
 ```bash
 # Run with matching provider/model flags
-super agent run <agent_id> --framework <framework> --cloud --provider google-genai --model gemini-2.5-flash --goal "..."
+super agent run <agent_id> --framework <framework> --cloud --provider google-genai --model gemini-3.7-flash --goal "..."
 ```
 
 ## StackOne-specific Checks

@@ -23,7 +23,7 @@ load_dotenv()
 
 # Setup DSPy model
 # Note: Ensure you have OPENAI_API_KEY in your .env
-lm = dspy.LM("openai/gpt-4o-mini")
+lm = dspy.LM("openai/gpt-5.6-luna")
 dspy.configure(lm=lm)
 
 

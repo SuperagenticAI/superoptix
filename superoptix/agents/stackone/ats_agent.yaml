@@ -9,7 +9,7 @@ tier: genies
 # Model Configuration
 model:
   provider: openai
-  name: gpt-4o
+  name: gpt-5.6-terra
   temperature: 0.2
 
 # Agent Instructions (Optimizable by GEPA)

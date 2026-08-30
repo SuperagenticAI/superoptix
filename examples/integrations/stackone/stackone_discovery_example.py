@@ -24,7 +24,7 @@ except ImportError:
 load_dotenv()
 
 # Setup DSPy
-lm = dspy.LM("openai/gpt-4o")
+lm = dspy.LM("openai/gpt-5.6-terra")
 dspy.configure(lm=lm)
 
 

@@ -76,7 +76,7 @@ You can look up employee information, list employees, and provide helpful HR-rel
 Always use the available tools to fetch accurate data.""",
         mcp_servers={"stackone": mcp_server},
         allowed_tools=tool_names,
-        model="claude-sonnet-4-5",
+        model="claude-sonnet-5",
     )
     print("   Options configured with MCP server and tools")
 

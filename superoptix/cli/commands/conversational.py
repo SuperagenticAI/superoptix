@@ -175,12 +175,12 @@ def run_setup_wizard(console: Console) -> dict:
 
     console.print("[bold]2. ☁️  OpenAI (Cloud)[/bold]")
     console.print("   • Paid (requires API key)")
-    console.print("   • Models: gpt-4o, gpt-4o-mini")
+    console.print("   • Models: gpt-5.6-terra, gpt-5.6-luna")
     console.print("   • Recommended for: Advanced reasoning\n")
 
     console.print("[bold]3. ☁️  Anthropic (Cloud)[/bold]")
     console.print("   • Paid (requires API key)")
-    console.print("   • Models: claude-3.5-sonnet")
+    console.print("   • Models: claude-sonnet-5")
     console.print("   • Recommended for: Coding assistance\n")
 
     choice = Prompt.ask("Choose provider", choices=["1", "2", "3"], default="1")
@@ -298,8 +298,8 @@ def run_setup_wizard(console: Console) -> dict:
 
         model = Prompt.ask(
             "Choose model",
-            choices=["gpt-4o", "gpt-4o-mini", "gpt-4-turbo"],
-            default="gpt-4o-mini",
+            choices=["gpt-5.6-terra", "gpt-5.6-luna", "gpt-4-turbo"],
+            default="gpt-5.6-luna",
         )
 
         config = {"provider": "openai", "model": model, "api_key": api_key}
@@ -317,8 +317,8 @@ def run_setup_wizard(console: Console) -> dict:
 
         model = Prompt.ask(
             "Choose model",
-            choices=["claude-3.5-sonnet", "claude-3.5-haiku"],
-            default="claude-3.5-sonnet",
+            choices=["claude-sonnet-5", "claude-haiku-4-5-20251001"],
+            default="claude-sonnet-5",
         )
 
         config = {"provider": "anthropic", "model": model, "api_key": api_key}

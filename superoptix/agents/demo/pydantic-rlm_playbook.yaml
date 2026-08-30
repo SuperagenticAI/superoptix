@@ -74,7 +74,7 @@ spec:
       verbose: false
       persistent: false
       # Optional cloud override for RLM backend:
-      # task_model: google-gla:gemini-2.5-flash
+      # task_model: google-gla:gemini-3.7-flash
       # api_key_env: GOOGLE_API_KEY
       logger:
         enabled: true

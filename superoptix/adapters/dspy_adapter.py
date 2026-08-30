@@ -8,7 +8,7 @@ from ..memory import AgentMemory
 
 
 class DSPyAdapter:
-    """DSPy 3.0 compatible implementation adapter with enhanced memory integration."""
+    """DSPy 3.3 compatible implementation adapter with enhanced memory integration."""
 
     def __init__(self, config: Dict[str, Any], agent_id: Optional[str] = None):
         self.config = config
@@ -34,7 +34,7 @@ class DSPyAdapter:
         self._setup_lm()
 
     def _setup_lm(self):
-        """Set up DSPy 3.0 language model with proper configuration."""
+        """Set up DSPy 3.3 language model with proper configuration."""
         provider = self.config["llm"]["provider"].lower()
 
         if provider == "ollama":
@@ -62,13 +62,13 @@ class DSPyAdapter:
         else:
             raise ValueError(f"Unsupported provider: {provider}")
 
-        # Store LM for DSPy 3.0 context usage
+        # Store LM for DSPy 3.3 context usage
         self.lm = lm
 
     def setup_agent(self) -> Any:
-        """Set up DSPy 3.0 agent with signature and module."""
+        """Set up DSPy 3.3 agent with signature and module."""
 
-        # Define signature for input/output with DSPy 3.0 syntax
+        # Define signature for input/output with DSPy 3.3 syntax
         class AgentSignature(self.dspy.Signature):
             """Signature defining input/output interface with memory context."""
 
@@ -76,7 +76,7 @@ class DSPyAdapter:
             query: str = self.dspy.InputField(desc="The user's input query")
             result: str = self.dspy.OutputField(desc="The agent's response")
 
-        # Create agent module with memory integration and DSPy 3.0 patterns
+        # Create agent module with memory integration and DSPy 3.3 patterns
         class MemoryEnhancedAgentModule(self.dspy.Module):
             def __init__(self, config, dspy_instance, memory_system, lm):
                 super().__init__()
@@ -134,7 +134,7 @@ class DSPyAdapter:
                         data={"query": query, "context_length": len(context_string)},
                     )
 
-                    # Generate response using DSPy 3.0 context management
+                    # Generate response using DSPy 3.3 context management
                     with self.dspy.context(lm=self.lm):
                         response = self.predictor(context=context_string, query=query)
 
@@ -184,14 +184,14 @@ class DSPyAdapter:
         return MemoryEnhancedAgentModule(self.config, self.dspy, self.memory, self.lm)
 
     async def run(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
-        """Execute the DSPy pipeline with DSPy 3.0 usage tracking and memory integration."""
+        """Execute the DSPy pipeline with DSPy 3.3 usage tracking and memory integration."""
         try:
             agent = self.setup_agent()
             query = inputs.get("query", "")
             user_context = inputs.get("context", {})
             current_usage = {}
 
-            # Use DSPy 3.0 usage tracking with fallback
+            # Use DSPy 3.3 usage tracking with fallback
             try:
                 with self.dspy.track_usage() as tracker:
                     result = agent(query, user_context)
@@ -249,7 +249,7 @@ class DSPyAdapter:
             }
 
         except Exception as e:
-            raise RuntimeError(f"DSPy 3.0 pipeline execution failed: {str(e)}") from e
+            raise RuntimeError(f"DSPy 3.3 pipeline execution failed: {str(e)}") from e
 
     def learn_from_feedback(self, feedback: Dict[str, Any]) -> bool:
         """Learn from user feedback and update memory."""
@@ -314,7 +314,7 @@ class DSPyAdapter:
             return {}
 
     def get_usage_summary(self) -> Dict[str, Any]:
-        """Get comprehensive usage statistics for DSPy 3.0."""
+        """Get comprehensive usage statistics for DSPy 3.3."""
         return {
             "cumulative_usage": self.usage_stats,
             "agent_id": self.agent_id,

@@ -20,7 +20,7 @@ spec:
   language_model:
     location: cloud
     provider: anthropic
-    model: claude-sonnet-4-20250514
+    model: claude-sonnet-5
     temperature: 0.2
     max_tokens: 1800
 
@@ -97,5 +97,5 @@ spec:
 # Quick Start:
 #   super agent pull rag_surrealdb_deepagents_demo
 #   export ANTHROPIC_API_KEY=your_key
-#   super agent compile rag_surrealdb_deepagents_demo --framework deepagents --cloud --provider anthropic --model claude-sonnet-4-20250514
-#   super agent run rag_surrealdb_deepagents_demo --framework deepagents --cloud --provider anthropic --model claude-sonnet-4-20250514 --goal "What is NEON-FOX-742?"
+#   super agent compile rag_surrealdb_deepagents_demo --framework deepagents --cloud --provider anthropic --model claude-sonnet-5
+#   super agent run rag_surrealdb_deepagents_demo --framework deepagents --cloud --provider anthropic --model claude-sonnet-5 --goal "What is NEON-FOX-742?"

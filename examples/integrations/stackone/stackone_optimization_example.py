@@ -62,7 +62,7 @@ def stackone_optimization_demo():
     optimized_tools = bridge.optimize(
         dataset=dataset,
         metric=simple_metric,
-        reflection_lm="gpt-4o-mini",
+        reflection_lm="gpt-5.6-luna",
         max_iterations=3,
     )
 

@@ -29,7 +29,7 @@ spec:
   # Gemini 2.5 Flash for execution
   language_model:
     provider: google-genai
-    model: google-genai:gemini-2.5-flash
+    model: google-genai:gemini-3.7-flash
     temperature: 0.7
     max_tokens: 8192
   
@@ -256,7 +256,7 @@ spec:
       params:
         metric: research_quality
         auto: heavy  # More iterations for complex agent
-        reflection_lm: google-genai:gemini-2.5-pro
+        reflection_lm: google-genai:gemini-3.1-pro-preview
         max_full_evals: 7
     metric: research_quality
     metric_threshold: 0.90

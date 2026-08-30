@@ -197,7 +197,7 @@ SuperSpec supports 6 major agent frameworks. Select based on your needs:
       target_framework: google-adk  # Gemini native
       language_model:
         provider: google
-        model: gemini-2.0-flash
+        model: gemini-3.7-flash
     ```
     **Best For**: Gemini 2.0, free tier available
 

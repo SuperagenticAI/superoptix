@@ -123,8 +123,8 @@ qwen3.5:9b (current)
 qwen2.5:14b
 
 ☁️  CLOUD MODELS:
-OpenAI: gpt-4o, gpt-4o-mini
-Anthropic: claude-3.5-sonnet
+OpenAI: gpt-5.6-terra, gpt-5.6-luna
+Anthropic: claude-sonnet-5
 
 SuperOptiX> /ask How do I add memory?
 
@@ -196,7 +196,7 @@ SuperOptiX> /model set qwen2.5:14b
 Switched to: qwen2.5:14b
 
 # Switch to OpenAI (requires API key)
-SuperOptiX> /model set gpt-4o
+SuperOptiX> /model set gpt-5.6-terra
 
 ⚠️  OPENAI_API_KEY not set
 Set it with: /config set OPENAI_API_KEY sk-...
@@ -226,12 +226,12 @@ Install: ollama pull <model>
 ☁️  CLOUD MODELS:
 
 OpenAI (Requires OPENAI_API_KEY):
-  • gpt-4o - Best overall
-  • gpt-4o-mini - Fast and affordable
+  • gpt-5.6-terra - Best overall
+  • gpt-5.6-luna - Fast and affordable
 
 Anthropic (Requires ANTHROPIC_API_KEY):
-  • claude-3.5-sonnet - Best for coding
-  • claude-3.5-haiku - Fast and affordable
+  • claude-sonnet-5 - Best for coding
+  • claude-haiku-4-5-20251001 - Fast and affordable
 
 Set API key: /config set OPENAI_API_KEY sk-...
 ```

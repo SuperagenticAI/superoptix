@@ -63,7 +63,7 @@ spec:
   
   language_model:
     provider: google-genai
-    model: gemini-2.5-flash  # Check provider docs for latest models
+    model: gemini-3.7-flash  # Check provider docs for latest models
   
   # Enable persistent memory
   backend:
@@ -199,7 +199,7 @@ spec:
   
   language_model:
     provider: google-genai
-    model: gemini-2.5-pro  # Pro for better analysis
+    model: gemini-3.1-pro-preview  # Pro for better analysis
     temperature: 0.3
   
   # Access real project files
@@ -335,7 +335,7 @@ spec:
   
   language_model:
     provider: google-genai
-    model: gemini-2.5-flash  # Check provider docs for latest models
+    model: gemini-3.7-flash  # Check provider docs for latest models
   
   # Hybrid storage strategy
   backend:
@@ -637,7 +637,7 @@ spec:
   
   language_model:
     provider: google-genai
-    model: gemini-2.5-flash  # Check provider docs for latest models
+    model: gemini-3.7-flash  # Check provider docs for latest models
     temperature: 0.7
   
   # Hybrid storage for production

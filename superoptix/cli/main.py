@@ -813,7 +813,7 @@ def main():
 Welcome to SuperOptiX! 🌟
 
 SuperOptiX is a revolutionary AI agent framework that brings enterprise-grade orchestration 
-to agentic AI development. Built on DSPy 3.0, it features intelligent BDD evaluation, 
+to agentic AI development. Built on DSPy 3.3, it features intelligent BDD evaluation, 
 multi-layered memory systems, comprehensive observability, and a progressive tier system 
 that scales from simple automation to enterprise complexity.
 
@@ -1140,7 +1140,7 @@ Use `super agent <command> --help` for more information on a specific command.
     )
     compile_parser.add_argument(
         "--model",
-        help="Override model id at compile time (e.g. qwen3.5:9b, gpt-4o-mini, gemini-2.5-flash-lite).",
+        help="Override model id at compile time (e.g. qwen3.5:9b, gpt-5.6-luna, gemini-3.5-flash-lite).",
     )
     compile_parser.add_argument(
         "--gateway-url",
@@ -1289,7 +1289,7 @@ Use `super agent <command> --help` for more information on a specific command.
     )
     optimize_parser.add_argument(
         "--model",
-        help="Model override for optimization task model (e.g. qwen3.5:9b, gemini-2.5-flash-lite).",
+        help="Model override for optimization task model (e.g. qwen3.5:9b, gemini-3.5-flash-lite).",
     )
     optimize_parser.add_argument(
         "--optimizer",
@@ -1310,7 +1310,7 @@ Use `super agent <command> --help` for more information on a specific command.
     )
     optimize_parser.add_argument(
         "--reflection-lm",
-        help="Language model for GEPA reflection (e.g., 'gpt-4o', 'gpt-4o-mini'). Required for GEPA.",
+        help="Language model for GEPA reflection (e.g., 'gpt-5.6-terra', 'gpt-5.6-luna'). Required for GEPA.",
     )
     optimize_parser.add_argument(
         "--gepa-api",

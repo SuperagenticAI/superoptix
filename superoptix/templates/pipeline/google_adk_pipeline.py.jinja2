@@ -98,7 +98,7 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
       variable_type="instruction",
       framework="google_adk",
       config={
-        "model": model_config.get("model", "gemini-2.0-flash") if model_config else "gemini-2.0-flash",
+        "model": model_config.get("model", "gemini-3.7-flash") if model_config else "gemini-3.7-flash",
         "description": model_config.get("description", "{{ metadata.description }}") if model_config else "{{ metadata.description }}",
         "tools": tools or [],
         **kwargs
@@ -166,7 +166,7 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
     if not isinstance(config, dict):
       config = {}
     
-    model_str = config.get("model", "gemini-2.0-flash")
+    model_str = config.get("model", "gemini-3.7-flash")
     description = config.get("description", "AI Agent")
     tools = config.get("tools", [])
     self._phoenix = superoptix_setup_phoenix_for_spec(
@@ -306,7 +306,7 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
     config = vars(self.config) if isinstance(self.config, python_types.SimpleNamespace) else self.config
     if not isinstance(config, dict):
       config = {}
-    model_str = str(config.get("model", "gemini-2.0-flash"))
+    model_str = str(config.get("model", "gemini-3.7-flash"))
     app_name = f"superoptix_{{ agent_name }}"
     return await superoptix_run_agent_with_optional_rlm(
       agent=self._agent,
@@ -407,7 +407,7 @@ class {{ agent_name | to_pascal_case }}Pipeline:
     if "language_model" in self.spec:
       lm = self.spec["language_model"]
       model_config = {
-        "model": lm.get("model", "gemini-2.0-flash"),
+        "model": lm.get("model", "gemini-3.7-flash"),
         "description": self.metadata.get("description", "AI Agent"),
       }
     
@@ -627,7 +627,7 @@ class {{ agent_name | to_pascal_case }}Pipeline:
       },
       "model_analysis": {
         "framework": "Google ADK",
-        "model": "{{ spec.language_model.model | default('gemini-2.0-flash') }}",
+        "model": "{{ spec.language_model.model | default('gemini-3.7-flash') }}",
       },
       "recommendations": [],
     }
@@ -694,7 +694,7 @@ class {{ agent_name | to_pascal_case }}Pipeline:
       optimizer = UniversalGEPA(
         metric=eval_metric,
         auto=auto,
-        reflection_lm="gpt-4o-mini",
+        reflection_lm="gpt-5.6-luna",
       )
       
       result = optimizer.compile(

@@ -130,7 +130,7 @@ from google.adk.runners import InMemoryRunner
 from google.genai import types
 
 agent = Agent(
-    model="gemini-2.0-flash",
+    model="gemini-3.7-flash",
     name="assistant_adk",
     description="AI assistant built with Google ADK",
     instruction="""You are a Helpful AI Assistant
@@ -240,7 +240,7 @@ spec:
   # LLM Configuration - Gemini models
   language_model:
     provider: google
-    model: gemini-2.0-flash  # Free access!
+    model: gemini-3.7-flash  # Free access!
     # Alternative: gemini-1.5-pro, gemini-1.5-flash
   
   # Input/Output Fields
@@ -301,7 +301,7 @@ spec:
 
 | Model | Description | Best For |
 |-------|-------------|----------|
-| `gemini-2.0-flash` | Latest, fastest, FREE access! | **Recommended** |
+| `gemini-3.7-flash` | Latest, fastest, FREE access! | **Recommended** |
 | `gemini-1.5-pro` | More capable, longer context | Complex tasks |
 | `gemini-1.5-flash` | Fast, efficient | Simple tasks |
 
@@ -329,7 +329,7 @@ gcloud auth application-default login
 ```yaml
 language_model:
   provider: google
-  model: gemini-2.0-flash
+  model: gemini-3.7-flash
   # No API key in playbook - use env var GOOGLE_API_KEY
 ```
 
@@ -513,7 +513,7 @@ pip install google-adk
 **Error:** `Model 'gemini-x' not found`
 
 **Solution:** Use supported models:
-- `gemini-2.0-flash` (recommended)
+- `gemini-3.7-flash` (recommended)
 - `gemini-1.5-pro`
 - `gemini-1.5-flash`
 
@@ -527,7 +527,7 @@ Google ADK supports context caching for performance:
 
 ```python
 agent = Agent(
-    model="gemini-2.0-flash",
+    model="gemini-3.7-flash",
     static_instruction="Static content that never changes...",
     instruction="Dynamic content with placeholders: {variable}",
     ...

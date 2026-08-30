@@ -47,7 +47,7 @@ Run it from the CLI:
 super harness run developer \
   --backend pydantic-ai \
   --provider openai \
-  --model gpt-4o \
+  --model gpt-5.6-terra \
   --pydantic-request-limit 5 \
   --pydantic-tool-calls-limit 20 \
   --prompt "Analyze this API design and return a concise implementation plan"
@@ -79,7 +79,7 @@ Run it from the CLI:
 super harness run developer \
   --backend deepagents \
   --provider openai \
-  --model gpt-4o \
+  --model gpt-5.6-terra \
   --deepagents-checkpointer memory \
   --allow-write \
   --allow-shell \
@@ -219,7 +219,7 @@ agent = HarnessAgent(
         Path.cwd(),
         SandboxPolicy(allow_write=True, allow_shell=True),
     ),
-    model_config={"provider": "openai", "model": "gpt-4o"},
+    model_config={"provider": "openai", "model": "gpt-5.6-terra"},
 )
 
 session = await agent.session("fix-123")

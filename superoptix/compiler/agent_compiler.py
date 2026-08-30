@@ -876,7 +876,7 @@ class AgentCompiler:
                         "[dim]   • GEPA optimization path (no secondary optimizer fallback)[/]"
                     )
                     console.print(
-                        "[dim]   • Default optimize models: task=gemini-2.5-flash-lite, teacher=gemini-2.5-flash[/]"
+                        "[dim]   • Default optimize models: task=gemini-3.5-flash-lite, teacher=gemini-3.7-flash[/]"
                     )
                 self.show_tier_features("unified")
 
@@ -1037,7 +1037,7 @@ class AgentCompiler:
         spec = context.get("spec", {})
         lm = spec.get("language_model", {})
         provider = str(lm.get("provider", "anthropic")).lower()
-        model = str(lm.get("model", "claude-sonnet-4-5")).strip()
+        model = str(lm.get("model", "claude-sonnet-5")).strip()
 
         anthropic_api_key = os.getenv("ANTHROPIC_API_KEY", "").strip()
         anthropic_base_url = os.getenv("ANTHROPIC_BASE_URL", "").strip()
@@ -1074,8 +1074,8 @@ class AgentCompiler:
                 "[yellow]⚠️  provider='anthropic' expects a Claude model name.[/]"
             )
             console.print(
-                "[yellow]   Update spec.language_model.model to e.g. claude-opus-4-5, claude-sonnet-4-5, or claude-haiku-4-5 "
-                "(or snapshots: claude-opus-4-5-20251101, claude-sonnet-4-5-20250929, claude-haiku-4-5-20251001).[/]"
+                "[yellow]   Update spec.language_model.model to e.g. claude-opus-5, claude-sonnet-5, or claude-haiku-4-5 "
+                "(or snapshots: claude-opus-5, claude-sonnet-5, claude-haiku-4-5-20251001).[/]"
             )
 
         auth_ok = False
@@ -1118,12 +1118,12 @@ class AgentCompiler:
   language_model:
     location: cloud
     provider: anthropic
-    model: claude-sonnet-4-5
+    model: claude-sonnet-5
     temperature: 0.2[/]"""
         )
-        console.print("[dim]Alternative models: claude-opus-4-5, claude-haiku-4-5[/]")
+        console.print("[dim]Alternative models: claude-opus-5, claude-haiku-4-5[/]")
         console.print(
-            "[dim]Stable snapshots: claude-opus-4-5-20251101, claude-sonnet-4-5-20250929, claude-haiku-4-5-20251001[/]"
+            "[dim]Stable snapshots: claude-opus-5, claude-sonnet-5, claude-haiku-4-5-20251001[/]"
         )
 
         console.print("\n[bold cyan]🔐 API Key Setup[/]")

@@ -28,7 +28,7 @@ spec:
   # Gemini 2.5 Pro (better for code analysis)
   language_model:
     provider: google-genai
-    model: google-genai:gemini-2.5-pro
+    model: google-genai:gemini-3.1-pro-preview
     temperature: 0.3  # Lower for more focused analysis
     max_tokens: 8192
   
@@ -263,7 +263,7 @@ spec:
       params:
         metric: code_analysis_quality
         auto: medium
-        reflection_lm: google-genai:gemini-2.5-pro
+        reflection_lm: google-genai:gemini-3.1-pro-preview
         max_full_evals: 5
     metric: code_analysis_quality
     metric_threshold: 0.85

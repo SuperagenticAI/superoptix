@@ -38,14 +38,14 @@ export ANTHROPIC_BASE_URL="https://your-anthropic-compatible-endpoint"
 
 Use current model aliases from Anthropic's model overview:
 
-- `claude-opus-4-5`
-- `claude-sonnet-4-5`
+- `claude-opus-5`
+- `claude-sonnet-5`
 - `claude-haiku-4-5`
 
 Latest snapshot IDs:
 
-- `claude-opus-4-5-20251101`
-- `claude-sonnet-4-5-20250929`
+- `claude-opus-5`
+- `claude-sonnet-5`
 - `claude-haiku-4-5-20251001`
 
 ## End-to-End Example
@@ -71,7 +71,7 @@ async def main():
         system_prompt="You are an HR assistant. Use tools for factual answers.",
         mcp_servers={"stackone": mcp_server},
         allowed_tools=tool_names,
-        model="claude-sonnet-4-5",
+        model="claude-sonnet-5",
     )
 
     async for message in query(
@@ -104,7 +104,7 @@ spec:
   language_model:
     location: cloud
     provider: anthropic
-    model: claude-sonnet-4-5
+    model: claude-sonnet-5
     temperature: 0.2
 ```
 

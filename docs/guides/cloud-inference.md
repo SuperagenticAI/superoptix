@@ -76,7 +76,7 @@ spec:
   language_model:
     location: cloud                    # REQUIRED for cloud providers
     provider: openai                  # or "anthropic", "google", etc.
-    model: gpt-4o                     # or "claude-3-opus-20240229"
+    model: gpt-5.6-terra                     # or "claude-3-opus-20240229"
     temperature: 0.7                  # OPTIONAL - Controls randomness
     max_tokens: 2000                  # OPTIONAL - Limit output length
     top_p: 1.0                        # OPTIONAL - Nucleus sampling
@@ -213,7 +213,7 @@ spec:
   language_model:
     location: cloud
     provider: openai
-    model: gpt-4o-mini  # Much cheaper than gpt-4o
+    model: gpt-5.6-luna  # Much cheaper than gpt-5.6-terra
     temperature: 0.7
     max_tokens: 1000    # Limit output length
     cache: true         # Enable caching
@@ -252,7 +252,7 @@ spec:
   language_model:
     location: cloud
     provider: openai
-    model: gpt-4o
+    model: gpt-5.6-terra
     cache: true              # Cache responses
     cache_in_memory: true    # Use memory cache
     num_retries: 2           # Limit retries
@@ -267,9 +267,9 @@ spec:
   language_model:
     location: cloud
     provider: openai
-    model: gpt-4o              # Latest model
+    model: gpt-5.6-terra              # Latest model
     # Alternative models:
-    # model: gpt-4o-mini       # Cheaper option
+    # model: gpt-5.6-luna       # Cheaper option
     # model: gpt-3.5-turbo     # Budget option
     temperature: 0.7
     max_tokens: 2000
@@ -290,7 +290,7 @@ spec:
     model: claude-3-opus-20240229    # Most capable
     # Alternative models:
     # model: claude-3-sonnet-20240229  # Balanced
-    # model: claude-3-haiku-20240307   # Fastest
+    # model: claude-haiku-4-5-20251001-20240307   # Fastest
     temperature: 0.7
     max_tokens: 2000
     top_p: 1.0
@@ -347,13 +347,13 @@ spec:
 ```bash
 # Phase 1: Development with cheap models
 super spec generate oracle dev_agent
-# Use gpt-4o-mini or gemini-pro
+# Use gpt-5.6-luna or gemini-pro
 
 # Phase 2: Testing with better models
-# Switch to gpt-4o or claude-3-sonnet
+# Switch to gpt-5.6-terra or claude-3-sonnet
 
 # Phase 3: Production with best models
-# Use gpt-4o or claude-3-opus
+# Use gpt-5.6-terra or claude-3-opus
 ```
 
 #### **2. Use Conservative Optimization**
@@ -375,7 +375,7 @@ spec:
   language_model:
     location: cloud
     provider: openai
-    model: gpt-4o
+    model: gpt-5.6-terra
     cache: true              # Essential for cost control
     cache_in_memory: true    # Fast access
 ```
@@ -413,13 +413,13 @@ super agent optimize expensive_agent --max-iterations 5
 spec:
   language_model:
     provider: openai
-    model: gpt-4o  # Expensive
+    model: gpt-5.6-terra  # Expensive
 
 # Good: Cost-effective for development
 spec:
   language_model:
     provider: openai
-    model: gpt-4o-mini  # Much cheaper
+    model: gpt-5.6-luna  # Much cheaper
 ```
 
 #### **3. Don't Ignore Rate Limits**
@@ -429,13 +429,13 @@ spec:
 spec:
   language_model:
     provider: openai
-    model: gpt-4o
+    model: gpt-5.6-terra
 
 # Good: Proper rate limiting
 spec:
   language_model:
     provider: openai
-    model: gpt-4o
+    model: gpt-5.6-terra
     num_retries: 3
     request_timeout: 30
     cache: true
@@ -467,7 +467,7 @@ spec:
   language_model:
     location: cloud
     provider: openai
-    model: gpt-4o
+    model: gpt-5.6-terra
     num_retries: 5
     request_timeout: 60
     cache: true  # Reduce API calls
@@ -483,7 +483,7 @@ super observability dashboard
 super agent inspect your_agent --show-usage
 
 # Switch to cheaper model
-# Edit playbook: model: gpt-4o-mini
+# Edit playbook: model: gpt-5.6-luna
 ```
 
 #### **4. Model Not Found**
@@ -492,7 +492,7 @@ super agent inspect your_agent --show-usage
 # Error: Model not found
 
 # Solution: Use exact model identifiers
-# OpenAI: gpt-4o, gpt-4o-mini, gpt-3.5-turbo
+# OpenAI: gpt-5.6-terra, gpt-5.6-luna, gpt-3.5-turbo
 # Anthropic: claude-3-opus-20240229, claude-3-sonnet-20240229
 # Google: gemini-pro, gemini-pro-vision
 ```
@@ -531,13 +531,13 @@ super agent inspect your_agent --show-traces
 ```bash
 # Development (Cheap)
 super spec generate oracle dev_agent
-# Use gpt-4o-mini or gemini-pro
+# Use gpt-5.6-luna or gemini-pro
 
 # Testing (Balanced)
-# Switch to gpt-4o or claude-3-sonnet
+# Switch to gpt-5.6-terra or claude-3-sonnet
 
 # Production (Best)
-# Use gpt-4o or claude-3-opus with caching
+# Use gpt-5.6-terra or claude-3-opus with caching
 
 # Monitor (Always)
 super observability dashboard
@@ -547,9 +547,9 @@ super observability dashboard
 
 | Phase | Model | Cost | Use Case |
 |-------|-------|------|----------|
-| **Development** | gpt-4o-mini | $0.00015/1K | Coding, testing |
-| **Testing** | gpt-4o | $0.005/1K | Validation |
-| **Production** | gpt-4o | $0.005/1K | Live deployment |
+| **Development** | gpt-5.6-luna | $0.00015/1K | Coding, testing |
+| **Testing** | gpt-5.6-terra | $0.005/1K | Validation |
+| **Production** | gpt-5.6-terra | $0.005/1K | Live deployment |
 
 ---
 

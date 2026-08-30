@@ -252,7 +252,7 @@ spec:
   
   language_model:
     provider: google-genai
-    model: google-genai:gemini-2.5-flash  # Use latest model from provider
+    model: google-genai:gemini-3.7-flash  # Use latest model from provider
     temperature: 0.7
     max_tokens: 8192
     # Note: Model names may change as providers release new versions.
@@ -281,7 +281,7 @@ spec:
       params:
         metric: response_accuracy
         auto: medium
-        reflection_lm: google-genai:gemini-2.5-pro  # FREE Gemini Pro for reflection!
+        reflection_lm: google-genai:gemini-3.1-pro-preview  # FREE Gemini Pro for reflection!
 ```
 
 **Checkpoint:** Note the `target_framework: deepagents` - this tells SuperOptiX to compile for DeepAgents.
@@ -360,7 +360,7 @@ pipelines/research_agent_deepagents_deepagents_pipeline.py
 │                                                                              │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 
-DeepAgents agent initialized with model: google-genai:gemini-2.5-flash
+DeepAgents agent initialized with model: google-genai:gemini-3.7-flash
 
                                 Analysis Results                                
 ┏━━━━━━━━━━┳━━━━━━━┓
@@ -432,7 +432,7 @@ super agent evaluate research_agent_deepagents
 
 Testing 3 BDD scenarios:
 
-DeepAgents agent initialized with model: google-genai:gemini-2.5-flash
+DeepAgents agent initialized with model: google-genai:gemini-3.7-flash
 Simple research query: PASS
 Technical comparison: FAIL
 Complex research: FAIL
@@ -469,13 +469,13 @@ Now let's use GEPA to automatically improve the agent:
 super agent optimize research_agent_deepagents \
   --framework deepagents \
   --auto medium \
-  --reflection-lm google-genai:gemini-2.5-pro
+  --reflection-lm google-genai:gemini-3.1-pro-preview
 ```
 
 **What's happening:**
 - `--framework deepagents` - Specifies the framework
 - `--auto medium` - GEPA budget (light/medium/heavy)
-- `--reflection-lm gemini-2.5-pro` - Uses Pro model for better reflection
+- `--reflection-lm gemini-3.1-pro-preview` - Uses Pro model for better reflection
 
 **Expected Output:**
 ```
@@ -499,12 +499,12 @@ super agent optimize research_agent_deepagents \
 🚀 Initializing Universal GEPA optimizer...
    Optimizer created
    Budget: medium
-   Reflection LM: google-genai:gemini-2.5-pro
+   Reflection LM: google-genai:gemini-3.1-pro-preview
 
 ⚡ Running GEPA optimization...
    This may take 5-10 minutes...
 
-DeepAgents agent initialized with model: google-genai:gemini-2.5-flash
+DeepAgents agent initialized with model: google-genai:gemini-3.7-flash
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Iteration 0: Base program full valset score: 0.33
@@ -720,7 +720,7 @@ Optimization: 🚀 Optimized Model
 
 Testing 3 BDD scenarios:
 
-DeepAgents agent initialized with model: google-genai:gemini-2.5-flash
+DeepAgents agent initialized with model: google-genai:gemini-3.7-flash
 Simple research query: PASS
 Technical comparison: PASS
 Complex research: PASS
@@ -1028,7 +1028,7 @@ super agent evaluate research_agent_deepagents
 super agent optimize research_agent_deepagents \
   --framework deepagents \
   --auto medium \
-  --reflection-lm google-genai:gemini-2.5-pro
+  --reflection-lm google-genai:gemini-3.1-pro-preview
 
 # Evaluate (optimized)
 super agent evaluate research_agent_deepagents  # automatically loads optimized weights
@@ -1232,7 +1232,7 @@ google.api_core.exceptions.ResourceExhausted: 429 Quota exceeded
 **Solution:**
 ```bash
 # Use lighter optimization (fewer API calls)
-super agent optimize my_agent --auto light --reflection-lm google-genai:gemini-2.5-flash
+super agent optimize my_agent --auto light --reflection-lm google-genai:gemini-3.7-flash
 
 # Or wait 1 minute (free tier: 15 requests/minute)
 ```
@@ -1249,7 +1249,7 @@ Pipeline not found for agent 'my_agent'
 **Solution:**
 ```bash
 # Make sure to specify framework when optimizing non-DSPy agents
-super agent optimize my_agent --framework deepagents --auto medium --reflection-lm google-genai:gemini-2.5-pro
+super agent optimize my_agent --framework deepagents --auto medium --reflection-lm google-genai:gemini-3.1-pro-preview
 
 # Recompile if needed
 super agent compile my_agent --framework deepagents
@@ -1367,13 +1367,13 @@ backend:
 ```yaml
 # For agent execution (runs many times)
 language_model:
-  model: gemini-2.5-flash  # Fast and cheap
+  model: gemini-3.7-flash  # Fast and cheap
 
 # For GEPA reflection (runs fewer times)
 optimization:
   optimizer:
     params:
-      reflection_lm: gemini-2.5-pro  # Better reasoning
+      reflection_lm: gemini-3.1-pro-preview  # Better reasoning
 ```
 
 ### Optimize BDD Scenarios
@@ -1445,7 +1445,7 @@ spec:
   # Production model
   language_model:
     provider: google-genai
-    model: gemini-2.5-flash
+    model: gemini-3.7-flash
     temperature: 0.5  # Lower for more consistent responses
     max_tokens: 8192
   
@@ -1477,7 +1477,7 @@ spec:
       params:
         metric: response_accuracy
         auto: heavy  # Best for production
-        reflection_lm: google-genai:gemini-2.5-pro
+        reflection_lm: google-genai:gemini-3.1-pro-preview
         max_full_evals: 10
     metric_threshold: 0.95  # 95% minimum for production
 ```
@@ -1493,7 +1493,7 @@ super agent evaluate production_agent
 super agent optimize production_agent \
   --framework deepagents \
   --auto heavy \
-  --reflection-lm google-genai:gemini-2.5-pro
+  --reflection-lm google-genai:gemini-3.1-pro-preview
 
 # Validate optimized version
 super agent evaluate production_agent  # automatically loads optimized weights
@@ -1571,7 +1571,7 @@ super agent evaluate research_agent_deepagents
 super agent optimize research_agent_deepagents \
   --framework deepagents \
   --auto medium \
-  --reflection-lm google-genai:gemini-2.5-pro
+  --reflection-lm google-genai:gemini-3.1-pro-preview
 
 # Test optimized
 super agent evaluate research_agent_deepagents  # automatically loads optimized weights

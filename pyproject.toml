@@ -46,11 +46,14 @@ dependencies = [
     "typer",
     "jinja2",
     "requests",
-    "transformers",
-    "torch",
-    "accelerate",
-    "dspy",  # Required for GEPA optimization (transitional - will be optional in future)
-    "litellm!=1.82.7,!=1.82.8",  # Block compromised March 2026 releases
+    # NOTE: torch / transformers / accelerate are NOT core dependencies.
+    # Only superoptix/models/backends/huggingface*.py imports them, always
+    # lazily, and they are already declared in the `huggingface` and
+    # `ml-cross-platform` extras. Keeping them here added ~545 MB to every
+    # install (torch alone is 491 MB) for an optional local-inference backend.
+    #   pip install "superoptix[huggingface]"   # to use that backend
+    "dspy>=3.3",  # GEPA lives in DSPy 3.x - floor prevents silent back-solve to 2.6.x
+    "litellm>=1.98,!=1.82.7,!=1.82.8",  # Block compromised March 2026 releases
     "pydantic",  # Required for data validation
     "python-dotenv",  # Required for environment variables
     "mcp",  # Required for Super CLI MCP client functionality
@@ -61,74 +64,82 @@ dependencies = [
 # FRAMEWORK INTEGRATIONS - Multi-Framework Support (NEW in 0.2.0)
 # ============================================================================
 
-# DSPy - Now optional to avoid conflicts with CrewAI
+# DSPy - kept as a separate extra so it can be pinned independently
 frameworks-dspy = [
-    "dspy",  # PyPI package name
+    "dspy>=3.3",  # PyPI package name
 ]
 
 # OpenAI Agents SDK
+# NOTE: capped at <0.21 - openai-agents 0.22+ requires openai>=3.0, while
+# litellm (a DSPy dependency) still requires openai<3.0. Lift the cap once
+# litellm ships openai v3 support.
 frameworks-openai = [
-    "openai-agents>=0.14.0",
-    "openai",
+    "openai-agents>=0.20,<0.21",
+    "openai>=2.54,<3",
 ]
 
 # Google ADK (Agent Development Kit)
+# ADK 2.x is a graph-based Workflow Runtime (BaseAgent now subclasses BaseNode).
+# SuperOptiX only uses Agent / Runner / InMemoryRunner, which are unchanged.
+# google-generativeai is deprecated upstream and unused here - use google-genai.
 frameworks-google = [
-    "google-adk",
-    "google-generativeai",
+    "google-adk>=2.7",
 ]
 
-# Microsoft Agent Framework (pre-release)
+# Microsoft Agent Framework (1.0 GA shipped 2026-04-03)
+# NOTE: agent-framework caps mcp<2, which holds the whole graph on mcp 1.x.
 frameworks-microsoft = [
-    "agent-framework>=1.0.0b260212",
+    "agent-framework>=1.16",
     "azure-identity",
 ]
 
 # DeepAgents (LangChain) - 0.5.6+ with pluggable backends
 frameworks-deepagents = [
-    "deepagents>=0.5.6,<0.6.0",  # Requires 0.5.6+ for current backend abstraction
+    "deepagents>=0.7,<0.8",  # 0.7.x backend abstraction; used via create_deep_agent
 ]
 
 # Pydantic AI - Type-safe agent framework (full package)
 # Upstream repo: https://github.com/pydantic/pydantic-ai
+# NOTE: capped at <2.32 - pydantic-ai 2.36 requires opentelemetry-api==1.44,
+# while google-adk 2.x requires opentelemetry-api<=1.42.1. Lift when ADK moves.
 frameworks-pydantic-ai = [
-    "pydantic-ai",
+    "pydantic-ai>=2.31,<2.32",
 ]
 
 # Claude Agent SDK
 frameworks-claude-sdk = [
-    "claude-agent-sdk",
+    "claude-agent-sdk>=0.2",
 ]
 
-# CrewAI - Conflicts with DSPy due to json-repair version
-# CrewAI 1.2.0 requires json-repair==0.25.2
-# DSPy 3.0.4b1 requires json-repair>=0.30.0
-# 
-# ⚠️ IMPORTANT: Cannot be installed together with DSPy
-# Choose ONE:
-#   - For CrewAI: pip install superoptix && pip install crewai==1.2.0 (no DSPy support)
-#   - For DSPy: pip install superoptix[frameworks] (no CrewAI support)
-# TEMPORARILY DISABLED FOR BUILD - Conflicts with DSPy (json-repair version mismatch)
-# Users can manually install: pip install superoptix && pip install crewai==1.2.0
-# frameworks-crewai = [
-#     "crewai==1.2.0",
-# ]
+# CrewAI - installed alongside SuperOptiX rather than as an extra.
+#
+# The historically documented blocker (json-repair) is RESOLVED upstream:
+# crewai 1.15+ requires json-repair~=0.60.1, which satisfies DSPy 3.3's
+# json-repair>=0.30. CrewAI and DSPy now co-install cleanly.
+#
+# The live blocker is chromadb: crewai 1.15+ requires chromadb~=1.1.0, while
+# the chromadb / turboagents / vectordb extras require chromadb>=1.5.5.
+# Declaring that as a [tool.uv] conflict pushes `uv lock` past 10 minutes,
+# so CrewAI stays a one-line install instead:
+#
+#   pip install superoptix "crewai>=1.15"
+#
+# Use a CrewAI-only environment (no turboagents/vectordb extras) for that path.
 
-# All frameworks (including DSPy, excluding CrewAI)
-# NOTE: DSPy and CrewAI conflict - choose one or the other
+# All frameworks except CrewAI (see the CrewAI chromadb note above).
+# Keep these bounds in sync with the individual frameworks-* extras above.
 frameworks = [
-    "dspy",  # DSPy framework
-    "openai-agents>=0.14.0",
-    "openai",
-    "google-adk",
-    "google-generativeai",
-    "agent-framework",
+    "dspy>=3.3",
+    "openai-agents>=0.20,<0.21",
+    "openai>=2.54,<3",
+    "google-adk>=2.7",
+    "agent-framework>=1.16",
     "azure-identity",
-    "deepagents>=0.5.6,<0.6.0",  # 0.5.6+ required for backend abstraction
-    "pydantic-ai",  # Pydantic AI framework
-    "claude-agent-sdk",
-    # NOTE: crewai==1.2.0 excluded - conflicts with DSPy
-    # For CrewAI: pip install superoptix && pip install crewai==1.2.0
+    "deepagents>=0.7,<0.8",
+    "pydantic-ai>=2.31,<2.32",
+    "claude-agent-sdk>=0.2",
+    # crewai excluded: requires chromadb~=1.1.0 vs our >=1.5.5.
+    # Install separately: pip install superoptix "crewai>=1.15"
 ]
 
 # MCP tool optimization (vendored from GEPA PR #105)
@@ -136,15 +147,22 @@ mcp = [
     "mcp",
 ]
 
-# A2A protocol support (client + optional HTTP server exposure)
+# A2A protocol support.
+# NOTE: superoptix implements A2A v1 directly over FastAPI (superoptix/protocols/a2a/);
+# the a2a-sdk package is not imported anywhere, so it is no longer declared here.
+# It previously supplied fastapi/starlette transitively via its [http-server] extra,
+# which these explicit deps now replace. If the implementation is migrated onto the
+# official SDK, add "a2a-sdk>=1.1" (the v1 spec line) rather than the 0.3.x pin.
 a2a = [
-    "a2a-sdk[http-server]==0.3.25",
+    "fastapi>=0.115.2",
+    "sse-starlette",
     "uvicorn>=0.35.0",
 ]
 
 # Backward-compatible alias while integrations settle
 protocols-a2a = [
-    "a2a-sdk[http-server]==0.3.25",
+    "fastapi>=0.115.2",
+    "sse-starlette",
     "uvicorn>=0.35.0",
 ]
 
@@ -187,8 +205,7 @@ connectors-stackone = [
     "stackone-ai[mcp]",
 ]
 
-# Note: CrewAI has known dependency conflicts with dspy due to json-repair version requirements.
-# See optimas-crewai section below for manual installation instructions.
+# Note: see the CrewAI note in the frameworks section for its chromadb constraint.
 
 # Development dependencies
 dev = [
@@ -218,21 +235,6 @@ dev = [
 # optimas-autogen = [
 #     "autogen-agentchat>=0.2,<1.0",
 #     "autogen-ext>=0.2,<1.0",
-# ]
-# CrewAI integration (requires manual installation due to dependency conflicts)
-# NOTE: CrewAI has a dependency conflict with dspy due to json-repair version requirements:
-# - dspy==3.0.0 requires json-repair>=0.30.0
-# - crewai==0.157.0 requires json-repair==0.25.2
-#
-# To use CrewAI with SuperOptiX, install it manually after installing superoptix[optimas]:
-# 1. pip install superoptix[optimas]  # This installs dspy with compatible json-repair
-# 2. pip install crewai==0.157.0 --no-deps  # Install crewai without dependencies
-# 3. pip install "json-repair>=0.30.0"  # Ensure compatible json-repair version
-#
-# IMPORTANT: This group is commented out to prevent build conflicts.
-# Users must install crewai manually using the steps above.
-# optimas-crewai = [
-#     "crewai==0.157.0",
 # ]
 
 # UI and visualization dependencies
@@ -312,6 +314,7 @@ ml-cross-platform = [
 huggingface = [
     "transformers",
     "torch",
+    "accelerate",
     "fastapi",
     "huggingface-hub",
     "uvicorn",
@@ -365,26 +368,26 @@ docs = [
 ]
 
 # All optional dependencies (excluding dev, Apple Silicon specific, CrewAI, and LogFire)
-# NOTE: Includes DSPy; CrewAI excluded due to conflict with DSPy
+# NOTE: Includes DSPy. CrewAI is a separate extra (chromadb version conflict).
 # NOTE: LogFire excluded due to opentelemetry-sdk conflict with google-adk
 #       LogFire must be installed separately: pip install superoptix[logfire]
 #       Cannot be combined with [all] due to google-adk dependency conflict
 all = [
-    # Framework dependencies (NEW in 0.2.0)
-    "dspy",  # DSPy framework
-    "openai-agents>=0.14.0",
-    "openai",
-    "google-adk",
-    "google-generativeai",
-    "agent-framework",
+    # Framework dependencies - keep in sync with the frameworks-* extras above
+    "dspy>=3.3",
+    "openai-agents>=0.20,<0.21",
+    "openai>=2.54,<3",
+    "google-adk>=2.7",
+    "agent-framework>=1.16",
     "azure-identity",
-    "deepagents>=0.5.6,<0.6.0",  # 0.5.6+ required for backend abstraction
-    "pydantic-ai",  # Pydantic AI framework
-    "claude-agent-sdk",
-    # Protocol integrations
-    "a2a-sdk[http-server]==0.3.25",
-    # crewai==1.2.0 - EXCLUDED (conflicts with DSPy)
-    # logfire==4.15.0 - EXCLUDED (conflicts with google-adk's opentelemetry-sdk version)
+    "deepagents>=0.7,<0.8",
+    "pydantic-ai>=2.31,<2.32",
+    "claude-agent-sdk>=0.2",
+    # crewai excluded: requires chromadb~=1.1.0 vs our >=1.5.5.
+    # Install separately: pip install superoptix "crewai>=1.15"
+    # Protocol integrations (A2A v1 is implemented directly over FastAPI)
+    "sse-starlette",
+    # logfire - EXCLUDED (conflicts with google-adk's opentelemetry-sdk version)
     # Existing dependencies
     "streamlit",
     "plotly",
@@ -410,22 +413,22 @@ all = [
 ]
 
 # All dependencies including Apple Silicon specific (use with caution on non-Apple platforms)
-# NOTE: Includes DSPy; CrewAI excluded due to conflict with DSPy
+# NOTE: Includes DSPy. CrewAI is a separate extra (chromadb version conflict).
 # NOTE: LogFire excluded due to opentelemetry-sdk conflict with google-adk
 all-with-mlx = [
-    # Framework dependencies (NEW in 0.2.0)
-    "dspy",  # DSPy framework
-    "openai-agents>=0.14.0",
-    "openai",
-    "google-adk",
-    "google-generativeai",
-    "agent-framework",
+    # Framework dependencies - keep in sync with the frameworks-* extras above
+    "dspy>=3.3",
+    "openai-agents>=0.20,<0.21",
+    "openai>=2.54,<3",
+    "google-adk>=2.7",
+    "agent-framework>=1.16",
     "azure-identity",
-    "deepagents>=0.5.6,<0.6.0",  # 0.5.6+ required for backend abstraction
-    "pydantic-ai",  # Pydantic AI framework
-    "claude-agent-sdk",
-    # crewai==1.2.0 - EXCLUDED (conflicts with DSPy)
-    # logfire==4.15.0 - EXCLUDED (conflicts with google-adk's opentelemetry-sdk version)
+    "deepagents>=0.7,<0.8",
+    "pydantic-ai>=2.31,<2.32",
+    "claude-agent-sdk>=0.2",
+    # crewai excluded: requires chromadb~=1.1.0 vs our >=1.5.5.
+    # Install separately: pip install superoptix "crewai>=1.15"
+    # logfire - EXCLUDED (conflicts with google-adk's opentelemetry-sdk version)
     # Existing dependencies
     "streamlit",
     "plotly",

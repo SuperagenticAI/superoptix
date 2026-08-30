@@ -72,7 +72,9 @@ class DeepAgentsHarnessBackend:
         if hasattr(agent, "ainvoke"):
             result = await agent.ainvoke(inputs, config=runnable_config)
         else:
-            result = await asyncio.to_thread(agent.invoke, inputs, config=runnable_config)
+            result = await asyncio.to_thread(
+                agent.invoke, inputs, config=runnable_config
+            )
 
         text = _extract_text(result)
         return HarnessRunResult(
@@ -160,7 +162,9 @@ def _create_deepagents_backend(sandbox: LocalSandbox) -> Any:
 
         def write(self, file_path: str, content: str) -> Any:
             try:
-                target = sandbox.resolve(_from_backend_path(file_path), must_exist=False)
+                target = sandbox.resolve(
+                    _from_backend_path(file_path), must_exist=False
+                )
                 if target.exists():
                     return WriteResult(error=f"File already exists: {file_path}")
                 sandbox.write(_from_backend_path(file_path), content)
@@ -177,7 +181,9 @@ def _create_deepagents_backend(sandbox: LocalSandbox) -> Any:
         ) -> Any:
             try:
                 target = sandbox.resolve(_from_backend_path(file_path))
-                occurrences = target.read_text(encoding="utf-8", errors="replace").count(old_string)
+                occurrences = target.read_text(
+                    encoding="utf-8", errors="replace"
+                ).count(old_string)
                 sandbox.edit(
                     _from_backend_path(file_path),
                     old_string,
@@ -241,7 +247,10 @@ def _create_deepagents_backend(sandbox: LocalSandbox) -> Any:
             responses = []
             for path, content in files:
                 try:
-                    sandbox.write(_from_backend_path(path), content.decode("utf-8", errors="replace"))
+                    sandbox.write(
+                        _from_backend_path(path),
+                        content.decode("utf-8", errors="replace"),
+                    )
                     responses.append(FileUploadResponse(path=path))
                 except Exception as exc:
                     responses.append(FileUploadResponse(path=path, error=str(exc)))
@@ -252,7 +261,9 @@ def _create_deepagents_backend(sandbox: LocalSandbox) -> Any:
             for path in paths:
                 try:
                     target = sandbox.resolve(_from_backend_path(path))
-                    responses.append(FileDownloadResponse(path=path, content=target.read_bytes()))
+                    responses.append(
+                        FileDownloadResponse(path=path, content=target.read_bytes())
+                    )
                 except Exception as exc:
                     responses.append(FileDownloadResponse(path=path, error=str(exc)))
             return responses
@@ -429,7 +440,9 @@ def _as_str_list(raw: Any) -> list[str]:
     return []
 
 
-def _build_runnable_config(*, agent_name: str, config: dict[str, Any]) -> dict[str, Any]:
+def _build_runnable_config(
+    *, agent_name: str, config: dict[str, Any]
+) -> dict[str, Any]:
     thread_id = config.get("thread_id") or agent_name
     return {"configurable": {"thread_id": thread_id}}
 

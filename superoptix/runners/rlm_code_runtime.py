@@ -102,7 +102,7 @@ def _resolve_provider_and_model(
         if resolved_model and backend_provider:
             return backend_provider, resolved_model
 
-    fallback_model = str(model_name or "").strip() or "gpt-4o-mini"
+    fallback_model = str(model_name or "").strip() or "gpt-5.6-luna"
     return backend_provider or "openai", fallback_model
 
 

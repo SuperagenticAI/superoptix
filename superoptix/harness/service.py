@@ -63,4 +63,3 @@ def create_harness_app(
         }
 
     return app
-

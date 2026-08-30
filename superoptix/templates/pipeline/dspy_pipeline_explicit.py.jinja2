@@ -1130,7 +1130,7 @@ class {{ agent_name | to_pascal_case }}Pipeline:
                 params = optimizer_config.get("params", {})
 
                 auto = params.get("auto", "light")
-                reflection_lm_model = params.get("reflection_lm", "gpt-4o")
+                reflection_lm_model = params.get("reflection_lm", "gpt-5.6-terra")
 
                 print(f"  Budget: {auto}")
                 print(f"  Reflection LM: {reflection_lm_model}")
@@ -1767,7 +1767,7 @@ class {{ agent_name | to_pascal_case }}Pipeline:
 def optimize_with_gepa(
     pipeline_path: Optional[str] = None,
     auto: str = "medium",
-    reflection_lm: str = "gpt-4o",
+    reflection_lm: str = "gpt-5.6-terra",
     max_full_evals: Optional[int] = None,
     reflection_minibatch_size: int = 3,
     verbose: bool = True
@@ -1930,7 +1930,7 @@ if __name__ == "__main__":
     parser.add_argument("--query", type=str, help="Query to run (for 'run' mode)")
     parser.add_argument("--optimize-budget", choices=["light", "medium", "heavy"], default="medium",
                        help="GEPA optimization budget")
-    parser.add_argument("--reflection-lm", default="gpt-4o", help="Reflection LM for GEPA")
+    parser.add_argument("--reflection-lm", default="gpt-5.6-terra", help="Reflection LM for GEPA")
 
     args = parser.parse_args()
 

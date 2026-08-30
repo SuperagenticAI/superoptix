@@ -20,7 +20,7 @@ spec:
   language_model:
     location: cloud
     provider: google-genai
-    model: gemini-2.5-flash
+    model: gemini-3.7-flash
     temperature: 0.1
     max_tokens: 1800
 

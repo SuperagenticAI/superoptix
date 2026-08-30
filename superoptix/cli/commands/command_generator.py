@@ -184,7 +184,7 @@ class CommandGenerator:
             auto_level = params.get("auto", "medium")
             fresh = params.get("fresh", False)
             reflection_lm = params.get(
-                "reflection_lm", "gpt-4o-mini"
+                "reflection_lm", "gpt-5.6-luna"
             )  # Default reflection model
 
             cmd = f"super agent optimize {target} --auto {auto_level} --reflection-lm {reflection_lm}"

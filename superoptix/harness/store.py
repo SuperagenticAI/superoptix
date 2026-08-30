@@ -140,4 +140,3 @@ class FileSessionStore:
         with path.open("w", encoding="utf-8") as handle:
             json.dump(state.to_dict(), handle, indent=2, sort_keys=True)
             handle.write("\n")
-

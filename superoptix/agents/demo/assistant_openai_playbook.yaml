@@ -145,7 +145,7 @@ spec:
 # 3. Use with Cloud Models:
 #    Edit language_model section:
 #      provider: openai
-#      model: openai:gpt-4o
+#      model: openai:gpt-5.6-terra
 #    Then: export OPENAI_API_KEY="sk-..."
 #
 # 4. Compare Frameworks:

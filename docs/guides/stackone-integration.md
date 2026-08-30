@@ -47,20 +47,20 @@ super agent compile stackone-calendly --framework dspy
 super agent run stackone-calendly --framework dspy --goal "What is my Calendly username?"
 
 # Pydantic AI
-super agent compile stackone-calendly --framework pydantic-ai --cloud --provider google-genai --model gemini-2.5-flash
-super agent run stackone-calendly --framework pydantic-ai --direct --cloud --provider google-genai --model gemini-2.5-flash --goal "What is my Calendly username?"
+super agent compile stackone-calendly --framework pydantic-ai --cloud --provider google-genai --model gemini-3.7-flash
+super agent run stackone-calendly --framework pydantic-ai --direct --cloud --provider google-genai --model gemini-3.7-flash --goal "What is my Calendly username?"
 
 # OpenAI SDK
-super agent compile stackone-calendly --framework openai --cloud --provider google-genai --model gemini-2.5-flash
-super agent run stackone-calendly --framework openai --cloud --provider google-genai --model gemini-2.5-flash --goal "What is my Calendly username?"
+super agent compile stackone-calendly --framework openai --cloud --provider google-genai --model gemini-3.7-flash
+super agent run stackone-calendly --framework openai --cloud --provider google-genai --model gemini-3.7-flash --goal "What is my Calendly username?"
 
 # Claude Agent SDK
 super agent compile stackone-calendly --framework claude-sdk
 super agent run stackone-calendly --framework claude-sdk --goal "What is my Calendly username?"
 
 # CrewAI
-super agent compile stackone-calendly --framework crewai --cloud --provider google-genai --model gemini-2.5-flash
-super agent run stackone-calendly --framework crewai --cloud --provider google-genai --model gemini-2.5-flash --goal "What is my Calendly username?"
+super agent compile stackone-calendly --framework crewai --cloud --provider google-genai --model gemini-3.7-flash
+super agent run stackone-calendly --framework crewai --cloud --provider google-genai --model gemini-3.7-flash --goal "What is my Calendly username?"
 ```
 
 For Claude-specific setup details, see [StackOne + Claude Agent SDK](stackone-claude-sdk.md).
@@ -148,7 +148,7 @@ from pydantic_ai import Agent
 pai_tools = StackOneBridge(tools).to_pydantic_ai()
 
 # Use in Agent (Type-safe!)
-agent = Agent('openai:gpt-4o', tools=pai_tools)
+agent = Agent('openai:gpt-5.6-terra', tools=pai_tools)
 ```
 
 ### CrewAI Integration
@@ -170,7 +170,7 @@ hr_agent = Agent(
     role="HR Assistant",
     goal="Help with HR queries using HRIS tools",
     backstory="You are an HR specialist with access to employee management systems.",
-    llm=LLM(model="gpt-4o-mini"),
+    llm=LLM(model="gpt-5.6-luna"),
     tools=crewai_tools,
 )
 
@@ -239,7 +239,7 @@ options = ClaudeAgentOptions(
     system_prompt="You are an HR assistant. Use StackOne tools for factual answers.",
     mcp_servers={"stackone": mcp_server},
     allowed_tools=tool_names,
-    model="claude-sonnet-4-5",
+    model="claude-sonnet-5",
 )
 
 async for message in query(prompt="List all employees in engineering", options=options):
@@ -247,8 +247,8 @@ async for message in query(prompt="List all employees in engineering", options=o
 ```
 
 Model examples (Anthropic docs):
-- `claude-opus-4-5`
-- `claude-sonnet-4-5`
+- `claude-opus-5`
+- `claude-sonnet-5`
 - `claude-haiku-4-5`
 
 Runtime setup:
@@ -351,9 +351,9 @@ super agent pull stackone-calendly
 
 # Compile for a framework (examples)
 super agent compile stackone-calendly --framework dspy
-super agent compile stackone-calendly --framework pydantic-ai --cloud --provider google-genai --model gemini-2.5-flash
+super agent compile stackone-calendly --framework pydantic-ai --cloud --provider google-genai --model gemini-3.7-flash
 
 # Run the agent
 super agent run stackone-calendly --framework dspy --goal "What is my Calendly username?"
-super agent run stackone-calendly --framework pydantic-ai --direct --cloud --provider google-genai --model gemini-2.5-flash --goal "What is my Calendly username?"
+super agent run stackone-calendly --framework pydantic-ai --direct --cloud --provider google-genai --model gemini-3.7-flash --goal "What is my Calendly username?"
 ```

@@ -93,7 +93,7 @@ super agent compile arize-phoenix-demo
 If you want to force a cloud Gemini run:
 
 ```bash
-super agent compile arize-phoenix-demo --cloud --provider google-genai --model gemini-2.5-flash
+super agent compile arize-phoenix-demo --cloud --provider google-genai --model gemini-3.7-flash
 ```
 
 ### Step 4: Run the demo
@@ -105,7 +105,7 @@ super agent run arize-phoenix-demo --goal "Summarize why tracing helps debug AI 
 Or with explicit cloud settings:
 
 ```bash
-super agent run arize-phoenix-demo --cloud --provider google-genai --model gemini-2.5-flash --goal "Summarize why tracing helps debug AI agents."
+super agent run arize-phoenix-demo --cloud --provider google-genai --model gemini-3.7-flash --goal "Summarize why tracing helps debug AI agents."
 ```
 
 ### Step 5: Inspect Phoenix
@@ -182,7 +182,7 @@ super agent compile developer
 Or override the model at compile time:
 
 ```bash
-super agent compile developer --cloud --provider google-genai --model gemini-2.5-flash
+super agent compile developer --cloud --provider google-genai --model gemini-3.7-flash
 ```
 
 ### Step 4: Run
@@ -194,7 +194,7 @@ super agent run developer --goal "Write a short Python function that returns fac
 Or with explicit cloud settings:
 
 ```bash
-super agent run developer --cloud --provider google-genai --model gemini-2.5-flash --goal "Write a short Python function that returns factorial(n) and explain the base case in one sentence."
+super agent run developer --cloud --provider google-genai --model gemini-3.7-flash --goal "Write a short Python function that returns factorial(n) and explain the base case in one sentence."
 ```
 
 ### Step 5: Inspect Phoenix

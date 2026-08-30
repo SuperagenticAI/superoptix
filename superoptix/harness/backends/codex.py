@@ -70,12 +70,16 @@ class CodexHarnessBackend:
             stdout = stdout_bytes.decode("utf-8", errors="replace").strip()
             stderr = stderr_bytes.decode("utf-8", errors="replace").strip()
             if proc.returncode != 0:
-                detail = stderr or stdout or f"codex exited with status {proc.returncode}"
+                detail = (
+                    stderr or stdout or f"codex exited with status {proc.returncode}"
+                )
                 raise RuntimeError(detail)
 
             text = ""
             if last_message_path.exists():
-                text = last_message_path.read_text(encoding="utf-8", errors="replace").strip()
+                text = last_message_path.read_text(
+                    encoding="utf-8", errors="replace"
+                ).strip()
             if not text:
                 text = stdout
 

@@ -28,8 +28,8 @@ spec:
     max_tokens: 3000
     api_base: http://localhost:11434
     # Alternative models:
-    # model: gpt-4o-mini  # OpenAI
-    # model: claude-3-5-sonnet  # Anthropic
+    # model: gpt-5.6-luna  # OpenAI
+    # model: claude-sonnet-5  # Anthropic
   
   input_fields:
     - name: topic
@@ -148,7 +148,7 @@ spec:
       params:
         metric: research_quality
         auto: medium
-        reflection_lm: gpt-4o-mini
+        reflection_lm: gpt-5.6-luna
         max_full_evals: 5
     metric: research_quality
     metric_threshold: 0.85

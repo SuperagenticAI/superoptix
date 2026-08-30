@@ -11,6 +11,23 @@
 import warnings
 import os
 
+# ---------------------------------------------------------------------------
+# NumPy eager submodule load - CRITICAL: must run before dspy is imported
+# ---------------------------------------------------------------------------
+# DSPy 3.3.0 changed to a lazy_import mechanism that, when dspy is imported
+# before a numpy-heavy package such as chromadb, leaves numpy partially
+# initialised and raises:
+#     ImportError: cannot import name 'NDArray' from partially initialized
+#     module 'numpy._typing' (most likely due to a circular import)
+# Bisected to dspy 3.3.0 (3.2.0 is unaffected) and reproducible with:
+#     python -c "import dspy, chromadb"
+# Importing numpy.linalg eagerly here completes numpy's initialisation up front,
+# which makes the import order irrelevant. Remove once DSPy fixes lazy_import.
+try:
+    import numpy.linalg  # noqa: F401
+except ImportError:  # numpy is a core dependency, but never hard-fail on import
+    pass
+
 # ============================================================================
 # ULTRA-AGGRESSIVE WARNING SUPPRESSION FOR PYPI INSTALLATIONS
 # ============================================================================
@@ -147,7 +164,14 @@ warnings.filterwarnings(
 # VERSION
 # ============================================================================
 
-__version__ = "0.2.24"
+# Single source of truth is pyproject.toml; read it back from installed metadata
+# so this can never drift from the released version again.
+try:
+    from importlib.metadata import PackageNotFoundError, version as _pkg_version
+
+    __version__ = _pkg_version("superoptix")
+except (ImportError, PackageNotFoundError):  # source checkout without install
+    __version__ = "0.2.25"
 
 # ============================================================================
 # FINAL SAFETY: Re-apply filters after all imports (defense in depth)

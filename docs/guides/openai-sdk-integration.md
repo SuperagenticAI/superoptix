@@ -137,14 +137,14 @@ super agent run assistant_openai --framework openai --goal "Hello!"
 language_model:
   location: cloud
   provider: openai
-  model: openai:gpt-4o
+  model: openai:gpt-5.6-terra
   # Set: export OPENAI_API_KEY="sk-..."
   
 # Anthropic Claude
 language_model:
   location: cloud
   provider: anthropic
-  model: anthropic:claude-sonnet-4-20250514
+  model: anthropic:claude-sonnet-5
   # Set: export ANTHROPIC_API_KEY="sk-ant-..."
 ```
 
@@ -175,13 +175,13 @@ SuperOptiX supports both local (Ollama) and cloud models (OpenAI, Anthropic, Goo
 super agent run assistant_openai --framework openai --local --provider ollama --model qwen3.5:9b --goal "Write hello"
 
 # Cloud - OpenAI
-super agent run assistant_openai --framework openai --cloud --provider openai --model gpt-4.1 --goal "Write hello"
+super agent run assistant_openai --framework openai --cloud --provider openai --model gpt-5.6-terra --goal "Write hello"
 
 # Cloud - Anthropic
 super agent run assistant_openai --framework openai --cloud --provider anthropic --model claude-sonnet-4.20250514 --goal "Write hello"
 
 # Cloud - Google
-super agent run assistant_openai --framework openai --cloud --provider google-genai --model gemini-2.0-flash --goal "Write hello"
+super agent run assistant_openai --framework openai --cloud --provider google-genai --model gemini-3.7-flash --goal "Write hello"
 ```
 
 **Features:**
@@ -712,7 +712,7 @@ language_model:
 ```yaml
 language_model:
   provider: openai
-  model: gpt-4.1
+  model: gpt-5.6-terra
   temperature: 0.7
 ```
 

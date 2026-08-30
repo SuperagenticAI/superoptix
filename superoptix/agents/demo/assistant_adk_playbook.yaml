@@ -21,7 +21,7 @@ spec:
   language_model:
     location: cloud
     provider: google
-    model: gemini-2.0-flash  # Free tier Gemini model
+    model: gemini-3.7-flash  # Free tier Gemini model
     # Note: Requires GOOGLE_API_KEY environment variable
     # Get free API key at: https://aistudio.google.com/apikey
   
@@ -123,7 +123,7 @@ spec:
       params:
         metric: response_quality
         auto: medium
-        reflection_lm: gpt-4o-mini
+        reflection_lm: gpt-5.6-luna
         max_full_evals: 5
     metric: response_quality
     metric_threshold: 0.85
