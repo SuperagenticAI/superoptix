@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-08-31
+
 ### Changed
 - **Dependency modernization.** All framework integrations moved onto their current
   upstream releases after ~4 months of drift:
