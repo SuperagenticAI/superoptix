@@ -49,8 +49,12 @@ endpoint called infrequently.
 
 ## Deploying to Cloud Run
 
-The image is `deploy/a2a/Dockerfile`. It has been built and run locally with the
-same environment Cloud Run provides.
+The image is the `Dockerfile` at the repository root. It has been built and run
+locally with the same environment Cloud Run provides.
+
+It sits at the root rather than in this directory because Cloud Build uses the
+Dockerfile's directory as the build context, and the image copies
+`pyproject.toml` and `superoptix/` from the repository root.
 
 ### 1. Prepare the project
 
@@ -75,7 +79,6 @@ gcloud run deploy superoptix-a2a \
   --max-instances 4 \
   --memory 512Mi \
   --set-env-vars SUPEROPTIX_A2A_PUBLIC_URL=https://a2a.superoptix.ai,SUPEROPTIX_TELEMETRY=false
-rm Dockerfile
 ```
 
 `--source` builds with Cloud Build, so no registry or pipeline is needed. The
