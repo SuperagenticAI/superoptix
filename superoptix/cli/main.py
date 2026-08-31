@@ -192,6 +192,7 @@ from superoptix.cli.commands.dataset_marketplace import (
     pull_example_dataset,
     show_dataset_details,
 )
+from superoptix.cli.commands.a2a import adapt_agent
 from superoptix.cli.commands.init import init_project
 from superoptix.cli.commands.marketplace import (
     browse_marketplace,
@@ -1733,6 +1734,57 @@ Use `super orchestra <command> --help` for more information.
     run_orchestra_parser.set_defaults(func=run_orchestra)
 
     # Marketplace commands
+    a2a_parser = subparsers.add_parser(
+        "a2a",
+        help="🔌 Make an existing agent speak A2A 1.0",
+        formatter_class=RawDescriptionHelpFormatter,
+        description="""
+Adapt an agent you already built into an A2A 1.0 endpoint.
+
+Point it at an agent in your own code. SuperOptiX reads its structure, derives
+the skills a calling agent would route on, and writes an Agent Card plus a
+server. Your agent is not modified.
+
+Examples:
+  super a2a adapt --entrypoint mycrew:crew --framework crewai
+  super a2a adapt --entrypoint app.rag:program --framework dspy --out ./a2a
+  super a2a adapt --entrypoint mycrew:crew --url https://agents.example.com
+""",
+    )
+    a2a_sub = a2a_parser.add_subparsers(
+        dest="a2a_command", help="A2A commands", required=True
+    )
+    a2a_adapt_parser = a2a_sub.add_parser(
+        "adapt",
+        help="Introspect an existing agent and emit an A2A card + server",
+    )
+    a2a_adapt_parser.add_argument(
+        "--entrypoint",
+        required=True,
+        help="Where your agent lives, as module:attribute (e.g. mycrew:crew)",
+    )
+    a2a_adapt_parser.add_argument(
+        "--framework",
+        default="",
+        help="Framework of the agent. Detected automatically when omitted.",
+    )
+    a2a_adapt_parser.add_argument(
+        "--out",
+        default="a2a",
+        help="Directory for the generated card and server (default: ./a2a)",
+    )
+    a2a_adapt_parser.add_argument(
+        "--url",
+        default="http://127.0.0.1:8000",
+        help="Public URL the card should advertise",
+    )
+    a2a_adapt_parser.add_argument(
+        "--project-root",
+        default="",
+        help="Directory to import your agent from (default: current directory)",
+    )
+    a2a_adapt_parser.set_defaults(func=adapt_agent)
+
     marketplace_parser = subparsers.add_parser(
         "marketplace",
         aliases=["market", "mk"],
