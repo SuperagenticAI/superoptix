@@ -51,7 +51,9 @@ def test_surrealdb_graphrag_framework_playbook_matrix_exists():
     """All framework GraphRAG playbooks for SurrealDB must exist."""
     for framework, filename in GRAPH_FRAMEWORK_PLAYBOOKS.items():
         path = DEMO_DIR / filename
-        assert path.exists(), f"Missing GraphRAG SurrealDB playbook for {framework}: {path}"
+        assert path.exists(), (
+            f"Missing GraphRAG SurrealDB playbook for {framework}: {path}"
+        )
 
 
 def test_surrealdb_framework_playbooks_are_wired_for_rag():
@@ -62,16 +64,23 @@ def test_surrealdb_framework_playbooks_are_wired_for_rag():
 
         rag = spec.get("rag", {})
         assert rag.get("enabled") is True, f"{framework}: rag.enabled should be true"
-        assert (
-            str(rag.get("retriever_type", "")).strip().lower()
-            in {"surrealdb", "turboagents-surrealdb"}
-        ), f"{framework}: rag.retriever_type must be surrealdb or turboagents-surrealdb"
+        assert str(rag.get("retriever_type", "")).strip().lower() in {
+            "surrealdb",
+            "turboagents-surrealdb",
+        }, f"{framework}: rag.retriever_type must be surrealdb or turboagents-surrealdb"
 
         config = rag.get("config", {})
         assert isinstance(config.get("top_k", 0), int) and config.get("top_k", 0) > 0
 
         vector_store = rag.get("vector_store", {})
-        for key in ("url", "namespace", "database", "table_name", "vector_field", "content_field"):
+        for key in (
+            "url",
+            "namespace",
+            "database",
+            "table_name",
+            "vector_field",
+            "content_field",
+        ):
             assert key in vector_store, f"{framework}: rag.vector_store missing '{key}'"
 
 
@@ -80,9 +89,9 @@ def test_surrealdb_graphrag_framework_playbooks_use_graph_mode():
     for framework, filename in GRAPH_FRAMEWORK_PLAYBOOKS.items():
         playbook = _load_playbook(filename)
         graph_cfg = playbook.get("spec", {}).get("rag", {}).get("config", {})
-        assert (
-            str(graph_cfg.get("retrieval_mode", "")).strip().lower() == "graph"
-        ), f"{framework}: expected rag.config.retrieval_mode=graph"
+        assert str(graph_cfg.get("retrieval_mode", "")).strip().lower() == "graph", (
+            f"{framework}: expected rag.config.retrieval_mode=graph"
+        )
 
 
 def test_surrealdb_advanced_playbooks_keep_expected_mode_boundaries():

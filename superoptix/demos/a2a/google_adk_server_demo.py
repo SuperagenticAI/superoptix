@@ -10,7 +10,7 @@ from superoptix.demos.a2a.common import serve_pipeline
 try:
     from superoptix.runners.google_adk_runtime_helpers import (
         create_agent_runner,
-        run_agent_with_optional_rlm,
+        run_agent,
     )
 except ImportError as exc:  # pragma: no cover - optional dependency guard
     raise ImportError(
@@ -63,7 +63,7 @@ class DemoGoogleADKPipeline:
         )
 
     async def run(self, query: str, **_: str):
-        response = await run_agent_with_optional_rlm(
+        response = await run_agent(
             agent=self.agent,
             runner=self.runner,
             prompt=query,

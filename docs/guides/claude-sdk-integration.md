@@ -2,8 +2,6 @@
 
 SuperOptiX provides first-class support for Claude Agent SDK, enabling GEPA-optimizable agents powered by Anthropic's Claude with in-process MCP tool support.
 
-RLM support is experimental. Unified sandbox support is coming soon.
-
 ---
 
 ## Key Features
@@ -11,7 +9,6 @@ RLM support is experimental. Unified sandbox support is coming soon.
 | Feature | Description |
 | :--- | :--- |
 | **GEPA Optimization** | Optimize system prompts automatically for better performance |
-| **In-Process MCP Tools** | Convert StackOne tools to Claude SDK MCP servers |
 | **Async-First** | Full async/await support for high-performance applications |
 | **Bidirectional Sessions** | Interactive multi-turn conversations with ClaudeSDKClient |
 | **Hook System** | Pre/Post tool use hooks for control and security |
@@ -24,9 +21,7 @@ RLM support is experimental. Unified sandbox support is coming soon.
 pip install superoptix claude-agent-sdk
 ```
 
-For StackOne integration:
 ```bash
-pip install superoptix claude-agent-sdk "stackone-ai[mcp]"
 ```
 
 ---
@@ -90,32 +85,22 @@ asyncio.run(main())
 
 ---
 
-## Using StackOne Tools
-
-The SuperOptiX StackOneBridge converts StackOne tools to Claude SDK's in-process MCP server format.
-
 ### Basic Integration
 
 ```python
-from stackone_ai import StackOneToolSet
 from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient, query
-from superoptix.adapters import StackOneBridge
 
-# Fetch StackOne tools
-toolset = StackOneToolSet()
 tools = toolset.fetch_tools(
     actions=["hris_get_employee", "hris_list_employees"],
     account_ids=["your_account_id"]
 )
 
 # Convert to Claude SDK MCP server
-bridge = StackOneBridge(tools)
 mcp_server, tool_names = bridge.to_claude_sdk()
 
 # Create Claude Agent with tools
 options = ClaudeAgentOptions(
     system_prompt="You are an HR assistant with HRIS access.",
-    mcp_servers={"stackone": mcp_server},
     allowed_tools=tool_names,
     model="claude-sonnet-5",
 )
@@ -142,21 +127,13 @@ async with ClaudeSDKClient(options=options) as client:
         pass
 ```
 
-### StackOne Tool Filtering
-
-For large tool sets, keep filters narrow and convert directly:
-
-```python
 # Fetch only needed families
 tools = toolset.fetch_tools(actions=["hris_*", "ats_*", "crm_*"])
 
 # Convert directly to Claude SDK MCP tools
-bridge = StackOneBridge(tools)
 mcp_server, tool_names = bridge.to_claude_sdk()
 
 options = ClaudeAgentOptions(
-    system_prompt="Use StackOne tools for factual answers.",
-    mcp_servers={"stackone": mcp_server},
     allowed_tools=tool_names,
 )
 ```
@@ -240,18 +217,6 @@ component = adapter.create_component(playbook)
 prompt = adapter.get_optimizable_variable(playbook)
 ```
 
-### StackOneBridge.to_claude_sdk()
-
-```python
-mcp_server, tool_names = bridge.to_claude_sdk()
-```
-
-**Returns:**
-- `mcp_server`: `McpSdkServerConfig` for use with `ClaudeAgentOptions.mcp_servers`
-- `tool_names`: List of tool names in format `mcp__stackone__{tool_name}`
-
----
-
 ## Best Practices
 
 1. **Use async/await**: Claude SDK is async-first; use `asyncio.run()` for sync contexts
@@ -298,9 +263,7 @@ MCPConnectionError: Failed to connect to MCP server
 
 See the complete example at:
 ```
-examples/integrations/stackone_claude_sdk_example.py
 ```
 
 This includes:
-- Basic StackOne + Claude SDK integration
 - Interactive sessions with ClaudeSDKClient

@@ -15,9 +15,8 @@ from typing import Any, Dict, Optional
 
 from superoptix.core.rag_mixin import RAGMixin
 from superoptix.runners.google_adk_runtime_helpers import (
+  run_agent as superoptix_run_agent,
     create_agent_runner as superoptix_create_agent_runner,
-    get_google_adk_rlm_config as superoptix_get_google_adk_rlm_config,
-    run_agent_with_optional_rlm as superoptix_run_agent_with_optional_rlm,
 )
 
 COMPILED_SPEC_PATH = Path(__file__).resolve().parent / "{{ compiled_spec_filename }}"
@@ -54,13 +53,6 @@ class {{ agent_name | to_pascal_case }}Pipeline:
             agent_name={{ agent_name | tojson }},
             model_config=model_config,
         )
-        self.rlm_config = superoptix_get_google_adk_rlm_config(FULL_SPEC)
-        if self.rlm_config.get("enabled", False):
-            print(
-                "✅ RLM configured "
-                f"(mode={self.rlm_config.get('mode', 'assist')}, "
-                f"backend={self.rlm_config.get('backend', 'litellm')})"
-            )
         self._rag_enabled = False
         self._rag_helper = None
         try:
@@ -116,7 +108,7 @@ class {{ agent_name | to_pascal_case }}Pipeline:
             "🧠 ADK run start | "
             f"model={self.runtime.get('model')} | tools={self.runtime.get('tool_count', 0)}"
         )
-        answer = await superoptix_run_agent_with_optional_rlm(
+        answer = await superoptix_run_agent(
             agent=self.agent,
             runner=self.runner,
             prompt=prompt,

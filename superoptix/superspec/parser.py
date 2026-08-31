@@ -71,7 +71,6 @@ class AgentSpec:
     google_adk: Optional[Dict[str, Any]] = None
     deepagents: Optional[Dict[str, Any]] = None
     crewai: Optional[Dict[str, Any]] = None
-    rlm: Optional[Dict[str, Any]] = None
     persona: Optional[Dict[str, Any]] = None
     agentflow: Optional[List[AgentFlowStep]] = None
     retrieval: Optional[Dict[str, Any]] = None
@@ -196,7 +195,6 @@ class SuperSpecXParser:
                 google_adk=spec_dict.get("google_adk"),
                 deepagents=spec_dict.get("deepagents"),
                 crewai=spec_dict.get("crewai"),
-                rlm=spec_dict.get("rlm"),
                 persona=spec_dict.get("persona"),
                 agentflow=agentflow if agentflow else None,
                 retrieval=spec_dict.get("retrieval"),
@@ -311,7 +309,6 @@ class SuperSpecXParser:
             "memory",
             "tool_calling",
             "retrieval",
-            "rlm",
             "agentflow",
             "optimization",
         ]
@@ -401,7 +398,6 @@ class SuperSpecXParser:
                 "google_adk",
                 "deepagents",
                 "crewai",
-                "rlm",
                 "retrieval",
                 "memory",
                 "tool_calling",

@@ -24,17 +24,6 @@ from superoptix.runners.deepagents_runtime_helpers import (
     resolve_model as superoptix_resolve_model,
 {% set tools_cfg = (spec.get("tools", {}) or {}) %}
 {% set dspy_tools_cfg = ((spec.get("dspy", {}) or {}).get("tools", {}) or {}) %}
-{% set stackone_cfg = spec.get("stackone") or tools_cfg.get("stackone") or dspy_tools_cfg.get("stackone") %}
-{% set stackone_mode = (spec.get("stackone_mode") or tools_cfg.get("mode") or dspy_tools_cfg.get("mode") or "") | string | lower %}
-{% set include_stackone_code = (stackone_mode in ["stackone"]) or (stackone_cfg is mapping and (stackone_cfg | length > 0)) %}
-{% set deepagents_rlm_cfg = ((spec.get("deepagents", {}) or {}).get("rlm")) %}
-{% set include_rlm_code = (deepagents_rlm_cfg is mapping and (deepagents_rlm_cfg | length > 0)) or (spec.get("rlm") is mapping and (spec.get("rlm") | length > 0)) %}
-{% if include_stackone_code %}
-    build_stackone_tools as superoptix_build_stackone_tools,
-{% endif %}
-{% if include_rlm_code %}
-    run_with_optional_rlm as superoptix_run_with_optional_rlm,
-{% endif %}
 )
 
 COMPILED_SPEC_PATH = Path(__file__).resolve().parent / "{{ compiled_spec_filename }}"
@@ -102,11 +91,7 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
         resolved_model = superoptix_resolve_model(
             LANGUAGE_MODEL, model_config=model_config
         )
-{% if include_stackone_code %}
-        tools = superoptix_build_stackone_tools(FULL_SPEC)
-{% else %}
         tools = []
-{% endif %}
 
         super().__init__(
             name="{{ agent_name }}",
@@ -138,14 +123,6 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 
     async def arun(self, prompt: str) -> str:
         graph = self._ensure_graph()
-{% if include_rlm_code %}
-        return await superoptix_run_with_optional_rlm(
-            agent_graph=graph,
-            prompt=prompt,
-            spec_data=FULL_SPEC,
-            model_name=self._model_name,
-        )
-{% else %}
         result = await asyncio.to_thread(
             graph.invoke, {"messages": [{"role": "user", "content": prompt}]}
         )
@@ -154,7 +131,6 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
             last = messages[-1]
             return str(getattr(last, "content", last))
         return str(result)
-{% endif %}
 
     def forward(self, **inputs: Any) -> Dict[str, Any]:
 {% if spec.input_fields and spec.input_fields|length > 0 %}

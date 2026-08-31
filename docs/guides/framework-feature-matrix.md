@@ -15,8 +15,6 @@ Full support for the new OpenAI Agents SDK with **harness + sandbox** architectu
 | Minimal pipeline compile/run | Yes | ✅ Yes | Yes | Yes | Yes | Yes | Yes | Yes |
 | `--optimize` compile path | Yes | ✅ Yes | Yes | Yes | Yes | Yes | Yes | Yes |
 | GEPA optimization flow | Yes | ✅ Yes | Yes | Yes | Yes | Yes | Yes | Yes |
-| StackOne connector integration | Yes | ✅ Yes | Yes | Yes | Yes | Planned | Planned | Planned |
-| RLM support | Yes | ✅ Yes | Planned | Yes | Yes | Yes | Yes | Planned |
 | Native sandbox harness | - | ✅ Yes | - | - | - | - | - | - |
 | Local Ollama-friendly path | Yes | ✅ Yes | No | Yes | Yes | No | No | Yes |
 | Cloud model routing flags (`--cloud`) | Yes | ✅ Yes | Yes | Yes | Yes | Yes | Yes | Yes |

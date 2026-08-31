@@ -172,7 +172,6 @@ class SuperSpecXSchema:
         "predict",
         "chain_of_thought",
         "react",
-        "rlm",
         "program_of_thought",
         "parallel",
     ]
@@ -776,122 +775,11 @@ class SuperSpecXSchema:
         }
 
     @classmethod
-    def get_rlm_schema(cls) -> Dict[str, Any]:
-        """Get DSPy RLM configuration schema (optional, framework-specific)."""
-        return {
-            "type": "object",
-            "description": "Optional DSPy RLM configuration for minimal compile mode",
-            "properties": {
-                "enabled": {
-                    "type": "boolean",
-                    "default": False,
-                    "description": "Enable dspy.RLM for DSPy minimal pipelines",
-                },
-                "max_iters": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "maximum": 50,
-                    "default": 10,
-                    "description": "Maximum RLM reasoning iterations",
-                },
-                "max_llm_calls": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "maximum": 100,
-                    "default": 5,
-                    "description": "Maximum LLM calls available to RLM helper actions",
-                },
-            },
-        }
-
-    @classmethod
     def get_pydantic_ai_schema(cls) -> Dict[str, Any]:
         """Get Pydantic AI framework-specific schema."""
         return {
             "type": "object",
-            "properties": {
-                "rlm": {
-                    "type": "object",
-                    "description": "Optional RLM orchestration for Pydantic AI runs",
-                    "properties": {
-                        "enabled": {"type": "boolean", "default": False},
-                        "provider": {
-                            "type": "string",
-                            "enum": ["native", "rlm_code", "legacy"],
-                            "default": "native",
-                            "description": "RLM provider (legacy is an alias of native)",
-                        },
-                        "mode": {
-                            "type": "string",
-                            "enum": ["assist", "replace", "auto"],
-                            "default": "assist",
-                            "description": "assist: RLM draft then Agent.run, replace: RLM only, auto: context-aware mode selection",
-                        },
-                        "auto_long_context_chars": {
-                            "type": "integer",
-                            "minimum": 1,
-                            "default": 12000,
-                            "description": "Auto mode threshold for long-context prompts",
-                        },
-                        "auto_short_context_mode": {
-                            "type": "string",
-                            "enum": ["direct", "assist"],
-                            "default": "direct",
-                            "description": "Auto mode behavior below long-context threshold",
-                        },
-                        "backend": {
-                            "type": "string",
-                            "default": "litellm",
-                            "description": "RLM backend (e.g. litellm, gemini, openai)",
-                        },
-                        "environment": {
-                            "type": "string",
-                            "default": "python",
-                            "description": "RLM environment (python/local/swebench, etc.)",
-                        },
-                        "max_iterations": {
-                            "type": "integer",
-                            "minimum": 1,
-                            "maximum": 50,
-                            "default": 8,
-                        },
-                        "max_depth": {
-                            "type": "integer",
-                            "minimum": 1,
-                            "maximum": 4,
-                            "default": 1,
-                        },
-                        "verbose": {"type": "boolean", "default": False},
-                        "persistent": {"type": "boolean", "default": False},
-                        "task_model": {
-                            "type": "string",
-                            "description": "Optional model override for RLM backend",
-                        },
-                        "api_key_env": {
-                            "type": "string",
-                            "description": "Optional env var name for backend API key",
-                        },
-                        "api_base": {
-                            "type": "string",
-                            "description": "Optional backend base URL override",
-                        },
-                        "logger": {
-                            "type": "object",
-                            "properties": {
-                                "enabled": {"type": "boolean", "default": False},
-                                "log_dir": {
-                                    "type": "string",
-                                    "default": ".superoptix/logs/rlm",
-                                },
-                                "file_name": {
-                                    "type": "string",
-                                    "default": "pydantic_rlm",
-                                },
-                            },
-                        },
-                    },
-                }
-            },
+            "properties": {},
         }
 
     @classmethod
@@ -900,87 +788,6 @@ class SuperSpecXSchema:
         return {
             "type": "object",
             "properties": {
-                "rlm": {
-                    "type": "object",
-                    "description": "Optional RLM orchestration for OpenAI Agents SDK runs",
-                    "properties": {
-                        "enabled": {"type": "boolean", "default": False},
-                        "provider": {
-                            "type": "string",
-                            "enum": ["native", "rlm_code", "legacy"],
-                            "default": "native",
-                            "description": "RLM provider (legacy is an alias of native)",
-                        },
-                        "mode": {
-                            "type": "string",
-                            "enum": ["assist", "replace", "auto"],
-                            "default": "assist",
-                            "description": "assist: RLM draft then Runner.run, replace: RLM only, auto: context-aware mode selection",
-                        },
-                        "auto_long_context_chars": {
-                            "type": "integer",
-                            "minimum": 1,
-                            "default": 12000,
-                            "description": "Auto mode threshold for long-context prompts",
-                        },
-                        "auto_short_context_mode": {
-                            "type": "string",
-                            "enum": ["direct", "assist"],
-                            "default": "direct",
-                            "description": "Auto mode behavior below long-context threshold",
-                        },
-                        "backend": {
-                            "type": "string",
-                            "default": "litellm",
-                            "description": "RLM backend (e.g. litellm, gemini, openai)",
-                        },
-                        "environment": {
-                            "type": "string",
-                            "default": "python",
-                            "description": "RLM environment (python/local/swebench, etc.)",
-                        },
-                        "max_iterations": {
-                            "type": "integer",
-                            "minimum": 1,
-                            "maximum": 50,
-                            "default": 8,
-                        },
-                        "max_depth": {
-                            "type": "integer",
-                            "minimum": 1,
-                            "maximum": 4,
-                            "default": 1,
-                        },
-                        "verbose": {"type": "boolean", "default": False},
-                        "persistent": {"type": "boolean", "default": False},
-                        "task_model": {
-                            "type": "string",
-                            "description": "Optional model override for RLM backend",
-                        },
-                        "api_key_env": {
-                            "type": "string",
-                            "description": "Optional env var name for backend API key",
-                        },
-                        "api_base": {
-                            "type": "string",
-                            "description": "Optional backend base URL override",
-                        },
-                        "logger": {
-                            "type": "object",
-                            "properties": {
-                                "enabled": {"type": "boolean", "default": False},
-                                "log_dir": {
-                                    "type": "string",
-                                    "default": ".superoptix/logs/rlm",
-                                },
-                                "file_name": {
-                                    "type": "string",
-                                    "default": "openai_rlm",
-                                },
-                            },
-                        },
-                    },
-                },
                 "sandbox": {
                     "type": "object",
                     "description": "Optional native sandbox execution for OpenAI Agents SDK runs",
@@ -1052,89 +859,7 @@ class SuperSpecXSchema:
         """Get Google ADK framework-specific schema."""
         return {
             "type": "object",
-            "properties": {
-                "rlm": {
-                    "type": "object",
-                    "description": "Optional RLM orchestration for Google ADK runs",
-                    "properties": {
-                        "enabled": {"type": "boolean", "default": False},
-                        "provider": {
-                            "type": "string",
-                            "enum": ["native", "rlm_code", "legacy"],
-                            "default": "native",
-                            "description": "RLM provider (legacy is an alias of native)",
-                        },
-                        "mode": {
-                            "type": "string",
-                            "enum": ["assist", "replace", "auto"],
-                            "default": "assist",
-                            "description": "assist: RLM draft then ADK run, replace: RLM only, auto: context-aware mode selection",
-                        },
-                        "auto_long_context_chars": {
-                            "type": "integer",
-                            "minimum": 1,
-                            "default": 12000,
-                            "description": "Auto mode threshold for long-context prompts",
-                        },
-                        "auto_short_context_mode": {
-                            "type": "string",
-                            "enum": ["direct", "assist"],
-                            "default": "direct",
-                            "description": "Auto mode behavior below long-context threshold",
-                        },
-                        "backend": {
-                            "type": "string",
-                            "default": "litellm",
-                            "description": "RLM backend (e.g. litellm, gemini, openai)",
-                        },
-                        "environment": {
-                            "type": "string",
-                            "default": "python",
-                            "description": "RLM environment (python/local/swebench, etc.)",
-                        },
-                        "max_iterations": {
-                            "type": "integer",
-                            "minimum": 1,
-                            "maximum": 50,
-                            "default": 8,
-                        },
-                        "max_depth": {
-                            "type": "integer",
-                            "minimum": 1,
-                            "maximum": 4,
-                            "default": 1,
-                        },
-                        "verbose": {"type": "boolean", "default": False},
-                        "persistent": {"type": "boolean", "default": False},
-                        "task_model": {
-                            "type": "string",
-                            "description": "Optional model override for RLM backend",
-                        },
-                        "api_key_env": {
-                            "type": "string",
-                            "description": "Optional env var name for backend API key",
-                        },
-                        "api_base": {
-                            "type": "string",
-                            "description": "Optional backend base URL override",
-                        },
-                        "logger": {
-                            "type": "object",
-                            "properties": {
-                                "enabled": {"type": "boolean", "default": False},
-                                "log_dir": {
-                                    "type": "string",
-                                    "default": ".superoptix/logs/rlm",
-                                },
-                                "file_name": {
-                                    "type": "string",
-                                    "default": "adk_rlm",
-                                },
-                            },
-                        },
-                    },
-                }
-            },
+            "properties": {},
         }
 
     @classmethod
@@ -1142,89 +867,7 @@ class SuperSpecXSchema:
         """Get DeepAgents framework-specific schema."""
         return {
             "type": "object",
-            "properties": {
-                "rlm": {
-                    "type": "object",
-                    "description": "Optional RLM orchestration for DeepAgents runs",
-                    "properties": {
-                        "enabled": {"type": "boolean", "default": False},
-                        "provider": {
-                            "type": "string",
-                            "enum": ["native", "rlm_code", "legacy"],
-                            "default": "native",
-                            "description": "RLM provider (legacy is an alias of native)",
-                        },
-                        "mode": {
-                            "type": "string",
-                            "enum": ["assist", "replace", "auto"],
-                            "default": "assist",
-                            "description": "assist: RLM draft then DeepAgents invoke, replace: RLM only, auto: context-aware mode selection",
-                        },
-                        "auto_long_context_chars": {
-                            "type": "integer",
-                            "minimum": 1,
-                            "default": 12000,
-                            "description": "Auto mode threshold for long-context prompts",
-                        },
-                        "auto_short_context_mode": {
-                            "type": "string",
-                            "enum": ["direct", "assist"],
-                            "default": "direct",
-                            "description": "Auto mode behavior below long-context threshold",
-                        },
-                        "backend": {
-                            "type": "string",
-                            "default": "litellm",
-                            "description": "RLM backend (e.g. litellm, gemini, openai)",
-                        },
-                        "environment": {
-                            "type": "string",
-                            "default": "python",
-                            "description": "RLM environment (python/local/swebench, etc.)",
-                        },
-                        "max_iterations": {
-                            "type": "integer",
-                            "minimum": 1,
-                            "maximum": 50,
-                            "default": 8,
-                        },
-                        "max_depth": {
-                            "type": "integer",
-                            "minimum": 1,
-                            "maximum": 4,
-                            "default": 1,
-                        },
-                        "verbose": {"type": "boolean", "default": False},
-                        "persistent": {"type": "boolean", "default": False},
-                        "task_model": {
-                            "type": "string",
-                            "description": "Optional model override for RLM backend",
-                        },
-                        "api_key_env": {
-                            "type": "string",
-                            "description": "Optional env var name for backend API key",
-                        },
-                        "api_base": {
-                            "type": "string",
-                            "description": "Optional backend base URL override",
-                        },
-                        "logger": {
-                            "type": "object",
-                            "properties": {
-                                "enabled": {"type": "boolean", "default": False},
-                                "log_dir": {
-                                    "type": "string",
-                                    "default": ".superoptix/logs/rlm",
-                                },
-                                "file_name": {
-                                    "type": "string",
-                                    "default": "deepagents_rlm",
-                                },
-                            },
-                        },
-                    },
-                }
-            },
+            "properties": {},
         }
 
     @classmethod
@@ -1232,89 +875,7 @@ class SuperSpecXSchema:
         """Get CrewAI framework-specific schema."""
         return {
             "type": "object",
-            "properties": {
-                "rlm": {
-                    "type": "object",
-                    "description": "Optional RLM orchestration for CrewAI runs",
-                    "properties": {
-                        "enabled": {"type": "boolean", "default": False},
-                        "provider": {
-                            "type": "string",
-                            "enum": ["native", "rlm_code", "legacy"],
-                            "default": "native",
-                            "description": "RLM provider (legacy is an alias of native)",
-                        },
-                        "mode": {
-                            "type": "string",
-                            "enum": ["assist", "replace", "auto"],
-                            "default": "assist",
-                            "description": "assist: RLM draft then Crew.kickoff, replace: RLM only, auto: context-aware mode selection",
-                        },
-                        "auto_long_context_chars": {
-                            "type": "integer",
-                            "minimum": 1,
-                            "default": 12000,
-                            "description": "Auto mode threshold for long-context prompts",
-                        },
-                        "auto_short_context_mode": {
-                            "type": "string",
-                            "enum": ["direct", "assist"],
-                            "default": "direct",
-                            "description": "Auto mode behavior below long-context threshold",
-                        },
-                        "backend": {
-                            "type": "string",
-                            "default": "litellm",
-                            "description": "RLM backend (e.g. litellm, gemini, openai)",
-                        },
-                        "environment": {
-                            "type": "string",
-                            "default": "python",
-                            "description": "RLM environment (python/local/swebench, etc.)",
-                        },
-                        "max_iterations": {
-                            "type": "integer",
-                            "minimum": 1,
-                            "maximum": 50,
-                            "default": 8,
-                        },
-                        "max_depth": {
-                            "type": "integer",
-                            "minimum": 1,
-                            "maximum": 4,
-                            "default": 1,
-                        },
-                        "verbose": {"type": "boolean", "default": False},
-                        "persistent": {"type": "boolean", "default": False},
-                        "task_model": {
-                            "type": "string",
-                            "description": "Optional model override for RLM backend",
-                        },
-                        "api_key_env": {
-                            "type": "string",
-                            "description": "Optional env var name for backend API key",
-                        },
-                        "api_base": {
-                            "type": "string",
-                            "description": "Optional backend base URL override",
-                        },
-                        "logger": {
-                            "type": "object",
-                            "properties": {
-                                "enabled": {"type": "boolean", "default": False},
-                                "log_dir": {
-                                    "type": "string",
-                                    "default": ".superoptix/logs/rlm",
-                                },
-                                "file_name": {
-                                    "type": "string",
-                                    "default": "crewai_rlm",
-                                },
-                            },
-                        },
-                    },
-                }
-            },
+            "properties": {},
         }
 
     @classmethod
@@ -1332,7 +893,6 @@ class SuperSpecXSchema:
                     "required": ["language_model", "tasks"],
                     "properties": {
                         "language_model": cls.get_language_model_schema(),
-                        "rlm": cls.get_rlm_schema(),
                         "pydantic_ai": cls.get_pydantic_ai_schema(),
                         "openai_agent": cls.get_openai_agent_schema(),
                         "google_adk": cls.get_google_adk_schema(),

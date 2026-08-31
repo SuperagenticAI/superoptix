@@ -60,9 +60,7 @@ MCP_AVAILABLE = False
 from superoptix.core.base_component import BaseComponent
 from superoptix.observability.phoenix import setup_phoenix_for_spec as superoptix_setup_phoenix_for_spec
 from superoptix.runners.pydantic_runtime_helpers import (
-	build_stackone_tools as superoptix_build_stackone_tools,
-	get_pydantic_rlm_config as superoptix_get_pydantic_rlm_config,
-	run_agent_with_optional_rlm as superoptix_run_agent_with_optional_rlm,
+  run_agent as superoptix_run_agent,
 )
 
 
@@ -287,12 +285,6 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 		# Check LogFire configuration (defaults to enabled if LogFire is available)
 		logfire_config = self.spec.get("logfire", {})
 		self.logfire_enabled = logfire_config.get("enabled", True)  # Default to True (auto-detect)
-		self.rlm_config = superoptix_get_pydantic_rlm_config(self.spec)
-		if self.rlm_config.get("enabled", False):
-			print(
-				f"✅ RLM configured (mode={self.rlm_config.get('mode')}, "
-				f"backend={self.rlm_config.get('backend')})"
-			)
 		
 		if self.output_mode == "structured":
 			if not output_fields_spec:
@@ -559,13 +551,6 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 		if "output_retries" in init_params:
 			agent_kwargs["output_retries"] = retries
 
-		# Add StackOne SDK tools when configured in SuperSpec
-		stackone_tools = superoptix_build_stackone_tools(self.spec, framework="pydantic_ai")
-		if stackone_tools and len(stackone_tools) > 0:
-			agent_kwargs["tools"] = stackone_tools
-			print(f"✅ StackOne tools registered: {len(stackone_tools)} tool(s)")
-		else:
-			print("ℹ️  No StackOne tools configured")
 		
 		# Add MCP toolsets if available
 		mcp_servers = self._initialize_mcp_servers()
@@ -924,7 +909,7 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 			else:
 				print("⚠️  No toolsets found on agent - tools may not be available")
 			
-			result = await superoptix_run_agent_with_optional_rlm(
+			result = await superoptix_run_agent(
 				agent=self._agent,
 				prompt=input_text,
 				spec_data=self.spec,

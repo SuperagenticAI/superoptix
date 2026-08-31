@@ -952,8 +952,6 @@ DeveloperPipeline (Genie tier) initialized with ReAct and 5 BDD scenarios
 
 ---
 
-
-
 ## 🎉 **Congratulations! You've Built a Production-Ready AI Agent!** 🚀
 
 ### 🏆 **What You've Accomplished**

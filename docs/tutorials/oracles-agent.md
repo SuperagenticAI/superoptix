@@ -748,8 +748,6 @@ Validation Warnings: []
 
 ---
 
-
-
 ---
 
 ## 🎉 **Congratulations! You've Built a Sophisticated Reasoning Agent!** 🚀
@@ -806,8 +804,6 @@ Discover pre-built agents and tools!
 
 **🎯 Deploy to Production:**
 Your Oracle agent is ready for real-world deployment and can handle complex reasoning tasks!
-
-
 
 ---
 

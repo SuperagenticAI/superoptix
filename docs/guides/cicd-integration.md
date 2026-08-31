@@ -287,8 +287,6 @@ pipeline {
 }
 ```
 
-
-
 ### CircleCI Integration
 
 ```yaml

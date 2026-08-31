@@ -745,11 +745,6 @@ def _compile_single_agent(agent_name: str, args, tier_level: str = None):
                     f"model={lm_model or 'unset'}[/]"
                 )
 
-        if getattr(args, "rlm", False) and framework != "dspy":
-            console.print(
-                "[yellow]⚠️  Ignoring --rlm: currently supported only for DSPy compilation.[/]"
-            )
-
         # Show what's happening (concise)
         console.print(
             Panel(
@@ -844,7 +839,6 @@ def _compile_single_agent(agent_name: str, args, tier_level: str = None):
                 next_steps = f"""🚀 [bold bright_cyan]NEXT STEPS[/]
 
 [cyan]super agent run {agent_name} --goal "goal"[/] - Execute minimal DSPy pipeline
-[cyan]super agent compile {agent_name} --rlm[/] - Recompile minimal DSPy pipeline with dspy.RLM
 [cyan]super agent compile {agent_name} --optimize[/] - Generate full optimization/evaluation pipeline
 [cyan]super agent evaluate {agent_name}[/] - Run BDD evaluation (after optimized compile)
 [cyan]super agent optimize {agent_name}[/] - Run optimizer (after optimized compile)
@@ -871,7 +865,7 @@ def _compile_single_agent(agent_name: str, args, tier_level: str = None):
         # Simple workflow guide (normal mode)
         if compile_profile == "minimal":
             console.print(
-                f'🎯 [bold cyan]Next:[/] [cyan]super agent run {agent_name} --goal "your goal"[/] (optional: recompile with [cyan]--rlm[/] for DSPy RLM, or [cyan]--optimize[/] for evaluate/optimize features)'
+                f'🎯 [bold cyan]Next:[/] [cyan]super agent run {agent_name} --goal "your goal"[/] (optional: recompile with [cyan]--optimize[/] for evaluate/optimize features)'
             )
         else:
             console.print(
@@ -2500,12 +2494,6 @@ def add_agent(args):
             # Pydantic AI Gateway demo
             "pydantic-gateway-demo": "demo/pydantic-gateway-demo_playbook.yaml",
             "pydantic_gateway_demo": "demo/pydantic-gateway-demo_playbook.yaml",
-            # Pydantic AI RLM demo
-            "pydantic-rlm": "demo/pydantic-rlm_playbook.yaml",
-            "pydantic_rlm": "demo/pydantic-rlm_playbook.yaml",
-            # DSPy RLM demo
-            "dspy-rlm": "demo/dspy-rlm_playbook.yaml",
-            "dspy_rlm": "demo/dspy-rlm_playbook.yaml",
             # DSPy automation demo
             "dspy-demo": "demo/dspy-demo_playbook.yaml",
             "dspy_demo": "demo/dspy-demo_playbook.yaml",
@@ -2514,26 +2502,6 @@ def add_agent(args):
             "arize_phoenix_demo": "demo/arize-phoenix-demo_playbook.yaml",
             "phoenix-demo": "demo/arize-phoenix-demo_playbook.yaml",
             "phoenix_demo": "demo/arize-phoenix-demo_playbook.yaml",
-            # Google ADK RLM demo
-            "adk-rlm": "demo/adk-rlm_playbook.yaml",
-            "adk_rlm": "demo/adk-rlm_playbook.yaml",
-            # StackOne Calendly demo (framework-neutral id, with legacy aliases)
-            "stackone-calendly": "demo/stackone-calendly_playbook.yaml",
-            "stackone_calendly": "demo/stackone-calendly_playbook.yaml",
-            "dspy-stackone-calendly": "demo/stackone-calendly_playbook.yaml",
-            "dspy_stackone_calendly": "demo/stackone-calendly_playbook.yaml",
-            # DeepAgents StackOne demo
-            "deepagents-stackone": "demo/deepagents-stackone_playbook.yaml",
-            "deepagents_stackone": "demo/deepagents-stackone_playbook.yaml",
-            # DeepAgents RLM demo
-            "deepagents-rlm": "demo/deepagents-rlm_playbook.yaml",
-            "deepagents_rlm": "demo/deepagents-rlm_playbook.yaml",
-            # CrewAI StackOne demo
-            "crewai-stackone": "demo/crewai-stackone_playbook.yaml",
-            "crewai_stackone": "demo/crewai-stackone_playbook.yaml",
-            # CrewAI RLM demo
-            "crewai-rlm": "demo/crewai-rlm_playbook.yaml",
-            "crewai_rlm": "demo/crewai-rlm_playbook.yaml",
             # A2A DSPy demo
             "a2a-dspy-demo": "demo/a2a_dspy_demo_playbook.yaml",
             "a2a_dspy_demo": "demo/a2a_dspy_demo_playbook.yaml",

@@ -82,7 +82,7 @@ super agent pull protocol_first_agent
 
 ### DSPy Automation Demo
 **Framework:** DSPy  
-**Features:** SuperSpec DSPy Automation (Modules, Adapters, Tools, RLM config, GEPA config)  
+**Features:** SuperSpec DSPy Automation (Modules, Adapters, Tools, GEPA config)  
 **ID:** `dspy-demo`  
 **Use Case:** Learn and test no-code DSPy automation from YAML
 
@@ -94,7 +94,6 @@ super agent pull dspy-demo
 - 🧩 `dspy.module` + `dspy.module_params`
 - 🎛️ Global adapter + per-module adapter overrides
 - 🛠️ Builtin tools wiring from SuperSpec
-- 🧠 RLM settings (opt-in by switching module)
 - ⚙️ GEPA settings for `--optimize` flow
 
 ---
@@ -114,91 +113,6 @@ super agent pull arize-phoenix-demo
 - 🔌 Built-in Phoenix config (`spec.phoenix`) with local collector default
 - 🧪 Useful for demos where you only need to see traces, not eval or optimization
 - 📥 Pull with `super agent pull arize-phoenix-demo`
-
----
-
-### DSPy StackOne Calendly Demo
-**Framework:** DSPy  
-**Features:** StackOne connector tools (Calendly provider)  
-**ID:** `stackone-calendly`  
-**Use Case:** Meeting schedule and conflict queries through connector tools
-
-```bash
-super agent pull stackone-calendly
-```
-
-**Highlights:**
-- 🔌 Connector-based SaaS access with managed auth
-- 📅 Calendly provider filters preconfigured
-- 🛠️ Direct StackOneToolSet tool loading
-
----
-
-### DeepAgents StackOne Calendly Demo
-**Framework:** DeepAgents  
-**Features:** StackOne Calendly connector tools  
-**ID:** `deepagents-stackone`  
-**Use Case:** DeepAgents-native tool calling against Calendly via StackOne
-
-```bash
-super agent pull deepagents-stackone
-```
-
-**Highlights:**
-- 🔌 DeepAgents + StackOne tool bridge
-- 📅 Calendly-focused provider/action filters
-- 🧭 Tool-grounded scheduling answers
-
----
-
-### DeepAgents RLM Demo
-**Framework:** DeepAgents  
-**Features:** Optional RLM orchestration (`spec.deepagents.rlm`)  
-**ID:** `deepagents-rlm`  
-**Use Case:** Compare base DeepAgents flow vs RLM-assisted reasoning
-
-```bash
-super agent pull deepagents-rlm
-```
-
-**Highlights:**
-- 🧠 DeepAgents RLM assist/replace modes
-- ⚙️ Framework-specific RLM config in SuperSpec
-- 🧪 Minimal demo for reasoning flows
-
----
-
-### CrewAI StackOne Calendly Demo
-**Framework:** CrewAI  
-**Features:** StackOne Calendly connector tools  
-**ID:** `crewai-stackone`  
-**Use Case:** CrewAI-native tool calling against Calendly via StackOne
-
-```bash
-super agent pull crewai-stackone
-```
-
-**Highlights:**
-- 🔌 CrewAI + StackOne tool bridge
-- 📅 Calendly-focused provider/action filters
-- 🧭 Tool-grounded scheduling answers
-
----
-
-### CrewAI RLM Demo
-**Framework:** CrewAI  
-**Features:** Optional RLM orchestration (`spec.crewai.rlm`)  
-**ID:** `crewai-rlm`  
-**Use Case:** Compare base CrewAI flow vs RLM-assisted reasoning
-
-```bash
-super agent pull crewai-rlm
-```
-
-**Highlights:**
-- 🧠 CrewAI RLM assist/replace modes
-- ⚙️ Framework-specific RLM config in SuperSpec
-- 🧪 Minimal demo for reasoning flows
 
 ---
 
@@ -256,10 +170,6 @@ super agent run <agent_id> --goal "your goal here"
 |-------|----------|-------|-----------|
 | **code_review_assistant** | Software teams, code quality | Ollama ✅ | DSPy |
 | **research_agent_deepagents** | Research, planning, complex tasks | Claude/GPT-4 | DeepAgents |
-| **deepagents-stackone** | SaaS connector workflows | Gemini/Claude/GPT | DeepAgents |
-| **deepagents-rlm** | Reasoning orchestration demos | Gemini/Claude/GPT | DeepAgents |
-| **crewai-stackone** | SaaS connector workflows | Gemini/Claude/GPT | CrewAI |
-| **crewai-rlm** | Reasoning orchestration demos | Gemini/Claude/GPT | CrewAI |
 | **customer_support_with_memory** | Support, context retention | Ollama ✅ | DSPy |
 | **protocol_first_agent** | Tool integration, MCP servers | Ollama ✅ | DSPy |
 

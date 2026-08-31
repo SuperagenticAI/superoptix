@@ -513,8 +513,6 @@ super observability dashboard --live
 super agent inspect your_agent --show-traces
 ```
 
-
-
 ## 🎯 **Summary: Responsible Cloud Inference**
 
 ### **Key Principles**

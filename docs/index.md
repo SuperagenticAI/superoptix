@@ -15,10 +15,7 @@
 </div>
 
 <div align="center" style="margin: 10px 0 24px 0;">
-  <p style="margin: 8px 0;"><strong>Now supported:</strong> 🧪 RLM (Experimental) · 🗂️ StackOne Connectors · 🧬 GEPA Optimization</p>
   <p style="margin: 8px 0;">
-    <a href="guides/rlm-experimental/">RLM Guide</a> ·
-    <a href="guides/stackone-integration/">StackOne Guide</a> ·
     <a href="guides/multi-framework/">Framework Support</a>
   </p>
 </div>
@@ -77,15 +74,12 @@ super agent optimize developer --framework dspy --auto light
     <td style="padding: 20px; border: 2px solid #FF9800; background: rgba(255, 152, 0, 0.08); vertical-align: top; width: 50%;">
       <h4 style="color: #FF9800; margin-top: 0;">🗂️ Connector-Driven Agents</h4>
       <ul>
-        <li>StackOne integration for SaaS tool access</li>
         <li>Cross-framework connector compilation</li>
         <li>Clear connector demos including Calendly flows</li>
       </ul>
     </td>
     <td style="padding: 20px; border: 2px solid #9C27B0; background: rgba(156, 39, 176, 0.08); vertical-align: top; width: 50%;">
-      <h4 style="color: #9C27B0; margin-top: 0;">🧪 RLM Support</h4>
       <ul>
-        <li>Experimental RLM support in active integrations</li>
         <li>Fallback-friendly pipeline strategy</li>
         <li>Unified sandbox support coming soon</li>
       </ul>

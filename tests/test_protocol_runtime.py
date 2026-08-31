@@ -35,7 +35,10 @@ def test_extract_protocol_entries_merges_legacy_mcp_servers():
 def test_uses_protocol_runtime_detects_native_protocols():
     assert uses_protocol_runtime({"tool_backend": "protocols"}) is True
     assert uses_protocol_runtime({"tool_backend": "agenspy"}) is True
-    assert uses_protocol_runtime({"protocols": [{"type": "a2a", "url": "https://x"}]}) is True
+    assert (
+        uses_protocol_runtime({"protocols": [{"type": "a2a", "url": "https://x"}]})
+        is True
+    )
     assert uses_protocol_runtime({"tool_backend": "dspy"}) is False
 
 
@@ -130,7 +133,9 @@ class _ContextAwarePipeline:
     def __init__(self):
         self.seen = None
 
-    def run(self, query: str, task_id: str | None = None, context_id: str | None = None):
+    def run(
+        self, query: str, task_id: str | None = None, context_id: str | None = None
+    ):
         self.seen = (query, task_id, context_id)
         return {"response": query}
 

@@ -45,8 +45,6 @@ Behavior:
 
 ## 🎯 What is OpenAI Agents SDK?
 
-OpenAI Agents SDK (v0.14+) is a production-grade agent framework with a **harness + sandbox** architecture. It's not an RLM (Recursive Language Model) implementation, but shares the "harness engineering" spirit - separating orchestration from compute.
-
 ### Harness + Sandbox Architecture
 
 ```

@@ -10,12 +10,6 @@ import pytest
 import yaml
 
 from superoptix.cli.commands.agent import _find_prebuilt_playbook, _run_framework_agent
-from superoptix.cli.commands.harness import (
-    _build_model_config,
-    _build_playbook_system_prompt,
-    _find_harness_playbook,
-    _parse_key_value_args,
-)
 from superoptix.cli.main import _requires_project_context
 from superoptix.cli.utils import is_superoptix_project, validate_superoptix_project
 from superoptix.runners.crewai_runtime_helpers import build_task_description
@@ -173,154 +167,6 @@ def test_requires_project_context_still_requires_project_for_agent_pull():
     assert _requires_project_context(args) is True
 
 
-def test_requires_project_context_for_harness_commands():
-    args = SimpleNamespace(command="harness", harness_command="run")
-
-    assert _requires_project_context(args) is True
-
-
-def test_find_harness_playbook_resolves_project_agent(tmp_path: Path):
-    playbook_path = (
-        tmp_path / "demo" / "agents" / "developer" / "playbook" / "developer_playbook.yaml"
-    )
-    playbook_path.parent.mkdir(parents=True)
-    playbook_path.write_text("metadata:\n  name: Developer\n")
-
-    assert _find_harness_playbook(tmp_path, "demo", "developer") == playbook_path
-
-
-def test_build_playbook_system_prompt_includes_persona_tasks_and_constraints():
-    prompt = _build_playbook_system_prompt(
-        {
-            "metadata": {"description": "Writes code"},
-            "spec": {
-                "persona": {
-                    "role": "Developer",
-                    "goal": "Ship working changes",
-                    "instructions": "Use tests.",
-                },
-                "tasks": [{"instruction": "Inspect the codebase first."}],
-                "constraints": ["Keep changes scoped."],
-            },
-        }
-    )
-
-    assert "Agent description: Writes code" in prompt
-    assert "Role:\nDeveloper" in prompt
-    assert "1. Inspect the codebase first." in prompt
-    assert "- Keep changes scoped." in prompt
-
-
-def test_parse_key_value_args_coerces_json_scalars():
-    parsed = _parse_key_value_args(
-        ["issue=123", "dry_run=true", "labels=[\"bug\"]", "note=hello"]
-    )
-
-    assert parsed == {
-        "issue": 123,
-        "dry_run": True,
-        "labels": ["bug"],
-        "note": "hello",
-    }
-
-
-def test_build_model_config_prefers_explicit_values_over_local_defaults():
-    args = SimpleNamespace(
-        provider="google-genai",
-        model="gemini-2.5-flash",
-        local=True,
-        codex_bin=None,
-        pydantic_request_limit=None,
-        pydantic_tool_calls_limit=None,
-        pydantic_input_tokens_limit=None,
-        pydantic_output_tokens_limit=None,
-        pydantic_total_tokens_limit=None,
-        pydantic_count_tokens_before_request=False,
-        pydantic_code_mode=False,
-    )
-
-    assert _build_model_config(args) == {
-        "provider": "google-genai",
-        "model": "gemini-2.5-flash",
-    }
-
-
-def test_build_model_config_includes_codex_bin():
-    args = SimpleNamespace(
-        provider=None,
-        model="gpt-5.4",
-        local=False,
-        codex_bin="/opt/bin/codex",
-        pydantic_request_limit=None,
-        pydantic_tool_calls_limit=None,
-        pydantic_input_tokens_limit=None,
-        pydantic_output_tokens_limit=None,
-        pydantic_total_tokens_limit=None,
-        pydantic_count_tokens_before_request=False,
-        pydantic_code_mode=False,
-    )
-
-    assert _build_model_config(args) == {
-        "model": "gpt-5.4",
-        "codex_bin": "/opt/bin/codex",
-    }
-
-
-def test_build_model_config_includes_pydantic_ai_controls():
-    args = SimpleNamespace(
-        provider=None,
-        model=None,
-        local=False,
-        codex_bin=None,
-        pydantic_request_limit=5,
-        pydantic_tool_calls_limit=12,
-        pydantic_input_tokens_limit=None,
-        pydantic_output_tokens_limit=1000,
-        pydantic_total_tokens_limit=None,
-        pydantic_count_tokens_before_request=True,
-        pydantic_code_mode=True,
-    )
-
-    assert _build_model_config(args) == {
-        "pydantic_usage_limits": {
-            "request_limit": 5,
-            "tool_calls_limit": 12,
-            "output_tokens_limit": 1000,
-            "count_tokens_before_request": True,
-        },
-        "pydantic_code_mode": True,
-    }
-
-
-def test_build_model_config_includes_deepagents_controls():
-    args = SimpleNamespace(
-        provider=None,
-        model=None,
-        local=False,
-        codex_bin=None,
-        pydantic_request_limit=None,
-        pydantic_tool_calls_limit=None,
-        pydantic_input_tokens_limit=None,
-        pydantic_output_tokens_limit=None,
-        pydantic_total_tokens_limit=None,
-        pydantic_count_tokens_before_request=False,
-        pydantic_code_mode=False,
-        deepagents_skill_source=["/.agents/skills"],
-        deepagents_memory=["/AGENTS.md"],
-        deepagents_checkpointer="memory",
-        deepagents_debug=True,
-    )
-
-    assert _build_model_config(args) == {
-        "deepagents": {
-            "skills": ["/.agents/skills"],
-            "memory": ["/AGENTS.md"],
-            "checkpointer": "memory",
-            "debug": True,
-        }
-    }
-
-
 def test_crewai_task_description_includes_runtime_query_placeholder():
     description = build_task_description(
         {
@@ -339,9 +185,7 @@ def test_run_framework_agent_passes_model_config_to_crewai_pipeline(tmp_path: Pa
     project_root = tmp_path
     (project_root / ".super").write_text("project: demo\n")
 
-    pipeline_dir = (
-        project_root / "demo" / "agents" / "demo_agent" / "pipelines"
-    )
+    pipeline_dir = project_root / "demo" / "agents" / "demo_agent" / "pipelines"
     pipeline_dir.mkdir(parents=True)
     capture_path = project_root / "captured_model_config.json"
 
@@ -401,7 +245,11 @@ def test_resolve_microsoft_client_config_for_google_genai(monkeypatch):
     monkeypatch.setenv("GOOGLE_API_KEY", "google-test-key")
 
     config = resolve_client_config(
-        {"provider": "ollama", "model": "qwen3.5:9b", "api_base": "http://localhost:11434"},
+        {
+            "provider": "ollama",
+            "model": "qwen3.5:9b",
+            "api_base": "http://localhost:11434",
+        },
         {"provider": "google-genai", "model": "gemini-2.5-flash"},
     )
 

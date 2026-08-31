@@ -16,7 +16,6 @@ from .framework_registry import (
     MicrosoftFrameworkAdapter,
     OpenAIFrameworkAdapter,
 )
-from .stackone_adapter import StackOneBridge
 
 __all__ = [
     "FrameworkRegistry",
@@ -27,5 +26,4 @@ __all__ = [
     "DeepAgentsFrameworkAdapter",
     "CrewAIFrameworkAdapter",
     "GoogleADKFrameworkAdapter",
-    "StackOneBridge",
 ]

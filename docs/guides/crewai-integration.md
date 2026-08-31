@@ -4,8 +4,6 @@
 
 SuperOptiX now supports **CrewAI** - a powerful multi-agent framework with 100,000+ certified developers. This integration brings the full SuperOptiX optimization workflow to CrewAI's role-based agent design.
 
-RLM support is experimental (`assist`, `replace`, `auto` modes). See [RLM (Experimental)](rlm-experimental.md).
-
 **Key Features:**
 - **Works with Ollama** (unlike DeepAgents!)
 - **GEPA optimization** of role + goal + backstory

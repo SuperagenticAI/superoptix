@@ -329,7 +329,6 @@ from openai import AsyncOpenAI
 # SuperOptiX Lite integration (matches superoptix-lite-openai repo)
 from openai_gepa.superoptix_lite import BaseComponent
 
-
 # ======================================================================
 # PART 1: Native OpenAI SDK Agent Implementation
 # ======================================================================
@@ -403,7 +402,6 @@ class CodeReviewerAgent:
                 return result.final_message.content
             return str(result.final_message)
         return str(result)
-
 
 # ======================================================================
 # PART 2: SuperOptiX Integration Layer
@@ -512,7 +510,6 @@ class CodeReviewerComponent(BaseComponent):
     def run(self, code: str, language: str = "unknown") -> Dict[str, str]:
         """Synchronous wrapper for async run."""
         return asyncio.run(self.run_async(code, language))
-
 
 # ======================================================================
 # PART 3: SuperOptiX Pipeline (Full Workflow Support)
@@ -706,7 +703,6 @@ class CodeReviewerPipeline:
             return matches >= len(keywords_str) * 0.5  # 50% threshold
 
         return True
-
 
 # ======================================================================
 # Factory Function

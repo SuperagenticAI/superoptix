@@ -30,17 +30,6 @@ from superoptix.runners.crewai_runtime_helpers import (
     resolve_model as superoptix_resolve_model,
 {% set tools_cfg = (spec.get("tools", {}) or {}) %}
 {% set dspy_tools_cfg = ((spec.get("dspy", {}) or {}).get("tools", {}) or {}) %}
-{% set stackone_cfg = spec.get("stackone") or tools_cfg.get("stackone") or dspy_tools_cfg.get("stackone") %}
-{% set stackone_mode = (spec.get("stackone_mode") or tools_cfg.get("mode") or dspy_tools_cfg.get("mode") or "") | string | lower %}
-{% set include_stackone_code = (stackone_mode in ["stackone"]) or (stackone_cfg is mapping and (stackone_cfg | length > 0)) %}
-{% set crewai_rlm_cfg = ((spec.get("crewai", {}) or {}).get("rlm")) %}
-{% set include_rlm_code = (crewai_rlm_cfg is mapping and (crewai_rlm_cfg | length > 0)) or (spec.get("rlm") is mapping and (spec.get("rlm") | length > 0)) %}
-{% if include_stackone_code %}
-    build_stackone_tools as superoptix_build_stackone_tools,
-{% endif %}
-{% if include_rlm_code %}
-    run_with_optional_rlm as superoptix_run_with_optional_rlm,
-{% endif %}
 )
 
 COMPILED_SPEC_PATH = Path(__file__).resolve().parent / "{{ compiled_spec_filename }}"
@@ -85,11 +74,7 @@ class {{ agent_name | to_pascal_case }}Pipeline:
         self._task_description = superoptix_build_task_description(INSTRUCTION_SPEC)
 
         self._llm = superoptix_create_crewai_llm(self._resolved_model, LANGUAGE_MODEL)
-{% if include_stackone_code %}
-        self._tools = superoptix_build_stackone_tools(FULL_SPEC)
-{% else %}
         self._tools = []
-{% endif %}
 
         persona = INSTRUCTION_SPEC.get("persona", {}) or {}
         role = str(persona.get("role") or "AI Assistant").strip() or "AI Assistant"
@@ -121,10 +106,6 @@ class {{ agent_name | to_pascal_case }}Pipeline:
             spec_data=FULL_SPEC,
             default_project_name="SuperOptiX-{{ agent_name }}",
         )
-        if self._tools:
-            print(f"✅ StackOne tools registered: {len(self._tools)}")
-        else:
-            print("ℹ️  No StackOne tools configured")
         self._rag_enabled = False
         self._rag_helper = None
         try:
@@ -210,15 +191,6 @@ class {{ agent_name | to_pascal_case }}Pipeline:
         )
         print(f"📝 Prompt: {preview}")
 
-{% if include_rlm_code %}
-        output = superoptix_run_with_optional_rlm(
-            crew=self._crew,
-            prompt=prompt,
-            spec_data=FULL_SPEC,
-            model_name=self._resolved_model,
-            task_description=self._task_description,
-        )
-{% else %}
         with superoptix_phoenix_session_span(
             self._phoenix,
             span_name="superoptix.crewai.run",
@@ -234,7 +206,6 @@ class {{ agent_name | to_pascal_case }}Pipeline:
             output = superoptix_extract_crewai_output(result)
             if _phoenix_span is not None and hasattr(_phoenix_span, "set_output"):
                 _phoenix_span.set_output({"status": "success", "output": output})
-{% endif %}
 
         elapsed_ms = int((time.time() - started) * 1000)
         print(f"✅ CrewAI run done ({elapsed_ms}ms)")

@@ -70,8 +70,6 @@ language_model:
 - 🌡️ **`temperature`**: Controls response creativity (0.7 = balanced)
 - 📏 **`max_tokens`**: Maximum response length
 
-
-
 ## 🎮 **LM Studio: Visual AI Management**
 
 LM Studio brings the power of local AI with the simplicity of a graphical interface. Perfect for users who prefer visual tools:

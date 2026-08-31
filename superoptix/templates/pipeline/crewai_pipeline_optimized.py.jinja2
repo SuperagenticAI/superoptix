@@ -24,17 +24,6 @@ from superoptix.runners.crewai_runtime_helpers import (
     resolve_model as superoptix_resolve_model,
 {% set tools_cfg = (spec.get("tools", {}) or {}) %}
 {% set dspy_tools_cfg = ((spec.get("dspy", {}) or {}).get("tools", {}) or {}) %}
-{% set stackone_cfg = spec.get("stackone") or tools_cfg.get("stackone") or dspy_tools_cfg.get("stackone") %}
-{% set stackone_mode = (spec.get("stackone_mode") or tools_cfg.get("mode") or dspy_tools_cfg.get("mode") or "") | string | lower %}
-{% set include_stackone_code = (stackone_mode in ["stackone"]) or (stackone_cfg is mapping and (stackone_cfg | length > 0)) %}
-{% set crewai_rlm_cfg = ((spec.get("crewai", {}) or {}).get("rlm")) %}
-{% set include_rlm_code = (crewai_rlm_cfg is mapping and (crewai_rlm_cfg | length > 0)) or (spec.get("rlm") is mapping and (spec.get("rlm") | length > 0)) %}
-{% if include_stackone_code %}
-    build_stackone_tools as superoptix_build_stackone_tools,
-{% endif %}
-{% if include_rlm_code %}
-    run_with_optional_rlm as superoptix_run_with_optional_rlm,
-{% endif %}
 )
 
 COMPILED_SPEC_PATH = Path(__file__).resolve().parent / "{{ compiled_spec_filename }}"
@@ -77,11 +66,7 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
             LANGUAGE_MODEL, model_config=model_config
         )
         task_description = superoptix_build_task_description(INSTRUCTION_SPEC)
-{% if include_stackone_code %}
-        tools = superoptix_build_stackone_tools(FULL_SPEC)
-{% else %}
         tools = []
-{% endif %}
 
         super().__init__(
             name="{{ agent_name }}",
@@ -142,18 +127,8 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 {% endif %}
 
         crew = self._ensure_crew()
-{% if include_rlm_code %}
-        text = superoptix_run_with_optional_rlm(
-            crew=crew,
-            prompt=prompt,
-            spec_data=FULL_SPEC,
-            model_name=self._model_name,
-            task_description=self._task_description,
-        )
-{% else %}
         result = crew.kickoff(inputs={"query": prompt})
         text = superoptix_extract_crewai_output(result)
-{% endif %}
 
 {% if spec.output_fields and spec.output_fields|length > 0 %}
         return {"{{ spec.output_fields[0].name | to_snake_case }}": text}

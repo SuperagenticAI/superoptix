@@ -70,8 +70,6 @@ language_model:
 - 🌡️ **`temperature`**: Controls response creativity (0.7 = balanced)
 - 📏 **`max_tokens`**: Maximum response length
 
-
-
 ## 🍎 **Why Choose MLX?**
 
 MLX is Apple's native machine learning framework, designed specifically for Apple Silicon Macs. It offers:

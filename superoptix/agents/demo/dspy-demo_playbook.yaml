@@ -6,14 +6,13 @@ metadata:
   namespace: demo
   version: 1.0.0
   level: oracles
-  description: End-to-end DSPy automation demo covering module selection, per-module adapter overrides, tools, RLM config, and GEPA.
+  description: End-to-end DSPy automation demo covering module selection, per-module adapter overrides, tools, and GEPA.
   author: SuperOptiX
   tags:
     - dspy
     - automation
     - adapters
     - tools
-    - rlm
     - gepa
     - demo
 
@@ -83,12 +82,6 @@ spec:
         - calculator
         - text_analyzer
         - json_processor
-
-    # RLM settings are configured here but not active unless module=rlm.
-    rlm:
-      enabled: false
-      max_iterations: 8
-      max_llm_calls: 6
 
     # GEPA automation settings used when compiling/running with --optimize.
     gepa:
@@ -198,7 +191,7 @@ spec:
 #   super agent run dspy-demo --goal "Design a migration strategy"
 #
 # Switch modules in this file to test adapter overrides:
-#   dspy.module: chain_of_thought | react | rlm | predict | program_of_thought | parallel
+#   dspy.module: chain_of_thought | react | predict | program_of_thought | parallel
 #
 # Optional cloud run:
 #   super agent compile dspy-demo --cloud --provider google-genai --model gemini-3.7-flash

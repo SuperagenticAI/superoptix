@@ -84,8 +84,6 @@ memory:
 - 🗄️ **`storage_type`**: Local file storage for persistence
 - 📁 **`persistence_path`**: Local storage directories
 
-
-
 ## 🧠 **Memory: Your AI's Brain**
 
 Memory systems give your AI agent the ability to learn, remember, and build relationships over time. It's like giving your AI a brain that grows smarter with each interaction:

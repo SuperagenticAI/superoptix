@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-import asyncio
 import os
 import time
 import inspect
-from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
 from superoptix.observability.phoenix import (
@@ -14,16 +12,6 @@ from superoptix.observability.phoenix import (
     phoenix_session_span,
     setup_phoenix_for_spec,
 )
-from superoptix.runners.rlm_mode_utils import resolve_effective_rlm_mode
-
-
-def _normalize_rlm_provider(provider: Any) -> str:
-    value = str(provider or "").strip().lower()
-    if not value:
-        return "native"
-    if value == "legacy":
-        return "native"
-    return value
 
 
 def _normalize_provider(provider: str) -> str:
@@ -105,123 +93,6 @@ def _to_str_list(value: Any) -> List[str]:
     return []
 
 
-def resolve_stackone_config(spec_data: Dict[str, Any] | None) -> Dict[str, Any]:
-    """Resolve StackOne config from framework-agnostic SuperSpec paths."""
-    spec = dict(spec_data or {})
-    stackone_cfg = spec.get("stackone")
-    mode = spec.get("stackone_mode")
-    if not isinstance(stackone_cfg, dict):
-        tools_cfg = spec.get("tools", {})
-        if isinstance(tools_cfg, dict):
-            stackone_cfg = tools_cfg.get("stackone")
-            mode = mode or tools_cfg.get("mode")
-    if not isinstance(stackone_cfg, dict):
-        dspy_cfg = spec.get("dspy", {})
-        dspy_tools = dspy_cfg.get("tools", {}) if isinstance(dspy_cfg, dict) else {}
-        if isinstance(dspy_tools, dict):
-            stackone_cfg = dspy_tools.get("stackone")
-            mode = mode or dspy_tools.get("mode")
-    if not isinstance(stackone_cfg, dict):
-        stackone_cfg = {}
-
-    merged = dict(stackone_cfg)
-    merged["mode"] = str(mode or merged.get("mode") or "none").strip().lower()
-    return merged
-
-
-def build_stackone_tools(spec_data: Dict[str, Any] | None) -> List[Any]:
-    """Build Google ADK-compatible StackOne tools when configured."""
-    cfg = resolve_stackone_config(spec_data)
-    mode = str(cfg.get("mode", "none")).strip().lower()
-    enabled = bool(cfg.get("enabled", mode == "stackone"))
-    if not enabled:
-        return []
-
-    strict_mode = str(
-        os.getenv("SUPEROPTIX_STACKONE_STRICT", "0")
-    ).strip().lower() not in {
-        "0",
-        "false",
-        "no",
-        "off",
-    }
-    try:
-        from stackone_ai import StackOneToolSet
-        from superoptix.adapters import StackOneBridge
-    except Exception as exc:
-        msg = (
-            "StackOne requested but dependencies are unavailable. "
-            "Install: pip install 'stackone-ai[mcp]'"
-        )
-        if strict_mode:
-            raise RuntimeError(msg) from exc
-        print(f"⚠️ {msg}")
-        return []
-
-    api_key_env = str(cfg.get("api_key_env", "STACKONE_API_KEY")).strip()
-    api_key = os.getenv(api_key_env, "")
-    if not api_key:
-        msg = f"StackOne requested but {api_key_env} is not set."
-        if strict_mode:
-            raise RuntimeError(msg)
-        print(f"⚠️ {msg}")
-        return []
-
-    account_ids = _to_str_list(cfg.get("account_ids"))
-    account_ids_env = str(cfg.get("account_ids_env", "")).strip()
-    if account_ids_env:
-        account_ids.extend(
-            [
-                part.strip()
-                for part in os.getenv(account_ids_env, "").split(",")
-                if part.strip()
-            ]
-        )
-    account_ids = list(dict.fromkeys(account_ids))
-
-    providers = _to_str_list(cfg.get("providers"))
-    actions = _to_str_list(cfg.get("actions"))
-    fallback_unfiltered = bool(cfg.get("fallback_unfiltered", True))
-
-    init_kwargs: Dict[str, Any] = {"api_key": api_key}
-    base_url = cfg.get("base_url")
-    if base_url:
-        init_kwargs["base_url"] = str(base_url).strip()
-
-    try:
-        toolset = StackOneToolSet(**init_kwargs)
-        fetched_tools = toolset.fetch_tools(
-            account_ids=account_ids or None,
-            providers=providers or None,
-            actions=actions or None,
-        )
-        bridge = StackOneBridge(fetched_tools or [])
-        source_tools = bridge.to_dspy()
-        converted = _to_adk_stackone_callables(source_tools)
-        if not converted and fallback_unfiltered and (providers or actions):
-            fetched_tools = toolset.fetch_tools(
-                account_ids=account_ids or None,
-                providers=None,
-                actions=None,
-            )
-            bridge = StackOneBridge(fetched_tools or [])
-            source_tools = bridge.to_dspy()
-            converted = _to_adk_stackone_callables(source_tools)
-        names = [getattr(t, "__name__", "") for t in converted[:5]]
-        if converted:
-            print(
-                f"[StackOne] Loaded {len(converted)} ADK tool(s): "
-                + ", ".join(name for name in names if name)
-            )
-        return converted
-    except Exception as exc:
-        msg = f"Failed to initialize StackOne tools: {exc}"
-        if strict_mode:
-            raise RuntimeError(msg) from exc
-        print(f"⚠️ {msg}")
-        return []
-
-
 def _json_schema_type_to_python(t: str | None) -> Any:
     raw = str(t or "string").strip().lower()
     mapping = {
@@ -269,40 +140,6 @@ def _tool_to_schema(tool: Any) -> Dict[str, Any]:
     return {}
 
 
-def _to_adk_stackone_callables(source_tools: List[Any]) -> List[Any]:
-    wrapped = []
-    for tool in source_tools or []:
-        name = str(getattr(tool, "name", "stackone_tool"))
-        description = str(getattr(tool, "description", "") or "").strip()
-        schema = _tool_to_schema(tool)
-        signature = _build_signature_from_schema(schema)
-
-        def _make_callable(bound_tool: Any, bound_name: str):
-            class _ToolCallable:
-                def __call__(self, **kwargs):
-                    started = time.time()
-                    keys = ", ".join(sorted(list(kwargs.keys()))[:6]) or "-"
-                    print(f"tool:start: {bound_name} kwargs=[{keys}]")
-                    try:
-                        result = bound_tool.execute(kwargs or {})
-                        elapsed = int((time.time() - started) * 1000)
-                        print(f"tool:ok: {bound_name} ({elapsed}ms)")
-                        return result
-                    except Exception as exc:
-                        elapsed = int((time.time() - started) * 1000)
-                        print(f"tool:error: {bound_name} ({elapsed}ms) {exc}")
-                        return {"error": str(exc)}
-
-            return _ToolCallable()
-
-        instance = _make_callable(tool, name)
-        instance.__name__ = str(name)
-        instance.__doc__ = description or f"StackOne tool: {name}"
-        instance.__signature__ = signature
-        wrapped.append(instance)
-    return wrapped
-
-
 def create_agent_runner(
     *,
     spec_data: Dict[str, Any],
@@ -333,7 +170,7 @@ def create_agent_runner(
     ).strip()
     if not description:
         description = f"{agent_name} agent"
-    tools = [*build_stackone_tools(spec_data), *(extra_tools or [])]
+    tools = list(extra_tools or [])
 
     agent_kwargs: Dict[str, Any] = {
         "name": agent_name.replace("-", "_"),
@@ -363,71 +200,15 @@ def create_agent_runner(
     return agent, runner, runtime
 
 
-def get_google_adk_rlm_config(spec_data: Dict[str, Any] | None) -> Dict[str, Any]:
-    """
-    Resolve Google ADK RLM config from SuperSpec.
-
-    Preferred location:
-      spec.google_adk.rlm
-    Optional fallback:
-      spec.rlm (legacy compatibility if it includes backend/task_model/mode fields)
-    """
-    spec = dict(spec_data or {})
-    adk_cfg = spec.get("google_adk")
-    rlm_cfg: Dict[str, Any] = {}
-
-    if isinstance(adk_cfg, dict) and isinstance(adk_cfg.get("rlm"), dict):
-        rlm_cfg = dict(adk_cfg.get("rlm") or {})
-    else:
-        legacy_rlm = spec.get("rlm")
-        if isinstance(legacy_rlm, dict) and (
-            "backend" in legacy_rlm
-            or "task_model" in legacy_rlm
-            or "mode" in legacy_rlm
-        ):
-            rlm_cfg = dict(legacy_rlm)
-
-    logger_cfg = rlm_cfg.get("logger")
-    if not isinstance(logger_cfg, dict):
-        logger_cfg = {}
-
-    return {
-        "enabled": bool(rlm_cfg.get("enabled", False)),
-        "provider": _normalize_rlm_provider(rlm_cfg.get("provider", "native")),
-        "mode": str(rlm_cfg.get("mode", "assist")).strip().lower() or "assist",
-        "auto_long_context_chars": int(
-            rlm_cfg.get("auto_long_context_chars", 12000) or 12000
-        ),
-        "auto_short_context_mode": str(rlm_cfg.get("auto_short_context_mode", "direct"))
-        .strip()
-        .lower()
-        or "direct",
-        "backend": str(rlm_cfg.get("backend", "litellm")).strip() or "litellm",
-        "environment": str(rlm_cfg.get("environment", "python")).strip() or "python",
-        "max_iterations": int(rlm_cfg.get("max_iterations", 8) or 8),
-        "max_depth": int(rlm_cfg.get("max_depth", 1) or 1),
-        "verbose": bool(rlm_cfg.get("verbose", False)),
-        "persistent": bool(rlm_cfg.get("persistent", False)),
-        "task_model": str(rlm_cfg.get("task_model", "") or "").strip(),
-        "api_key_env": str(rlm_cfg.get("api_key_env", "") or "").strip(),
-        "api_base": str(rlm_cfg.get("api_base", "") or "").strip(),
-        "logger_enabled": bool(logger_cfg.get("enabled", False)),
-        "logger_dir": str(
-            logger_cfg.get("log_dir", ".superoptix/logs/rlm") or ".superoptix/logs/rlm"
-        ),
-        "logger_file_name": str(logger_cfg.get("file_name", "adk_rlm") or "adk_rlm"),
-    }
-
-
 def _build_logfire_span(logfire_enabled: bool, config: Dict[str, Any]):
-    """Best-effort Logfire span context manager for ADK RLM calls."""
+    """Best-effort Logfire span context manager for ADK agent runs."""
     if not logfire_enabled:
         return None
     try:
         import logfire  # type: ignore
 
         return logfire.span(
-            "superoptix.google_adk.rlm",
+            "superoptix.google_adk.run",
             backend=config.get("backend"),
             mode=config.get("mode"),
             max_iterations=config.get("max_iterations"),
@@ -437,7 +218,7 @@ def _build_logfire_span(logfire_enabled: bool, config: Dict[str, Any]):
         return None
 
 
-async def run_agent_with_optional_rlm(
+async def run_agent(
     *,
     agent: Any,
     runner: Any,
@@ -448,15 +229,7 @@ async def run_agent_with_optional_rlm(
     user_id: str = "superoptix_user",
     logfire_enabled: bool = False,
 ) -> str:
-    """
-    Execute ADK run with optional RLM routing.
-
-    Modes:
-    - disabled: direct ADK run
-    - assist: RLM draft -> ADK run(augmented_prompt)
-    - replace: RLM only
-    - auto: choose direct/assist/replace from prompt size thresholds
-    """
+    """Execute a Google ADK agent run with Phoenix instrumentation."""
     phoenix_handle = setup_phoenix_for_spec(
         agent_id=str(getattr(agent, "name", "google_adk_agent") or "google_adk_agent"),
         spec_data=spec_data,
@@ -472,158 +245,23 @@ async def run_agent_with_optional_rlm(
         "superoptix.model_name": model_name,
         "superoptix.app_name": app_name,
     }
-    cfg = get_google_adk_rlm_config(spec_data)
-    if not cfg.get("enabled", False):
-        with phoenix_session_span(
-            phoenix_handle,
-            span_name="superoptix.google_adk.run",
-            session_id=session_id,
-            attributes=span_attributes,
-            input_data=prompt,
-        ) as span:
-            result = await run_agent_query(
-                agent=agent,
-                runner=runner,
-                prompt=prompt,
-                app_name=app_name,
-                user_id=user_id,
-            )
-            if span is not None and hasattr(span, "set_output"):
-                span.set_output({"status": "success"})
-            return result
-
-    mode, mode_reason = resolve_effective_rlm_mode(prompt=prompt, config=cfg)
-    if mode == "direct":
-        print(f"🧠 RLM auto mode selected direct execution ({mode_reason})")
-        with phoenix_session_span(
-            phoenix_handle,
-            span_name="superoptix.google_adk.run",
-            session_id=session_id,
-            attributes={**span_attributes, "superoptix.rlm_mode": "direct"},
-            input_data=prompt,
-        ) as span:
-            result = await run_agent_query(
-                agent=agent,
-                runner=runner,
-                prompt=prompt,
-                app_name=app_name,
-                user_id=user_id,
-            )
-            if span is not None and hasattr(span, "set_output"):
-                span.set_output({"status": "success", "rlm_mode": "direct"})
-            return result
-
-    provider = _normalize_rlm_provider(cfg.get("provider", "native"))
-    if provider == "rlm_code":
-        print(
-            "⚠️ google_adk.rlm.provider=rlm_code is not wired yet; "
-            "falling back to provider=native."
-        )
-        provider = "native"
-    elif provider != "native":
-        print(
-            f"⚠️ Unsupported google_adk.rlm.provider '{provider}'. "
-            "Falling back to provider=native."
-        )
-        provider = "native"
-    cfg["provider"] = provider
-
-    try:
-        from rlm import RLM  # type: ignore
-    except Exception:
-        print("⚠️ RLM enabled but package not installed. Install with: pip install rlms")
-        return await run_agent_query(
+    with phoenix_session_span(
+        phoenix_handle,
+        span_name="superoptix.google_adk.run",
+        session_id=session_id,
+        attributes=span_attributes,
+        input_data=prompt,
+    ) as span:
+        result = await run_agent_query(
             agent=agent,
             runner=runner,
             prompt=prompt,
             app_name=app_name,
             user_id=user_id,
         )
-
-    logger_obj = None
-    if cfg.get("logger_enabled", False):
-        try:
-            from rlm.logger.rlm_logger import RLMLogger  # type: ignore
-
-            log_dir = Path(
-                str(cfg.get("logger_dir", ".superoptix/logs/rlm"))
-            ).as_posix()
-            logger_obj = RLMLogger(
-                log_dir=log_dir,
-                file_name=str(cfg.get("logger_file_name", "adk_rlm")),
-            )
-        except Exception as exc:
-            print(f"⚠️ Unable to initialize RLM logger: {exc}")
-
-    backend_kwargs: Dict[str, Any] = {
-        "model_name": cfg.get("task_model") or model_name,
-    }
-    api_key_env = str(cfg.get("api_key_env", "")).strip()
-    if api_key_env:
-        api_key = os.getenv(api_key_env, "").strip()
-        if api_key:
-            backend_kwargs["api_key"] = api_key
-
-    api_base = str(cfg.get("api_base", "")).strip()
-    if api_base:
-        backend_kwargs["api_base"] = api_base
-
-    rlm = RLM(
-        backend=str(cfg.get("backend") or "litellm"),
-        backend_kwargs=backend_kwargs,
-        environment=str(cfg.get("environment") or "python"),
-        max_depth=int(cfg.get("max_depth") or 1),
-        max_iterations=int(cfg.get("max_iterations") or 8),
-        logger=logger_obj,
-        verbose=bool(cfg.get("verbose", False)),
-        persistent=bool(cfg.get("persistent", False)),
-    )
-
-    span = _build_logfire_span(logfire_enabled=logfire_enabled, config=cfg)
-    if span is not None:
-        span.__enter__()
-    try:
-        print(
-            "🧠 RLM enabled "
-            f"(provider={cfg.get('provider')}, mode={mode}, "
-            f"backend={cfg.get('backend')}, max_iterations={cfg.get('max_iterations')}, "
-            f"resolution={mode_reason})"
-        )
-        started = time.time()
-        completion = await asyncio.to_thread(rlm.completion, prompt)
-        rlm_text = str(getattr(completion, "response", completion) or "").strip()
-        elapsed = int((time.time() - started) * 1000)
-        print(f"✅ RLM completed ({elapsed}ms)")
-
-        if mode == "replace":
-            return rlm_text
-
-        augmented_prompt = (
-            "User request:\n"
-            f"{prompt}\n\n"
-            "RLM draft reasoning (use as guidance, verify with tools when needed):\n"
-            f"{rlm_text}\n"
-        )
-        with phoenix_session_span(
-            phoenix_handle,
-            span_name="superoptix.google_adk.run",
-            session_id=session_id,
-            attributes={**span_attributes, "superoptix.rlm_mode": mode},
-            input_data=augmented_prompt,
-        ) as span:
-            result = await run_agent_query(
-                agent=agent,
-                runner=runner,
-                prompt=augmented_prompt,
-                app_name=app_name,
-                user_id=user_id,
-            )
-            if span is not None and hasattr(span, "set_output"):
-                span.set_output({"status": "success", "rlm_mode": mode})
-            return result
-    finally:
-        if span is not None:
-            span.__exit__(None, None, None)
+        if span is not None and hasattr(span, "set_output"):
+            span.set_output({"status": "success"})
+        return result
 
 
 async def run_agent_query(

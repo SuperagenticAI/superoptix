@@ -32,6 +32,73 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   The live constraint is `chromadb~=1.1.0` vs SuperOptiX's `chromadb>=1.5.5` extras,
   so CrewAI installs as `pip install superoptix "crewai>=1.15"` in its own environment.
 
+### Fixed
+- **A2A conformance: 100% MUST / 100% SHOULD / 100% MAY**, up from 42.6% MUST, measured
+  with the official [A2A TCK](https://github.com/a2aproject/a2a-tck). Four fixes:
+  - `Task` no longer carries `createdAt` / `lastModified`. The A2A 1.0 Task
+    schema sets `additionalProperties: false`, so every task was failing schema
+    validation. Timestamps moved beside the task; `status.timestamp` is unchanged.
+  - **JSON-RPC errors now return HTTP 200** with the failure inside the envelope,
+    and A2A errors carry a `google.rpc.ErrorInfo` entry in the `data` array
+    (spec 9.5). Returning 4xx made conformant clients treat the response as a
+    transport failure and never read the error code.
+  - **The JSON-RPC route is served with and without a trailing slash.** A client
+    using the interface URL as an HTTP base and posting to `/` resolves to
+    `<rpc_url>/`; Starlette answered the mismatch with an empty 307 body that
+    JSON-RPC clients cannot parse. This single fix moved compliance 54% → 77%.
+  - `CancelTask` on a terminal task now returns `TaskNotCancelableError` instead
+    of silently succeeding, and the push-notification methods return
+    `PushNotificationNotSupportedError` rather than `MethodNotFound`.
+  - **A follow-up message carrying a `taskId` continues that task** instead of
+    forking a new one, and the runtime now sees the message it is answering
+    rather than the first message in the history.
+  - **Subscribers always observe status transitions.** The publish flag gated the
+    streaming caller's own feed; anyone attached via `SubscribeToTask` never saw
+    the task finish and their stream hung open.
+  - `SendMessage` validates its task reference: unknown task, terminal task and
+    mismatched `contextId` are each rejected with the spec'd error.
+  - `GetTask` honours `historyLength`; runtimes may declare a non-terminal state
+    (`input_required`), return artifacts, or answer with a bare `Message`.
+- HTTP+JSON errors now use AIP-193 bodies with ProtoJSON `details`, unsupported
+  media types return 415 rather than FastAPI's 422, and `A2A-Version` is
+  negotiated against the 1.0 and 0.3 lines the card advertises.
+
+### Added
+- `superoptix/protocols/a2a/errors.py` — the A2A error binding table (JSON-RPC
+  code, HTTP status, ErrorInfo reason) with ProtoJSON payload builders.
+- `superoptix/protocols/a2a/tck_sut.py` — the conformance harness. The TCK drives
+  protocol states through magic `messageId` prefixes; the published agent must
+  not honour client-supplied ids that way, so the hooks live in a separate app
+  sharing the same server implementation.
+- `.github/workflows/a2a-conformance.yml` — runs the official TCK against the SUT
+  harness on every change to the protocol or runtime packages, publishes the
+  compatibility report as a build artifact, and fails if MUST-level compliance
+  regresses below 100%.
+
+### Removed
+- **StackOne connector integration.** Removed across the tree: the
+  `StackOneBridge` adapter, three connector agent playbooks (HRIS, ATS, CRM),
+  four demo playbooks, the benchmark suite, nine examples, the
+  `build_stackone_tools` / `resolve_stackone_config` helpers in every runtime,
+  the `stackone` tool mode in SuperSpec and its validator rules, the Jinja
+  template branches, the `connectors-stackone` extra, and the docs. Agent tool
+  lists are now built from the framework's own tools and MCP servers.
+
+### Removed
+- **The harness runtime and `super harness run/serve`.** SuperQode already ships
+  this layer with a 6-stage execution model and a 97-harness hub; SuperOptiX was
+  carrying a smaller second copy. Nothing in the optimizer or the A2A layers
+  imported it — it was a self-contained product surface, so the cut is complete
+  rather than surgical. This includes the Codex CLI backend, which put a coding
+  agent inside the agent-framework product.
+- **RLM.** SuperQode ships Native RLM as a flagship feature; two implementations
+  of one idea in a single portfolio is worse than one good one. Removed across
+  the tree: the `rlm_code` runtime and mode utils, five demo playbooks, the
+  SuperSpec schema/validator/parser fields, per-framework `rlm` config blocks,
+  Jinja template branches, the `--rlm` compile flag, the `rlm-native` and
+  `rlm-code` extras, and the docs. `run_agent_with_optional_rlm` is now simply
+  `run_agent`. All eight frameworks still compile to valid pipelines.
+
 ### Removed
 - **`torch`, `transformers` and `accelerate` are no longer core dependencies.**
   Only `superoptix/models/backends/huggingface*.py` imports them, always lazily,

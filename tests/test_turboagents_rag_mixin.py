@@ -86,7 +86,10 @@ class _FakeTurboChroma:
             {
                 "index": 0,
                 "score": 0.97,
-                "metadata": {"content": "TurboAgents chroma content", "source": "turbo-chroma"},
+                "metadata": {
+                    "content": "TurboAgents chroma content",
+                    "source": "turbo-chroma",
+                },
             }
         ]
 

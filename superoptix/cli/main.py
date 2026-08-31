@@ -182,10 +182,6 @@ from superoptix.cli.commands.agent import (
     show_tier_status,
     test_agent_bdd,
 )
-from superoptix.cli.commands.harness import (
-    run_harness_agent,
-    serve_harness_agent,
-)
 from superoptix.cli.commands.dataset import (
     preview_dataset,
     validate_dataset,
@@ -705,11 +701,6 @@ def execute_with_loader(func, args, command_name="SuperOptiX"):
                 needs_progress = True
                 progress_message = f"Agent {args.agent_command}..."
 
-        elif args.command in {"harness", "ha"}:
-            if getattr(args, "harness_command", None) == "run":
-                needs_progress = True
-                progress_message = "Harness run..."
-
         elif args.command == "spec":
             if hasattr(args, "spec_command") and args.spec_command in [
                 "generate",
@@ -1094,11 +1085,6 @@ Use `super agent <command> --help` for more information on a specific command.
         "--optimize",
         action="store_true",
         help="Generate the full optimization/evaluation pipeline (default compile generates a minimal PyTorch-like DSPy pipeline).",
-    )
-    compile_parser.add_argument(
-        "--rlm",
-        action="store_true",
-        help="DSPy only: opt into dspy.RLM in minimal mode (default remains ChainOfThought/ReAct).",
     )
     compile_parser.add_argument(
         "--local-ollama",
@@ -1680,303 +1666,6 @@ Use `super agent <command> --help` for more information on a specific command.
     )
 
     # Harness commands
-    harness_parser = subparsers.add_parser(
-        "harness",
-        aliases=["ha"],
-        help="Run and serve stateful SuperOptiX harness agents.",
-        description="""
-Run SuperOptiX agents through the native harness runtime.
-
-Examples:
-  super harness run developer --prompt "Review this repository" --backend openai
-  super harness run developer --skill triage --arg issue=123 --backend google-adk
-  super harness run developer --prompt "Return typed service output" --backend pydantic-ai
-  super harness run developer --prompt "Research and patch" --backend deepagents --allow-write --allow-shell
-  super harness run developer --prompt "Fix failing tests" --backend codex --allow-write
-  super harness serve developer --backend openai --port 3583
-        """,
-        formatter_class=RawDescriptionHelpFormatter,
-    )
-    harness_subparsers = harness_parser.add_subparsers(
-        dest="harness_command", help="Harness commands", required=True
-    )
-
-    harness_run_parser = harness_subparsers.add_parser(
-        "run",
-        help="Run a stateful harness session.",
-        formatter_class=RawDescriptionHelpFormatter,
-    )
-    harness_run_parser.add_argument("name", help="Agent name")
-    harness_run_parser.add_argument(
-        "--prompt",
-        "--message",
-        "--goal",
-        dest="prompt",
-        help="Prompt to send to the harness session.",
-    )
-    harness_run_parser.add_argument(
-        "--skill",
-        help="Run a discovered Markdown skill instead of a raw prompt.",
-    )
-    harness_run_parser.add_argument(
-        "--arg",
-        action="append",
-        default=[],
-        help="Skill argument in key=value form. Repeatable.",
-    )
-    harness_run_parser.add_argument(
-        "--backend",
-        choices=["openai", "google-adk", "codex", "deepagents", "pydantic-ai"],
-        default="openai",
-        help="Harness backend (default: openai).",
-    )
-    harness_run_parser.add_argument(
-        "--session",
-        default="default",
-        help="Persistent session id (default: default).",
-    )
-    harness_run_parser.add_argument(
-        "--role",
-        help="Role overlay discovered from roles/ or .agents/roles/.",
-    )
-    harness_run_parser.add_argument(
-        "--cwd",
-        help="Working directory for AGENTS.md, skills, and roles discovery.",
-    )
-    harness_run_parser.add_argument(
-        "--state-dir",
-        help="Directory for persisted harness session state.",
-    )
-    harness_run_parser.add_argument(
-        "--no-tools",
-        action="store_true",
-        help="Disable model-callable built-in tools for this run.",
-    )
-    harness_run_parser.add_argument(
-        "--allow-write",
-        action="store_true",
-        help="Enable model-callable write/edit tools.",
-    )
-    harness_run_parser.add_argument(
-        "--allow-shell",
-        action="store_true",
-        help="Enable model-callable bash tool and session shell execution.",
-    )
-    harness_run_parser.add_argument(
-        "--local",
-        action="store_true",
-        help="Use local provider defaults when backend supports model config.",
-    )
-    harness_run_parser.add_argument(
-        "--provider",
-        help="Override model provider.",
-    )
-    harness_run_parser.add_argument(
-        "--model",
-        help="Override model id.",
-    )
-    harness_run_parser.add_argument(
-        "--codex-bin",
-        help="Path to codex binary when using --backend codex.",
-    )
-    harness_run_parser.add_argument(
-        "--pydantic-request-limit",
-        type=int,
-        help="Maximum Pydantic AI model requests for one harness run.",
-    )
-    harness_run_parser.add_argument(
-        "--pydantic-tool-calls-limit",
-        type=int,
-        help="Maximum Pydantic AI tool calls for one harness run.",
-    )
-    harness_run_parser.add_argument(
-        "--pydantic-input-tokens-limit",
-        type=int,
-        help="Maximum Pydantic AI input tokens for one harness run.",
-    )
-    harness_run_parser.add_argument(
-        "--pydantic-output-tokens-limit",
-        type=int,
-        help="Maximum Pydantic AI output tokens for one harness run.",
-    )
-    harness_run_parser.add_argument(
-        "--pydantic-total-tokens-limit",
-        type=int,
-        help="Maximum total Pydantic AI tokens for one harness run.",
-    )
-    harness_run_parser.add_argument(
-        "--pydantic-count-tokens-before-request",
-        action="store_true",
-        help="Ask Pydantic AI to count tokens before each model request.",
-    )
-    harness_run_parser.add_argument(
-        "--pydantic-code-mode",
-        action="store_true",
-        help="Enable optional Pydantic AI CodeMode capability when installed.",
-    )
-    harness_run_parser.add_argument(
-        "--deepagents-skill-source",
-        action="append",
-        default=[],
-        help="DeepAgents skill source path. Repeatable.",
-    )
-    harness_run_parser.add_argument(
-        "--deepagents-memory",
-        action="append",
-        default=[],
-        help="DeepAgents memory file path, such as /AGENTS.md. Repeatable.",
-    )
-    harness_run_parser.add_argument(
-        "--deepagents-checkpointer",
-        choices=["none", "memory"],
-        default=None,
-        help="DeepAgents-managed session memory (default: none).",
-    )
-    harness_run_parser.add_argument(
-        "--deepagents-debug",
-        action="store_true",
-        help="Enable DeepAgents debug mode.",
-    )
-    harness_run_parser.add_argument(
-        "--json",
-        action="store_true",
-        help="Print machine-readable JSON output.",
-    )
-    harness_run_parser.set_defaults(func=run_harness_agent)
-
-    harness_serve_parser = harness_subparsers.add_parser(
-        "serve",
-        help="Serve a stateful harness agent over HTTP.",
-        formatter_class=RawDescriptionHelpFormatter,
-    )
-    harness_serve_parser.add_argument("name", help="Agent name")
-    harness_serve_parser.add_argument(
-        "--backend",
-        choices=["openai", "google-adk", "codex", "deepagents", "pydantic-ai"],
-        default="openai",
-        help="Harness backend (default: openai).",
-    )
-    harness_serve_parser.add_argument(
-        "--host",
-        default="127.0.0.1",
-        help="Bind host (default: 127.0.0.1).",
-    )
-    harness_serve_parser.add_argument(
-        "--port",
-        type=int,
-        default=3583,
-        help="Bind port (default: 3583).",
-    )
-    harness_serve_parser.add_argument(
-        "--log-level",
-        choices=["critical", "error", "warning", "info", "debug", "trace"],
-        default="info",
-        help="Server log level (default: info).",
-    )
-    harness_serve_parser.add_argument(
-        "--role",
-        help="Default role overlay discovered from roles/ or .agents/roles/.",
-    )
-    harness_serve_parser.add_argument(
-        "--cwd",
-        help="Working directory for AGENTS.md, skills, and roles discovery.",
-    )
-    harness_serve_parser.add_argument(
-        "--state-dir",
-        help="Directory for persisted harness session state.",
-    )
-    harness_serve_parser.add_argument(
-        "--no-tools",
-        action="store_true",
-        help="Disable model-callable built-in tools for served sessions.",
-    )
-    harness_serve_parser.add_argument(
-        "--allow-write",
-        action="store_true",
-        help="Enable model-callable write/edit tools.",
-    )
-    harness_serve_parser.add_argument(
-        "--allow-shell",
-        action="store_true",
-        help="Enable model-callable bash tool and session shell execution.",
-    )
-    harness_serve_parser.add_argument(
-        "--local",
-        action="store_true",
-        help="Use local provider defaults when backend supports model config.",
-    )
-    harness_serve_parser.add_argument(
-        "--provider",
-        help="Override model provider.",
-    )
-    harness_serve_parser.add_argument(
-        "--model",
-        help="Override model id.",
-    )
-    harness_serve_parser.add_argument(
-        "--codex-bin",
-        help="Path to codex binary when using --backend codex.",
-    )
-    harness_serve_parser.add_argument(
-        "--pydantic-request-limit",
-        type=int,
-        help="Maximum Pydantic AI model requests per served harness call.",
-    )
-    harness_serve_parser.add_argument(
-        "--pydantic-tool-calls-limit",
-        type=int,
-        help="Maximum Pydantic AI tool calls per served harness call.",
-    )
-    harness_serve_parser.add_argument(
-        "--pydantic-input-tokens-limit",
-        type=int,
-        help="Maximum Pydantic AI input tokens per served harness call.",
-    )
-    harness_serve_parser.add_argument(
-        "--pydantic-output-tokens-limit",
-        type=int,
-        help="Maximum Pydantic AI output tokens per served harness call.",
-    )
-    harness_serve_parser.add_argument(
-        "--pydantic-total-tokens-limit",
-        type=int,
-        help="Maximum total Pydantic AI tokens per served harness call.",
-    )
-    harness_serve_parser.add_argument(
-        "--pydantic-count-tokens-before-request",
-        action="store_true",
-        help="Ask Pydantic AI to count tokens before each model request.",
-    )
-    harness_serve_parser.add_argument(
-        "--pydantic-code-mode",
-        action="store_true",
-        help="Enable optional Pydantic AI CodeMode capability when installed.",
-    )
-    harness_serve_parser.add_argument(
-        "--deepagents-skill-source",
-        action="append",
-        default=[],
-        help="DeepAgents skill source path. Repeatable.",
-    )
-    harness_serve_parser.add_argument(
-        "--deepagents-memory",
-        action="append",
-        default=[],
-        help="DeepAgents memory file path, such as /AGENTS.md. Repeatable.",
-    )
-    harness_serve_parser.add_argument(
-        "--deepagents-checkpointer",
-        choices=["none", "memory"],
-        default=None,
-        help="DeepAgents-managed session memory (default: none).",
-    )
-    harness_serve_parser.add_argument(
-        "--deepagents-debug",
-        action="store_true",
-        help="Enable DeepAgents debug mode.",
-    )
-    harness_serve_parser.set_defaults(func=serve_harness_agent)
-
     # Orchestra commands
     orchestra_parser = subparsers.add_parser(
         "orchestra",
@@ -3109,8 +2798,6 @@ def _requires_project_context(args) -> bool:
     if command not in {
         "agent",
         "ag",
-        "harness",
-        "ha",
         "spec",
         "orchestra",
         "orch",

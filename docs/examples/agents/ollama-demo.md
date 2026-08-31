@@ -72,8 +72,6 @@ language_model:
 - 🌡️ **`temperature`**: Controls response creativity (0.7 = balanced)
 - 📏 **`max_tokens`**: Maximum response length
 
-
-
 ## 🦙 **The Ollama Advantage**
 
 Ollama makes local AI accessible to everyone. It's the simplest way to run powerful language models on your own machine:

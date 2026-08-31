@@ -437,7 +437,7 @@ class AgentCompiler:
         Apply SuperSpec `spec.dspy` automation overrides to legacy runtime keys.
 
         This keeps templates/runners backward-compatible while allowing users to
-        configure DSPy (module + GEPA + RLM) from a single SuperSpec block.
+        configure DSPy (module + GEPA) from a single SuperSpec block.
         """
         dspy_cfg = spec.get("dspy")
         if not isinstance(dspy_cfg, dict):
@@ -451,8 +451,6 @@ class AgentCompiler:
                 reasoning = {}
             if module == "react":
                 reasoning["method"] = "react"
-            elif module == "rlm":
-                reasoning["method"] = "rlm"
             elif module == "predict":
                 reasoning["method"] = "predict"
             elif module == "program_of_thought":
@@ -478,29 +476,6 @@ class AgentCompiler:
                 if key in module_params and module_params[key] is not None:
                     reasoning[key] = module_params[key]
             spec["reasoning"] = reasoning
-
-        # 2) DSPy RLM -> spec.rlm
-        dspy_rlm = dspy_cfg.get("rlm")
-        if isinstance(dspy_rlm, dict):
-            rlm_cfg = spec.get("rlm")
-            if not isinstance(rlm_cfg, dict):
-                rlm_cfg = {}
-
-            # Enable RLM when requested via module or explicit flag.
-            if module == "rlm":
-                rlm_cfg["enabled"] = True
-            if "enabled" in dspy_rlm:
-                rlm_cfg["enabled"] = bool(dspy_rlm.get("enabled"))
-
-            if "max_iters" in dspy_rlm:
-                rlm_cfg["max_iters"] = dspy_rlm.get("max_iters")
-            elif "max_iterations" in dspy_rlm:
-                rlm_cfg["max_iters"] = dspy_rlm.get("max_iterations")
-
-            if "max_llm_calls" in dspy_rlm:
-                rlm_cfg["max_llm_calls"] = dspy_rlm.get("max_llm_calls")
-
-            spec["rlm"] = rlm_cfg
 
         # 3) DSPy GEPA -> spec.optimization.optimizer.params
         dspy_gepa = dspy_cfg.get("gepa")
@@ -583,17 +558,6 @@ class AgentCompiler:
                 ):
                     spec["mcp_servers"] = tools_cfg.get("mcp_servers")
                     spec["protocols"] = extract_protocol_entries(spec)
-            elif mode == "stackone":
-                # Runner/template will fetch + convert StackOne tools at runtime.
-                spec["tool_backend"] = "dspy"
-                spec.pop("mcp_servers", None)
-                spec.pop("protocols", None)
-                existing_tool_calling = spec.get("tool_calling", {})
-                if not isinstance(existing_tool_calling, dict):
-                    existing_tool_calling = {}
-                existing_tool_calling.setdefault("enabled", True)
-                existing_tool_calling.setdefault("available_tools", [])
-                spec["tool_calling"] = existing_tool_calling
             else:
                 # Builtin tools map to existing tool_calling shape used by templates.
                 builtin_tools = tools_cfg.get("builtin_tools", [])
@@ -738,13 +702,6 @@ class AgentCompiler:
             context["model_override"] = model_override
             # Ollama-first default: keep local path available unless user explicitly forces cloud.
             context["include_local_ollama_code"] = not is_cloud_mode
-            if getattr(args, "rlm", False):
-                spec = context.get("spec", {})
-                rlm_cfg = spec.get("rlm", {})
-                if not isinstance(rlm_cfg, dict):
-                    rlm_cfg = {}
-                rlm_cfg["enabled"] = True
-                spec["rlm"] = rlm_cfg
             pipeline_path = self._get_pipeline_path(agent_name, target)
             pipeline_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -805,7 +762,7 @@ class AgentCompiler:
                     )
             else:
                 console.print(
-                    "[cyan]🔧 Unified Capabilities: RLM, GEPA, tools, assertions, structured outputs, RAG (when configured).[/]"
+                    "[cyan]🔧 Unified Capabilities: GEPA, tools, assertions, structured outputs, RAG (when configured).[/]"
                 )
 
             context["compiled_spec_filename"] = self._write_compiled_spec_sidecar(
@@ -853,9 +810,7 @@ class AgentCompiler:
                     console.print(
                         "[dim]   • Lightweight run path with playbook model/persona config[/]"
                     )
-                    console.print(
-                        "[dim]   • Optional RLM: use --rlm or spec.rlm.enabled=true[/]"
-                    )
+                    console.print()
                     console.print(
                         "[dim]   • No evaluation/optimization scaffolding in generated code[/]"
                     )
@@ -1144,7 +1099,7 @@ class AgentCompiler:
         console.print("\n[bold blue]🎯 Unified DSPy Pipeline Features[/]")
         features = [
             "Minimal, readable DSPy Signature + Module pipeline generation",
-            "RLM and ReAct/module automation via SuperSpec",
+            "ReAct/module automation via SuperSpec",
             "GEPA optimization lifecycle with runner-managed orchestration",
             "Structured outputs + assertions + blended optimization metrics",
             "Tool and MCP integration driven by SuperSpec configuration",

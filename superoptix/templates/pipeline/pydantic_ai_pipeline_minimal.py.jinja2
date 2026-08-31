@@ -25,10 +25,8 @@ except ImportError as e:
     raise ImportError("pydantic-ai is required. Install with: pip install pydantic-ai") from e
 
 from superoptix.runners.pydantic_runtime_helpers import (
-    build_stackone_tools as superoptix_build_stackone_tools,
+  run_agent as superoptix_run_agent,
     build_instructions as superoptix_build_instructions,
-    get_pydantic_rlm_config as superoptix_get_pydantic_rlm_config,
-    run_agent_with_optional_rlm as superoptix_run_agent_with_optional_rlm,
     resolve_model as superoptix_resolve_model,
 )
 from superoptix.core.rag_mixin import RAGMixin
@@ -111,7 +109,6 @@ class {{ agent_name | to_pascal_case }}Pipeline:
         )
         self._resolved_model = resolved_model
         self._resolved_instructions = resolved_instructions
-        self._rlm_config = superoptix_get_pydantic_rlm_config(FULL_SPEC)
         self._model_settings = ModelSettings(
             temperature=temperature,
             max_tokens=max_tokens,
@@ -135,25 +132,13 @@ class {{ agent_name | to_pascal_case }}Pipeline:
 {% if spec.output_fields and spec.output_mode == "structured" %}
         agent_kwargs["output_type"] = {{ agent_name | to_pascal_case }}Output
 {% endif %}
-        stackone_tools = superoptix_build_stackone_tools(FULL_SPEC, framework="pydantic_ai")
-        if stackone_tools:
-            agent_kwargs["tools"] = stackone_tools
-            print(f"✅ StackOne tools registered: {len(stackone_tools)}")
-        else:
-            print("ℹ️  No StackOne tools configured")
         self.agent = Agent(**agent_kwargs)
         self._phoenix = superoptix_setup_phoenix_for_spec(
             agent_id={{ agent_name | tojson }},
             spec_data=FULL_SPEC,
             default_project_name="SuperOptiX-{{ agent_name }}",
         )
-        self._tool_count = len(stackone_tools or [])
-        if self._rlm_config.get("enabled", False):
-            print(
-                "✅ RLM configured "
-                f"(mode={self._rlm_config.get('mode', 'assist')}, "
-                f"backend={self._rlm_config.get('backend', 'litellm')})"
-            )
+        self._tool_count = len(agent_kwargs.get("tools") or [])
         self._rag_enabled = False
         self._rag_helper = None
         try:
@@ -208,7 +193,7 @@ class {{ agent_name | to_pascal_case }}Pipeline:
         print(f"🧠 Pydantic AI run start | model={self._resolved_model} | tools={self._tool_count}")
         print(f"📝 Prompt: {preview}")
         try:
-            result = await superoptix_run_agent_with_optional_rlm(
+            result = await superoptix_run_agent(
                 agent=self.agent,
                 prompt=prompt,
                 spec_data=FULL_SPEC,
@@ -232,7 +217,7 @@ class {{ agent_name | to_pascal_case }}Pipeline:
                     if "output_retries" in init_params:
                         fallback_agent_kwargs["output_retries"] = 0
                     fallback_agent = Agent(**fallback_agent_kwargs)
-                    result = await superoptix_run_agent_with_optional_rlm(
+                    result = await superoptix_run_agent(
                         agent=fallback_agent,
                         prompt=prompt,
                         spec_data=FULL_SPEC,

@@ -76,8 +76,6 @@ react_config:
 - 🔄 **`error_handling: retry`**: Automatic error retry with logging
 - 🧠 **`reasoning_style: step_by_step`**: Detailed reasoning logs
 
-
-
 ## 📊 **Observability: Your AI's Health Monitor**
 
 Observability gives you complete visibility into your AI agent's performance, health, and behavior. It's like having a comprehensive monitoring system for your AI:

@@ -30,12 +30,9 @@ except ImportError as e:
   print("⚠️  Install with: pip install google-adk")
   print("⚠️  Set GOOGLE_API_KEY environment variable")
 
+from superoptix.runners.google_adk_runtime_helpers import run_agent as superoptix_run_agent
 from superoptix.core.base_component import BaseComponent
 from superoptix.observability.phoenix import setup_phoenix_for_spec as superoptix_setup_phoenix_for_spec
-from superoptix.runners.google_adk_runtime_helpers import (
-  get_google_adk_rlm_config as superoptix_get_google_adk_rlm_config,
-  run_agent_with_optional_rlm as superoptix_run_agent_with_optional_rlm,
-)
 
 COMPILED_SPEC_PATH = Path(__file__).resolve().parent / "{{ compiled_spec_filename }}"
 def _load_compiled_spec(path: Path) -> Dict[str, Any]:
@@ -107,13 +104,6 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
     
     self._agent = None
     self._runner = None
-    self._rlm_config = superoptix_get_google_adk_rlm_config(FULL_SPEC)
-    if self._rlm_config.get("enabled", False):
-      print(
-        "✅ RLM configured "
-        f"(mode={self._rlm_config.get('mode', 'assist')}, "
-        f"backend={self._rlm_config.get('backend', 'litellm')})"
-      )
   
   def _build_default_instruction(self) -> str:
     """Build default instruction from playbook."""
@@ -219,24 +209,24 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
       user_id = "superoptix_user"
       session_id = str(uuid.uuid4())
       
-      # Execute with helper-managed optional RLM routing.
+      # Execute through the shared runtime helper.
       import inspect
-      if inspect.iscoroutinefunction(self._run_with_optional_rlm_async):
+      if inspect.iscoroutinefunction(self._run_agent_async):
         try:
           loop = asyncio.get_event_loop()
           if loop.is_running():
             # If loop is running, create a task
             import concurrent.futures
             with concurrent.futures.ThreadPoolExecutor() as executor:
-              future = executor.submit(asyncio.run, self._run_with_optional_rlm_async(user_id, session_id, user_message))
+              future = executor.submit(asyncio.run, self._run_agent_async(user_id, session_id, user_message))
               response_text = future.result()
           else:
-            response_text = loop.run_until_complete(self._run_with_optional_rlm_async(user_id, session_id, user_message))
+            response_text = loop.run_until_complete(self._run_agent_async(user_id, session_id, user_message))
         except RuntimeError:
           # No event loop, create one
-          response_text = asyncio.run(self._run_with_optional_rlm_async(user_id, session_id, user_message))
+          response_text = asyncio.run(self._run_agent_async(user_id, session_id, user_message))
       else:
-        response_text = self._run_with_optional_rlm_async(user_id, session_id, user_message)
+        response_text = self._run_agent_async(user_id, session_id, user_message)
       
 {% if spec.output_fields %}
 {% set first_output = spec.output_fields[0] %}
@@ -295,10 +285,9 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
     
     return ''.join(response_parts) if response_parts else "No response generated"
   
-  async def _run_with_optional_rlm_async(self, user_id: str, session_id: str, user_message: str) -> str:
+  async def _run_agent_async(self, user_id: str, session_id: str, user_message: str) -> str:
     """
-    Execute with optional RLM wrapper.
-    Keeps optimized pipeline aligned with minimal-mode RLM behavior.
+    Execute the agent through the shared runtime helper.
     """
     del session_id  # Session IDs are managed by runner/session service
     # Convert config to dict if needed
@@ -308,7 +297,7 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
       config = {}
     model_str = str(config.get("model", "gemini-3.7-flash"))
     app_name = f"superoptix_{{ agent_name }}"
-    return await superoptix_run_agent_with_optional_rlm(
+    return await superoptix_run_agent(
       agent=self._agent,
       runner=self._runner,
       prompt=user_message,
