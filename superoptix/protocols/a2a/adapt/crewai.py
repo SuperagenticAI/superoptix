@@ -54,7 +54,7 @@ def _task_skill(task: Any, index: int) -> Skill:
         name=label,
         description=first_sentence(text),
         tags=tags,
-        examples=[first_sentence(description, 120)] if description else [],
+        examples=[expected] if expected else [],
         output_modes=["text/plain", "application/json"],
     )
 
@@ -75,7 +75,7 @@ def _agent_skill(agent: Any, index: int = 0) -> Skill:
         name=role,
         description=first_sentence(description),
         tags=tags,
-        examples=[first_sentence(goal, 120)] if goal else [],
+        examples=[first_sentence(goal, 120)] if goal and goal != description else [],
         output_modes=["text/plain", "application/json"],
     )
 

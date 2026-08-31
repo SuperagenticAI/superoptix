@@ -7,6 +7,7 @@ modified.
 
 from superoptix.protocols.a2a.adapt import crewai as _crewai  # noqa: F401
 from superoptix.protocols.a2a.adapt import dspy as _dspy  # noqa: F401
+from superoptix.protocols.a2a.adapt import frameworks as _frameworks  # noqa: F401
 from superoptix.protocols.a2a.adapt.base import (
     AdaptError,
     AgentSpec,

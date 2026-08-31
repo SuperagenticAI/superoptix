@@ -107,6 +107,84 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   optional local-inference backend. `pip install "superoptix[a2a]"` drops from
   ~650 MB to ~219 MB. Install `superoptix[huggingface]` to use that backend.
 
+### Fixed
+- **Documentation site build.** Removing RLM left an empty `🧪 RLM` navigation
+  section in `mkdocs.yml`. A nav entry with no children parses as null, which
+  invalidates the entire nav, so `mkdocs build` aborted with
+  `Config value 'nav': Expected nav to be a list, got None`.
+
+### Added
+- Documentation for the A2A work: [Adapting an existing agent](guides/a2a-adapt.md),
+  [A2A conformance](guides/a2a-conformance.md) and
+  [Routing quality](guides/a2a-routing.md), covering the eight introspectors,
+  entrypoint resolution, the generated intermediate representation, TCK
+  procedure, 0.3/1.0 negotiation, the error binding table, and the routing
+  metric with its evaluation-set constraint.
+
+### Added
+- **All eight frameworks now adapt.** `super a2a adapt` gained introspectors for
+  OpenAI Agents SDK, Pydantic AI, Google ADK, Microsoft Agent Framework, Claude
+  Agent SDK and DeepAgents, joining CrewAI and DSPy. Each reader is small
+  because the IR and every emitter are shared — a framework needs one reader in,
+  and gets the Agent Card, the server, the 0.3 bridge and the routing metric for
+  free. Object shapes were read from the installed packages, not inferred:
+
+  | Framework | Skills derived from |
+  |---|---|
+  | OpenAI Agents SDK | `tools[].name` / `.description` |
+  | Pydantic AI | `_function_toolset.tools` |
+  | Google ADK | `description`, plus `sub_agents` |
+  | Microsoft Agent Framework | `description` / `instructions` |
+  | Claude Agent SDK | `AgentDefinition.description` or `ClaudeAgentOptions.system_prompt` |
+  | DeepAgents | subagent `name` / `description` |
+
+- **0.3 ↔ 1.0 negotiation** (`superoptix/protocols/a2a/bridge.py`). One endpoint
+  serves both spec lines: a caller sending `A2A-Version: 0.3` receives 0.3 task
+  states (`completed`), roles (`agent`), `kind`-tagged Parts and a card with a
+  top-level `url`, while a 1.0 caller is unaffected. This is table stakes rather
+  than differentiation, but the installed base is on 0.3 — five of the eight
+  frameworks declare no A2A at all and the three that do are pinned pre-1.0 — so
+  without it the brownfield claim is false for most of the market.
+
+### Added
+- **Routing-quality metric** (`superoptix/protocols/a2a/routing/`). Scores how
+  well other agents can route to yours, because a gateway makes an agent
+  reachable but only its Agent Card makes it worth reaching. Three numbers,
+  since "invisible" and "confusable" fail differently: **discovery** (surfaced at
+  all), **invocation** (chosen first), and **confusion** (lost to a sibling
+  rather than being unseen).
+
+  The metric moves on description quality alone. Four sibling support skills,
+  identical queries, differing only in how each describes itself:
+
+  | Catalogue | Invocation | Discovery |
+  |---|---|---|
+  | Vague (`"Handle a customer query"`) | 12.5% | 75% |
+  | Specific (names the vocabulary users bring) | 100% | 100% |
+
+  Ships a deterministic `LexicalRouter` so baselines are reproducible without a
+  provider, and an `LLMRouter` for use as a held-out validator — optimising and
+  scoring with one router measures that router's reading habits, not
+  interoperability.
+
+- **GEPA over the routing surface** (`routing/optimize.py`). Optimises
+  `skills[].description` and `skills[].examples`, exactly what the adapt IR
+  declares optimisable; identity and protocol fields stay out of reach. Failures
+  are fed back as text naming the sibling that stole the query, which is what
+  GEPA reflects on. On the vague catalogue above it lifts invocation from
+  **12.5% to 75%**.
+
+### Known limitation
+- **The routing eval set must come from outside the Agent Card.** Deterministic
+  query generation from the card is circular: every field either is the
+  description under optimisation or was derived from it, so a generated query
+  wins by echoing what it is meant to test. `generate_cases(hard=True)` withholds
+  the skill name to reduce the leak and is useful as a smoke test, but a
+  meaningful benchmark needs LLM-generated caller-vocabulary queries or real
+  traffic. GEPA's own `gskill` avoids this by mining tasks from a repository —
+  ground truth independent of the artifact being optimised. There is no
+  equivalent free source here.
+
 ### Added
 - **`super a2a adapt` — make an agent you already built speak A2A 1.0.**
   Point it at your own code and it emits an Agent Card and a conformant server
