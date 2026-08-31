@@ -1,6 +1,6 @@
 # 🔧 Installation Guide
 
-Welcome to SuperOptiX! This guide will help you install the Full Stack Agentic AI Optimization Framework on your system.
+This guide covers installing SuperOptiX and the optional extras for each supported agent runtime.
 
 !!! tip "🚀 Quick Start"
     **New to SuperOptiX?** Start with our [Quick Start Guide](quick-start.md) after installation!
@@ -123,7 +123,7 @@ Customize your installation by adding only what you need:
 | **OpenAI SDK** | `uv tool install superoptix --with "superoptix[frameworks-openai]"` | openai-agents, openai SDK |
 | **Claude SDK** | `uv tool install superoptix --with "superoptix[frameworks-claude-sdk]"` | claude-agent-sdk |
 | **Google ADK** | `uv tool install superoptix --with "superoptix[frameworks-google]"` | google-adk, google-generativeai |
-| **Microsoft (Legacy)** | `uv tool install superoptix --with "superoptix[frameworks-microsoft]"` | agent-framework>=1.0.0b260212, azure-identity |
+| **Microsoft** | `uv tool install superoptix --with "superoptix[frameworks-microsoft]"` | agent-framework>=1.16, azure-identity |
 | **DeepAgents** | `uv tool install superoptix --with "superoptix[frameworks-deepagents]"` | deepagents |
 | **Pydantic AI** | `uv tool install superoptix --with "superoptix[frameworks-pydantic-ai]"` | Pydantic AI |
 | **CrewAI** ⚠️ | `uv tool install superoptix --with crewai==1.2.0` | crewai (conflicts with DSPy) |
@@ -202,7 +202,7 @@ uv tool upgrade superoptix
 # The issue: CrewAI requires json-repair==0.25.2, but DSPy needs json-repair>=0.30.0
 # Solution: Install manually with --no-deps flag
 uv tool install superoptix --with "superoptix[frameworks-dspy]"  # Install DSPy support first
-uv tool install superoptix --with crewai==0.157.0  # Add CrewAI manually
+uv tool install superoptix --with crewai>=1.15  # Add CrewAI manually
 uv tool install superoptix --with "json-repair>=0.30.0"  # Ensure compatible version
 ```
 

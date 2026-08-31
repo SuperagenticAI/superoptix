@@ -1,6 +1,6 @@
 # 🧠 DeepAgents Framework Integration
 
-**SuperOptiX now supports DeepAgents 0.2.0 - a LangGraph-based "agent harness" for building sophisticated, long-running agents with planning, pluggable backends, and subagent spawning!**
+**SuperOptiX now supports DeepAgents 0.7 - a LangGraph-based "agent harness" for building sophisticated, long-running agents with planning, pluggable backends, and subagent spawning!**
 
 !!! tip "🚀 New to DeepAgents? Start with the Complete Tutorial!"
     **[👉 Complete End-to-End Workflow Tutorial](../tutorials/deepagents-complete-workflow.md)**
@@ -58,7 +58,7 @@ pip install langchain-google-genai  # For Gemini
 ```
 
 **Includes:**
-- **deepagents 0.2.0+** with pluggable backends
+- **deepagents 0.7+** with pluggable backends
 - SuperOptiX core with GEPA
 - LangChain integration (provider-specific packages need to be installed separately)
 - LangChain, LangGraph integration
@@ -167,7 +167,7 @@ super agent evaluate research_agent_deepagents  # automatically loads optimized 
 
 ### What Are Backends?
 
-DeepAgents 0.2.0 introduces a **pluggable backend abstraction** that lets you choose where agent files are stored. This transforms DeepAgents from a toy framework into a **deployment-ready agent harness**.
+DeepAgents 0.7 introduces a **pluggable backend abstraction** that lets you choose where agent files are stored. This transforms DeepAgents from a toy framework into a **deployment-ready agent harness**.
 
 **Source:** [LangChain Blog - Doubling Down on DeepAgents](https://blog.langchain.com/doubling-down-on-deepagents/)
 
@@ -945,7 +945,7 @@ super agent pull researcher_hybrid          # CompositeBackend (hybrid)
 
 ### External Resources
 
-- [DeepAgents 0.2.0 Announcement](https://blog.langchain.com/doubling-down-on-deepagents/) - LangChain blog post
+- [DeepAgents 0.7 Announcement](https://blog.langchain.com/doubling-down-on-deepagents/) - LangChain blog post
 - [DeepAgents GitHub](https://github.com/langchain-ai/deepagents) - Source repository
 - [LangChain Docs](https://python.langchain.com/) - LangChain documentation
 

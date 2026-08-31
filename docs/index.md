@@ -1,10 +1,10 @@
 <div align="center">
   <img src="logo.png" alt="SuperOptiX Logo" width="300" style="margin-bottom: -10px;"/>
   <h1 style="margin-top: 10px; margin-bottom: 10px;">SUPEROPTIX AI</h1>
-  <h3 style="margin-top: 5px; margin-bottom: 15px;">Full Stack Agentic AI Optimization Framework</h3>
-  <p style="margin-top: 10px; margin-bottom: 10px;"><strong>Evaluation-First ⚡ Optimization-Core 🕸️ Multi-Agent Orchestration</strong></p>
+  <h3 style="margin-top: 5px; margin-bottom: 15px;">Agent-to-Agent (A2A) Interoperability and Optimization Layer</h3>
+  <p style="margin-top: 10px; margin-bottom: 10px;"><strong>Make the agents you already run A2A-compliant, and get them discovered.</strong></p>
   <p style="margin-top: 5px; margin-bottom: 10px;"><em>Powered by DSPy. Refined by Superagentic AI.</em></p>
-  <p style="margin-top: 10px; margin-bottom: 20px;">Build once with SuperSpec and compile to your preferred framework.</p>
+  <p style="margin-top: 10px; margin-bottom: 20px;">Adapt an existing agent to A2A 1.0 without rewriting it, then measure and improve how other agents find it.</p>
 </div>
 
 <div align="center" style="margin: 30px 0;">

@@ -245,6 +245,63 @@ super agent design --mode code       # Code editor
 
 ---
 
+## A2A Commands
+
+### `super a2a adapt` - Adapt an Existing Agent
+
+Give an agent built outside SuperOptiX an A2A 1.0 endpoint. The agent is read,
+not modified, and does not need to be rewritten as a SuperSpec playbook.
+
+```bash
+super a2a adapt --entrypoint mycrew:crew --framework crewai
+```
+
+**Options:**
+
+| Flag | Default | Description |
+|---|---|---|
+| `--entrypoint` | required | Where the agent lives, as `module:attribute` |
+| `--framework` | detected | One of `crewai`, `dspy`, `openai`, `pydantic-ai`, `google-adk`, `microsoft`, `claude-sdk`, `deepagents` |
+| `--out` | `a2a` | Directory for the generated files |
+| `--url` | `http://127.0.0.1:8000` | Public URL the Agent Card advertises |
+| `--project-root` | current directory | Directory to import the agent from |
+
+**Output:**
+
+```
+a2a/
+├── agent-card.json    A2A 1.0 Agent Card, advertising the 1.0 and 0.3 lines
+├── a2a_server.py      ASGI app that imports your entrypoint and serves it
+└── agentspec.json     The generated intermediate representation
+```
+
+**Serving the result:**
+
+```bash
+uvicorn a2a.a2a_server:app --port 8000
+curl localhost:8000/.well-known/agent-card.json
+```
+
+**Examples:**
+
+```bash
+# CrewAI crew, framework detected automatically
+super a2a adapt --entrypoint mycrew:crew
+
+# DSPy program, written to a chosen directory
+super a2a adapt --entrypoint app.rag:program --framework dspy --out ./a2a
+
+# Advertise a public address rather than localhost
+super a2a adapt --entrypoint mycrew:crew --url https://agents.example.com
+```
+
+`--url` must match where the agent is actually reachable. A card advertising an
+address that does not resolve causes other agents to discover it, call it, and
+record the failure.
+
+See [Adapting an existing agent](a2a-adapt.md) for entrypoint conventions and
+per-framework detail.
+
 ## Optimization Commands
 
 ### `super spec generate` - Generate Agent from SuperSpec

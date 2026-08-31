@@ -88,7 +88,7 @@ The pipeline reads the sidecar at runtime. If missing/corrupt, runtime now gives
 | **Claude SDK** | Agent system prompt | Cloud only | Anthropic-native agent workflows |
 | **CrewAI** | Persona and task instructions | Ollama | Multi-agent teams |
 | **Google ADK** | Agent instruction | Cloud only | Google ecosystem, Gemini |
-| **Microsoft (Legacy)** | Agent instructions | Ollama | Existing Microsoft-framework projects |
+| **Microsoft** | Agent instructions | Ollama | Existing Microsoft-framework projects |
 | **DeepAgents** | System prompt | Cloud only | Complex planning, LangGraph |
 | **Pydantic AI** | Instructions, output shaping, MCP/tool flow | Ollama | Type-safe outputs and tool use |
 

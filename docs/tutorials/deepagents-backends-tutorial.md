@@ -1,6 +1,6 @@
 # 🗄️ DeepAgents Backends Tutorial
 
-**Complete hands-on tutorial for DeepAgents 0.2.0 pluggable backends. Learn how to build agents with persistent memory, filesystem access, and hybrid storage strategies.**
+**Complete hands-on tutorial for DeepAgents 0.7 pluggable backends. Learn how to build agents with persistent memory, filesystem access, and hybrid storage strategies.**
 
 ---
 
@@ -863,7 +863,7 @@ spec:
 
 ## 📚 Resources
 
-- [DeepAgents 0.2.0 Announcement](https://blog.langchain.com/doubling-down-on-deepagents/)
+- [DeepAgents 0.7 Announcement](https://blog.langchain.com/doubling-down-on-deepagents/)
 - [SuperOptiX DeepAgents Guide](../guides/deepagents-integration.md)
 - [Backend Configuration Reference](../guides/deepagents-backends.md)
 - [Gemini Setup Guide](../GEMINI_CONFIGURATION_GUIDE.md)
