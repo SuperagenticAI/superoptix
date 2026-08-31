@@ -7,7 +7,7 @@ This guide documents a complete, real-world workflow for integrating MLFlow with
 ## Install MLFlow
 
 ```bash
-pip install mlflow
+uv pip install mlflow
 ```
 
 **Output:**

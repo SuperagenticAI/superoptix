@@ -38,7 +38,7 @@ super --help
 ### Alternative Install (pip)
 
 ```bash
-pip install superoptix
+uv pip install superoptix
 ```
 
 ### Get Documentation
@@ -539,7 +539,7 @@ jobs:
       - uses: actions/checkout@v2
       
       - name: Install SuperOptiX
-        run: pip install superoptix
+        run: uv pip install superoptix
       
       - name: Compile Agent
         run: super agent compile my_agent

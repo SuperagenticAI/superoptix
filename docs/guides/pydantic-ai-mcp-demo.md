@@ -16,10 +16,10 @@ This demo shows how to:
 
 ```bash
 # Install SuperOptiX with Pydantic AI
-pip install superoptix[frameworks-pydantic-ai]
+uv pip install superoptix[frameworks-pydantic-ai]
 
 # Install MCP SDK (included with pydantic-ai, but ensure it's there)
-pip install mcp
+uv pip install mcp
 
 # Node.js (for filesystem MCP server)
 node --version  # Should be 18+
@@ -617,7 +617,7 @@ super agent optimize developer_mcp \
 
 **Solution:** This was fixed in SuperOptiX 0.2.1. Update:
 ```bash
-pip install --upgrade superoptix
+uv pip install --upgrade superoptix
 ```
 
 The Pydantic AI template now uses plain text output mode, which works better with 8b models.

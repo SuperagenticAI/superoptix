@@ -161,7 +161,7 @@ def setup_phoenix(
         from phoenix.otel import register
     except ImportError:
         logger.warning(
-            "⚠️  Phoenix not available - install with: pip install superoptix[phoenix]"
+            "⚠️  Phoenix not available - install with: uv pip install superoptix[phoenix]"
         )
         return None
 

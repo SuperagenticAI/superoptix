@@ -19,7 +19,7 @@ This demo shows how to use **Weights & Biases (W&B)** with SuperOptiX to track a
 
 ```bash
 # Install W&B
-pip install wandb
+uv pip install wandb
 
 # Login to W&B
 wandb login

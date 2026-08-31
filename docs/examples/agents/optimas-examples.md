@@ -115,8 +115,8 @@ super agent run optimas_crewai --engine optimas --target optimas-crewai --goal "
 #### Dependencies Required
 ```bash
 # Install manually to avoid conflicts
-pip install crewai
-pip install json-repair>=0.30.0
+uv pip install crewai
+uv pip install json-repair>=0.30.0
 ```
 
 #### Why It's Great

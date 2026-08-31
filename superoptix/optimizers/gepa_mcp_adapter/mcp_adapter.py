@@ -30,7 +30,7 @@ try:
     from mcp import StdioServerParameters
 except ImportError as e:
     raise ImportError(
-        "MCP Python SDK is required for MCPAdapter. Install it with: pip install mcp"
+        "MCP Python SDK is required for MCPAdapter. Install it with: uv pip install mcp"
     ) from e
 
 from .simple_stdio_client import SimpleStdioMCPClient

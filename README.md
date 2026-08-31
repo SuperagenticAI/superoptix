@@ -75,7 +75,7 @@ uv tool install superoptix --with "superoptix[frameworks-microsoft]"
 CrewAI installs alongside SuperOptiX rather than as an extra:
 
 ```bash
-pip install superoptix "crewai>=1.15"
+uv tool install superoptix --with "crewai>=1.15"
 ```
 
 Use a CrewAI-only environment for this: CrewAI requires `chromadb~=1.1.0`, while
@@ -83,13 +83,13 @@ SuperOptiX's `chromadb` / `turboagents` / `vectordb` extras require `chromadb>=1
 The older DSPy/CrewAI `json-repair` conflict no longer applies — CrewAI 1.15+ and
 DSPy 3.3 co-install cleanly.
 
-### Alternative with `pip`
+### Adding SuperOptiX to an existing project
 
 ```bash
-pip install superoptix
+uv add superoptix
 ```
 
-Requirements: Python 3.11+
+Requirements: Python 3.11+ and [uv](https://docs.astral.sh/uv/).
 
 ---
 
@@ -229,13 +229,13 @@ supported.
 Install the optional A2A extra:
 
 ```bash
-pip install "superoptix[a2a]"
+uv tool install superoptix --with "superoptix[a2a]"
 ```
 
 For the full packaged demo set:
 
 ```bash
-pip install "superoptix[a2a,frameworks-pydantic-ai,frameworks-google]"
+uv tool install superoptix --with "superoptix[a2a,frameworks-pydantic-ai,frameworks-google]"
 ```
 
 For demo details:

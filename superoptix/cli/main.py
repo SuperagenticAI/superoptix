@@ -266,7 +266,7 @@ def show_comprehensive_docs(args):
     console.print("     [cyan]conda activate superoptix[/]")
     console.print()
     console.print("   🔹 [bold]Option C - uv (Fast & Modern, for advanced users):[/]")
-    console.print("     [cyan]pip install uv[/]")
+    console.print("     [cyan]uv pip install uv[/]")
     console.print("     [cyan]uv venv[/]")
     console.print(
         "     [cyan]source .venv/bin/activate[/]  [dim]# Windows: .venv\\Scripts\\activate[/]"
@@ -301,7 +301,7 @@ def show_comprehensive_docs(args):
     )
     console.print()
     console.print("   [yellow]Install the project in development mode:[/]")
-    console.print("   [cyan]pip install -e .[/]")
+    console.print("   [cyan]uv pip install -e .[/]")
     console.print(
         "   [dim]🔧 This installs SuperOptiX and all dependencies for development[/]"
     )

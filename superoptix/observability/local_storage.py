@@ -604,7 +604,7 @@ class LocalObservabilityStorage:
             logger.info(f"Exported {len(runs)} runs to MLFlow")
 
         except ImportError:
-            logger.error("MLFlow not available - install with: pip install mlflow")
+            logger.error("MLFlow not available - install with: uv pip install mlflow")
         except Exception as e:
             logger.error(f"Failed to export to MLFlow: {e}")
 
@@ -634,7 +634,7 @@ class LocalObservabilityStorage:
             logger.info(f"Exported {len(runs)} runs to W&B")
 
         except ImportError:
-            logger.error("W&B not available - install with: pip install wandb")
+            logger.error("W&B not available - install with: uv pip install wandb")
         except Exception as e:
             logger.error(f"Failed to export to W&B: {e}")
 

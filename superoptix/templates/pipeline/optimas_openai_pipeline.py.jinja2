@@ -23,7 +23,7 @@ except Exception:
 
 def _require_openai():
 	if OpenAI is None:
-		raise ImportError("OpenAI SDK is required for optimas-openai pipelines. Install: pip install openai")
+		raise ImportError("OpenAI SDK is required for optimas-openai pipelines. Install: uv pip install openai")
 
 
 def _build_openai_callable(model: str, system_prompt: str, base_url: str | None = None, api_key: str | None = None) -> Callable[..., Dict[str, Any]]:

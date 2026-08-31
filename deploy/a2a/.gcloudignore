@@ -1,0 +1,13 @@
+.git
+.venv
+node_modules
+site
+dist
+tests
+docs
+examples
+.ruff_cache
+.pytest_cache
+**/__pycache__
+*.pyc
+uv.lock

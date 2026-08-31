@@ -138,7 +138,7 @@ class EnhancedSuperOptixTracer(SuperOptixTracer):
                 logger.info(f"✅ MLflow tracing enabled for agent {self.agent_id}")
             except ImportError:
                 logger.warning(
-                    "⚠️  MLflow not available - install with: pip install mlflow"
+                    "⚠️  MLflow not available - install with: uv pip install mlflow"
                 )
 
         # Langfuse integration
@@ -154,7 +154,7 @@ class EnhancedSuperOptixTracer(SuperOptixTracer):
                     )
             except ImportError:
                 logger.warning(
-                    "⚠️  Langfuse not available - install with: pip install langfuse"
+                    "⚠️  Langfuse not available - install with: uv pip install langfuse"
                 )
             except Exception:
                 logger.warning("⚠️  Langfuse authentication failed - check credentials")
@@ -194,7 +194,7 @@ class EnhancedSuperOptixTracer(SuperOptixTracer):
 
         except ImportError:
             logger.warning(
-                "⚠️  Weights & Biases not available - install with: pip install wandb"
+                "⚠️  Weights & Biases not available - install with: uv pip install wandb"
             )
         except Exception as e:
             logger.warning(f"⚠️  W&B initialization failed: {e}")

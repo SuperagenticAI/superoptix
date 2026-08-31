@@ -34,7 +34,7 @@ So the answer today is: we have DSPy and Pydantic AI A2A demos, but we do not ye
 Install the A2A extra and the Pydantic AI extra:
 
 ```bash
-pip install -e ".[a2a,frameworks-pydantic-ai,frameworks-google]"
+uv pip install -e ".[a2a,frameworks-pydantic-ai,frameworks-google]"
 ```
 
 Run all commands from the repository root.
@@ -228,25 +228,25 @@ These pulled playbooks are packaged with SuperOptiX, so users do not need the re
 If `import a2a` fails:
 
 ```bash
-pip install -e ".[a2a]"
+uv pip install -e ".[a2a]"
 ```
 
 If the Pydantic AI demo fails to import:
 
 ```bash
-pip install -e ".[frameworks-pydantic-ai]"
+uv pip install -e ".[frameworks-pydantic-ai]"
 ```
 
 If the Google ADK demo fails to import:
 
 ```bash
-pip install -e ".[frameworks-google]"
+uv pip install -e ".[frameworks-google]"
 ```
 
 If both are needed:
 
 ```bash
-pip install -e ".[a2a,frameworks-pydantic-ai,frameworks-google]"
+uv pip install -e ".[a2a,frameworks-pydantic-ai,frameworks-google]"
 ```
 
 ## Notes

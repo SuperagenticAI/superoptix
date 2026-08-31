@@ -75,7 +75,7 @@ python -c "from superoptix.observability.simple_dashboard import start_dashboard
 
 **Setup**:
 ```bash
-pip install mlflow
+uv pip install mlflow
 mlflow ui  # View at http://localhost:5000
 ```
 
@@ -95,7 +95,7 @@ mlflow ui  # View at http://localhost:5000
 
 **Setup**:
 ```bash
-pip install langfuse
+uv pip install langfuse
 # Set environment variables
 export LANGFUSE_PUBLIC_KEY="..."
 export LANGFUSE_SECRET_KEY="..."
@@ -117,7 +117,7 @@ export LANGFUSE_SECRET_KEY="..."
 
 **Setup**:
 ```bash
-pip install wandb
+uv pip install wandb
 wandb login
 ```
 
@@ -389,7 +389,7 @@ obs.log_protocol(
 **Issue**: Metrics not appearing in MLFlow
 
 **Solution**:
-1. Ensure MLFlow is installed: `pip install mlflow`
+1. Ensure MLFlow is installed: `uv pip install mlflow`
 2. Start MLFlow UI: `mlflow ui`
 3. Check experiment name matches: `SuperOptiX-{agent_name}`
 4. Verify environment variables if using remote tracking
@@ -408,7 +408,7 @@ obs.log_protocol(
 **Issue**: Dashboard won't start
 
 **Solution**:
-1. Install FastAPI: `pip install fastapi uvicorn`
+1. Install FastAPI: `uv pip install fastapi uvicorn`
 2. Check port 8000 is free: `lsof -i :8000`
 3. Try different port: `start_dashboard(port=8001)`
 

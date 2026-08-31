@@ -25,15 +25,15 @@ LogFire is available as a **separate optional dependency** to avoid conflicts wi
 
 ```bash
 # Install Pydantic AI support
-pip install "superoptix[frameworks-pydantic-ai]"
+uv pip install "superoptix[frameworks-pydantic-ai]"
 
 # Install LogFire observability (separate, optional)
-pip install "superoptix[logfire]"
+uv pip install "superoptix[logfire]"
 ```
 
 Or install both together:
 ```bash
-pip install "superoptix[frameworks-pydantic-ai,logfire]"
+uv pip install "superoptix[frameworks-pydantic-ai,logfire]"
 ```
 
 ### Installation with `all` Extra
@@ -42,10 +42,10 @@ pip install "superoptix[frameworks-pydantic-ai,logfire]"
 
 ```bash
 # This installs everything EXCEPT LogFire
-pip install "superoptix[all]"
+uv pip install "superoptix[all]"
 
 # LogFire must be installed separately if needed
-pip install "superoptix[logfire]"
+uv pip install "superoptix[logfire]"
 
 # ⚠️ WARNING: Installing both [all,logfire] will FAIL
 # because 'all' includes google-adk which conflicts with LogFire
@@ -372,9 +372,9 @@ logfire.configure(
 
 **Solution:**
 ```bash
-pip install "superoptix[frameworks-pydantic-ai]"
+uv pip install "superoptix[frameworks-pydantic-ai]"
 # OR
-pip install logfire==4.15.0
+uv pip install logfire==4.15.0
 ```
 
 ### Instrumentation Not Working

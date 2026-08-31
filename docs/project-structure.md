@@ -100,16 +100,16 @@ SuperOptiX supports various optional dependencies through extras. You can instal
 
 ```bash
 # Core AI framework (DSPy, OpenAI, AutoGen)
-pip install "superoptix[optimas]"
+uv pip install "superoptix[optimas]"
 
 # UI and visualization
-pip install "superoptix[ui]"
+uv pip install "superoptix[ui]"
 
 # Vector databases for RAG
-pip install "superoptix[vectordb]"
+uv pip install "superoptix[vectordb]"
 
 # Observability and monitoring
-pip install "superoptix[observability]"
+uv pip install "superoptix[observability]"
 ```
 
 ### ⚠️ Important: CrewAI Dependency Conflict
@@ -122,13 +122,13 @@ pip install "superoptix[observability]"
 **To use CrewAI with SuperOptiX, install it manually:**
 ```bash
 # Install SuperOptiX with DSPy support
-pip install "superoptix[optimas]"
+uv pip install "superoptix[optimas]"
 
 # Install CrewAI without dependencies
-pip install crewai>=1.15 --no-deps
+uv pip install crewai>=1.15 --no-deps
 
 # Ensure compatible json-repair version
-pip install "json-repair>=0.30.0"
+uv pip install "json-repair>=0.30.0"
 ```
 
 See our [Troubleshooting Guide](troubleshooting.md) for more details.

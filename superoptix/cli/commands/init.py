@@ -240,7 +240,7 @@ uv sync
 uv run python -m {agent_name.lower()}
 
 # Or using pip
-pip install -e .
+uv pip install -e .
 ```
 
 ## Project Structure

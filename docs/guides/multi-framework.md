@@ -21,7 +21,7 @@ Build once from SuperSpec YAML, compile to your target framework, and run either
 ### Core Installation
 
 ```bash
-pip install superoptix
+uv pip install superoptix
 ```
 
 **Includes:** Core framework with DSPy support
@@ -30,29 +30,29 @@ pip install superoptix
 
 ```bash
 # OpenAI Agents SDK
-pip install superoptix[frameworks-openai]
+uv pip install superoptix[frameworks-openai]
 
 # Claude Agent SDK
-pip install superoptix[frameworks-claude-sdk]
+uv pip install superoptix[frameworks-claude-sdk]
 
 # Google ADK
-pip install superoptix[frameworks-google]
+uv pip install superoptix[frameworks-google]
 
 # Microsoft Agent Framework (legacy support)
-pip install superoptix[frameworks-microsoft]
+uv pip install superoptix[frameworks-microsoft]
 
 # DeepAgents
-pip install superoptix[frameworks-deepagents]
+uv pip install superoptix[frameworks-deepagents]
 
 # Pydantic AI
-pip install superoptix[frameworks-pydantic-ai]
+uv pip install superoptix[frameworks-pydantic-ai]
 
 # CrewAI
-pip install superoptix
-pip install crewai==1.2.0
+uv pip install superoptix
+uv pip install crewai==1.2.0
 
 # All frameworks at once
-pip install superoptix[frameworks]
+uv pip install superoptix[frameworks]
 ```
 
 ---
@@ -590,22 +590,22 @@ super agent run <agent>
 
 ```bash
 # OpenAI SDK
-pip install openai-agents-sdk
+uv pip install openai-agents-sdk
 
 # CrewAI
-pip install crewai
+uv pip install crewai
 
 # Google ADK
-pip install google-adk
+uv pip install google-adk
 
 # Microsoft
-pip install agent-framework
+uv pip install agent-framework
 
 # DeepAgents (LangGraph)
-pip install langgraph langchain-anthropic
+uv pip install langgraph langchain-anthropic
 
 # Pydantic AI
-pip install pydantic-ai==1.31.0
+uv pip install pydantic-ai==1.31.0
 ```
 
 ### Issue: "Ollama not supported"

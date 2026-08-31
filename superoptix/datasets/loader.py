@@ -72,7 +72,7 @@ class DatasetLoader:
             import pandas as pd
         except ImportError:
             raise ImportError(
-                "pandas is required for CSV support. Install with: pip install pandas"
+                "pandas is required for CSV support. Install with: uv pip install pandas"
             )
 
         logger.debug(f"Reading CSV from: {self.source}")
@@ -127,7 +127,7 @@ class DatasetLoader:
             import pandas as pd
         except ImportError:
             raise ImportError(
-                "pandas is required for Parquet support. Install with: pip install pandas pyarrow"
+                "pandas is required for Parquet support. Install with: uv pip install pandas pyarrow"
             )
 
         logger.debug(f"Reading Parquet from: {self.source}")
@@ -139,7 +139,7 @@ class DatasetLoader:
         except ImportError:
             raise ImportError(
                 "pyarrow or fastparquet is required for Parquet support. "
-                "Install with: pip install pyarrow"
+                "Install with: uv pip install pyarrow"
             )
 
     def _load_huggingface(self) -> List[Dict[str, Any]]:
@@ -148,7 +148,7 @@ class DatasetLoader:
             from datasets import load_dataset
         except ImportError:
             raise ImportError(
-                "HuggingFace datasets is required. Install with: pip install datasets"
+                "HuggingFace datasets is required. Install with: uv pip install datasets"
             )
 
         # Parse huggingface:dataset_name or huggingface:dataset_name:subset

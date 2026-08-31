@@ -108,7 +108,7 @@ python -m venv .venv
 source .venv/bin/activate
 
 # Install SuperOptiX
-pip install superoptix
+uv pip install superoptix
 ```
 
 ## 📦 Optional Frameworks & Extras

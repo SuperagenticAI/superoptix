@@ -78,7 +78,7 @@ class SuperOptixTracer:
             self.external_tracers["mlflow"] = mlflow
             print(f"✅ MLflow tracing enabled for agent {self.agent_id}")
         except ImportError:
-            print("⚠️  MLflow not available - install with: pip install mlflow")
+            print("⚠️  MLflow not available - install with: uv pip install mlflow")
 
         # Langfuse integration
         try:
@@ -89,7 +89,7 @@ class SuperOptixTracer:
                 self.external_tracers["langfuse"] = langfuse
                 print(f"✅ Langfuse tracing enabled for agent {self.agent_id}")
         except ImportError:
-            print("⚠️  Langfuse not available - install with: pip install langfuse")
+            print("⚠️  Langfuse not available - install with: uv pip install langfuse")
         except Exception:
             print("⚠️  Langfuse authentication failed - check credentials")
 

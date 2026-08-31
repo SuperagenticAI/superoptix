@@ -235,7 +235,7 @@ jobs:
           python-version: '3.11'
       
       - name: Setup SuperOptiX
-        run: pip install superoptix
+        run: uv pip install superoptix
       
       - name: Compile Agent
         run: super agent compile developer
@@ -283,7 +283,7 @@ agent-test:
   stage: test
   image: python:3.11
   script:
-    - pip install superoptix
+    - uv pip install superoptix
     - super agent compile developer
     - super agent evaluate developer --format json --save-report baseline.json
     - |
@@ -309,7 +309,7 @@ agent-optimize:
   stage: optimize
   image: python:3.11
   script:
-    - pip install superoptix
+    - uv pip install superoptix
     - super agent optimize developer
   dependencies:
     - agent-test
@@ -318,7 +318,7 @@ agent-validate:
   stage: validate
   image: python:3.11
   script:
-    - pip install superoptix
+    - uv pip install superoptix
     - super agent evaluate developer --format json --save-report final.json
     - |
       # Quality gate check
@@ -347,7 +347,7 @@ pipeline {
     stages {
         stage('Setup') {
             steps {
-                sh 'pip install superoptix'
+                sh 'uv pip install superoptix'
             }
         }
         
@@ -420,7 +420,7 @@ stages:
         versionSpec: '3.11'
     
     - script: |
-        pip install superoptix
+        uv pip install superoptix
       displayName: 'Install SuperOptiX'
     
     - script: |

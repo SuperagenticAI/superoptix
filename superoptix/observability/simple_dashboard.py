@@ -394,12 +394,14 @@ if FASTAPI_AVAILABLE:
         uvicorn.run(app, host=host, port=port, log_level="info")
 
 else:
-    logger.warning("FastAPI not available - install with: pip install fastapi uvicorn")
+    logger.warning(
+        "FastAPI not available - install with: uv pip install fastapi uvicorn"
+    )
 
     def start_dashboard(host: str = "127.0.0.1", port: int = 8000):
         """Stub function when FastAPI not available."""
         print("❌ FastAPI not available")
-        print("   Install with: pip install fastapi uvicorn")
+        print("   Install with: uv pip install fastapi uvicorn")
         print("   Then run: super observe dashboard")
 
 

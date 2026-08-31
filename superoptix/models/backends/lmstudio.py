@@ -435,7 +435,7 @@ class SuperOptiXLMStudioBackend(SuperOptiXBaseBackend):
             )
             console.print()
             console.print("🚀 To install required packages, run:", style="bold green")
-            console.print("  pip install dspy-ai litellm", style="bright_white")
+            console.print("  uv pip install dspy-ai litellm", style="bright_white")
             console.print("  or (with uv):", style="bright_white")
             console.print("  uv pip install dspy-ai litellm", style="bright_white")
             console.print("  or (with conda):", style="bright_white")
@@ -447,7 +447,7 @@ class SuperOptiXLMStudioBackend(SuperOptiXBaseBackend):
             raise RuntimeError(
                 f"Failed to import required libraries for LM Studio DSPy integration: {e}\n"
                 "Please ensure dspy-ai and litellm are installed:\n"
-                "  pip install dspy-ai litellm\n"
+                "  uv pip install dspy-ai litellm\n"
                 "  or\n"
                 "  uv pip install dspy-ai litellm"
             )

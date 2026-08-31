@@ -3,21 +3,21 @@
   "description": "The A2A interoperability layer for agent frameworks. Reports A2A readiness for DSPy, OpenAI Agents SDK, Claude Agent SDK, Pydantic AI, Google ADK, CrewAI, DeepAgents and Microsoft Agent Framework, and reviews Agent Cards for conformance and discoverability",
   "version": "1.0",
   "protocolVersion": "1.0",
-  "url": "https://superoptix.onrender.com",
+  "url": "https://a2a.superoptix.ai",
   "preferredTransport": "JSONRPC",
   "supportedInterfaces": [
     {
-      "url": "https://superoptix.onrender.com/a2a/jsonrpc",
+      "url": "https://a2a.superoptix.ai/a2a/jsonrpc",
       "protocolBinding": "JSONRPC",
       "protocolVersion": "1.0"
     },
     {
-      "url": "https://superoptix.onrender.com",
+      "url": "https://a2a.superoptix.ai",
       "protocolBinding": "HTTP+JSON",
       "protocolVersion": "1.0"
     },
     {
-      "url": "https://superoptix.onrender.com/a2a/jsonrpc",
+      "url": "https://a2a.superoptix.ai/a2a/jsonrpc",
       "protocolBinding": "JSONRPC",
       "protocolVersion": "0.3"
     }

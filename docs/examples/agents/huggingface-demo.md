@@ -17,7 +17,7 @@ This demo demonstrates:
 
 ```bash
 # Install HuggingFace dependencies
-pip install "superoptix[huggingface]"
+uv pip install "superoptix[huggingface]"
 ```
 
 ### **2. Install HuggingFace Model**

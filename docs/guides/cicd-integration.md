@@ -123,7 +123,7 @@ jobs:
           python-version: '3.11'
       
       - name: Setup SuperOptiX
-        run: pip install superoptix
+        run: uv pip install superoptix
       
       - name: Compile Agent
         run: super agent compile developer
@@ -171,7 +171,7 @@ agent-test:
   stage: test
   image: python:3.11
   script:
-    - pip install superoptix
+    - uv pip install superoptix
     - super agent compile developer
     - super agent evaluate developer --format json --save-report baseline.json
     - |
@@ -197,7 +197,7 @@ agent-optimize:
   stage: optimize
   image: python:3.11
   script:
-    - pip install superoptix
+    - uv pip install superoptix
     - super agent optimize developer
   dependencies:
     - agent-test
@@ -206,7 +206,7 @@ agent-validate:
   stage: validate
   image: python:3.11
   script:
-    - pip install superoptix
+    - uv pip install superoptix
     - super agent evaluate developer --format json --save-report final.json
     - |
       # Quality gate check
@@ -235,7 +235,7 @@ pipeline {
     stages {
         stage('Setup') {
             steps {
-                sh 'pip install superoptix'
+                sh 'uv pip install superoptix'
             }
         }
         
@@ -301,7 +301,7 @@ jobs:
       - checkout
       - run:
           name: Install SuperOptiX
-          command: pip install superoptix
+          command: uv pip install superoptix
       - run:
           name: Compile Agent
           command: super agent compile developer
@@ -423,7 +423,7 @@ jobs:
           python-version: '3.11'
       
       - name: Setup SuperOptiX
-        run: pip install superoptix
+        run: uv pip install superoptix
       
       - name: Test Agent
         run: |
@@ -452,7 +452,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Setup SuperOptiX
-        run: pip install superoptix
+        run: uv pip install superoptix
       
       - name: Baseline Evaluation
         run: |
@@ -492,7 +492,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Setup SuperOptiX
-        run: pip install superoptix
+        run: uv pip install superoptix
       
       - name: Download Test Results
         uses: actions/download-artifact@v3

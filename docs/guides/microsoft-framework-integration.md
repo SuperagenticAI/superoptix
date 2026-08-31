@@ -13,7 +13,7 @@ Use it when you already have Microsoft Agent Framework projects and want to keep
 ## Install
 
 ```bash
-pip install -U "superoptix[frameworks-microsoft]"
+uv pip install -U "superoptix[frameworks-microsoft]"
 ```
 
 Important:
@@ -25,7 +25,7 @@ Important:
 - reinstall the framework package with:
 
 ```bash
-pip install -U --pre agent-framework azure-identity
+uv pip install -U --pre agent-framework azure-identity
 ```
 
 - after that, recompile the Microsoft pipeline before rerunning so it regenerates against the updated template
@@ -33,7 +33,7 @@ pip install -U --pre agent-framework azure-identity
 If you are upgrading from an older release and the compiled Microsoft pipeline is still stale, use this reset flow:
 
 ```bash
-pip install -U --force-reinstall "superoptix[frameworks-microsoft]"
+uv pip install -U --force-reinstall "superoptix[frameworks-microsoft]"
 
 rm -f surrealoptix/agents/assistant_microsoft/pipelines/assistant_microsoft_microsoft_pipeline.py
 rm -f surrealoptix/agents/assistant_microsoft/pipelines/assistant_microsoft_microsoft_pipeline_compiled_spec.json
@@ -86,5 +86,5 @@ spec:
 ## Notes
 
 - Keep `--framework microsoft` explicit in `compile`, `run`, and `optimize`.
-- If you hit a `ChatAgent` import error, your generated pipeline is stale or your `agent-framework` install is outdated. Reinstall with `pip install -U --pre agent-framework azure-identity` and recompile.
+- If you hit a `ChatAgent` import error, your generated pipeline is stale or your `agent-framework` install is outdated. Reinstall with `uv pip install -U --pre agent-framework azure-identity` and recompile.
 - If you hit a `Agent.__init__() missing 1 required positional argument: 'client'` error, your generated Microsoft pipeline was compiled from an older SuperOptiX release. Force reinstall SuperOptiX, delete the generated Microsoft pipeline files, and compile again.

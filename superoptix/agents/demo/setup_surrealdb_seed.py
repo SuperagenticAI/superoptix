@@ -231,7 +231,7 @@ def seed_surrealdb_graph(
         from surrealdb import Surreal
     except ImportError as exc:
         raise ImportError(
-            "Required packages missing. Install with: pip install surrealdb sentence-transformers"
+            "Required packages missing. Install with: uv pip install surrealdb sentence-transformers"
         ) from exc
 
     from superoptix.utils.surrealdb_features import SurrealDBFeatureDetector
@@ -342,7 +342,7 @@ def seed_surrealdb_documents(
         from surrealdb import Surreal
     except ImportError as exc:
         raise ImportError(
-            "Required packages missing. Install with: pip install surrealdb sentence-transformers"
+            "Required packages missing. Install with: uv pip install surrealdb sentence-transformers"
         ) from exc
 
     url = str(vector_store["url"])
@@ -398,7 +398,7 @@ def seed_turboagents_surrealdb_documents(
         from turboagents.rag import TurboSurrealDB
     except ImportError as exc:
         raise ImportError(
-            "Required packages missing. Install with: pip install surrealdb sentence-transformers turboagents[rag]"
+            "Required packages missing. Install with: uv pip install surrealdb sentence-transformers turboagents[rag]"
         ) from exc
 
     url = str(vector_store["url"])

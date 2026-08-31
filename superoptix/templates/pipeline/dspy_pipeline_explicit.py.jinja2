@@ -34,7 +34,7 @@ try:
     RAG_AVAILABLE = True
 except ImportError:
     RAG_AVAILABLE = False
-    print("⚠️  ChromaDB not installed. Install with: pip install chromadb sentence-transformers")
+    print("⚠️  ChromaDB not installed. Install with: uv pip install chromadb sentence-transformers")
 {% endif %}
 
 {% if spec.tools and spec.tools.enabled %}
@@ -45,7 +45,7 @@ try:
     MCP_AVAILABLE = True
 except ImportError:
     MCP_AVAILABLE = False
-    print("⚠️  MCP support not available. Install with: pip install mcp")
+    print("⚠️  MCP support not available. Install with: uv pip install mcp")
 {% endif %}
 
 
@@ -1247,7 +1247,7 @@ class {{ agent_name | to_pascal_case }}Pipeline:
 
             except ImportError as ie:
                 print(f"⚠️  GEPA not available: {str(ie)}")
-                print("   Upgrade DSPy: pip install dspy>=3.0.3")
+                print("   Upgrade DSPy: uv pip install dspy>=3.0.3")
                 training_stats["success"] = True
                 training_stats["optimizer"] = "none"
 
@@ -1792,8 +1792,8 @@ def optimize_with_gepa(
     try:
         from gepa import GEPAOptimizer
     except ImportError:
-        print("❌ GEPA not installed. Install with: pip install gepa")
-        print("   Or: pip install superoptix[gepa]")
+        print("❌ GEPA not installed. Install with: uv pip install gepa")
+        print("   Or: uv pip install superoptix[gepa]")
         return None
 
     if verbose:

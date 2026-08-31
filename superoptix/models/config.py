@@ -307,7 +307,7 @@ def get_superoptix_model_discovery_settings() -> Dict[str, Any]:
                 "quick_start": [
                     "1. Create account at https://huggingface.co",
                     "2. Browse models at https://huggingface.co/models",
-                    "3. Install with: pip install transformers",
+                    "3. Install with: uv pip install transformers",
                     "4. Use with SuperOptiX model management",
                 ],
                 "popular_models": [

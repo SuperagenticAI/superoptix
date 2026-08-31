@@ -235,7 +235,7 @@ class SuperOptiXMLXBackend(SuperOptiXBaseBackend):
         try:
             if not self.is_available():
                 console.print(
-                    "❌ MLX is not available. Install with: pip install mlx mlx-lm"
+                    "❌ MLX is not available. Install with: uv pip install mlx mlx-lm"
                 )
                 return False
 

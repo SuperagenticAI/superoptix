@@ -15,7 +15,7 @@ This tutorial covers:
 ### Install SuperOptiX with MCP Support
 
 ```bash
-pip install superoptix[mcp]
+uv pip install superoptix[mcp]
 ```
 
 **Includes:**

@@ -21,7 +21,7 @@ except Exception:
 def _require_autogen():
 	if AssistantAgent is None or OpenAIChatCompletionClient is None:
 		raise ImportError(
-			"AutoGen is required for optimas-autogen pipelines. Install: pip install autogen_agentchat autogen_ext"
+			"AutoGen is required for optimas-autogen pipelines. Install: uv pip install autogen_agentchat autogen_ext"
 		)
 
 

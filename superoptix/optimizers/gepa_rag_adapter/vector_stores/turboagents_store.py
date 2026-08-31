@@ -36,7 +36,7 @@ class _TurboAgentsBaseStore(VectorStoreInterface):
         if not _turboagents_available():
             raise ImportError(
                 "turboagents is required for TurboAgents-backed vector stores. "
-                "Install with: pip install 'turboagents[rag]'"
+                "Install with: uv pip install 'turboagents[rag]'"
             )
         self.embedding_function = embedding_function
         self.rerank_top = rerank_top

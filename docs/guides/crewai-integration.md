@@ -18,8 +18,8 @@ SuperOptiX now supports **CrewAI** - a powerful multi-agent framework with 100,0
 ### Install SuperOptiX with CrewAI
 
 ```bash
-pip install superoptix
-pip install crewai==1.2.0
+uv pip install superoptix
+uv pip install crewai==1.2.0
 ```
 
 **Includes:**
@@ -471,7 +471,7 @@ metadata:
 **Solution:**
 
 ```bash
-pip install crewai
+uv pip install crewai
 ```
 
 #### Ollama Model Not Found

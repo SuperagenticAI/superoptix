@@ -57,7 +57,7 @@ ollama pull gpt-oss:20b      # Primary model (20B parameters)
 ollama pull qwen3.5:9b       # Reflection model (9B parameters)
 
 # SuperOptiX with OpenAI SDK support
-pip install "superoptix[frameworks-openai]"
+uv pip install "superoptix[frameworks-openai]"
 ```
 
 **💡 Why use different model sizes?**
@@ -105,7 +105,7 @@ python3 -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 
 # Install dependencies
-pip install "superoptix[frameworks-openai]"
+uv pip install "superoptix[frameworks-openai]"
 ```
 
 ### Project Layout
@@ -1229,7 +1229,7 @@ ollama serve
 **Solution**:
 ```bash
 # Reinstall with correct extras
-pip install "superoptix[frameworks-openai]"
+uv pip install "superoptix[frameworks-openai]"
 
 # Verify installation
 python -c "from agents import Agent; print('OK')"
@@ -1312,7 +1312,7 @@ This tutorial mirrors the lightweight framework distributed with [`superoptix-li
 Need the full stack? Install the production framework with:
 
 ```bash
-pip install "superoptix[frameworks-openai]"
+uv pip install "superoptix[frameworks-openai]"
 ```
 
 ---

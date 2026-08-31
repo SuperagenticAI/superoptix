@@ -101,7 +101,7 @@ them.
 This is exposed through the optional package extra:
 
 ```bash
-pip install "superoptix[a2a]"
+uv pip install "superoptix[a2a]"
 ```
 
 ## Current SuperOptiX A2A Scope

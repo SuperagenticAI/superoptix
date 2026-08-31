@@ -513,7 +513,7 @@ super dataset pull code_review_examples
 
 1. **Installation**:  
    ```bash
-   pip install superoptix
+   uv pip install superoptix
    super init my_project
    super agent pull code_review_assistant
    ```

@@ -494,10 +494,10 @@ super model install lmstudio-community/gpt-oss-20b-MLX-8bit --backend mlx
 
 ```bash
 # Install MLX dependencies
-pip install mlx-lm==0.26.3
+uv pip install mlx-lm==0.26.3
 
 # Or install with SuperOptiX
-pip install "superoptix[mlx]"
+uv pip install "superoptix[mlx]"
 ```
 
 ### 📦 Install MLX Models
@@ -644,10 +644,10 @@ super model info qwen2.5-3b-instruct
 
 ```bash
 # Install HuggingFace dependencies
-pip install transformers torch fastapi uvicorn
+uv pip install transformers torch fastapi uvicorn
 
 # Or install with SuperOptiX
-pip install "superoptix[huggingface]"
+uv pip install "superoptix[huggingface]"
 ```
 
 ### 📦 Install HuggingFace Models
@@ -810,7 +810,7 @@ super model info qwen2.5-3b-instruct
 curl -fsSL https://ollama.ai/install.sh | sh
 
 # Install SuperOptiX
-pip install superoptix
+uv pip install superoptix
 
 # Install a model
 super model install qwen3.5:2b
@@ -821,10 +821,10 @@ super model install qwen3.5:2b
 ### 🍎 **Apple Silicon User**
 ```bash
 # Install MLX dependencies
-pip install mlx-lm
+uv pip install mlx-lm
 
 # Install SuperOptiX
-pip install superoptix
+uv pip install superoptix
 
 # Install MLX model
 super model install -b mlx mlx-community/phi-2
@@ -842,7 +842,7 @@ super model server mlx phi-2 --port 8000
 # Start server in LM Studio
 
 # Install SuperOptiX
-pip install superoptix
+uv pip install superoptix
 
 # Connect to LM Studio
 super model server lmstudio your-model-name --port 1234
@@ -853,10 +853,10 @@ super model server lmstudio your-model-name --port 1234
 ### 🤗 **Advanced User**
 ```bash
 # Install HuggingFace dependencies
-pip install transformers torch fastapi uvicorn
+uv pip install transformers torch fastapi uvicorn
 
 # Install SuperOptiX
-pip install superoptix
+uv pip install superoptix
 
 # Install HuggingFace model
 super model install -b huggingface microsoft/Phi-4
@@ -950,14 +950,14 @@ super model server lmstudio qwen2.5-3b-instruct --port 1234
     **Solution:**
     ```bash
     # Install MLX dependencies
-    pip install mlx-lm
+    uv pip install mlx-lm
     
     # Install HuggingFace dependencies
-    pip install transformers torch fastapi uvicorn
+    uv pip install transformers torch fastapi uvicorn
     
     # Or install with SuperOptiX extras
-    pip install "superoptix[mlx]"
-    pip install "superoptix[huggingface]"
+    uv pip install "superoptix[mlx]"
+    uv pip install "superoptix[huggingface]"
     ```
 
 === "Missing CLI Tools"
@@ -1024,10 +1024,10 @@ Now that you have your local models set up:
 
 ```bash
 # Install HuggingFace dependencies
-pip install transformers torch fastapi uvicorn
+uv pip install transformers torch fastapi uvicorn
 
 # Or install with SuperOptiX
-pip install "superoptix[huggingface]"
+uv pip install "superoptix[huggingface]"
 ```
 
 ### 📦 Install HuggingFace Models

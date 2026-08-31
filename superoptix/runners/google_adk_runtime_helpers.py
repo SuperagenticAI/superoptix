@@ -153,7 +153,7 @@ def create_agent_runner(
         from google.adk.runners import InMemoryRunner
     except Exception as exc:
         raise ImportError(
-            "google-adk is required. Install with: pip install google-adk"
+            "google-adk is required. Install with: uv pip install google-adk"
         ) from exc
 
     model = resolve_model(

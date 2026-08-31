@@ -1326,7 +1326,7 @@ def serve_agent(args):
         console.print(
             "[bold red]❌ A2A serve requires optional dependencies.[/]\nInstall:"
         )
-        console.print('pip install "superoptix[a2a]"', markup=False)
+        console.print('uv pip install "superoptix[a2a]"', markup=False)
         console.print(str(exc), style="dim", markup=False)
         return
 
@@ -1371,7 +1371,7 @@ def serve_agent(args):
     except ImportError as exc:
         console.print("\n[bold red]❌ Failed to start A2A server.[/]")
         console.print("Install:", markup=False)
-        console.print('pip install "superoptix[a2a]"', markup=False)
+        console.print('uv pip install "superoptix[a2a]"', markup=False)
         console.print(str(exc), style="dim", markup=False)
     except Exception as exc:
         console.print(f"\n[bold red]❌ Failed to start A2A server:[/] {exc}")
@@ -3909,7 +3909,7 @@ def _optimize_mcp_tools(
 
     if not MCPAdapter:
         console.print(
-            "[yellow]⚠️  MCPAdapter not available. Install with: pip install mcp[/]"
+            "[yellow]⚠️  MCPAdapter not available. Install with: uv pip install mcp[/]"
         )
         return False
 

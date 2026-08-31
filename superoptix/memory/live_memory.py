@@ -199,7 +199,7 @@ class LiveMemorySubscriber:
         except ImportError as exc:
             raise ImportError(
                 "LiveMemorySubscriber requires the 'surrealdb' package (>=1.0.0) "
-                "with async support. Install with: pip install surrealdb"
+                "with async support. Install with: uv pip install surrealdb"
             ) from exc
 
         last_exc: Exception | None = None

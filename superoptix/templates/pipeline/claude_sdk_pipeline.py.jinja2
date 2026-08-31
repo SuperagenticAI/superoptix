@@ -36,8 +36,8 @@ try:
 except ImportError as e:
     CLAUDE_SDK_AVAILABLE = False
     print(f"⚠️  Claude Agent SDK not available: {e}")
-    print("⚠️  Install with: pip install claude-agent-sdk")
-    print("⚠️  Editable install: pip install -e '.[frameworks-claude-sdk]'")
+    print("⚠️  Install with: uv pip install claude-agent-sdk")
+    print("⚠️  Editable install: uv pip install -e '.[frameworks-claude-sdk]'")
 
 # MCP Server support for in-process tools
 try:
@@ -323,8 +323,8 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
         if not CLAUDE_SDK_AVAILABLE:
             raise ImportError(
                 "Claude Agent SDK not installed. "
-                "Install with: pip install claude-agent-sdk "
-                "or pip install -e '.[frameworks-claude-sdk]'"
+                "Install with: uv pip install claude-agent-sdk "
+                "or uv pip install -e '.[frameworks-claude-sdk]'"
             )
 
         # Get input text from first input field

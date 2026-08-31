@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 try:
     from fastapi import Body, FastAPI, HTTPException, Request
-    from fastapi.responses import JSONResponse, StreamingResponse
+    from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 
     FASTAPI_AVAILABLE = True
 except ImportError:  # pragma: no cover - exercised in live use
@@ -35,6 +35,7 @@ except ImportError:  # pragma: no cover - exercised in live use
     FastAPI = None
     HTTPException = Exception
     Request = object
+    HTMLResponse = None
     JSONResponse = None
     StreamingResponse = None
 
@@ -809,6 +810,75 @@ def create_a2a_fastapi_app(
             )
 
         return await call_next(request)
+
+    @app.get("/", include_in_schema=False)
+    async def index() -> Any:
+        """Explain the endpoint to a person who opened it in a browser.
+
+        This address appears in the Agent Card, in registries and in anything
+        published about the agent, so people will click it. A bare 404 reads as
+        a broken service. The JSON-RPC binding lives at the RPC path, so the
+        root is free to answer.
+        """
+        name = str(agent_card.get("name") or "SuperOptiX Agent")
+        description = str(agent_card.get("description") or "")
+        skills = agent_card.get("skills") or []
+        bindings = sorted(
+            {
+                str(i.get("protocolBinding"))
+                for i in agent_card.get("supportedInterfaces") or []
+                if i.get("protocolBinding")
+            }
+        )
+        versions = sorted(
+            {
+                str(i.get("protocolVersion"))
+                for i in agent_card.get("supportedInterfaces") or []
+                if i.get("protocolVersion")
+            }
+        )
+        skill_rows = "".join(
+            f"<tr><td><code>{s.get('id')}</code></td><td>{s.get('description', '')}</td></tr>"
+            for s in skills
+            if isinstance(s, dict)
+        )
+        html = f"""<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{name} — A2A interface</title>
+<style>
+ body{{font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+   max-width:44rem;margin:3rem auto;padding:0 1.5rem;color:#12161c;background:#fbfcfd}}
+ h1{{font-size:1.5rem;margin:0 0 .25rem}}
+ p.lede{{color:#566470;margin:0 0 2rem}}
+ table{{border-collapse:collapse;width:100%;margin:.5rem 0 2rem;font-size:.94rem}}
+ td,th{{text-align:left;padding:.45rem .6rem;border-bottom:1px solid #e5ebf0;vertical-align:top}}
+ th{{color:#566470;font-weight:600;width:11rem}}
+ code{{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9em;
+   background:#eef2f6;border-radius:3px;padding:.1em .35em}}
+ a{{color:#16607c}}
+ @media (prefers-color-scheme:dark){{
+   body{{background:#0e1317;color:#e8eef3}} p.lede,th{{color:#8c9ba7}}
+   td,th{{border-color:#27333c}} code{{background:#1d262e}} a{{color:#6fbdda}}}}
+</style></head><body>
+<h1>{name}</h1>
+<p class="lede">This is an Agent-to-Agent (A2A) interface. Other agents call it.
+If you were looking for the project, see the documentation link below.</p>
+<table>
+<tr><th>Agent Card</th><td><a href="/.well-known/agent-card.json">/.well-known/agent-card.json</a></td></tr>
+<tr><th>Protocol versions</th><td>{", ".join(versions) or "1.0"}</td></tr>
+<tr><th>Bindings</th><td>{", ".join(bindings) or "JSONRPC"}</td></tr>
+<tr><th>JSON-RPC endpoint</th><td><code>{rpc_url}</code></td></tr>
+<tr><th>Description</th><td>{description}</td></tr>
+</table>
+<h2 style="font-size:1.05rem">Skills</h2>
+<table>{skill_rows or "<tr><td>None declared</td></tr>"}</table>
+<p style="color:#566470;font-size:.9rem">The first request after a quiet period
+may take a moment while the service starts.</p>
+<p><a href="https://superagenticai.github.io/superoptix/guides/a2a-adapt/">Documentation</a>
+ · <a href="https://github.com/SuperagenticAI/superoptix">Source</a></p>
+</body></html>"""
+        return HTMLResponse(content=html)
 
     @app.get("/.well-known/agent-card.json")
     async def get_agent_card(request: Request) -> Dict[str, Any]:

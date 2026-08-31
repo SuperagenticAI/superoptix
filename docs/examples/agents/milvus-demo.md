@@ -22,12 +22,12 @@ This demo showcases how to integrate **Milvus** - a cloud-native vector database
 
 ### Install SuperOptiX
 ```bash
-pip install superoptix
+uv pip install superoptix
 ```
 
 ### Install Milvus Dependencies
 ```bash
-pip install pymilvus
+uv pip install pymilvus
 ```
 
 ### Set Up Milvus Server

@@ -15,12 +15,12 @@ This tutorial covers:
 ### Install SuperOptiX
 
 ```bash
-pip install superoptix
+uv pip install superoptix
 ```
 
 **For vector database support:**
 ```bash
-pip install superoptix[vectordb]
+uv pip install superoptix[vectordb]
 ```
 
 **Includes:**
@@ -31,7 +31,7 @@ pip install superoptix[vectordb]
 **Optional TurboAgents integration:**
 
 ```bash
-pip install "superoptix[turboagents]"
+uv pip install "superoptix[turboagents]"
 ```
 
 This enables `turboagents`-backed GEPA vector stores for Chroma, FAISS,

@@ -28,7 +28,7 @@ class MilvusVectorStore(VectorStoreInterface):
 
         if importlib.util.find_spec("pymilvus") is None:
             raise ImportError(
-                "Milvus client is required for MilvusVectorStore. Install with: pip install litellm pymilvus"
+                "Milvus client is required for MilvusVectorStore. Install with: uv pip install litellm pymilvus"
             )
 
         self.client = client
@@ -324,7 +324,7 @@ class MilvusVectorStore(VectorStoreInterface):
             from pymilvus import DataType, MilvusClient
         except ImportError as e:
             raise ImportError(
-                "Milvus client is required. Install with: pip install litellm pymilvus"
+                "Milvus client is required. Install with: uv pip install litellm pymilvus"
             ) from e
 
         client = MilvusClient(uri=uri)
@@ -385,7 +385,7 @@ class MilvusVectorStore(VectorStoreInterface):
             from pymilvus import DataType, MilvusClient
         except ImportError as e:
             raise ImportError(
-                "Milvus client is required. Install with: pip install litellm pymilvus"
+                "Milvus client is required. Install with: uv pip install litellm pymilvus"
             ) from e
 
         # Connect to remote Milvus

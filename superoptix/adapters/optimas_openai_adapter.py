@@ -15,7 +15,7 @@ try:
     from optimas.adapt.utils import format_input_fields
 except Exception as e:
     raise ImportError(
-        "Optimas must be installed to use optimas-openai target.\nInstall: pip install optimas-ai"
+        "Optimas must be installed to use optimas-openai target.\nInstall: uv pip install optimas-ai"
     ) from e
 
 

@@ -284,7 +284,7 @@ class SuperOptiXHuggingFaceBackend(SuperOptiXBaseBackend):
         """Install a HuggingFace model with proper download using huggingface_hub."""
         try:
             if not await self.is_available():
-                yield "❌ HuggingFace is not available. Install with: pip install transformers torch huggingface_hub"
+                yield "❌ HuggingFace is not available. Install with: uv pip install transformers torch huggingface_hub"
                 return
 
             yield f"📥 Downloading {model_name} from HuggingFace Hub..."
@@ -326,7 +326,7 @@ class SuperOptiXHuggingFaceBackend(SuperOptiXBaseBackend):
 
                 console = Console()
                 console.print(
-                    "❌ HuggingFace is not available. Install with: pip install transformers torch huggingface_hub"
+                    "❌ HuggingFace is not available. Install with: uv pip install transformers torch huggingface_hub"
                 )
                 return False
 
@@ -618,7 +618,9 @@ class SuperOptiXHuggingFaceBackend(SuperOptiXBaseBackend):
             install_text.append(
                 "🚀 To install required packages, run:\n", style="bold green"
             )
-            install_text.append("  pip install dspy-ai litellm\n", style="bright_white")
+            install_text.append(
+                "  uv pip install dspy-ai litellm\n", style="bright_white"
+            )
             install_text.append("  or (with uv):\n", style="bright_white")
             install_text.append(
                 "  uv pip install dspy-ai litellm\n", style="bright_white"
@@ -646,7 +648,7 @@ class SuperOptiXHuggingFaceBackend(SuperOptiXBaseBackend):
             raise RuntimeError(
                 f"Failed to import required libraries for HuggingFace DSPy integration: {e}\n"
                 "Please ensure dspy-ai and litellm are installed:\n"
-                "  pip install dspy-ai litellm\n"
+                "  uv pip install dspy-ai litellm\n"
                 "  or\n"
                 "  uv pip install dspy-ai litellm"
             )

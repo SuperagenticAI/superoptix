@@ -25,8 +25,8 @@ Both paths produce Phoenix traces from a normal `super agent run`.
 Install SuperOptiX with Phoenix support:
 
 ```bash
-pip install "superoptix[phoenix]"
-pip install arize-phoenix
+uv pip install "superoptix[phoenix]"
+uv pip install arize-phoenix
 ```
 
 You also need a working model backend.
@@ -233,7 +233,7 @@ Even if the model call fails, Phoenix can still be useful. Error traces will sti
 Install the server package:
 
 ```bash
-pip install arize-phoenix
+uv pip install arize-phoenix
 ```
 
 Then retry:
@@ -271,7 +271,7 @@ Run the agent again after Phoenix is already up.
 Install the Phoenix/OpenInference extras:
 
 ```bash
-pip install "superoptix[phoenix]"
+uv pip install "superoptix[phoenix]"
 ```
 
 ### The model request fails
@@ -291,8 +291,8 @@ For Ollama, make sure the server is running and the configured model exists.
 Fastest path:
 
 ```bash
-pip install "superoptix[phoenix]"
-pip install arize-phoenix
+uv pip install "superoptix[phoenix]"
+uv pip install arize-phoenix
 
 python -m phoenix.server.main serve
 

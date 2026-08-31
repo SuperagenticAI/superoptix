@@ -29,13 +29,13 @@ Install CrewAI manually after installing SuperOptiX with DSPy support:
 
 ```bash
 # Install SuperOptiX with DSPy support (this gets compatible json-repair)
-pip install "superoptix[optimas]"
+uv pip install "superoptix[optimas]"
 
 # Install CrewAI without dependencies to avoid conflicts
-pip install crewai>=1.15 --no-deps
+uv pip install crewai>=1.15 --no-deps
 
 # Ensure compatible json-repair version
-pip install "json-repair>=0.30.0"
+uv pip install "json-repair>=0.30.0"
 ```
 
 **Why This Works:**
@@ -55,7 +55,7 @@ pip install "json-repair>=0.30.0"
 **Problem:** Build fails due to missing build tooling or an older uv version.
 
 **Solutions:**
-- Install build tooling: `uv pip install build` (or `pip install build`).
+- Install build tooling: `uv pip install build` (or `uv pip install build`).
 - Use `uv build` if available, otherwise run `uv run python -m build --wheel`.
 
 ## 🐍 Python Version Issues
@@ -99,7 +99,7 @@ source superoptix-env/bin/activate
 superoptix-env\Scripts\activate
 
 # Install SuperOptiX
-pip install superoptix
+uv pip install superoptix
 ```
 
 ### Package Not Found
@@ -111,13 +111,13 @@ Update pip and check PyPI:
 
 ```bash
 # Update pip
-pip install --upgrade pip
+uv pip install --upgrade pip
 
 # Check if package exists
 pip search superoptix
 
 # Install from PyPI
-pip install superoptix
+uv pip install superoptix
 ```
 
 ## 🚀 Still Having Issues?

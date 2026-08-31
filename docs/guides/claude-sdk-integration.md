@@ -18,7 +18,7 @@ SuperOptiX provides first-class support for Claude Agent SDK, enabling GEPA-opti
 ## Installation
 
 ```bash
-pip install superoptix claude-agent-sdk
+uv pip install superoptix claude-agent-sdk
 ```
 
 ```bash
@@ -239,7 +239,7 @@ prompt = adapter.get_optimizable_variable(playbook)
 ImportError: claude-agent-sdk is not installed
 ```
 
-**Solution:** `pip install claude-agent-sdk`
+**Solution:** `uv pip install claude-agent-sdk`
 
 ### CLI not found
 

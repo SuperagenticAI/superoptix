@@ -1106,7 +1106,7 @@ def convert_model(
     if not mlx_backend or not mlx_backend.is_available():
         console.print("❌ MLX backend is not available")
         console.print("💡 MLX requires Apple Silicon (M1/M2/M3) with macOS")
-        console.print("📦 Install with: pip install mlx mlx-lm")
+        console.print("📦 Install with: uv pip install mlx mlx-lm")
         return
 
     # Set default output path if not specified
@@ -1170,7 +1170,7 @@ def convert_model(
 
     except ImportError as e:
         console.print(f"❌ Failed to import MLX-LM: {e}")
-        console.print("💡 Make sure mlx-lm is installed: pip install mlx-lm")
+        console.print("💡 Make sure mlx-lm is installed: uv pip install mlx-lm")
     except Exception as e:
         console.print(f"❌ Conversion failed: {e}")
         console.print("💡 Check that the HuggingFace model exists and is accessible")
@@ -1260,7 +1260,7 @@ def quantize_model(
 
     except ImportError as e:
         console.print(f"❌ Failed to import MLX-LM: {e}")
-        console.print("💡 Make sure mlx-lm is installed: pip install mlx-lm")
+        console.print("💡 Make sure mlx-lm is installed: uv pip install mlx-lm")
     except Exception as e:
         console.print(
             f"❌ {'Dequantization' if dequantize else 'Quantization'} failed: {e}"
@@ -1335,7 +1335,7 @@ def start_mlx_server(model_name: str, port: int = 8000):
 
     except subprocess.CalledProcessError as e:
         console.print(f"❌ Failed to start MLX server: {e}")
-        console.print("💡 Make sure mlx-lm is installed: pip install mlx-lm")
+        console.print("💡 Make sure mlx-lm is installed: uv pip install mlx-lm")
         return False
     except KeyboardInterrupt:
         console.print("\n🛑 MLX server stopped by user")
@@ -1384,7 +1384,7 @@ def start_huggingface_server(model_name: str, port: int = 8001):
     except ImportError as e:
         console.print(f"❌ Failed to import HuggingFace server: {e}")
         console.print("💡 Make sure you have the required dependencies:")
-        console.print("   pip install fastapi uvicorn torch transformers")
+        console.print("   uv pip install fastapi uvicorn torch transformers")
         console.print("   or")
         console.print("   uv pip install fastapi uvicorn torch transformers")
         return False
