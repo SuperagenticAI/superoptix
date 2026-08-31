@@ -3,6 +3,10 @@
 # Built for Cloud Run, which sets PORT at runtime and requires the process to
 # bind 0.0.0.0. The image installs only the a2a extra, so it carries neither the
 # framework integrations nor the ML stack.
+#
+# This lives at the repository root because Cloud Build uses the Dockerfile's
+# directory as the build context, and the COPY steps below need the repository
+# root as that context.
 FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
