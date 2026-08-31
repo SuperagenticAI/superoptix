@@ -224,7 +224,7 @@ spec:
         input:
           query: "How do I install SuperOptiX?"
         expected_output:
-          answer: "pip install superoptix"
+          answer: "uv pip install superoptix"
           expected_keywords:
             - pip
             - install

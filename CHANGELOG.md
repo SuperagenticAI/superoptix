@@ -107,6 +107,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   optional local-inference backend. `pip install "superoptix[a2a]"` drops from
   ~650 MB to ~219 MB. Install `superoptix[huggingface]` to use that backend.
 
+### Added
+- **Cloud Run deployment for the public A2A endpoint** (`deploy/a2a/Dockerfile`,
+  `deploy/a2a/service.yaml`), with a migration guide in `deploy/a2a/README.md`.
+  Measured on the live endpoint, Render's free tier takes 42.5 seconds to answer
+  a cold request against 0.4 seconds warm, which is outside the timeout an A2A
+  registry allows when fetching an Agent Card. The container starts in 1.7
+  seconds, so scale-to-zero is usable and the free tier is viable for an
+  endpoint that is called infrequently. The image was built and exercised
+  locally with the environment Cloud Run provides.
+- **Landing page at the endpoint root.** `GET /` returned 404, which reads as a
+  broken service to anyone who clicks the address printed in the Agent Card or a
+  registry listing. It now returns a page naming the protocol versions, the
+  bindings, the card path and the declared skills, which is also what an
+  integrator needs when checking they are pointed at the right host. The
+  JSON-RPC binding is unaffected; it lives at the RPC path.
+
+### Changed
+- The published Agent Card advertises `a2a.superoptix.ai` rather than the host
+  it happens to run on. Changing host is then a DNS change rather than a card
+  change that every registry holding a copy has to re-fetch.
+
+### Changed
+- **Install instructions use uv throughout.** `pip install` was replaced across
+  the README, documentation, source error messages and examples. Primary
+  installation is `uv tool install superoptix`, extras are added with
+  `--with "superoptix[extra]"`, adding SuperOptiX to an existing project is
+  `uv add superoptix`, and remaining cases use `uv pip install`.
+
 ### Changed
 - **Repositioned as the Agent-to-Agent (A2A) interoperability and optimization
   layer.** The previous description, "Full Stack Agentic AI Optimization

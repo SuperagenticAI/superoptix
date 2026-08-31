@@ -482,7 +482,7 @@ super agent run sentiment_analyzer \
 ### ❓ Common Issues
 
 !!! question "Installation fails"
-    **Solution**: Try using `pip install superoptix[all]` or check Python version with `python --version` (must be 3.11+)
+    **Solution**: Try using `uv pip install superoptix[all]` or check Python version with `python --version` (must be 3.11+)
 
 !!! question "Optimization fails"
     **Solution**: Check that you have sufficient GPU RAM and Ollama is running with `ollama list`

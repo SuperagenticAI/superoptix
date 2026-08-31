@@ -636,7 +636,7 @@ If you don't see any traces:
 If the dashboard fails to start:
 
 1. **Check port availability**: Ensure port 8501 (or your chosen port) is free
-2. **Verify Streamlit installation**: Install with `pip install streamlit`
+2. **Verify Streamlit installation**: Install with `uv pip install streamlit`
 3. **Check permissions**: Ensure write access to `/tmp/` directory
 4. **Review logs**: Check for error messages in the console output
 

@@ -257,13 +257,13 @@ class RAGMixin:
         print(f"🔧 To enable RAG with {db_name}, install the required dependencies:")
         print("")
         print("   # Option 1: Install specific package")
-        print(f"   pip install {package_name} sentence-transformers")
+        print(f"   uv pip install {package_name} sentence-transformers")
         print("")
         print("   # Option 2: Install via SuperOptiX extras")
-        print(f"   pip install superoptix[{extra_name}]")
+        print(f"   uv pip install superoptix[{extra_name}]")
         print("")
         print("   # Option 3: Install all vector databases")
-        print("   pip install superoptix[vectordb]")
+        print("   uv pip install superoptix[vectordb]")
         print("")
         print(
             "📚 For more information, see: https://superoptix.readthedocs.io/rag-setup"

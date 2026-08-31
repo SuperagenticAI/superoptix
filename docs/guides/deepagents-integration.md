@@ -49,12 +49,12 @@ The biggest addition is the **backend abstraction** that lets you choose where a
 
 ```bash
 # Install SuperOptiX with DeepAgents support
-pip install superoptix[frameworks-deepagents]
+uv pip install superoptix[frameworks-deepagents]
 
 # REQUIRED: Install Gemini integration (or your preferred LLM provider)
-pip install langchain-google-genai  # For Gemini
-# pip install langchain-anthropic   # For Claude
-# pip install langchain-openai      # For GPT-4
+uv pip install langchain-google-genai  # For Gemini
+# uv pip install langchain-anthropic   # For Claude
+# uv pip install langchain-openai      # For GPT-4
 ```
 
 **Includes:**
@@ -715,7 +715,7 @@ language_model:
 **Checklist:**
 1. API key set? (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`)
 2. Model string correct? (e.g., `anthropic:claude-sonnet-5`)
-3. LangChain dependencies installed? (`pip install langchain langchain-anthropic`)
+3. LangChain dependencies installed? (`uv pip install langchain langchain-anthropic`)
 
 ### No BDD Specifications Found
 

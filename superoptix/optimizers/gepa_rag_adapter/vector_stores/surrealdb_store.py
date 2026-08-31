@@ -29,7 +29,7 @@ class SurrealDBVectorStore(VectorStoreInterface):
 
         if importlib.util.find_spec("surrealdb") is None:
             raise ImportError(
-                "SurrealDB client is required for SurrealDBVectorStore. Install with: pip install litellm surrealdb"
+                "SurrealDB client is required for SurrealDBVectorStore. Install with: uv pip install litellm surrealdb"
             )
 
         if not re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", table_name):

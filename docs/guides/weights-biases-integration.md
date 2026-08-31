@@ -18,7 +18,7 @@ SuperOptiX provides **native integration** with Weights & Biases (W&B) for exper
 ### Install W&B
 
 ```bash
-pip install wandb
+uv pip install wandb
 wandb login
 ```
 
@@ -356,7 +356,7 @@ wandb.log({
 ## 🎉 Next Steps
 
 1. **Set up W&B account**: https://wandb.ai/signup
-2. **Install and login**: `pip install wandb && wandb login`
+2. **Install and login**: `uv pip install wandb && wandb login`
 3. **Run your first tracked agent**: `super agent run my_agent --observe wandb`
 4. **Create custom dashboard** in W&B
 5. **Set up team collaboration** with shared projects

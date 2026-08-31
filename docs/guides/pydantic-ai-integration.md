@@ -30,7 +30,7 @@ Perfect for deployment applications requiring type safety and reliable tool inte
 ## 📦 Installation
 
 ```bash
-pip install superoptix[frameworks-pydantic-ai]
+uv pip install superoptix[frameworks-pydantic-ai]
 ```
 
 **Includes:**
@@ -1294,7 +1294,7 @@ The pipeline auto-detects Ollama models, but explicit prefix is safer.
 
 3. **General:**
    - Check server logs for errors
-   - Verify `mcp` package is installed: `pip install mcp`
+   - Verify `mcp` package is installed: `uv pip install mcp`
    - Test server independently first
 
 ### Import Error
@@ -1303,9 +1303,9 @@ The pipeline auto-detects Ollama models, but explicit prefix is safer.
 
 **Solution:**
 ```bash
-pip install superoptix[frameworks-pydantic-ai]
+uv pip install superoptix[frameworks-pydantic-ai]
 # or
-pip install pydantic-ai==1.31.0
+uv pip install pydantic-ai==1.31.0
 ```
 
 ### Optimization Takes Too Long
@@ -1359,7 +1359,7 @@ pip install pydantic-ai==1.31.0
 
 **Solution:** This was fixed in SuperOptiX 0.2.1. The template now uses plain text output mode:
 ```bash
-pip install --upgrade superoptix
+uv pip install --upgrade superoptix
 super agent compile your_agent --framework pydantic-ai  # Recompile
 ```
 

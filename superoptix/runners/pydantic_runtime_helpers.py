@@ -164,7 +164,7 @@ def create_agent(
 ):
     if Agent is None:
         raise ImportError(
-            "pydantic-ai is required. Install with: pip install pydantic-ai"
+            "pydantic-ai is required. Install with: uv pip install pydantic-ai"
         )
 
     language_model = (spec_data or {}).get("language_model", {}) or {}

@@ -728,7 +728,9 @@ class SlashCommandHandler:
         """Handle /mcp commands for MCP server management."""
         if not self.mcp_client:
             self.console.print("\n[yellow]⚠️  MCP client not available[/yellow]")
-            self.console.print("[dim]Install with: pip install superoptix[mcp][/dim]\n")
+            self.console.print(
+                "[dim]Install with: uv pip install superoptix[mcp][/dim]\n"
+            )
             return
 
         if not args:

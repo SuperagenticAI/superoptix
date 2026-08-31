@@ -18,10 +18,10 @@ LangFuse is a modern observability platform specifically designed for LLM applic
 
 ```bash
 # Install LangFuse
-pip install langfuse
+uv pip install langfuse
 
 # Install SuperOptiX with LangFuse support
-pip install superoptix[langfuse]
+uv pip install superoptix[langfuse]
 ```
 
 ### Basic Configuration

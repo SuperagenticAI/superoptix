@@ -22,12 +22,12 @@ This demo showcases how to integrate **Qdrant** - a blazingly fast vector databa
 
 ### Install SuperOptiX
 ```bash
-pip install superoptix
+uv pip install superoptix
 ```
 
 ### Install Qdrant Dependencies
 ```bash
-pip install qdrant-client
+uv pip install qdrant-client
 ```
 
 ### Set Up Qdrant Server

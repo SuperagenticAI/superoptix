@@ -18,7 +18,7 @@ except Exception as e:
 
 def _require_crewai():
 	if crewai is None:
-		raise ImportError("CrewAI is required for optimas-crewai pipelines. Install: pip install crewai")
+		raise ImportError("CrewAI is required for optimas-crewai pipelines. Install: uv pip install crewai")
 
 
 def _build_agent(role: str, goal: str, backstory: str, llm_config: Dict[str, Any]) -> "crewai.Agent":

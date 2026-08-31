@@ -23,7 +23,7 @@ try:
 except ImportError as e:
 	OPENAI_AGENTS_AVAILABLE = False
 	print(f"⚠️  OpenAI Agents SDK not available: {e}")
-	print("⚠️  Install with: pip install openai-agents")
+	print("⚠️  Install with: uv pip install openai-agents")
 
 from superoptix.core.base_component import BaseComponent
 
@@ -159,7 +159,7 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 			return
 		
 		if not OPENAI_AGENTS_AVAILABLE:
-			raise ImportError("OpenAI Agents SDK not installed. Install with: pip install openai-agents")
+			raise ImportError("OpenAI Agents SDK not installed. Install with: uv pip install openai-agents")
 		
 		# Initialize model first
 		self._initialize_model()

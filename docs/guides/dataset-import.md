@@ -179,7 +179,7 @@ datasets:
 - `huggingface:glue:sst2` - With subset
 - ... 100,000+ more!
 
-**Requirements**: `pip install datasets`
+**Requirements**: `uv pip install datasets`
 
 ---
 
@@ -527,7 +527,7 @@ Dataset import feature not available
 
 ```bash
 cd /path/to/SuperOptiX
-pip install -e .
+uv pip install -e .
 ```
 
 ---

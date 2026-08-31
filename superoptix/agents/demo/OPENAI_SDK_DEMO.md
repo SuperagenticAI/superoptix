@@ -39,14 +39,14 @@
 
 2. **SuperOptiX installed**:
    ```bash
-   pip install superoptix
+   uv pip install superoptix
    # Or from source:
-   cd SuperOptiX && pip install . --upgrade
+   cd SuperOptiX && uv pip install . --upgrade
    ```
 
 3. **OpenAI Agents SDK installed**:
    ```bash
-   pip install openai-agents
+   uv pip install openai-agents
    ```
 
 ### Run the Demo

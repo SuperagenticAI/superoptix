@@ -306,14 +306,14 @@ super model mlx evaluate phi-2-mlx \
 **Setup Requirements:**
 ```bash
 # Install evaluation dependencies
-pip install lm_eval
+uv pip install lm_eval
 
 # Verify MLX-LM installation
 python -c "import mlx_lm; print('MLX-LM ready')"
 ```
 
 **Dependencies:**
-- `lm_eval` - Required for evaluation (install with: `pip install lm_eval`)
+- `lm_eval` - Required for evaluation (install with: `uv pip install lm_eval`)
 - `mlx_lm` - Required for MLX operations
 
 **Supported Tasks:**
@@ -473,7 +473,7 @@ super model vllm quantize llama-2-7b --quantization awq --bits 4
 **Option 1: Install vLLM separately (Recommended)**
 ```bash
 # Install vLLM directly
-pip install vllm
+uv pip install vllm
 
 # Verify installation
 python -c "import vllm; print('vLLM installed')"
@@ -485,7 +485,7 @@ python -c "from vllm import LLM; print('GPU support available')"
 **Option 2: Install with SuperOptiX vLLM dependency**
 ```bash
 # Install SuperOptiX with vLLM support
-pip install superoptix[vllm]
+uv pip install superoptix[vllm]
 
 # Verify installation
 python -c "import vllm; print('vLLM installed via SuperOptiX')"
@@ -675,7 +675,7 @@ super model sglang benchmark llama-2-7b --num-requests 100 --request-rate 10
 **Option 1: Install SGLang separately (Recommended)**
 ```bash
 # Install SGLang directly
-pip install sglang
+uv pip install sglang
 
 # Verify installation
 python -c "import sglang; print('SGLang installed')"
@@ -687,7 +687,7 @@ python -c "from sglang import SGLang; print('GPU support available')"
 **Option 2: Install with SuperOptiX SGLang dependency**
 ```bash
 # Install SuperOptiX with SGLang support
-pip install superoptix[sglang]
+uv pip install superoptix[sglang]
 
 # Verify installation
 python -c "import sglang; print('SGLang installed via SuperOptiX')"
@@ -908,7 +908,7 @@ super model info <model_name>
 - Models cannot be removed via CLI (use desktop app)
 
 **MLX Evaluation Issues:**
-- **Missing lm_eval**: Install with `pip install lm_eval`
+- **Missing lm_eval**: Install with `uv pip install lm_eval`
 - **Model not found**: Ensure model is properly installed with `super model list --backend mlx`
 - **Memory issues**: Use `--limit` to reduce evaluation examples
 - **Slow evaluation**: Use `--batch-size` to optimize performance
@@ -1055,46 +1055,46 @@ SuperOptiX uses a modular dependency structure to keep the base installation lig
 **Backend-Specific:**
 ```bash
 # MLX (Apple Silicon only)
-pip install superoptix[mlx]
+uv pip install superoptix[mlx]
 
 # vLLM (Linux with NVIDIA GPU)
-pip install superoptix[vllm]
+uv pip install superoptix[vllm]
 
 # SGLang (Linux with NVIDIA GPU)
-pip install superoptix[sglang]
+uv pip install superoptix[sglang]
 
 # HuggingFace (Cross-platform)
-pip install superoptix[huggingface]
+uv pip install superoptix[huggingface]
 ```
 
 **Vector Databases:**
 ```bash
 # Individual databases
-pip install superoptix[chromadb]
-pip install superoptix[lancedb]
-pip install superoptix[weaviate]
-pip install superoptix[qdrant]
-pip install superoptix[milvus]
+uv pip install superoptix[chromadb]
+uv pip install superoptix[lancedb]
+uv pip install superoptix[weaviate]
+uv pip install superoptix[qdrant]
+uv pip install superoptix[milvus]
 
 # All vector databases
-pip install superoptix[vectordb]
+uv pip install superoptix[vectordb]
 ```
 
 **Observability:**
 ```bash
-pip install superoptix[observability]
+uv pip install superoptix[observability]
 ```
 
 **UI Components:**
 ```bash
-pip install superoptix[ui]
+uv pip install superoptix[ui]
 ```
 
 **Complete Installation:**
 ```bash
 # All features (excluding MLX on non-Apple platforms)
-pip install superoptix[all]
+uv pip install superoptix[all]
 
 # All features including MLX (use with caution on non-Apple platforms)
-pip install superoptix[all-with-mlx]
+uv pip install superoptix[all-with-mlx]
 ``` 

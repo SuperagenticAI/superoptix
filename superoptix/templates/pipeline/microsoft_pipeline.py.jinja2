@@ -31,7 +31,7 @@ except ImportError as e:
 	MICROSOFT_FRAMEWORK_AVAILABLE = False
 	print(f"⚠️  Microsoft Agent Framework not available: {e}")
 	print(
-		"⚠️  Install with: pip install -U --pre agent-framework azure-identity"
+		"⚠️  Install with: uv pip install -U --pre agent-framework azure-identity"
 	)
 
 from superoptix.core.base_component import BaseComponent
@@ -222,7 +222,7 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 		if not MICROSOFT_FRAMEWORK_AVAILABLE:
 			raise ImportError(
 				"Microsoft Agent Framework not available. "
-				"Install with: pip install -U --pre agent-framework azure-identity"
+				"Install with: uv pip install -U --pre agent-framework azure-identity"
 			)
 		
 		# Re-initialize agent if instructions changed (after GEPA update)

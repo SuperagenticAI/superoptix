@@ -26,7 +26,7 @@ By the end of this tutorial, you'll know how to:
 
 ```bash
 # Install SuperOptiX with DeepAgents
-pip install superoptix[frameworks-deepagents]
+uv pip install superoptix[frameworks-deepagents]
 
 # Verify version (must be 0.2.0+)
 python -c "import deepagents; print(deepagents.__version__)"

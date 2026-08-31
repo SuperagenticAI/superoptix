@@ -56,10 +56,10 @@
 
 ```bash
 # Install SGLang
-pip install "sglang[all]"
+uv pip install "sglang[all]"
 
 # Or minimal install
-pip install sglang
+uv pip install sglang
 ```
 
 ### Option 2: Docker

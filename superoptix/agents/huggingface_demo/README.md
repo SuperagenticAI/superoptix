@@ -24,7 +24,7 @@ The HuggingFace Demo Agent is designed to showcase the power of running SuperOpt
 ### 1. Install Dependencies
 ```bash
 # Install required packages
-pip install transformers torch fastapi uvicorn
+uv pip install transformers torch fastapi uvicorn
 # or with uv
 uv pip install transformers torch fastapi uvicorn
 ```

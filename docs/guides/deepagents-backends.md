@@ -608,7 +608,7 @@ spec:
 ```bash
 # Update SuperOptiX
 cd /Users/local/superagentic/SuperOptiX
-pip install -e .
+uv pip install -e .
 
 # Verify backends are available
 python -c "from superoptix.vendor.deepagents.backends import state; print('Backends available')"

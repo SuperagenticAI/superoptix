@@ -112,13 +112,13 @@ Install CrewAI manually after installing SuperOptiX with DSPy support:
 
 ```bash
 # Install SuperOptiX with DSPy support (this gets compatible json-repair)
-pip install "superoptix[optimas]"
+uv pip install "superoptix[optimas]"
 
 # Install CrewAI without dependencies to avoid conflicts
-pip install crewai>=1.15 --no-deps
+uv pip install crewai>=1.15 --no-deps
 
 # Ensure compatible json-repair version
-pip install "json-repair>=0.30.0"
+uv pip install "json-repair>=0.30.0"
 ```
 
 **💡 Why This Works:**

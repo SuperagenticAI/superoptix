@@ -109,7 +109,7 @@ Virtual environments isolate project dependencies, preventing conflicts between 
     superoptix-env\Scripts\activate
     
     # Install SuperOptiX
-    pip install superoptix
+    uv pip install superoptix
     ```
 
 === "📦 conda"
@@ -121,7 +121,7 @@ Virtual environments isolate project dependencies, preventing conflicts between 
     conda activate superoptix
     
     # Install SuperOptiX
-    pip install superoptix
+    uv pip install superoptix
     ```
 
 ## 📦 Package Management
@@ -147,13 +147,13 @@ Virtual environments isolate project dependencies, preventing conflicts between 
 === "📦 pip (Standard)"
     ```bash
     # Install SuperOptiX
-    pip install superoptix
+    uv pip install superoptix
     
     # Install with optional dependencies
-    pip install superoptix[vectordb,ui,observability]
+    uv pip install superoptix[vectordb,ui,observability]
     
     # Install latest version
-    pip install --upgrade superoptix
+    uv pip install --upgrade superoptix
     ```
 
 ## 🛠️ Development Tools

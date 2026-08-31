@@ -73,30 +73,30 @@ This extends optimization beyond prompts to hyperparameters, model selection/rou
 
 ```bash
 # Install with Optimas support
-pip install "superoptix[optimas]"
+uv pip install "superoptix[optimas]"
 
 # For OpenAI SDK target (recommended - most reliable)
-pip install "superoptix[optimas,optimas-openai]"
+uv pip install "superoptix[optimas,optimas-openai]"
 
 # For CrewAI target
-pip install "superoptix[optimas,optimas-crewai]"
+uv pip install "superoptix[optimas,optimas-crewai]"
 
 # For AutoGen target  
-pip install "superoptix[optimas,optimas-autogen]"
+uv pip install "superoptix[optimas,optimas-autogen]"
 
 # For DSPy target
-pip install "superoptix[optimas,optimas-dspy]"
+uv pip install "superoptix[optimas,optimas-dspy]"
 ```
 
 ### Install Additional Dependencies
 
 ```bash
 # Required for DSPy 3.0.0 streaming support
-pip install litellm
+uv pip install litellm
 
 # For CrewAI (install manually to avoid conflicts)
-pip install crewai
-pip install json-repair>=0.30.0
+uv pip install crewai
+uv pip install json-repair>=0.30.0
 ```
 
 ### Quick Demo
@@ -261,8 +261,8 @@ tasks:
 **⚠️ CrewAI Dependencies:**
 ```bash
 # Install manually to avoid conflicts
-pip install crewai
-pip install json-repair>=0.30.0
+uv pip install crewai
+uv pip install json-repair>=0.30.0
 ```
 
 ### AutoGen Target
@@ -434,8 +434,8 @@ json-repair version conflicts
 
 **Solutions:**
 ```bash
-pip install crewai --no-deps
-pip install json-repair>=0.30.0
+uv pip install crewai --no-deps
+uv pip install json-repair>=0.30.0
 ```
 
 #### AutoGen Model Info Errors

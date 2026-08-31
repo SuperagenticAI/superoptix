@@ -40,7 +40,7 @@ curl -fsSL https://ollama.com/install.sh | sh
 ollama pull qwen3.5:2b
 
 # For RAG assistant, install vector DB
-pip install chromadb sentence-transformers
+uv pip install chromadb sentence-transformers
 ```
 
 ### Pull an Agent

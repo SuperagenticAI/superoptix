@@ -160,7 +160,7 @@ cp /path/from/above/code_review_examples.csv ./data/
 
 ### **"ChromaDB not installed" error**
 ```bash
-pip install chromadb sentence-transformers
+uv pip install chromadb sentence-transformers
 ```
 
 ### **"Ollama model not found" error**

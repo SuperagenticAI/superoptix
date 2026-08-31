@@ -28,7 +28,7 @@ class QdrantVectorStore(VectorStoreInterface):
 
         if importlib.util.find_spec("qdrant_client") is None:
             raise ImportError(
-                "Qdrant client is required for QdrantVectorStore. Install with: pip install litellm qdrant-client"
+                "Qdrant client is required for QdrantVectorStore. Install with: uv pip install litellm qdrant-client"
             )
 
         from qdrant_client.http import models
@@ -348,7 +348,7 @@ class QdrantVectorStore(VectorStoreInterface):
             from qdrant_client.http import models
         except ImportError as e:
             raise ImportError(
-                "Qdrant client is required. Install with: pip install litellm qdrant-client"
+                "Qdrant client is required. Install with: uv pip install litellm qdrant-client"
             ) from e
 
         client = QdrantClient(path=path)
@@ -383,7 +383,7 @@ class QdrantVectorStore(VectorStoreInterface):
             from qdrant_client.http import models
         except ImportError as e:
             raise ImportError(
-                "Qdrant client is required. Install with: pip install litellm qdrant-client"
+                "Qdrant client is required. Install with: uv pip install litellm qdrant-client"
             ) from e
 
         client = QdrantClient(host=host, port=port, api_key=api_key)

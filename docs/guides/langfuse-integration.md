@@ -18,7 +18,7 @@ LangFuse is a modern observability platform specifically designed for LLM applic
 
 ```bash
 # Install LangFuse Python SDK
-pip install langfuse
+uv pip install langfuse
 
 # Verify installation
 python -c "import langfuse; print('LangFuse SDK installed successfully')"

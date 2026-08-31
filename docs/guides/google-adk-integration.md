@@ -11,7 +11,7 @@ SuperOptiX now supports **Google ADK (Agent Development Kit)** - Google's code-f
 **Install SuperOptiX with Google ADK:**
 
 ```bash
-pip install superoptix[frameworks-google]
+uv pip install superoptix[frameworks-google]
 ```
 
 **Includes:**
@@ -465,7 +465,7 @@ gcloud auth application-default login
 **Solution:**
 
 ```bash
-pip install google-adk
+uv pip install google-adk
 ```
 
 #### Rate Limits

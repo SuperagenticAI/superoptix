@@ -12,7 +12,10 @@ from typing import Any, Dict
 from superoptix.protocols.a2a.card_builder import build_a2a_agent_card_payload
 from superoptix.protocols.a2a.public.skills import PUBLIC_SKILL_DEFINITIONS
 
-DEFAULT_SERVICE_URL = "https://superoptix.onrender.com"
+# The address the card advertises. Keeping this on a domain you control
+# means changing host later is a DNS change rather than a card change
+# that every registry holding a copy has to re-fetch.
+DEFAULT_SERVICE_URL = "https://a2a.superoptix.ai"
 DOCUMENTATION_URL = "https://github.com/SuperagenticAI/superoptix"
 ICON_URL = "https://superoptix.ai/uploads/logo.png"
 

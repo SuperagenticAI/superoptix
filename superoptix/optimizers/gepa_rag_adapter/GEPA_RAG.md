@@ -19,21 +19,21 @@ The Generic RAG Adapter brings GEPA's evolutionary optimization to the world of 
 
 ```bash
 # Install core GEPA package
-pip install gepa
+uv pip install gepa
 
 # Install RAG adapter dependencies
 # Navigate to the examples/rag_adapter directory
 cd src/gepa/examples/rag_adapter
 
 # Option A: Install all vector store dependencies (recommended for exploration)
-pip install -r requirements-rag.txt
+uv pip install -r requirements-rag.txt
 
 # Option B: Install specific vector store dependencies
-pip install litellm chromadb                    # For ChromaDB
-pip install litellm weaviate-client             # For Weaviate  
-pip install litellm lancedb pyarrow             # For LanceDB
-pip install litellm pymilvus                    # For Milvus
-pip install litellm qdrant-client               # For Qdrant
+uv pip install litellm chromadb                    # For ChromaDB
+uv pip install litellm weaviate-client             # For Weaviate  
+uv pip install litellm lancedb pyarrow             # For LanceDB
+uv pip install litellm pymilvus                    # For Milvus
+uv pip install litellm qdrant-client               # For Qdrant
 
 # Setup local Ollama models for examples
 ollama pull qwen3:8b          # Default for ChromaDB/Weaviate/Qdrant

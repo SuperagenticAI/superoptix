@@ -90,7 +90,7 @@ Both MLFlow and LangFuse provide excellent observability capabilities for SuperO
 
 ```bash
 # Install MLFlow
-pip install mlflow
+uv pip install mlflow
 
 # Start MLFlow server
 mlflow server --host 0.0.0.0 --port 5001 --backend-store-uri sqlite:///mlflow.db
@@ -112,7 +112,7 @@ observability:
 
 ```bash
 # Install LangFuse
-pip install langfuse
+uv pip install langfuse
 
 # Start LangFuse with Docker
 docker compose up -d
@@ -206,7 +206,7 @@ with langfuse.start_as_current_span(name="llm_call") as span:
 
 If you're currently using MLFlow for LLM observability:
 
-1. **Install LangFuse**: `pip install langfuse`
+1. **Install LangFuse**: `uv pip install langfuse`
 2. **Update agent configuration**: Replace MLFlow config with LangFuse
 3. **Migrate metrics**: Convert MLFlow metrics to LangFuse spans
 4. **Set up cost tracking**: Enable automatic token and cost tracking
@@ -216,7 +216,7 @@ If you're currently using MLFlow for LLM observability:
 
 If you need traditional ML capabilities:
 
-1. **Install MLFlow**: `pip install mlflow`
+1. **Install MLFlow**: `uv pip install mlflow`
 2. **Update agent configuration**: Replace LangFuse config with MLFlow
 3. **Set up experiment tracking**: Configure MLFlow experiments
 4. **Migrate artifacts**: Move artifacts to MLFlow storage

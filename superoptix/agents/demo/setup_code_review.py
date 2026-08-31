@@ -29,7 +29,7 @@ def setup_code_review_assistant():
 
         package_root = Path(superoptix.__file__).parent
     except ImportError:
-        print("❌ SuperOptiX not installed. Install with: pip install superoptix")
+        print("❌ SuperOptiX not installed. Install with: uv pip install superoptix")
         return False
 
     # Find project root

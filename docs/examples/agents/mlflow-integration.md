@@ -18,10 +18,10 @@ MLFlow is a popular open-source platform (third-party) for managing the complete
 
 ```bash
 # Install MLFlow
-pip install mlflow
+uv pip install mlflow
 
 # Install SuperOptiX with MLFlow support
-pip install superoptix[mlflow]
+uv pip install superoptix[mlflow]
 ```
 
 ### Basic Configuration

@@ -58,10 +58,10 @@ DeepAgents 0.7 is LangChain's framework for building **"deep agents"** - sophist
 
 ```bash
 # Install SuperOptiX with DeepAgents support
-pip install superoptix[frameworks-deepagents]
+uv pip install superoptix[frameworks-deepagents]
 
 # REQUIRED: Install Gemini integration for LangChain
-pip install langchain-google-genai
+uv pip install langchain-google-genai
 ```
 
 **What gets installed:**
@@ -1217,7 +1217,7 @@ echo "set -x GOOGLE_API_KEY \"AIzaSy-your-key\"" >> ~/.config/fish/config.fish
 
 **Solution:**
 ```bash
-pip install langchain-google-genai
+uv pip install langchain-google-genai
 ```
 
 ---

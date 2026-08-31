@@ -84,7 +84,7 @@ Perfect for simple to moderate complexity tasks with local models!
 ## 📦 Installation
 
 ```bash
-pip install superoptix[frameworks-openai]
+uv pip install superoptix[frameworks-openai]
 ```
 
 **Includes:**
@@ -575,7 +575,7 @@ guardrails:
 
 **Solution:**
 ```bash
-pip install openai-agents
+uv pip install openai-agents
 ```
 
 ---

@@ -102,7 +102,7 @@ class ObservabilityEnhancedDSPyAdapter:
                 mlflow.dspy.autolog()
                 print("✅ MLflow auto-logging enabled")
             except ImportError:
-                print("⚠️  MLflow not available - install with: pip install mlflow")
+                print("⚠️  MLflow not available - install with: uv pip install mlflow")
 
         if obs_config.get("enable_langfuse", False):
             try:

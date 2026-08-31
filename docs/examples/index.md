@@ -65,7 +65,7 @@ Integrate with external observability platforms:
 
 1. **Install SuperOptiX**
    ```bash
-   pip install superoptix
+   uv pip install superoptix
    ```
 
 2. **Choose Your Demo**

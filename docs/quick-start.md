@@ -59,7 +59,7 @@ We recommend using `uv` for fast, reliable installation.
 === "pip"
 
     ```bash
-    pip install superoptix
+    uv pip install superoptix
     super --version
     ```
 

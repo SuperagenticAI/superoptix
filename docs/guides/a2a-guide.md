@@ -7,13 +7,13 @@ This guide explains how A2A support works in SuperOptiX and how to use it today.
 Install the A2A extra:
 
 ```bash
-pip install "superoptix[a2a]"
+uv pip install "superoptix[a2a]"
 ```
 
 If you want to run the full packaged demo set:
 
 ```bash
-pip install "superoptix[a2a,frameworks-pydantic-ai,frameworks-google]"
+uv pip install "superoptix[a2a,frameworks-pydantic-ai,frameworks-google]"
 ```
 
 ## A2A in the Architecture
@@ -255,19 +255,19 @@ The current implementation status is tracked in:
 If `import a2a` fails:
 
 ```bash
-pip install "superoptix[a2a]"
+uv pip install "superoptix[a2a]"
 ```
 
 If the Pydantic AI demo import fails:
 
 ```bash
-pip install "superoptix[frameworks-pydantic-ai]"
+uv pip install "superoptix[frameworks-pydantic-ai]"
 ```
 
 If you want both:
 
 ```bash
-pip install "superoptix[a2a,frameworks-pydantic-ai]"
+uv pip install "superoptix[a2a,frameworks-pydantic-ai]"
 ```
 
 If the server starts but client calls fail:

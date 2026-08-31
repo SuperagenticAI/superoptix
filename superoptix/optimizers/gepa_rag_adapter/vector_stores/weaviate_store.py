@@ -28,7 +28,7 @@ class WeaviateVectorStore(VectorStoreInterface):
 
         if importlib.util.find_spec("weaviate") is None:
             raise ImportError(
-                "Weaviate client is required for WeaviateVectorStore. Install with: pip install litellm weaviate-client"
+                "Weaviate client is required for WeaviateVectorStore. Install with: uv pip install litellm weaviate-client"
             )
 
         import weaviate.classes as wvc
@@ -373,7 +373,7 @@ class WeaviateVectorStore(VectorStoreInterface):
             import weaviate
         except ImportError as e:
             raise ImportError(
-                "Weaviate client is required. Install with: pip install litellm weaviate-client"
+                "Weaviate client is required. Install with: uv pip install litellm weaviate-client"
             ) from e
 
         client = weaviate.connect_to_local(
@@ -406,7 +406,7 @@ class WeaviateVectorStore(VectorStoreInterface):
             import weaviate
         except ImportError as e:
             raise ImportError(
-                "Weaviate client is required. Install with: pip install litellm weaviate-client"
+                "Weaviate client is required. Install with: uv pip install litellm weaviate-client"
             ) from e
 
         client = weaviate.connect_to_weaviate_cloud(
@@ -441,7 +441,7 @@ class WeaviateVectorStore(VectorStoreInterface):
             import weaviate
         except ImportError as e:
             raise ImportError(
-                "Weaviate client is required. Install with: pip install litellm weaviate-client"
+                "Weaviate client is required. Install with: uv pip install litellm weaviate-client"
             ) from e
 
         client = weaviate.connect_to_custom(

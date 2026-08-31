@@ -93,7 +93,7 @@ super init my_demo_project
 cd my_demo_project
 
 # Install dependencies
-pip install -e .
+uv pip install -e .
 ```
 
 ### **2. Choose Your Demo**

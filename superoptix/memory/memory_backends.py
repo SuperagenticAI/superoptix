@@ -451,7 +451,9 @@ class RedisBackend(MemoryBackend):
         prefix: str = "superoptix:",
     ):
         if not REDIS_AVAILABLE:
-            raise ImportError("Redis is not available. Install with: pip install redis")
+            raise ImportError(
+                "Redis is not available. Install with: uv pip install redis"
+            )
 
         self.prefix = prefix
         self.redis_client = redis.Redis(
@@ -591,7 +593,7 @@ class SurrealDBBackend(MemoryBackend):
     ):
         if not SURREALDB_AVAILABLE:
             raise ImportError(
-                "SurrealDB backend requires surrealdb package. Install with: pip install surrealdb"
+                "SurrealDB backend requires surrealdb package. Install with: uv pip install surrealdb"
             )
         if not re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", table_name):
             raise ValueError(

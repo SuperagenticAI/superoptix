@@ -67,16 +67,16 @@ super agent pull optimas_dspy
 ### 2. Install Dependencies
 ```bash
 # CrewAI target (most reliable)
-pip install superoptix[optimas,optimas-crewai]
+uv pip install superoptix[optimas,optimas-crewai]
 
 # OpenAI target
-pip install superoptix[optimas,optimas-openai]
+uv pip install superoptix[optimas,optimas-openai]
 
 # AutoGen target (now includes autogen-ext)
-pip install superoptix[optimas,optimas-autogen]
+uv pip install superoptix[optimas,optimas-autogen]
 
 # DSPy target
-pip install superoptix[optimas,optimas-dspy]
+uv pip install superoptix[optimas,optimas-dspy]
 ```
 
 ### 3. Run Full Workflow

@@ -37,7 +37,7 @@ adapter = MCPAdapter(
 Install the MCP Python SDK:
 
 ```bash
-pip install mcp
+uv pip install mcp
 ```
 
 ## Quick Start

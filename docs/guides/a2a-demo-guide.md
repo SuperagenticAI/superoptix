@@ -41,7 +41,7 @@ The packaged demo requirements are:
 ### Install
 
 ```bash
-pip install "superoptix[a2a,frameworks-pydantic-ai,frameworks-google]==0.2.20"
+uv pip install "superoptix[a2a,frameworks-pydantic-ai,frameworks-google]==0.2.20"
 ```
 
 You can verify the install with:

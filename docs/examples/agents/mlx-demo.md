@@ -17,7 +17,7 @@ This demo demonstrates:
 
 ```bash
 # Install MLX dependencies
-pip install "superoptix[mlx]"
+uv pip install "superoptix[mlx]"
 ```
 
 ### **2. Install MLX Model**

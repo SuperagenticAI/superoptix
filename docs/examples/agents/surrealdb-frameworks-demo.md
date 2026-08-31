@@ -274,7 +274,7 @@ Do not close Terminal A or Terminal B while you are testing.
 
 ## Success Checklist
 
-- [ ] `pip install "superoptix[surrealdb]"` completed
+- [ ] `uv pip install "superoptix[surrealdb]"` completed
 - [ ] `ollama pull qwen3.5:9b` completed
 - [ ] `ollama serve` is running
 - [ ] SurrealDB Docker process is running on port `8000`
@@ -313,7 +313,7 @@ ollama pull qwen3.5:9b
 Or with `pip`:
 
 ```bash
-pip install "superoptix[turboagents]"
+uv pip install "superoptix[turboagents]"
 ollama pull qwen3.5:9b
 ```
 
@@ -578,19 +578,19 @@ Use these IDs with `pull`, `compile`, and `run`.
 Install only the framework you want to test:
 
 ```bash
-pip install -U "superoptix[frameworks-dspy]"
-pip install -U "superoptix[frameworks-openai]"
-pip install -U "superoptix[frameworks-claude-sdk]"
-pip install -U "superoptix[frameworks-microsoft]"
-pip install -U "superoptix[frameworks-pydantic-ai]"
-pip install -U "superoptix[frameworks-google]"
-pip install -U "superoptix[frameworks-deepagents]"
+uv pip install -U "superoptix[frameworks-dspy]"
+uv pip install -U "superoptix[frameworks-openai]"
+uv pip install -U "superoptix[frameworks-claude-sdk]"
+uv pip install -U "superoptix[frameworks-microsoft]"
+uv pip install -U "superoptix[frameworks-pydantic-ai]"
+uv pip install -U "superoptix[frameworks-google]"
+uv pip install -U "superoptix[frameworks-deepagents]"
 ```
 
 Install most supported frameworks at once:
 
 ```bash
-pip install -U "superoptix[frameworks]"
+uv pip install -U "superoptix[frameworks]"
 ```
 
 If you install SuperOptiX with `uv tool`, use:
@@ -609,7 +609,7 @@ Notes:
 
 - use `frameworks-google`, not `framework-google`
 - use `frameworks-pydantic-ai`, not `frameworks-pydanticai`
-- `frameworks-microsoft` should install a compatible prerelease Microsoft SDK build; if `ChatAgent` import errors still appear, run `pip install -U --pre agent-framework azure-identity` and then recompile the Microsoft pipeline.
+- `frameworks-microsoft` should install a compatible prerelease Microsoft SDK build; if `ChatAgent` import errors still appear, run `uv pip install -U --pre agent-framework azure-identity` and then recompile the Microsoft pipeline.
 - CrewAI is not bundled in `frameworks` because of dependency conflicts with DSPy
 
 ## SurrealDB Across Frameworks
@@ -667,7 +667,7 @@ Important retrieval note:
     Install:
 
     ```bash
-    pip install -U "superoptix[frameworks-dspy]"
+    uv pip install -U "superoptix[frameworks-dspy]"
     ```
 
     Current local status:
@@ -695,14 +695,14 @@ Important retrieval note:
 === "🤖 OpenAI"
     Note:
 
-    - install with `pip install -U "superoptix[frameworks-openai]"`
+    - install with `uv pip install -U "superoptix[frameworks-openai]"`
     - for the OpenAI Agents SDK demo, recompile with the Gemini cloud flags before running
     - if the run log still shows `model=litellm/ollama/qwen3.5:9b`, the pipeline is still using an older Ollama-compiled spec
 
     Install:
 
     ```bash
-    pip install -U "superoptix[frameworks-openai]"
+    uv pip install -U "superoptix[frameworks-openai]"
     ```
 
     Basic RAG:
@@ -731,7 +731,7 @@ Important retrieval note:
     Install:
 
     ```bash
-    pip install -U "superoptix[frameworks-claude-sdk]"
+    uv pip install -U "superoptix[frameworks-claude-sdk]"
     ```
 
     Basic RAG:
@@ -759,17 +759,17 @@ Important retrieval note:
 === "🏢 Microsoft"
     Note:
 
-    - `pip install -U --force-reinstall "superoptix[frameworks-microsoft]"` is the safest upgrade path for Microsoft demos
+    - `uv pip install -U --force-reinstall "superoptix[frameworks-microsoft]"` is the safest upgrade path for Microsoft demos
     - if the run still fails with `cannot import name 'ChatAgent' from 'agent_framework'`, your generated pipeline is still using the older Microsoft SDK API or your env still has an older `agent-framework` build
     - when using Gemini here, set `GOOGLE_API_KEY` or `GEMINI_API_KEY`; do not set only `OPENAI_API_KEY`
     - if the run fails with `Agent.__init__() missing 1 required positional argument: 'client'`, your generated Microsoft pipeline is stale from an older SuperOptiX release
-    - fix the env with `pip install -U --pre agent-framework azure-identity`
+    - fix the env with `uv pip install -U --pre agent-framework azure-identity`
     - then delete the generated Microsoft pipeline files and recompile before rerunning
 
     Install:
 
     ```bash
-    pip install -U --force-reinstall "superoptix[frameworks-microsoft]"
+    uv pip install -U --force-reinstall "superoptix[frameworks-microsoft]"
     ```
 
     Basic RAG:
@@ -809,7 +809,7 @@ Important retrieval note:
 === "🐍 PydanticAI"
     Note:
 
-    - install with `pip install -U "superoptix[frameworks-pydantic-ai]"`
+    - install with `uv pip install -U "superoptix[frameworks-pydantic-ai]"`
     - if your installed `superoptix` incorrectly asks for `PYDANTIC_AI_GATEWAY_API_KEY` while using Gemini, force direct mode for now:
 
     ```bash
@@ -821,7 +821,7 @@ Important retrieval note:
     Install:
 
     ```bash
-    pip install -U "superoptix[frameworks-pydantic-ai]"
+    uv pip install -U "superoptix[frameworks-pydantic-ai]"
     ```
 
     Basic RAG:
@@ -855,8 +855,8 @@ Important retrieval note:
     Install:
 
     ```bash
-    pip install -U superoptix
-    pip install -U crewai==1.2.0
+    uv pip install -U superoptix
+    uv pip install -U crewai==1.2.0
     ```
 
     Basic RAG:
@@ -885,7 +885,7 @@ Important retrieval note:
     Install:
 
     ```bash
-    pip install -U "superoptix[frameworks-google]"
+    uv pip install -U "superoptix[frameworks-google]"
     ```
 
     Basic RAG:
@@ -914,7 +914,7 @@ Important retrieval note:
     Install:
 
     ```bash
-    pip install -U "superoptix[frameworks-deepagents]"
+    uv pip install -U "superoptix[frameworks-deepagents]"
     ```
 
     Basic RAG:

@@ -27,7 +27,7 @@ try:
 except ImportError as e:
   ADK_AVAILABLE = False
   print(f"⚠️  Google ADK not available: {e}")
-  print("⚠️  Install with: pip install google-adk")
+  print("⚠️  Install with: uv pip install google-adk")
   print("⚠️  Set GOOGLE_API_KEY environment variable")
 
 from superoptix.runners.google_adk_runtime_helpers import run_agent as superoptix_run_agent
@@ -148,7 +148,7 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
       return
     
     if not ADK_AVAILABLE:
-      raise ImportError("Google ADK not installed. Install with: pip install google-adk")
+      raise ImportError("Google ADK not installed. Install with: uv pip install google-adk")
     
     # Convert config to dict if needed
     import types as python_types

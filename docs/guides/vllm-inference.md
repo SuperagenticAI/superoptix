@@ -56,13 +56,13 @@
 
 ```bash
 # Install vLLM
-pip install vllm
+uv pip install vllm
 
 # For CUDA 12.1
-pip install vllm
+uv pip install vllm
 
 # For CUDA 11.8
-pip install vllm --extra-index-url https://download.pytorch.org/whl/cu118
+uv pip install vllm --extra-index-url https://download.pytorch.org/whl/cu118
 ```
 
 ### Option 2: Docker

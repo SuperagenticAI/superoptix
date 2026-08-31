@@ -31,7 +31,7 @@ except Exception as e:
   CREWAI_AVAILABLE = False
   CREWAI_IMPORT_ERROR = e
   print(f"⚠️  CrewAI not available: {e}")
-  print("⚠️  Install with: pip install crewai")
+  print("⚠️  Install with: uv pip install crewai")
 
 from superoptix.core.base_component import BaseComponent
 
@@ -201,7 +201,7 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
     if not CREWAI_AVAILABLE:
       raise ImportError(
         f"CrewAI is unavailable: {CREWAI_IMPORT_ERROR}. "
-        "Install with: pip install crewai"
+        "Install with: uv pip install crewai"
       )
     
     # Convert config to dict if needed

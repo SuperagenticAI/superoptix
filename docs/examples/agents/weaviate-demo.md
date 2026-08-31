@@ -22,12 +22,12 @@ This demo showcases how to integrate **Weaviate** - a powerful vector database -
 
 ### Install SuperOptiX
 ```bash
-pip install superoptix
+uv pip install superoptix
 ```
 
 ### Install Weaviate Dependencies
 ```bash
-pip install weaviate-client
+uv pip install weaviate-client
 ```
 
 ### Set Up Weaviate Server
@@ -138,7 +138,7 @@ vector_store:
 
 ### Client Version Issues
 - **Error**: "Client.__init__() takes 1 positional argument but 2 were given"
-  - **Solution**: Update to Weaviate client v4: `pip install weaviate-client>=4.0.0`
+  - **Solution**: Update to Weaviate client v4: `uv pip install weaviate-client>=4.0.0`
 
 ### Performance Issues
 - **Slow queries**: Reduce `top_k` or increase `similarity_threshold`

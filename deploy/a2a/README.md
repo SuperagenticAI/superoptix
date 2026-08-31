@@ -27,29 +27,130 @@ This mirrors how SuperQode does it: the card lives on the marketing domain
 (`super-agentic.ai/.well-known/agent-card.json`) while the service runs on
 Render, and the service serves its own copy of the card too.
 
-## Deploy the service
+## Where to host it
+
+Measured on the live Render endpoint and on the container locally, 31 August 2026:
+
+| | Cold start | Idle cost |
+| --- | --- | --- |
+| Render free | **42.5 s** | free |
+| Cloud Run, `minScale: 0` | **1.7 s** | free within the monthly request allowance |
+| Cloud Run, `minScale: 1` | none | a few dollars a month |
+
+Warm requests on Render return in 0.4 s, so the 42.5 s is entirely start-up:
+the free tier stops the container and a cold request pays a full application
+boot behind a proxy wake-up.
+
+That number decides the host. A2A clients apply timeouts, and a registry
+fetching an Agent Card with a 30 second timeout records the agent as
+unreachable rather than slow. The container starts in 1.7 s, which is inside
+those timeouts, so scale-to-zero is usable and the free tier is viable for an
+endpoint called infrequently.
+
+## Deploying to Cloud Run
+
+The image is `deploy/a2a/Dockerfile`. It has been built and run locally with the
+same environment Cloud Run provides.
+
+### 1. Prepare the project
 
 ```bash
-# From the repo root
-render blueprint launch          # uses deploy/a2a/render.yaml
+gcloud auth login
+gcloud config set project YOUR_PROJECT_ID
+gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com
 ```
 
-Or point Render at `deploy/a2a/render.yaml` from the dashboard. Manual settings:
+### 2. Deploy
 
-- **Build**: `pip install ".[a2a]"`
-- **Start**: `uvicorn superoptix.protocols.a2a.public.app:app --host 0.0.0.0 --port $PORT`
-- **Health check**: `/.well-known/agent-card.json`
-
-Set `SUPEROPTIX_A2A_PUBLIC_URL` to the public URL Render assigns. If it does not
-match, the card advertises an address callers cannot reach.
-
-Run it locally the same way:
+Cloud Run looks for a `Dockerfile` in the build context root, so copy it up for
+the deploy:
 
 ```bash
-pip install -e ".[a2a]"
-uvicorn superoptix.protocols.a2a.public.app:app --reload
-curl localhost:8000/.well-known/agent-card.json
+cp deploy/a2a/Dockerfile .
+gcloud run deploy superoptix-a2a \
+  --source . \
+  --region europe-west1 \
+  --allow-unauthenticated \
+  --min-instances 0 \
+  --max-instances 4 \
+  --memory 512Mi \
+  --set-env-vars SUPEROPTIX_A2A_PUBLIC_URL=https://a2a.superoptix.ai,SUPEROPTIX_TELEMETRY=false
+rm Dockerfile
 ```
+
+`--source` builds with Cloud Build, so no registry or pipeline is needed. The
+command prints a `*.run.app` URL. Test on that before touching DNS:
+
+```bash
+curl -s https://YOUR-SERVICE.run.app/.well-known/agent-card.json | jq .name
+```
+
+`deploy/a2a/service.yaml` holds the same configuration declaratively for
+`gcloud run services replace`.
+
+### 3. Map the subdomain
+
+```bash
+gcloud run domain-mappings create \
+  --service superoptix-a2a \
+  --domain a2a.superoptix.ai \
+  --region europe-west1
+```
+
+The command prints the DNS record to add. For a subdomain that is a CNAME on
+the `a2a` host pointing at `ghs.googlehosted.com`. Cloud Run issues the TLS
+certificate once the record resolves, which usually takes minutes but can take
+longer.
+
+At the registrar, turn off domain forwarding and any parked page on the
+subdomain. Both shadow DNS records and leave you debugging a placeholder.
+
+### Render settings, and their Cloud Run equivalent
+
+| Render | Cloud Run |
+| --- | --- |
+| Build Command | The `RUN` layer in the Dockerfile |
+| Start Command | The `CMD` in the Dockerfile |
+| Environment variables | `--set-env-vars`, or Secret Manager for credentials |
+| Region | `--region` |
+| Health Check Path | `startupProbe` in `service.yaml` |
+| Auto-Deploy on commit | A Cloud Build trigger, or re-run `gcloud run deploy` |
+| Build Filters | Trigger `includedFiles` |
+
+## Migrating from Render
+
+Change the address before changing the host. The Agent Card is fetched and
+cached by registries, so moving both at once gives two failure modes and no way
+to separate them.
+
+1. Point the card at the new address while Render still serves it. Set
+   `SUPEROPTIX_A2A_PUBLIC_URL=https://a2a.superoptix.ai` on the Render service,
+   redeploy, and add a CNAME from `a2a` to the Render hostname. Callers now
+   record an address you control.
+2. Deploy to Cloud Run and verify on the `run.app` URL.
+3. Repoint the CNAME to Cloud Run. Nothing holding a cached card re-fetches,
+   because the advertised URL did not change.
+4. Keep Render running until Cloud Run has served real traffic. Rolling back is
+   then a DNS change.
+
+### Two things that behave differently on Cloud Run
+
+The filesystem is ephemeral and per-instance. The public endpoint holds task
+state in memory and writes nothing, so it is unaffected. An adapted agent that
+persists to disk needs storage that survives a restart.
+
+Instances are recycled. In-memory A2A task state does not survive scale-down, so
+a caller polling `GetTask` after an idle period may find the task gone. This
+starts mattering when push notifications are implemented.
+
+### Image size
+
+The image is 662 MB, of which roughly 200 MB is LiteLLM, NumPy, botocore and
+tokenizers pulled in through DSPy. The public endpoint does not call a model, so
+none of that is used at runtime. `superoptix/protocols/__init__.py` imports
+`dspy` at module scope, which is what drags the chain in; removing that import
+would cut the image substantially. Cold start is already 1.7 s, so this is worth
+doing for build time rather than latency.
 
 ## Publish the card
 

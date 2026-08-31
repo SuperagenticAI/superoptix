@@ -723,7 +723,7 @@ SuperOptiX says: "Use our spec structure, our optimization approach, but choose 
   </tr>
   <tr>
     <td style="padding: 12px; border: 1px solid rgba(204, 0, 0, 0.2);"><code>bundle install</code></td>
-    <td style="padding: 12px; border: 1px solid rgba(156, 39, 176, 0.2);"><code>pip install superoptix[frameworks-dspy]</code></td>
+    <td style="padding: 12px; border: 1px solid rgba(156, 39, 176, 0.2);"><code>uv pip install superoptix[frameworks-dspy]</code></td>
   </tr>
 </table>
 

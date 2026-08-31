@@ -23,7 +23,7 @@ try:
 except ImportError as e:
 	raise ImportError(
 		"pydantic is required for Pydantic AI integration. "
-		"Install with: pip install pydantic"
+		"Install with: uv pip install pydantic"
 	) from e
 
 # Pydantic AI imports
@@ -42,7 +42,7 @@ try:
 except ImportError as e:
 	PYDANTIC_AI_AVAILABLE = False
 	print(f"⚠️  Pydantic AI not available: {e}")
-	print("⚠️  Install with: pip install pydantic-ai")
+	print("⚠️  Install with: uv pip install pydantic-ai")
 
 # MCP (Model Context Protocol) imports for tool support
 {% if spec.mcp and spec.mcp.enabled %}
@@ -52,7 +52,7 @@ try:
 except ImportError as e:
 	MCP_AVAILABLE = False
 	print(f"⚠️  MCP support not available: {e}")
-	print("⚠️  Install with: pip install pydantic-ai (MCP support included)")
+	print("⚠️  Install with: uv pip install pydantic-ai (MCP support included)")
 {% else %}
 MCP_AVAILABLE = False
 {% endif %}
@@ -481,7 +481,7 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 			# Instructions changed - recreate agent
 		
 		if not PYDANTIC_AI_AVAILABLE:
-			raise ImportError("Pydantic AI not installed. Install with: pip install pydantic-ai")
+			raise ImportError("Pydantic AI not installed. Install with: uv pip install pydantic-ai")
 		
 		# Get model object using Pydantic AI's infer_model()
 		# This automatically handles all providers (ollama, openai, anthropic, etc.)
@@ -712,7 +712,7 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 		"""
 {% if spec.mcp and spec.mcp.enabled %}
 		if not MCP_AVAILABLE:
-			print("⚠️  MCP support not available. Install with: pip install pydantic-ai")
+			print("⚠️  MCP support not available. Install with: uv pip install pydantic-ai")
 			return None
 		
 		# Ensure self.spec exists (should be initialized in __init__)
