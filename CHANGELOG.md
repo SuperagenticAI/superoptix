@@ -107,6 +107,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   optional local-inference backend. `pip install "superoptix[a2a]"` drops from
   ~650 MB to ~219 MB. Install `superoptix[huggingface]` to use that backend.
 
+### Changed
+- **Repositioned as the Agent-to-Agent (A2A) interoperability and optimization
+  layer.** The previous description, "Full Stack Agentic AI Optimization
+  Framework", no longer matched the product after the harness, RLM and connector
+  removals. Applied to `pyproject.toml`, the README, the documentation index and
+  the CLI banner.
+- The MCP relationship is now stated in the direction it exists. Adapted agents
+  continue to use their MCP tools; exposing an agent as an MCP server is not
+  supported, and the documentation says so rather than implying two-way support.
+
 ### Fixed
 - **Documentation site build.** Removing RLM left an empty `🧪 RLM` navigation
   section in `mkdocs.yml`. A nav entry with no children parses as null, which
@@ -120,6 +130,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   entrypoint resolution, the generated intermediate representation, TCK
   procedure, 0.3/1.0 negotiation, the error binding table, and the routing
   metric with its evaluation-set constraint.
+- `super a2a adapt` documented in the CLI reference, and A2A capability added to
+  the framework feature matrix.
+
+### Changed
+- **Corrected documentation that contradicted the current implementation.** The
+  A2A introduction, guide and integration checklist still told readers that A2A
+  support arrived through `a2a-sdk[http-server]==0.3.25`, a dependency removed
+  earlier in this release. They now describe the direct implementation and point
+  at measured conformance results.
+- README rewritten around what the release actually does: adapting existing
+  agents, conformance figures, and the protocol surface with its gaps stated.
+- Framework version claims across the documentation corrected to match
+  `pyproject.toml` — DeepAgents 0.2.0 to 0.7, DSPy 3.0 to 3.3, CrewAI 0.157 to
+  1.15, `openai-agents>=0.14` to `>=0.20,<0.21`, and the Microsoft Agent
+  Framework beta pin to 1.16. "Microsoft (Legacy)" relabelled, since that
+  framework reached 1.0 GA in April 2026.
 
 ### Added
 - **All eight frameworks now adapt.** `super a2a adapt` gained introspectors for

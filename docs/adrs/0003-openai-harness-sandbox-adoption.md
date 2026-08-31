@@ -13,7 +13,7 @@ while reducing custom runtime glue code.
 ## Decision
 
 Adopt sandbox support in the **main** OpenAI framework path using official SDK APIs from
-`openai-agents>=0.14.0`, without importing code from local protocol snapshots.
+`openai-agents>=0.20,<0.21`, without importing code from local protocol snapshots.
 
 ## Scope Implemented
 
@@ -33,7 +33,7 @@ Adopt sandbox support in the **main** OpenAI framework path using official SDK A
 - OpenAI minimal/optimized templates use sandbox-aware helper functions.
 
 4. Dependency floor:
-- `openai-agents>=0.14.0` in OpenAI-related extras.
+- `openai-agents>=0.20,<0.21` in OpenAI-related extras.
 
 ## Best Path Forward (Phase 2+)
 

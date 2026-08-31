@@ -3,7 +3,8 @@
     <img src="https://raw.githubusercontent.com/SuperagenticAI/superoptix/main/docs/logo.png" alt="SuperOptiX Logo" width="260" />
   </a>
   <h1>SuperOptiX AI</h1>
-  <h3><strong>Full Stack Agentic AI Optimization Framework</strong></h3>
+  <h3><strong>Agent-to-Agent (A2A) Interoperability and Optimization Layer</strong></h3>
+  <p>Make the agents you already run A2A-compliant, and get them discovered.</p>
 
   <div style="margin: 20px 0;">
     <a href="https://badge.fury.io/py/superoptix">
@@ -31,7 +32,8 @@
   </div>
 
   <p style="font-size: 1.0em; margin: 10px 0;">
-    Evaluation-first workflow, framework-native pipelines, and GEPA optimization.
+    A2A 1.0 at full conformance, an adapt path for eight agent runtimes, and
+    GEPA optimization of how agents are discovered.
   </p>
 </div>
 
@@ -136,10 +138,12 @@ super agent optimize developer --framework dspy --auto light
 
 ## Featured Capabilities
 
+- Adapt agents built outside SuperOptiX to A2A 1.0 without modifying them
+- A2A 1.0 server at 100% conformance against the official Technology Compatibility Kit
+- Routing-quality measurement and GEPA optimization over the Agent Card
 - GEPA optimization flow across frameworks
 - TurboAgents-backed GEPA vector stores for Chroma, FAISS, LanceDB, and SurrealDB
 - Minimal runtime pipelines by default with optional optimization lifecycle
-- Core A2A v1 agent-to-agent interoperability
 
 ---
 
@@ -170,27 +174,63 @@ Read more:
 
 ---
 
-## A2A v1 Support
+## A2A Support
 
-SuperOptiX implements the core A2A `1.0` protocol shape.
+SuperOptiX implements the A2A `1.0` protocol directly over FastAPI. The
+`a2a-sdk` package is not a dependency.
 
-That includes:
+### Conformance
 
-- v1 Agent Cards with `supportedInterfaces[]`
-- v1 task and message semantics
-- v1 method surface such as `SendMessage`, `GetTask`, `CancelTask`, and `SubscribeToTask`
-- serving compiled agents over A2A with `super agent serve <name> --protocol a2a`
-- calling remote A2A agents through the SuperOptiX A2A client
-- packaged A2A demos for DSPy, Pydantic AI, and Google ADK
+Measured with the [official A2A TCK](https://github.com/a2aproject/a2a-tck):
+
+| Level | Compliance |
+|---|---|
+| MUST | 100% |
+| SHOULD | 100% |
+| MAY | 100% |
+
+The suite runs in CI on every change to the protocol layer, with a floor that
+fails the build if compliance regresses.
+
+### Adapting an existing agent
+
+Agents built before you adopted SuperOptiX can be given an A2A endpoint without
+being rewritten:
+
+```bash
+super a2a adapt --entrypoint mycrew:crew --framework crewai
+uvicorn a2a.a2a_server:app --port 8000
+```
+
+This reads the agent's structure, derives the skills a calling agent would route
+on, and writes an Agent Card and a server. Your code is not modified.
+Introspectors ship for all eight supported frameworks; the framework is detected
+when not specified.
+
+### Protocol surface
+
+- All eleven A2A 1.0 methods answer. Push-notification configuration and the
+  extended agent card return the errors the spec defines for an agent that does
+  not offer them, rather than a 404
+- JSON-RPC 2.0 and HTTP+JSON bindings
+- `0.3` and `1.0` served from one endpoint, selected with the `A2A-Version`
+  header, so agents on the pre-1.0 line remain reachable
+- Serving compiled agents with `super agent serve <name> --protocol a2a`
+- Calling remote A2A agents through the SuperOptiX A2A client
+
+gRPC and signed Agent Cards are not implemented.
+
+### MCP
+
+Agents adapted by SuperOptiX keep using their MCP tools. SuperOptiX changes how
+an agent is reached, not how it works. Exposing an agent as an MCP server is not
+supported.
 
 Install the optional A2A extra:
 
 ```bash
 pip install "superoptix[a2a]"
 ```
-
-> SuperOptiX implements the A2A v1 wire shape directly over FastAPI rather than
-> wrapping the `a2a-sdk` package. The extra installs the HTTP server stack only.
 
 For the full packaged demo set:
 
@@ -207,6 +247,9 @@ For demo details:
 Read more:
 
 - A2A introduction: https://superagenticai.github.io/superoptix/guides/a2a-introduction/
+- Adapting an existing agent: https://superagenticai.github.io/superoptix/guides/a2a-adapt/
+- A2A conformance: https://superagenticai.github.io/superoptix/guides/a2a-conformance/
+- Routing quality: https://superagenticai.github.io/superoptix/guides/a2a-routing/
 - A2A guide: https://superagenticai.github.io/superoptix/guides/a2a-guide/
 - A2A demo guide: https://superagenticai.github.io/superoptix/guides/a2a-demo-guide/
 

@@ -658,8 +658,8 @@ def show_version_screen(args=None):
     console.print(
         Panel(
             f"[bold bright_yellow]SuperOptiX[/bold bright_yellow] [bold cyan]v{version}[/bold cyan]\n\n"
-            "[green]The Full Stack Agentic AI Framework[/green]\n"
-            "[bright_magenta]✨ Fast. Modular. Beautiful. ✨[/bright_magenta]",
+            "[green]Agent-to-Agent (A2A) Interoperability and Optimization Layer[/green]\n"
+            "[bright_magenta]Adapt an existing agent to A2A 1.0 without rewriting it.[/bright_magenta]",
             title="[bold bright_cyan]🚀 SuperOptiX Version[/bold bright_cyan]",
             border_style="bold magenta",
             padding=(1, 2),

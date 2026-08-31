@@ -1,6 +1,6 @@
 # 🗄️ DeepAgents Backend Configuration Guide
 
-**Complete guide to DeepAgents 0.2.0 pluggable backends for persistent memory, filesystem access, and advanced storage strategies.**
+**Complete guide to DeepAgents 0.7 pluggable backends for persistent memory, filesystem access, and advanced storage strategies.**
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## 🎯 Introduction
 
-### What's New in DeepAgents 0.2.0?
+### What's New in DeepAgents 0.7?
 
-DeepAgents 0.2.0 introduces a **pluggable backend abstraction** that transforms how agents store and access files. Instead of being limited to ephemeral virtual filesystems, you can now:
+DeepAgents 0.7 introduces a **pluggable backend abstraction** that transforms how agents store and access files. Instead of being limited to ephemeral virtual filesystems, you can now:
 
 **Persist memory** across conversations (StoreBackend)  
 **Access real files** on your local filesystem (FilesystemBackend)  
@@ -763,7 +763,7 @@ spec:
 
 ## 📚 Resources
 
-- [DeepAgents 0.2.0 Announcement](https://blog.langchain.com/doubling-down-on-deepagents/)
+- [DeepAgents 0.7 Announcement](https://blog.langchain.com/doubling-down-on-deepagents/)
 - [DeepAgents GitHub](https://github.com/langchain-ai/deepagents)
 - [SuperOptiX DeepAgents Integration Guide](deepagents-integration.md)
 - [Gemini Configuration Guide](../GEMINI_CONFIGURATION_GUIDE.md)

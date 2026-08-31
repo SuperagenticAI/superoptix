@@ -63,7 +63,7 @@ pip install "superoptix[logfire]"
 - `superoptix[all,logfire]` - Fails! (google-adk conflict)
 
 **What gets installed:**
-- `pydantic-ai==1.31.0` (from `frameworks-pydantic-ai`)
+- `pydantic-ai>=2.31,<2.32` (from `frameworks-pydantic-ai`)
 - `logfire==4.15.0` ✨ (from `logfire` extra)
 
 ---

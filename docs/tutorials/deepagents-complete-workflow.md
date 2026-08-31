@@ -34,7 +34,7 @@ By the end of this tutorial, you'll have:
 
 ### What is DeepAgents?
 
-DeepAgents 0.2.0 is LangChain's framework for building **"deep agents"** - sophisticated, long-running agents that can:
+DeepAgents 0.7 is LangChain's framework for building **"deep agents"** - sophisticated, long-running agents that can:
 
 - 📋 **Plan** complex tasks with `write_todos`
 - 📁 **Manage files** with 6 filesystem tools
@@ -66,7 +66,7 @@ pip install langchain-google-genai
 
 **What gets installed:**
 - SuperOptiX core
-- DeepAgents 0.2.0+ with backend support
+- DeepAgents 0.7+ with backend support
 - LangChain, LangGraph integration
 - GEPA optimizer
 - Google Gemini integration for LangChain
@@ -757,11 +757,11 @@ Overall: 3/3 PASS (100.0%)
 
 ---
 
-## 🗄️ Backend Configuration (DeepAgents 0.2.0)
+## 🗄️ Backend Configuration (DeepAgents 0.7)
 
 ### Understanding Backends
 
-DeepAgents 0.2.0 introduces **pluggable backends** that control where agent files are stored. This is a game-changer for production agents!
+DeepAgents 0.7 introduces **pluggable backends** that control where agent files are stored. This is a game-changer for production agents!
 
 ### Backend Type 1: StateBackend (Default - Ephemeral)
 
@@ -1541,7 +1541,7 @@ super agent pull researcher_hybrid          # CompositeBackend
 
 ### External Resources
 
-- [DeepAgents 0.2.0 Announcement](https://blog.langchain.com/doubling-down-on-deepagents/) - LangChain blog
+- [DeepAgents 0.7 Announcement](https://blog.langchain.com/doubling-down-on-deepagents/) - LangChain blog
 - [Google AI Studio](https://aistudio.google.com/) - Get FREE Gemini API key
 - [Gemini Pricing](https://ai.google.dev/pricing) - Free tier details
 

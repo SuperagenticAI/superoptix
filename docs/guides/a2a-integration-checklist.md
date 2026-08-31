@@ -9,7 +9,7 @@ It is based on analysis of the official A2A protocol and Python SDK materials. S
 Current implementation target:
 
 - A2A protocol target: `1.0`
-- Optional Python dependency: `a2a-sdk[http-server]==0.3.25`
+- Optional extra: `superoptix[a2a]`, which installs the HTTP server stack. The `a2a-sdk` package is not used.
 - SuperOptiX A2A dependency boundary: external SDK only
 
 Official sources reviewed:
@@ -165,7 +165,9 @@ The broader A2A integration can be considered more complete later when the follo
 
 The current SuperOptiX integration emits and consumes the A2A `1.0` protocol model.
 
-The optional Python SDK dependency is still pinned to `0.3.25`, so SuperOptiX carries the protocol compatibility layer itself. The `1.0.0` protocol release introduces breaking changes around:
+SuperOptiX implements the protocol directly, so there is no SDK version to
+track. Both the `1.0` and `0.3` lines are served from one endpoint and selected
+with the `A2A-Version` header; see [A2A conformance](a2a-conformance.md).
 
 - operation names
 - event payload shapes

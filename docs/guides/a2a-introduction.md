@@ -72,29 +72,31 @@ MCP and A2A are complementary:
 
 Runtime A2A support in SuperOptiX follows these rules:
 
-- no vendored A2A implementation
-- A2A support comes through the external dependency `a2a-sdk`
-- SuperOptiX owns the protocol adapter layer on top of that dependency boundary
+- SuperOptiX implements the A2A wire protocol directly, over FastAPI
+- the `a2a-sdk` package is not a dependency and is not imported
+- conformance is verified against the official Technology Compatibility Kit
+  rather than asserted
 
 See the decision record:
 
 - [ADR 0001: A2A Integration Boundary](../adrs/0001-a2a-integration-boundary.md)
 
-## A2A v1 Protocol And SDK Version
+## Protocol versions
 
-SuperOptiX now targets the A2A `1.0` protocol at the adapter boundary.
+SuperOptiX targets A2A `1.0` and also serves the `0.3` line. A client selects
+with the `A2A-Version` request header; `1.0` is assumed when it is absent.
 
-Official A2A v1 release announcement:
+Official release announcement:
 
 - [Announcing A2A 1.0](https://a2a-protocol.org/latest/announcing-1.0/)
 
-The optional dependency remains pinned to:
+Both lines are served because the installed base is on 0.3. Of the eight agent
+frameworks SuperOptiX adapts, five declare no A2A dependency and the three that
+do are pinned below 1.0.
 
-```text
-a2a-sdk[http-server]==0.3.25
-```
-
-This split exists because the published Python SDK release line still lags the latest protocol spec, so SuperOptiX normalizes protocol `1.0` shapes in its own adapter layer.
+Conformance is measured, not claimed. See
+[A2A conformance](a2a-conformance.md) for current results and how to reproduce
+them.
 
 This is exposed through the optional package extra:
 

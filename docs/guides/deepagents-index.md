@@ -47,7 +47,7 @@
 
 ### **[Backend Configuration Reference](deepagents-backends.md)**
 
-**Deep dive into DeepAgents 0.2.0 backends**
+**Deep dive into DeepAgents 0.7 backends**
 
 **Topics covered:**
 - What are backends?

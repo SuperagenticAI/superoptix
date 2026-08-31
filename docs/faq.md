@@ -105,7 +105,7 @@ This is a **known dependency conflict** between CrewAI and DSPy due to incompati
 
 **🔍 The Problem:**
 - **DSPy 3.0.0** requires `json-repair>=0.30.0`
-- **CrewAI 0.157.0** requires `json-repair==0.25.2` (exact version)
+- **CrewAI 1.15** requires `json-repair==0.25.2` (exact version)
 
 **The Solution:**
 Install CrewAI manually after installing SuperOptiX with DSPy support:
@@ -115,7 +115,7 @@ Install CrewAI manually after installing SuperOptiX with DSPy support:
 pip install "superoptix[optimas]"
 
 # Install CrewAI without dependencies to avoid conflicts
-pip install crewai==0.157.0 --no-deps
+pip install crewai>=1.15 --no-deps
 
 # Ensure compatible json-repair version
 pip install "json-repair>=0.30.0"

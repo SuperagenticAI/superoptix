@@ -12,7 +12,7 @@ For fast error-to-fix mapping, use [Troubleshooting by Symptom](guides/troublesh
 
 **Error Message:**
 ```
-ERROR: Cannot install crewai==0.157.0 and dspy==3.0.0 because these package versions have conflicting dependencies.
+ERROR: Cannot install crewai>=1.15 and dspy>=3.3 because these package versions have conflicting dependencies.
 
 The conflict is caused by:
     dspy 3.0.0 depends on json-repair>=0.30.0
@@ -22,7 +22,7 @@ The conflict is caused by:
 **Root Cause:**
 This is a **known dependency conflict** between CrewAI and DSPy due to incompatible `json-repair` version requirements:
 - **DSPy 3.0.0** requires `json-repair>=0.30.0`
-- **CrewAI 0.157.0** requires `json-repair==0.25.2` (exact version)
+- **CrewAI 1.15** requires `json-repair==0.25.2` (exact version)
 
 **Solution:**
 Install CrewAI manually after installing SuperOptiX with DSPy support:
@@ -32,7 +32,7 @@ Install CrewAI manually after installing SuperOptiX with DSPy support:
 pip install "superoptix[optimas]"
 
 # Install CrewAI without dependencies to avoid conflicts
-pip install crewai==0.157.0 --no-deps
+pip install crewai>=1.15 --no-deps
 
 # Ensure compatible json-repair version
 pip install "json-repair>=0.30.0"

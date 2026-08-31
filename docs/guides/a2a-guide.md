@@ -32,7 +32,7 @@ Inbound A2A uses:
 - a SuperOptiX pipeline or runtime adapter
 - the framework-neutral runtime contract
 - the A2A server bridge
-- the external `a2a-sdk`
+- the A2A wire protocol, implemented directly over FastAPI
 
 The bridge is created through:
 
@@ -191,22 +191,23 @@ Compatibility notes:
 - `mcp_servers` is still accepted as legacy MCP-only config
 - new playbooks should prefer `protocols`
 
-## What Exists Today vs Planned
+## What exists today
 
-Exists today:
-
-- A2A bridge package
-- packaged demos
-- pullable A2A demo playbooks
-- runtime contract
+- A2A 1.0 server covering the full method surface, with 0.3 negotiation
+- 100% MUST/SHOULD/MAY against the official Technology Compatibility Kit,
+  enforced in CI ([A2A conformance](a2a-conformance.md))
+- `super a2a adapt` for agents built outside SuperOptiX, across all eight
+  supported frameworks ([Adapting an existing agent](a2a-adapt.md))
+- routing-quality measurement and optimisation over the Agent Card
+  ([Routing quality](a2a-routing.md))
 - CLI serve command for compiled agents
-- integration checklist and gap map
+- packaged demos and pullable A2A demo playbooks
 
-Planned next:
+Not implemented:
 
-- Microsoft and DeepAgents runtime adapters
-- multi-agent cross-framework A2A demo
-- richer observability around A2A task execution
+- gRPC binding; JSON-RPC and HTTP+JSON are both served
+- signed Agent Cards
+- push notifications, which report `PushNotificationNotSupportedError`
 
 ## CLI Serve
 
@@ -241,7 +242,9 @@ SuperOptiX now emits and consumes A2A `1.0` protocol shapes:
 - `ROLE_USER` / `ROLE_AGENT`
 - `TASK_STATE_*`
 
-The optional `a2a-sdk` dependency is still pinned separately because the published SDK release line is behind the latest protocol spec. SuperOptiX keeps that mismatch inside the adapter layer so CLI and runtime behavior stay stable.
+SuperOptiX does not depend on the `a2a-sdk` package. The protocol is implemented
+directly, and correctness is established by running the official Technology
+Compatibility Kit rather than by inheriting an SDK's behaviour.
 
 The current implementation status is tracked in:
 
