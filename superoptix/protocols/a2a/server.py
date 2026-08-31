@@ -12,6 +12,7 @@ from contextlib import suppress
 from datetime import datetime, timezone
 from typing import Any, Dict
 
+from superoptix.protocols.a2a import bridge as a2a_bridge
 from superoptix.protocols.a2a import errors as a2a_errors
 from superoptix.protocols.a2a.card_builder import build_a2a_agent_card_payload
 from superoptix.protocols.a2a.mappers import (
@@ -691,9 +692,32 @@ def _unsupported_version(request: Any) -> str | None:
         requested = (request.headers.get("A2A-Version") or "").strip()
     except AttributeError:
         return None
-    if requested and requested not in SUPPORTED_PROTOCOL_VERSIONS:
-        return requested
-    return None
+    if not requested:
+        return None
+    # Accept any spelling that reduces to a line we serve: a client asking for
+    # "0.3.0" wants the same wire shape as one asking for "0.3".
+    if a2a_bridge.normalize_version(requested) in SUPPORTED_PROTOCOL_VERSIONS:
+        return None
+    if requested in SUPPORTED_PROTOCOL_VERSIONS:
+        return None
+    return requested
+
+
+def _maybe_legacy(request: Any, payload: Dict[str, Any]) -> Dict[str, Any]:
+    """Render a response in the 0.3 wire shape when the caller asked for it."""
+    if not _wants_legacy(request):
+        return payload
+    if isinstance(payload, dict) and "task" in payload:
+        return {**payload, "task": a2a_bridge.task_to_v03(payload["task"])}
+    return a2a_bridge.task_to_v03(payload)
+
+
+def _wants_legacy(request: Any) -> bool:
+    """Whether this caller asked for the pre-1.0 wire shape."""
+    try:
+        return a2a_bridge.requested_version(request.headers) == a2a_bridge.V03
+    except AttributeError:
+        return False
 
 
 def _sse_stream(
@@ -787,7 +811,11 @@ def create_a2a_fastapi_app(
         return await call_next(request)
 
     @app.get("/.well-known/agent-card.json")
-    async def get_agent_card() -> Dict[str, Any]:
+    async def get_agent_card(request: Request) -> Dict[str, Any]:
+        # A 0.3 reader expects a top-level `url` and its own protocolVersion;
+        # handed only `supportedInterfaces` it has nothing to call.
+        if _wants_legacy(request):
+            return a2a_bridge.card_to_v03(agent_card)
         return agent_card
 
     @app.get("/extendedAgentCard")
@@ -803,7 +831,7 @@ def create_a2a_fastapi_app(
             result = await _http_send_message(request, payload)
         except A2AProtocolError as exc:
             return _http_error(exc.error, str(exc))
-        return result
+        return _maybe_legacy(request, result)
 
     async def _http_send_message(
         request: Request, payload: Dict[str, Any]
@@ -836,11 +864,15 @@ def create_a2a_fastapi_app(
         return await tasks.list(context_id=contextId, status=status, page_size=pageSize)
 
     @app.get("/tasks/{task_id}")
-    async def get_task(task_id: str, historyLength: int | None = None) -> Any:  # noqa: N803
+    async def get_task(
+        request: Request,
+        task_id: str,
+        historyLength: int | None = None,  # noqa: N803
+    ) -> Any:
         task = await tasks.get(task_id, history_length=historyLength)
         if not task:
             return _http_error(a2a_errors.TASK_NOT_FOUND, "Task not found")
-        return task
+        return _maybe_legacy(request, task)
 
     @app.post("/tasks/{task_id}:cancel")
     async def cancel_task(task_id: str, request: Request) -> Any:

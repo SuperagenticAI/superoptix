@@ -149,6 +149,9 @@ nav:
       - '📘 A2A Guide': guides/a2a-guide.md
       - '🧭 Integration Checklist': guides/a2a-integration-checklist.md
       - '🧪 A2A Demo Guide': guides/a2a-demo-guide.md
+      - '🔌 Adapt an Existing Agent': guides/a2a-adapt.md
+      - '✅ Conformance': guides/a2a-conformance.md
+      - '🎯 Routing Quality': guides/a2a-routing.md
   - Evaluate:
       - 'Evaluation & Testing': guides/evaluation-testing.md
       - '🎭 RSpec-Style BDD Testing': guides/bdd.md
@@ -169,7 +172,6 @@ nav:
       - '🔍 RAG Optimization': tutorials/rag-optimization.md
       - '🔌 MCP Optimization': tutorials/mcp-optimization.md
       - '💡 Memory Optimization': guides/memory-optimization.md
-  - 🧪 RLM:
   - 🎼 Orchestrate:
       - '🎼 Orchestra Development': guides/orchestra-development.md
       - '🎼 Multi-Agent Orchestra': tutorials/first-orchestra.md

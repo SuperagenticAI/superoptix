@@ -314,3 +314,173 @@ class TestInvoke:
 
     def test_internal_fields_are_not_returned(self):
         assert "hidden" not in _as_text({"answer": "42", "reasoning": "hidden"})
+
+
+# --------------------------------------------------------------------------
+# The remaining six frameworks
+# --------------------------------------------------------------------------
+class _OATool:
+    def __init__(self, name, description):
+        self.name, self.description = name, description
+
+
+class _OpenAIAgent:
+    """Shaped like agents.Agent: `handoffs` is the attribute only it has."""
+
+    def __init__(self, name, instructions, tools=None):
+        self.name, self.instructions = name, instructions
+        self.tools = tools or []
+        self.handoffs = []
+        self.handoff_description = None
+
+
+_OpenAIAgent.__name__ = "Agent"
+
+
+class _PydanticToolset:
+    def __init__(self, tools):
+        self.tools = tools
+
+
+class _PydanticAgent:
+    """Shaped like pydantic_ai.Agent: `instructions` is a method, not a string."""
+
+    def __init__(self, name, instructions, tools=None):
+        self.name = name
+        self._instructions = [instructions]
+        self._system_prompts = ()
+        self._function_toolset = _PydanticToolset(tools or {})
+
+    def instructions(self):
+        return self._instructions
+
+
+_PydanticAgent.__name__ = "Agent"
+
+
+class _ADKAgent:
+    def __init__(self, name, description, instruction, sub_agents=None):
+        self.name, self.description, self.instruction = name, description, instruction
+        self.tools, self.sub_agents = [], sub_agents or []
+
+
+_ADKAgent.__name__ = "Agent"
+
+
+class _MSAgent:
+    def __init__(self, name, description, instructions):
+        self.id, self.name = "id-1", name
+        self.description, self.instructions, self.tools = description, instructions, []
+
+
+_MSAgent.__name__ = "Agent"
+
+
+class _ClaudeDefinition:
+    def __init__(self, description, prompt):
+        self.description, self.prompt, self.tools = description, prompt, []
+
+
+_ClaudeDefinition.__name__ = "AgentDefinition"
+
+
+class _DeepGraph:
+    def __init__(self, subagents):
+        self.subagents = subagents
+
+    def invoke(self, payload):
+        return payload
+
+    def get_graph(self):
+        return None
+
+
+_DeepGraph.__name__ = "CompiledStateGraph"
+
+
+class TestRemainingFrameworks:
+    """Object shapes here were read from the installed packages, not guessed."""
+
+    def test_openai_agent_uses_its_tool_descriptions(self):
+        agent = _OpenAIAgent(
+            "OrderBot", "Help customers",
+            tools=[_OATool("lookup_order", "Look up a customer order by its id")],
+        )
+        spec = detect(agent).introspect(agent, entrypoint="m:orders")
+        assert spec.framework == "openai"
+        assert spec.skills[0].id == "lookup-order"
+        assert "Look up a customer order" in spec.skills[0].description
+
+    def test_pydantic_ai_is_not_mistaken_for_openai(self):
+        """Regression: three frameworks name their class `Agent`.
+
+        Pydantic AI also has `instructions` and no `role`, so an OpenAI matcher
+        keyed on those claimed it. `handoffs` is the discriminator.
+        """
+        agent = _PydanticAgent(
+            "RefundBot", "Handle refunds",
+            tools={"issue_refund": _OATool("issue_refund", "Issue a refund")},
+        )
+        assert detect(agent).framework == "pydantic-ai"
+
+    def test_pydantic_ai_reads_its_function_toolset(self):
+        agent = _PydanticAgent(
+            "RefundBot", "Handle refunds",
+            tools={"issue_refund": _OATool("issue_refund", "Issue a refund on an order")},
+        )
+        spec = detect(agent).introspect(agent, entrypoint="m:refunds")
+        assert spec.skills[0].id == "issue-refund"
+
+    def test_google_adk_prefers_description_over_instruction(self):
+        """`instruction` is internal steering; `description` faces other agents."""
+        agent = _ADKAgent("SupportBot", "Answers product questions", "Be concise")
+        spec = detect(agent).introspect(agent, entrypoint="m:support")
+        assert spec.framework == "google-adk"
+        assert "Answers product questions" in spec.skills[0].description
+        assert "Be concise" not in spec.skills[0].description
+
+    def test_google_adk_sub_agents_become_skills(self):
+        sub = _ADKAgent("Escalator", "Escalates bugs to engineering", "")
+        agent = _ADKAgent("SupportBot", "Answers questions", "Be concise", [sub])
+        spec = detect(agent).introspect(agent, entrypoint="m:support")
+        assert "escalator" in [s.id for s in spec.skills]
+
+    def test_microsoft_agent(self):
+        agent = _MSAgent("Planner", "Plans multi-step work", "Think first")
+        spec = detect(agent).introspect(agent, entrypoint="m:planner")
+        assert spec.framework == "microsoft"
+        assert "Plans multi-step work" in spec.skills[0].description
+
+    def test_claude_agent_definition(self):
+        definition = _ClaudeDefinition("Reviews pull requests for defects", "You review code")
+        spec = detect(definition).introspect(definition, entrypoint="m:reviewer")
+        assert spec.framework == "claude-sdk"
+        assert "Reviews pull requests" in spec.skills[0].description
+
+    def test_deepagents_reads_its_subagents(self):
+        graph = _DeepGraph([
+            {"name": "researcher", "description": "Searches sources and cites them"},
+            {"name": "writer", "description": "Drafts prose from research notes"},
+        ])
+        spec = detect(graph).introspect(graph, entrypoint="m:graph")
+        assert spec.framework == "deepagents"
+        assert {s.id for s in spec.skills} == {"researcher", "writer"}
+
+    def test_a_deepagents_graph_without_descriptions_explains_itself(self):
+        """A bare graph tells a caller nothing, and the error should say so."""
+        with pytest.raises(AdaptError, match="tells a caller nothing"):
+            detect(_DeepGraph([{"name": "x"}])).introspect(
+                _DeepGraph([{"name": "x"}]), entrypoint="m:g"
+            )
+
+    def test_all_eight_frameworks_are_registered(self):
+        assert set(available()) == {
+            "claude-sdk", "crewai", "deepagents", "dspy",
+            "google-adk", "microsoft", "openai", "pydantic-ai",
+        }
+
+    def test_every_introspector_has_an_invoker(self):
+        """A framework that can be adapted must also be runnable."""
+        from superoptix.protocols.a2a.adapt.invoke import _INVOKERS
+
+        assert sorted(_INVOKERS) == available()

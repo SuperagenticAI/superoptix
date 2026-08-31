@@ -83,9 +83,74 @@ async def _invoke_dspy(program: Any, query: str) -> Any:
     return await _maybe_await(program(query))
 
 
+async def _invoke_openai(agent: Any, query: str) -> Any:
+    from agents import Runner
+
+    return await _maybe_await(Runner.run(agent, query))
+
+
+async def _invoke_pydantic_ai(agent: Any, query: str) -> Any:
+    return await _maybe_await(agent.run(query))
+
+
+async def _invoke_google_adk(agent: Any, query: str) -> Any:
+    from google.adk.runners import InMemoryRunner
+    from google.genai import types
+
+    runner = InMemoryRunner(agent=agent, app_name="superoptix-a2a")
+    session = await _maybe_await(
+        runner.session_service.create_session(app_name="superoptix-a2a", user_id="a2a")
+    )
+    message = types.Content(role="user", parts=[types.Part(text=query)])
+    chunks = []
+    async for event in runner.run_async(
+        user_id="a2a", session_id=session.id, new_message=message
+    ):
+        content = getattr(event, "content", None)
+        for part in getattr(content, "parts", None) or []:
+            if getattr(part, "text", None):
+                chunks.append(part.text)
+    return "\n".join(chunks)
+
+
+async def _invoke_microsoft(agent: Any, query: str) -> Any:
+    return await _maybe_await(agent.run(query))
+
+
+async def _invoke_claude_sdk(options: Any, query: str) -> Any:
+    from claude_agent_sdk import AssistantMessage, TextBlock, query as claude_query
+
+    chunks = []
+    async for message in claude_query(prompt=query, options=options):
+        if isinstance(message, AssistantMessage):
+            for block in getattr(message, "content", None) or []:
+                if isinstance(block, TextBlock):
+                    chunks.append(block.text)
+    return "\n".join(chunks)
+
+
+async def _invoke_deepagents(graph: Any, query: str) -> Any:
+    result = await _maybe_await(
+        graph.invoke({"messages": [{"role": "user", "content": query}]})
+    )
+    messages = (result or {}).get("messages") if isinstance(result, dict) else None
+    if messages:
+        last = messages[-1]
+        return getattr(last, "content", None) or (
+            last.get("content") if isinstance(last, dict) else last
+        )
+    return result
+
+
 _INVOKERS = {
     "crewai": _invoke_crewai,
     "dspy": _invoke_dspy,
+    "openai": _invoke_openai,
+    "pydantic-ai": _invoke_pydantic_ai,
+    "google-adk": _invoke_google_adk,
+    "microsoft": _invoke_microsoft,
+    "claude-sdk": _invoke_claude_sdk,
+    "deepagents": _invoke_deepagents,
 }
 
 
