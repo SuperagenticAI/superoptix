@@ -108,6 +108,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ~650 MB to ~219 MB. Install `superoptix[huggingface]` to use that backend.
 
 ### Added
+- **`super a2a adapt` — make an agent you already built speak A2A 1.0.**
+  Point it at your own code and it emits an Agent Card and a conformant server
+  without modifying the agent:
+
+  ```
+  super a2a adapt --entrypoint mycrew:crew --framework crewai
+  super a2a adapt --entrypoint app.rag:program --framework dspy --out ./a2a
+  ```
+
+  Introspectors ship for **CrewAI** (crews, tasks and agents) and **DSPy**
+  (modules and signatures); the framework is detected when not given. A DSPy
+  signature is unusually good source material — it already names its inputs and
+  outputs with per-field descriptions, which maps almost directly onto a skill.
+
+  The generated agent **scores 86.3% MUST on the official A2A TCK**, identical
+  to SuperOptiX's own published endpoint; every remaining failure is a TCK test
+  hook that a production agent deliberately does not implement.
+
+- **SuperSpec as a generated intermediate representation**
+  (`superoptix/protocols/a2a/adapt/`). On the adapt path SuperSpec is emitted by
+  introspection rather than written by hand — the user never authors one. Each
+  framework needs one introspector in and shares every emitter out, which is
+  what makes covering eight of them tractable, and the IR records which fields
+  GEPA may later rewrite (`skills[].description`, `skills[].examples` — the
+  routing interface other agents read, never identity or protocol fields).
+
+### Added
 - **Public A2A endpoint and Agent Card** (`superoptix/protocols/a2a/public/`).
   Two deterministic, vendor-neutral skills served over A2A — no model calls, no
   user code, no credentials:
