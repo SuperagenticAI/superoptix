@@ -18,12 +18,6 @@ from superoptix.observability.unified_interface import (
     ObservabilityBackend,
     UnifiedObservability,
 )
-from superoptix.runners.crewai_runtime_helpers import (
-    run_with_optional_rlm as run_crewai_with_optional_rlm,
-)
-from superoptix.runners.openai_runtime_helpers import (
-    run_with_optional_rlm as run_openai_with_optional_rlm,
-)
 
 
 class _FakeSpan:
@@ -120,7 +114,9 @@ def _install_fake_instrumentor(
     for idx in range(1, len(parts)):
         package_name = ".".join(parts[:idx])
         monkeypatch.setitem(
-            sys.modules, package_name, sys.modules.get(package_name, types.ModuleType(package_name))
+            sys.modules,
+            package_name,
+            sys.modules.get(package_name, types.ModuleType(package_name)),
         )
 
     instrumentor_mod = types.ModuleType(module_name)
@@ -260,67 +256,3 @@ def test_unified_observability_accepts_phoenix_backend(monkeypatch):
 
     assert obs.backend == ObservabilityBackend.PHOENIX
     assert "phoenix" in obs.tracer.external_tracers
-
-
-def test_openai_runtime_helper_logs_phoenix_span(monkeypatch):
-    _install_fake_phoenix(monkeypatch)
-    instrument_calls = []
-    _install_fake_instrumentor(
-        monkeypatch,
-        module_name="openinference.instrumentation.openai_agents",
-        class_name="OpenAIAgentsInstrumentor",
-        instrument_calls=instrument_calls,
-    )
-
-    agents_mod = types.ModuleType("agents")
-
-    class _FakeRunner:
-        @staticmethod
-        async def run(agent, input):
-            return {"agent": getattr(agent, "name", "agent"), "input": input}
-
-    agents_mod.Runner = _FakeRunner
-    monkeypatch.setitem(sys.modules, "agents", agents_mod)
-
-    class _Agent:
-        name = "openai-demo"
-
-    result = __import__("asyncio").run(
-        run_openai_with_optional_rlm(
-            agent=_Agent(),
-            prompt="hello",
-            spec_data={"phoenix": {"enabled": True}},
-            model_name="gpt-4o-mini",
-        )
-    )
-
-    assert result["input"] == "hello"
-    assert len(instrument_calls) == 1
-
-
-def test_crewai_runtime_helper_logs_phoenix_span(monkeypatch):
-    _install_fake_phoenix(monkeypatch)
-    instrument_calls = []
-    _install_fake_instrumentor(
-        monkeypatch,
-        module_name="openinference.instrumentation.crewai",
-        class_name="CrewAIInstrumentor",
-        instrument_calls=instrument_calls,
-    )
-
-    class _Crew:
-        name = "crewai-demo"
-
-        def kickoff(self, inputs):
-            return {"raw": f"done:{inputs['query']}"}
-
-    output = run_crewai_with_optional_rlm(
-        crew=_Crew(),
-        prompt="hello",
-        spec_data={"phoenix": {"enabled": True}},
-        model_name="gpt-4o-mini",
-        task_description="Task",
-    )
-
-    assert "done:hello" in output
-    assert len(instrument_calls) == 1

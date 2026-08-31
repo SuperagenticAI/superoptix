@@ -6,7 +6,6 @@ Accepted - April 15, 2026
 
 ## Context
 
-Main SuperOptiX already supports OpenAI Agents SDK pipelines and optional RLM orchestration.
 OpenAI Agents SDK introduced a production runtime split (`harness + sandbox`) with `SandboxAgent`,
 manifest staging, and sandbox run config. This aligns with SuperOptiX's optimization-first model
 while reducing custom runtime glue code.

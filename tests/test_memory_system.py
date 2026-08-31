@@ -120,7 +120,13 @@ class TestMemoryBackends:
                     return [{"result": result[:1]}]
 
                 if sql.startswith("select memory_key"):
-                    return [{"result": [{"memory_key": row["memory_key"]} for row in self.rows]}]
+                    return [
+                        {
+                            "result": [
+                                {"memory_key": row["memory_key"]} for row in self.rows
+                            ]
+                        }
+                    ]
 
                 if sql.startswith("select count()"):
                     return [{"result": [{"count": len(self.rows)}]}]
@@ -211,7 +217,13 @@ class TestMemoryBackends:
                     return [{"result": result[:1]}]
 
                 if sql.startswith("select memory_key"):
-                    return [{"result": [{"memory_key": row["memory_key"]} for row in self.rows]}]
+                    return [
+                        {
+                            "result": [
+                                {"memory_key": row["memory_key"]} for row in self.rows
+                            ]
+                        }
+                    ]
 
                 if sql.startswith("select count()"):
                     return [{"result": [{"count": len(self.rows)}]}]
@@ -602,8 +614,8 @@ class _TemporalSurrealSession:
     """Fake SurrealDB session that tracks both primary and versions table writes."""
 
     def __init__(self):
-        self.primary: list[dict] = []    # primary table rows
-        self.versions: list[dict] = []   # versions table rows (append-only)
+        self.primary: list[dict] = []  # primary table rows
+        self.versions: list[dict] = []  # versions table rows (append-only)
 
     def signin(self, _payload):
         return None
@@ -620,7 +632,10 @@ class _TemporalSurrealSession:
             return [{"result": []}]
 
         # DELETE primary by memory_key
-        if normalized.startswith("delete") and "where memory_key = $memory_key" in normalized:
+        if (
+            normalized.startswith("delete")
+            and "where memory_key = $memory_key" in normalized
+        ):
             mk = params.get("memory_key")
             self.primary = [r for r in self.primary if r.get("memory_key") != mk]
             return [{"result": []}]
@@ -653,7 +668,8 @@ class _TemporalSurrealSession:
             mk = params.get("key")
             as_of = params.get("as_of", "")
             matches = [
-                r for r in self.versions
+                r
+                for r in self.versions
                 if r.get("memory_key") == mk and str(r.get("version_ts", "")) <= as_of
             ]
             matches.sort(key=lambda r: r.get("version_ts", ""), reverse=True)
@@ -729,7 +745,9 @@ class TestTemporalSurrealDBBackend:
         assert session.primary[0]["stored_value"] == '"v2"'
 
         # Versions table: both versions recorded
-        config_versions = [r for r in session.versions if r.get("memory_key") == "config"]
+        config_versions = [
+            r for r in session.versions if r.get("memory_key") == "config"
+        ]
         assert len(config_versions) == 2
 
     def test_temporal_retrieve_at_returns_version_at_timestamp(self, monkeypatch):
@@ -738,11 +756,22 @@ class TestTemporalSurrealDBBackend:
 
         # Inject two versions manually with distinct timestamps
         import json as _json
+
         t1 = "2025-01-01T10:00:00"
         t2 = "2025-01-01T11:00:00"
         session.versions = [
-            {"memory_key": "cfg", "stored_value": '"v1"', "is_pickle": False, "version_ts": t1},
-            {"memory_key": "cfg", "stored_value": '"v2"', "is_pickle": False, "version_ts": t2},
+            {
+                "memory_key": "cfg",
+                "stored_value": '"v1"',
+                "is_pickle": False,
+                "version_ts": t1,
+            },
+            {
+                "memory_key": "cfg",
+                "stored_value": '"v2"',
+                "is_pickle": False,
+                "version_ts": t2,
+            },
         ]
 
         # Ask for value at a point between t1 and t2
@@ -772,9 +801,24 @@ class TestTemporalSurrealDBBackend:
         t2 = "2025-01-01T10:00:00"
         t3 = "2025-01-01T11:00:00"
         session.versions = [
-            {"memory_key": "k", "stored_value": '"a"', "is_pickle": False, "version_ts": t1},
-            {"memory_key": "k", "stored_value": '"b"', "is_pickle": False, "version_ts": t2},
-            {"memory_key": "k", "stored_value": '"c"', "is_pickle": False, "version_ts": t3},
+            {
+                "memory_key": "k",
+                "stored_value": '"a"',
+                "is_pickle": False,
+                "version_ts": t1,
+            },
+            {
+                "memory_key": "k",
+                "stored_value": '"b"',
+                "is_pickle": False,
+                "version_ts": t2,
+            },
+            {
+                "memory_key": "k",
+                "stored_value": '"c"',
+                "is_pickle": False,
+                "version_ts": t3,
+            },
         ]
 
         hist = backend.history("k", limit=10)
@@ -817,17 +861,21 @@ class TestTemporalSurrealDBBackend:
         # Versions should still have both records
         assert len(session.versions) == 2
 
-    def test_retrieve_at_falls_back_to_retrieve_when_temporal_disabled(self, monkeypatch):
+    def test_retrieve_at_falls_back_to_retrieve_when_temporal_disabled(
+        self, monkeypatch
+    ):
         """retrieve_at() delegates to retrieve() when temporal is off."""
         backend, session = _make_temporal_backend(monkeypatch, temporal_enabled=False)
-        session.primary = [{
-            "memory_key": "k",
-            "stored_value": '"current"',
-            "is_pickle": False,
-            "created_at": "2025-01-01T00:00:00",
-            "updated_at": "2025-01-01T00:00:00",
-            "expires_at": None,
-        }]
+        session.primary = [
+            {
+                "memory_key": "k",
+                "stored_value": '"current"',
+                "is_pickle": False,
+                "created_at": "2025-01-01T00:00:00",
+                "updated_at": "2025-01-01T00:00:00",
+                "expires_at": None,
+            }
+        ]
         result = backend.retrieve_at("k", as_of=datetime(2024, 1, 1))
         assert result == "current"
 
@@ -842,6 +890,7 @@ class TestLiveMemorySubscriber:
 
     def _make_fake_backend(self, url: str) -> object:
         """Return a minimal object that looks like SurrealDBBackend."""
+
         class _FakeBackend:
             pass
 
@@ -902,7 +951,9 @@ class TestLiveMemorySubscriber:
         from superoptix.memory.live_memory import LiveMemorySubscriber
 
         backend = self._make_fake_backend("ws://localhost:8000")
-        subscriber = LiveMemorySubscriber(backend, reconnect_attempts=5, reconnect_delay_s=1.0)
+        subscriber = LiveMemorySubscriber(
+            backend, reconnect_attempts=5, reconnect_delay_s=1.0
+        )
         assert subscriber._reconnect_attempts == 5
         assert subscriber._reconnect_delay_s == 1.0
 
@@ -1001,7 +1052,10 @@ class TestSurrealDBMCPTool:
     def test_inject_limit_does_not_modify_info_or_return(self):
         """_inject_limit only applies to SELECT statements."""
         tool = self._make_tool(max_rows=25)
-        assert tool._inject_limit("INFO FOR TABLE rag_documents;") == "INFO FOR TABLE rag_documents;"
+        assert (
+            tool._inject_limit("INFO FOR TABLE rag_documents;")
+            == "INFO FOR TABLE rag_documents;"
+        )
         assert tool._inject_limit("RETURN 1 + 1;") == "RETURN 1 + 1;"
 
     def test_allowlist_rejects_multi_statement_payload(self):

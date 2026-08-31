@@ -97,7 +97,6 @@ spec:                                  # REQUIRED - Agent specification
   target_framework: string             # REQUIRED - Framework choice (dspy, openai, crewai, google-adk, microsoft, deepagents)
   language_model:                      # REQUIRED - LLM configuration
   openai_agent|pydantic_ai|google_adk|deepagents|crewai:
-    rlm:                               # OPTIONAL - Framework-specific RLM settings (experimental)
   openai_agent:
     sandbox:                           # OPTIONAL - OpenAI SDK native sandbox harness
   persona:                             # OPTIONAL - Agent personality
@@ -110,26 +109,6 @@ spec:                                  # REQUIRED - Agent specification
   feature_specifications:              # REQUIRED - BDD scenarios (universal)
   optimization:                        # OPTIONAL - GEPA optimization (universal)
 ```
-
-### **Framework RLM Block (Experimental)**
-
-Use RLM only under the framework you are compiling/running.
-
-```yaml
-spec:
-  openai_agent:  # same pattern for pydantic_ai, google_adk, deepagents, crewai
-    rlm:
-      enabled: true
-      provider: native                 # native | legacy | rlm_code
-      mode: auto                       # assist | replace | auto
-      auto_long_context_chars: 12000
-      auto_short_context_mode: direct  # direct | assist
-```
-
-Notes:
-- `legacy` is an alias of `native`.
-- `rlm_code` is an opt-in provider. Prefer `native` first, then enable `rlm_code` only where your framework/runtime path supports it.
-- See full details: [RLM (Experimental)](rlm-experimental.md).
 
 ### **OpenAI Sandbox Block**
 

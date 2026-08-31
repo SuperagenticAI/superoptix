@@ -23,17 +23,6 @@ from superoptix.runners.deepagents_runtime_helpers import (
     resolve_model as superoptix_resolve_model,
 {% set tools_cfg = (spec.get("tools", {}) or {}) %}
 {% set dspy_tools_cfg = ((spec.get("dspy", {}) or {}).get("tools", {}) or {}) %}
-{% set stackone_cfg = spec.get("stackone") or tools_cfg.get("stackone") or dspy_tools_cfg.get("stackone") %}
-{% set stackone_mode = (spec.get("stackone_mode") or tools_cfg.get("mode") or dspy_tools_cfg.get("mode") or "") | string | lower %}
-{% set include_stackone_code = (stackone_mode in ["stackone"]) or (stackone_cfg is mapping and (stackone_cfg | length > 0)) %}
-{% set deepagents_rlm_cfg = ((spec.get("deepagents", {}) or {}).get("rlm")) %}
-{% set include_rlm_code = (deepagents_rlm_cfg is mapping and (deepagents_rlm_cfg | length > 0)) or (spec.get("rlm") is mapping and (spec.get("rlm") | length > 0)) %}
-{% if include_stackone_code %}
-    build_stackone_tools as superoptix_build_stackone_tools,
-{% endif %}
-{% if include_rlm_code %}
-    run_with_optional_rlm as superoptix_run_with_optional_rlm,
-{% endif %}
 )
 
 COMPILED_SPEC_PATH = Path(__file__).resolve().parent / "{{ compiled_spec_filename }}"
@@ -78,20 +67,12 @@ class {{ agent_name | to_pascal_case }}Pipeline:
             INSTRUCTION_SPEC
         )
         self._model = init_chat_model(self._resolved_model)
-{% if include_stackone_code %}
-        self._tools = superoptix_build_stackone_tools(FULL_SPEC)
-{% else %}
         self._tools = []
-{% endif %}
         self._agent = create_deep_agent(
             model=self._model,
             tools=self._tools or [],
             system_prompt=self._resolved_instructions,
         )
-        if self._tools:
-            print(f"✅ StackOne tools registered: {len(self._tools)}")
-        else:
-            print("ℹ️  No StackOne tools configured")
         self._rag_enabled = False
         self._rag_helper = None
         try:
@@ -147,14 +128,6 @@ class {{ agent_name | to_pascal_case }}Pipeline:
             f"🧠 DeepAgents run start | model={self._resolved_model} | tools={len(self._tools)}"
         )
         print(f"📝 Prompt: {preview}")
-{% if include_rlm_code %}
-        output = await superoptix_run_with_optional_rlm(
-            agent_graph=self._agent,
-            prompt=prompt,
-            spec_data=FULL_SPEC,
-            model_name=self._resolved_model,
-        )
-{% else %}
         result = await asyncio.to_thread(
             self._agent.invoke, {"messages": [{"role": "user", "content": prompt}]}
         )
@@ -164,7 +137,6 @@ class {{ agent_name | to_pascal_case }}Pipeline:
             output = str(getattr(last, "content", last))
         else:
             output = str(result)
-{% endif %}
         elapsed_ms = int((time.time() - started) * 1000)
         print(f"✅ DeepAgents run done ({elapsed_ms}ms)")
 

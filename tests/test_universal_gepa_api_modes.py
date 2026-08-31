@@ -105,7 +105,9 @@ def test_optimize_anything_opt_in_uses_new_api_when_available(monkeypatch):
     calls = {"optimize_anything": 0}
 
     def _legacy_should_not_run(**kwargs):
-        raise AssertionError("legacy optimize should not be called when optimize_anything is available")
+        raise AssertionError(
+            "legacy optimize should not be called when optimize_anything is available"
+        )
 
     monkeypatch.setattr(ug, "optimize", _legacy_should_not_run)
 

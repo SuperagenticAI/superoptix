@@ -88,4 +88,3 @@ spec:
 - Keep `--framework microsoft` explicit in `compile`, `run`, and `optimize`.
 - If you hit a `ChatAgent` import error, your generated pipeline is stale or your `agent-framework` install is outdated. Reinstall with `pip install -U --pre agent-framework azure-identity` and recompile.
 - If you hit a `Agent.__init__() missing 1 required positional argument: 'client'` error, your generated Microsoft pipeline was compiled from an older SuperOptiX release. Force reinstall SuperOptiX, delete the generated Microsoft pipeline files, and compile again.
-- If you need stronger active support for new capabilities (StackOne, RLM, fast template evolution), use one of the actively expanded frameworks.

@@ -365,7 +365,6 @@ MLX server is running on http://localhost:8000
 
 **Note:** Keep the server running while using GPT-OSS models in your playbooks.
 
-
 ```
 
 #### **Test GPT-OSS Models**
@@ -803,8 +802,6 @@ super model info microsoft/Phi-4
 super model info qwen2.5-3b-instruct
 ```
 
-
-
 ## 🎯 Choose Your Setup
 
 ### 🚀 **Beginner (Recommended)**
@@ -892,8 +889,6 @@ super model server huggingface microsoft/Phi-4 --port 8001
 super model server lmstudio qwen2.5-3b-instruct --port 1234
 # Models are ready to use with SuperOptiX agents
 ```
-
-
 
 ## 🚨 Troubleshooting
 

@@ -1347,19 +1347,6 @@ wheels = [
 ]
 
 [[package]]
-name = "bm25s"
-version = "0.3.11"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
-    { name = "numpy", version = "2.5.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/a4/f6/38a4eb22be0c715aa9bc290e44a48bbdf7a27cffa7f85914fd10242442e4/bm25s-0.3.11.tar.gz", hash = "sha256:8ae0f0707d279969829383c7aaeef00fb09ca343101160222571d6bfc969f889", size = 80978, upload-time = "2026-08-25T03:14:57.502Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/41/d9/bb770dabb7e0edeb2c949460a05c38df7f4f564a1693a778352fb0d213b0/bm25s-0.3.11-py3-none-any.whl", hash = "sha256:3d1d28badb299d6fc9324111e5c8276927e990b908607b39ff9bd65b102e9a24", size = 74985, upload-time = "2026-08-25T03:14:56.051Z" },
-]
-
-[[package]]
 name = "boto3"
 version = "1.43.83"
 source = { registry = "https://pypi.org/simple" }
@@ -1408,15 +1395,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/4d/b7/1db48a9ce2984842c8c886432ec8a2719613322e868a966ba82a28862f25/build-1.6.0.tar.gz", hash = "sha256:bd2c8afc603e7a2e0ce70e2ea85f0a6d02043bafbd307f5bada0f98669eca5af", size = 113825, upload-time = "2026-08-27T21:01:16.458Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/ab/e5/aa1e81b21aea0ce0ba435311837a37d4cb936e7461f9fecac08580073ba9/build-1.6.0-py3-none-any.whl", hash = "sha256:f7aaf1ebbb79178a02ba248bb524f2176b256017e17e8e4bd4289c7b38cc2bad", size = 31187, upload-time = "2026-08-27T21:01:14.957Z" },
-]
-
-[[package]]
-name = "cached-property"
-version = "2.0.1"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/76/4b/3d870836119dbe9a5e3c9a61af8cc1a8b69d75aea564572e385882d5aefb/cached_property-2.0.1.tar.gz", hash = "sha256:484d617105e3ee0e4f1f58725e72a8ef9e93deee462222dbd51cd91230897641", size = 10574, upload-time = "2024-10-25T15:43:55.667Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/11/0e/7d8225aab3bc1a0f5811f8e1b557aa034ac04bdf641925b30d3caf586b28/cached_property-2.0.1-py3-none-any.whl", hash = "sha256:f617d70ab1100b7bcf6e42228f9ddcb78c676ffa167278d9f730d1c2fba69ccb", size = 7428, upload-time = "2024-10-25T15:43:54.711Z" },
 ]
 
 [[package]]
@@ -6625,27 +6603,6 @@ wheels = [
 ]
 
 [[package]]
-name = "portkey-ai"
-version = "2.3.4"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "anyio" },
-    { name = "cached-property" },
-    { name = "distro" },
-    { name = "httpx" },
-    { name = "jiter" },
-    { name = "pydantic" },
-    { name = "sniffio" },
-    { name = "tqdm" },
-    { name = "types-requests" },
-    { name = "typing-extensions" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/cf/cf/058cce65cc54a347a897a888c75b4c7c52f44a3e04899f58d61b1c03fc90/portkey_ai-2.3.4.tar.gz", hash = "sha256:c74b7e1798044a43dec064ed830ca9a3e57eb5114e0c78efff95e0b5937becd1", size = 650776, upload-time = "2026-07-23T09:13:45.62Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/ae/45/b9a3586ad9506476342f177082c727d1573baf39c9b1aee6befbaba4cdef/portkey_ai-2.3.4-py3-none-any.whl", hash = "sha256:143262721fbf63dd03262286ad707a1644aca9bc3474b2a8d8247be8d507a703", size = 1346290, upload-time = "2026-07-23T09:13:43.851Z" },
-]
-
-[[package]]
 name = "posthog"
 version = "7.44.2"
 source = { registry = "https://pypi.org/simple" }
@@ -8203,48 +8160,6 @@ wheels = [
 ]
 
 [[package]]
-name = "rlm-code"
-version = "0.1.13"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "anyio" },
-    { name = "click" },
-    { name = "dspy" },
-    { name = "httpx" },
-    { name = "httpx-sse" },
-    { name = "jsonschema" },
-    { name = "mcp" },
-    { name = "packaging" },
-    { name = "pydantic" },
-    { name = "pyyaml" },
-    { name = "requests" },
-    { name = "rich" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/9e/49/17122add71bd31beb7c6246235da3bf4c11a1e1dd88da84e49ac652cb864/rlm_code-0.1.13.tar.gz", hash = "sha256:c781df27978effd9a9c34a3a69ca84417da8f311b13b96bbadae93fd3fe8d0ce", size = 855956, upload-time = "2026-08-09T20:36:26.352Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/49/d7/68248fea4995757ae320ca4d0c23212407fe212e80075080fc1eb34b85c6/rlm_code-0.1.13-py3-none-any.whl", hash = "sha256:8aab87d0448caa3a0654d925fd17feab64c3e5fb18b448d5766034e5ac5c93e0", size = 853899, upload-time = "2026-08-09T20:36:23.539Z" },
-]
-
-[[package]]
-name = "rlms"
-version = "0.1.3"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "anthropic" },
-    { name = "google-genai" },
-    { name = "openai" },
-    { name = "portkey-ai" },
-    { name = "pytest" },
-    { name = "python-dotenv" },
-    { name = "requests" },
-    { name = "rich" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/28/0c/0114c2beda479e4a1a1c93d6d151df16da73f494ebe538cc333230df3eaf/rlms-0.1.3.tar.gz", hash = "sha256:00fa074b2c7bf5acf0607120e4dbfc58679365fbbceed96dff2af28577ca23e9", size = 132760, upload-time = "2026-06-26T01:03:24.505Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/31/80/267c5eb2599399e931c847e03b414911f36469d560aca067792347b7900d/rlms-0.1.3-py3-none-any.whl", hash = "sha256:fac541ff745242540fee47b6e41a74c847fd7022091330dad7844d413eb5944f", size = 111774, upload-time = "2026-06-26T01:03:23.278Z" },
-]
-
-[[package]]
 name = "rpds-py"
 version = "2026.6.3"
 source = { registry = "https://pypi.org/simple" }
@@ -8868,29 +8783,6 @@ wheels = [
 ]
 
 [[package]]
-name = "stackone-ai"
-version = "2.10.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "bm25s" },
-    { name = "httpx" },
-    { name = "langchain-core" },
-    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
-    { name = "numpy", version = "2.5.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
-    { name = "pydantic" },
-    { name = "typing-extensions" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/b8/0a/439c2dc0323dd06c4b27cd41ba2dfe0dd0913fa46a08e0494cbae66262b2/stackone_ai-2.10.1.tar.gz", hash = "sha256:8f123a8ff022761fc734ecb81a0abcd92f2046b52b82fed8a87ffdc6fbc8c458", size = 591635, upload-time = "2026-07-28T15:23:39.118Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/a7/11/e0e3e57d06f88049d5abd3b90f7d9f6c40a58caaa5a3ab49f1211fc5050c/stackone_ai-2.10.1-py3-none-any.whl", hash = "sha256:ebb513d3207121755fb86cce6ac109aee15ddd1dcc30c45a3434944325356cc0", size = 44018, upload-time = "2026-07-28T15:23:40.267Z" },
-]
-
-[package.optional-dependencies]
-mcp = [
-    { name = "mcp" },
-]
-
-[[package]]
 name = "starlette"
 version = "1.6.0"
 source = { registry = "https://pypi.org/simple" }
@@ -9030,9 +8922,6 @@ chromadb = [
     { name = "chromadb" },
     { name = "sentence-transformers" },
 ]
-connectors-stackone = [
-    { name = "stackone-ai", extra = ["mcp"] },
-]
 dev = [
     { name = "black" },
     { name = "mypy" },
@@ -9143,12 +9032,6 @@ qdrant = [
 ]
 redis = [
     { name = "redis" },
-]
-rlm-code = [
-    { name = "rlm-code" },
-]
-rlm-native = [
-    { name = "rlms" },
 ]
 surrealdb = [
     { name = "sentence-transformers" },
@@ -9320,8 +9203,6 @@ requires-dist = [
     { name = "requests" },
     { name = "responses", marker = "extra == 'testing'" },
     { name = "rich" },
-    { name = "rlm-code", marker = "extra == 'rlm-code'" },
-    { name = "rlms", marker = "extra == 'rlm-native'" },
     { name = "ruff", marker = "extra == 'dev'" },
     { name = "sentence-transformers", marker = "extra == 'all'" },
     { name = "sentence-transformers", marker = "extra == 'all-with-mlx'" },
@@ -9337,7 +9218,6 @@ requires-dist = [
     { name = "sse-starlette", marker = "extra == 'a2a'" },
     { name = "sse-starlette", marker = "extra == 'all'" },
     { name = "sse-starlette", marker = "extra == 'protocols-a2a'" },
-    { name = "stackone-ai", extras = ["mcp"], marker = "extra == 'connectors-stackone'" },
     { name = "streamlit", marker = "extra == 'all'" },
     { name = "streamlit", marker = "extra == 'all-with-mlx'" },
     { name = "streamlit", marker = "extra == 'ui'" },
@@ -9367,7 +9247,7 @@ requires-dist = [
     { name = "weaviate-client", marker = "extra == 'vectordb'" },
     { name = "weaviate-client", marker = "extra == 'weaviate'" },
 ]
-provides-extras = ["frameworks-dspy", "frameworks-openai", "frameworks-google", "frameworks-microsoft", "frameworks-deepagents", "frameworks-pydantic-ai", "frameworks-claude-sdk", "frameworks", "mcp", "a2a", "protocols-a2a", "rlm-native", "rlm-code", "logfire", "phoenix", "connectors-stackone", "dev", "ui", "chromadb", "lancedb", "faiss", "turboagents", "weaviate", "qdrant", "milvus", "surrealdb", "vectordb", "mlx", "ml-cross-platform", "huggingface", "redis", "observability", "web", "data", "cloud", "testing", "docs", "all", "all-with-mlx"]
+provides-extras = ["frameworks-dspy", "frameworks-openai", "frameworks-google", "frameworks-microsoft", "frameworks-deepagents", "frameworks-pydantic-ai", "frameworks-claude-sdk", "frameworks", "mcp", "a2a", "protocols-a2a", "logfire", "phoenix", "dev", "ui", "chromadb", "lancedb", "faiss", "turboagents", "weaviate", "qdrant", "milvus", "surrealdb", "vectordb", "mlx", "ml-cross-platform", "huggingface", "redis", "observability", "web", "data", "cloud", "testing", "docs", "all", "all-with-mlx"]
 
 [[package]]
 name = "surrealdb"
@@ -9704,18 +9584,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/16/f7/57713ba479fd405eb76de31404b2c744c289e336b2d999511ebf51e496f7/typer-0.27.2.tar.gz", hash = "sha256:269b7eb9d3c202ca84b4bc9618cb04ebb43d3d4d1e567e4c768607232c05f945", size = 204045, upload-time = "2026-08-28T10:26:55.046Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/dc/bf/205d0004930ede8f542fb58f601526fccf4ae7626075ca1e6c4de5d3d652/typer-0.27.2-py3-none-any.whl", hash = "sha256:b3a5fc4342d5fc8fda8fc3010b1cf117e9249aab7fae800c2eff62fd3842d97d", size = 123130, upload-time = "2026-08-28T10:26:53.752Z" },
-]
-
-[[package]]
-name = "types-requests"
-version = "2.33.0.20260712"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "urllib3" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/db/51/703318f7b7be8bee126ec13bf615050f932d0179b8784420f3a0199cc769/types_requests-2.33.0.20260712.tar.gz", hash = "sha256:2141b67ab534a5c5cd2dac5034f2a35f42e699c5bf185eee608c5246a069d7fb", size = 25084, upload-time = "2026-07-12T05:14:20.455Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/62/e7/010c87f559e216d83f9dc51e939633fd0d0ead3377340181ab0e223cd3b5/types_requests-2.33.0.20260712-py3-none-any.whl", hash = "sha256:de027e28c171d3da529689cbfa023b0b4eab188c8dfa22fd834eebd2cee6e7bb", size = 21392, upload-time = "2026-07-12T05:14:19.616Z" },
 ]
 
 [[package]]

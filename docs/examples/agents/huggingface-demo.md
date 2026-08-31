@@ -70,8 +70,6 @@ language_model:
 - 🌡️ **`temperature`**: Controls response creativity (0.7 = balanced)
 - 📏 **`max_tokens`**: Maximum response length
 
-
-
 ## 🤗 **HuggingFace: The NLP Powerhouse**
 
 HuggingFace is the go-to platform for state-of-the-art natural language processing. It offers unparalleled access to the latest AI research:

@@ -170,7 +170,6 @@ nav:
       - '🔌 MCP Optimization': tutorials/mcp-optimization.md
       - '💡 Memory Optimization': guides/memory-optimization.md
   - 🧪 RLM:
-      - '🧪 RLM Overview (Experimental)': guides/rlm-experimental.md
   - 🎼 Orchestrate:
       - '🎼 Orchestra Development': guides/orchestra-development.md
       - '🎼 Multi-Agent Orchestra': tutorials/first-orchestra.md
@@ -196,8 +195,6 @@ nav:
   - 🔌 Integrations:
       - '⚡ Optimas': examples/agents/optimas-examples.md
       - '⚡ Optimas Guide': guides/optimas-integration.md
-      - '🗂️ StackOne Integration': guides/stackone-integration.md
-      - '🗂️ StackOne + Claude SDK': guides/stackone-claude-sdk.md
       - '🔰 Weaviate': examples/agents/weaviate-demo.md
       - '🔸 Qdrant': examples/agents/qdrant-demo.md
       - '👁️ Milvus': examples/agents/milvus-demo.md
@@ -244,7 +241,6 @@ nav:
       - '🚀 GEPA': examples/agents/gepa-integration.md
   - 🎯 Techniques:
       - '🎯 Overview': techniques/index.md
-      - '🧰 Harness & Sandbox': guides/harness.md
       - '🗜️ Memory & Context Optimization': guides/memory-context-optimization.md
       - '🧠 Memory Systems': guides/memory.md
       - '💡 Memory Optimization': guides/memory-optimization.md
@@ -269,7 +265,6 @@ nav:
       - '🤝 Contributing': contributing.md
       - '🏛️ Architecture Decisions':
           - 'A2A Integration Boundary': adrs/0001-a2a-integration-boundary.md
-          - 'Meta-Harness Outer Loop': adrs/0002-meta-harness-outer-loop.md
           - 'OpenAI Harness + Sandbox Adoption': adrs/0003-openai-harness-sandbox-adoption.md
 
 copyright: Copyright © 2026 Superagentic AI. Made with ❤️ for the Agentic AI community. 

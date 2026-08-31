@@ -12,6 +12,7 @@ from contextlib import suppress
 from datetime import datetime, timezone
 from typing import Any, Dict
 
+from superoptix.protocols.a2a import errors as a2a_errors
 from superoptix.protocols.a2a.card_builder import build_a2a_agent_card_payload
 from superoptix.protocols.a2a.mappers import (
     extract_text_from_message,
@@ -35,6 +36,27 @@ except ImportError:  # pragma: no cover - exercised in live use
     Request = object
     JSONResponse = None
     StreamingResponse = None
+
+
+class A2AProtocolError(Exception):
+    """A request that the A2A spec requires the server to reject.
+
+    Carries the binding so each transport can render it with the right code.
+    """
+
+    def __init__(self, error: "a2a_errors.A2AError", message: str):
+        super().__init__(message)
+        self.error = error
+
+
+class TaskNotCancelable(A2AProtocolError):
+    """CancelTask targeted a task already in a terminal state."""
+
+    def __init__(self, task_id: str):
+        super().__init__(
+            a2a_errors.TASK_NOT_CANCELABLE, f"Task {task_id} is already terminal"
+        )
+        self.task_id = task_id
 
 
 def _iso8601_now() -> str:
@@ -90,6 +112,34 @@ def _task_status(
     return payload
 
 
+# States a runtime may ask for instead of the default completion. Anything else
+# is ignored so a runtime cannot invent protocol states.
+_RUNTIME_SELECTABLE_STATES = {
+    "TASK_STATE_COMPLETED",
+    "TASK_STATE_INPUT_REQUIRED",
+    "TASK_STATE_FAILED",
+    "TASK_STATE_REJECTED",
+    "TASK_STATE_AUTH_REQUIRED",
+}
+
+
+def _int_or_none(value: Any) -> int | None:
+    """Coerce a query/param value to int, ignoring anything unparseable."""
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _declared_state(result: Any) -> str:
+    """Task state requested by the runtime, defaulting to completion."""
+    if isinstance(result, dict):
+        state = str(result.get("a2a_state") or "")
+        if state in _RUNTIME_SELECTABLE_STATES:
+            return state
+    return "TASK_STATE_COMPLETED"
+
+
 def _terminal_state(state: str | None) -> bool:
     return state in {
         "TASK_STATE_COMPLETED",
@@ -107,6 +157,12 @@ class _A2ATaskStore:
         self.tasks: Dict[str, Dict[str, Any]] = {}
         self.running: Dict[str, asyncio.Task] = {}
         self.subscribers: dict[str, set[asyncio.Queue]] = defaultdict(set)
+        # Timestamps kept beside the task rather than on it: the A2A Task
+        # schema is closed (additionalProperties: false).
+        self.created_at: Dict[str, str] = {}
+        # Populated when a runtime answers with a bare Message instead of a Task.
+        self.message_replies: Dict[str, Dict[str, Any]] = {}
+        self.last_modified: Dict[str, str] = {}
         self.lock = asyncio.Lock()
 
     async def _publish(self, task_id: str, event: Dict[str, Any]) -> None:
@@ -115,15 +171,29 @@ class _A2ATaskStore:
             await queue.put(event)
 
     async def _set_task(self, task_id: str, task: Dict[str, Any]) -> Dict[str, Any]:
-        task["lastModified"] = _iso8601_now()
+        # No bookkeeping fields on the Task itself: the A2A 1.0 Task schema
+        # declares additionalProperties: false, so anything beyond the six
+        # spec'd fields fails conformance validation. Timestamps live on
+        # status.timestamp, which the spec does define.
+        self.last_modified[task_id] = _iso8601_now()
         async with self.lock:
             self.tasks[task_id] = task
         return task
 
-    async def get(self, task_id: str) -> Dict[str, Any] | None:
+    async def get(
+        self, task_id: str, *, history_length: int | None = None
+    ) -> Dict[str, Any] | None:
         async with self.lock:
             task = self.tasks.get(task_id)
-            return dict(task) if task else None
+            if not task:
+                return None
+            task = dict(task)
+        if history_length is not None and history_length >= 0:
+            # Spec: historyLength caps the messages returned, keeping the most
+            # recent ones.
+            history = list(task.get("history") or [])
+            task["history"] = history[-history_length:] if history_length else []
+        return task
 
     async def list(
         self,
@@ -185,7 +255,10 @@ class _A2ATaskStore:
             context_id=task["contextId"],
         )
         await self._set_task(task["id"], task)
-        if publish:
+        # `publish` controls the streaming caller's own SSE feed. Anyone
+        # subscribed through SubscribeToTask must see the transition either
+        # way, or their stream never observes the task finish and hangs open.
+        if publish or self.subscribers.get(task["id"]):
             await self._publish(
                 task["id"],
                 {
@@ -205,6 +278,7 @@ class _A2ATaskStore:
         state: str,
         response_text: str,
         publish: bool,
+        artifacts: list[Dict[str, Any]] | None = None,
     ) -> Dict[str, Any]:
         response_message = _agent_message(
             response_text,
@@ -214,13 +288,18 @@ class _A2ATaskStore:
         history = list(task.get("history") or [])
         history.append(response_message)
         task["history"] = history
+        if artifacts:
+            task["artifacts"] = list(artifacts)
         task["status"] = {
             "state": state,
             "timestamp": _iso8601_now(),
             "message": response_message,
         }
         await self._set_task(task["id"], task)
-        if publish:
+        # `publish` controls the streaming caller's own SSE feed. Anyone
+        # subscribed through SubscribeToTask must see the transition either
+        # way, or their stream never observes the task finish and hangs open.
+        if publish or self.subscribers.get(task["id"]):
             await self._publish(
                 task["id"],
                 {
@@ -237,6 +316,22 @@ class _A2ATaskStore:
         self,
         message: Dict[str, Any],
     ) -> Dict[str, Any]:
+        """Start a task, or continue the one the message references.
+
+        A message carrying a taskId is a follow-up turn: it must extend that
+        task's history rather than replacing it with a fresh task, or anything
+        subscribed to the original never observes it finish.
+        """
+        existing_id = message.get("taskId")
+        if existing_id:
+            existing = await self.get(str(existing_id))
+            if existing:
+                history = list(existing.get("history") or [])
+                history.append(message)
+                existing["history"] = history
+                await self._set_task(str(existing_id), existing)
+                return existing
+
         task_id = str(message.get("taskId") or uuid.uuid4())
         context_id = str(message.get("contextId") or uuid.uuid4())
         created_at = _iso8601_now()
@@ -251,9 +346,8 @@ class _A2ATaskStore:
             "artifacts": [],
             "history": [message],
             "metadata": {},
-            "createdAt": created_at,
-            "lastModified": created_at,
         }
+        self.created_at[task_id] = created_at
         await self._set_task(task_id, task)
         return task
 
@@ -271,7 +365,9 @@ class _A2ATaskStore:
             task_id=task_id,
             context_id=context_id,
             request=request,
-            message=task["history"][0],
+            # The current turn, not the first: on a follow-up the runtime must
+            # see the message it is actually answering.
+            message=(task.get("history") or [{}])[-1],
         )
         await self._update_status(
             task,
@@ -285,13 +381,23 @@ class _A2ATaskStore:
                 context=runtime_context,
             )
             current = await self.get(task_id) or task
+            if isinstance(result, dict) and result.get("a2a_message_only"):
+                # The runtime answered directly; no Task envelope is produced.
+                self.message_replies[task_id] = _agent_message(
+                    runtime_result_to_text(result),
+                    task_id=task_id,
+                    context_id=context_id,
+                )
             if _terminal_state(str((current.get("status") or {}).get("state"))):
                 return current
             return await self._finalize_task(
                 current,
-                state="TASK_STATE_COMPLETED",
+                state=_declared_state(result),
                 response_text=runtime_result_to_text(result),
                 publish=publish,
+                artifacts=result.get("a2a_artifacts")
+                if isinstance(result, dict)
+                else None,
             )
         except asyncio.CancelledError:  # pragma: no cover - async cancellation timing
             current = await self.get(task_id) or task
@@ -315,6 +421,43 @@ class _A2ATaskStore:
         finally:
             self.running.pop(task_id, None)
 
+    async def _validate_message_references(self, message: Dict[str, Any]) -> None:
+        """Reject a message whose taskId/contextId cannot be honoured.
+
+        The spec requires TaskNotFoundError for an unknown task, and rejection
+        of a follow-up aimed at a terminal task or carrying a contextId that
+        disagrees with the task's own.
+        """
+        if not (message.get("parts") or message.get("content")):
+            raise A2AProtocolError(
+                a2a_errors.INVALID_PARAMS,
+                "message.parts is required and must not be empty",
+            )
+
+        task_id = message.get("taskId")
+        if not task_id:
+            return
+
+        task = await self.get(str(task_id))
+        if not task:
+            raise A2AProtocolError(
+                a2a_errors.TASK_NOT_FOUND, f"Task {task_id} not found"
+            )
+
+        context_id = message.get("contextId")
+        if context_id and str(context_id) != str(task.get("contextId")):
+            raise A2AProtocolError(
+                a2a_errors.INVALID_PARAMS,
+                f"contextId does not match task {task_id}",
+            )
+
+        state = str((task.get("status") or {}).get("state"))
+        if _terminal_state(state):
+            raise A2AProtocolError(
+                a2a_errors.UNSUPPORTED_OPERATION,
+                f"Task {task_id} is terminal and cannot accept further messages",
+            )
+
     async def send_message(
         self,
         *,
@@ -322,7 +465,13 @@ class _A2ATaskStore:
         configuration: Dict[str, Any] | None = None,
         request: Any | None = None,
     ) -> Dict[str, Any]:
+        """Run one turn.
+
+        Returns a Task, or a bare Message when the runtime asks for one via
+        ``a2a_message_only`` — the spec allows either as a SendMessage result.
+        """
         user_message = _user_message(message)
+        await self._validate_message_references(user_message)
         task = await self._create_task(user_message)
         user_input = extract_text_from_message(user_message)
         config = configuration or {}
@@ -344,12 +493,16 @@ class _A2ATaskStore:
             )
             return await self.get(task["id"]) or task
 
-        return await self._execute_task(
+        finished = await self._execute_task(
             task,
             user_input=user_input,
             request=request,
             publish=False,
         )
+        message_reply = self.message_replies.pop(task["id"], None)
+        if message_reply is not None:
+            return {"__a2a_message__": message_reply}
+        return finished
 
     async def stream_message(
         self,
@@ -444,7 +597,9 @@ class _A2ATaskStore:
             raise KeyError(task_id)
         state = str((task.get("status") or {}).get("state"))
         if _terminal_state(state):
-            return task
+            # The spec requires TaskNotCancelableError rather than a silent
+            # success when the task has already reached a terminal state.
+            raise TaskNotCancelable(task_id)
 
         runtime_context = RuntimeContext(
             task_id=task_id,
@@ -492,15 +647,53 @@ class _A2ATaskStore:
             self.subscribers[task_id].discard(queue)
 
 
-def _jsonrpc_error(request_id: Any, code: int, message: str) -> JSONResponse:
+def _jsonrpc_error(
+    request_id: Any,
+    error: a2a_errors.A2AError,
+    message: str,
+    *,
+    metadata: Dict[str, str] | None = None,
+) -> JSONResponse:
+    """JSON-RPC error, returned with HTTP 200.
+
+    The transport succeeded; the failure is inside the envelope. Returning 4xx
+    makes conformant clients treat it as a transport error and never read the
+    code, which is what the A2A TCK observed.
+    """
     return JSONResponse(
-        status_code=400,
-        content={
-            "jsonrpc": "2.0",
-            "id": request_id,
-            "error": {"code": code, "message": message},
-        },
+        status_code=200,
+        content=a2a_errors.jsonrpc_error_body(
+            request_id, error, message, metadata=metadata
+        ),
     )
+
+
+def _http_error(
+    error: a2a_errors.A2AError,
+    message: str,
+    *,
+    metadata: Dict[str, str] | None = None,
+) -> JSONResponse:
+    """AIP-193 error response for the HTTP+JSON binding."""
+    return JSONResponse(
+        status_code=error.http_status,
+        content=a2a_errors.http_error_body(error, message, metadata=metadata),
+    )
+
+
+# Clients declare the spec line they speak via this header; we serve 1.0 and 0.3.
+SUPPORTED_PROTOCOL_VERSIONS = {"1.0", "0.3"}
+
+
+def _unsupported_version(request: Any) -> str | None:
+    """Return the requested A2A version when we cannot serve it."""
+    try:
+        requested = (request.headers.get("A2A-Version") or "").strip()
+    except AttributeError:
+        return None
+    if requested and requested not in SUPPORTED_PROTOCOL_VERSIONS:
+        return requested
+    return None
 
 
 def _sse_stream(
@@ -550,23 +743,78 @@ def create_a2a_fastapi_app(
     tasks = _A2ATaskStore(runtime)
     app = FastAPI(title="SuperOptiX A2A", version="1.0")
 
+    @app.middleware("http")
+    async def _a2a_protocol_middleware(request: Any, call_next: Any) -> Any:
+        """Enforce the two request-level contracts the spec puts before routing.
+
+        FastAPI would otherwise answer an unsupported media type with its own
+        422 validation error, and would ignore version negotiation entirely.
+        """
+        if request.method in ("POST", "PUT", "PATCH"):
+            content_type = (request.headers.get("content-type") or "").split(";")[0]
+            content_type = content_type.strip().lower()
+            if content_type and content_type != "application/json":
+                message = (
+                    f"Content type '{content_type}' is not supported; "
+                    "use application/json"
+                )
+                if request.url.path.rstrip("/") == rpc_url.rstrip("/"):
+                    # JSON-RPC reports this in its envelope, not as an HTTP status.
+                    return _jsonrpc_error(
+                        None,
+                        a2a_errors.CONTENT_TYPE_NOT_SUPPORTED,
+                        message,
+                        metadata={"received": content_type},
+                    )
+                return _http_error(
+                    a2a_errors.CONTENT_TYPE_NOT_SUPPORTED,
+                    message,
+                    metadata={"received": content_type},
+                )
+
+        requested_version = _unsupported_version(request)
+        if requested_version and not request.url.path.endswith(rpc_url):
+            # The JSON-RPC binding reports this inside its own envelope.
+            return _http_error(
+                a2a_errors.VERSION_NOT_SUPPORTED,
+                f"A2A version {requested_version} is not supported",
+                metadata={
+                    "requested": requested_version,
+                    "supported": ", ".join(sorted(SUPPORTED_PROTOCOL_VERSIONS)),
+                },
+            )
+
+        return await call_next(request)
+
     @app.get("/.well-known/agent-card.json")
     async def get_agent_card() -> Dict[str, Any]:
         return agent_card
 
     @app.get("/extendedAgentCard")
-    async def get_extended_agent_card() -> JSONResponse:
-        raise HTTPException(status_code=400, detail="Extended agent card not supported")
+    async def get_extended_agent_card() -> Any:
+        return _http_error(
+            a2a_errors.EXTENDED_AGENT_CARD_NOT_CONFIGURED,
+            "Extended agent card is not configured",
+        )
 
     @app.post("/message:send")
-    async def send_message(
-        request: Request, payload: Dict[str, Any] = Body()
+    async def send_message(request: Request, payload: Dict[str, Any] = Body()) -> Any:
+        try:
+            result = await _http_send_message(request, payload)
+        except A2AProtocolError as exc:
+            return _http_error(exc.error, str(exc))
+        return result
+
+    async def _http_send_message(
+        request: Request, payload: Dict[str, Any]
     ) -> Dict[str, Any]:
         task = await tasks.send_message(
             message=payload.get("message") or {},
             configuration=payload.get("configuration") or {},
             request=request,
         )
+        if "__a2a_message__" in task:
+            return {"message": task["__a2a_message__"]}
         return {"task": task}
 
     @app.post("/message:stream")
@@ -588,43 +836,92 @@ def create_a2a_fastapi_app(
         return await tasks.list(context_id=contextId, status=status, page_size=pageSize)
 
     @app.get("/tasks/{task_id}")
-    async def get_task(task_id: str) -> Dict[str, Any]:
-        task = await tasks.get(task_id)
+    async def get_task(task_id: str, historyLength: int | None = None) -> Any:  # noqa: N803
+        task = await tasks.get(task_id, history_length=historyLength)
         if not task:
-            raise HTTPException(status_code=404, detail="Task not found")
+            return _http_error(a2a_errors.TASK_NOT_FOUND, "Task not found")
         return task
 
     @app.post("/tasks/{task_id}:cancel")
-    async def cancel_task(task_id: str, request: Request) -> Dict[str, Any]:
+    async def cancel_task(task_id: str, request: Request) -> Any:
         try:
             return await tasks.cancel(task_id, request=request)
-        except KeyError as exc:
-            raise HTTPException(status_code=404, detail="Task not found") from exc
+        except KeyError:
+            return _http_error(a2a_errors.TASK_NOT_FOUND, "Task not found")
+        except A2AProtocolError as exc:
+            return _http_error(exc.error, str(exc))
 
     @app.post("/tasks/{task_id}:subscribe")
-    async def subscribe_task(task_id: str) -> StreamingResponse:
+    async def subscribe_task(task_id: str) -> Any:
         current = await tasks.get(task_id)
         if not current:
-            raise HTTPException(status_code=404, detail="Task not found")
+            return _http_error(a2a_errors.TASK_NOT_FOUND, "Task not found")
         state = str((current.get("status") or {}).get("state"))
         if _terminal_state(state):
-            raise HTTPException(
-                status_code=409, detail=f"Task {task_id} is already terminal"
+            return _http_error(
+                a2a_errors.TASK_NOT_CANCELABLE,
+                f"Task {task_id} is already terminal",
             )
         return _sse_stream(tasks.subscribe(task_id))
 
+    # Both spellings are served. A client given the interface URL as an httpx
+    # base_url and posting to "/" resolves to "<rpc_url>/", and Starlette's
+    # default redirect for the missing trailing slash returns an empty 307 body
+    # that JSON-RPC clients cannot parse.
+    # Declared so callers get the spec'd PushNotificationNotSupportedError
+    # rather than a 404, which reads as "wrong URL" instead of "not offered".
+    @app.post("/tasks/{task_id}/pushNotificationConfigs")
+    @app.get("/tasks/{task_id}/pushNotificationConfigs")
+    @app.get("/tasks/{task_id}/pushNotificationConfigs/{config_id}")
+    @app.delete("/tasks/{task_id}/pushNotificationConfigs/{config_id}")
+    async def push_notification_configs(task_id: str, config_id: str = "") -> Any:
+        return _http_error(
+            a2a_errors.PUSH_NOTIFICATION_NOT_SUPPORTED,
+            "Push notifications are not supported by this agent",
+        )
+
     @app.post(rpc_url)
+    @app.post(rpc_url.rstrip("/") + "/")
     async def jsonrpc(request: Request, payload: Dict[str, Any] = Body()) -> Any:
-        method = str(payload.get("method") or "")
-        request_id = payload.get("id")
+        request_id = payload.get("id") if isinstance(payload, dict) else None
+
+        requested_version = _unsupported_version(request)
+        if requested_version:
+            return _jsonrpc_error(
+                request_id,
+                a2a_errors.VERSION_NOT_SUPPORTED,
+                f"A2A version {requested_version} is not supported",
+                metadata={
+                    "requested": requested_version,
+                    "supported": ", ".join(sorted(SUPPORTED_PROTOCOL_VERSIONS)),
+                },
+            )
+
+        method = str(payload.get("method") or "") if isinstance(payload, dict) else ""
+        if not isinstance(payload, dict) or not method:
+            return _jsonrpc_error(
+                request_id,
+                a2a_errors.INVALID_REQUEST,
+                "Request must be a JSON-RPC 2.0 object with a 'method' member",
+            )
+
         params = normalize_a2a_payload(payload.get("params") or {})
 
         if method == "SendMessage":
-            task = await tasks.send_message(
-                message=params.get("message") or {},
-                configuration=params.get("configuration") or {},
-                request=request,
-            )
+            try:
+                task = await tasks.send_message(
+                    message=params.get("message") or {},
+                    configuration=params.get("configuration") or {},
+                    request=request,
+                )
+            except A2AProtocolError as exc:
+                return _jsonrpc_error(request_id, exc.error, str(exc))
+            if "__a2a_message__" in task:
+                return {
+                    "jsonrpc": "2.0",
+                    "id": request_id,
+                    "result": {"message": task["__a2a_message__"]},
+                }
             return {"jsonrpc": "2.0", "id": request_id, "result": {"task": task}}
 
         if method == "SendStreamingMessage":
@@ -636,9 +933,13 @@ def create_a2a_fastapi_app(
 
         if method == "GetTask":
             task_id = params.get("id")
-            task = await tasks.get(str(task_id))
+            task = await tasks.get(
+                str(task_id), history_length=_int_or_none(params.get("historyLength"))
+            )
             if not task:
-                return _jsonrpc_error(request_id, -32001, "Task not found")
+                return _jsonrpc_error(
+                    request_id, a2a_errors.TASK_NOT_FOUND, "Task not found"
+                )
             return {"jsonrpc": "2.0", "id": request_id, "result": task}
 
         if method == "ListTasks":
@@ -654,30 +955,51 @@ def create_a2a_fastapi_app(
             try:
                 task = await tasks.cancel(str(task_id), request=request)
             except KeyError:
-                return _jsonrpc_error(request_id, -32001, "Task not found")
+                return _jsonrpc_error(
+                    request_id, a2a_errors.TASK_NOT_FOUND, "Task not found"
+                )
+            except A2AProtocolError as exc:
+                return _jsonrpc_error(request_id, exc.error, str(exc))
             return {"jsonrpc": "2.0", "id": request_id, "result": task}
 
         if method == "SubscribeToTask":
             task_id = str(params.get("id") or "")
             current = await tasks.get(task_id)
             if not current:
-                return _jsonrpc_error(request_id, -32001, "Task not found")
+                return _jsonrpc_error(
+                    request_id, a2a_errors.TASK_NOT_FOUND, "Task not found"
+                )
             state = str((current.get("status") or {}).get("state"))
             if _terminal_state(state):
                 return _jsonrpc_error(
                     request_id,
-                    -32004,
+                    a2a_errors.TASK_NOT_CANCELABLE,
                     f"Task {task_id} is already terminal",
                 )
             return _sse_stream(tasks.subscribe(task_id), request_id=request_id)
 
+        if method in (
+            "CreateTaskPushNotificationConfig",
+            "GetTaskPushNotificationConfig",
+            "ListTaskPushNotificationConfigs",
+            "DeleteTaskPushNotificationConfig",
+            "SetTaskPushNotificationConfig",
+        ):
+            return _jsonrpc_error(
+                request_id,
+                a2a_errors.PUSH_NOTIFICATION_NOT_SUPPORTED,
+                "Push notifications are not supported by this agent",
+            )
+
         if method == "GetExtendedAgentCard":
             return _jsonrpc_error(
                 request_id,
-                -32004,
-                "Extended agent card is not supported",
+                a2a_errors.EXTENDED_AGENT_CARD_NOT_CONFIGURED,
+                "Extended agent card is not configured",
             )
 
-        return _jsonrpc_error(request_id, -32601, f"Method not found: {method}")
+        return _jsonrpc_error(
+            request_id, a2a_errors.METHOD_NOT_FOUND, f"Method not found: {method}"
+        )
 
     return app

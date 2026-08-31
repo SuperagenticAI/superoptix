@@ -218,7 +218,7 @@ schema:
               type: string
               required: false
               default: "chain_of_thought"
-              enum: ["predict", "chain_of_thought", "react", "rlm", "program_of_thought", "parallel"]
+              enum: ["predict", "chain_of_thought", "react", "program_of_thought", "parallel"]
               description: "DSPy module strategy for the primary program"
             module_params:
               type: object
@@ -350,7 +350,7 @@ schema:
                   name:
                     type: string
                     required: true
-                    enum: ["predict", "chain_of_thought", "react", "rlm", "program_of_thought", "parallel"]
+                    enum: ["predict", "chain_of_thought", "react", "program_of_thought", "parallel"]
                   adapter:
                     type: object
                     required: false
@@ -393,7 +393,6 @@ schema:
                   type: string
                   required: false
                   default: "builtin"
-                  enum: ["none", "builtin", "mcp", "stackone"]
                 builtin_tools:
                   type: array
                   required: false
@@ -404,68 +403,6 @@ schema:
                   required: false
                   items:
                     type: string
-                stackone:
-                  type: object
-                  required: false
-                  description: "StackOne connector tool loading configuration"
-                  properties:
-                    enabled:
-                      type: boolean
-                      required: false
-                      default: true
-                    api_key_env:
-                      type: string
-                      required: false
-                      default: "STACKONE_API_KEY"
-                    account_ids_env:
-                      type: string
-                      required: false
-                      description: "Optional env var containing comma-separated account IDs"
-                    account_ids:
-                      type: array
-                      required: false
-                      items:
-                        type: string
-                    providers:
-                      type: array
-                      required: false
-                      items:
-                        type: string
-                    actions:
-                      type: array
-                      required: false
-                      items:
-                        type: string
-                    fallback_unfiltered:
-                      type: boolean
-                      required: false
-                      default: true
-                      description: "Retry unfiltered tool fetch when provider/action filters return zero tools"
-                    base_url:
-                      type: string
-                      required: false
-                      description: "Optional StackOne API base URL override"
-            rlm:
-              type: object
-              required: false
-              description: "RLM module settings (used when module=rlm or enabled=true)"
-              properties:
-                enabled:
-                  type: boolean
-                  required: false
-                  default: false
-                max_iterations:
-                  type: integer
-                  required: false
-                  default: 10
-                  minimum: 1
-                  maximum: 50
-                max_llm_calls:
-                  type: integer
-                  required: false
-                  default: 5
-                  minimum: 1
-                  maximum: 100
             gepa:
               type: object
               required: false
@@ -527,178 +464,11 @@ schema:
           required: false
           description: "Pydantic AI-specific automation options"
           properties:
-            rlm:
-              type: object
-              required: false
-              description: "Optional RLM orchestration for Pydantic AI"
-              properties:
-                enabled:
-                  type: boolean
-                  required: false
-                  default: false
-                provider:
-                  type: string
-                  required: false
-                  default: "native"
-                  enum: ["native", "rlm_code", "legacy"]
-                  description: "RLM provider (legacy is an alias of native)"
-                mode:
-                  type: string
-                  required: false
-                  default: "assist"
-                  enum: ["assist", "replace", "auto"]
-                auto_long_context_chars:
-                  type: integer
-                  required: false
-                  default: 12000
-                  minimum: 1
-                auto_short_context_mode:
-                  type: string
-                  required: false
-                  default: "direct"
-                  enum: ["direct", "assist"]
-                backend:
-                  type: string
-                  required: false
-                  default: "litellm"
-                environment:
-                  type: string
-                  required: false
-                  default: "python"
-                max_iterations:
-                  type: integer
-                  required: false
-                  default: 8
-                  minimum: 1
-                  maximum: 50
-                max_depth:
-                  type: integer
-                  required: false
-                  default: 1
-                  minimum: 1
-                  maximum: 4
-                verbose:
-                  type: boolean
-                  required: false
-                  default: false
-                persistent:
-                  type: boolean
-                  required: false
-                  default: false
-                task_model:
-                  type: string
-                  required: false
-                api_key_env:
-                  type: string
-                  required: false
-                api_base:
-                  type: string
-                  required: false
-                logger:
-                  type: object
-                  required: false
-                  properties:
-                    enabled:
-                      type: boolean
-                      required: false
-                      default: false
-                    log_dir:
-                      type: string
-                      required: false
-                      default: ".superoptix/logs/rlm"
-                    file_name:
-                      type: string
-                      required: false
-                      default: "pydantic_rlm"
-
         openai_agent:
           type: object
           required: false
           description: "OpenAI Agents SDK-specific automation options"
           properties:
-            rlm:
-              type: object
-              required: false
-              description: "Optional RLM orchestration for OpenAI Agents SDK"
-              properties:
-                enabled:
-                  type: boolean
-                  required: false
-                  default: false
-                provider:
-                  type: string
-                  required: false
-                  default: "native"
-                  enum: ["native", "rlm_code", "legacy"]
-                  description: "RLM provider (legacy is an alias of native)"
-                mode:
-                  type: string
-                  required: false
-                  default: "assist"
-                  enum: ["assist", "replace", "auto"]
-                auto_long_context_chars:
-                  type: integer
-                  required: false
-                  default: 12000
-                  minimum: 1
-                auto_short_context_mode:
-                  type: string
-                  required: false
-                  default: "direct"
-                  enum: ["direct", "assist"]
-                backend:
-                  type: string
-                  required: false
-                  default: "litellm"
-                environment:
-                  type: string
-                  required: false
-                  default: "python"
-                max_iterations:
-                  type: integer
-                  required: false
-                  default: 8
-                  minimum: 1
-                  maximum: 50
-                max_depth:
-                  type: integer
-                  required: false
-                  default: 1
-                  minimum: 1
-                  maximum: 4
-                verbose:
-                  type: boolean
-                  required: false
-                  default: false
-                persistent:
-                  type: boolean
-                  required: false
-                  default: false
-                task_model:
-                  type: string
-                  required: false
-                api_key_env:
-                  type: string
-                  required: false
-                api_base:
-                  type: string
-                  required: false
-                logger:
-                  type: object
-                  required: false
-                  properties:
-                    enabled:
-                      type: boolean
-                      required: false
-                      default: false
-                    log_dir:
-                      type: string
-                      required: false
-                      default: ".superoptix/logs/rlm"
-                    file_name:
-                      type: string
-                      required: false
-                      default: "openai_rlm"
             sandbox:
               type: object
               required: false
@@ -772,294 +542,16 @@ schema:
           required: false
           description: "Google ADK-specific automation options"
           properties:
-            rlm:
-              type: object
-              required: false
-              description: "Optional RLM orchestration for Google ADK"
-              properties:
-                enabled:
-                  type: boolean
-                  required: false
-                  default: false
-                provider:
-                  type: string
-                  required: false
-                  default: "native"
-                  enum: ["native", "rlm_code", "legacy"]
-                  description: "RLM provider (legacy is an alias of native)"
-                mode:
-                  type: string
-                  required: false
-                  default: "assist"
-                  enum: ["assist", "replace", "auto"]
-                auto_long_context_chars:
-                  type: integer
-                  required: false
-                  default: 12000
-                  minimum: 1
-                auto_short_context_mode:
-                  type: string
-                  required: false
-                  default: "direct"
-                  enum: ["direct", "assist"]
-                backend:
-                  type: string
-                  required: false
-                  default: "litellm"
-                environment:
-                  type: string
-                  required: false
-                  default: "python"
-                max_iterations:
-                  type: integer
-                  required: false
-                  default: 8
-                  minimum: 1
-                  maximum: 50
-                max_depth:
-                  type: integer
-                  required: false
-                  default: 1
-                  minimum: 1
-                  maximum: 4
-                verbose:
-                  type: boolean
-                  required: false
-                  default: false
-                persistent:
-                  type: boolean
-                  required: false
-                  default: false
-                task_model:
-                  type: string
-                  required: false
-                api_key_env:
-                  type: string
-                  required: false
-                api_base:
-                  type: string
-                  required: false
-                logger:
-                  type: object
-                  required: false
-                  properties:
-                    enabled:
-                      type: boolean
-                      required: false
-                      default: false
-                    log_dir:
-                      type: string
-                      required: false
-                      default: ".superoptix/logs/rlm"
-                    file_name:
-                      type: string
-                      required: false
-                      default: "adk_rlm"
-
         crewai:
           type: object
           required: false
           description: "CrewAI-specific automation options"
           properties:
-            rlm:
-              type: object
-              required: false
-              description: "Optional RLM orchestration for CrewAI"
-              properties:
-                enabled:
-                  type: boolean
-                  required: false
-                  default: false
-                provider:
-                  type: string
-                  required: false
-                  default: "native"
-                  enum: ["native", "rlm_code", "legacy"]
-                  description: "RLM provider (legacy is an alias of native)"
-                mode:
-                  type: string
-                  required: false
-                  default: "assist"
-                  enum: ["assist", "replace", "auto"]
-                auto_long_context_chars:
-                  type: integer
-                  required: false
-                  default: 12000
-                  minimum: 1
-                auto_short_context_mode:
-                  type: string
-                  required: false
-                  default: "direct"
-                  enum: ["direct", "assist"]
-                backend:
-                  type: string
-                  required: false
-                  default: "litellm"
-                environment:
-                  type: string
-                  required: false
-                  default: "python"
-                max_iterations:
-                  type: integer
-                  required: false
-                  default: 8
-                  minimum: 1
-                  maximum: 50
-                max_depth:
-                  type: integer
-                  required: false
-                  default: 1
-                  minimum: 1
-                  maximum: 4
-                verbose:
-                  type: boolean
-                  required: false
-                  default: false
-                persistent:
-                  type: boolean
-                  required: false
-                  default: false
-                task_model:
-                  type: string
-                  required: false
-                api_key_env:
-                  type: string
-                  required: false
-                api_base:
-                  type: string
-                  required: false
-                logger:
-                  type: object
-                  required: false
-                  properties:
-                    enabled:
-                      type: boolean
-                      required: false
-                      default: false
-                    log_dir:
-                      type: string
-                      required: false
-                      default: ".superoptix/logs/rlm"
-                    file_name:
-                      type: string
-                      required: false
-                      default: "crewai_rlm"
-
         deepagents:
           type: object
           required: false
           description: "DeepAgents-specific automation options"
           properties:
-            rlm:
-              type: object
-              required: false
-              description: "Optional RLM orchestration for DeepAgents"
-              properties:
-                enabled:
-                  type: boolean
-                  required: false
-                  default: false
-                provider:
-                  type: string
-                  required: false
-                  default: "native"
-                  enum: ["native", "rlm_code", "legacy"]
-                  description: "RLM provider (legacy is an alias of native)"
-                mode:
-                  type: string
-                  required: false
-                  default: "assist"
-                  enum: ["assist", "replace", "auto"]
-                auto_long_context_chars:
-                  type: integer
-                  required: false
-                  default: 12000
-                  minimum: 1
-                auto_short_context_mode:
-                  type: string
-                  required: false
-                  default: "direct"
-                  enum: ["direct", "assist"]
-                backend:
-                  type: string
-                  required: false
-                  default: "litellm"
-                environment:
-                  type: string
-                  required: false
-                  default: "python"
-                max_iterations:
-                  type: integer
-                  required: false
-                  default: 8
-                  minimum: 1
-                  maximum: 50
-                max_depth:
-                  type: integer
-                  required: false
-                  default: 1
-                  minimum: 1
-                  maximum: 4
-                verbose:
-                  type: boolean
-                  required: false
-                  default: false
-                persistent:
-                  type: boolean
-                  required: false
-                  default: false
-                task_model:
-                  type: string
-                  required: false
-                api_key_env:
-                  type: string
-                  required: false
-                api_base:
-                  type: string
-                  required: false
-                logger:
-                  type: object
-                  required: false
-                  properties:
-                    enabled:
-                      type: boolean
-                      required: false
-                      default: false
-                    log_dir:
-                      type: string
-                      required: false
-                      default: ".superoptix/logs/rlm"
-                    file_name:
-                      type: string
-                      required: false
-                      default: "deepagents_rlm"
-
-        # DSPy RLM Configuration (legacy top-level; prefer spec.dspy.rlm)
-        rlm:
-          type: object
-          required: false
-          description: "Optional DSPy RLM configuration for minimal compile mode (not enabled by default)"
-          properties:
-            enabled:
-              type: boolean
-              required: false
-              default: false
-              description: "Enable dspy.RLM during DSPy minimal compile"
-            max_iters:
-              type: integer
-              required: false
-              default: 10
-              minimum: 1
-              maximum: 50
-              description: "Maximum RLM reasoning iterations"
-            max_llm_calls:
-              type: integer
-              required: false
-              default: 5
-              minimum: 1
-              maximum: 100
-              description: "Maximum LLM calls available to RLM helper actions"
-        
         # Tool Backend Configuration (Protocol-First vs Tool-First)
         tool_backend:
           type: string

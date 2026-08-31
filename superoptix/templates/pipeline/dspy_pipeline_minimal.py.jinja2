@@ -14,9 +14,6 @@ This file intentionally contains DSPy-native program code:
 SuperOptiX runner handles playbook loading/execution orchestration.
 """
 {% set dspy_tools_cfg = ((spec.get('dspy', {}) or {}).get('tools', {}) or {}) %}
-{% set stackone_mode = (dspy_tools_cfg.get('mode', '') | string | lower) %}
-{% set stackone_cfg = dspy_tools_cfg.get('stackone') %}
-{% set include_stackone_code = (stackone_mode in ['stackone']) or (stackone_cfg is mapping and (stackone_cfg | length > 0)) %}
 
 import inspect
 import json
@@ -27,9 +24,6 @@ from superoptix.runners.dspy_runtime_helpers import (
     build_builtin_tools as _runtime_build_builtin_tools,
     postprocess_prediction as _runtime_postprocess_prediction,
     validate_prediction_result as _runtime_validate_prediction_result,
-{% if include_stackone_code %}
-    build_stackone_tools as _runtime_build_stackone_tools,
-{% endif %}
 )
 
 # Compile-time runtime policy flag injected by SuperOptiX compiler.
@@ -164,11 +158,6 @@ def build_builtin_tools(tool_names):
     return _runtime_build_builtin_tools(tool_names)
 
 
-{% if include_stackone_code %}
-def build_stackone_tools(dspy_tool_config):
-    """Build DSPy-compatible StackOne tools via shared SuperOptiX runtime."""
-    return _runtime_build_stackone_tools(dspy_tool_config)
-{% endif %}
 
 
 class {{ agent_name | to_pascal_case }}Signature(dspy.Signature):
@@ -236,9 +225,6 @@ class {{ agent_name | to_pascal_case }}Module(dspy.Module):
 {% if method == 'react' %}
         tools = []
         tools.extend(build_builtin_tools(DSPY_TOOL_NAMES))
-{% if include_stackone_code %}
-        tools.extend(build_stackone_tools(DSPY_TOOL_CONFIG))
-{% endif %}
         self.program = dspy.ReAct(
             {{ agent_name | to_pascal_case }}Signature,
             tools=tools,
@@ -259,24 +245,6 @@ class {{ agent_name | to_pascal_case }}Module(dspy.Module):
             for _ in range(self.parallel_workers)
         ]
         self.program = dspy.Parallel(num_threads=self.parallel_workers)
-{% elif (spec.reasoning and spec.reasoning.method == 'rlm') or (spec.rlm and spec.rlm.enabled) %}
-        if hasattr(dspy, "RLM"):
-            sig = inspect.signature(dspy.RLM.__init__)
-            params = sig.parameters
-            rlm_kwargs = {}
-
-            if "tools" in params:
-                rlm_kwargs["tools"] = None
-            if "max_iterations" in params:
-                rlm_kwargs["max_iterations"] = {{ spec.rlm.max_iters | default(spec.reasoning.max_iterations | default(10)) }}
-            elif "max_iters" in params:
-                rlm_kwargs["max_iters"] = {{ spec.rlm.max_iters | default(spec.reasoning.max_iterations | default(10)) }}
-            if "max_llm_calls" in params:
-                rlm_kwargs["max_llm_calls"] = {{ spec.rlm.max_llm_calls | default(5) }}
-
-            self.program = dspy.RLM({{ agent_name | to_pascal_case }}Signature, **rlm_kwargs)
-        else:
-            self.program = dspy.ChainOfThought({{ agent_name | to_pascal_case }}Signature)
 {% else %}
         self.program = dspy.ChainOfThought({{ agent_name | to_pascal_case }}Signature)
 {% endif %}

@@ -26,9 +26,7 @@ def _load_playbook(filename: str) -> dict[str, Any]:
         return yaml.safe_load(handle)
 
 
-def _compile_pipeline(
-    framework: str, playbook: dict[str, Any], tmp_path: Path
-) -> Path:
+def _compile_pipeline(framework: str, playbook: dict[str, Any], tmp_path: Path) -> Path:
     registry = _load_local_framework_registry()
     output_path = tmp_path / f"{framework}_pipeline.py"
     registry.compile_agent(framework, playbook, str(output_path))
@@ -232,12 +230,14 @@ async def test_microsoft_surrealdb_rag_prompt_grounding(tmp_path: Path, monkeypa
     fake_agent_framework_azure = ModuleType("agent_framework.azure")
     fake_agent_framework_azure.AzureOpenAIChatClient = _FakeAzureOpenAIChatClient
     monkeypatch.setitem(sys.modules, "agent_framework", fake_agent_framework)
-    monkeypatch.setitem(sys.modules, "agent_framework.openai", fake_agent_framework_openai)
-    monkeypatch.setitem(sys.modules, "agent_framework.azure", fake_agent_framework_azure)
-
-    module = _import_compiled_module(
-        pipeline_path, "test_microsoft_surrealdb_pipeline"
+    monkeypatch.setitem(
+        sys.modules, "agent_framework.openai", fake_agent_framework_openai
     )
+    monkeypatch.setitem(
+        sys.modules, "agent_framework.azure", fake_agent_framework_azure
+    )
+
+    module = _import_compiled_module(pipeline_path, "test_microsoft_surrealdb_pipeline")
     rag_state = _patch_seeded_surrealdb_retrieval(monkeypatch, module.RAGMixin)
     pipeline_cls = _get_pipeline_class(module)
     pipeline = pipeline_cls()
@@ -276,14 +276,22 @@ async def test_deepagents_surrealdb_rag_prompt_grounding(tmp_path: Path, monkeyp
         sys.modules, "superoptix.vendor.deepagents.graph", fake_deepagents_graph
     )
 
-    fake_deepagents_helpers = ModuleType("superoptix.runners.deepagents_runtime_helpers")
+    fake_deepagents_helpers = ModuleType(
+        "superoptix.runners.deepagents_runtime_helpers"
+    )
     fake_deepagents_helpers.build_instructions = lambda spec: "test instructions"  # noqa: ARG005
-    fake_deepagents_helpers.resolve_model = lambda language_model, model_config=None: "anthropic:claude-sonnet-4-20250514"  # noqa: ARG005
+    fake_deepagents_helpers.resolve_model = lambda language_model, model_config=None: (
+        "anthropic:claude-sonnet-4-20250514"
+    )  # noqa: ARG005
     monkeypatch.setitem(
-        sys.modules, "superoptix.runners.deepagents_runtime_helpers", fake_deepagents_helpers
+        sys.modules,
+        "superoptix.runners.deepagents_runtime_helpers",
+        fake_deepagents_helpers,
     )
 
-    module = _import_compiled_module(pipeline_path, "test_deepagents_surrealdb_pipeline")
+    module = _import_compiled_module(
+        pipeline_path, "test_deepagents_surrealdb_pipeline"
+    )
     rag_state = _patch_seeded_surrealdb_retrieval(monkeypatch, module.RAGMixin)
     pipeline_cls = _get_pipeline_class(module)
     pipeline = pipeline_cls()
@@ -327,11 +335,9 @@ async def test_pydantic_ai_surrealdb_rag_prompt_grounding(tmp_path: Path, monkey
     monkeypatch.setitem(sys.modules, "pydantic_ai.settings", fake_pydantic_ai_settings)
 
     fake_pydantic_helpers = ModuleType("superoptix.runners.pydantic_runtime_helpers")
-    fake_pydantic_helpers.build_stackone_tools = lambda spec_data, framework="pydantic_ai": []  # noqa: ARG005
     fake_pydantic_helpers.build_instructions = lambda spec_data: "test instructions"  # noqa: ARG005
-    fake_pydantic_helpers.get_pydantic_rlm_config = lambda spec_data: {"enabled": False}  # noqa: ARG005
 
-    async def _fake_run_agent_with_optional_rlm(
+    async def _fake_run_agent(
         *,
         agent,
         prompt,
@@ -342,12 +348,14 @@ async def test_pydantic_ai_surrealdb_rag_prompt_grounding(tmp_path: Path, monkey
         captured["prompts"].append(prompt)
         return SimpleNamespace(output="token retrieval success", messages=[])
 
-    fake_pydantic_helpers.run_agent_with_optional_rlm = _fake_run_agent_with_optional_rlm
+    fake_pydantic_helpers.run_agent = _fake_run_agent
     fake_pydantic_helpers.resolve_model = (
         lambda language_model, model_config=None: "ollama:qwen3.5:9b"  # noqa: ARG005
     )
     monkeypatch.setitem(
-        sys.modules, "superoptix.runners.pydantic_runtime_helpers", fake_pydantic_helpers
+        sys.modules,
+        "superoptix.runners.pydantic_runtime_helpers",
+        fake_pydantic_helpers,
     )
 
     module = _import_compiled_module(pipeline_path, "test_pydantic_surrealdb_pipeline")
@@ -441,11 +449,8 @@ async def test_google_adk_surrealdb_rag_prompt_grounding(tmp_path: Path, monkeyp
         object(),
         {"model": "gemini-2.5-flash", "tool_count": 0, "app_name": "test_app"},
     )
-    fake_adk_helpers.get_google_adk_rlm_config = (
-        lambda spec_data: {"enabled": False}  # noqa: ARG005
-    )
 
-    async def _fake_run_agent_with_optional_rlm(
+    async def _fake_run_agent(
         *,
         agent,
         runner,
@@ -458,7 +463,7 @@ async def test_google_adk_surrealdb_rag_prompt_grounding(tmp_path: Path, monkeyp
         captured["prompts"].append(prompt)
         return "token retrieval success"
 
-    fake_adk_helpers.run_agent_with_optional_rlm = _fake_run_agent_with_optional_rlm
+    fake_adk_helpers.run_agent = _fake_run_agent
     monkeypatch.setitem(
         sys.modules, "superoptix.runners.google_adk_runtime_helpers", fake_adk_helpers
     )

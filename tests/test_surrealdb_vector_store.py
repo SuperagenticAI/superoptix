@@ -90,7 +90,10 @@ def test_vector_search_uses_query_raw_and_formats_results():
 
 
 def test_vector_search_falls_back_to_query_when_query_raw_not_shaped():
-    client = FakeClient(query_raw_response={"unexpected": True}, query_response=[{"id": "docs:2", "content": "fallback"}])
+    client = FakeClient(
+        query_raw_response={"unexpected": True},
+        query_response=[{"id": "docs:2", "content": "fallback"}],
+    )
     store = SurrealDBVectorStore(client=client, table_name="docs")
 
     results = store.vector_search([0.2, 0.3], k=1)
@@ -104,7 +107,9 @@ def test_vector_search_falls_back_to_query_when_query_raw_not_shaped():
 def test_similarity_search_uses_embedding_function():
     client = FakeClient(
         query_raw_response={
-            "result": [{"result": [{"id": "docs:3", "content": "embedded", "score": 0.5}]}]
+            "result": [
+                {"result": [{"id": "docs:3", "content": "embedded", "score": 0.5}]}
+            ]
         }
     )
     embed_calls: list[str] = []
@@ -126,7 +131,9 @@ def test_similarity_search_uses_embedding_function():
 def test_hybrid_search_emits_hybrid_query_and_scores():
     client = FakeClient(
         query_raw_response={
-            "result": [{"result": [{"id": "docs:9", "content": "hybrid", "score": 0.77}]}]
+            "result": [
+                {"result": [{"id": "docs:9", "content": "hybrid", "score": 0.77}]}
+            ]
         }
     )
 
@@ -148,11 +155,7 @@ def test_hybrid_search_emits_hybrid_query_and_scores():
 
 
 def test_get_collection_info_parses_count_and_dimension():
-    client = FakeClient(
-        query_raw_response={
-            "result": [{"result": [{"count": 12}]}]
-        }
-    )
+    client = FakeClient(query_raw_response={"result": [{"result": [{"count": 12}]}]})
     store = SurrealDBVectorStore(client=client, table_name="docs")
 
     # First call returns count, second call returns dimension.

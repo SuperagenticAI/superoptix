@@ -27,8 +27,6 @@ SuperOptiX brings together declarative agent specification, universal GEPA optim
 
 ## What's New
 
-- 🧪 **RLM Support (Experimental)**: Available for early adoption and testing. Unified sandbox support is coming soon. See [RLM guide](guides/rlm-experimental.md).
-- 🗂️ **Connector Integrations**: StackOne connector support for cross-framework tool-driven agents. See [StackOne integration](guides/stackone-integration.md).
 - ⚙️ **Minimal + Optimize Flow**: Default compile generates minimal framework-native pipelines, with expanded optimization flow enabled via `--optimize`.
 
 ## Core Philosophy

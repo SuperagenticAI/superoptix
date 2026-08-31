@@ -102,7 +102,7 @@ def resolve_pipeline_class(module: Any, agent_name: str) -> Any:
     Resolve generated pipeline class robustly across naming variants.
 
     Handles differences like:
-    - CrewAIStackonePipeline vs CrewaiStackonePipeline
+    - CrewAIDemoPipeline vs CrewaiDemoPipeline
     - kebab/snake agent IDs
     """
     candidates = []
@@ -1030,11 +1030,7 @@ class DSPyRunner:
         )
 
         # ReAct and tool-heavy flows are usually chat-centric.
-        if module_name == "react" or tools_mode in {
-            "builtin",
-            "mcp",
-            "stackone",
-        }:
+        if module_name == "react" or tools_mode in {"builtin", "mcp"}:
             return "chat"
 
         if self._should_prefer_structured_adapter(spec_data):

@@ -69,7 +69,9 @@ class _FakeSurreal:
         return False
 
 
-def _install_fake_surreal_modules(monkeypatch: pytest.MonkeyPatch, session: _FakeSurrealSession):
+def _install_fake_surreal_modules(
+    monkeypatch: pytest.MonkeyPatch, session: _FakeSurrealSession
+):
     fake_surreal_mod = ModuleType("surrealdb")
     fake_surreal_mod.Surreal = lambda url: _FakeSurreal(url, session)
     monkeypatch.setitem(sys.modules, "surrealdb", fake_surreal_mod)
@@ -152,7 +154,11 @@ async def test_surrealdb_index_check_is_warning_only_and_cached(monkeypatch):
     await harness._query_surrealdb("query one", top_k=2)
     await harness._query_surrealdb("query two", top_k=2)
 
-    info_calls = [sql for sql, _ in session.calls if sql.strip().lower().startswith("info for table")]
+    info_calls = [
+        sql
+        for sql, _ in session.calls
+        if sql.strip().lower().startswith("info for table")
+    ]
     assert len(info_calls) == 1
     assert harness.vector_db["_index_check_done"] is True
     assert isinstance(harness.vector_db["_index_warnings"], list)
@@ -182,16 +188,22 @@ class _FakeSurrealSessionGraph(_FakeSurrealSession):
 
         # Graph expansion query (contains -> arrow)
         if "->" in sql:
-            return [
-                {"result": [{"content": c} for c in self.graph_results]}
-            ]
+            return [{"result": [{"content": c} for c in self.graph_results]}]
 
         # Seed vector query
         return [
             {
                 "result": [
-                    {"id": "rag_documents:superoptix", "content": "NEON-FOX-742 is present", "score": 0.91},
-                    {"id": "rag_documents:surrealdb", "content": "Second hit", "score": 0.77},
+                    {
+                        "id": "rag_documents:superoptix",
+                        "content": "NEON-FOX-742 is present",
+                        "score": 0.91,
+                    },
+                    {
+                        "id": "rag_documents:surrealdb",
+                        "content": "Second hit",
+                        "score": 0.77,
+                    },
                 ]
             }
         ]
@@ -220,7 +232,9 @@ def _build_graph_harness(
         "telemetry_enabled": False,
         "index_check": False,
         "graph_depth": graph_depth,
-        "graph_relations": graph_relations if graph_relations is not None else ["integrates_with", "provides"],
+        "graph_relations": graph_relations
+        if graph_relations is not None
+        else ["integrates_with", "provides"],
         "embedding_mode": embedding_mode,
         "config": {"embedding_model": "sentence-transformers/all-MiniLM-L6-v2"},
     }
@@ -243,6 +257,7 @@ def _install_fake_graph_modules(
 
     # Patch SurrealDBFeatureDetector.has to control capability gate
     import superoptix.utils.surrealdb_features as _feat_mod
+
     monkeypatch.setattr(
         _feat_mod.SurrealDBFeatureDetector,
         "has",
@@ -253,7 +268,9 @@ def _install_fake_graph_modules(
 @pytest.mark.asyncio
 async def test_graph_mode_performs_vector_seed_then_graph_expansion(monkeypatch):
     """graph mode: vector seed search + graph expansion calls are both made."""
-    session = _FakeSurrealSessionGraph(graph_results=["Graph entity: SurrealDB capabilities"])
+    session = _FakeSurrealSessionGraph(
+        graph_results=["Graph entity: SurrealDB capabilities"]
+    )
     _install_fake_graph_modules(monkeypatch, session, relate_supported=True)
 
     harness = _build_graph_harness(mode="graph", graph_depth=1)
@@ -285,7 +302,9 @@ async def test_graph_mode_fallback_to_vector_when_relate_unsupported(monkeypatch
     assert len(docs) >= 1
     # Should NOT have issued any graph expansion queries
     graph_queries = [sql for sql, _ in session.calls if "->" in sql]
-    assert len(graph_queries) == 0, "Should not issue graph queries when RELATE unsupported"
+    assert len(graph_queries) == 0, (
+        "Should not issue graph queries when RELATE unsupported"
+    )
 
 
 @pytest.mark.asyncio
@@ -316,7 +335,17 @@ async def test_graph_mode_expansion_failure_is_nonfatal(monkeypatch):
                 return [{"result": [{"indexes": {}}]}]
             if "->" in sql:
                 raise RuntimeError("Simulated graph traversal failure")
-            return [{"result": [{"id": "rag_documents:x", "content": "Seed result", "score": 0.9}]}]
+            return [
+                {
+                    "result": [
+                        {
+                            "id": "rag_documents:x",
+                            "content": "Seed result",
+                            "score": 0.9,
+                        }
+                    ]
+                }
+            ]
 
     session = _FailingGraphSession()
     _install_fake_graph_modules(monkeypatch, session, relate_supported=True)
@@ -390,8 +419,13 @@ def test_setup_surrealdb_clamps_graph_depth():
     h = _Harness()
     config = {
         "url": "memory",
-        "namespace": "t", "database": "t", "username": "r", "password": "r",
-        "table_name": "docs", "vector_field": "emb", "content_field": "c",
+        "namespace": "t",
+        "database": "t",
+        "username": "r",
+        "password": "r",
+        "table_name": "docs",
+        "vector_field": "emb",
+        "content_field": "c",
         "_rag_runtime_config": {"retrieval_mode": "graph", "graph_depth": 99},
     }
     result = h._setup_surrealdb(config)
@@ -403,8 +437,13 @@ def test_setup_surrealdb_rejects_unknown_mode_falls_back_to_vector():
     h = _Harness()
     config = {
         "url": "memory",
-        "namespace": "t", "database": "t", "username": "r", "password": "r",
-        "table_name": "docs", "vector_field": "emb", "content_field": "c",
+        "namespace": "t",
+        "database": "t",
+        "username": "r",
+        "password": "r",
+        "table_name": "docs",
+        "vector_field": "emb",
+        "content_field": "c",
         "_rag_runtime_config": {"retrieval_mode": "unknown_mode"},
     }
     result = h._setup_surrealdb(config)
@@ -502,7 +541,9 @@ async def test_server_embedding_mode_uses_fn_embed_in_sql(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_server_embedding_fallback_to_client_when_fn_embed_unavailable(monkeypatch):
+async def test_server_embedding_fallback_to_client_when_fn_embed_unavailable(
+    monkeypatch,
+):
     """embedding_mode=server: falls back to client-side when fn::embed unavailable."""
     session = _FakeSurrealSessionServerEmbed(fn_embed_supported=False)
     _install_server_embed_modules(monkeypatch, session)
@@ -536,7 +577,9 @@ async def test_client_embedding_mode_uses_sentence_transformer(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_server_embedding_mode_hybrid_uses_fn_embed_without_query_vector(monkeypatch):
+async def test_server_embedding_mode_hybrid_uses_fn_embed_without_query_vector(
+    monkeypatch,
+):
     """embedding_mode=server + mode=hybrid uses fn::embed and query_text params."""
     session = _FakeSurrealSessionServerEmbed(fn_embed_supported=True)
     _install_server_embed_modules(monkeypatch, session)
@@ -571,7 +614,9 @@ async def test_server_embedding_mode_graph_uses_fn_embed_seed(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_server_embedding_mode_multi_uses_fn_embed_without_query_vector(monkeypatch):
+async def test_server_embedding_mode_multi_uses_fn_embed_without_query_vector(
+    monkeypatch,
+):
     """embedding_mode=server + mode=multi keeps server-side embeddings through hybrid+graph."""
     session = _FakeSurrealSessionGraph(graph_results=["Multi graph"])
     _install_fake_graph_modules(monkeypatch, session, relate_supported=True)
@@ -592,8 +637,13 @@ def test_setup_surrealdb_parses_embedding_mode():
     h = _Harness()
     config = {
         "url": "memory",
-        "namespace": "t", "database": "t", "username": "r", "password": "r",
-        "table_name": "docs", "vector_field": "emb", "content_field": "c",
+        "namespace": "t",
+        "database": "t",
+        "username": "r",
+        "password": "r",
+        "table_name": "docs",
+        "vector_field": "emb",
+        "content_field": "c",
         "_rag_runtime_config": {"embedding_mode": "server"},
     }
     result = h._setup_surrealdb(config)
@@ -605,8 +655,13 @@ def test_setup_surrealdb_defaults_embedding_mode_to_client():
     h = _Harness()
     config = {
         "url": "memory",
-        "namespace": "t", "database": "t", "username": "r", "password": "r",
-        "table_name": "docs", "vector_field": "emb", "content_field": "c",
+        "namespace": "t",
+        "database": "t",
+        "username": "r",
+        "password": "r",
+        "table_name": "docs",
+        "vector_field": "emb",
+        "content_field": "c",
     }
     result = h._setup_surrealdb(config)
     assert result["embedding_mode"] == "client"
@@ -617,8 +672,13 @@ def test_setup_surrealdb_rejects_invalid_embedding_mode():
     h = _Harness()
     config = {
         "url": "memory",
-        "namespace": "t", "database": "t", "username": "r", "password": "r",
-        "table_name": "docs", "vector_field": "emb", "content_field": "c",
+        "namespace": "t",
+        "database": "t",
+        "username": "r",
+        "password": "r",
+        "table_name": "docs",
+        "vector_field": "emb",
+        "content_field": "c",
         "_rag_runtime_config": {"embedding_mode": "gpu_turbo_mode"},
     }
     result = h._setup_surrealdb(config)

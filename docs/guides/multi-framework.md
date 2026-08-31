@@ -6,14 +6,10 @@ Build once from SuperSpec YAML, compile to your target framework, and run either
 - minimal pipeline (default)
 - optimized pipeline (`--optimize`)
 
-RLM support is available as an experimental feature. Unified sandbox support is coming soon.
-
 ---
 
 ## Feature Highlights
 
-- 🧪 **RLM (Experimental)**: Available now across active framework integrations where configured. Unified sandbox support is coming soon.
-- 🗂️ **Connector Integration (StackOne)**: Compile one connector-enabled SuperSpec into multiple frameworks.
 - 🧬 **GEPA Optimization Path**: Keep minimal runtime pipelines by default; enable optimization lifecycle with `--optimize`.
 - 🧩 **Framework-Native Templates**: Generated pipelines stay close to each framework's native style.
 - 📊 **Coverage View**: See the [Framework Feature Matrix](framework-feature-matrix.md) for current capability status.

@@ -88,8 +88,6 @@ tools:
 - 🔧 **`specific_tools`**: Individual tools to enable
 - 🏷️ **Tool Categories**: development, core, utilities, education, finance, health, marketing, research
 
-
-
 ## 🛠️ **Your AI's Swiss Army Knife**
 
 SuperOptiX provides access to a comprehensive toolkit that transforms your AI agent into a multi-talented assistant. From basic utilities to specialized industry tools:

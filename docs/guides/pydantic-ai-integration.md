@@ -10,30 +10,6 @@
 
 **Model Settings** - Full control over generation parameters
 
-**RLM (Experimental)** - Supports `assist`, `replace`, and `auto` modes. See [RLM (Experimental)](rlm-experimental.md).
-
----
-
-## 🧠 RLM Provider Quick Decision
-
-Use this for `spec.pydantic_ai.rlm.provider`:
-
-| Use Case | Provider | Why |
-| --- | --- | --- |
-| Keep behavior stable and framework-native | `native` | Uses the existing SuperOptiX native RLM path. |
-| Opt in to RLM Code runtime behavior | `rlm_code` | Uses installed `rlm-code` package. If unavailable/failing, SuperOptiX falls back to `native`. |
-
-Quick example:
-
-```yaml
-spec:
-  pydantic_ai:
-    rlm:
-      enabled: true
-      provider: native   # or rlm_code
-      mode: assist
-```
-
 ---
 
 ## 🎯 What is Pydantic AI?

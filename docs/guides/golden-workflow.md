@@ -42,7 +42,6 @@ super agent run <agent_id> --framework <framework> --cloud --provider google-gen
 - `google-genai`: `GOOGLE_API_KEY`
 - `openai`: `OPENAI_API_KEY`
 - `anthropic` / `claude-sdk`: `ANTHROPIC_API_KEY`
-- `stackone` tools: `STACKONE_API_KEY` and usually `STACKONE_ACCOUNT_IDS`
 
 ## Minimal vs Optimize
 

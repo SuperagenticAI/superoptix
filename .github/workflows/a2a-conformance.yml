@@ -1,0 +1,107 @@
+name: A2A Conformance
+
+# Runs the official A2A Technology Compatibility Kit against the public A2A
+# endpoint and publishes the compatibility report as a build artifact.
+#
+# The job enforces a ratchet rather than demanding 100%: it fails if MUST-level
+# compliance drops below MIN_MUST_COMPLIANCE. Raise that number as gaps close so
+# conformance can only improve.
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'superoptix/protocols/**'
+      - 'superoptix/runtime/**'
+      - '.github/workflows/a2a-conformance.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'superoptix/protocols/**'
+      - 'superoptix/runtime/**'
+      - '.github/workflows/a2a-conformance.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  MIN_MUST_COMPLIANCE: "100.0"
+
+jobs:
+  tck:
+    name: A2A TCK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v1
+        with:
+          version: "latest"
+
+      - name: Install SuperOptiX with A2A support
+        run: uv venv && uv pip install ".[a2a]"
+
+      # Conformance runs against the TCK SUT harness, not the published
+      # endpoint. The TCK drives protocol states through magic messageId
+      # prefixes; a production agent must not honour those, so the hooks live
+      # in a separate app that shares the same server implementation.
+      - name: Start the TCK SUT harness
+        env:
+          SUPEROPTIX_A2A_SUT_URL: http://127.0.0.1:8000
+          SUPEROPTIX_TELEMETRY: "false"
+        run: |
+          uv run --no-project uvicorn superoptix.protocols.a2a.tck_sut:app \
+            --host 127.0.0.1 --port 8000 > server.log 2>&1 &
+          for _ in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:8000/.well-known/agent-card.json > /dev/null; then
+              echo "endpoint up"; exit 0
+            fi
+            sleep 1
+          done
+          echo "endpoint failed to start"; cat server.log; exit 1
+
+      - name: Install the A2A TCK
+        run: |
+          git clone --depth 1 https://github.com/a2aproject/a2a-tck.git "$RUNNER_TEMP/a2a-tck"
+          cd "$RUNNER_TEMP/a2a-tck"
+          uv venv
+          uv pip install --python .venv/bin/python -e .
+
+      - name: Run the conformance suite
+        working-directory: ${{ runner.temp }}/a2a-tck
+        run: |
+          .venv/bin/python run_tck.py --sut-host http://127.0.0.1:8000 --level must || true
+          cp -r reports "$GITHUB_WORKSPACE/tck-reports"
+
+      - name: Check the compliance ratchet
+        run: |
+          python - <<'PY'
+          import json, os, sys
+          summary = json.load(open("tck-reports/compatibility.json"))["summary"]
+          actual = float(summary["must_compatibility"].rstrip("%"))
+          floor = float(os.environ["MIN_MUST_COMPLIANCE"])
+          print(f"MUST compliance: {actual}%  (floor {floor}%)")
+          print(f"SHOULD: {summary['should_compatibility']}  MAY: {summary['may_compatibility']}")
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as fh:
+              fh.write(f"## A2A conformance\n\n")
+              fh.write(f"| Level | Compliance |\n|---|---|\n")
+              fh.write(f"| MUST | {summary['must_compatibility']} |\n")
+              fh.write(f"| SHOULD | {summary['should_compatibility']} |\n")
+              fh.write(f"| MAY | {summary['may_compatibility']} |\n")
+          if actual < floor:
+              sys.exit(f"MUST compliance regressed: {actual}% < {floor}%")
+          PY
+
+      - name: Publish the compatibility report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: a2a-compatibility-report
+          path: tck-reports/
+          retention-days: 30

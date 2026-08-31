@@ -2,7 +2,7 @@
 Tests for Claude Agent SDK Adapter
 ==================================
 
-Tests the ClaudeAgentSDKFrameworkAdapter and StackOneBridge Claude SDK integration.
+Tests the ClaudeAgentSDKFrameworkAdapter.
 """
 
 import pytest
@@ -31,49 +31,6 @@ class MockMcpServerConfig:
         self.tools = tools
 
 
-# Mock StackOne classes
-class MockStackOneParameters:
-    """Mock StackOne tool parameters."""
-
-    def __init__(self, schema: Dict[str, Any]):
-        self._schema = schema
-
-    def model_dump(self) -> Dict[str, Any]:
-        return self._schema
-
-    @property
-    def properties(self):
-        mock = MagicMock()
-        mock.keys.return_value = self._schema.get("properties", {}).keys()
-        return mock
-
-
-class MockStackOneTool:
-    """Mock StackOne tool for testing."""
-
-    def __init__(self, name: str, description: str, parameters: Dict[str, Any]):
-        self.name = name
-        self.description = description
-        self.parameters = MockStackOneParameters(parameters)
-
-    def execute(self, args: Dict[str, Any]) -> str:
-        return f"Executed {self.name} with {args}"
-
-    def to_openai_function(self) -> Dict[str, Any]:
-        return {"name": self.name, "description": self.description}
-
-    def to_langchain(self) -> Any:
-        return MagicMock(name=self.name)
-
-
-class MockStackOneTools:
-    """Mock StackOne Tools collection."""
-
-    def __init__(self, tools: List[MockStackOneTool]):
-        self._tools = tools
-
-    def to_list(self) -> List[MockStackOneTool]:
-        return self._tools
 
 
 # Test fixtures
@@ -84,26 +41,13 @@ def sample_tool_schema():
         "type": "object",
         "properties": {
             "employee_id": {"type": "string", "description": "The employee ID"},
-            "include_details": {"type": "boolean", "description": "Include full details"},
+            "include_details": {
+                "type": "boolean",
+                "description": "Include full details",
+            },
         },
         "required": ["employee_id"],
     }
-
-
-@pytest.fixture
-def sample_stackone_tool(sample_tool_schema):
-    """Create a sample StackOne tool."""
-    return MockStackOneTool(
-        name="hris_get_employee",
-        description="Get employee information from HRIS system",
-        parameters=sample_tool_schema,
-    )
-
-
-@pytest.fixture
-def sample_stackone_tools(sample_stackone_tool):
-    """Create sample StackOne tools collection."""
-    return [sample_stackone_tool]
 
 
 @pytest.fixture
@@ -141,26 +85,36 @@ class TestClaudeAgentSDKFrameworkAdapter:
 
     def test_framework_name(self):
         """Test framework name is correct."""
-        from superoptix.adapters.framework_registry import ClaudeAgentSDKFrameworkAdapter
+        from superoptix.adapters.framework_registry import (
+            ClaudeAgentSDKFrameworkAdapter,
+        )
 
         assert ClaudeAgentSDKFrameworkAdapter.framework_name == "claude-sdk"
 
     def test_requires_async(self):
         """Test requires_async is True."""
-        from superoptix.adapters.framework_registry import ClaudeAgentSDKFrameworkAdapter
+        from superoptix.adapters.framework_registry import (
+            ClaudeAgentSDKFrameworkAdapter,
+        )
 
         assert ClaudeAgentSDKFrameworkAdapter.requires_async == True
 
     def test_get_optimizable_variable_with_instructions(self, sample_playbook):
         """Test extraction of instructions as optimizable variable."""
-        from superoptix.adapters.framework_registry import ClaudeAgentSDKFrameworkAdapter
+        from superoptix.adapters.framework_registry import (
+            ClaudeAgentSDKFrameworkAdapter,
+        )
 
-        result = ClaudeAgentSDKFrameworkAdapter.get_optimizable_variable(sample_playbook)
+        result = ClaudeAgentSDKFrameworkAdapter.get_optimizable_variable(
+            sample_playbook
+        )
         assert result == "Be helpful and concise"
 
     def test_get_optimizable_variable_builds_from_parts(self):
         """Test building optimizable variable from role/goal/backstory."""
-        from superoptix.adapters.framework_registry import ClaudeAgentSDKFrameworkAdapter
+        from superoptix.adapters.framework_registry import (
+            ClaudeAgentSDKFrameworkAdapter,
+        )
 
         playbook = {
             "spec": {
@@ -178,7 +132,9 @@ class TestClaudeAgentSDKFrameworkAdapter:
 
     def test_get_optimizable_variable_default(self):
         """Test default when no persona info."""
-        from superoptix.adapters.framework_registry import ClaudeAgentSDKFrameworkAdapter
+        from superoptix.adapters.framework_registry import (
+            ClaudeAgentSDKFrameworkAdapter,
+        )
 
         playbook = {"spec": {"persona": {}}}
 
@@ -194,107 +150,6 @@ class TestClaudeAgentSDKFrameworkAdapter:
         assert adapter.framework_name == "claude-sdk"
 
 
-class TestStackOneBridgeClaudeSDK:
-    """Tests for StackOneBridge Claude SDK conversion."""
-
-    def test_to_claude_sdk_not_installed(self, sample_stackone_tools):
-        """Test to_claude_sdk raises ImportError when SDK not installed."""
-        with patch(
-            "superoptix.adapters.stackone_adapter.STACKONE_AVAILABLE", True
-        ), patch.dict("sys.modules", {"claude_agent_sdk": None}):
-            from superoptix.adapters.stackone_adapter import StackOneBridge
-
-            bridge = StackOneBridge(sample_stackone_tools)
-
-            with pytest.raises(ImportError) as exc_info:
-                bridge.to_claude_sdk()
-
-            assert "claude-agent-sdk" in str(exc_info.value)
-
-    def test_to_claude_sdk_creates_mcp_server(self, sample_stackone_tools):
-        """Test to_claude_sdk creates MCP server and returns tool names."""
-        def mock_create_server(name, version, tools):
-            return MockMcpServerConfig(name, version, tools)
-
-        mock_claude_module = types.ModuleType("claude_agent_sdk")
-        mock_claude_module.SdkMcpTool = MockSdkMcpTool
-        mock_claude_module.create_sdk_mcp_server = mock_create_server
-
-        with patch(
-            "superoptix.adapters.stackone_adapter.STACKONE_AVAILABLE", True
-        ), patch.dict(
-            "sys.modules",
-            {"claude_agent_sdk": mock_claude_module},
-        ):
-            from superoptix.adapters.stackone_adapter import StackOneBridge
-
-            bridge = StackOneBridge(sample_stackone_tools)
-            mcp_server, tool_names = bridge.to_claude_sdk()
-
-            # Verify tool names follow convention
-            assert len(tool_names) == 1
-            assert tool_names[0] == "mcp__stackone__hris_get_employee"
-
-            # Verify MCP server was created
-            assert mcp_server.name == "stackone"
-            assert mcp_server.version == "1.0.0"
-            assert len(mcp_server.tools) == 1
-
-    def test_convert_to_claude_sdk_schema(self, sample_stackone_tools, sample_tool_schema):
-        """Test schema conversion for Claude SDK."""
-        with patch(
-            "superoptix.adapters.stackone_adapter.STACKONE_AVAILABLE", True
-        ):
-            from superoptix.adapters.stackone_adapter import StackOneBridge
-
-            bridge = StackOneBridge(sample_stackone_tools)
-            schema = bridge._convert_to_claude_sdk_schema(sample_tool_schema)
-
-            # Check types are converted correctly
-            assert schema["employee_id"] == str
-            assert schema["include_details"] == bool
-
-class TestClaudeSDKToolHandler:
-    """Tests for Claude SDK tool handler generation."""
-
-    @pytest.mark.asyncio
-    async def test_handler_returns_correct_format(self, sample_stackone_tools):
-        """Test that generated handlers return correct Claude SDK format."""
-        captured_tools = []
-
-        def mock_create_server(name, version, tools):
-            captured_tools.extend(tools)
-            return MockMcpServerConfig(name, version, tools)
-
-        mock_claude_module = types.ModuleType("claude_agent_sdk")
-        mock_claude_module.SdkMcpTool = MockSdkMcpTool
-        mock_claude_module.create_sdk_mcp_server = mock_create_server
-
-        with patch(
-            "superoptix.adapters.stackone_adapter.STACKONE_AVAILABLE", True
-        ), patch.dict(
-            "sys.modules",
-            {"claude_agent_sdk": mock_claude_module},
-        ):
-            from superoptix.adapters.stackone_adapter import StackOneBridge
-
-            bridge = StackOneBridge(sample_stackone_tools)
-            bridge.to_claude_sdk()
-
-            # Get the created tool's handler
-            assert len(captured_tools) == 1
-            tool = captured_tools[0]
-
-            # Execute the handler
-            result = await tool.handler({"employee_id": "123"})
-
-            # Verify response format
-            assert "content" in result
-            assert isinstance(result["content"], list)
-            assert result["content"][0]["type"] == "text"
-            assert "hris_get_employee" in result["content"][0]["text"]
-
-
 class TestClaudeSDKTemplate:
     """Tests for Claude SDK template compilation."""
 
@@ -302,12 +157,20 @@ class TestClaudeSDKTemplate:
         """Test that the Claude SDK template file exists."""
         from pathlib import Path
 
-        template_path = Path(__file__).parent.parent.parent / "superoptix" / "templates" / "pipeline" / "claude_sdk_pipeline.py.jinja2"
+        template_path = (
+            Path(__file__).parent.parent.parent
+            / "superoptix"
+            / "templates"
+            / "pipeline"
+            / "claude_sdk_pipeline.py.jinja2"
+        )
         assert template_path.exists(), f"Template not found at {template_path}"
 
     def test_compile_from_playbook(self, sample_playbook, tmp_path):
         """Test template compilation from playbook."""
-        from superoptix.adapters.framework_registry import ClaudeAgentSDKFrameworkAdapter
+        from superoptix.adapters.framework_registry import (
+            ClaudeAgentSDKFrameworkAdapter,
+        )
 
         output_path = tmp_path / "test_agent_claude_sdk_pipeline.py"
         result = ClaudeAgentSDKFrameworkAdapter.compile_from_playbook(

@@ -166,17 +166,6 @@ protocols-a2a = [
     "uvicorn>=0.35.0",
 ]
 
-# RLM providers (optional, opt-in)
-# native: current `from rlm import RLM` implementation
-rlm-native = [
-    "rlms",
-]
-
-# rlm_code: Superagentic RLM framework package
-rlm-code = [
-    "rlm-code",
-]
-
 # LogFire observability for Pydantic AI
 # Note: Separate from frameworks-pydantic-ai to avoid dependency conflicts with google-adk
 # LogFire requires opentelemetry-sdk>=1.39.0 while google-adk requires opentelemetry-sdk==1.37.0
@@ -199,11 +188,6 @@ phoenix = [
 # ============================================================================
 # EXISTING OPTIONAL DEPENDENCIES
 # ============================================================================
-
-# Connector integrations
-connectors-stackone = [
-    "stackone-ai[mcp]",
-]
 
 # Note: see the CrewAI note in the frameworks section for its chromadb constraint.
 
