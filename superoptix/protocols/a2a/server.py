@@ -687,8 +687,6 @@ def _http_error(
     )
 
 
-# Clients declare the spec line they speak via this header; we serve 1.0 and 0.3.
-
 def _apply_history_length(
     task: Dict[str, Any], history_length: int | None
 ) -> Dict[str, Any]:
@@ -718,6 +716,8 @@ def _etag_matches(header: str | None, etag: str) -> bool:
     target = etag.removeprefix("W/")
     return any(c.removeprefix("W/") == target for c in candidates)
 
+
+# Clients declare the spec line they speak via this header; we serve 1.0 and 0.3.
 SUPPORTED_PROTOCOL_VERSIONS = {"1.0", "0.3"}
 
 # The 0.3 spec line names its JSON-RPC methods with slashes; 1.0 renamed them to
