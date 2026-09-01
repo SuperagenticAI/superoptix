@@ -1,6 +1,6 @@
 site_name: SUPEROPTIX AI
 site_description: 'AI Agent Development Framework: Evaluation-First and Optimization-Core.'
-site_url: https://docs.super-agentic.ai
+site_url: https://docs.superoptix.ai
 site_author: SuperagenticAI
 
 markdown_extensions:
