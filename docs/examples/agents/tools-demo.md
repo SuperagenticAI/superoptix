@@ -179,7 +179,7 @@ super agent --help
 ## 📚 Related Documentation
 
 - [Tool Development](../../guides/tool-development.md) - Building custom tools
-- [Tool Categories](../../reference/api/tools.md) - Available tool categories
+- [Tool Development](../../guides/tool-development.md) - Building and registering tools
 - [Agent Development](../../guides/agent-development.md) - Building custom agents
 
 ## 🔗 Next Steps

@@ -4,7 +4,16 @@ title: Optimas Integration Guide
 
 # ⚡ Optimas Integration Guide
 
-SuperOptiX integrates seamlessly with the **Optimas** framework, enabling you to use advanced prompt optimization techniques (OPRO, MIPRO, COPRO) with multiple LLM frameworks including **OpenAI SDK**, **CrewAI**, **AutoGen**, and **DSPy**.
+!!! warning "Status: not currently installable"
+
+    The Optimas extras are commented out in `pyproject.toml` and have been since
+    0.2.0b1, because `optimas-ai` conflicts with the framework integrations.
+    `super agent optimize --engine optimas` reports `Optimas not available` and
+    exits. This page documents the intended integration and is kept for when the
+    dependency conflict is resolved. For optimization that works today, see
+    [GEPA optimization](gepa-optimization.md).
+
+SuperOptiX carries an integration with the **Optimas** framework, covering prompt optimization techniques (OPRO, MIPRO, COPRO) across **OpenAI SDK**, **CrewAI**, **AutoGen** and **DSPy**. See the status note above before following the install steps.
 
 > About Optimas: Optimas optimizes compound AI systems using globally aligned Local Reward Functions (LRFs) so that local improvements translate to higher end‑to‑end performance. Learn more on the official site and paper:
 
@@ -505,7 +514,7 @@ SUPEROPTIX_OPRO_COMPILE_TIMEOUT=300
 ## 🔗 Related Documentation
 
 - [Optimas Examples](../examples/agents/optimas-examples.md) - Working examples for all targets
-- [CLI Reference](../reference/cli.md) - Complete command reference
+- [CLI Reference](cli-complete-guide.md) - Complete command reference
 - [Agent Development](../guides/agent-development.md) - Building custom agents
 
 ## 📖 External References

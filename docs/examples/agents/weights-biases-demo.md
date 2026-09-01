@@ -401,7 +401,7 @@ super agent run my_agent --observe langfuse --tags ["traces"]
 4. **Try hyperparameter optimization** with sweeps
 5. **Integrate with your existing workflow**
 
-**Ready to start?** Begin with the [Quick Demo](#-quick-demo) section!
+**Ready to start?** Begin with the [Quick Demo](#quick-demo) section!
 
 ---
 

@@ -8,14 +8,14 @@ This guide covers ethical AI practices, cost management, environmental considera
 
 ## 📋 Table of Contents
 
-- [Ethical AI Principles](#-ethical-ai-principles)
-- [Cost Responsibility](#-cost-responsibility)
-- [Environmental Impact](#-environmental-impact)
-- [Data Privacy](#-data-privacy)
-- [Bias and Fairness](#-bias-and-fairness)
-- [Transparency](#-transparency)
-- [Best Practices](#-best-practices)
-- [Monitoring and Auditing](#-monitoring-and-auditing)
+- [Ethical AI Principles](#ethical-ai-principles)
+- [Cost Responsibility](#cost-responsibility)
+- [Environmental Impact](#environmental-impact)
+- [Data Privacy](#data-privacy)
+- [Bias and Fairness](#bias-and-fairness)
+- [Transparency](#transparency)
+- [Best Practices](#best-practices)
+- [Monitoring and Auditing](#monitoring-and-auditing)
 
 ## 🎯 Ethical AI Principles
 

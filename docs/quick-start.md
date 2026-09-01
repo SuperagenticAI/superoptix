@@ -2,22 +2,24 @@
 title: Quick Start - SuperOptiX
 ---
 
-# 🚀 Quick Start Guide: Two Paths to SuperOptiX Mastery
+# 🚀 Quick Start Guide
 
 <div align="center">
 
-**Two hands-on experiences that highlight the SuperOptiX workflow**
+**Three hands-on paths through the SuperOptiX workflow**
 
 </div>
 
 !!! abstract "Choose Your Path"
 
-    **Part 1 - Sentiment Analyzer Demo:** A lightweight project that walks through evaluation and GEPA optimization in minutes.
+    **Part 1 - Adapt an agent to A2A:** Take an agent you already have and give it an A2A endpoint. Five minutes, no model required.
 
-    **Part 2 - SWE Orchestration:** A full multi-agent software engineering workflow that showcases the orchestration features.
+    **Part 2 - Sentiment Analyzer Demo:** A lightweight project that walks through evaluation and GEPA optimization.
+
+    **Part 3 - SWE Orchestration:** A multi-agent software engineering workflow that shows the orchestration features.
 
 !!! tip "Getting Started"
-    You can complete Part 1 on its own, then move on to Part 2 when you're ready to build larger teams.
+    Each part stands on its own. Part 1 is the fastest way to see what SuperOptiX does.
 
 ---
 
@@ -65,7 +67,82 @@ We recommend using `uv` for fast, reliable installation.
 
 ---
 
-## 🎨 Part 1 - Sentiment Analyzer Demo (Evaluation & Optimization)
+## 🔌 Part 1 - Adapt an Agent to A2A
+
+!!! info "Overview"
+    `super a2a adapt` reads an agent you already wrote, derives the skills a calling agent would
+    route on, and writes an Agent Card plus a conformant A2A server. Your agent is not modified.
+
+### Write an agent
+
+Any agent on a supported runtime works. This example uses DSPy because it needs no extra setup.
+
+```python title="sentiment.py"
+import dspy
+
+
+class ClassifySentiment(dspy.Signature):
+    """Classify the sentiment of a customer review as positive, negative or neutral."""
+
+    review: str = dspy.InputField(desc="the customer review text")
+    sentiment: str = dspy.OutputField(desc="positive, negative or neutral")
+
+
+program = dspy.Predict(ClassifySentiment)
+```
+
+### Adapt it
+
+```bash
+super a2a adapt --entrypoint sentiment:program --framework dspy
+```
+
+Three files are written to `./a2a`:
+
+| File | Contents |
+|---|---|
+| `agent-card.json` | The Agent Card other agents read to decide whether to call yours |
+| `a2a_server.py` | A FastAPI application serving A2A 1.0 and 0.3 |
+| `agentspec.json` | The intermediate representation the card was derived from |
+
+The card carries the skill the introspector found:
+
+```json
+{
+  "id": "program",
+  "name": "ClassifySentiment",
+  "description": "Classify the sentiment of a customer review as positive, negative or neutral. Takes review (the customer review text); returns sentiment (positive, negative or neutral).",
+  "tags": ["dspy", "signature", "review"]
+}
+```
+
+### Serve it
+
+```bash
+uvicorn a2a.a2a_server:app --port 8000
+```
+
+### Call it
+
+```bash
+curl localhost:8000/.well-known/agent-card.json
+
+curl -X POST localhost:8000/message:send \
+  -H 'content-type: application/json' \
+  -d '{"message":{"role":"ROLE_USER","parts":[{"text":"This product exceeded my expectations"}]}}'
+```
+
+!!! tip "A live example"
+    A SuperOptiX agent runs at [a2a.superoptix.ai](https://a2a.superoptix.ai), with its Agent Card
+    published at [superoptix.ai/.well-known/agent-card.json](https://superoptix.ai/.well-known/agent-card.json).
+    Call it to see the shape of a response before you deploy your own.
+
+Further reading: [Adapt an existing agent](guides/a2a-adapt.md), [Conformance](guides/a2a-conformance.md),
+[Routing quality](guides/a2a-routing.md).
+
+---
+
+## 🎨 Part 2 - Sentiment Analyzer Demo (Evaluation & Optimization)
 
 !!! info "Overview"
     This mini-project validates that your environment is ready. You'll initialize a project, pull a sample dataset, run the agent, evaluate it, and apply GEPA optimization.
@@ -150,7 +227,7 @@ super agent evaluate sentiment_analyzer
 
 ---
 
-## 🏗️ Part 2 - SWE Multi-Agent Orchestration
+## 🏗️ Part 3 - SWE Multi-Agent Orchestration
 
 !!! info "Overview"
     In this section you'll build an end-to-end software development workflow with multiple cooperating agents.
@@ -237,9 +314,11 @@ super observe dashboard
 
 !!! success "What You've Accomplished"
 
-    **Part 1:** Demonstrated evaluation-first development using a sentiment analyzer, including GEPA optimization.
+    **Part 1:** Gave an existing agent an A2A endpoint without changing its code.
 
-    **Part 2:** Showed the full SWE orchestration flow with multiple agents collaborating on an SDLC task.
+    **Part 2:** Demonstrated evaluation-first development using a sentiment analyzer, including GEPA optimization.
+
+    **Part 3:** Showed the full SWE orchestration flow with multiple agents collaborating on an SDLC task.
 
 !!! note "Next Steps"
     From here you can explore the marketplace (`super market`), design custom agents (`super agent design`), or build orchestras tailored to your workflows. Happy building! 🎉

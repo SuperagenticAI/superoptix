@@ -751,8 +751,8 @@ Category: {category}
 
 - [Agent Development Guide](./agent-development.md) - Learn how tools fit into the agent development process
 - [SuperSpec DSL Guide](./superspec.md) - Configure tools in agent playbooks
-- [CLI Reference](../reference/cli.md) - Command-line tool management
-- [API Reference](../reference/api/index.md) - Programmatic tool access
+- [CLI Reference](cli-complete-guide.md) - Command-line tool management
+- [Marketplace](marketplace.md) - Browsing and installing tools
 
 ---
 

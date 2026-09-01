@@ -528,8 +528,8 @@ super agent evaluate my_protocol_agent
 ## 📖 Related Documentation
 
 - `examples/protocol_agent_basic.yaml`
-- [API Reference: Protocols](../reference/api/protocols.md)
-- [SuperSpec DSL](../reference/api/superspec.md)
+- [A2A Guide](a2a-guide.md)
+- [SuperSpec Overview](superspec.md)
 - [GEPA Optimization](./gepa-optimization.md)
 
 ---

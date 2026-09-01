@@ -704,7 +704,7 @@ If you experience performance problems:
 - [Tool Development Guide](tool-development.md) - Build custom tools for your agents
 - [Memory System Guide](memory.md) - Understand agent memory and context management
 - [Evaluation and Testing Guide](evaluation-testing.md) - Test and validate your agents
-- [CLI Reference](../reference/cli.md) - Complete CLI command reference
+- [CLI Reference](cli-complete-guide.md) - Complete CLI command reference
 
 ## 🎉 Conclusion
 

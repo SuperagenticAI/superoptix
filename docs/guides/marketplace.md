@@ -296,8 +296,8 @@ super agent optimize relevant_agent
 ### What's Available Now
 
 **Local Marketplace**: Pre-built agents and tools in the SuperOptiX package
-**Industry Coverage**: 18 industries with specialized agents
-**Tool Categories**: 17 categories with 29+ tools
+**Industry Coverage**: 25 industries with 193 pre-built agents
+**Tool Categories**: 4 registry categories with 17 tools, plus 95 industry tool classes imported directly
 **Search & Browse**: Universal search and filtering
 **Quick Installation**: One-command agent installation
 
@@ -444,7 +444,7 @@ super marketplace install tool web_search
 - [Tool Development Guide](./tool-development.md) - Create custom tools
 - [Agent Development Guide](./agent-development.md) - Full development workflow
 - [SuperSpec DSL Guide](./superspec.md) - Configure agents and tools
-- [CLI Reference](../reference/cli.md) - Complete command reference
+- [CLI Reference](cli-complete-guide.md) - Complete command reference
 
 ---
 

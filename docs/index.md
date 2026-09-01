@@ -4,29 +4,36 @@
   <h3 style="margin-top: 5px; margin-bottom: 15px;">Agent-to-Agent (A2A) Interoperability and Optimization Layer</h3>
   <p style="margin-top: 10px; margin-bottom: 10px;"><strong>Make the agents you already run A2A-compliant, and get them discovered.</strong></p>
   <p style="margin-top: 5px; margin-bottom: 10px;"><em>Powered by DSPy. Refined by Superagentic AI.</em></p>
-  <p style="margin-top: 10px; margin-bottom: 20px;">Adapt an existing agent to A2A 1.0 without rewriting it, then measure and improve how other agents find it. Your code is not modified.</p>
+  <p style="margin-top: 10px; margin-bottom: 20px;">Adapt an existing agent to A2A 1.0 without rewriting it, then measure and improve how other agents find it.</p>
 </div>
 
 <div align="center" style="margin: 30px 0;">
-  <a href="quick-start/" style="background: #1976d2; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 5px; display: inline-block; font-weight: bold;">🚀 Quick Start</a>
-  <a href="guides/golden-workflow/" style="background: #424242; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 5px; display: inline-block; font-weight: bold;">⭐ Golden Workflow</a>
-  <a href="guides/" style="background: #424242; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 5px; display: inline-block; font-weight: bold;">📚 Guides</a>
-  <a href="guides/framework-feature-matrix/" style="background: #424242; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 5px; display: inline-block; font-weight: bold;">📊 Feature Matrix</a>
-</div>
-
-<div align="center" style="margin: 10px 0 24px 0;">
-  <p style="margin: 8px 0;">
-    <a href="guides/multi-framework/">Framework Support</a>
-  </p>
+  <a href="guides/a2a-adapt/" style="background: #1976d2; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 5px; display: inline-block; font-weight: bold;">Adapt an Agent</a>
+  <a href="guides/a2a-conformance/" style="background: #424242; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 5px; display: inline-block; font-weight: bold;">Conformance</a>
+  <a href="guides/a2a-routing/" style="background: #424242; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 5px; display: inline-block; font-weight: bold;">Routing Quality</a>
+  <a href="quick-start/" style="background: #424242; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 5px; display: inline-block; font-weight: bold;">Quick Start</a>
 </div>
 
 ---
 
 ## What is SuperOptiX?
 
-SuperOptiX is a universal agent optimization framework that lets you build, evaluate, and optimize agents across major frameworks with one workflow.
+Agents built on different frameworks cannot call each other. A2A is the protocol that lets them, and SuperOptiX gives an agent an A2A interface without asking you to rewrite it.
 
-It keeps generated pipelines framework-native and readable in minimal mode, and enables full optimization lifecycle only when you opt in with `--optimize`.
+Point it at an agent you already run. SuperOptiX reads its structure, works out the skills a calling agent would route on, and writes an Agent Card and a conformant server. Your code is not modified.
+
+```bash
+super a2a adapt --entrypoint mycrew:crew --framework crewai
+uvicorn a2a.a2a_server:app --port 8000
+```
+
+Eight runtimes are supported: DSPy, CrewAI, the OpenAI Agents SDK, Pydantic AI, Google ADK, the Claude Agent SDK, DeepAgents and the Microsoft Agent Framework.
+
+Being reachable is only half the problem. Whether another agent chooses to call yours depends on how its Agent Card describes it, so SuperOptiX measures that and improves it with GEPA. See [Routing quality](guides/a2a-routing/).
+
+The protocol implementation scores 100% at MUST, SHOULD and MAY against the official A2A Technology Compatibility Kit, verified in CI. A live agent runs at [a2a.superoptix.ai](https://a2a.superoptix.ai). See [A2A conformance](guides/a2a-conformance/).
+
+SuperOptiX also compiles agents from SuperSpec, a declarative YAML format, into native code for any supported runtime.
 
 ---
 
@@ -49,39 +56,42 @@ super agent optimize developer --framework dspy --auto light
 
 ---
 
-## Why Teams Use It
+## What It Gives You
 
 <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
   <tr>
     <td style="padding: 20px; border: 2px solid #2196F3; background: rgba(33, 150, 243, 0.08); vertical-align: top; width: 50%;">
-      <h4 style="color: #2196F3; margin-top: 0;">🔬 Multi-Framework Freedom</h4>
+      <h4 style="color: #2196F3; margin-top: 0;">Adaptation without a rewrite</h4>
       <ul>
-        <li>Compile one SuperSpec into DSPy, OpenAI SDK, Claude SDK, Pydantic AI, CrewAI, Google ADK, DeepAgents</li>
-        <li>Microsoft support remains available in legacy mode</li>
-        <li>Switch frameworks without rewriting agent intent</li>
+        <li>One command reads an existing agent and writes its Agent Card and server</li>
+        <li>Eight runtimes, including agents SuperOptiX did not build</li>
+        <li>Your agent code is left unchanged</li>
       </ul>
     </td>
     <td style="padding: 20px; border: 2px solid #4CAF50; background: rgba(76, 175, 80, 0.08); vertical-align: top; width: 50%;">
-      <h4 style="color: #4CAF50; margin-top: 0;">🧬 Optimization by Default Path</h4>
+      <h4 style="color: #4CAF50; margin-top: 0;">Verified conformance</h4>
       <ul>
-        <li>Minimal runtime pipeline first</li>
-        <li>GEPA optimization loop when needed</li>
-        <li>BDD-style evaluation and repeatable quality checks</li>
+        <li>100% MUST, SHOULD and MAY on the official A2A Technology Compatibility Kit</li>
+        <li>The suite runs in CI with a 100% MUST floor</li>
+        <li>A2A 1.0 and 0.3 served from one endpoint</li>
       </ul>
     </td>
   </tr>
   <tr>
     <td style="padding: 20px; border: 2px solid #FF9800; background: rgba(255, 152, 0, 0.08); vertical-align: top; width: 50%;">
-      <h4 style="color: #FF9800; margin-top: 0;">🗂️ Connector-Driven Agents</h4>
+      <h4 style="color: #FF9800; margin-top: 0;">Measured discoverability</h4>
       <ul>
-        <li>Cross-framework connector compilation</li>
-        <li>Clear connector demos including Calendly flows</li>
+        <li>Discovery, invocation and confusion rates over a query set</li>
+        <li>GEPA rewrites skill descriptions against that score</li>
+        <li>Agent behaviour is untouched, only the card changes</li>
       </ul>
     </td>
     <td style="padding: 20px; border: 2px solid #9C27B0; background: rgba(156, 39, 176, 0.08); vertical-align: top; width: 50%;">
+      <h4 style="color: #9C27B0; margin-top: 0;">Compilation from a specification</h4>
       <ul>
-        <li>Fallback-friendly pipeline strategy</li>
-        <li>Unified sandbox support coming soon</li>
+        <li>One SuperSpec compiles to native code for any supported runtime</li>
+        <li>Optional GEPA and DSPy optimization on the compile path</li>
+        <li>BDD-style evaluation for repeatable quality checks</li>
       </ul>
     </td>
   </tr>

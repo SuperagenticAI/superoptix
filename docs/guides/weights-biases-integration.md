@@ -361,4 +361,4 @@ wandb.log({
 4. **Create custom dashboard** in W&B
 5. **Set up team collaboration** with shared projects
 
-**Ready to track your agent experiments?** Start with the [Quick Start](#-quick-start) section above!
+**Ready to track your agent experiments?** Start with the [Quick Start](#quick-start) section above!

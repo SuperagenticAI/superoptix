@@ -228,7 +228,7 @@ If you need traditional ML capabilities:
 - **[LangFuse Integration Guide](langfuse-integration.md)** - Complete LangFuse setup and usage
 - **[Observability Guide](observability.md)** - General observability overview
 - **[Agent Development](agent-development.md)** - Build custom agents
-- **[SuperOptiX CLI Reference](../reference/cli.md)** - CLI commands reference
+- **[SuperOptiX CLI Reference](cli-complete-guide.md)** - CLI commands reference
 
 ## 🎯 Next Steps
 

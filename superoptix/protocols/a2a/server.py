@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
 import logging
 import uuid
@@ -10,6 +11,7 @@ from collections import defaultdict
 from collections.abc import AsyncIterator
 from contextlib import suppress
 from datetime import datetime, timezone
+from email.utils import format_datetime
 from typing import Any, Dict
 
 from superoptix.protocols.a2a import bridge as a2a_bridge
@@ -27,7 +29,12 @@ logger = logging.getLogger(__name__)
 
 try:
     from fastapi import Body, FastAPI, HTTPException, Request
-    from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
+    from fastapi.responses import (
+        HTMLResponse,
+        JSONResponse,
+        Response,
+        StreamingResponse,
+    )
 
     FASTAPI_AVAILABLE = True
 except ImportError:  # pragma: no cover - exercised in live use
@@ -37,6 +44,7 @@ except ImportError:  # pragma: no cover - exercised in live use
     Request = object
     HTMLResponse = None
     JSONResponse = None
+    Response = None
     StreamingResponse = None
 
 
@@ -190,12 +198,7 @@ class _A2ATaskStore:
             if not task:
                 return None
             task = dict(task)
-        if history_length is not None and history_length >= 0:
-            # Spec: historyLength caps the messages returned, keeping the most
-            # recent ones.
-            history = list(task.get("history") or [])
-            task["history"] = history[-history_length:] if history_length else []
-        return task
+        return _apply_history_length(task, history_length)
 
     async def list(
         self,
@@ -477,6 +480,7 @@ class _A2ATaskStore:
         task = await self._create_task(user_message)
         user_input = extract_text_from_message(user_message)
         config = configuration or {}
+        history_length = _int_or_none(config.get("historyLength"))
         if bool(config.get("returnImmediately")):
             worker = asyncio.create_task(
                 self._execute_task(
@@ -493,7 +497,7 @@ class _A2ATaskStore:
                 message_text="Processing request",
                 publish=True,
             )
-            return await self.get(task["id"]) or task
+            return await self.get(task["id"], history_length=history_length) or task
 
         finished = await self._execute_task(
             task,
@@ -504,7 +508,7 @@ class _A2ATaskStore:
         message_reply = self.message_replies.pop(task["id"], None)
         if message_reply is not None:
             return {"__a2a_message__": message_reply}
-        return finished
+        return _apply_history_length(dict(finished), history_length)
 
     async def stream_message(
         self,
@@ -684,7 +688,55 @@ def _http_error(
 
 
 # Clients declare the spec line they speak via this header; we serve 1.0 and 0.3.
+
+def _apply_history_length(
+    task: Dict[str, Any], history_length: int | None
+) -> Dict[str, Any]:
+    """Cap a task's history, keeping the most recent messages.
+
+    Zero is a meaningful value here and asks for no history at all, so the
+    check is against None rather than truthiness.
+    """
+    if history_length is None or history_length < 0:
+        return task
+    history = list(task.get("history") or [])
+    task["history"] = history[-history_length:] if history_length else []
+    return task
+
+
+def _etag_matches(header: str | None, etag: str) -> bool:
+    """True when an If-None-Match header covers this entity tag.
+
+    RFC 9110 allows a comma separated list and the wildcard, and a weak
+    validator compares equal to its strong form for this purpose.
+    """
+    if not header:
+        return False
+    candidates = [c.strip() for c in header.split(",")]
+    if "*" in candidates:
+        return True
+    target = etag.removeprefix("W/")
+    return any(c.removeprefix("W/") == target for c in candidates)
+
 SUPPORTED_PROTOCOL_VERSIONS = {"1.0", "0.3"}
+
+# The 0.3 spec line names its JSON-RPC methods with slashes; 1.0 renamed them to
+# the RPC style. The card advertises a 0.3 JSON-RPC interface, so a 0.3 client
+# calling the older names has to reach the same handlers.
+LEGACY_JSONRPC_METHODS = {
+    "message/send": "SendMessage",
+    "message/stream": "SendStreamingMessage",
+    "tasks/get": "GetTask",
+    "tasks/list": "ListTasks",
+    "tasks/cancel": "CancelTask",
+    "tasks/resubscribe": "SubscribeToTask",
+    "agent/authenticatedExtendedCard": "GetExtendedAgentCard",
+    "agent/getAuthenticatedExtendedCard": "GetExtendedAgentCard",
+    "tasks/pushNotificationConfig/set": "CreateTaskPushNotificationConfig",
+    "tasks/pushNotificationConfig/get": "GetTaskPushNotificationConfig",
+    "tasks/pushNotificationConfig/list": "ListTaskPushNotificationConfigs",
+    "tasks/pushNotificationConfig/delete": "DeleteTaskPushNotificationConfig",
+}
 
 
 def _unsupported_version(request: Any) -> str | None:
@@ -880,13 +932,36 @@ may take a moment while the service starts.</p>
 </body></html>"""
         return HTMLResponse(content=html)
 
+    # The card is fixed for the life of the process, so its validators are too.
+    # A2A asks servers to make the card cacheable, and a conditional request that
+    # matches should cost the caller nothing.
+    _card_served_at = format_datetime(datetime.now(timezone.utc), usegmt=True)
+
+    def _card_etag(payload: Dict[str, Any]) -> str:
+        body = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+        return '"' + hashlib.sha256(body.encode("utf-8")).hexdigest()[:32] + '"'
+
+    _card_etags = {
+        "1.0": _card_etag(agent_card),
+        "0.3": _card_etag(a2a_bridge.card_to_v03(agent_card)),
+    }
+
     @app.get("/.well-known/agent-card.json")
-    async def get_agent_card(request: Request) -> Dict[str, Any]:
+    async def get_agent_card(request: Request) -> Any:
         # A 0.3 reader expects a top-level `url` and its own protocolVersion;
         # handed only `supportedInterfaces` it has nothing to call.
-        if _wants_legacy(request):
-            return a2a_bridge.card_to_v03(agent_card)
-        return agent_card
+        legacy = _wants_legacy(request)
+        payload = a2a_bridge.card_to_v03(agent_card) if legacy else agent_card
+        etag = _card_etags["0.3" if legacy else "1.0"]
+        headers = {
+            "Cache-Control": "public, max-age=3600",
+            "ETag": etag,
+            "Last-Modified": _card_served_at,
+            "Vary": "A2A-Version",
+        }
+        if _etag_matches(request.headers.get("if-none-match"), etag):
+            return Response(status_code=304, headers=headers)
+        return JSONResponse(content=payload, headers=headers)
 
     @app.get("/extendedAgentCard")
     async def get_extended_agent_card() -> Any:
@@ -1006,6 +1081,8 @@ may take a moment while the service starts.</p>
                 a2a_errors.INVALID_REQUEST,
                 "Request must be a JSON-RPC 2.0 object with a 'method' member",
             )
+
+        method = LEGACY_JSONRPC_METHODS.get(method, method)
 
         params = normalize_a2a_payload(payload.get("params") or {})
 

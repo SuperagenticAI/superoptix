@@ -437,7 +437,7 @@ SuperOptiX focuses on practical capability coverage:
     </td>
     <td style="padding: 20px; text-align: center; width: 25%; border: 2px solid rgba(255, 152, 0, 0.3); background: rgba(255, 152, 0, 0.05);">
       <h2>⚙️</h2>
-      <h4><a href="../reference/api/" style="color: #FF9800; text-decoration: none; font-weight: bold;">API Reference</a></h4>
+      <h4><a href="../guides/cli-complete-guide/" style="color: #FF9800; text-decoration: none; font-weight: bold;">CLI Reference</a></h4>
       <p>Complete API documentation</p>
     </td>
     <td style="padding: 20px; text-align: center; width: 25%; border: 2px solid rgba(156, 39, 176, 0.3); background: rgba(156, 39, 176, 0.05);">

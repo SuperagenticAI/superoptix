@@ -23,7 +23,7 @@ SuperOptiX provides a comprehensive suite of advanced techniques for building pr
 
 - **[BDD Scenarios](../guides/bdd.md)** - Behavior-driven development for agents
 - **[CI/CD Integration](../guides/cicd-integration.md)** - Automate testing and deployment
-- **[API Reference](../reference/api/index.md)** - REST API for integration
+- **[CLI Complete Guide](../guides/cli-complete-guide.md)** - Every command with examples
 
 ## 🎯 Getting Started
 

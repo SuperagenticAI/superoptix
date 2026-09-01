@@ -1,50 +1,48 @@
 # Guides Overview
 
-SuperOptiX lets you define agents once in SuperSpec YAML and compile them into multiple frameworks.
+SuperOptiX gives an agent you already run an A2A interface, then measures whether other agents
+find it. It also compiles agents from SuperSpec YAML into native code for eight runtimes.
 
-## Highlighted Capabilities
+## A2A
 
-- [Harness Runtime](harness.md)
-- 🧬 [GEPA Optimization](gepa-optimization.md)
-- 🤝 [A2A Introduction](a2a-introduction.md)
+- [A2A Introduction](a2a-introduction.md)
+- [Adapt an existing agent](a2a-adapt.md)
+- [Conformance and the live endpoint](a2a-conformance.md)
+- [Routing quality](a2a-routing.md)
+- [A2A Guide](a2a-guide.md)
+- [A2A Demo Guide](a2a-demo-guide.md)
 
 ## Start Here
 
 - [SuperSpec Overview](superspec.md)
 - [Multi-Framework Guide](multi-framework.md)
-- [Harness Runtime](harness.md)
 - [Golden Workflow](golden-workflow.md)
 - [CLI Complete Guide](cli-complete-guide.md)
-- [A2A Guide](a2a-guide.md)
 
 ## Framework Guides
 
-- [DSPy](multi-framework.md#supported-frameworks)
 - [Framework Feature Matrix](framework-feature-matrix.md)
+- [DSPy](multi-framework.md#supported-frameworks)
 - [OpenAI Agents SDK](openai-sdk-integration.md)
 - [Claude Agent SDK](claude-sdk-integration.md)
 - [Pydantic AI](pydantic-ai-integration.md)
 - [CrewAI](crewai-integration.md)
 - [Google ADK](google-adk-integration.md)
 - [DeepAgents](deepagents-integration.md)
-- [Microsoft Agent Framework (Legacy Support)](microsoft-framework-integration.md)
-
-## Connectors
-
-- [A2A Demo Guide](a2a-demo-guide.md)
+- [Microsoft Agent Framework (legacy support)](microsoft-framework-integration.md)
 
 ## Optimization and Evaluation
 
 - [GEPA Optimization](gepa-optimization.md)
 - [Optimization Guide](optimization.md)
-- [Evaluation & Testing](evaluation-testing.md)
+- [Evaluation and Testing](evaluation-testing.md)
 
 ## Observability
 
 - [Observability Guide](observability.md)
-- [MLFlow](mlflow-guide.md)
-- [LangFuse](langfuse-integration.md)
-- [LogFire](logfire-integration.md)
+- [MLflow](mlflow-guide.md)
+- [Langfuse](langfuse-integration.md)
+- [Logfire](logfire-integration.md)
 
 ## Troubleshooting
 
