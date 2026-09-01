@@ -4,7 +4,8 @@
   </a>
   <h1>SuperOptiX AI</h1>
   <h3><strong>Agent-to-Agent (A2A) Interoperability and Optimization Layer</strong></h3>
-  <p>Make the agents you already run A2A-compliant, and get them discovered.</p>
+  <p><strong>Agent-to-agent communication, without framework lock-in.</strong></p>
+  <p>Make the agents you already run callable by any other agent, and get them discovered.</p>
 
   <div style="margin: 20px 0;">
     <a href="https://badge.fury.io/py/superoptix">
