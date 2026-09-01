@@ -48,9 +48,17 @@ curl -fsSL https://ollama.com/install.sh | sh
 
 ### 🔧 Install SuperOptiX
 
-We recommend using `uv` for fast, reliable installation.
+=== "One line (recommended)"
 
-=== "uv (Recommended)"
+    Installs `uv` when it is missing, then SuperOptiX into an isolated tool
+    environment. It never uses sudo.
+
+    ```bash
+    curl -fsSL https://superoptix.ai/install.sh | sh
+    super --version
+    ```
+
+=== "uv"
 
     ```bash
     curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -58,10 +66,10 @@ We recommend using `uv` for fast, reliable installation.
     super --version
     ```
 
-=== "pip"
+=== "Into an existing project"
 
     ```bash
-    uv pip install superoptix
+    uv add superoptix
     super --version
     ```
 
