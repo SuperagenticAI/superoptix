@@ -194,7 +194,7 @@ Compatibility notes:
 ## What exists today
 
 - A2A 1.0 server covering the full method surface, with 0.3 negotiation
-- 100% MUST/SHOULD/MAY against the official Technology Compatibility Kit,
+- Zero failures against the official Technology Compatibility Kit,
   enforced in CI ([A2A conformance](a2a-conformance.md))
 - `super a2a adapt` for agents built outside SuperOptiX, across all eight
   supported frameworks ([Adapting an existing agent](a2a-adapt.md))

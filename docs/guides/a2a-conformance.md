@@ -9,16 +9,48 @@ how to test an agent you have adapted.
 Measured with the [official A2A TCK](https://github.com/a2aproject/a2a-tck)
 against the conformance harness:
 
-| Level | Compliance |
-| --- | --- |
-| MUST | 100% |
-| SHOULD | 100% |
-| MAY | 100% |
+| Level | Passed / exercised | Not exercised | TCK headline |
+| --- | --- | --- | --- |
+| MUST | 73 / 73 | 21 | 77.7% |
+| SHOULD | 7 / 7 | 4 | 63.6% |
+| MAY | 4 / 4 | 0 | 100% |
+
+**Zero failures.** Every requirement the TCK is able to exercise against this
+endpoint passes.
+
+### Why the headline percentage is lower
+
+The TCK counts a requirement it cannot exercise as non-compliant. Until
+2026-08-31 it counted those as compliant, which is why earlier versions of this
+page reported 100% across the board. The change is upstream commit
+[`cf4985b`](https://github.com/a2aproject/a2a-tck), "don't count NOT TESTED
+requirements as compatible".
+
+25 requirements fall into that bucket here:
+
+| Area | Count | Why it cannot be exercised |
+| --- | --- | --- |
+| Authentication and TLS | 13 | The harness serves plain HTTP with no auth scheme |
+| Agent Card JWS signatures | 4 | Card signing is not implemented |
+| Cross-binding equivalence | 4 | Requires the gRPC binding for comparison |
+| Version negotiation probes | 3 | Require a second declared server version |
+| gRPC binding | 1 | Not implemented |
+
+None are failures. Reaching a 100% headline means implementing authentication,
+card signing and a gRPC binding, which are not scheduled.
+
+### What the CI gate checks
+
+`.github/workflows/a2a-conformance.yml` runs on demand and fails on any
+conformance failure. It does not gate on the headline percentage, because that
+number moves when the TCK changes what it can exercise, independent of this
+implementation.
 
 The published SuperOptiX endpoint and agents produced by
-[`super a2a adapt`](a2a-adapt.md) score 86.3% MUST. The difference is not a
-defect: the remaining requirements are TCK scenario hooks that a production
-agent should not implement. See [The conformance harness](#the-conformance-harness).
+[`super a2a adapt`](a2a-adapt.md) score lower on the headline figure. The
+difference is not a defect: the remaining requirements are TCK scenario hooks
+that a production agent should not implement. See
+[The conformance harness](#the-conformance-harness).
 
 ## The live endpoint
 
