@@ -5,10 +5,11 @@ This guide covers installing SuperOptiX and the optional extras for each support
 !!! tip "🚀 Quick Start"
     **New to SuperOptiX?** Start with our [Quick Start Guide](quick-start.md) after installation!
 
-!!! tip "Stable Release Available!"
-    SuperOptiX is now available as a stable release. We recommend using `uv` for the best experience.
+!!! tip "One-line install"
+    The installer sets up `uv` if it is missing, then installs SuperOptiX into an
+    isolated tool environment. It never uses sudo.
     ```bash
-    uv tool install superoptix
+    curl -fsSL https://superoptix.ai/install.sh | sh
     ```
 
 ## 📋 Prerequisites
@@ -63,13 +64,31 @@ git --version  # Should show git version
 
 ### Recommended: Using uv
 
-We highly recommend using `uv` for faster, more reliable installations.
+### One line
+
+Installs `uv` when it is missing, then SuperOptiX into an isolated tool
+environment. Works on macOS, Linux and WSL, and never uses sudo.
 
 ```bash
-# Install UV (if not already installed)
+curl -fsSL https://superoptix.ai/install.sh | sh
+```
+
+Extras and an exact version are selected with environment variables:
+
+```bash
+curl -fsSL https://superoptix.ai/install.sh | SUPEROPTIX_EXTRAS=a2a sh
+curl -fsSL https://superoptix.ai/install.sh | SUPEROPTIX_VERSION=0.3.1 sh
+```
+
+### With uv directly
+
+If you already have `uv` and would rather run it yourself:
+
+```bash
+# Install uv if you do not have it
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Install SuperOptiX CLI globally (isolated tool env)
+# Install SuperOptiX into an isolated tool environment
 uv tool install superoptix
 
 # Verify
