@@ -171,7 +171,7 @@ try:
 
     __version__ = _pkg_version("superoptix")
 except (ImportError, PackageNotFoundError):  # source checkout without install
-    __version__ = "0.3.0"
+    __version__ = "0.3.1"
 
 # ============================================================================
 # FINAL SAFETY: Re-apply filters after all imports (defense in depth)
