@@ -3,9 +3,9 @@ name: A2A Conformance
 # Runs the official A2A Technology Compatibility Kit against the public A2A
 # endpoint and publishes the compatibility report as a build artifact.
 #
-# The job enforces a ratchet rather than demanding 100%: it fails if MUST-level
-# compliance drops below MIN_MUST_COMPLIANCE. Raise that number as gaps close so
-# conformance can only improve.
+# The job enforces a floor at each RFC 2119 level. Every level is executed,
+# because the compatibility report treats a level it did not run as fully
+# compliant, which would turn a real regression into a green build.
 on:
   push:
     branches: [ main ]
@@ -26,6 +26,8 @@ permissions:
 
 env:
   MIN_MUST_COMPLIANCE: "100.0"
+  MIN_SHOULD_COMPLIANCE: "100.0"
+  MIN_MAY_COMPLIANCE: "100.0"
 
 jobs:
   tck:
@@ -76,26 +78,44 @@ jobs:
       - name: Run the conformance suite
         working-directory: ${{ runner.temp }}/a2a-tck
         run: |
-          .venv/bin/python run_tck.py --sut-host http://127.0.0.1:8000 --level must || true
+          for level in must should may; do
+            echo "::group::TCK $level"
+            .venv/bin/python run_tck.py --sut-host http://127.0.0.1:8000 --level "$level" || true
+            cp reports/compatibility.json "reports/compatibility-$level.json"
+            echo "::endgroup::"
+          done
           cp -r reports "$GITHUB_WORKSPACE/tck-reports"
 
-      - name: Check the compliance ratchet
+      - name: Check the compliance floors
         run: |
           python - <<'PY'
           import json, os, sys
-          summary = json.load(open("tck-reports/compatibility.json"))["summary"]
-          actual = float(summary["must_compatibility"].rstrip("%"))
-          floor = float(os.environ["MIN_MUST_COMPLIANCE"])
-          print(f"MUST compliance: {actual}%  (floor {floor}%)")
-          print(f"SHOULD: {summary['should_compatibility']}  MAY: {summary['may_compatibility']}")
+
+          # Each level is read from its own run. A level that was deselected is
+          # reported as 100% compliant, so the must run cannot speak for should.
+          levels = ("must", "should", "may")
+          floors = {lv: float(os.environ[f"MIN_{lv.upper()}_COMPLIANCE"]) for lv in levels}
+          actual = {}
+          for lv in levels:
+              summary = json.load(open(f"tck-reports/compatibility-{lv}.json"))["summary"]
+              actual[lv] = float(summary[f"{lv}_compatibility"].rstrip("%"))
+
+          rows = "\n".join(
+              f"| {lv.upper()} | {actual[lv]}% | {floors[lv]}% |" for lv in levels
+          )
+          print(rows)
           with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as fh:
-              fh.write(f"## A2A conformance\n\n")
-              fh.write(f"| Level | Compliance |\n|---|---|\n")
-              fh.write(f"| MUST | {summary['must_compatibility']} |\n")
-              fh.write(f"| SHOULD | {summary['should_compatibility']} |\n")
-              fh.write(f"| MAY | {summary['may_compatibility']} |\n")
-          if actual < floor:
-              sys.exit(f"MUST compliance regressed: {actual}% < {floor}%")
+              fh.write("## A2A conformance\n\n")
+              fh.write("| Level | Compliance | Floor |\n|---|---|---|\n")
+              fh.write(rows + "\n")
+
+          failures = [
+              f"{lv.upper()} regressed: {actual[lv]}% < {floors[lv]}%"
+              for lv in levels
+              if actual[lv] < floors[lv]
+          ]
+          if failures:
+              sys.exit("; ".join(failures))
           PY
 
       - name: Publish the compatibility report

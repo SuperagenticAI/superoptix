@@ -248,15 +248,18 @@ def browse_industries(args):
 
 def browse_categories(args):
     """Show tool categories overview."""
-    from ..tools.tool_registry import get_registry
+    from ...tools.tool_registry import get_tool_registry
 
     console.print(
         "📂 [bold bright_blue]Marketplace: Tool Categories[/bold bright_blue]"
     )
     console.print("═" * 50)
 
-    registry = get_registry()
-    categories = registry.get_tools_by_category()
+    registry = get_tool_registry()
+    categories = {
+        category: registry.get_tools_by_category(category)
+        for category in registry.list_categories()
+    }
 
     # Create categories table
     table = Table(title="📂 Tool Categories", border_style="blue")
@@ -369,9 +372,9 @@ def show_component(args):
 
     # Try to find as tool first
     try:
-        from ...tools.tool_registry import get_registry
+        from ...tools.tool_registry import get_tool_registry
 
-        registry = get_registry()
+        registry = get_tool_registry()
         tool_metadata = registry.get_tool_metadata(name)
     except ImportError:
         tool_metadata = None

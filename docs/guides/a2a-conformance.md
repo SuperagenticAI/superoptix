@@ -20,6 +20,54 @@ The published SuperOptiX endpoint and agents produced by
 defect: the remaining requirements are TCK scenario hooks that a production
 agent should not implement. See [The conformance harness](#the-conformance-harness).
 
+## The live endpoint
+
+A SuperOptiX agent runs at `a2a.superoptix.ai`, hosted on Cloud Run.
+
+| | |
+| --- | --- |
+| Agent Card, published | `superoptix.ai/.well-known/agent-card.json` |
+| Agent Card, served by the agent | `a2a.superoptix.ai/.well-known/agent-card.json` |
+| Endpoint | `https://a2a.superoptix.ai` |
+
+Two copies of the card is the intended arrangement rather than duplication. The
+published copy is a static file on the website, so discovery answers instantly
+whether or not the service is warm. The served copy confirms the running agent
+agrees with what was published. The two are byte-identical.
+
+The agent exposes two skills, both deterministic. Neither calls a model, reads
+user code, nor holds a credential, which is what makes the endpoint safe to
+expose and inexpensive to run.
+
+```bash
+curl -X POST https://a2a.superoptix.ai/message:send \
+  -H 'content-type: application/json' \
+  -d '{"message":{"role":"ROLE_USER","parts":[{"text":"Does CrewAI support A2A?"}]}}'
+```
+
+Opening `https://a2a.superoptix.ai` in a browser returns a page describing the
+endpoint rather than an error. The address appears in the Agent Card and in
+registry listings, so people follow it, and a bare 404 reads as a broken
+service.
+
+### Hosting
+
+The endpoint moved from Render to Cloud Run in August 2026. The reason was cold
+start rather than cost:
+
+| | Cold start | Warm |
+| --- | --- | --- |
+| Render free tier | 42.5 s | 0.41 s |
+| Cloud Run, scale to zero | 1.7 s | 0.06 s |
+
+A2A clients apply timeouts. A registry fetching a card with a 30 second timeout
+records a 42.5 second endpoint as unreachable rather than slow, so the free tier
+on Render was not viable for an agent meant to be discovered. Cloud Run keeps the
+image staged and starts a container on demand, which brings the same
+idle-to-first-request path inside those timeouts.
+
+`deploy/a2a/README.md` covers the deployment and the migration.
+
 ## Running the TCK
 
 The TCK is a pytest suite that exercises a running agent across the JSON-RPC,
@@ -94,13 +142,30 @@ What changes between the two:
 | Part shape | Unified, fields set directly | Wrapped, tagged with `kind` |
 | File part | `raw` / `url` / `filename` / `mediaType` | `file.bytes` / `file.uri` / `file.name` / `file.mimeType` |
 | Card | `supportedInterfaces` | Top-level `url` and `preferredTransport` |
+| JSON-RPC method names | `SendMessage` | `message/send` |
+
+Both sets of method names reach the same handlers, so a 0.3 client does not have
+to know it is talking to a 1.0 implementation:
+
+| 0.3 | 1.0 |
+| --- | --- |
+| `message/send` | `SendMessage` |
+| `message/stream` | `SendStreamingMessage` |
+| `tasks/get` | `GetTask` |
+| `tasks/list` | `ListTasks` |
+| `tasks/cancel` | `CancelTask` |
+| `tasks/resubscribe` | `SubscribeToTask` |
+| `agent/authenticatedExtendedCard` | `GetExtendedAgentCard` |
+| `tasks/pushNotificationConfig/*` | `*TaskPushNotificationConfig` |
+
+A method outside both sets returns `-32601`.
 
 An unrecognised version returns `VersionNotSupportedError`: `-32009` over
 JSON-RPC, HTTP 400 over REST.
 
 Both lines matter because the installed base is on 0.3. Of the eight frameworks
-SuperOptiX adapts, five declare no A2A dependency and the three that do — CrewAI,
-Google ADK and Pydantic AI — are pinned below 1.0. An endpoint that speaks only
+SuperOptiX adapts, five declare no A2A dependency, and the three that do
+(CrewAI, Google ADK and Pydantic AI) are pinned below 1.0. An endpoint that speaks only
 1.0 is unreachable by most agents currently deployed.
 
 Translation is available directly:
@@ -112,6 +177,32 @@ legacy = bridge.task_to_v03(task)
 current = bridge.task_to_v1(legacy)
 card = bridge.card_to_v03(agent_card)
 ```
+
+## Agent Card caching
+
+The Agent Card is fixed for the life of the process, so it is served with
+validators that let a caller skip the transfer on a repeat read.
+
+```
+Cache-Control: public, max-age=3600
+ETag: "5b8e694cb6e718eb2633ad7de9a2909b"
+Last-Modified: Mon, 31 Aug 2026 19:40:41 GMT
+Vary: A2A-Version
+```
+
+A conditional request that matches returns `304` with no body:
+
+```bash
+curl -sI localhost:8000/.well-known/agent-card.json | grep -i etag
+curl -si -H 'If-None-Match: "<etag>"' localhost:8000/.well-known/agent-card.json | head -1
+```
+
+The 1.0 and 0.3 renderings of the card are different documents and carry
+different entity tags, which is what the `Vary` header exists to signal. A cache
+holding one will not hand it to a client that asked for the other.
+
+`If-None-Match` follows RFC 9110: a comma separated list is accepted, `*` matches
+anything, and a weak validator compares equal to its strong form.
 
 ## Error handling
 

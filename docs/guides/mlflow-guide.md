@@ -353,6 +353,6 @@ with open('mlflow_demo/.superoptix/traces/developer_20250714_204941.jsonl') as f
 - **[LangFuse Integration Guide](langfuse-integration.md)** - LangFuse observability integration
 - **[Agent Development](agent-development.md)** - Build custom agents
 - **[MLFlow Documentation](https://mlflow.org/docs/latest/index.html)** - Official MLFlow docs
-- **[SuperOptiX CLI Reference](../reference/cli.md)** - CLI commands reference
+- **[SuperOptiX CLI Reference](cli-complete-guide.md)** - CLI commands reference
 
 --- 

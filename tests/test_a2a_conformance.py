@@ -301,3 +301,132 @@ class TestErrorBindings:
     def test_standard_jsonrpc_errors_carry_no_errorinfo(self):
         assert a2a_errors.METHOD_NOT_FOUND.details() == []
         assert a2a_errors.INVALID_REQUEST.details() == []
+
+
+class TestAgentCardCaching:
+    """CARD-CACHE-001/002/003: the card is served with cache validators."""
+
+    CARD = "/.well-known/agent-card.json"
+
+    def test_cache_control_declares_max_age(self, client):
+        headers = client.get(self.CARD).headers
+        assert "max-age" in headers["cache-control"]
+
+    def test_etag_and_last_modified_are_present(self, client):
+        headers = client.get(self.CARD).headers
+        assert headers["etag"].startswith('"')
+        assert headers["last-modified"]
+
+    def test_vary_names_the_negotiating_header(self, client):
+        """The two renderings differ, so a cache has to key on the header."""
+        assert client.get(self.CARD).headers["vary"] == "A2A-Version"
+
+    def test_matching_etag_returns_304(self, client):
+        etag = client.get(self.CARD).headers["etag"]
+        response = client.get(self.CARD, headers={"If-None-Match": etag})
+        assert response.status_code == 304
+        assert not response.content
+
+    def test_wildcard_matches(self, client):
+        assert client.get(self.CARD, headers={"If-None-Match": "*"}).status_code == 304
+
+    def test_weak_validator_matches_its_strong_form(self, client):
+        etag = client.get(self.CARD).headers["etag"]
+        response = client.get(self.CARD, headers={"If-None-Match": f"W/{etag}"})
+        assert response.status_code == 304
+
+    def test_stale_etag_returns_the_card(self, client):
+        response = client.get(self.CARD, headers={"If-None-Match": '"stale"'})
+        assert response.status_code == 200
+
+    def test_the_two_spec_lines_carry_different_etags(self, client):
+        current = client.get(self.CARD).headers["etag"]
+        legacy = client.get(self.CARD, headers={"A2A-Version": "0.3"}).headers["etag"]
+        assert current != legacy
+
+    def test_an_etag_from_one_version_does_not_match_the_other(self, client):
+        legacy = client.get(self.CARD, headers={"A2A-Version": "0.3"}).headers["etag"]
+        response = client.get(self.CARD, headers={"If-None-Match": legacy})
+        assert response.status_code == 200
+
+
+class TestLegacyMethodNames:
+    """The card advertises a 0.3 JSON-RPC interface, so 0.3 names must work."""
+
+    def _call(self, client, method, params):
+        return client.post(
+            RPC,
+            json={"jsonrpc": "2.0", "id": "1", "method": method, "params": params},
+        ).json()
+
+    def test_message_send_reaches_the_handler(self, client):
+        body = self._call(
+            client,
+            "message/send",
+            {"message": {"role": "user", "messageId": "m1", "parts": [{"kind": "text", "text": "hi"}]}},
+        )
+        assert "error" not in body, body
+
+    def test_tasks_get_reports_a_missing_task(self, client):
+        body = self._call(client, "tasks/get", {"name": "tasks/nope"})
+        assert body["error"]["code"] == a2a_errors.TASK_NOT_FOUND.jsonrpc_code
+
+    def test_tasks_cancel_reports_a_missing_task(self, client):
+        body = self._call(client, "tasks/cancel", {"name": "tasks/nope"})
+        assert body["error"]["code"] == a2a_errors.TASK_NOT_FOUND.jsonrpc_code
+
+    def test_extended_card_reports_it_is_unconfigured(self, client):
+        body = self._call(client, "agent/authenticatedExtendedCard", {})
+        assert body["error"]["code"] == a2a_errors.EXTENDED_AGENT_CARD_NOT_CONFIGURED.jsonrpc_code
+
+    def test_push_config_reports_it_is_unsupported(self, client):
+        body = self._call(client, "tasks/pushNotificationConfig/set", {})
+        assert body["error"]["code"] == a2a_errors.PUSH_NOTIFICATION_NOT_SUPPORTED.jsonrpc_code
+
+    def test_the_1_0_names_still_work(self, client):
+        body = self._call(client, "GetTask", {"name": "tasks/nope"})
+        assert body["error"]["code"] == a2a_errors.TASK_NOT_FOUND.jsonrpc_code
+
+    def test_an_unknown_method_is_still_rejected(self, client):
+        body = self._call(client, "bogus/thing", {})
+        assert body["error"]["code"] == a2a_errors.METHOD_NOT_FOUND.jsonrpc_code
+
+
+class TestSendMessageHistoryLength:
+    """CORE-HIST-003: SendMessage honours configuration.historyLength."""
+
+    def _send(self, client, text, context_id=None, history_length=None):
+        message = {"role": "ROLE_USER", "parts": [{"text": text}]}
+        if context_id:
+            message["contextId"] = context_id
+        body = {"message": message}
+        if history_length is not None:
+            body["configuration"] = {"historyLength": history_length}
+        return client.post("/message:send", json=body).json()["task"]
+
+    @pytest.fixture()
+    def context(self, client):
+        """A context carrying enough turns for a cap to be observable."""
+        first = self._send(client, "first")
+        context_id = first["contextId"]
+        for text in ("second", "third", "fourth"):
+            self._send(client, text, context_id)
+        return context_id
+
+    def test_zero_returns_no_history(self, client, context):
+        """Zero is a value, not an absent field."""
+        task = self._send(client, "next", context, history_length=0)
+        assert task["history"] == []
+
+    def test_a_cap_keeps_the_most_recent_messages(self, client, context):
+        task = self._send(client, "next", context, history_length=1)
+        assert len(task["history"]) == 1
+
+    def test_an_absent_cap_leaves_history_alone(self, client, context):
+        capped = self._send(client, "next", context, history_length=0)
+        uncapped = self._send(client, "next", context)
+        assert len(uncapped["history"]) > len(capped["history"])
+
+    def test_a_negative_cap_is_ignored(self, client, context):
+        task = self._send(client, "next", context, history_length=-1)
+        assert task["history"]

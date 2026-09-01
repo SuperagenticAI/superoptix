@@ -98,7 +98,7 @@ super agent optimize research_agent_deepagents --auto medium --framework deepage
 # Done! Agent optimized with local Ollama
 ```
 
-**📖 Detailed Gemini Guide**: See `DEEPAGENTS_GEMINI_TEST.md` in repo root
+**Gemini setup**: see [Backend Configuration](deepagents-backends.md)
 
 ---
 
@@ -920,18 +920,14 @@ A: Coming soon! We're extending the same pattern to CrewAI, Microsoft, OpenAI SD
 
 - 📖 **[Backend Reference Guide](deepagents-backends.md)** - Complete configuration reference
 - 🎓 **[Backends Tutorial](../tutorials/deepagents-backends-tutorial.md)** - 6 hands-on tutorials  
-- 📝 **[Integration Summary](../DEEPAGENTS_0.2.0_COMPLETE.md)** - What's new and how to use
+- 📝 **[Complete Workflow Tutorial](../tutorials/deepagents-complete-workflow.md)** - End to end walkthrough
 
 ### Model Configuration
 
-- 🔧 **[Gemini Configuration Guide](../GEMINI_CONFIGURATION_GUIDE.md)** - Gemini 2.5 setup
-- 🧪 **[Gemini Testing Guide](../DEEPAGENTS_GEMINI_TEST.md)** - Complete testing workflow
+- 🔧 **[Backend Configuration](deepagents-backends.md)** - Backends and model setup
+- 🧪 **[Backends Tutorial](../tutorials/deepagents-backends-tutorial.md)** - Hands on backend walkthrough
 
 ### Technical Details
-
-- 🔍 **[Technical Analysis](../DEEPAGENTS_ANALYSIS.md)** - Why Ollama doesn't work
-- 🐛 **[Fixes Summary](../DEEPAGENTS_FIXES_SUMMARY.md)** - Bug fixes applied
-- 🚀 **[Integration Plan](../DEEPAGENTS_0.2.0_INTEGRATION.md)** - Implementation details
 
 ### Demo Agents
 

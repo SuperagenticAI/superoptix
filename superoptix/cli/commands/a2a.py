@@ -13,6 +13,23 @@ console = Console()
 DEFAULT_PUBLIC_URL = "http://127.0.0.1:8000"
 
 
+def _uvicorn_target(out_dir: Path, server_module: str) -> str:
+    """Build the uvicorn target for the emitted server.
+
+    uvicorn takes a dotted module path, so the output directory has to be
+    converted rather than interpolated. A directory outside the working
+    directory gets an --app-dir, since no dotted path from here reaches it.
+    """
+    resolved = out_dir.resolve()
+    try:
+        relative = resolved.relative_to(Path.cwd())
+    except ValueError:
+        return f"--app-dir {resolved} {server_module}:app"
+    if not relative.parts:
+        return f"{server_module}:app"
+    return ".".join([*relative.parts, server_module]) + ":app"
+
+
 def adapt_agent(args) -> None:
     """Introspect an existing agent and emit an A2A card plus server."""
     from superoptix.protocols.a2a.adapt import (
@@ -79,7 +96,7 @@ def adapt_agent(args) -> None:
     server_module = written[1].stem
     console.print(
         "\n[bold]Serve it:[/]\n"
-        f"  [cyan]uvicorn {out_dir}.{server_module}:app --port 8000[/]\n"
+        f"  [cyan]uvicorn {_uvicorn_target(out_dir, server_module)} --port 8000[/]\n"
         "\n[bold]Then check it:[/]\n"
         "  [cyan]curl localhost:8000/.well-known/agent-card.json[/]\n"
     )

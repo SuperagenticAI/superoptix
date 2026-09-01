@@ -51,7 +51,7 @@ dependencies = [
     # lazily, and they are already declared in the `huggingface` and
     # `ml-cross-platform` extras. Keeping them here added ~545 MB to every
     # install (torch alone is 491 MB) for an optional local-inference backend.
-    #   pip install "superoptix[huggingface]"   # to use that backend
+    #   uv pip install "superoptix[huggingface]"   # to use that backend
     "dspy>=3.3",  # GEPA lives in DSPy 3.x - floor prevents silent back-solve to 2.6.x
     "litellm>=1.98,!=1.82.7,!=1.82.8",  # Block compromised March 2026 releases
     "pydantic",  # Required for data validation
@@ -122,7 +122,7 @@ frameworks-claude-sdk = [
 # Declaring that as a [tool.uv] conflict pushes `uv lock` past 10 minutes,
 # so CrewAI stays a one-line install instead:
 #
-#   pip install superoptix "crewai>=1.15"
+#   uv pip install superoptix "crewai>=1.15"
 #
 # Use a CrewAI-only environment (no turboagents/vectordb extras) for that path.
 
@@ -139,7 +139,7 @@ frameworks = [
     "pydantic-ai>=2.31,<2.32",
     "claude-agent-sdk>=0.2",
     # crewai excluded: requires chromadb~=1.1.0 vs our >=1.5.5.
-    # Install separately: pip install superoptix "crewai>=1.15"
+    # Install separately: uv pip install superoptix "crewai>=1.15"
 ]
 
 # MCP tool optimization (vendored from GEPA PR #105)
@@ -354,7 +354,7 @@ docs = [
 # All optional dependencies (excluding dev, Apple Silicon specific, CrewAI, and LogFire)
 # NOTE: Includes DSPy. CrewAI is a separate extra (chromadb version conflict).
 # NOTE: LogFire excluded due to opentelemetry-sdk conflict with google-adk
-#       LogFire must be installed separately: pip install superoptix[logfire]
+#       LogFire must be installed separately: uv pip install "superoptix[logfire]"
 #       Cannot be combined with [all] due to google-adk dependency conflict
 all = [
     # Framework dependencies - keep in sync with the frameworks-* extras above
@@ -368,7 +368,7 @@ all = [
     "pydantic-ai>=2.31,<2.32",
     "claude-agent-sdk>=0.2",
     # crewai excluded: requires chromadb~=1.1.0 vs our >=1.5.5.
-    # Install separately: pip install superoptix "crewai>=1.15"
+    # Install separately: uv pip install superoptix "crewai>=1.15"
     # Protocol integrations (A2A v1 is implemented directly over FastAPI)
     "sse-starlette",
     # logfire - EXCLUDED (conflicts with google-adk's opentelemetry-sdk version)
@@ -411,7 +411,7 @@ all-with-mlx = [
     "pydantic-ai>=2.31,<2.32",
     "claude-agent-sdk>=0.2",
     # crewai excluded: requires chromadb~=1.1.0 vs our >=1.5.5.
-    # Install separately: pip install superoptix "crewai>=1.15"
+    # Install separately: uv pip install superoptix "crewai>=1.15"
     # logfire - EXCLUDED (conflicts with google-adk's opentelemetry-sdk version)
     # Existing dependencies
     "streamlit",

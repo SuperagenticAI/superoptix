@@ -87,7 +87,7 @@ After completing the tutorials, explore:
 
 - [Core Concepts](../guides/index.md) - Deep dive into SuperOptix fundamentals
 - [Guides](../guides/index.md) - Techniques and integrations
-- [Reference](../reference/index.md) - API documentation and CLI reference
+- [CLI Complete Guide](../guides/cli-complete-guide.md) - Every command with examples
 
 ## 🆘 Need Help?
 

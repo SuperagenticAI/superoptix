@@ -348,7 +348,7 @@ spec:
 - **[Observability Guide](../../guides/observability.md)** - Complete observability overview
 - **[Agent Development](../../guides/agent-development.md)** - Build custom agents
 - **[MLFlow Documentation](https://mlflow.org/docs/latest/index.html)** - Official MLFlow docs
-- **[SuperOptiX CLI Reference](../../reference/cli.md)** - CLI commands reference
+- **[SuperOptiX CLI Reference](../../guides/cli-complete-guide.md)** - CLI commands reference
 
 ## 🎯 Next Steps
 

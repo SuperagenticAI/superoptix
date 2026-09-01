@@ -9,7 +9,7 @@
 1. [Introduction](#introduction)
 2. [Prerequisites](#prerequisites)
 3. [Step-by-Step Workflow](#step-by-step-workflow)
-4. [Backend Configuration](#backend-configuration)
+4. [Backend Configuration](#backend-configuration-deepagents-07)
 5. [Advanced Examples](#advanced-examples)
 6. [Troubleshooting](#troubleshooting)
 7. [Production Deployment](#production-deployment)
@@ -1536,8 +1536,8 @@ super agent pull researcher_hybrid          # CompositeBackend
 
 ### Configuration Guides
 
-- [Gemini Configuration Guide](../GEMINI_CONFIGURATION_GUIDE.md) - Model setup
-- [Quick Reference](../DEEPAGENTS_QUICK_REFERENCE.md) - Command cheat sheet
+- [Backend Configuration](../guides/deepagents-backends.md) - Backends and model setup
+- [CLI Complete Guide](../guides/cli-complete-guide.md) - Every command with examples
 
 ### External Resources
 

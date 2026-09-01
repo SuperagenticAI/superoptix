@@ -4,6 +4,15 @@ title: Optimas Examples
 
 # ⚡ Optimas Examples
 
+!!! warning "Status: not currently installable"
+
+    The Optimas extras are commented out in `pyproject.toml` and have been since
+    0.2.0b1, because `optimas-ai` conflicts with the framework integrations.
+    `super agent optimize --engine optimas` reports `Optimas not available` and
+    exits. This page documents the intended integration and is kept for when the
+    dependency conflict is resolved. For optimization that works today, see
+    [GEPA optimization](../../guides/gepa-optimization.md).
+
 Working examples and demos for all Optimas integration targets. These examples have been verified to work correctly with the latest SuperOptiX version.
 
 Background reading and references:
@@ -309,7 +318,7 @@ super agent optimize <agent> --engine optimas --target <target>
 ## 🔗 Next Steps
 
 - **Start Here**: [Optimas Integration Guide](../../guides/optimas-integration.md)
-- **CLI Reference**: [Command Reference](../../reference/cli.md)
+- **CLI Reference**: [Command Reference](../../guides/cli-complete-guide.md)
 - **Agent Development**: [Building Custom Agents](../../guides/agent-development.md)
 - **Troubleshooting**: [Common Issues & Solutions](../../guides/optimas-integration.md#troubleshooting)
 

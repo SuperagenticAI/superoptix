@@ -866,7 +866,7 @@ spec:
 - [DeepAgents 0.7 Announcement](https://blog.langchain.com/doubling-down-on-deepagents/)
 - [SuperOptiX DeepAgents Guide](../guides/deepagents-integration.md)
 - [Backend Configuration Reference](../guides/deepagents-backends.md)
-- [Gemini Setup Guide](../GEMINI_CONFIGURATION_GUIDE.md)
+- [DeepAgents Integration Guide](../guides/deepagents-integration.md)
 
 ---
 

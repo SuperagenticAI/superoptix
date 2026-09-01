@@ -64,7 +64,7 @@ Having trouble with SuperOptiX? This guide will help you diagnose and fix common
 
 ## 📚 Additional Resources
 
-- [Documentation](../index)
+- [Documentation](index.md)
 
 ---
 

@@ -832,7 +832,7 @@ observability:
 - **[MLFlow Integration Guide](mlflow-guide.md)** - MLFlow observability integration
 - **[Agent Development](agent-development.md)** - Build custom agents
 - **[LangFuse Documentation](https://langfuse.com/docs)** - Official LangFuse docs
-- **[SuperOptiX CLI Reference](../reference/cli.md)** - CLI commands reference
+- **[SuperOptiX CLI Reference](cli-complete-guide.md)** - CLI commands reference
 
 ## 🎯 Next Steps
 

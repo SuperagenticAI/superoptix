@@ -11,7 +11,7 @@ Learn how to build and optimize RAG agents with MCP protocol support.
 1. [Overview](#overview)
 2. [What is MCP?](#what-is-mcp)
 3. [RAG Basics](#rag-basics)
-4. [MCP + RAG Integration](#mcp--rag-integration)
+4. [MCP + RAG Integration](#mcp-rag-integration)
 5. [GEPA Optimization for RAG](#gepa-optimization-for-rag)
 6. [Practical Examples](#practical-examples)
 7. [Advanced Configurations](#advanced-configurations)
