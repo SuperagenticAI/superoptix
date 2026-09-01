@@ -17,7 +17,7 @@
     <a href="https://www.python.org/downloads/">
       <img src="https://img.shields.io/badge/python-3.11+-blue.svg" alt="Python 3.11+" />
     </a>
-    <img src="https://img.shields.io/badge/A2A%20TCK-100%25%20MUST-1C6B48.svg" alt="100% MUST on the A2A TCK" />
+    <img src="https://img.shields.io/badge/A2A%20TCK-0%20failures-1C6B48.svg" alt="Zero failures on the A2A TCK" />
     <img src="https://img.shields.io/badge/runtimes-8-purple.svg" alt="8 agent runtimes" />
   </div>
 </div>
@@ -40,7 +40,22 @@ improves it.
 
 ## Install
 
-Requires Python 3.11+ and [uv](https://docs.astral.sh/uv/).
+One line, on macOS, Linux and WSL. It installs [uv](https://docs.astral.sh/uv/)
+if it is missing, then installs SuperOptiX into an isolated tool environment.
+It never uses sudo.
+
+```bash
+curl -fsSL https://superoptix.ai/install.sh | sh
+```
+
+Extras and an exact version can be selected with environment variables:
+
+```bash
+curl -fsSL https://superoptix.ai/install.sh | SUPEROPTIX_EXTRAS=a2a sh
+curl -fsSL https://superoptix.ai/install.sh | SUPEROPTIX_VERSION=0.3.1 sh
+```
+
+If you already have uv and would rather run it yourself:
 
 ```bash
 uv tool install superoptix
@@ -109,16 +124,30 @@ uv tool install superoptix --with "crewai>=1.15"
 
 Measured against the [official A2A Technology Compatibility Kit](https://github.com/a2aproject/a2a-tck):
 
-| Level | Compliance |
-|---|---|
-| MUST | 100% |
-| SHOULD | 100% |
-| MAY | 100% |
+| Level | Passed / exercised | Not exercised |
+|---|---|---|
+| MUST | 73 / 73 | 21 |
+| SHOULD | 7 / 7 | 4 |
+| MAY | 4 / 4 | 0 |
 
-The suite runs in CI on every change to the protocol layer, and the build fails
-if compliance regresses. An adapted agent scores 86.3% MUST, which matches the
-published SuperOptiX endpoint. The difference is a set of TCK scenario hooks
-that a production agent should not implement.
+Zero failures. Every requirement the TCK is able to exercise against this
+endpoint passes.
+
+The TCK also prints a headline percentage, currently 77.7% at MUST. That figure
+counts the 25 requirements it cannot exercise here as non-compliant. They break
+down as 13 for authentication and TLS, 4 for Agent Card JWS signatures, 4 for
+cross-binding equivalence, 3 for version negotiation probes and 1 for the gRPC
+binding. None of them are failures, and none can be exercised until those
+features exist. Authentication, card signing and a gRPC binding are not
+implemented today.
+
+Run it yourself with `super a2a adapt`, the TCK SUT harness and
+`.github/workflows/a2a-conformance.yml`, which is a manual workflow that fails
+on any conformance failure rather than on a percentage.
+
+An adapted agent scores lower on the headline figure than the SuperOptiX
+endpoint because the TCK drives protocol states through magic messageId
+prefixes that a production agent should not honour.
 
 A live endpoint runs at
 [a2a.superoptix.ai](https://a2a.superoptix.ai/.well-known/agent-card.json), with

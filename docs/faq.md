@@ -52,9 +52,14 @@ interface.
 
 ### How conformant is the A2A implementation?
 
-It scores 100% at MUST, SHOULD and MAY level against the official A2A Technology Compatibility
-Kit from the A2A project. The suite runs in CI on every change to the protocol layer, with a
-100% MUST floor that fails the build. See [A2A conformance](guides/a2a-conformance.md).
+Zero failures against the official A2A Technology Compatibility Kit. Every requirement the TCK
+exercises against the endpoint passes: 73 of 73 at MUST, 7 of 7 at SHOULD, 4 of 4 at MAY.
+
+The TCK also prints a headline percentage, currently 77.7% at MUST. That counts 25 requirements
+it cannot exercise here as non-compliant, covering authentication and TLS, Agent Card JWS
+signatures, cross-binding equivalence, version negotiation probes and the gRPC binding. Those
+features are not implemented, so the TCK has nothing to test. See
+[A2A conformance](guides/a2a-conformance.md).
 
 ### Is A2A a paid feature?
 

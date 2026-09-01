@@ -375,9 +375,10 @@ class TestLegacyMethodNames:
         body = self._call(client, "tasks/cancel", {"name": "tasks/nope"})
         assert body["error"]["code"] == a2a_errors.TASK_NOT_FOUND.jsonrpc_code
 
-    def test_extended_card_reports_it_is_unconfigured(self, client):
+    def test_extended_card_reports_it_is_unsupported(self, client):
+        """CORE-CAP-003: the card declares extendedAgentCard false."""
         body = self._call(client, "agent/authenticatedExtendedCard", {})
-        assert body["error"]["code"] == a2a_errors.EXTENDED_AGENT_CARD_NOT_CONFIGURED.jsonrpc_code
+        assert body["error"]["code"] == a2a_errors.UNSUPPORTED_OPERATION.jsonrpc_code
 
     def test_push_config_reports_it_is_unsupported(self, client):
         body = self._call(client, "tasks/pushNotificationConfig/set", {})
@@ -430,3 +431,53 @@ class TestSendMessageHistoryLength:
     def test_a_negative_cap_is_ignored(self, client, context):
         task = self._send(client, "next", context, history_length=-1)
         assert task["history"]
+
+
+class TestSpecMandatedErrorCodes:
+    """The TCK asserts the specific error, not merely that one was returned."""
+
+    def _terminal_task(self, client):
+        body = client.post(
+            "/message:send",
+            json={"message": {"role": "ROLE_USER", "parts": [{"text": "hi"}]}},
+        ).json()
+        return body["task"]["id"]
+
+    def test_subscribe_to_terminal_task_is_unsupported_over_jsonrpc(self, client):
+        """STREAM-SUB-003, spec 3.1.6."""
+        task_id = self._terminal_task(client)
+        body = client.post(
+            RPC,
+            json={
+                "jsonrpc": "2.0",
+                "id": "1",
+                "method": "SubscribeToTask",
+                "params": {"id": task_id},
+            },
+        ).json()
+        assert body["error"]["code"] == a2a_errors.UNSUPPORTED_OPERATION.jsonrpc_code
+
+    def test_subscribe_to_terminal_task_is_unsupported_over_http(self, client):
+        """The REST binding must agree with the JSON-RPC one."""
+        task_id = self._terminal_task(client)
+        response = client.post(f"/tasks/{task_id}:subscribe")
+        assert response.status_code == a2a_errors.UNSUPPORTED_OPERATION.http_status
+
+    def test_cancel_still_reports_task_not_cancelable(self, client):
+        """TaskNotCancelable belongs to CancelTask, and must not leak to subscribe."""
+        task_id = self._terminal_task(client)
+        body = client.post(
+            RPC,
+            json={
+                "jsonrpc": "2.0",
+                "id": "1",
+                "method": "CancelTask",
+                "params": {"id": task_id},
+            },
+        ).json()
+        assert body["error"]["code"] == a2a_errors.TASK_NOT_CANCELABLE.jsonrpc_code
+
+    def test_extended_card_is_unsupported_over_http(self, client):
+        """CORE-CAP-003 on the REST binding."""
+        response = client.get("/extendedAgentCard")
+        assert response.status_code == a2a_errors.UNSUPPORTED_OPERATION.http_status

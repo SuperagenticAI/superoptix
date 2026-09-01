@@ -965,9 +965,11 @@ may take a moment while the service starts.</p>
 
     @app.get("/extendedAgentCard")
     async def get_extended_agent_card() -> Any:
+        # Spec 3.3.4: the card declares extendedAgentCard false, so this
+        # operation is unsupported rather than merely unconfigured.
         return _http_error(
-            a2a_errors.EXTENDED_AGENT_CARD_NOT_CONFIGURED,
-            "Extended agent card is not configured",
+            a2a_errors.UNSUPPORTED_OPERATION,
+            "This agent does not support the extended agent card",
         )
 
     @app.post("/message:send")
@@ -1035,9 +1037,11 @@ may take a moment while the service starts.</p>
             return _http_error(a2a_errors.TASK_NOT_FOUND, "Task not found")
         state = str((current.get("status") or {}).get("state"))
         if _terminal_state(state):
+            # Spec 3.1.6, same rule as the JSON-RPC binding: subscribing to a
+            # terminal task is an unsupported operation.
             return _http_error(
-                a2a_errors.TASK_NOT_CANCELABLE,
-                f"Task {task_id} is already terminal",
+                a2a_errors.UNSUPPORTED_OPERATION,
+                f"Task {task_id} is already terminal and cannot be subscribed to",
             )
         return _sse_stream(tasks.subscribe(task_id))
 
@@ -1150,10 +1154,12 @@ may take a moment while the service starts.</p>
                 )
             state = str((current.get("status") or {}).get("state"))
             if _terminal_state(state):
+                # Spec 3.1.6: subscribing to a terminal task is an unsupported
+                # operation. TaskNotCancelable belongs to CancelTask alone.
                 return _jsonrpc_error(
                     request_id,
-                    a2a_errors.TASK_NOT_CANCELABLE,
-                    f"Task {task_id} is already terminal",
+                    a2a_errors.UNSUPPORTED_OPERATION,
+                    f"Task {task_id} is already terminal and cannot be subscribed to",
                 )
             return _sse_stream(tasks.subscribe(task_id), request_id=request_id)
 
@@ -1171,10 +1177,12 @@ may take a moment while the service starts.</p>
             )
 
         if method == "GetExtendedAgentCard":
+            # Spec 3.3.4: the card declares extendedAgentCard false, so this
+            # operation is unsupported rather than merely unconfigured.
             return _jsonrpc_error(
                 request_id,
-                a2a_errors.EXTENDED_AGENT_CARD_NOT_CONFIGURED,
-                "Extended agent card is not configured",
+                a2a_errors.UNSUPPORTED_OPERATION,
+                "This agent does not support the extended agent card",
             )
 
         return _jsonrpc_error(
