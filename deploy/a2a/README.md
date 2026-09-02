@@ -67,7 +67,13 @@ gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregi
 ### 2. Deploy
 
 The `Dockerfile` lives at the repository root (Cloud Build uses that directory
-as the build context). Deploy from the repo root:
+as the build context). A `cloudbuild.yaml` at the root sets
+`options.logging: CLOUD_LOGGING_ONLY`, which a user-managed trigger service
+account requires. On the Cloud Build trigger: Type Autodetected or Cloud Build
+configuration file, uncheck "Send build logs to GitHub", and keep the service
+account. The trigger is tag-based, so a push to `main` does not deploy.
+
+Deploy from the repo root:
 
 ```bash
 gcloud run deploy superoptix-a2a \
