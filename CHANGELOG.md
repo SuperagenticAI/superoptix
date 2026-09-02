@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.4] - 2026-09-02
+
+Cloud Run GitHub trigger uses a user-managed service account, which cannot
+write the Google-owned logs bucket. `cloudbuild.yaml` now sets
+`options.logging: CLOUD_LOGGING_ONLY` so tag deploys can run.
+
 ## [0.3.3] - 2026-09-02
 
 Rebuild of 0.3.2 so Cloud Run picks up the A2A JSON-RPC 0.3 bridge. No protocol
