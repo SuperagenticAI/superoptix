@@ -52,7 +52,7 @@ Extras and an exact version can be selected with environment variables:
 
 ```bash
 curl -fsSL https://superoptix.ai/install.sh | SUPEROPTIX_EXTRAS=a2a sh
-curl -fsSL https://superoptix.ai/install.sh | SUPEROPTIX_VERSION=0.3.2 sh
+curl -fsSL https://superoptix.ai/install.sh | SUPEROPTIX_VERSION=0.3.3 sh
 ```
 
 If you already have uv and would rather run it yourself:
