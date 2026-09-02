@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.5] - 2026-09-02
+
+Tag so Cloud Run rebuilds the public A2A endpoint from the 0.3.2 protocol
+fixes and the 0.3.4 Cloud Build logging config.
+
 ## [0.3.4] - 2026-09-02
 
 Cloud Run GitHub trigger uses a user-managed service account, which cannot
