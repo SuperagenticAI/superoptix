@@ -53,7 +53,7 @@ interface.
 ### How conformant is the A2A implementation?
 
 Zero failures against the official A2A Technology Compatibility Kit. Every requirement the TCK
-exercises against the endpoint passes: 73 of 73 at MUST, 7 of 7 at SHOULD, 4 of 4 at MAY.
+exercises against the conformance harness passes: 73 of 73 at MUST, 7 of 7 at SHOULD, 4 of 4 at MAY.
 
 The TCK also prints a headline percentage, currently 77.7% at MUST. That counts 25 requirements
 it cannot exercise here as non-compliant, covering authentication and TLS, Agent Card JWS
@@ -75,6 +75,10 @@ Yes. A SuperOptiX agent runs at `https://a2a.superoptix.ai`, and its Agent Card 
 curl -X POST https://a2a.superoptix.ai/message:send \
   -H 'content-type: application/json' \
   -d '{"message":{"role":"ROLE_USER","parts":[{"text":"Does CrewAI support A2A?"}]}}'
+
+curl -X POST https://a2a.superoptix.ai/a2a/jsonrpc \
+  -H 'content-type: application/json' \
+  -d '{"jsonrpc":"2.0","id":"1","method":"message/send","params":{"message":{"role":"user","parts":[{"kind":"text","text":"Does CrewAI support A2A?"}]}}}'
 ```
 
 The agent answers from a static table of runtime capabilities. It does not call a model.

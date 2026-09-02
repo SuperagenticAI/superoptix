@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import html
 import json
 import logging
 import uuid
@@ -29,6 +30,7 @@ logger = logging.getLogger(__name__)
 
 try:
     from fastapi import Body, FastAPI, HTTPException, Request
+    from fastapi.middleware.cors import CORSMiddleware
     from fastapi.responses import (
         HTMLResponse,
         JSONResponse,
@@ -40,6 +42,7 @@ try:
 except ImportError:  # pragma: no cover - exercised in live use
     FASTAPI_AVAILABLE = False
     FastAPI = None
+    CORSMiddleware = None
     HTTPException = Exception
     Request = object
     HTMLResponse = None
@@ -96,6 +99,7 @@ def _user_message(message: Dict[str, Any]) -> Dict[str, Any]:
     payload = normalize_a2a_payload(message)
     if not isinstance(payload, dict):
         payload = {}
+    payload = a2a_bridge.message_to_v1(payload)
     payload.setdefault("messageId", str(uuid.uuid4()))
     payload.setdefault("role", "ROLE_USER")
     payload.setdefault("parts", [])
@@ -162,6 +166,8 @@ def _terminal_state(state: str | None) -> bool:
 class _A2ATaskStore:
     """Small in-memory task manager for the SuperOptiX A2A bridge."""
 
+    MAX_TASKS = 512
+
     def __init__(self, runtime: AgentRuntime):
         self.runtime = runtime
         self.tasks: Dict[str, Dict[str, Any]] = {}
@@ -180,6 +186,16 @@ class _A2ATaskStore:
         for queue in queues:
             await queue.put(event)
 
+    def _evict_overflow(self) -> None:
+        while len(self.tasks) > self.MAX_TASKS:
+            oldest = min(self.created_at, key=self.created_at.get)
+            self.tasks.pop(oldest, None)
+            self.created_at.pop(oldest, None)
+            self.last_modified.pop(oldest, None)
+            self.message_replies.pop(oldest, None)
+            self.running.pop(oldest, None)
+            self.subscribers.pop(oldest, None)
+
     async def _set_task(self, task_id: str, task: Dict[str, Any]) -> Dict[str, Any]:
         # No bookkeeping fields on the Task itself: the A2A 1.0 Task schema
         # declares additionalProperties: false, so anything beyond the six
@@ -188,6 +204,7 @@ class _A2ATaskStore:
         self.last_modified[task_id] = _iso8601_now()
         async with self.lock:
             self.tasks[task_id] = task
+            self._evict_overflow()
         return task
 
     async def get(
@@ -516,84 +533,99 @@ class _A2ATaskStore:
         message: Dict[str, Any],
         request: Any | None = None,
     ) -> AsyncIterator[Dict[str, Any]]:
+        """Validate then return the SSE event iterator.
+
+        Validation runs before the iterator is returned so HTTP and JSON-RPC
+        handlers can render protocol errors instead of a 500 from the stream.
+        """
         user_message = _user_message(message)
-        task = await self._create_task(user_message)
-        task_id = str(task["id"])
-        context_id = str(task["contextId"])
-        user_input = extract_text_from_message(user_message)
-        runtime_context = await self._runtime_context(
-            task_id=task_id,
-            context_id=context_id,
-            request=request,
-            message=user_message,
-        )
-        await self._update_status(
-            task,
-            state="TASK_STATE_WORKING",
-            message_text="Processing request",
-            publish=False,
-        )
-        yield {"task": await self.get(task_id) or task}
+        await self._validate_message_references(user_message)
 
-        try:
-            capabilities = await self.runtime.capabilities()
-            if capabilities.get("streaming"):
-                last_text = ""
-                async for chunk in self.runtime.stream(
-                    {"query": user_input},
-                    context=runtime_context,
-                ):
-                    last_text = runtime_result_to_text(chunk)
-                    yield {
-                        "statusUpdate": {
-                            "taskId": task_id,
-                            "contextId": context_id,
-                            "status": _task_status(
-                                "TASK_STATE_WORKING",
-                                message_text=last_text,
-                                task_id=task_id,
-                                context_id=context_id,
-                            ),
+        async def events() -> AsyncIterator[Dict[str, Any]]:
+            task = await self._create_task(user_message)
+            task_id = str(task["id"])
+            context_id = str(task["contextId"])
+            user_input = extract_text_from_message(user_message)
+            runtime_context = await self._runtime_context(
+                task_id=task_id,
+                context_id=context_id,
+                request=request,
+                message=user_message,
+            )
+            await self._update_status(
+                task,
+                state="TASK_STATE_WORKING",
+                message_text="Processing request",
+                publish=False,
+            )
+            yield {"task": await self.get(task_id) or task}
+
+            result: Any = None
+            try:
+                capabilities = await self.runtime.capabilities()
+                if capabilities.get("streaming"):
+                    last_text = ""
+                    async for chunk in self.runtime.stream(
+                        {"query": user_input},
+                        context=runtime_context,
+                    ):
+                        result = chunk
+                        last_text = runtime_result_to_text(chunk)
+                        yield {
+                            "statusUpdate": {
+                                "taskId": task_id,
+                                "contextId": context_id,
+                                "status": _task_status(
+                                    "TASK_STATE_WORKING",
+                                    message_text=last_text,
+                                    task_id=task_id,
+                                    context_id=context_id,
+                                ),
+                            }
                         }
-                    }
-                final_text = last_text or "Completed"
-            else:
-                result = await self.runtime.invoke(
-                    {"query": user_input},
-                    context=runtime_context,
-                )
-                final_text = runtime_result_to_text(result)
+                    final_text = last_text or "Completed"
+                else:
+                    result = await self.runtime.invoke(
+                        {"query": user_input},
+                        context=runtime_context,
+                    )
+                    final_text = runtime_result_to_text(result)
 
-            current = await self.get(task_id) or task
-            current = await self._finalize_task(
-                current,
-                state="TASK_STATE_COMPLETED",
-                response_text=final_text,
-                publish=False,
-            )
-            yield {
-                "statusUpdate": {
-                    "taskId": task_id,
-                    "contextId": context_id,
-                    "status": dict(current["status"]),
+                current = await self.get(task_id) or task
+                current = await self._finalize_task(
+                    current,
+                    state=_declared_state(result),
+                    response_text=final_text,
+                    publish=False,
+                    artifacts=result.get("a2a_artifacts")
+                    if isinstance(result, dict)
+                    else None,
+                )
+                yield {
+                    "statusUpdate": {
+                        "taskId": task_id,
+                        "contextId": context_id,
+                        "status": dict(current["status"]),
+                    }
                 }
-            }
-        except Exception as exc:
-            logger.exception("A2A runtime stream failed")
-            current = await self.get(task_id) or task
-            current = await self._finalize_task(
-                current,
-                state="TASK_STATE_FAILED",
-                response_text=str(exc),
-                publish=False,
-            )
-            yield {
-                "statusUpdate": {
-                    "taskId": task_id,
-                    "contextId": context_id,
-                    "status": dict(current["status"]),
+            except Exception as exc:
+                logger.exception("A2A runtime stream failed")
+                current = await self.get(task_id) or task
+                current = await self._finalize_task(
+                    current,
+                    state="TASK_STATE_FAILED",
+                    response_text=str(exc),
+                    publish=False,
+                )
+                yield {
+                    "statusUpdate": {
+                        "taskId": task_id,
+                        "contextId": context_id,
+                        "status": dict(current["status"]),
+                    }
                 }
-            }
+
+        return events()
 
     async def cancel(
         self, task_id: str, *, request: Any | None = None
@@ -739,6 +771,35 @@ LEGACY_JSONRPC_METHODS = {
 }
 
 
+def _task_id_from_params(params: Dict[str, Any]) -> str:
+    """Accept both 1.0 `id` and 0.3 resource `name` (`tasks/{id}`)."""
+    value = params.get("id") or params.get("name") or ""
+    text = str(value)
+    if text.startswith("tasks/"):
+        return text.split("/", 1)[-1]
+    return text
+
+
+def _jsonrpc_is_legacy(request: Any, original_method: str) -> bool:
+    return _wants_legacy(request) or original_method in LEGACY_JSONRPC_METHODS
+
+
+def _legacy_stream_event(payload: Dict[str, Any]) -> Dict[str, Any]:
+    if not isinstance(payload, dict):
+        return payload
+    if isinstance(payload.get("task"), dict):
+        return {**payload, "task": a2a_bridge.task_to_v03(payload["task"])}
+    if isinstance(payload.get("statusUpdate"), dict):
+        update = dict(payload["statusUpdate"])
+        status = update.get("status")
+        if isinstance(status, dict):
+            update["status"] = a2a_bridge.task_to_v03({"status": status}).get(
+                "status"
+            ) or status
+        return {**payload, "statusUpdate": update}
+    return a2a_bridge.task_to_v03(payload)
+
+
 def _unsupported_version(request: Any) -> str | None:
     """Return the requested A2A version when we cannot serve it."""
     try:
@@ -777,10 +838,13 @@ def _sse_stream(
     iterator: AsyncIterator[Dict[str, Any]],
     *,
     request_id: Any | None = None,
+    legacy: bool = False,
 ) -> StreamingResponse:
     async def _event_stream() -> AsyncIterator[str]:
         async for payload in iterator:
             envelope = normalize_a2a_payload(payload)
+            if legacy:
+                envelope = _legacy_stream_event(envelope)
             if request_id is not None:
                 envelope = {"jsonrpc": "2.0", "id": request_id, "result": envelope}
             yield f"data: {json.dumps(envelope, ensure_ascii=True)}\n\n"
@@ -819,6 +883,13 @@ def create_a2a_fastapi_app(
         )
     tasks = _A2ATaskStore(runtime)
     app = FastAPI(title="SuperOptiX A2A", version="1.0")
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_methods=["GET", "POST", "HEAD", "OPTIONS"],
+        allow_headers=["*"],
+        expose_headers=["ETag", "Last-Modified", "Vary", "Cache-Control"],
+    )
 
     @app.middleware("http")
     async def _a2a_protocol_middleware(request: Any, call_next: Any) -> Any:
@@ -872,8 +943,8 @@ def create_a2a_fastapi_app(
         a broken service. The JSON-RPC binding lives at the RPC path, so the
         root is free to answer.
         """
-        name = str(agent_card.get("name") or "SuperOptiX Agent")
-        description = str(agent_card.get("description") or "")
+        name = html.escape(str(agent_card.get("name") or "SuperOptiX Agent"))
+        description = html.escape(str(agent_card.get("description") or ""))
         skills = agent_card.get("skills") or []
         bindings = sorted(
             {
@@ -890,7 +961,9 @@ def create_a2a_fastapi_app(
             }
         )
         skill_rows = "".join(
-            f"<tr><td><code>{s.get('id')}</code></td><td>{s.get('description', '')}</td></tr>"
+            "<tr><td><code>"
+            f"{html.escape(str(s.get('id') or ''))}</code></td>"
+            f"<td>{html.escape(str(s.get('description', '') or ''))}</td></tr>"
             for s in skills
             if isinstance(s, dict)
         )
@@ -946,8 +1019,7 @@ may take a moment while the service starts.</p>
         "0.3": _card_etag(a2a_bridge.card_to_v03(agent_card)),
     }
 
-    @app.get("/.well-known/agent-card.json")
-    async def get_agent_card(request: Request) -> Any:
+    async def _agent_card_response(request: Request) -> Any:
         # A 0.3 reader expects a top-level `url` and its own protocolVersion;
         # handed only `supportedInterfaces` it has nothing to call.
         legacy = _wants_legacy(request)
@@ -959,9 +1031,18 @@ may take a moment while the service starts.</p>
             "Last-Modified": _card_served_at,
             "Vary": "A2A-Version",
         }
+        if request.method == "HEAD":
+            return Response(status_code=200, headers=headers)
         if _etag_matches(request.headers.get("if-none-match"), etag):
             return Response(status_code=304, headers=headers)
         return JSONResponse(content=payload, headers=headers)
+
+    @app.get("/.well-known/agent-card.json")
+    @app.head("/.well-known/agent-card.json")
+    @app.get("/.well-known/agent.json")
+    @app.head("/.well-known/agent.json")
+    async def get_agent_card(request: Request) -> Any:
+        return await _agent_card_response(request)
 
     @app.get("/extendedAgentCard")
     async def get_extended_agent_card() -> Any:
@@ -995,12 +1076,15 @@ may take a moment while the service starts.</p>
     @app.post("/message:stream")
     async def stream_message(
         request: Request, payload: Dict[str, Any] = Body()
-    ) -> StreamingResponse:
-        iterator = tasks.stream_message(
-            message=payload.get("message") or {},
-            request=request,
-        )
-        return _sse_stream(iterator)
+    ) -> Any:
+        try:
+            iterator = await tasks.stream_message(
+                message=payload.get("message") or {},
+                request=request,
+            )
+        except A2AProtocolError as exc:
+            return _http_error(exc.error, str(exc))
+        return _sse_stream(iterator, legacy=_wants_legacy(request))
 
     @app.get("/tasks")
     async def list_tasks(
@@ -1031,7 +1115,7 @@ may take a moment while the service starts.</p>
             return _http_error(exc.error, str(exc))
 
     @app.post("/tasks/{task_id}:subscribe")
-    async def subscribe_task(task_id: str) -> Any:
+    async def subscribe_task(task_id: str, request: Request) -> Any:
         current = await tasks.get(task_id)
         if not current:
             return _http_error(a2a_errors.TASK_NOT_FOUND, "Task not found")
@@ -1043,7 +1127,7 @@ may take a moment while the service starts.</p>
                 a2a_errors.UNSUPPORTED_OPERATION,
                 f"Task {task_id} is already terminal and cannot be subscribed to",
             )
-        return _sse_stream(tasks.subscribe(task_id))
+        return _sse_stream(tasks.subscribe(task_id), legacy=_wants_legacy(request))
 
     # Both spellings are served. A client given the interface URL as an httpx
     # base_url and posting to "/" resolves to "<rpc_url>/", and Starlette's
@@ -1078,15 +1162,18 @@ may take a moment while the service starts.</p>
                 },
             )
 
-        method = str(payload.get("method") or "") if isinstance(payload, dict) else ""
-        if not isinstance(payload, dict) or not method:
+        original_method = (
+            str(payload.get("method") or "") if isinstance(payload, dict) else ""
+        )
+        if not isinstance(payload, dict) or not original_method:
             return _jsonrpc_error(
                 request_id,
                 a2a_errors.INVALID_REQUEST,
                 "Request must be a JSON-RPC 2.0 object with a 'method' member",
             )
 
-        method = LEGACY_JSONRPC_METHODS.get(method, method)
+        method = LEGACY_JSONRPC_METHODS.get(original_method, original_method)
+        legacy = _jsonrpc_is_legacy(request, original_method)
 
         params = normalize_a2a_payload(payload.get("params") or {})
 
@@ -1100,22 +1187,40 @@ may take a moment while the service starts.</p>
             except A2AProtocolError as exc:
                 return _jsonrpc_error(request_id, exc.error, str(exc))
             if "__a2a_message__" in task:
+                message_payload = task["__a2a_message__"]
+                if legacy:
+                    return {
+                        "jsonrpc": "2.0",
+                        "id": request_id,
+                        "result": a2a_bridge.message_to_v03(message_payload),
+                    }
                 return {
                     "jsonrpc": "2.0",
                     "id": request_id,
-                    "result": {"message": task["__a2a_message__"]},
+                    "result": {"message": message_payload},
+                }
+            if legacy:
+                return {
+                    "jsonrpc": "2.0",
+                    "id": request_id,
+                    "result": a2a_bridge.task_to_v03(task),
                 }
             return {"jsonrpc": "2.0", "id": request_id, "result": {"task": task}}
 
         if method == "SendStreamingMessage":
-            iterator = tasks.stream_message(
-                message=params.get("message") or {},
-                request=request,
+            try:
+                iterator = await tasks.stream_message(
+                    message=params.get("message") or {},
+                    request=request,
+                )
+            except A2AProtocolError as exc:
+                return _jsonrpc_error(request_id, exc.error, str(exc))
+            return _sse_stream(
+                iterator, request_id=request_id, legacy=legacy
             )
-            return _sse_stream(iterator, request_id=request_id)
 
         if method == "GetTask":
-            task_id = params.get("id")
+            task_id = _task_id_from_params(params)
             task = await tasks.get(
                 str(task_id), history_length=_int_or_none(params.get("historyLength"))
             )
@@ -1123,7 +1228,8 @@ may take a moment while the service starts.</p>
                 return _jsonrpc_error(
                     request_id, a2a_errors.TASK_NOT_FOUND, "Task not found"
                 )
-            return {"jsonrpc": "2.0", "id": request_id, "result": task}
+            result = a2a_bridge.task_to_v03(task) if legacy else task
+            return {"jsonrpc": "2.0", "id": request_id, "result": result}
 
         if method == "ListTasks":
             result = await tasks.list(
@@ -1131,10 +1237,18 @@ may take a moment while the service starts.</p>
                 status=params.get("status"),
                 page_size=params.get("pageSize"),
             )
+            if legacy:
+                result = {
+                    **result,
+                    "tasks": [
+                        a2a_bridge.task_to_v03(item)
+                        for item in result.get("tasks") or []
+                    ],
+                }
             return {"jsonrpc": "2.0", "id": request_id, "result": result}
 
         if method == "CancelTask":
-            task_id = params.get("id")
+            task_id = _task_id_from_params(params)
             try:
                 task = await tasks.cancel(str(task_id), request=request)
             except KeyError:
@@ -1143,10 +1257,11 @@ may take a moment while the service starts.</p>
                 )
             except A2AProtocolError as exc:
                 return _jsonrpc_error(request_id, exc.error, str(exc))
-            return {"jsonrpc": "2.0", "id": request_id, "result": task}
+            result = a2a_bridge.task_to_v03(task) if legacy else task
+            return {"jsonrpc": "2.0", "id": request_id, "result": result}
 
         if method == "SubscribeToTask":
-            task_id = str(params.get("id") or "")
+            task_id = _task_id_from_params(params)
             current = await tasks.get(task_id)
             if not current:
                 return _jsonrpc_error(
@@ -1161,7 +1276,9 @@ may take a moment while the service starts.</p>
                     a2a_errors.UNSUPPORTED_OPERATION,
                     f"Task {task_id} is already terminal and cannot be subscribed to",
                 )
-            return _sse_stream(tasks.subscribe(task_id), request_id=request_id)
+            return _sse_stream(
+                tasks.subscribe(task_id), request_id=request_id, legacy=legacy
+            )
 
         if method in (
             "CreateTaskPushNotificationConfig",

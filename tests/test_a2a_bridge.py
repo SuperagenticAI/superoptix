@@ -139,3 +139,40 @@ class TestNegotiationOverHttp:
 
         response = client.get("/tasks", headers={"A2A-Version": "99.0"})
         assert response.status_code == a2a_errors.VERSION_NOT_SUPPORTED.http_status
+
+    def test_jsonrpc_message_send_uses_the_0_3_shape(self, client):
+        body = client.post(
+            "/a2a/jsonrpc",
+            json={
+                "jsonrpc": "2.0",
+                "id": "1",
+                "method": "message/send",
+                "params": {
+                    "message": {
+                        "role": "user",
+                        "parts": [{"kind": "text", "text": "does dspy support a2a"}],
+                    }
+                },
+            },
+        ).json()
+        task = body["result"]
+        assert task["status"]["state"] == "completed"
+        assert task["status"]["message"]["role"] == "agent"
+        assert task["status"]["message"]["parts"][0]["kind"] == "text"
+
+    def test_jsonrpc_send_with_version_header_translates_too(self, client):
+        body = client.post(
+            "/a2a/jsonrpc",
+            json={
+                "jsonrpc": "2.0",
+                "id": "1",
+                "method": "SendMessage",
+                "params": {
+                    "message": {"role": "ROLE_USER", "parts": [{"text": "hi"}]}
+                },
+            },
+            headers={"A2A-Version": "0.3"},
+        ).json()
+        task = body["result"]
+        assert task["status"]["state"] == "completed"
+        assert "task" not in task

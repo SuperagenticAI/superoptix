@@ -66,11 +66,10 @@ gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregi
 
 ### 2. Deploy
 
-Cloud Run looks for a `Dockerfile` in the build context root, so copy it up for
-the deploy:
+The `Dockerfile` lives at the repository root (Cloud Build uses that directory
+as the build context). Deploy from the repo root:
 
 ```bash
-cp deploy/a2a/Dockerfile .
 gcloud run deploy superoptix-a2a \
   --source . \
   --region europe-west1 \
@@ -81,6 +80,9 @@ gcloud run deploy superoptix-a2a \
   --set-env-vars SUPEROPTIX_A2A_PUBLIC_URL=https://a2a.superoptix.ai,SUPEROPTIX_TELEMETRY=false
 ```
 
+A git tag on `main` is what rebuilds the live service. Pushing to `main` alone
+does not.
+
 `--source` builds with Cloud Build, so no registry or pipeline is needed. The
 command prints a `*.run.app` URL. Test on that before touching DNS:
 
@@ -89,7 +91,9 @@ curl -s https://YOUR-SERVICE.run.app/.well-known/agent-card.json | jq .name
 ```
 
 `deploy/a2a/service.yaml` holds the same configuration declaratively for
-`gcloud run services replace`.
+`gcloud run services replace`. That path does **not** grant public invoker;
+add `allUsers` as `roles/run.invoker` (or keep using `--allow-unauthenticated`
+on `gcloud run deploy`).
 
 ### 3. Map the subdomain
 
@@ -148,12 +152,10 @@ starts mattering when push notifications are implemented.
 
 ### Image size
 
-The image is 662 MB, of which roughly 200 MB is LiteLLM, NumPy, botocore and
-tokenizers pulled in through DSPy. The public endpoint does not call a model, so
-none of that is used at runtime. `superoptix/protocols/__init__.py` imports
-`dspy` at module scope, which is what drags the chain in; removing that import
-would cut the image substantially. Cold start is already 1.7 s, so this is worth
-doing for build time rather than latency.
+The image is large because `dspy` is a core `pyproject.toml` dependency, so
+`pip install ".[a2a]"` still pulls LiteLLM, NumPy, botocore and tokenizers. The
+public endpoint does not call a model. Cold start is already 1.7 s; shrinking
+the image is a build-time concern, not a latency one.
 
 ## Publish the card
 
@@ -177,8 +179,8 @@ reliably, so publish it at the canonical path rather than redirecting to it.
 Use the apex marketing domain — `superoptix.ai/.well-known/agent-card.json` —
 not a subdomain. A2A discovery convention is to look up the well-known path on
 the organisation's domain, and a card on `a2a.superoptix.ai` is one that nobody
-looks for. Keep the *service* on Render (or a subdomain); keep the *card* on the
-domain people already know.
+looks for. Keep the *service* on Cloud Run at `a2a.superoptix.ai`; keep the
+*card* on the domain people already know.
 
 ## Verify before announcing
 
@@ -192,9 +194,12 @@ print(agent_card_review(json.dumps(build_public_agent_card()))['response'])
 
 # 2. The advertised endpoints actually answer
 curl -s https://superoptix.ai/.well-known/agent-card.json | python -m json.tool
-curl -s -X POST https://superoptix.onrender.com/message:send \
+curl -s -X POST https://a2a.superoptix.ai/message:send \
   -H 'content-type: application/json' \
   -d '{"message":{"role":"ROLE_USER","parts":[{"text":"Does CrewAI support A2A?"}]}}'
+curl -s -X POST https://a2a.superoptix.ai/a2a/jsonrpc \
+  -H 'content-type: application/json' \
+  -d '{"jsonrpc":"2.0","id":"1","method":"message/send","params":{"message":{"role":"user","parts":[{"kind":"text","text":"Does CrewAI support A2A?"}]}}}'
 ```
 
 ## Known gap

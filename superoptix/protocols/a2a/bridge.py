@@ -162,6 +162,11 @@ def message_to_v1(message: Dict[str, Any]) -> Dict[str, Any]:
     return _message_to_v1(dict(message or {}))
 
 
+def message_to_v03(message: Dict[str, Any]) -> Dict[str, Any]:
+    """Render a 1.0 message as a 0.3 client expects to read it."""
+    return _message_to_v03(dict(message or {}))
+
+
 def card_to_v03(card: Dict[str, Any]) -> Dict[str, Any]:
     """Present a 1.0 card to a 0.3 client.
 

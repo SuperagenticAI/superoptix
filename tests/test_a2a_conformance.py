@@ -353,10 +353,11 @@ class TestAgentCardCaching:
 class TestLegacyMethodNames:
     """The card advertises a 0.3 JSON-RPC interface, so 0.3 names must work."""
 
-    def _call(self, client, method, params):
+    def _call(self, client, method, params, headers=None):
         return client.post(
             RPC,
             json={"jsonrpc": "2.0", "id": "1", "method": method, "params": params},
+            headers=headers or {},
         ).json()
 
     def test_message_send_reaches_the_handler(self, client):
@@ -366,13 +367,43 @@ class TestLegacyMethodNames:
             {"message": {"role": "user", "messageId": "m1", "parts": [{"kind": "text", "text": "hi"}]}},
         )
         assert "error" not in body, body
+        task = body["result"]
+        assert task["status"]["state"] == "completed"
+        assert task["status"]["message"]["role"] == "agent"
+        assert "task" not in task
+
+    def test_one_line_send_still_wraps_the_task(self, client):
+        body = self._call(
+            client,
+            "SendMessage",
+            {"message": {"role": "ROLE_USER", "parts": [{"text": "hi"}]}},
+        )
+        assert "error" not in body, body
+        task = body["result"]["task"]
+        assert task["status"]["state"] == "TASK_STATE_COMPLETED"
 
     def test_tasks_get_reports_a_missing_task(self, client):
+        body = self._call(client, "tasks/get", {"id": "missing"})
+        assert body["error"]["code"] == a2a_errors.TASK_NOT_FOUND.jsonrpc_code
+
+    def test_tasks_get_accepts_a_resource_name(self, client):
         body = self._call(client, "tasks/get", {"name": "tasks/nope"})
         assert body["error"]["code"] == a2a_errors.TASK_NOT_FOUND.jsonrpc_code
 
+    def test_tasks_get_returns_a_real_task(self, client):
+        sent = self._call(
+            client,
+            "message/send",
+            {"message": {"role": "user", "parts": [{"kind": "text", "text": "hi"}]}},
+        )
+        task_id = sent["result"]["id"]
+        body = self._call(client, "tasks/get", {"id": task_id})
+        assert "error" not in body, body
+        assert body["result"]["id"] == task_id
+        assert body["result"]["status"]["state"] == "completed"
+
     def test_tasks_cancel_reports_a_missing_task(self, client):
-        body = self._call(client, "tasks/cancel", {"name": "tasks/nope"})
+        body = self._call(client, "tasks/cancel", {"id": "missing"})
         assert body["error"]["code"] == a2a_errors.TASK_NOT_FOUND.jsonrpc_code
 
     def test_extended_card_reports_it_is_unsupported(self, client):
@@ -385,12 +416,20 @@ class TestLegacyMethodNames:
         assert body["error"]["code"] == a2a_errors.PUSH_NOTIFICATION_NOT_SUPPORTED.jsonrpc_code
 
     def test_the_1_0_names_still_work(self, client):
-        body = self._call(client, "GetTask", {"name": "tasks/nope"})
+        body = self._call(client, "GetTask", {"id": "missing"})
         assert body["error"]["code"] == a2a_errors.TASK_NOT_FOUND.jsonrpc_code
 
     def test_an_unknown_method_is_still_rejected(self, client):
         body = self._call(client, "bogus/thing", {})
         assert body["error"]["code"] == a2a_errors.METHOD_NOT_FOUND.jsonrpc_code
+
+    def test_empty_stream_parts_are_rejected(self, client):
+        body = self._call(
+            client,
+            "message/stream",
+            {"message": {"role": "user", "parts": []}},
+        )
+        assert body["error"]["code"] == a2a_errors.INVALID_PARAMS.jsonrpc_code
 
 
 class TestSendMessageHistoryLength:

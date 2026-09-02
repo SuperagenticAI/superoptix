@@ -19,26 +19,17 @@ DEFAULT_SERVICE_URL = "https://a2a.superoptix.ai"
 DOCUMENTATION_URL = "https://github.com/SuperagenticAI/superoptix"
 ICON_URL = "https://superoptix.ai/uploads/logo.png"
 
-SECURITY_SCHEMES: Dict[str, Any] = {
-    "bearer": {
-        "type": "http",
-        "scheme": "bearer",
-        "description": "Bearer token issued by the SuperOptiX operator. "
-        "The public catalogue skills are readable without one.",
-        "httpAuthSecurityScheme": {
-            "scheme": "bearer",
-            "description": "Bearer token issued by the SuperOptiX operator",
-        },
-    }
-}
-
-
 def build_public_agent_card(
     *,
     service_url: str = DEFAULT_SERVICE_URL,
     rpc_url: str = "/a2a/jsonrpc",
 ) -> Dict[str, Any]:
-    """Return the published SuperOptiX Agent Card payload."""
+    """Return the published SuperOptiX Agent Card payload.
+
+    No ``securitySchemes``: the catalogue is anonymous and Cloud Run is
+    unauthenticated. Declaring bearer without verifying it made 1.0 clients
+    skip the agent.
+    """
     return build_a2a_agent_card_payload(
         metadata={
             "name": "SuperOptiX",
@@ -57,7 +48,6 @@ def build_public_agent_card(
         protocol_version="1.0",
         legacy_protocol_version="0.3",
         skills_override=PUBLIC_SKILL_DEFINITIONS,
-        security_schemes=SECURITY_SCHEMES,
         icon_url=ICON_URL,
         documentation_url=DOCUMENTATION_URL,
         preferred_transport="JSONRPC",

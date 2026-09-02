@@ -90,17 +90,6 @@
     "organization": "Superagentic AI",
     "url": "https://super-agentic.ai"
   },
-  "securitySchemes": {
-    "bearer": {
-      "type": "http",
-      "scheme": "bearer",
-      "description": "Bearer token issued by the SuperOptiX operator. The public catalogue skills are readable without one.",
-      "httpAuthSecurityScheme": {
-        "scheme": "bearer",
-        "description": "Bearer token issued by the SuperOptiX operator"
-      }
-    }
-  },
   "iconUrl": "https://superoptix.ai/uploads/logo.png",
   "documentationUrl": "https://github.com/SuperagenticAI/superoptix"
 }

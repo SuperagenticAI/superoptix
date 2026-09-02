@@ -9,8 +9,8 @@ It is based on analysis of the official A2A protocol and Python SDK materials. S
 Current implementation target:
 
 - A2A protocol target: `1.0`
-- Optional extra: `superoptix[a2a]`, which installs the HTTP server stack. The `a2a-sdk` package is not used.
-- SuperOptiX A2A dependency boundary: external SDK only
+- Optional extra: `superoptix[a2a]`, which installs FastAPI, uvicorn, and sse-starlette. The `a2a-sdk` package is not used.
+- SuperOptiX A2A dependency boundary: protocol implemented directly over FastAPI
 
 Official sources reviewed:
 

@@ -1,8 +1,8 @@
-# Render blueprint for the public SuperOptiX A2A endpoint.
+# Deprecated. The public endpoint runs on Cloud Run at a2a.superoptix.ai.
+# Kept only as a rollback blueprint. Do not deploy this as the live service.
 #
 # The service exposes only the deterministic catalogue skills, so it needs no
-# model provider keys and no persistent storage. Deploy with:
-#   render blueprint launch   (or point Render at this file from the dashboard)
+# model provider keys and no persistent storage.
 services:
   - type: web
     name: superoptix-a2a
@@ -20,6 +20,6 @@ services:
       # Must match the public URL Render assigns, or the card will advertise an
       # address callers cannot reach.
       - key: SUPEROPTIX_A2A_PUBLIC_URL
-        value: https://superoptix.onrender.com
+        value: https://a2a.superoptix.ai
       - key: SUPEROPTIX_TELEMETRY
         value: "false"
