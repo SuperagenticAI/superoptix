@@ -65,7 +65,8 @@ A SuperOptiX agent runs at `a2a.superoptix.ai`, hosted on Cloud Run.
 Two copies of the card is the intended arrangement rather than duplication. The
 published copy is a static file on the website, so discovery answers instantly
 whether or not the service is warm. The served copy confirms the running agent
-agrees with what was published. The two are byte-identical.
+agrees with what was published. The two are the same JSON document (pretty-printed
+on the website, compact on Cloud Run).
 
 The agent exposes two skills, both deterministic. Neither calls a model, reads
 user code, nor holds a credential, which is what makes the endpoint safe to
@@ -75,6 +76,10 @@ expose and inexpensive to run.
 curl -X POST https://a2a.superoptix.ai/message:send \
   -H 'content-type: application/json' \
   -d '{"message":{"role":"ROLE_USER","parts":[{"text":"Does CrewAI support A2A?"}]}}'
+
+curl -X POST https://a2a.superoptix.ai/a2a/jsonrpc \
+  -H 'content-type: application/json' \
+  -d '{"jsonrpc":"2.0","id":"1","method":"message/send","params":{"message":{"role":"user","parts":[{"kind":"text","text":"Does CrewAI support A2A?"}]}}}'
 ```
 
 Opening `https://a2a.superoptix.ai` in a browser returns a page describing the
@@ -140,20 +145,15 @@ protocol layer that adapted agents use.
 
 ## Continuous integration
 
-`.github/workflows/a2a-conformance.yml` runs the TCK against the harness on
-changes to `superoptix/protocols/**` or `superoptix/runtime/**`. It publishes
-the compatibility report as a build artifact and writes the score to the job
-summary.
+`.github/workflows/a2a-conformance.yml` is a manual (`workflow_dispatch`) job.
+It starts `superoptix.protocols.a2a.tck_sut:app`, runs the official TCK against
+that harness, publishes the compatibility report as an artifact, and fails on
+any FAIL status. It does not run on every push, and it does not gate on the
+TCK headline percentage.
 
-The job enforces a floor rather than demanding a perfect score:
-
-```yaml
-env:
-  MIN_MUST_COMPLIANCE: "100.0"
-```
-
-A build fails when MUST-level compliance falls below the floor. Raise the value
-as gaps close; conformance can then only be maintained or improved.
+The published endpoint at `a2a.superoptix.ai` is a separate Cloud Run service,
+redeployed from a git tag. Protocol regressions can therefore land on `main`
+before they are on the live host.
 
 ## Version negotiation
 

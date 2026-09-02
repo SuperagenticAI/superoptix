@@ -52,7 +52,7 @@ Extras and an exact version can be selected with environment variables:
 
 ```bash
 curl -fsSL https://superoptix.ai/install.sh | SUPEROPTIX_EXTRAS=a2a sh
-curl -fsSL https://superoptix.ai/install.sh | SUPEROPTIX_VERSION=0.3.1 sh
+curl -fsSL https://superoptix.ai/install.sh | SUPEROPTIX_VERSION=0.3.2 sh
 ```
 
 If you already have uv and would rather run it yourself:
@@ -130,8 +130,8 @@ Measured against the [official A2A Technology Compatibility Kit](https://github.
 | SHOULD | 7 / 7 | 4 |
 | MAY | 4 / 4 | 0 |
 
-Zero failures. Every requirement the TCK is able to exercise against this
-endpoint passes.
+Zero failures. Every requirement the TCK is able to exercise against the
+conformance harness passes.
 
 The TCK also prints a headline percentage, currently 77.7% at MUST. That figure
 counts the 25 requirements it cannot exercise here as non-compliant. They break

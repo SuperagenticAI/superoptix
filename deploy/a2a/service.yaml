@@ -3,8 +3,11 @@
 # Deploy with:
 #   gcloud run services replace deploy/a2a/service.yaml --region europe-west1
 #
-# Or skip this file entirely and use the source deploy in README.md, which
-# builds and deploys in one command.
+# `replace` does not grant public access. After applying, bind
+# roles/run.invoker to allUsers, or prefer the `gcloud run deploy --source .`
+# command in README.md which passes --allow-unauthenticated.
+#
+# Replace PROJECT_ID in the image field before using this file.
 apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:

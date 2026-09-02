@@ -1,7 +1,7 @@
 name: A2A Conformance
 
-# Runs the official A2A Technology Compatibility Kit against the public A2A
-# endpoint and publishes the compatibility report as a build artifact.
+# Runs the official A2A Technology Compatibility Kit against the TCK SUT
+# harness and publishes the compatibility report as a build artifact.
 #
 # This runs on demand rather than on every push.
 #

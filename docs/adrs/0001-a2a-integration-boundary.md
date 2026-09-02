@@ -2,7 +2,12 @@
 
 ## Status
 
-Accepted on March 14, 2026.
+Superseded on 2026-09-02. The protocol is implemented in
+`superoptix.protocols.a2a` over FastAPI. `superoptix[a2a]` installs FastAPI,
+uvicorn, and sse-starlette. The `a2a-sdk` package is not a runtime dependency.
+
+The decisions below are kept as the original record. Decision 2's MVP pin of
+`a2a-sdk[http-server]==0.3.25` no longer applies.
 
 ## Context
 

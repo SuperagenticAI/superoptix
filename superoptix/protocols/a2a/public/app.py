@@ -1,15 +1,14 @@
 """ASGI entrypoint for the published SuperOptiX A2A endpoint.
 
-Deployed as a small web service (Render, Fly, Cloud Run, anything that runs an
-ASGI app). It serves the public Agent Card and the deterministic catalogue
-skills — no model calls, no user code, no credentials.
+Deployed as a Cloud Run service. It serves the public Agent Card and the
+deterministic catalogue skills — no model calls, no user code, no credentials.
 
     uvicorn superoptix.protocols.a2a.public.app:app
 
 Configuration comes from the environment so the card always advertises the URL
 the service is actually reachable at:
 
-    SUPEROPTIX_A2A_PUBLIC_URL   public base URL (default: the Render service)
+    SUPEROPTIX_A2A_PUBLIC_URL   public base URL (default: https://a2a.superoptix.ai)
 """
 
 from __future__ import annotations

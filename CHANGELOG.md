@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-09-02
+
+### Fixed
+- JSON-RPC `message/send` (and the other 0.3 slash names) now return the 0.3
+  task shape, not a wrapped 1.0 Task. HTTP+JSON already translated; the
+  preferred JSON-RPC transport did not.
+- `message/stream` validates empty parts and unknown `taskId` the same way
+  `SendMessage` does, and honours `a2a_state` / `a2a_artifacts` on the final
+  chunk.
+- Public Agent Card no longer declares a bearer scheme the service does not
+  verify. CORS, `HEAD`, and `/.well-known/agent.json` are served so 0.3
+  discovery clients can fetch the card.
+
+### Changed
+- Cloud Run deploy docs use the root `Dockerfile` and
+  `https://a2a.superoptix.ai`. The TCK workflow is documented as on-demand
+  against the SUT harness, not as a path-triggered 100% MUST floor.
+
 ## [0.3.0] - 2026-08-31
 
 ### Changed

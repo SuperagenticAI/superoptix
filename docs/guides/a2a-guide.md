@@ -66,7 +66,7 @@ Current bridge surfaces:
 - `GET /tasks`
 - `POST /tasks/{id}:cancel`
 - `POST /tasks/{id}:subscribe`
-- `POST /a2a/jsonrpc` with `SendMessage`, `SendStreamingMessage`, `GetTask`, `ListTasks`, `CancelTask`, and `SubscribeToTask`
+- `POST /a2a/jsonrpc` with `SendMessage` / `message/send`, `SendStreamingMessage` / `message/stream`, `GetTask` / `tasks/get`, `ListTasks` / `tasks/list`, `CancelTask` / `tasks/cancel`, and `SubscribeToTask` / `tasks/resubscribe`
 
 ## Outbound A2A: Calling a Remote Agent
 

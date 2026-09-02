@@ -127,9 +127,9 @@ class TestPublicAgentCard:
         assert bindings == {"JSONRPC", "HTTP+JSON"}
         assert card["preferredTransport"] == "JSONRPC"
 
-    def test_declares_security_and_provenance_fields(self):
+    def test_declares_provenance_fields_without_a_fake_auth_scheme(self):
         card = build_public_agent_card()
-        assert card["securitySchemes"]["bearer"]["scheme"] == "bearer"
+        assert "securitySchemes" not in card
         assert card["provider"]["organization"] == "Superagentic AI"
         assert card["documentationUrl"]
 
@@ -148,11 +148,11 @@ class TestPublicAgentCard:
         )
 
     def test_our_own_card_passes_our_own_review(self):
-        """Only the unsigned-card finding should remain; see roadmap item C3."""
+        """Unsigned card, and no auth scheme, because the catalogue is public."""
         review = agent_card_review(json.dumps(build_public_agent_card()))
         fields = [f["field"] for f in review["data"]["findings"]]
-        assert fields == ["signature"]
-        assert review["data"]["score"] >= 85
+        assert fields == ["signature", "securitySchemes"]
+        assert review["data"]["score"] >= 80
 
 
 class TestPublicEndpoint:
@@ -167,6 +167,27 @@ class TestPublicEndpoint:
         response = client.get("/.well-known/agent-card.json")
         assert response.status_code == 200
         assert response.json()["name"] == "SuperOptiX"
+
+    def test_serves_the_0_3_card_path_too(self, client):
+        response = client.get("/.well-known/agent.json")
+        assert response.status_code == 200
+        assert response.json()["name"] == "SuperOptiX"
+
+    def test_head_on_the_card_is_allowed(self, client):
+        response = client.head("/.well-known/agent-card.json")
+        assert response.status_code == 200
+        assert response.headers.get("etag")
+
+    def test_cors_preflight_on_the_card_is_allowed(self, client):
+        response = client.options(
+            "/.well-known/agent-card.json",
+            headers={
+                "Origin": "https://superoptix.ai",
+                "Access-Control-Request-Method": "GET",
+            },
+        )
+        assert response.status_code == 200
+        assert response.headers.get("access-control-allow-origin") == "*"
 
     def test_answers_a_message_send_call(self, client):
         response = client.post(

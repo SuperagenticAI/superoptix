@@ -32,7 +32,7 @@ Eight runtimes are supported: DSPy, CrewAI, the OpenAI Agents SDK, Pydantic AI, 
 
 Being reachable is only half the problem. Whether another agent chooses to call yours depends on how its Agent Card describes it, so SuperOptiX measures that and improves it with GEPA. See [Routing quality](guides/a2a-routing/).
 
-The protocol implementation records zero failures against the official A2A Technology Compatibility Kit. Every requirement the TCK exercises passes, 73 of 73 at MUST. A live agent runs at [a2a.superoptix.ai](https://a2a.superoptix.ai). See [A2A conformance](guides/a2a-conformance/).
+The protocol implementation records zero failures against the official A2A Technology Compatibility Kit. Every requirement the TCK exercises against the conformance harness passes, 73 of 73 at MUST. A live agent runs at [a2a.superoptix.ai](https://a2a.superoptix.ai). See [A2A conformance](guides/a2a-conformance/).
 
 SuperOptiX also compiles agents from SuperSpec, a declarative YAML format, into native code for any supported runtime.
 
