@@ -56,7 +56,7 @@ dependencies = [
     "litellm>=1.98,!=1.82.7,!=1.82.8",  # Block compromised March 2026 releases
     "pydantic",  # Required for data validation
     "python-dotenv",  # Required for environment variables
-    "mcp",  # Required for Super CLI MCP client functionality
+    "mcp>=1.28,<2",  # Super CLI uses v1 ClientSession/initialize; MCP SDK 2.0 dropped that handshake
 ]
 
 [project.optional-dependencies]
@@ -144,7 +144,7 @@ frameworks = [
 
 # MCP tool optimization (vendored from GEPA PR #105)
 mcp = [
-    "mcp",
+    "mcp>=1.28,<2",
 ]
 
 # A2A protocol support.
