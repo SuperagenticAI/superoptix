@@ -19,6 +19,7 @@ DEFAULT_SERVICE_URL = "https://a2a.superoptix.ai"
 DOCUMENTATION_URL = "https://github.com/SuperagenticAI/superoptix"
 ICON_URL = "https://superoptix.ai/uploads/logo.png"
 
+
 def build_public_agent_card(
     *,
     service_url: str = DEFAULT_SERVICE_URL,
