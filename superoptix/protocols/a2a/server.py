@@ -967,7 +967,7 @@ def create_a2a_fastapi_app(
             for s in skills
             if isinstance(s, dict)
         )
-        html = f"""<!doctype html>
+        page = f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{name} — A2A interface</title>
@@ -1003,7 +1003,7 @@ may take a moment while the service starts.</p>
 <p><a href="https://superagenticai.github.io/superoptix/guides/a2a-adapt/">Documentation</a>
  · <a href="https://github.com/SuperagenticAI/superoptix">Source</a></p>
 </body></html>"""
-        return HTMLResponse(content=html)
+        return HTMLResponse(content=page)
 
     # The card is fixed for the life of the process, so its validators are too.
     # A2A asks servers to make the card cacheable, and a conditional request that
