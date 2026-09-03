@@ -793,9 +793,9 @@ def _legacy_stream_event(payload: Dict[str, Any]) -> Dict[str, Any]:
         update = dict(payload["statusUpdate"])
         status = update.get("status")
         if isinstance(status, dict):
-            update["status"] = a2a_bridge.task_to_v03({"status": status}).get(
-                "status"
-            ) or status
+            update["status"] = (
+                a2a_bridge.task_to_v03({"status": status}).get("status") or status
+            )
         return {**payload, "statusUpdate": update}
     return a2a_bridge.task_to_v03(payload)
 
@@ -967,7 +967,7 @@ def create_a2a_fastapi_app(
             for s in skills
             if isinstance(s, dict)
         )
-        html = f"""<!doctype html>
+        page = f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{name} — A2A interface</title>
@@ -1003,7 +1003,7 @@ may take a moment while the service starts.</p>
 <p><a href="https://superagenticai.github.io/superoptix/guides/a2a-adapt/">Documentation</a>
  · <a href="https://github.com/SuperagenticAI/superoptix">Source</a></p>
 </body></html>"""
-        return HTMLResponse(content=html)
+        return HTMLResponse(content=page)
 
     # The card is fixed for the life of the process, so its validators are too.
     # A2A asks servers to make the card cacheable, and a conditional request that
@@ -1074,9 +1074,7 @@ may take a moment while the service starts.</p>
         return {"task": task}
 
     @app.post("/message:stream")
-    async def stream_message(
-        request: Request, payload: Dict[str, Any] = Body()
-    ) -> Any:
+    async def stream_message(request: Request, payload: Dict[str, Any] = Body()) -> Any:
         try:
             iterator = await tasks.stream_message(
                 message=payload.get("message") or {},
@@ -1215,9 +1213,7 @@ may take a moment while the service starts.</p>
                 )
             except A2AProtocolError as exc:
                 return _jsonrpc_error(request_id, exc.error, str(exc))
-            return _sse_stream(
-                iterator, request_id=request_id, legacy=legacy
-            )
+            return _sse_stream(iterator, request_id=request_id, legacy=legacy)
 
         if method == "GetTask":
             task_id = _task_id_from_params(params)
