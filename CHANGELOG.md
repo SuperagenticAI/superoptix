@@ -7,8 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.6] - 2026-09-04
+
 ### Fixed
 - Pin `mcp>=1.28,<2` so Super CLI and FastMCP paths do not resolve MCP Python SDK 2.x, which dropped `ClientSession`/`initialize`.
+- A2A public index handler no longer shadows the stdlib `html` module (Ruff F823); format-check clean for CI.
 
 ## [0.3.5] - 2026-09-02
 
