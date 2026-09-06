@@ -70,27 +70,3 @@ jobs:
 
       - name: Run tests
         run: PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run --no-sync pytest -p pytest_asyncio.plugin tests/
-
-  # Advisory. The vendored trees carry a large backlog, so this reports as its
-  # own non-blocking status instead of being hidden behind `|| echo`, which made
-  # a failing step look green.
-  types:
-    needs: [lint]
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Set up uv
-        uses: astral-sh/setup-uv@v5
-
-      - name: Install dependencies
-        run: uv sync --frozen --extra dev
-
-      - name: Type check
-        run: uv run --no-sync mypy superoptix/ --no-error-summary

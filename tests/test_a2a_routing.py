@@ -196,7 +196,10 @@ class TestOptimizationContract:
 class TestGepaIntegration:
     def test_optimization_improves_a_vague_catalogue(self):
         """End-to-end through GEPA with a scripted reflection model."""
-        pytest.importorskip("gepa")
+        # optimize_routing needs gepa.optimize_anything, which is absent from the
+        # tagged GEPA releases. Guarding on the bare package let the test run
+        # against a build without that API and fail on the import.
+        pytest.importorskip("gepa.optimize_anything")
         from superoptix.protocols.a2a.routing.optimize import optimize_routing
 
         improved = {
