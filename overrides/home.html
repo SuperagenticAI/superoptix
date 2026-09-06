@@ -1,0 +1,16 @@
+{% extends "main.html" %}
+
+{% block tabs %}
+  {{ super() }}
+  <style>
+    .md-tabs .md-tabs__link--active {
+      border-bottom-color: #7C3AED;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <div class="container">
+    {{ super() }}
+  </div>
+{% endblock %}

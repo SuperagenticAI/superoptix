@@ -1,0 +1,7064 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="AI Agent Development Framework: Evaluation-First and Optimization-Core.">
+      
+      
+        <meta name="author" content="SuperagenticAI">
+      
+      
+        <link rel="canonical" href="https://docs.superoptix.ai/tutorials/first-orchestra/">
+      
+      
+        <link rel="prev" href="../../guides/orchestra-development/">
+      
+      
+        <link rel="next" href="../../guides/observability/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>🎼 Multi-Agent Orchestra - SUPEROPTIX AI</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CFira+Code:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"Fira Code"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css?v=24.0">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="grey" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#create-your-first-orchestra-multi-agent-team" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SUPEROPTIX AI" class="md-header__button md-logo" aria-label="SUPEROPTIX AI" data-md-component="logo">
+      
+  <img src="../../logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SUPEROPTIX AI
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              🎼 Multi-Agent Orchestra
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="grey" data-md-color-accent="purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="grey" data-md-color-accent="purple"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SUPEROPTIX AI" class="md-nav__button md-logo" aria-label="SUPEROPTIX AI" data-md-component="logo">
+      
+  <img src="../../logo.png" alt="logo">
+
+    </a>
+    SUPEROPTIX AI
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🏠 Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🚀 Get Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🚀 Get Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../introduction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📖 Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🚀 Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/golden-workflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ⭐ Golden Workflow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/agent-quality-record/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧭 Agent Quality Records
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../multi-framework-quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🌐 Multi-Framework Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ⚙️ Setup & Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/troubleshooting-by-symptom/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🛠️ Troubleshooting by Symptom
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../llm-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧠 LLM Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../environment-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🏗️ Environment Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../project-structure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📁 Project Structure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_11" id="__nav_2_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎓 Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🎓 Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📚 Tutorials Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../openai-sdk-gepa-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔧 OpenAI SDK + GEPA Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔬 Frameworks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🔬 Frameworks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📚 Frameworks Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/multi-framework/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🌐 Comparison
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/framework-feature-matrix/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📊 Feature Matrix
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/openai-sdk-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🤖 OpenAI SDK
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/claude-sdk-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧠 Claude Agent SDK
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/pydantic-ai-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🐍 Pydantic AI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/pydantic-ai-mcp-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🐍 Pydantic AI MCP Demo
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/crewai-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    👥 CrewAI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/crewai-task-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ⚡ CrewAI Advanced
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/google-adk-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔮 Google ADK
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/microsoft-framework-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🏢 Microsoft (Legacy)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/deepagents-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🌊 DeepAgents
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📝 SuperSpec
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    📝 SuperSpec
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/superspec/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📝 SuperSpec Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/superspec-dsl-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📗 DSL Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/superspec-dsl-examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📙 DSL Examples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/superspec-agent-building/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🏗️ Agent Building
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/superspec-configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ⚙️ Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/superspec-context-engineering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧠 Context Engineering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🛠️ Build
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🛠️ Build
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../agent-patterns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎨 Agent Patterns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/agent-discovery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔍 Agent Discovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/agent-development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🤖 Agent Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/tool-development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔧 Tool Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/technical-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🏛️ Technical Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🤝 A2A
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🤝 A2A
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/a2a-introduction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🤝 Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/a2a-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📘 A2A Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/a2a-integration-checklist/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧭 Integration Checklist
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/a2a-demo-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧪 A2A Demo Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/a2a-adapt/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔌 Adapt an Existing Agent
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/a2a-conformance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ✅ Conformance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/a2a-routing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎯 Routing Quality
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Evaluate
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Evaluate
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/evaluation-testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Evaluation & Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/bdd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎭 RSpec-Style BDD Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎯 Agent Optimization
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🎯 Agent Optimization
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/agent-optimization/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📖 Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/agent-optimization/prompts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    💬 Prompt Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/agent-optimization/rag/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔍 RAG Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/agent-optimization/tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🛠️ Tool Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/agent-optimization/memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧠 Memory Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/agent-optimization/protocols/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔌 Protocol Optimization (MCP)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/agent-optimization/datasets/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📊 Dataset-Driven Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/agent-optimization/full-stack-example/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎯 Full-Stack Example
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ⚡ Optimize
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    ⚡ Optimize
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/gepa-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧬 GEPA Optimizer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📈 Optimization Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/dspy-optimizers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔬 DSPy Optimizers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../openai-sdk-gepa-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔧 OpenAI SDK + GEPA Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rag-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔍 RAG Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mcp-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔌 MCP Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/memory-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    💡 Memory Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎼 Orchestrate
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🎼 Orchestrate
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/orchestra-development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎼 Orchestra Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎼 Multi-Agent Orchestra
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎼 Multi-Agent Orchestra
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+  
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-youll-build" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🛠️ What You'll Build
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#caution-multi-agent-resource-warning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🚨 Caution: Multi-Agent Resource Warning
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-initialize-your-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1️⃣ Initialize Your Project
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-pull-multiple-pre-built-agents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2️⃣ Pull Multiple Pre-built Agents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-compile-all-agents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3️⃣ Compile All Agents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-create-your-orchestra" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4️⃣ Create Your Orchestra
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-list-your-orchestras" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5️⃣ List Your Orchestras
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-run-your-orchestra" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6️⃣ Run Your Orchestra
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6️⃣ Run Your Orchestra">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-developer-agent-first" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1️⃣ Developer Agent (First)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-qa-engineer-agent-second" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2️⃣ QA Engineer Agent (Second)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-devops-engineer-agent-third" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3️⃣ DevOps Engineer Agent (Third)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-insights" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎯 Key Insights
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#congratulations-youve-built-a-multi-agent-orchestra" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎉 Congratulations! You've Built a Multi-Agent Orchestra! 🚀
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎉 Congratulations! You&#39;ve Built a Multi-Agent Orchestra! 🚀">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-youve-accomplished" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🏆 What You've Accomplished
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#youre-now-a-multi-agent-orchestra-conductor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🌟 You're Now a Multi-Agent Orchestra Conductor!
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#whats-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🚀 What's Next?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-future-is-yours" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        💫 The Future is Yours
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#whats-next_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎯 What's Next?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎯 What&#39;s Next?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#immediate-next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🚀 Immediate Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recommended-learning-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📚 Recommended Learning Path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-topics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎯 Advanced Topics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#explore-the-marketplace" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🏪 Explore the Marketplace
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📊 Monitor
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    📊 Monitor
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/observability/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📊 Observability Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/mlflow-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧿 MLFlow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/langfuse-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧬 LangFuse
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/logfire-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔥 LogFire
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/weights-biases-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📈 Weights & Biases
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/observability-comparison/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ⚖️ Comparison
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/enhanced-observability/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🚀 Enhanced
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🗄️ Context
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🗄️ Context
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/mcp-rag-complete-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔍 RAG & MCP Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/rag/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📚 RAG Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/protocol-first-agents/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔌 MCP Protocol
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/dataset-import/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📊 Dataset Import
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧠 Memory Systems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_13" >
+        
+          
+          <label class="md-nav__link" for="__nav_13" id="__nav_13_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧩 TurboAgents
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_13_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_13">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🧩 TurboAgents
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/turboagents-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/rag-chroma-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chroma
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/rag-lancedb-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LanceDB
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/surrealdb-frameworks-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SurrealDB
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_14" >
+        
+          
+          <label class="md-nav__link" for="__nav_14" id="__nav_14_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔌 Integrations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_14_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_14">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🔌 Integrations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/optimas-examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ⚡ Optimas
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/optimas-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ⚡ Optimas Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/weaviate-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔰 Weaviate
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/qdrant-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔸 Qdrant
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/milvus-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    👁️ Milvus
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/tools-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🛠️ Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/memory-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧠 Memory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/observability-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📊 Observability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/arize-phoenix-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🛰️ Arize Phoenix
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/mlflow-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧿 MLFlow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/langfuse-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧬 LangFuse
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/gepa-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🚀 GEPA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_15" >
+        
+          
+          <label class="md-nav__link" for="__nav_15" id="__nav_15_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    💻 CLI
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_15_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_15">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    💻 CLI
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/cli-complete-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📘 CLI Complete Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_16" >
+        
+          
+          <label class="md-nav__link" for="__nav_16" id="__nav_16_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ✨ Super CLI (Beta)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_16_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_16">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    ✨ Super CLI (Beta)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/super-cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    💬 Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/conversational-interface/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔧 Technical Details
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_17" >
+        
+          
+          <label class="md-nav__link" for="__nav_17" id="__nav_17_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🤖 Models
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_17_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_17">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🤖 Models
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/model-management/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧠 Model Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/model-intelligence/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    💡 Model Intelligence
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_17_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_17_3" id="__nav_17_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    💻 Local Inference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_17_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_17_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    💻 Local Inference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/mlx-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    💻 MLX (Apple Silicon)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/ollama-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🐼 Ollama
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/huggingface-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🤗 HuggingFace
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/lmstudio-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎛️ LM Studio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_17_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_17_4" id="__nav_17_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ☁️ Cloud
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_17_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_17_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    ☁️ Cloud
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/cloud-inference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ☁️ Cloud Inference (OpenAI, Anthropic, Google)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/vllm-inference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🚀 vLLM (High-Performance Serving)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/sglang-inference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ⚡ SGLang (Structured Generation)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_18" >
+        
+          
+          <label class="md-nav__link" for="__nav_18" id="__nav_18_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📚 Examples
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_18_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_18">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    📚 Examples
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📚 Examples Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/optimas-examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ⚡ Optimas
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/rag-chroma-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chroma
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/rag-lancedb-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LanceDB
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/weaviate-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔰 Weaviate
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/qdrant-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔸 Qdrant
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/milvus-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    👁️ Milvus
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/surrealdb-frameworks-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SurrealDB
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/tools-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🛠️ Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/memory-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧠 Memory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/observability-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📊 Observability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/arize-phoenix-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🛰️ Arize Phoenix
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/mlflow-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧿 MLFlow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/langfuse-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧬 LangFuse
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/weights-biases-demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📈 Weights & Biases
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/agents/gepa-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🚀 GEPA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_19" >
+        
+          
+          <label class="md-nav__link" for="__nav_19" id="__nav_19_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎯 Techniques
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_19_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_19">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🎯 Techniques
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../techniques/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎯 Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/memory-context-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🗜️ Memory & Context Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🧠 Memory Systems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/memory-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    💡 Memory Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/rag/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📚 RAG Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📈 Optimization Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/evaluation-testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Evaluation & Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/observability/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📊 Observability Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/bdd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🎭 RSpec-Style BDD Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/cicd-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🔄 CI/CD Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/rails-analogy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🚂 Rails Analogy (For Rails Devs)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_20" >
+        
+          
+          <label class="md-nav__link" for="__nav_20" id="__nav_20_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🛍️ Marketplace
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_20_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_20">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🛍️ Marketplace
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/marketplace/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🛍️ Marketplace Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_21" >
+        
+          
+          <label class="md-nav__link" for="__nav_21" id="__nav_21_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Responsible AI
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_21_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_21">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Responsible AI
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/responsible-ai/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Responsible AI Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_22" >
+        
+          
+          <label class="md-nav__link" for="__nav_22" id="__nav_22_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🏢 Company
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_22_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_22">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🏢 Company
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superagentic-ai/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🌟 Superagentic AI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_23" >
+        
+          
+          <label class="md-nav__link" for="__nav_23" id="__nav_23_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📖 Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_23_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_23">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    📖 Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📔 Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ❓ FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🐛 Debugging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🗒️ Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🤝 Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_23_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_23_6" id="__nav_23_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🏛️ Architecture Decisions
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_23_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_23_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🏛️ Architecture Decisions
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/0001-a2a-integration-boundary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    A2A Integration Boundary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/0003-openai-harness-sandbox-adoption/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OpenAI Harness + Sandbox Adoption
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-youll-build" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🛠️ What You'll Build
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#caution-multi-agent-resource-warning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🚨 Caution: Multi-Agent Resource Warning
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-initialize-your-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1️⃣ Initialize Your Project
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-pull-multiple-pre-built-agents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2️⃣ Pull Multiple Pre-built Agents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-compile-all-agents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3️⃣ Compile All Agents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-create-your-orchestra" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4️⃣ Create Your Orchestra
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-list-your-orchestras" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5️⃣ List Your Orchestras
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-run-your-orchestra" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6️⃣ Run Your Orchestra
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6️⃣ Run Your Orchestra">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-developer-agent-first" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1️⃣ Developer Agent (First)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-qa-engineer-agent-second" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2️⃣ QA Engineer Agent (Second)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-devops-engineer-agent-third" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3️⃣ DevOps Engineer Agent (Third)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-insights" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎯 Key Insights
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#congratulations-youve-built-a-multi-agent-orchestra" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎉 Congratulations! You've Built a Multi-Agent Orchestra! 🚀
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎉 Congratulations! You&#39;ve Built a Multi-Agent Orchestra! 🚀">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-youve-accomplished" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🏆 What You've Accomplished
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#youre-now-a-multi-agent-orchestra-conductor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🌟 You're Now a Multi-Agent Orchestra Conductor!
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#whats-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🚀 What's Next?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-future-is-yours" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        💫 The Future is Yours
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#whats-next_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎯 What's Next?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎯 What&#39;s Next?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#immediate-next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🚀 Immediate Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recommended-learning-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📚 Recommended Learning Path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-topics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎯 Advanced Topics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#explore-the-marketplace" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🏪 Explore the Marketplace
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+        
+  
+  
+    <li class="md-path__item">
+      <a href="../.." class="md-path__link">
+        
+  <span class="md-ellipsis">
+    🏠 Home
+  </span>
+
+      </a>
+    </li>
+  
+
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../../guides/orchestra-development/" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    🎼 Orchestrate
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="create-your-first-orchestra-multi-agent-team">🎼 Create Your First Orchestra: Multi-Agent Team</h1>
+<h2 id="what-youll-build">🛠️ What You'll Build</h2>
+<p>You'll create a <strong>multi-agent orchestra</strong> with:</p>
+<ul>
+<li>🤖 <strong>3 Specialized Agents</strong>: Developer, QA Engineer, and DevOps Engineer</li>
+<li>🎼 <strong>Orchestra Coordination</strong>: Sequential workflow management</li>
+<li>🎯 <strong>Team Collaboration</strong>: Agents working together on complex tasks</li>
+<li>📊 <strong>Full Observability</strong>: Complete tracing and monitoring</li>
+</ul>
+<p>This is a <strong>production-ready multi-agent system</strong> that demonstrates the power of agent orchestration for complex software development workflows.</p>
+<hr />
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Before starting this tutorial, ensure you have:</p>
+<ul>
+<li><strong>Python 3.8+</strong> installed</li>
+<li><strong>SuperOptiX</strong> installed (see <a href="../../setup/">Installation Guide</a>)</li>
+<li>Completed the <a href="../genies-agent/">Your First Agent</a> tutorial (recommended)</li>
+</ul>
+<hr />
+<h2 id="caution-multi-agent-resource-warning">🚨 Caution: Multi-Agent Resource Warning</h2>
+<div class="admonition warning">
+<p class="admonition-title">Multi-Agent Systems are Resource Intensive</p>
+<ul>
+<li><strong>Multiple agents running simultaneously</strong> can consume significant resources</li>
+<li><strong>Each agent makes separate LLM calls</strong>, increasing total token usage</li>
+<li><strong>Orchestra coordination</strong> adds overhead to the system</li>
+<li><strong>Monitor your API usage and costs carefully</strong> if using cloud LLMs</li>
+<li>Only proceed if you understand the resource and cost implications!</li>
+</ul>
+</div>
+<hr />
+<h2 id="1-initialize-your-project">1️⃣ Initialize Your Project</h2>
+<div class="language-bash highlight"><pre><span></span><code>super<span class="w"> </span>init<span class="w"> </span>swe
+</code></pre></div>
+<details><summary>Actual Output</summary>
+
+<div class="language-text highlight"><pre><span></span><code>================================================================================
+╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ 🎉 SUCCESS! Your full-blown shippable Agentic System 'swe' is ready!                                         │
+│                                                                                                              │
+│ 🚀 You now own a complete agentic AI system in 'swe'.                                                        │
+│                                                                                                              │
+│ Start making it production-ready by evaluating, optimizing, and orchestrating with advanced agent            │
+│ engineering.                                                                                                 │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭──────────────────────────────────────── 🎯 Your Journey Starts Here ─────────────────────────────────────────╮
+│                                                                                                              │
+│  🚀 GETTING STARTED                                                                                          │
+│                                                                                                              │
+│  1. Move to your new project root and confirm setup:                                                         │
+│     cd swe                                                                                                   │
+│     # You should see a .super file here - always run super commands from this directory                      │
+│                                                                                                              │
+│  2. Pull your first agent:                                                                                   │
+│     super agent pull developer  # swap 'developer' for any agent name                                        │
+│                                                                                                              │
+│  3. Explore the marketplace:                                                                                 │
+│     super market                                                                                             │
+│                                                                                                              │
+│  4. Need the full guide?                                                                                     │
+│     super docs                                                                                               │
+│     https://superoptix.dev/docs                                                                              │
+│                                                                                                              │
+│  Tip: Use 'super market search &lt;keyword&gt;' to discover components tailored to your domain.                    │
+│                                                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+================================================================================
+🎯 Welcome to your Agentic System! Ready to build intelligent agents? 🚀
+📍 Next steps: cd swe
+================================================================================
+</code></pre></div>
+
+</details>
+
+<hr />
+<h2 id="2-pull-multiple-pre-built-agents">2️⃣ Pull Multiple Pre-built Agents</h2>
+<p>Now let's pull three specialized agents that will work together as a team:</p>
+<div class="language-bash highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>swe
+super<span class="w"> </span>agent<span class="w"> </span>pull<span class="w"> </span>developer
+super<span class="w"> </span>agent<span class="w"> </span>pull<span class="w"> </span>qa_engineer
+super<span class="w"> </span>agent<span class="w"> </span>pull<span class="w"> </span>devops_engineer
+</code></pre></div>
+<details><summary>Actual Output</summary>
+
+**Developer Agent:**
+<div class="language-text highlight"><pre><span></span><code>================================================================================
+
+🤖 Adding agent 'developer'...
+╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ 🎉 AGENT ADDED SUCCESSFULLY! Pre-built Agent Ready                                                           │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭────────────────────────────────────────────── 📋 Agent Details ──────────────────────────────────────────────╮
+│                                                                                                              │
+│  🤖 Name: Developer Assistant                                                                                │
+│  🏢 Industry: Software | 🔮 Tier: Oracles                                                                    │
+│  🔧 Tasks: 1 | 📁 Location: swe/agents/developer/playbook/developer_playbook.yaml                            │
+│                                                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+================================================================================
+🎉 Agent 'Developer Assistant' ready for customization and deployment! 🚀
+</code></pre></div>
+
+**QA Engineer Agent:**
+<div class="language-text highlight"><pre><span></span><code>================================================================================
+
+🤖 Adding agent 'qa_engineer'...
+╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ 🎉 AGENT ADDED SUCCESSFULLY! Pre-built Agent Ready                                                           │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭────────────────────────────────────────────── 📋 Agent Details ──────────────────────────────────────────────╮
+│                                                                                                              │
+│  🤖 Name: QA Engineer Assistant                                                                              │
+│  🏢 Industry: Software | 🔮 Tier: Oracles                                                                    │
+│  🔧 Tasks: 1 | 📁 Location: swe/agents/qa_engineer/playbook/qa_engineer_playbook.yaml                        │
+│                                                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+================================================================================
+🎉 Agent 'QA Engineer Assistant' ready for customization and deployment! 🚀
+</code></pre></div>
+
+**DevOps Engineer Agent:**
+<div class="language-text highlight"><pre><span></span><code>================================================================================
+
+🤖 Adding agent 'devops_engineer'...
+╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ 🎉 AGENT ADDED SUCCESSFULLY! Pre-built Agent Ready                                                           │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭────────────────────────────────────────────── 📋 Agent Details ──────────────────────────────────────────────╮
+│                                                                                                              │
+│  🤖 Name: DevOps Engineer Assistant                                                                          │
+│  🏢 Industry: Software | 🔮 Tier: Oracles                                                                    │
+│  🔧 Tasks: 1 | 📁 Location: swe/agents/devops_engineer/playbook/devops_engineer_playbook.yaml                │
+│                                                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+================================================================================
+🎉 Agent 'DevOps Engineer Assistant' ready for customization and deployment! 🚀
+</code></pre></div>
+
+</details>
+
+<div class="admonition info">
+<p class="admonition-title">🎯 Why These Three Agents?</p>
+<p>We're creating a <strong>Software Development Lifecycle (SDLC) team</strong>:</p>
+<ul>
+<li><strong>🤖 Developer Agent</strong>: Handles code development, architecture, and implementation</li>
+<li><strong>🧪 QA Engineer Agent</strong>: Manages testing, quality assurance, and validation</li>
+<li><strong>⚙️ DevOps Engineer Agent</strong>: Handles deployment, infrastructure, and operations</li>
+</ul>
+<p>This combination creates a <strong>complete development workflow</strong> from coding to deployment!</p>
+</div>
+<hr />
+<h2 id="3-compile-all-agents">3️⃣ Compile All Agents</h2>
+<p>Now let's compile all three agents at once to create their executable pipelines:</p>
+<div class="language-bash highlight"><pre><span></span><code>super<span class="w"> </span>agent<span class="w"> </span>compile<span class="w"> </span>--all
+</code></pre></div>
+<details><summary>Actual Output</summary>
+
+<div class="language-text highlight"><pre><span></span><code>🚀 Compiling all 3 agents in project 'swe'...
+================================================================================
+
+🔨 Compiling agent 'developer'...
+╭─────────────────────────────────────────── ⚡ Compilation Details ───────────────────────────────────────────╮
+│                                                                                                              │
+│  🤖 COMPILATION IN PROGRESS                                                                                  │
+│                                                                                                              │
+│  🎯 Agent: Developer Assistant                                                                               │
+│  🏗️ Framework: DSPy (default) Junior Pipeline - other frameworks coming soon
+ │
+│  🔧 Process: YAML playbook → Executable Python pipeline                                                      │
+│  📁 Output: swe/agents/developer/pipelines/developer_pipeline.py                                             │
+│                                                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+Successfully generated Oracles-tier pipeline (mixin) at: /Users/super/swe 
+18-15-10-253/swe/agents/developer/pipelines/developer_pipeline.py
+
+🎯 Oracles Tier Features
+  Basic Predict and Chain of Thought modules
+  Bootstrap Few-Shot optimization
+  Basic evaluation metrics
+  Sequential task orchestration
+  Basic tracing and observability
+
+╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ 🎉 COMPILATION SUCCESSFUL! Pipeline Generated                                                                │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+================================================================================
+🎉 Agent 'Developer Assistant' pipeline ready! Time to make it yours! 🚀
+================================================================================
+
+🔨 Compiling agent 'devops_engineer'...
+╭─────────────────────────────────────────── ⚡ Compilation Details ───────────────────────────────────────────╮
+│                                                                                                              │
+│  🤖 COMPILATION IN PROGRESS                                                                                  │
+│                                                                                                              │
+│  🎯 Agent: DevOps Engineer Assistant                                                                         │
+│  🏗️ Framework: DSPy (default) Junior Pipeline - other frameworks coming soon
+ │
+│  🔧 Process: YAML playbook → Executable Python pipeline                                                      │
+│  📁 Output: swe/agents/devops_engineer/pipelines/devops_engineer_pipeline.py                                 │
+│                                                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+Successfully generated Oracles-tier pipeline (mixin) at: /Users/super/swe 
+18-15-10-253/swe/agents/devops_engineer/pipelines/devops_engineer_pipeline.py
+
+🎯 Oracles Tier Features
+  Basic Predict and Chain of Thought modules
+  Bootstrap Few-Shot optimization
+  Basic evaluation metrics
+  Sequential task orchestration
+  Basic tracing and observability
+
+╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ 🎉 COMPILATION SUCCESSFUL! Pipeline Generated                                                                │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+================================================================================
+🎉 Agent 'DevOps Engineer Assistant' pipeline ready! Time to make it yours! 🚀
+================================================================================
+
+🔨 Compiling agent 'qa_engineer'...
+╭─────────────────────────────────────────── ⚡ Compilation Details ───────────────────────────────────────────╮
+│                                                                                                              │
+│  🤖 COMPILATION IN PROGRESS                                                                                  │
+│                                                                                                              │
+│  🎯 Agent: QA Engineer Assistant                                                                             │
+│  🏗️ Framework: DSPy (default) Junior Pipeline - other frameworks coming soon
+ │
+│  🔧 Process: YAML playbook → Executable Python pipeline                                                      │
+│  📁 Output: swe/agents/qa_engineer/pipelines/qa_engineer_pipeline.py                                         │
+│                                                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+Successfully generated Oracles-tier pipeline (mixin) at: /Users/super/swe 
+18-15-10-253/swe/agents/qa_engineer/pipelines/qa_engineer_pipeline.py
+
+🎯 Oracles Tier Features
+  Basic Predict and Chain of Thought modules
+  Bootstrap Few-Shot optimization
+  Basic evaluation metrics
+  Sequential task orchestration
+  Basic tracing and observability
+
+╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ 🎉 COMPILATION SUCCESSFUL! Pipeline Generated                                                                │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+================================================================================
+🎉 Agent 'QA Engineer Assistant' pipeline ready! Time to make it yours! 🚀
+================================================================================
+╭─────────────────────────────────────────── 📊 Compilation Summary ───────────────────────────────────────────╮
+│                                                                                                              │
+│  🎉 ALL AGENTS COMPILED SUCCESSFULLY!                                                                        │
+│                                                                                                              │
+│  Successful: 3 agent(s)                                                                                   │
+│  🚀 Ready for testing and customization!                                                                     │
+│                                                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+</code></pre></div>
+
+</details>
+
+<div class="admonition info">
+<p class="admonition-title">🔧 What Happens During Compilation</p>
+<p>The <code>--all</code> flag compiles <strong>all agents</strong> in your project:</p>
+<ul>
+<li><strong>📁 Developer Pipeline</strong>: <code>swe/agents/developer/pipelines/developer_pipeline.py</code></li>
+<li><strong>📁 QA Engineer Pipeline</strong>: <code>swe/agents/qa_engineer/pipelines/qa_engineer_pipeline.py</code></li>
+<li><strong>📁 DevOps Engineer Pipeline</strong>: <code>swe/agents/devops_engineer/pipelines/devops_engineer_pipeline.py</code></li>
+</ul>
+<p>Each agent gets its own <strong>optimized DSPy pipeline</strong> ready for orchestration!</p>
+</div>
+<hr />
+<h2 id="4-create-your-orchestra">4️⃣ Create Your Orchestra</h2>
+<p>Now let's create a multi-agent orchestra that coordinates these three agents:</p>
+<div class="language-bash highlight"><pre><span></span><code>super<span class="w"> </span>orchestra<span class="w"> </span>create<span class="w"> </span>sdlc
+</code></pre></div>
+<details><summary>Actual Output</summary>
+
+<div class="language-text highlight"><pre><span></span><code>🔎 Found 3 existing agent(s): developer, devops_engineer, qa_engineer. Adding them to the orchestra.
+📝 Loaded 3 task(s) from agent playbooks.
+
+Created new orchestra definition at: swe/orchestras/sdlc_orchestra.yaml
+👉 Orchestra automatically configured with tasks from agent playbooks.
+   Found 3 task(s): implement_feature, configure_ci_pipeline, create_test_plan
+
+💡 Customization Guidance:
+   This is an automatic orchestra created based on your agent playbooks.
+   You should refine this orchestra based on your specific goal to make it more targeted.
+   You can:
+   • Add more agents that align with your goal
+   • Modify task descriptions to be more specific
+   • Adjust execution strategy (sequential/parallel)
+   • Add dependencies between tasks
+   • Set custom timeouts and priorities
+
+📋 Version Information:
+   🆓 Free Version: Sequential execution strategy only
+   💎 Pro Version: Parallel, hierarchical, mixed strategies + Kubernetes orchestration
+   ℹ️  Orchestra kind 'basic' is supported in both versions
+
+🚀 Ready to run: super orchestra run sdlc --goal "your specific goal here"
+📝 Edit file: swe/orchestras/sdlc_orchestra.yaml
+
+🎯 Orchestra Workflow Recommendations:
+   Before running this orchestra, ensure your agents are optimized:
+   1. Compile all agents: super agent compile --all
+   2. Evaluate baseline: super agent evaluate &lt;agent_name&gt;
+   3. Optimize agents: super agent optimize &lt;agent_name&gt;
+   4. Re-evaluate improvement: super agent evaluate &lt;agent_name&gt;
+   5. Then run orchestra: super orchestra run sdlc --goal "goal"
+
+💡 Well-optimized individual agents lead to better orchestration results!
+</code></pre></div>
+
+</details>
+
+<div class="admonition info">
+<p class="admonition-title">🎼 What is an Orchestra?</p>
+<p>An <strong>Orchestra</strong> is a <strong>multi-agent coordination system</strong> that:</p>
+<ul>
+<li><strong>🎯 Manages Agent Workflow</strong>: Defines how agents work together</li>
+<li><strong>📋 Assigns Tasks</strong>: Distributes work among team members</li>
+<li><strong>🔄 Coordinates Execution</strong>: Ensures proper task sequencing</li>
+<li><strong>📊 Monitors Progress</strong>: Tracks completion and performance</li>
+</ul>
+<p>Think of it as a <strong>conductor</strong> that directs multiple musicians to create beautiful music together!</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">📝 Understanding the Orchestra YAML</p>
+<p>The orchestra creates a YAML configuration file that defines:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sdlc</span>
+<span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">"Software</span><span class="nv"> </span><span class="s">Development</span><span class="nv"> </span><span class="s">Lifecycle</span><span class="nv"> </span><span class="s">Orchestra"</span>
+
+<span class="nt">agents</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">developer</span>
+<span class="w">    </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="s">"Code</span><span class="nv"> </span><span class="s">development</span><span class="nv"> </span><span class="s">and</span><span class="nv"> </span><span class="s">implementation"</span>
+<span class="w">    </span><span class="nt">tasks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"code_review"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"implementation"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"architecture"</span><span class="p p-Indicator">]</span>
+
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">qa_engineer</span>
+<span class="w">    </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="s">"Testing</span><span class="nv"> </span><span class="s">and</span><span class="nv"> </span><span class="s">quality</span><span class="nv"> </span><span class="s">assurance"</span>
+<span class="w">    </span><span class="nt">tasks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"testing"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"validation"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"quality_check"</span><span class="p p-Indicator">]</span>
+
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">devops_engineer</span>
+<span class="w">    </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="s">"Deployment</span><span class="nv"> </span><span class="s">and</span><span class="nv"> </span><span class="s">infrastructure"</span>
+<span class="w">    </span><span class="nt">tasks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"deployment"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"infrastructure"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"monitoring"</span><span class="p p-Indicator">]</span>
+
+<span class="nt">workflow</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">"sequential"</span><span class="w">  </span><span class="c1"># Agents work in order</span>
+<span class="w">  </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">agent</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">developer</span>
+<span class="w">      </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="s">"implementation"</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">agent</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">qa_engineer</span>
+<span class="w">      </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="s">"testing"</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">agent</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">devops_engineer</span>
+<span class="w">      </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="s">"deployment"</span>
+</code></pre></div>
+<p><strong>🎯 Customize This File</strong>: You can modify the goals, tasks, and workflow to match your specific needs!</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">🔄 Sequential Orchestras Only</p>
+<p><strong>Currently Supported</strong>: Only <strong>sequential orchestras</strong> are supported in the current version.</p>
+<p><strong>Sequential Workflow</strong>: Agents work one after another, passing results to the next agent.</p>
+<p><strong>Future Support</strong>: Parallel orchestras and advanced coordination patterns are available in the commercial version.</p>
+</div>
+<hr />
+<h2 id="5-list-your-orchestras">5️⃣ List Your Orchestras</h2>
+<p>Let's see what orchestras you have available:</p>
+<div class="language-bash highlight"><pre><span></span><code>super<span class="w"> </span>orchestra<span class="w"> </span>list
+</code></pre></div>
+<details><summary>Actual Output</summary>
+
+<div class="language-text highlight"><pre><span></span><code>                                         🎵 Orchestras in Project: swe
+
+┏━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━┓
+┃ ID   ┃ Name           ┃ Description                                                         ┃ Agents ┃ Tasks ┃
+┡━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━┩
+│ sdlc │ Sdlc Orchestra │ An orchestra to accomplish a specific goal with flexible execution  │ 3      │ 3     │
+│      │                │ strategies.                                                         │        │       │
+└──────┴────────────────┴─────────────────────────────────────────────────────────────────────┴────────┴───────┘
+</code></pre></div>
+
+</details>
+
+<div class="admonition info">
+<p class="admonition-title">📋 Orchestra Management</p>
+<p>The <code>super orchestra list</code> command shows:</p>
+<ul>
+<li><strong>🎼 Available Orchestras</strong>: All orchestras in your project</li>
+<li><strong>🤖 Agent Members</strong>: Which agents are part of each orchestra</li>
+<li><strong>📊 Status</strong>: Whether orchestras are ready to run</li>
+<li><strong>📁 Location</strong>: Where orchestra configurations are stored</li>
+</ul>
+</div>
+<hr />
+<h2 id="6-run-your-orchestra">6️⃣ Run Your Orchestra</h2>
+<p>Now let's run your multi-agent orchestra with a complex goal that requires all three agents:</p>
+<div class="language-bash highlight"><pre><span></span><code>super<span class="w"> </span>orchestra<span class="w"> </span>run<span class="w"> </span>sdlc<span class="w"> </span>--goal<span class="w"> </span><span class="s2">"Build a complete web application for a task management system with user authentication, CRUD operations, and real-time notifications. Include comprehensive testing and deployment configuration."</span>
+</code></pre></div>
+<details><summary>Actual Output</summary>
+
+<div class="language-text highlight"><pre><span></span><code>🎼 Running Orchestra: sdlc
+🎭 Agent Tier: oracles
+📁 Using orchestra file: /Users/super/swe 18-15-10-253/swe/orchestras/sdlc_orchestra.yaml
+📁 Created workspace directory: /Users/super/swe 18-15-10-253/swe/orchestra_workspaces/sdlc
+📂 Using workspace: /Users/super/swe 18-15-10-253/swe/orchestra_workspaces/sdlc
+🔐 Validating tier access for oracles tier...
+Tier validation passed!
+🎼 Using basic orchestration mode
+🚀 Running Basic Orchestra: Sdlc Orchestra
+📋 Executing 3 tasks sequentially...
+
+🔄 Task 1/3: implement_feature
+🚀 Using pre-optimized pipeline from developer_optimized.json
+Model connection successful: ollama/qwen3.5:2b
+📋 Loaded 5 BDD specifications for execution
+DeveloperPipeline (Oracle tier) initialized with 5 BDD scenarios
+
+         Analysis Results
+┏━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Aspect         ┃ Value                                                                                       ┃
+┡━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ Reasoning      │ To build a complete web application for a task management system, we need to consider the   │
+│                │ following features:                                                                         │
+│                │ 1. User authentication using OAuth or JWT for secure login and authorization.               │
+│                │ 2. CRUD operations (Create, Read, Update, Delete) for tasks and users.                      │
+│                │ 3. Real-time notifications using WebSockets or Socket.IO for push updates.                  │
+│                │ 4. Comprehensive testing using Jest, React Testing Library, and Supertest to ensure the     │
+│                │ application's stability and performance.                                                    │
+│                │ 5. Deployment configuration using AWS S3, Elastic Beanstalk, and Amazon RDS for scalable    │
+│                │ infrastructure.                                                                             │
+│ Implementation │ Firstly, we'll set up the project structure with a `server` folder containing the           │
+│                │ Express.js app. We'll create a `users` collection in our MongoDB database and define models │
+│                │ for User and Task.                                                                          │
+│                │ Next, we'll implement user authentication using OAuth. We'll use Passport.js to handle      │
+│                │ authentication and authorization.                                                           │
+│                │ For CRUD operations, we'll create API endpoints for creating, reading, updating, and        │
+│                │ deleting tasks and users.                                                                   │
+│                │ To enable real-time notifications, we'll use WebSockets. We'll set up a WebSocket server to │
+│                │ listen for incoming connections and broadcast updates to connected clients.                 │
+│                │ Finally, we'll configure our deployment using AWS S3, Elastic Beanstalk, and Amazon RDS to  │
+│                │ ensure scalability and high availability.                                                   │
+│                │ Below is an example implementation of the feature:                                          │
+│                │ // Import required modules                                                                  │
+│                │ const express = require('express');                                                         │
+│                │ const app = express();                                                                      │
+│                │ // Define MongoDB connection                                                                │
+│                │ const mongoose = require('mongoose');                                                       │
+│                │ const User = mongoose.model('User', { username: String, password: String });               │
+│                │ const Task = mongoose.model('Task', { title: String, description: String });               │
+│                │ // Set up Passport.js for authentication                                                    │
+│                │ const passport = require('passport');                                                       │
+│                │ passport.authenticate('oauth', { strategy: 'jwt' });                                        │
+│                │ // Implement user authentication                                                            │
+│                │ app.use(passport.initialize());                                                             │
+│                │ app.use(passport.session());                                                                │
+│                │ // Define API endpoints for CRUD operations                                                 │
+│                │ app.get('/users', async (req, res) =&gt; {                                                     │
+│                │   const users = await User.find();                                                          │
+│                │   res.json(users);                                                                          │
+│                │ });                                                                                         │
+│                │ // Implement WebSocket server for real-time notifications                                   │
+│                │ const appWs = require('ws');                                                                │
+│                │ const wss = new appWs({ port: 8080 });                                                      │
+│                │ wss.on('connection', (ws) =&gt; {                                                              │
+│                │   console.log('Client connected');                                                          │
+│                │   ws.on('message', (message) =&gt; {                                                           │
+│                │     // Handle incoming message and broadcast update to all clients                          │
+│                │   });                                                                                       │
+│                │ });                                                                                         │
+│                │ // Configure deployment using AWS S3, Elastic Beanstalk, and Amazon RDS                    │
+│                │ const s3 = require('aws-sdk').createS3();                                                   │
+│                │ const beanstalk = require('aws-sdk').createElasticBeanstalkClient();                       │
+│                │ const rds = require('aws-sdk').createRDSClient();                                           │
+│                │ const bucket = 'your-bucket-name';                                                          │
+│                │ const region = 'us-east-1';                                                                 │
+│                │ const params = { Bucket: bucket, Region: region, DbName: 'your-database-name', StorageClass: │
+│                │ 'Standard' };                                                                               │
+│                │ beanstalk.updateEndpoint({ params });                                                       │
+│                │ rds.createDatabaseInstance(params);                                                         │
+│                │ // Implement comprehensive testing using Jest, React Testing Library, and Supertest        │
+│                │ const test = require('supertest');                                                          │
+│                │ const app = require('./server');                                                            │
+│                │ test(app, (err, res) =&gt; {                                                                   │
+│                │   // Test for user authentication                                                            │
+│                │ });                                                                                         │
+│                │ // Implement deployment configuration using AWS S3, Elastic Beanstalk, and Amazon RDS      │
+│                │ const s3Client = new s3({ region, bucket });                                                │
+│                │ const beanstalkClient = new beanstalk();                                                    │
+│                │ const rdsClient = new rds();                                                                │
+│ Trained        │ False                                                                                       │
+│ Usage          │ {'ollama_chat/qwen3.5:2b': {'completion_tokens': 1844, 'prompt_tokens': 580,               │
+│                │ 'total_tokens': 2424, 'completion_tokens_details': 0, 'prompt_tokens_details': 0}}          │
+│ Agent_Id       │ developer_20250711_185510                                                                   │
+│ Tier           │ oracles                                                                                     │
+└────────────────┴─────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+Task implement_feature completed in 11.16s
+
+🔄 Task 2/3: configure_ci_pipeline
+📝 Using base pipeline (no optimization available)
+Model connection successful: ollama/qwen3.5:2b
+📋 Loaded 5 BDD specifications for execution
+DevopsEngineerPipeline (Oracle tier) initialized with 5 BDD scenarios
+
+         Analysis Results
+┏━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Aspect          ┃ Value                                                                                      ┃
+┡━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ Reasoning       │ To automate software deployment and infrastructure management for a task management        │
+│                 │ system, we can create a CI/CD pipeline using Docker, Kubernetes, and AWS services. The     │
+│                 │ pipeline will involve the following stages:                                                │
+│                 │ 1. Building and pushing the application to the Docker registry.                            │
+│                 │ 2. Deploying the application to the AWS S3 bucket using Elastic Beanstalk.                 │
+│                 │ 3. Configuring the database with Amazon RDS.                                               │
+│                 │ 4. Testing the application using Jest, React Testing Library, and Supertest.               │
+│                 │ 5. Integrating the application with WebSocket for real-time notifications using Node.js    │
+│                 │ and Socket.IO.                                                                             │
+│ Pipeline_Config │ ['docker', 'aws', 'maven']                                                                │
+│ Trained         │ False                                                                                      │
+│ Usage           │ {'ollama_chat/qwen3.5:2b': {'completion_tokens': 1345, 'prompt_tokens': 2478,             │
+│                 │ 'total_tokens': 3823, 'completion_tokens_details': 0, 'prompt_tokens_details': 0}}         │
+│ Agent_Id        │ devops_engineer_20250711_185521                                                            │
+│ Tier            │ oracles                                                                                    │
+└─────────────────┴─────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+Task configure_ci_pipeline completed in 9.05s
+
+🔄 Task 3/3: create_test_plan
+📝 Using base pipeline (no optimization available)
+Model connection successful: ollama/qwen3.5:2b
+📋 Loaded 5 BDD specifications for execution
+QaEngineerPipeline (Oracle tier) initialized with 5 BDD scenarios
+
+         Analysis Results
+┏━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Aspect          ┃ Value                                                                                      ┃
+┡━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ Reasoning       │ The following step-by-step reasoning process is used to arrive at the answer:              │
+│                 │ 1. First, create a Docker image of the application using `docker build`.                   │
+│                 │ 2. Then, push the Docker image to the Docker registry using `docker tag`.                  │
+│                 │ 3. Next, deploy the application to Elastic Beanstalk.                                      │
+│                 │ 4. After that, configure the database with Amazon RDS.                                     │
+│                 │ 5. Write unit tests and integration tests for the application using Jest, React Testing    │
+│                 │ Library, and Supertest.                                                                   │
+│                 │ 6. Finally, integrate the WebSocket endpoint with Node.js and Socket.IO.                   │
+│ Test_Plan       │ Here's a high-level test plan including key test cases:                                    │
+│                 │ 1. Unit tests: Test individual components of the application using Jest.                   │
+│                 │ 2. Integration tests: Test the integration between different components of the application  │
+│                 │ using Jest and Supertest.                                                                 │
+│                 │ 3. End-to-end tests: Test the entire application using Jest, React Testing Library, and    │
+│                 │ Supertest.                                                                                 │
+│                 │ 4. WebSocket tests: Test the integration of the WebSocket endpoint with Node.js and        │
+│                 │ Socket.IO.                                                                                 │
+│ Trained         │ False                                                                                      │
+│ Usage           │ {'ollama_chat/qwen3.5:2b': {'completion_tokens': 214, 'prompt_tokens': 735,               │
+│                 │ 'total_tokens': 949, 'completion_tokens_details': None, 'prompt_tokens_details': None}}    │
+│ Agent_Id        │ qa_engineer_20250711_185530                                                                │
+│ Tier            │ oracles                                                                                    │
+└─────────────────┴─────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+Task create_test_plan completed in 1.40s
+🎉 Orchestra completed successfully!
+</code></pre></div>
+
+</details>
+
+<div class="admonition info">
+<p class="admonition-title">🎯 What Happens During Orchestra Execution</p>
+<p>Your orchestra will coordinate the three agents in sequence:</p>
+<h4 id="1-developer-agent-first"><strong>1️⃣ Developer Agent (First)</strong></h4>
+<ul>
+<li><strong>🎯 Task</strong>: Design and implement the web application</li>
+<li><strong>📝 Output</strong>: Code, architecture, and implementation details</li>
+<li><strong>🔄 Handoff</strong>: Passes code and specifications to QA Engineer</li>
+</ul>
+<h4 id="2-qa-engineer-agent-second"><strong>2️⃣ QA Engineer Agent (Second)</strong></h4>
+<ul>
+<li><strong>🎯 Task</strong>: Test the application and ensure quality</li>
+<li><strong>📝 Output</strong>: Test cases, validation results, and quality report</li>
+<li><strong>🔄 Handoff</strong>: Passes tested code and deployment requirements to DevOps Engineer</li>
+</ul>
+<h4 id="3-devops-engineer-agent-third"><strong>3️⃣ DevOps Engineer Agent (Third)</strong></h4>
+<ul>
+<li><strong>🎯 Task</strong>: Deploy and configure the application</li>
+<li><strong>📝 Output</strong>: Deployment configuration, infrastructure setup, and monitoring</li>
+<li><strong>Final Result</strong>: Complete, tested, and deployed application</li>
+</ul>
+</div>
+<div class="admonition info">
+<p class="admonition-title">🧠 How Multi-Agent Coordination Works</p>
+<p><strong>Sequential Coordination Process:</strong></p>
+<ol>
+<li><strong>📋 Goal Decomposition</strong>: Orchestra breaks the goal into agent-specific tasks</li>
+<li><strong>🎯 Agent Assignment</strong>: Each agent receives their specific responsibility</li>
+<li><strong>🔄 Sequential Execution</strong>: Agents work in order, building on previous results</li>
+<li><strong>📊 Result Aggregation</strong>: Orchestra combines all agent outputs</li>
+<li><strong>Final Delivery</strong>: Complete solution from the entire team</li>
+</ol>
+<p><strong>💡 Benefits of Multi-Agent Teams:</strong>
+- <strong>🎯 Specialized Expertise</strong>: Each agent focuses on their domain
+- <strong>🔍 Comprehensive Coverage</strong>: All aspects of the problem are addressed
+- <strong>📈 Quality Assurance</strong>: Multiple perspectives ensure better results
+- <strong>⚡ Scalable Workflows</strong>: Easy to add more agents for complex projects</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">📊 Orchestra Performance Metrics</p>
+<p><strong>🎼 Orchestra Execution Summary:</strong>
+- <strong>⏱️ Total Execution Time</strong>: ~21.61 seconds
+- <strong>🤖 Agents Coordinated</strong>: 3 specialized agents
+- <strong>📋 Tasks Completed</strong>: 3 sequential tasks
+- <strong>🎯 Success Rate</strong>: 100% (all tasks completed successfully)</p>
+<p><strong>📈 Individual Agent Performance:</strong>
+- <strong>🤖 Developer Agent</strong>: 11.16s (implementation + architecture)
+- <strong>⚙️ DevOps Engineer Agent</strong>: 9.05s (CI/CD pipeline configuration)
+- <strong>🧪 QA Engineer Agent</strong>: 1.40s (test plan creation)</p>
+<p><strong>💾 Resource Usage:</strong>
+- <strong>🔤 Total Tokens</strong>: 7,196 tokens across all agents
+- <strong>🧠 Model</strong>: qwen3.5:2b (local Ollama)
+- <strong>📁 Workspace</strong>: Created dedicated workspace for coordination</p>
+<h4 id="key-insights">🎯 <strong>Key Insights</strong></h4>
+<p><strong>🎼 Multi-Agent Coordination Benefits:</strong>
+- <strong>🎯 Specialized Expertise</strong>: Each agent focused on their domain (development, DevOps, QA)
+- <strong>🔄 Sequential Handoff</strong>: Results passed seamlessly between agents
+- <strong>📊 Comprehensive Coverage</strong>: All aspects of the project addressed
+- <strong>⚡ Efficient Execution</strong>: Parallel processing within each agent's domain</p>
+<p><strong>🏗️ Production-Ready Architecture:</strong>
+- <strong>📋 BDD Testing</strong>: Each agent validated against 5 BDD scenarios
+- <strong>🔧 Modular Design</strong>: Clean separation of concerns
+- <strong>📈 Scalable Workflow</strong>: Easy to add more agents or modify tasks
+- <strong>💻 Enterprise Features</strong>: Ready for deployment and scaling</p>
+</div>
+<hr />
+<h2 id="congratulations-youve-built-a-multi-agent-orchestra">🎉 <strong>Congratulations! You've Built a Multi-Agent Orchestra!</strong> 🚀</h2>
+<h3 id="what-youve-accomplished">🏆 <strong>What You've Accomplished</strong></h3>
+<p>You've successfully created a <strong>sophisticated multi-agent orchestra</strong> that demonstrates the power of coordinated AI teams! Here's what makes your orchestra special:</p>
+<p><strong>🎼 Orchestra Capabilities:</strong>
+- <strong>🤖 Multi-Agent Coordination</strong>: Three specialized agents working together
+- <strong>🎯 Sequential Workflow</strong>: Systematic task execution and handoff
+- <strong>📋 Goal Decomposition</strong>: Automatic breakdown of complex goals
+- <strong>🔄 Result Aggregation</strong>: Combining outputs from multiple agents
+- <strong>📊 Full Observability</strong>: Complete tracing and monitoring
+- <strong>⚡ Scalable Architecture</strong>: Easy to add more agents</p>
+<p><strong>🏗️ Enterprise-Grade Architecture:</strong>
+- <strong>📊 BDD Testing</strong>: Each agent has behavior-driven specifications
+- <strong>🔄 Optimization Pipeline</strong>: All agents are optimized with DSPy
+- <strong>📈 Performance Monitoring</strong>: Detailed metrics for each agent
+- <strong>🔧 Modular Design</strong>: Easy to customize and extend
+- <strong>💻 Production Ready</strong>: Can be deployed and scaled</p>
+<h3 id="youre-now-a-multi-agent-orchestra-conductor">🌟 <strong>You're Now a Multi-Agent Orchestra Conductor!</strong></h3>
+<p>This isn't just a simple automation-you've built a <strong>sophisticated AI team</strong> that can:
+- <strong>Coordinate multiple specialists</strong> for complex projects
+- <strong>Manage sequential workflows</strong> with proper handoffs
+- <strong>Ensure comprehensive coverage</strong> of all project aspects
+- <strong>Scale to enterprise needs</strong> with additional agents
+- <strong>Maintain quality standards</strong> across the entire team</p>
+<h3 id="whats-next">🚀 <strong>What's Next?</strong></h3>
+<p>Your journey into multi-agent orchestration has just begun! Here are some exciting next steps:</p>
+<p><strong>🎼 Create More Complex Orchestras:</strong>
+<div class="language-bash highlight"><pre><span></span><code><span class="c1"># Create a marketing team orchestra</span>
+super<span class="w"> </span>agent<span class="w"> </span>pull<span class="w"> </span>content_creator
+super<span class="w"> </span>agent<span class="w"> </span>pull<span class="w"> </span>social_media_manager
+super<span class="w"> </span>agent<span class="w"> </span>pull<span class="w"> </span>analytics_specialist
+super<span class="w"> </span>orchestra<span class="w"> </span>create<span class="w"> </span>marketing_team
+</code></pre></div></p>
+<p><strong>🔧 Add More Specialized Agents:</strong>
+<div class="language-bash highlight"><pre><span></span><code><span class="c1"># Pull additional agents for different domains</span>
+super<span class="w"> </span>agent<span class="w"> </span>pull<span class="w"> </span>data_scientist
+super<span class="w"> </span>agent<span class="w"> </span>pull<span class="w"> </span>ui_ux_designer
+super<span class="w"> </span>agent<span class="w"> </span>pull<span class="w"> </span>security_analyst
+</code></pre></div></p>
+<p><strong>📊 Explore Advanced Orchestration:</strong>
+<div class="language-bash highlight"><pre><span></span><code><span class="c1"># Create orchestras for different industries</span>
+super<span class="w"> </span>orchestra<span class="w"> </span>create<span class="w"> </span>healthcare_team
+super<span class="w"> </span>orchestra<span class="w"> </span>create<span class="w"> </span>finance_team
+super<span class="w"> </span>orchestra<span class="w"> </span>create<span class="w"> </span>education_team
+</code></pre></div></p>
+<p><strong>🎯 Deploy to Production:</strong>
+Your orchestra is ready for real-world deployment and can handle complex, multi-agent workflows!</p>
+<h3 id="the-future-is-yours">💫 <strong>The Future is Yours</strong></h3>
+<p>You now have the power to create AI orchestras that can:
+- <strong>Coordinate specialized teams</strong> 🎼
+- <strong>Handle complex workflows</strong> 🔄
+- <strong>Scale to enterprise needs</strong> 📈
+- <strong>Ensure quality delivery</strong> - <strong>Adapt to any domain</strong> 🎯</p>
+<p><strong>Welcome to the future of multi-agent orchestration!</strong> 🌟</p>
+<hr />
+<h2 id="whats-next_1">🎯 What's Next?</h2>
+<p>Congratulations on building your first multi-agent orchestra! Here are some exciting next steps to continue your SuperOptiX journey:</p>
+<h3 id="immediate-next-steps">🚀 <strong>Immediate Next Steps</strong></h3>
+<p><strong>🎼 Create More Complex Orchestras:</strong>
+<div class="language-bash highlight"><pre><span></span><code><span class="c1"># Create a marketing team orchestra</span>
+super<span class="w"> </span>agent<span class="w"> </span>pull<span class="w"> </span>content_creator
+super<span class="w"> </span>agent<span class="w"> </span>pull<span class="w"> </span>social_media_manager
+super<span class="w"> </span>agent<span class="w"> </span>pull<span class="w"> </span>analytics_specialist
+super<span class="w"> </span>orchestra<span class="w"> </span>create<span class="w"> </span>marketing_team
+</code></pre></div></p>
+<p><strong>🔧 Add More Specialized Agents:</strong>
+<div class="language-bash highlight"><pre><span></span><code><span class="c1"># Pull additional agents for different domains</span>
+super<span class="w"> </span>agent<span class="w"> </span>pull<span class="w"> </span>data_scientist
+super<span class="w"> </span>agent<span class="w"> </span>pull<span class="w"> </span>ui_ux_designer
+super<span class="w"> </span>agent<span class="w"> </span>pull<span class="w"> </span>security_analyst
+</code></pre></div></p>
+<p><strong>📊 Explore Advanced Orchestration:</strong>
+<div class="language-bash highlight"><pre><span></span><code><span class="c1"># Create orchestras for different industries</span>
+super<span class="w"> </span>orchestra<span class="w"> </span>create<span class="w"> </span>healthcare_team
+super<span class="w"> </span>orchestra<span class="w"> </span>create<span class="w"> </span>finance_team
+super<span class="w"> </span>orchestra<span class="w"> </span>create<span class="w"> </span>education_team
+</code></pre></div></p>
+<h3 id="recommended-learning-path">📚 <strong>Recommended Learning Path</strong></h3>
+<ol>
+<li><strong>💎 <a href="../../guides/superspec/">SuperSpec Guide</a></strong>: Master declarative agent specifications</li>
+<li><strong>🧪 <a href="../../guides/bdd/">BDD Guide</a></strong>: Learn behavior-driven development for agents</li>
+<li><strong>⚙️ <a href="../../guides/optimization/">Optimization Guide</a></strong>: Understand DSPy-powered optimization</li>
+<li><strong>🎭 <a href="../../guides/orchestra-development/">Multi-Agent Guide</a></strong>: Build advanced orchestration patterns</li>
+<li><strong>🏭 <a href="../../guides/agent-development/">Production Guide</a></strong>: Deploy and monitor in production</li>
+</ol>
+<h3 id="advanced-topics">🎯 <strong>Advanced Topics</strong></h3>
+<ul>
+<li><strong>🔍 <a href="../../guides/agent-discovery/">Agent Discovery</a></strong>: Find the perfect agents for your use case</li>
+<li><strong>🛠️ <a href="../../guides/tool-development/">Tool Development</a></strong>: Create custom tools for your agents</li>
+<li><strong>🧠 <a href="../../guides/memory/">Memory Systems</a></strong>: Add persistent memory to your orchestras</li>
+<li><strong>🔍 <a href="../../guides/rag/">RAG Integration</a></strong>: Add knowledge retrieval capabilities</li>
+<li><strong>📊 <a href="../../guides/observability/">Observability</a></strong>: Monitor and debug your orchestras</li>
+</ul>
+<h3 id="explore-the-marketplace">🏪 <strong>Explore the Marketplace</strong></h3>
+<p>Discover more pre-built agents and tools:
+<div class="language-bash highlight"><pre><span></span><code><span class="c1"># Browse available agents</span>
+super<span class="w"> </span>market<span class="w"> </span>browse<span class="w"> </span>agents
+
+<span class="c1"># Search for specific agents</span>
+super<span class="w"> </span>market<span class="w"> </span>search<span class="w"> </span><span class="s2">"data analysis"</span>
+
+<span class="c1"># Browse available tools</span>
+super<span class="w"> </span>market<span class="w"> </span>browse<span class="w"> </span>tools
+</code></pre></div></p>
+<p><strong>Ready to build the next generation of AI orchestras? The future of multi-agent systems is yours to create! 🚀</strong> </p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright © 2026 Superagentic AI. Made with ❤️ for the Agentic AI community.
+    </div>
+  
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/SuperagenticAI" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://x.com/SuperagenticAI" target="_blank" rel="noopener" title="x.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M459.4 151.7c.3 4.5.3 9.1.3 13.6 0 138.7-105.6 298.6-298.6 298.6-59.5 0-114.7-17.2-161.1-47.1 8.4 1 16.6 1.3 25.3 1.3 49.1 0 94.2-16.6 130.3-44.8-46.1-1-84.8-31.2-98.1-72.8 6.5 1 13 1.6 19.8 1.6 9.4 0 18.8-1.3 27.6-3.6-48.1-9.7-84.1-52-84.1-103v-1.3c14 7.8 30.2 12.7 47.4 13.3-28.3-18.8-46.8-51-46.8-87.4 0-19.5 5.2-37.4 14.3-53C87.4 130.8 165 172.4 252.1 176.9c-1.6-7.8-2.6-15.9-2.6-24C249.5 95.1 296.3 48 354.4 48c30.2 0 57.5 12.7 76.7 33.1 23.7-4.5 46.5-13.3 66.6-25.3-7.8 24.4-24.4 44.8-46.1 57.8 21.1-2.3 41.6-8.1 60.4-16.2-14.3 20.8-32.2 39.3-52.6 54.3"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://www.linkedin.com/company/superagenticai" target="_blank" rel="noopener" title="www.linkedin.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3M135.4 416H69V202.2h66.5V416zM102.2 96a38.5 38.5 0 1 1 0 77 38.5 38.5 0 1 1 0-77m282.1 320h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant.prefetch", "navigation.tracking", "navigation.path", "navigation.top", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
+      
+        <script src="../../javascripts/extra.js"></script>
+      
+    
+  </body>
+</html>
