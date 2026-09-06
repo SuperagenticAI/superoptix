@@ -1,15 +1,58 @@
+# Mirrors the gating checks in .github/workflows/ci.yml and release.yml, so a
+# commit that passes locally passes in CI.
+#
+#   pre-commit install --install-hooks
+#   pre-commit install --hook-type pre-push
+#
+# Lint and formatting run on commit. The test suite runs on push, because it is
+# too slow to sit in front of every commit and a hook people disable protects
+# nothing.
 repos:
-- repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.4.0
-  hooks:
-    - id: check-yaml
-    - id: end-of-file-fixer
-    - id: trailing-whitespace
-- repo: https://github.com/psf/black
-  rev: 23.3.0
-  hooks:
-    - id: black
-- repo: https://github.com/PyCQA/flake8
-  rev: 6.0.0
-  hooks:
-    - id: flake8
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+        exclude: ^mkdocs\.yml$
+      - id: check-toml
+      - id: check-json
+      - id: check-added-large-files
+        args: [--maxkb=2000]
+      - id: check-merge-conflict
+      - id: mixed-line-ending
+        args: [--fix=lf]
+
+  # CI runs `ruff check .` and `ruff format --check .`. This replaces the black
+  # and flake8 hooks that were here: black and ruff-format disagree on output,
+  # so the previous config reformatted files into a state CI then rejected.
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.12
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: local
+    hooks:
+      # release.yml runs this against the tag. Running it whenever a
+      # version-carrying file changes catches a stale uv.lock or a missing
+      # changelog heading at commit time instead of halfway through a release,
+      # where the version number has already been spent.
+      - id: release-metadata
+        name: release metadata is consistent
+        entry: python scripts/check_release_metadata.py
+        language: system
+        pass_filenames: false
+        files: ^(pyproject\.toml|uv\.lock|CHANGELOG\.md|superoptix/__init__\.py)$
+
+      - id: pytest
+        name: pytest
+        entry: >
+          env PYTEST_DISABLE_PLUGIN_AUTOLOAD=1
+          uv run --no-sync pytest -p pytest_asyncio.plugin tests/ -q
+        language: system
+        pass_filenames: false
+        stages: [pre-push]

@@ -8,10 +8,49 @@ on:
 permissions:
   contents: read
 
+# A newer push to the same ref cancels the older run, so a queue of commits does
+# not sit behind results nobody will read.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  # Cheap checks on a single Python, ahead of the matrix. A formatting error
+  # should report in under a minute, not after two full dependency installs.
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install dependencies
+        run: uv sync --frozen --extra dev
+
+      - name: Ruff lint
+        run: uv run --no-sync ruff check .
+
+      - name: Ruff format check
+        run: uv run --no-sync ruff format --check .
+
+      # Catches a stale uv.lock or a missing changelog heading on every commit,
+      # instead of at release time where the version is already spent.
+      - name: Release metadata is consistent
+        run: uv run --no-sync python scripts/check_release_metadata.py
+
   test:
+    needs: [lint]
     runs-on: ubuntu-latest
     strategy:
+      # One Python version failing stops the other. Both failing the same way is
+      # the common case, and the second result adds nothing.
+      fail-fast: true
       matrix:
         python-version: ["3.11", "3.12"]
 
@@ -24,23 +63,34 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Set up uv
-        uses: astral-sh/setup-uv@v1
-        with:
-          version: "latest"
+        uses: astral-sh/setup-uv@v5
 
       - name: Install dependencies
         run: uv sync --frozen --extra dev --extra testing --extra turboagents
 
-      - name: Run Ruff
-        run: |
-          uv run --no-sync ruff check .
-          uv run --no-sync ruff format --check .
-
       - name: Run tests
-        run: |
-          PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run --no-sync pytest -p pytest_asyncio.plugin tests/
+        run: PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run --no-sync pytest -p pytest_asyncio.plugin tests/
 
-      - name: Run type checking
-        run: |
-          uv run --no-sync mypy superoptix/ --no-error-summary || echo "Type checking completed with warnings"
-        
+  # Advisory. The vendored trees carry a large backlog, so this reports as its
+  # own non-blocking status instead of being hidden behind `|| echo`, which made
+  # a failing step look green.
+  types:
+    needs: [lint]
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install dependencies
+        run: uv sync --frozen --extra dev
+
+      - name: Type check
+        run: uv run --no-sync mypy superoptix/ --no-error-summary

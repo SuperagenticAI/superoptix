@@ -1,25 +1,39 @@
 name: Release to PyPI
 
+# A pushed tag is the release. The version is derived from the tag rather than
+# typed as an input, so the two can never disagree. workflow_dispatch is kept
+# for a rerun that should not move a tag.
 on:
+  push:
+    tags:
+      - "v*"
   workflow_dispatch:
     inputs:
-      version:
-        description: Python package version to release
-        required: true
       tag:
-        description: Git tag to create for this release, for example v0.2.22
+        description: Existing tag to release, for example v0.3.7
         required: true
+
+permissions:
+  contents: write
 
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
 
     steps:
-      - name: Checkout code
+      - name: Resolve tag and version
+        id: release
+        run: |
+          set -euo pipefail
+          tag="${{ inputs.tag || github.ref_name }}"
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+          echo "version=${tag#v}" >> "$GITHUB_OUTPUT"
+          echo "Releasing SuperOptiX ${tag#v} from ${tag}"
+
+      - name: Checkout tag
         uses: actions/checkout@v4
         with:
+          ref: ${{ steps.release.outputs.tag }}
           fetch-depth: 0
 
       - name: Set up Python
@@ -28,30 +42,23 @@ jobs:
           python-version: "3.12"
 
       - name: Set up uv
-        uses: astral-sh/setup-uv@v1
-        with:
-          version: "latest"
+        uses: astral-sh/setup-uv@v5
 
-      - name: Validate requested version
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          import re
-          version = "${{ inputs.version }}"
-          pyproject = Path("pyproject.toml").read_text()
-          match = re.search(r'^version = "([^"]+)"$', pyproject, re.MULTILINE)
-          if not match:
-              raise SystemExit("Could not find project version in pyproject.toml")
-          project_version = match.group(1)
-          if project_version != version:
-              raise SystemExit(
-                  f"Workflow input version {version!r} does not match pyproject.toml version {project_version!r}"
-              )
-          print(f"Releasing SuperOptiX {project_version}")
-          PY
+      # Fails on a stale uv.lock, a missing changelog section, or a tag that
+      # disagrees with pyproject.toml, before anything reaches PyPI where a
+      # version cannot be withdrawn.
+      - name: Validate release metadata
+        run: python scripts/check_release_metadata.py --tag "${{ steps.release.outputs.tag }}"
 
       - name: Install release dependencies
         run: uv sync --frozen --extra dev --extra testing --extra turboagents
+
+      # Same gates as ci.yml. A tag that skipped CI still cannot reach PyPI.
+      - name: Ruff lint
+        run: uv run --no-sync ruff check .
+
+      - name: Ruff format check
+        run: uv run --no-sync ruff format --check .
 
       - name: Run tests
         run: PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run --no-sync pytest -p pytest_asyncio.plugin tests/
@@ -59,29 +66,38 @@ jobs:
       - name: Build package
         run: uv build
 
+      # --skip-existing keeps a rerun idempotent. Without it, re-running a tag
+      # whose version already published fails here and the GitHub release is
+      # never created.
       - name: Publish to PyPI
         env:
           UV_PUBLISH_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
-        run: uv publish dist/*
+        run: uv publish --skip-existing dist/*
+
+      # The published notes are the notes committed to the repository.
+      - name: Build release notes
+        run: |
+          set -euo pipefail
+          python scripts/changelog_notes.py "${{ steps.release.outputs.tag }}" \
+            > "${RUNNER_TEMP}/notes.md"
+          {
+            echo ""
+            echo "## Install"
+            echo ""
+            echo '```bash'
+            echo "uv add superoptix"
+            echo 'uv add "superoptix[turboagents]"'
+            echo '```'
+            echo ""
+            echo "- Docs: https://docs.super-agentic.ai"
+            echo "- PyPI: https://pypi.org/project/superoptix/${{ steps.release.outputs.version }}/"
+            echo "- TurboAgents: https://pypi.org/project/turboagents/"
+          } >> "${RUNNER_TEMP}/notes.md"
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ inputs.tag }}
-          name: SuperOptiX ${{ inputs.version }}
-          generate_release_notes: true
-          files: |
-            dist/*
-          body: |
-            SuperOptiX ${{ inputs.version }}
-
-            Install:
-            ```bash
-            uv add superoptix
-            uv add "superoptix[turboagents]"
-            ```
-
-            Links:
-            - Docs: https://docs.super-agentic.ai
-            - PyPI: https://pypi.org/project/superoptix/${{ inputs.version }}/
-            - TurboAgents: https://pypi.org/project/turboagents/
+          tag_name: ${{ steps.release.outputs.tag }}
+          name: SuperOptiX ${{ steps.release.outputs.version }}
+          body_path: ${{ runner.temp }}/notes.md
+          files: dist/*
