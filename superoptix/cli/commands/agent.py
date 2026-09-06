@@ -1997,6 +1997,25 @@ feature_specifications:
             )
             console.print()
 
+        # Emit a SuperGauge Agent Quality Record when asked. The record reports
+        # what this evaluation established and nothing more: measures appear
+        # only where the run produced them, so a single-pass evaluation carries
+        # no reliability measure and reaches a lower conformance level.
+        gauge_out = getattr(args, "gauge_out", None)
+        if gauge_out:
+            try:
+                _emit_gauge_record(
+                    out_path=gauge_out,
+                    agent_name=agent_name,
+                    playbook_path=runner.playbook_path,
+                    detailed_results=detailed_results,
+                    tier=getattr(args, "gauge_tier", "T1"),
+                    sealed=bool(getattr(args, "gauge_sealed", False)),
+                    engine=getattr(args, "engine", "dspy"),
+                )
+            except Exception as exc:  # emission must never fail an evaluation
+                console.print(f"⚠️  [yellow]Record not written:[/] {exc}")
+
     except FileNotFoundError:
         console.print(f"❌ [bold red]Agent '{agent_name}' not found.[/]")
         console.print("💡 Available agents: [cyan]super agent list[/]")
@@ -2005,6 +2024,69 @@ feature_specifications:
         console.print(
             f"🔧 [dim]Try: super agent compile {agent_name} && super agent evaluate {agent_name}[/]"
         )
+
+
+def _emit_gauge_record(
+    *,
+    out_path,
+    agent_name: str,
+    playbook_path,
+    detailed_results: list,
+    tier: str = "T1",
+    sealed: bool = False,
+    engine: str = "dspy",
+) -> None:
+    """Write an Agent Quality Record for a completed BDD evaluation.
+
+    Scenarios are the task set; a scenario tagged `held-out` in the playbook
+    counts toward the held-out split. Where the playbook declares no split, the
+    record reports zero held-out scenarios, which is accurate and caps the
+    record at a lower level.
+    """
+    import json
+    from pathlib import Path
+
+    import yaml
+
+    from superoptix.gauge import build_record
+
+    playbook_file = Path(playbook_path)
+    with open(playbook_file, encoding="utf-8") as handle:
+        playbook = yaml.safe_load(handle) or {}
+
+    spec_data = playbook.get("spec", playbook)
+    feature_specs = spec_data.get("feature_specifications", {}) or {}
+    scenarios = feature_specs.get("scenarios", []) or []
+
+    results = [
+        {
+            "id": str(item.get("scenario") or item.get("name") or index),
+            "status": "passed" if item.get("passed") else "failed",
+            "usage": item.get("usage") or {},
+        }
+        for index, item in enumerate(detailed_results)
+    ]
+
+    record = build_record(
+        agent_name=agent_name,
+        playbook_path=playbook_file,
+        playbook=playbook,
+        scenarios=scenarios,
+        results=results,
+        framework=engine,
+        tier=tier,
+        sealed=sealed,
+    )
+
+    destination = Path(out_path)
+    if destination.suffix == ".json":
+        destination.write_text(json.dumps(record, indent=2), encoding="utf-8")
+    else:
+        destination.write_text(
+            yaml.safe_dump(record, sort_keys=False, default_flow_style=False, width=100),
+            encoding="utf-8",
+        )
+    console.print(f"📋 [green]Agent Quality Record:[/] {destination}")
 
 
 def lint_agent(args):

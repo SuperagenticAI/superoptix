@@ -206,6 +206,22 @@ super agent compile developer --framework dspy --optimize
 super agent optimize developer --framework dspy --auto light
 ```
 
+## Release records
+
+`super agent evaluate` can write an Agent Quality Record: what was measured,
+what held, and the way back.
+
+```bash
+super agent evaluate developer --gauge-out record.yaml
+```
+
+The format is [SuperGauge](https://github.com/SuperagenticAI/supergauge). The
+record carries the playbook digest, the scenario manifest, the agent's declared
+capabilities, and `interop.routing_invocation`, which reports how often a calling
+agent selects yours from a catalogue. That becomes a quality dimension once
+agents route work to one another.
+See [Agent Quality Records](https://superagenticai.github.io/superoptix/guides/agent-quality-record/).
+
 ## Documentation
 
 - [Adapting an existing agent](https://superagenticai.github.io/superoptix/guides/a2a-adapt/)

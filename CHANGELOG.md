@@ -7,6 +7,65 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.7] - 2026-09-06
+
+`super agent evaluate` can now write an Agent Quality Record. The evaluation
+tells you what passed; the record states what was checked before the agent went
+live, in a format a colleague or an auditor can read months later.
+
+### 🧭 Agent Quality Records
+
+- New `--gauge-out PATH` flag on `super agent evaluate` writes a record in the
+  format published at [SuperGauge](https://github.com/SuperagenticAI/supergauge),
+  an open specification any tool may implement. A `.json` suffix selects JSON,
+  otherwise YAML.
+- `--gauge-tier {T0,T1,T2}` sets the risk tier the record claims, and
+  `--gauge-sealed` asserts the held-out scenarios were closed to anything that
+  tunes the agent.
+- Record emission never fails an evaluation. A problem writing the file prints a
+  warning and the evaluation result stands.
+
+### 📐 What the record reports
+
+- Playbook scenarios are the task set. A scenario marked `split: held-out`
+  counts toward the held-out portion, and the manifest is fingerprinted by
+  scenario name and expected output, so editing the wording of a scenario
+  without changing what it asserts leaves the seal intact.
+- `subject.authority` records what the agent was permitted to do, read from the
+  compiled playbook: tools become capabilities, and the runtime block supplies
+  the sandbox and egress posture.
+- `subject.harness_digest` is a sha256 of the playbook, so a record names the
+  exact agent definition it describes.
+- `add_reliability` computes `reliability.pass_hat_k` and
+  `reliability.pass_at_k` across independent evaluation runs.
+
+### 🔀 Routing quality as a measure
+
+- New `interop.routing_invocation`, registered in the SuperGauge measure
+  registry, reporting how often a calling agent selects yours from a catalogue
+  of candidates.
+- An agent published over A2A is selected by another agent reading its card,
+  which makes the description on that card a routing interface. Where selection
+  fails, the agent receives no work, and its completion rate describes traffic
+  that never arrived. Four sibling skills under identical queries, differing
+  only in how each described itself, moved invocation from 12.5% to 100%.
+- No other measure in the registry covers discoverability, and it becomes a
+  quality dimension once agents route work to one another.
+
+### 📊 Conformance
+
+- An evaluation-only record reaches level L1. Reaching L2 additionally requires
+  a gate list and contamination probes; SuperOptiX reports measures and leaves
+  the gate list empty, because asserting a gate requires a policy engine that
+  decides at runtime.
+- Any SuperGauge implementation reads the output, so an organisation running
+  SuperOptiX alongside SuperQode gets one record shape across a repository
+  harness and an agent on any supported runtime.
+
+### 📚 Documentation
+
+- New guide: [Agent Quality Records](https://superagenticai.github.io/superoptix/guides/agent-quality-record/).
+
 ## [0.3.6] - 2026-09-04
 
 ### Fixed

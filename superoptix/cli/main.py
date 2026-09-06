@@ -1647,6 +1647,27 @@ Use `super agent <command> --help` for more information on a specific command.
         metavar="FILE",
         help="Save detailed test report to file",
     )
+    test_parser.add_argument(
+        "--gauge-out",
+        metavar="PATH",
+        default=None,
+        help=(
+            "Write a SuperGauge Agent Quality Record for this evaluation. "
+            "The record states what was measured, what held, and the way back. "
+            "Format: github.com/SuperagenticAI/supergauge"
+        ),
+    )
+    test_parser.add_argument(
+        "--gauge-tier",
+        choices=["T0", "T1", "T2"],
+        default="T1",
+        help="Risk tier for the emitted record (default: T1)",
+    )
+    test_parser.add_argument(
+        "--gauge-sealed",
+        action="store_true",
+        help="Assert the held-out scenarios were closed to anything that tunes the agent.",
+    )
     test_parser.set_defaults(func=test_agent_bdd)
 
     # super agent tier-status

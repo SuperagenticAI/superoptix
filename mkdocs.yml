@@ -109,6 +109,7 @@ nav:
       - '📖 Introduction': introduction.md
       - '🚀 Quick Start': quick-start.md
       - '⭐ Golden Workflow': guides/golden-workflow.md
+      - '🧭 Agent Quality Records': guides/agent-quality-record.md
       - '🌐 Multi-Framework Quick Start': tutorials/multi-framework-quickstart.md
       - '⚙️ Setup & Installation': setup.md
       - '🛠️ Troubleshooting by Symptom': guides/troubleshooting-by-symptom.md
