@@ -7,8 +7,8 @@ repository harness and an agent running on any of the supported runtimes.
 It adds one measure the coding-agent side has no equivalent for:
 `interop.routing_invocation`, the rate at which a calling agent selects this
 agent from a catalogue. For an agent reached over A2A, discoverability is a
-quality dimension, and a skill nobody routes to has a completion rate nobody
-observes.
+quality dimension: where selection fails, the agent receives no work, and its
+completion rate describes traffic that never arrived.
 
 Record format: https://github.com/SuperagenticAI/supergauge
 """
@@ -43,7 +43,9 @@ def sha256_file(path: str | Path) -> str:
     return f"sha256:{digest.hexdigest()}"
 
 
-def scenario_manifest_digest(scenarios: list[dict[str, Any]], split: str = "held-out") -> str:
+def scenario_manifest_digest(
+    scenarios: list[dict[str, Any]], split: str = "held-out"
+) -> str:
     """Fingerprint a BDD scenario split by name and expected output.
 
     SuperSpec scenarios are the task set for a compiled agent. Wording of the
@@ -52,7 +54,9 @@ def scenario_manifest_digest(scenarios: list[dict[str, Any]], split: str = "held
     items = sorted(
         (
             str(s.get("name") or s.get("id") or ""),
-            json.dumps(s.get("expected_output") or s.get("expect") or {}, sort_keys=True),
+            json.dumps(
+                s.get("expected_output") or s.get("expect") or {}, sort_keys=True
+            ),
         )
         for s in scenarios
         if str(s.get("split") or "held-in") == split
@@ -119,10 +123,12 @@ def build_record(
 
     Measures appear only where the run produced them. An evaluation without
     repeated attempts carries no reliability measure and reaches L2 at best,
-    which is the accurate outcome rather than a flattering one.
+    which is the accurate outcome.
     """
     held_in = sum(1 for s in scenarios if str(s.get("split") or "held-in") == "held-in")
-    held_out = sum(1 for s in scenarios if str(s.get("split") or "held-in") == "held-out")
+    held_out = sum(
+        1 for s in scenarios if str(s.get("split") or "held-in") == "held-out"
+    )
 
     measures: list[dict[str, Any]] = []
     gates: list[dict[str, Any]] = []
@@ -139,13 +145,17 @@ def build_record(
         )
 
     # Discoverability. Only meaningful for an agent published over A2A, so it is
-    # omitted rather than defaulted when no routing evaluation ran.
+    # omitted, never defaulted, when no routing evaluation ran.
     if routing_metrics is not None:
         rate = getattr(routing_metrics, "invocation_rate", None)
         if rate is None and isinstance(routing_metrics, dict):
-            rate = routing_metrics.get("invocationRate") or routing_metrics.get("invocation_rate")
+            rate = routing_metrics.get("invocationRate") or routing_metrics.get(
+                "invocation_rate"
+            )
         if rate is not None:
-            measures.append({"id": "interop.routing_invocation", "value": round(float(rate), 3)})
+            measures.append(
+                {"id": "interop.routing_invocation", "value": round(float(rate), 3)}
+            )
 
     usage = _aggregate_usage(results)
     successes = sum(1 for r in results if r.get("status") == "passed")
@@ -187,7 +197,10 @@ def build_record(
     }
     model = (playbook.get("spec") or {}).get("language_model") or {}
     if model.get("provider") and model.get("model"):
-        subject["model"] = {"provider": str(model["provider"]), "id": str(model["model"])}
+        subject["model"] = {
+            "provider": str(model["provider"]),
+            "id": str(model["model"]),
+        }
 
     return {
         "supergauge": SUPERGAUGE_VERSION,

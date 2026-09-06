@@ -2083,7 +2083,9 @@ def _emit_gauge_record(
         destination.write_text(json.dumps(record, indent=2), encoding="utf-8")
     else:
         destination.write_text(
-            yaml.safe_dump(record, sort_keys=False, default_flow_style=False, width=100),
+            yaml.safe_dump(
+                record, sort_keys=False, default_flow_style=False, width=100
+            ),
             encoding="utf-8",
         )
     console.print(f"📋 [green]Agent Quality Record:[/] {destination}")
