@@ -143,6 +143,21 @@ def _int_or_none(value: Any) -> int | None:
         return int(value)
     except (TypeError, ValueError):
         return None
+def _bool_or_none(value: Any) -> bool | None:
+    if value is None or value == "":
+        return None
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        lowered = value.strip().lower()
+        if lowered in {"true", "1", "yes"}:
+            return True
+        if lowered in {"false", "0", "no"}:
+            return False
+        return None
+    return bool(value)
+
+
 
 
 def _declared_state(result: Any) -> str:
@@ -223,6 +238,7 @@ class _A2ATaskStore:
         context_id: str | None = None,
         status: str | None = None,
         page_size: int | None = None,
+        include_artifacts: bool | None = None,
     ) -> Dict[str, Any]:
         async with self.lock:
             tasks = [dict(task) for task in self.tasks.values()]
@@ -234,6 +250,12 @@ class _A2ATaskStore:
                 for task in tasks
                 if (task.get("status") or {}).get("state") == status
             ]
+        # Spec / TCK MUST: when includeArtifacts is false or unset, omit the
+        # artifacts field entirely (not [] or null). See a2a-tck ListTasks
+        # requirement and a2aproject/a2a-python#1212.
+        if not include_artifacts:
+            for task in tasks:
+                task.pop("artifacts", None)
         total_size = len(tasks)
         size = page_size or total_size
         return {
@@ -1089,8 +1111,14 @@ may take a moment while the service starts.</p>
         contextId: str | None = None,
         status: str | None = None,
         pageSize: int | None = None,
+        includeArtifacts: bool | None = None,
     ) -> Dict[str, Any]:
-        return await tasks.list(context_id=contextId, status=status, page_size=pageSize)
+        return await tasks.list(
+            context_id=contextId,
+            status=status,
+            page_size=pageSize,
+            include_artifacts=includeArtifacts,
+        )
 
     @app.get("/tasks/{task_id}")
     async def get_task(
@@ -1232,6 +1260,7 @@ may take a moment while the service starts.</p>
                 context_id=params.get("contextId"),
                 status=params.get("status"),
                 page_size=params.get("pageSize"),
+                include_artifacts=_bool_or_none(params.get("includeArtifacts")),
             )
             if legacy:
                 result = {

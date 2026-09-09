@@ -520,3 +520,42 @@ class TestSpecMandatedErrorCodes:
         """CORE-CAP-003 on the REST binding."""
         response = client.get("/extendedAgentCard")
         assert response.status_code == a2a_errors.UNSUPPORTED_OPERATION.http_status
+
+
+class TestListTasksArtifacts:
+    """TCK MUST: ListTasks omits artifacts when includeArtifacts is false/unset."""
+
+    def test_list_tasks_omits_artifacts_by_default_jsonrpc(self, client):
+        _new_task(client)
+        body = client.post(
+            RPC,
+            json={"jsonrpc": "2.0", "id": 1, "method": "ListTasks", "params": {}},
+        ).json()
+        tasks = body["result"]["tasks"]
+        assert tasks
+        for task in tasks:
+            assert "artifacts" not in task
+
+    def test_list_tasks_omits_artifacts_by_default_http(self, client):
+        _new_task(client)
+        body = client.get("/tasks").json()
+        tasks = body["tasks"]
+        assert tasks
+        for task in tasks:
+            assert "artifacts" not in task
+
+    def test_list_tasks_includes_artifacts_when_requested_jsonrpc(self, client):
+        _new_task(client)
+        body = client.post(
+            RPC,
+            json={
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "ListTasks",
+                "params": {"includeArtifacts": True},
+            },
+        ).json()
+        tasks = body["result"]["tasks"]
+        assert tasks
+        # When requested, artifacts may be present (including empty arrays).
+        assert any("artifacts" in task for task in tasks)
