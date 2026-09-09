@@ -143,6 +143,8 @@ def _int_or_none(value: Any) -> int | None:
         return int(value)
     except (TypeError, ValueError):
         return None
+
+
 def _bool_or_none(value: Any) -> bool | None:
     if value is None or value == "":
         return None
@@ -156,8 +158,6 @@ def _bool_or_none(value: Any) -> bool | None:
             return False
         return None
     return bool(value)
-
-
 
 
 def _declared_state(result: Any) -> str:
