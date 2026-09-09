@@ -8,7 +8,7 @@ allow-direct-references = true
 [project]
 name = "superoptix"
 version = "0.3.7"
-description = "Agent-to-agent communication, without framework lock-in. Make the agents you already run callable by any other agent, and get them discovered. Adapts existing DSPy, CrewAI, OpenAI Agents SDK, Pydantic AI, Google ADK, Claude Agent SDK, DeepAgents and Microsoft agents to A2A 1.0 without rewriting them."
+description = "Optimization and Quality layer for AI agents. Optimize agents. Connect over A2A. Ship with quality. Adapts existing DSPy, CrewAI, OpenAI Agents SDK, Pydantic AI, Google ADK, Claude Agent SDK, DeepAgents and Microsoft agents for A2A connect and interop without rewriting them."
 authors = [
     {name = "Superagentic AI", email = "hello@super-agentic.ai"},
     {name = "Shashi Jagtap", email = "shashikant.jagtap@icloud.com"},

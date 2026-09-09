@@ -3,9 +3,8 @@
     <img src="https://raw.githubusercontent.com/SuperagenticAI/superoptix/main/docs/logo.png" alt="SuperOptiX Logo" width="260" />
   </a>
   <h1>SuperOptiX AI</h1>
-  <h3><strong>Agent-to-Agent (A2A) Interoperability and Optimization Layer</strong></h3>
-  <p><strong>Agent-to-agent communication, without framework lock-in.</strong></p>
-  <p>Make the agents you already run callable by any other agent, and get them discovered.</p>
+  <h3><strong>Optimization and Quality layer for AI agents</strong></h3>
+  <p><strong>Optimize agents. Connect over A2A. Ship with quality.</strong></p>
 
   <div style="margin: 20px 0;">
     <a href="https://badge.fury.io/py/superoptix">
@@ -26,9 +25,9 @@
 
 ## What it does
 
-Agents built on different frameworks cannot call each other. A2A is the protocol
-that lets them, and SuperOptiX gives an agent an A2A interface without asking you
-to rewrite it.
+SuperOptiX is an optimization and quality layer for AI agents. Improve how agents
+behave and get discovered, connect them over A2A for interop across frameworks,
+and ship with measurable quality.
 
 Point it at an agent you already run. SuperOptiX reads its structure, works out
 the skills a calling agent would route on, and writes an Agent Card and a

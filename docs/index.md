@@ -1,11 +1,9 @@
 <div align="center">
   <img src="logo.png" alt="SuperOptiX Logo" width="300" style="margin-bottom: -10px;"/>
   <h1 style="margin-top: 10px; margin-bottom: 10px;">SUPEROPTIX AI</h1>
-  <h3 style="margin-top: 5px; margin-bottom: 15px;">Agent-to-Agent (A2A) Interoperability and Optimization Layer</h3>
-  <p style="margin-top: 10px; margin-bottom: 6px; font-size: 1.15em;"><strong>Agent-to-agent communication, without framework lock-in.</strong></p>
-  <p style="margin-top: 0; margin-bottom: 10px;">Make the agents you already run callable by any other agent, and get them discovered.</p>
-  <p style="margin-top: 5px; margin-bottom: 10px;"><em>Powered by A2A. Refined by Superagentic AI.</em></p>
-  <p style="margin-top: 10px; margin-bottom: 20px;">Adapt an existing agent to A2A 1.0 without rewriting it, then measure and improve how other agents find it.</p>
+  <h3 style="margin-top: 5px; margin-bottom: 15px;">Optimization and Quality layer for AI agents</h3>
+  <p style="margin-top: 10px; margin-bottom: 6px; font-size: 1.15em;"><strong>Optimize agents. Connect over A2A. Ship with quality.</strong></p>
+  <p style="margin-top: 10px; margin-bottom: 20px;">Make agents better, callable over A2A, and ready to ship.</p>
 </div>
 
 <div align="center" style="margin: 30px 0;">
