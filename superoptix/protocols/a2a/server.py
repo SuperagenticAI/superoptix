@@ -252,8 +252,12 @@ class _A2ATaskStore:
             ]
         # Spec / TCK MUST: when includeArtifacts is false or unset, omit the
         # artifacts field entirely (not [] or null). See a2a-tck ListTasks
-        # requirement and a2aproject/a2a-python#1212.
-        if not include_artifacts:
+        # requirement and a2aproject/a2a-python#1212. When requested, ensure
+        # the key is present even if the task has no artifacts yet.
+        if include_artifacts:
+            for task in tasks:
+                task.setdefault("artifacts", [])
+        else:
             for task in tasks:
                 task.pop("artifacts", None)
         total_size = len(tasks)
@@ -387,7 +391,8 @@ class _A2ATaskStore:
                 task_id=task_id,
                 context_id=context_id,
             ),
-            "artifacts": [],
+            # Do not seed artifacts: []. ListTasks must omit the field unless
+            # includeArtifacts is true; an empty list still fails that MUST.
             "history": [message],
             "metadata": {},
         }

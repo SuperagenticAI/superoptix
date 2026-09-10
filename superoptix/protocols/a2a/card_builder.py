@@ -125,4 +125,7 @@ def build_a2a_agent_card_payload(
         card["iconUrl"] = icon_url
     if documentation_url:
         card["documentationUrl"] = documentation_url
+    build = metadata.get("superoptixBuild")
+    if build:
+        card["superoptixBuild"] = str(build)
     return card
