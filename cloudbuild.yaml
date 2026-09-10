@@ -9,6 +9,11 @@
 #
 # This file is preferred over Dockerfile when Type is Autodetected. Also
 # uncheck "Send build logs to GitHub" on the trigger (that path uses GCS).
+#
+# Image tags use COMMIT_SHA. Each new tag commit gets a new SHA, so Cloud Run
+# always receives a new image reference. --no-cache avoids stale COPY layers.
+# --revision-suffix + SUPEROPTIX_GIT_SHA force a new revision even if an image
+# tag were reused.
 
 substitutions:
   _SERVICE_NAME: superoptix-a2a
@@ -20,8 +25,11 @@ steps:
   - name: gcr.io/cloud-builders/docker
     args:
       - build
+      - --no-cache
       - -t
       - ${_AR_HOSTNAME}/${PROJECT_ID}/${_AR_REPOSITORY}/${_SERVICE_NAME}:${COMMIT_SHA}
+      - -t
+      - ${_AR_HOSTNAME}/${PROJECT_ID}/${_AR_REPOSITORY}/${_SERVICE_NAME}:${SHORT_SHA}
       - -f
       - Dockerfile
       - .
@@ -29,6 +37,10 @@ steps:
     args:
       - push
       - ${_AR_HOSTNAME}/${PROJECT_ID}/${_AR_REPOSITORY}/${_SERVICE_NAME}:${COMMIT_SHA}
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - ${_AR_HOSTNAME}/${PROJECT_ID}/${_AR_REPOSITORY}/${_SERVICE_NAME}:${SHORT_SHA}
   - name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
     entrypoint: gcloud
     args:
@@ -39,10 +51,13 @@ steps:
       - --platform=managed
       - --image=${_AR_HOSTNAME}/${PROJECT_ID}/${_AR_REPOSITORY}/${_SERVICE_NAME}:${COMMIT_SHA}
       - --region=${_DEPLOY_REGION}
+      - --revision-suffix=${SHORT_SHA}
+      - --update-env-vars=SUPEROPTIX_GIT_SHA=${COMMIT_SHA},SUPEROPTIX_A2A_PUBLIC_URL=https://a2a.superoptix.ai,SUPEROPTIX_TELEMETRY=false
       - --quiet
 
 images:
   - ${_AR_HOSTNAME}/${PROJECT_ID}/${_AR_REPOSITORY}/${_SERVICE_NAME}:${COMMIT_SHA}
+  - ${_AR_HOSTNAME}/${PROJECT_ID}/${_AR_REPOSITORY}/${_SERVICE_NAME}:${SHORT_SHA}
 
 options:
   logging: CLOUD_LOGGING_ONLY

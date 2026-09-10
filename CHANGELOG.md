@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.9] - 2026-09-11
+
+### 🔧 Fixed
+
+- Cloud Run A2A deploys from a tag now force a fresh image build (`docker build
+  --no-cache`) and a new Cloud Run revision (`--revision-suffix` plus
+  `SUPEROPTIX_GIT_SHA`), so retrying or retagging cannot leave the service on a
+  stale image digest. Makes the ListTasks omit-`artifacts` fix from 0.3.8
+  actually land on https://a2a.superoptix.ai.
+
 ## [0.3.8] - 2026-09-10
 
 ### 🔧 Fixed
