@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.8] - 2026-09-10
+
+### 🔧 Fixed
+
+- A2A `ListTasks` now omits the `artifacts` field when `includeArtifacts` is
+  false or unset (TCK MUST), instead of returning an empty list. Aligns with
+  a2aproject/a2a-python#1212.
+
+### 📝 Changed
+
+- Positioning and docs messaging updated to the Optimization and Quality layer.
+
 ## [0.3.7] - 2026-09-06
 
 `super agent evaluate` can now write an Agent Quality Record. The evaluation
