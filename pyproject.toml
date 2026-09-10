@@ -7,7 +7,7 @@ allow-direct-references = true
 
 [project]
 name = "superoptix"
-version = "0.3.9"
+version = "0.3.10"
 description = "Optimization and Quality layer for AI agents. Optimize agents. Connect over A2A. Ship with quality. Adapts existing DSPy, CrewAI, OpenAI Agents SDK, Pydantic AI, Google ADK, Claude Agent SDK, DeepAgents and Microsoft agents for A2A connect and interop without rewriting them."
 authors = [
     {name = "Superagentic AI", email = "hello@super-agentic.ai"},

@@ -7,6 +7,7 @@ organisation's work while remaining independent implementations.
 
 from __future__ import annotations
 
+import os
 from typing import Any, Dict
 
 from superoptix.protocols.a2a.card_builder import build_a2a_agent_card_payload
@@ -31,18 +32,23 @@ def build_public_agent_card(
     unauthenticated. Declaring bearer without verifying it made 1.0 clients
     skip the agent.
     """
+    git_sha = (os.environ.get("SUPEROPTIX_GIT_SHA") or "").strip()
+    metadata: Dict[str, Any] = {
+        "name": "SuperOptiX",
+        "description": (
+            "Optimization and Quality layer for AI agents. Optimize agents. "
+            "Connect over A2A. Ship with quality. Reports A2A readiness for DSPy, "
+            "OpenAI Agents SDK, Claude Agent SDK, Pydantic AI, Google ADK, CrewAI, "
+            "DeepAgents and Microsoft Agent Framework, and reviews Agent Cards for "
+            "conformance and discoverability"
+        ),
+        "version": "1.0",
+    }
+    if git_sha:
+        metadata["superoptixBuild"] = git_sha[:12]
+
     return build_a2a_agent_card_payload(
-        metadata={
-            "name": "SuperOptiX",
-            "description": (
-                "The A2A interoperability layer for agent frameworks. Reports "
-                "A2A readiness for DSPy, OpenAI Agents SDK, Claude Agent SDK, "
-                "Pydantic AI, Google ADK, CrewAI, DeepAgents and Microsoft Agent "
-                "Framework, and reviews Agent Cards for conformance and "
-                "discoverability"
-            ),
-            "version": "1.0",
-        },
+        metadata=metadata,
         spec={},
         agent_url=service_url,
         rpc_url=rpc_url,

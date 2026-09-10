@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.10] - 2026-09-11
+
+### 🔧 Fixed
+
+- A2A tasks no longer seed `artifacts: []` on create. `ListTasks` omits
+  `artifacts` unless `includeArtifacts` is true (and then ensures the key).
+- Public Agent Card description uses Optimization and Quality messaging, and
+  exposes `superoptixBuild` from `SUPEROPTIX_GIT_SHA` so Cloud Run deploys are
+  verifiable.
+
 ## [0.3.9] - 2026-09-11
 
 ### 🔧 Fixed
