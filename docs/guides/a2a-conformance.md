@@ -129,6 +129,30 @@ Reports land in `reports/`: `compatibility.json` for machine reading,
 
 To test an agent you have adapted, point the same command at its server instead.
 
+## Official A2A CLI
+
+The A2A project publishes an official command-line client,
+[`a2a`](https://github.com/a2aproject/a2a-cli) (`a2aproject/a2a-cli`). Prefer it
+when you want a standardized third-party or CI client against the public
+SuperOptiX agent or any adapted agent. Product surfaces remain
+`super a2a adapt`, serving the FastAPI bridge, and the TCK harness below. SuperOptiX
+does not vendor the Go CLI.
+
+Install from the [a2a-cli releases](https://github.com/a2aproject/a2a-cli/releases).
+Then:
+
+```bash
+# Discover the public Agent Card
+a2a card get -a https://a2a.superoptix.ai
+
+# Call a catalogue skill (framework readiness)
+a2a send -a https://a2a.superoptix.ai "Does CrewAI support A2A?"
+```
+
+Add `-o json` for scripts. Machine-readable card fetch and a skill send against
+`https://a2a.superoptix.ai` were verified with `a2a` v0.2.0. Upstream CLI
+command details may change while the CLI specification is in Review.
+
 ## The conformance harness
 
 The TCK drives an agent into specific protocol states using reserved
