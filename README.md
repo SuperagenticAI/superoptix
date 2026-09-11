@@ -153,6 +153,30 @@ A live endpoint runs at
 its Agent Card published at
 [superoptix.ai/.well-known/agent-card.json](https://superoptix.ai/.well-known/agent-card.json).
 
+### Official A2A CLI
+
+The A2A project publishes an official command-line client,
+[`a2a`](https://github.com/a2aproject/a2a-cli) (`a2aproject/a2a-cli`). Use it as a
+standardized third-party or CI client against any A2A agent, including the public
+SuperOptiX endpoint. SuperOptiX product surfaces stay `super a2a adapt`,
+`super a2a serve`, and the FastAPI bridge. The Go CLI is not vendored into
+SuperOptiX.
+
+Install from the [a2a-cli releases](https://github.com/a2aproject/a2a-cli/releases)
+(Homebrew, WinGet, or a prebuilt binary). Then:
+
+```bash
+# Discover the public Agent Card
+a2a card get -a https://a2a.superoptix.ai
+
+# Call a catalogue skill
+a2a send -a https://a2a.superoptix.ai "Does CrewAI support A2A?"
+```
+
+Add `-o json` for protocol-native JSON suitable for scripts. Verified with
+`a2a` v0.2.0 against `https://a2a.superoptix.ai`. The CLI specification is still
+in Review; treat command details as evolving with upstream releases.
+
 ## Protocol surface
 
 All eleven A2A 1.0 methods answer. Push notification configuration and the
