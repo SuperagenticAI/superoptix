@@ -160,6 +160,45 @@ def _bool_or_none(value: Any) -> bool | None:
     return bool(value)
 
 
+
+# Opaque per-caller key for anonymous multi-tenant deployments (public catalogue).
+# Cookie or header identifies the caller without inventing full authentication.
+CALLER_COOKIE = "sox_a2a_caller"
+CALLER_HEADER = "x-superoptix-caller-key"
+
+
+def _resolve_caller_key(request: Any) -> tuple[str, bool]:
+    """Return (caller_key, newly_minted) for anonymous caller isolation."""
+    try:
+        header = (request.headers.get(CALLER_HEADER) or "").strip()
+    except AttributeError:
+        header = ""
+    if header and 8 <= len(header) <= 128 and all(
+        c.isalnum() or c in "-_" for c in header
+    ):
+        return header, False
+    try:
+        cookie = (request.cookies.get(CALLER_COOKIE) or "").strip()
+    except AttributeError:
+        cookie = ""
+    if cookie and 8 <= len(cookie) <= 128 and all(
+        c.isalnum() or c in "-_" for c in cookie
+    ):
+        return cookie, False
+    return uuid.uuid4().hex, True
+
+
+def _caller_key_from_request(request: Any | None, *, isolate: bool) -> str | None:
+    if not isolate:
+        return None
+    if request is not None:
+        existing = getattr(getattr(request, "state", None), "a2a_caller_key", None)
+        if existing:
+            return str(existing)
+        return _resolve_caller_key(request)[0]
+    return None
+
+
 def _declared_state(result: Any) -> str:
     """Task state requested by the runtime, defaulting to completion."""
     if isinstance(result, dict):
@@ -183,8 +222,9 @@ class _A2ATaskStore:
 
     MAX_TASKS = 512
 
-    def __init__(self, runtime: AgentRuntime):
+    def __init__(self, runtime: AgentRuntime, *, isolate_callers: bool = False):
         self.runtime = runtime
+        self.isolate_callers = isolate_callers
         self.tasks: Dict[str, Dict[str, Any]] = {}
         self.running: Dict[str, asyncio.Task] = {}
         self.subscribers: dict[str, set[asyncio.Queue]] = defaultdict(set)
@@ -194,6 +234,8 @@ class _A2ATaskStore:
         # Populated when a runtime answers with a bare Message instead of a Task.
         self.message_replies: Dict[str, Dict[str, Any]] = {}
         self.last_modified: Dict[str, str] = {}
+        # task_id -> opaque caller key (public multi-tenant isolation).
+        self.owners: Dict[str, str] = {}
         self.lock = asyncio.Lock()
 
     async def _publish(self, task_id: str, event: Dict[str, Any]) -> None:
@@ -210,6 +252,7 @@ class _A2ATaskStore:
             self.message_replies.pop(oldest, None)
             self.running.pop(oldest, None)
             self.subscribers.pop(oldest, None)
+            self.owners.pop(oldest, None)
 
     async def _set_task(self, task_id: str, task: Dict[str, Any]) -> Dict[str, Any]:
         # No bookkeeping fields on the Task itself: the A2A 1.0 Task schema
@@ -223,11 +266,24 @@ class _A2ATaskStore:
         return task
 
     async def get(
-        self, task_id: str, *, history_length: int | None = None
+        self,
+        task_id: str,
+        *,
+        history_length: int | None = None,
+        caller_key: str | None = None,
     ) -> Dict[str, Any] | None:
         async with self.lock:
             task = self.tasks.get(task_id)
             if not task:
+                return None
+            # When caller_key is omitted, skip the ACL check so in-process
+            # execution can re-read the task it already owns. HTTP/JSON-RPC
+            # handlers always pass the resolved caller key when isolating.
+            if (
+                self.isolate_callers
+                and caller_key is not None
+                and self.owners.get(task_id) != caller_key
+            ):
                 return None
             task = dict(task)
         return _apply_history_length(task, history_length)
@@ -239,9 +295,20 @@ class _A2ATaskStore:
         status: str | None = None,
         page_size: int | None = None,
         include_artifacts: bool | None = None,
+        caller_key: str | None = None,
     ) -> Dict[str, Any]:
         async with self.lock:
-            tasks = [dict(task) for task in self.tasks.values()]
+            if self.isolate_callers:
+                if not caller_key:
+                    tasks = []
+                else:
+                    tasks = [
+                        dict(task)
+                        for task_id, task in self.tasks.items()
+                        if self.owners.get(task_id) == caller_key
+                    ]
+            else:
+                tasks = [dict(task) for task in self.tasks.values()]
         if context_id:
             tasks = [task for task in tasks if task.get("contextId") == context_id]
         if status:
@@ -363,6 +430,8 @@ class _A2ATaskStore:
     async def _create_task(
         self,
         message: Dict[str, Any],
+        *,
+        caller_key: str | None = None,
     ) -> Dict[str, Any]:
         """Start a task, or continue the one the message references.
 
@@ -372,7 +441,7 @@ class _A2ATaskStore:
         """
         existing_id = message.get("taskId")
         if existing_id:
-            existing = await self.get(str(existing_id))
+            existing = await self.get(str(existing_id), caller_key=caller_key)
             if existing:
                 history = list(existing.get("history") or [])
                 history.append(message)
@@ -381,7 +450,12 @@ class _A2ATaskStore:
                 return existing
 
         task_id = str(message.get("taskId") or uuid.uuid4())
-        context_id = str(message.get("contextId") or uuid.uuid4())
+        if self.isolate_callers:
+            # Refuse to honour client-supplied contextId on multi-tenant stores
+            # (A2ABreak: Cross-Client Context Injection). Mint server-side.
+            context_id = str(uuid.uuid4())
+        else:
+            context_id = str(message.get("contextId") or uuid.uuid4())
         created_at = _iso8601_now()
         task = {
             "id": task_id,
@@ -397,6 +471,8 @@ class _A2ATaskStore:
             "metadata": {},
         }
         self.created_at[task_id] = created_at
+        if self.isolate_callers and caller_key:
+            self.owners[task_id] = caller_key
         await self._set_task(task_id, task)
         return task
 
@@ -470,7 +546,9 @@ class _A2ATaskStore:
         finally:
             self.running.pop(task_id, None)
 
-    async def _validate_message_references(self, message: Dict[str, Any]) -> None:
+    async def _validate_message_references(
+        self, message: Dict[str, Any], *, caller_key: str | None = None
+    ) -> None:
         """Reject a message whose taskId/contextId cannot be honoured.
 
         The spec requires TaskNotFoundError for an unknown task, and rejection
@@ -487,7 +565,7 @@ class _A2ATaskStore:
         if not task_id:
             return
 
-        task = await self.get(str(task_id))
+        task = await self.get(str(task_id), caller_key=caller_key)
         if not task:
             raise A2AProtocolError(
                 a2a_errors.TASK_NOT_FOUND, f"Task {task_id} not found"
@@ -519,9 +597,12 @@ class _A2ATaskStore:
         Returns a Task, or a bare Message when the runtime asks for one via
         ``a2a_message_only`` — the spec allows either as a SendMessage result.
         """
+        caller_key = _caller_key_from_request(
+            request, isolate=self.isolate_callers
+        )
         user_message = _user_message(message)
-        await self._validate_message_references(user_message)
-        task = await self._create_task(user_message)
+        await self._validate_message_references(user_message, caller_key=caller_key)
+        task = await self._create_task(user_message, caller_key=caller_key)
         user_input = extract_text_from_message(user_message)
         config = configuration or {}
         history_length = _int_or_none(config.get("historyLength"))
@@ -541,7 +622,12 @@ class _A2ATaskStore:
                 message_text="Processing request",
                 publish=True,
             )
-            return await self.get(task["id"], history_length=history_length) or task
+            return (
+                await self.get(
+                    task["id"], history_length=history_length, caller_key=caller_key
+                )
+                or task
+            )
 
         finished = await self._execute_task(
             task,
@@ -565,11 +651,14 @@ class _A2ATaskStore:
         Validation runs before the iterator is returned so HTTP and JSON-RPC
         handlers can render protocol errors instead of a 500 from the stream.
         """
+        caller_key = _caller_key_from_request(
+            request, isolate=self.isolate_callers
+        )
         user_message = _user_message(message)
-        await self._validate_message_references(user_message)
+        await self._validate_message_references(user_message, caller_key=caller_key)
 
         async def events() -> AsyncIterator[Dict[str, Any]]:
-            task = await self._create_task(user_message)
+            task = await self._create_task(user_message, caller_key=caller_key)
             task_id = str(task["id"])
             context_id = str(task["contextId"])
             user_input = extract_text_from_message(user_message)
@@ -585,7 +674,9 @@ class _A2ATaskStore:
                 message_text="Processing request",
                 publish=False,
             )
-            yield {"task": await self.get(task_id) or task}
+            yield {
+                "task": await self.get(task_id, caller_key=caller_key) or task
+            }
 
             result: Any = None
             try:
@@ -657,7 +748,10 @@ class _A2ATaskStore:
     async def cancel(
         self, task_id: str, *, request: Any | None = None
     ) -> Dict[str, Any]:
-        task = await self.get(task_id)
+        caller_key = _caller_key_from_request(
+            request, isolate=self.isolate_callers
+        )
+        task = await self.get(task_id, caller_key=caller_key)
         if not task:
             raise KeyError(task_id)
         state = str((task.get("status") or {}).get("state"))
@@ -688,8 +782,10 @@ class _A2ATaskStore:
             publish=True,
         )
 
-    async def subscribe(self, task_id: str) -> AsyncIterator[Dict[str, Any]]:
-        current = await self.get(task_id)
+    async def subscribe(
+        self, task_id: str, *, caller_key: str | None = None
+    ) -> AsyncIterator[Dict[str, Any]]:
+        current = await self.get(task_id, caller_key=caller_key)
         if not current:
             raise KeyError(task_id)
         state = str((current.get("status") or {}).get("state"))
@@ -886,6 +982,7 @@ def create_a2a_fastapi_app(
     rpc_url: str = "/a2a/jsonrpc",
     runtime_adapter: str = "compiled_pipeline",
     agent_card: Dict[str, Any] | None = None,
+    isolate_callers: bool = False,
 ) -> Any:
     """Create an A2A v1 FastAPI app exposing a compiled SuperOptiX pipeline.
 
@@ -893,6 +990,11 @@ def create_a2a_fastapi_app(
         agent_card: serve this card verbatim instead of deriving one from the
             runtime's metadata. Used by the published public endpoint, which
             advertises hand-written skills rather than SuperSpec tasks.
+        isolate_callers: when True (public catalogue), bind tasks to an opaque
+            per-caller key, ignore client-supplied contextId on new tasks, and
+            scope ListTasks/GetTask/Cancel/Subscribe to that caller. Avoids
+            cross-client context injection and global task list leakage without
+            inventing full authentication.
     """
     if not FASTAPI_AVAILABLE:
         raise ImportError(
@@ -908,7 +1010,7 @@ def create_a2a_fastapi_app(
             agent_url=agent_url,
             rpc_url=rpc_url,
         )
-    tasks = _A2ATaskStore(runtime)
+    tasks = _A2ATaskStore(runtime, isolate_callers=isolate_callers)
     app = FastAPI(title="SuperOptiX A2A", version="1.0")
     app.add_middleware(
         CORSMiddleware,
@@ -917,6 +1019,25 @@ def create_a2a_fastapi_app(
         allow_headers=["*"],
         expose_headers=["ETag", "Last-Modified", "Vary", "Cache-Control"],
     )
+
+    @app.middleware("http")
+    async def _a2a_caller_isolation_middleware(request: Any, call_next: Any) -> Any:
+        """Mint or restore an opaque caller key for anonymous multi-tenant use."""
+        if isolate_callers:
+            key, is_new = _resolve_caller_key(request)
+            request.state.a2a_caller_key = key
+            request.state.a2a_caller_key_new = is_new
+        response = await call_next(request)
+        if isolate_callers and getattr(request.state, "a2a_caller_key_new", False):
+            response.set_cookie(
+                key=CALLER_COOKIE,
+                value=request.state.a2a_caller_key,
+                httponly=True,
+                samesite="lax",
+                max_age=60 * 60 * 24 * 30,
+                path="/",
+            )
+        return response
 
     @app.middleware("http")
     async def _a2a_protocol_middleware(request: Any, call_next: Any) -> Any:
@@ -1113,16 +1234,19 @@ may take a moment while the service starts.</p>
 
     @app.get("/tasks")
     async def list_tasks(
+        request: Request,
         contextId: str | None = None,
         status: str | None = None,
         pageSize: int | None = None,
         includeArtifacts: bool | None = None,
     ) -> Dict[str, Any]:
+        caller_key = _caller_key_from_request(request, isolate=isolate_callers)
         return await tasks.list(
             context_id=contextId,
             status=status,
             page_size=pageSize,
             include_artifacts=includeArtifacts,
+            caller_key=caller_key,
         )
 
     @app.get("/tasks/{task_id}")
@@ -1131,7 +1255,10 @@ may take a moment while the service starts.</p>
         task_id: str,
         historyLength: int | None = None,  # noqa: N803
     ) -> Any:
-        task = await tasks.get(task_id, history_length=historyLength)
+        caller_key = _caller_key_from_request(request, isolate=isolate_callers)
+        task = await tasks.get(
+            task_id, history_length=historyLength, caller_key=caller_key
+        )
         if not task:
             return _http_error(a2a_errors.TASK_NOT_FOUND, "Task not found")
         return _maybe_legacy(request, task)
@@ -1147,7 +1274,8 @@ may take a moment while the service starts.</p>
 
     @app.post("/tasks/{task_id}:subscribe")
     async def subscribe_task(task_id: str, request: Request) -> Any:
-        current = await tasks.get(task_id)
+        caller_key = _caller_key_from_request(request, isolate=isolate_callers)
+        current = await tasks.get(task_id, caller_key=caller_key)
         if not current:
             return _http_error(a2a_errors.TASK_NOT_FOUND, "Task not found")
         state = str((current.get("status") or {}).get("state"))
@@ -1158,7 +1286,10 @@ may take a moment while the service starts.</p>
                 a2a_errors.UNSUPPORTED_OPERATION,
                 f"Task {task_id} is already terminal and cannot be subscribed to",
             )
-        return _sse_stream(tasks.subscribe(task_id), legacy=_wants_legacy(request))
+        return _sse_stream(
+            tasks.subscribe(task_id, caller_key=caller_key),
+            legacy=_wants_legacy(request),
+        )
 
     # Both spellings are served. A client given the interface URL as an httpx
     # base_url and posting to "/" resolves to "<rpc_url>/", and Starlette's
@@ -1250,8 +1381,11 @@ may take a moment while the service starts.</p>
 
         if method == "GetTask":
             task_id = _task_id_from_params(params)
+            caller_key = _caller_key_from_request(request, isolate=isolate_callers)
             task = await tasks.get(
-                str(task_id), history_length=_int_or_none(params.get("historyLength"))
+                str(task_id),
+                history_length=_int_or_none(params.get("historyLength")),
+                caller_key=caller_key,
             )
             if not task:
                 return _jsonrpc_error(
@@ -1261,11 +1395,13 @@ may take a moment while the service starts.</p>
             return {"jsonrpc": "2.0", "id": request_id, "result": result}
 
         if method == "ListTasks":
+            caller_key = _caller_key_from_request(request, isolate=isolate_callers)
             result = await tasks.list(
                 context_id=params.get("contextId"),
                 status=params.get("status"),
                 page_size=params.get("pageSize"),
                 include_artifacts=_bool_or_none(params.get("includeArtifacts")),
+                caller_key=caller_key,
             )
             if legacy:
                 result = {
@@ -1292,7 +1428,8 @@ may take a moment while the service starts.</p>
 
         if method == "SubscribeToTask":
             task_id = _task_id_from_params(params)
-            current = await tasks.get(task_id)
+            caller_key = _caller_key_from_request(request, isolate=isolate_callers)
+            current = await tasks.get(task_id, caller_key=caller_key)
             if not current:
                 return _jsonrpc_error(
                     request_id, a2a_errors.TASK_NOT_FOUND, "Task not found"
@@ -1307,7 +1444,9 @@ may take a moment while the service starts.</p>
                     f"Task {task_id} is already terminal and cannot be subscribed to",
                 )
             return _sse_stream(
-                tasks.subscribe(task_id), request_id=request_id, legacy=legacy
+                tasks.subscribe(task_id, caller_key=caller_key),
+                request_id=request_id,
+                legacy=legacy,
             )
 
         if method in (

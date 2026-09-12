@@ -43,6 +43,10 @@ def create_public_app(service_url: str | None = None) -> Any:
         rpc_url=RPC_URL,
         runtime_adapter="superoptix_public",
         agent_card=build_public_agent_card(service_url=url, rpc_url=RPC_URL),
+        # Public catalogue is anonymous and multi-tenant: isolate callers so
+        # ListTasks/GetTask cannot leak other clients' histories, and ignore
+        # client-supplied contextId on new tasks (A2ABreak protocol risk).
+        isolate_callers=True,
     )
 
 
