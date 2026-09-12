@@ -302,13 +302,24 @@ def agent_card_review(query: str) -> Dict[str, Any]:
             }
         )
 
-    if not card.get("signature") and not card.get("signatures"):
+    has_signature = bool(card.get("signature") or card.get("signatures"))
+    if not has_signature:
         findings.append(
             {
                 "severity": "high",
                 "field": "signature",
                 "issue": "Card is unsigned. Signed cards are the A2A 1.0 mechanism "
                 "for proving the card came from the domain owner.",
+            }
+        )
+    else:
+        findings.append(
+            {
+                "severity": "medium",
+                "field": "signature.trust",
+                "issue": "JWS authenticates the card publisher, not skill capability. "
+                "A signature does not attest that advertised skills are truthful "
+                "(A2ABreak protocol risk: JWS Key Trust Model Gap).",
             }
         )
     if not card.get("securitySchemes"):
@@ -370,6 +381,16 @@ def agent_card_review(query: str) -> Dict[str, Any]:
                 "this agent at all.",
             }
         )
+    else:
+        findings.append(
+            {
+                "severity": "high",
+                "field": "skills.attestation",
+                "issue": "Skill claims are self-asserted. A2A 1.0 provides no "
+                "attestation or capability challenge (A2ABreak protocol risk: "
+                "Unattested Skill Claims).",
+            }
+        )
     for index, skill in enumerate(skills):
         if isinstance(skill, dict):
             findings.extend(_review_skill(skill, index))
@@ -396,7 +417,7 @@ def agent_card_review(query: str) -> Dict[str, Any]:
 
     name = str(card.get("name") or "unnamed agent")
     lines = [
-        f"Agent Card review — {name}",
+        f"Agent Card review: {name}",
         f"Discoverability and conformance score: {score}/100",
         f"{len(findings)} finding(s).",
         "",
@@ -442,11 +463,11 @@ PUBLIC_SKILL_DEFINITIONS: List[Dict[str, Any]] = [
         "id": "agent-card-review",
         "name": "Agent Card Review",
         "description": (
-            "Review an A2A Agent Card for conformance and discoverability. "
-            "Returns a scored list of findings covering protocol version, card "
-            "signing, security schemes, interface bindings and the quality of "
-            "each skill description as a calling agent would read it. Submit the "
-            "card as JSON"
+            "Review an A2A Agent Card for conformance, discoverability, and "
+            "protocol-risk trust gaps. Returns a scored list of findings covering "
+            "protocol version, card signing, unattested skill claims, security "
+            "schemes, interface bindings and the quality of each skill description "
+            "as a calling agent would read it. Submit the card as JSON"
         ),
         "tags": ["a2a", "agent-card", "conformance", "discoverability", "review"],
         "examples": [

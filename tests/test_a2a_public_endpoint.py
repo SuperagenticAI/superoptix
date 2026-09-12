@@ -113,6 +113,37 @@ class TestAgentCardReviewSkill:
         )
 
 
+    def test_flags_unattested_skill_claims(self):
+        card = {
+            "name": "x",
+            "protocolVersion": "1.0",
+            "skills": [
+                {
+                    "id": "s",
+                    "description": "A concrete skill description with enough text.",
+                    "examples": ["do the thing"],
+                    "tags": ["demo"],
+                }
+            ],
+            "supportedInterfaces": [
+                {"protocolBinding": "JSONRPC", "protocolVersion": "1.0"},
+                {"protocolBinding": "HTTP+JSON", "protocolVersion": "1.0"},
+            ],
+            "signature": {"protected": "x", "signature": "y"},
+            "securitySchemes": {"bearer": {"type": "http"}},
+            "description": "demo",
+            "provider": {"organization": "x"},
+            "documentationUrl": "https://example.test",
+            "preferredTransport": "JSONRPC",
+        }
+        findings = agent_card_review(json.dumps(card))["data"]["findings"]
+        fields = {f["field"] for f in findings}
+        assert "skills.attestation" in fields
+        assert "signature.trust" in fields
+        assert any("Unattested Skill Claims" in f["issue"] for f in findings)
+        assert any("JWS authenticates" in f["issue"] for f in findings)
+
+
 class TestPublicAgentCard:
     def test_advertises_both_spec_lines(self):
         """A 1.0 card that also advertises 0.3 so pre-1.0 clients negotiate."""
@@ -151,8 +182,8 @@ class TestPublicAgentCard:
         """Unsigned card, and no auth scheme, because the catalogue is public."""
         review = agent_card_review(json.dumps(build_public_agent_card()))
         fields = [f["field"] for f in review["data"]["findings"]]
-        assert fields == ["signature", "securitySchemes"]
-        assert review["data"]["score"] >= 80
+        assert fields == ["signature", "skills.attestation", "securitySchemes"]
+        assert review["data"]["score"] >= 70
 
 
 class TestPublicEndpoint:
@@ -217,3 +248,83 @@ class TestPublicEndpoint:
         )
         assert response.status_code == 200
         assert "Agent Card review" in json.dumps(response.json())
+
+class TestPublicCallerIsolation:
+    """Anonymous multi-tenant harden for the public catalogue (A2ABreak)."""
+
+    @pytest.fixture()
+    def app(self):
+        from superoptix.protocols.a2a.public.app import create_public_app
+
+        return create_public_app("https://example.test")
+
+    def _client(self, app, *, headers=None):
+        fastapi_testclient = pytest.importorskip("fastapi.testclient")
+        # Separate TestClient instances share the app/store but keep distinct
+        # cookie jars, which is how anonymous callers are isolated.
+        return fastapi_testclient.TestClient(app, headers=headers or {})
+
+    def _send(self, client, text="Does CrewAI support A2A?", **message_extra):
+        message = {
+            "role": "ROLE_USER",
+            "parts": [{"text": text}],
+            **message_extra,
+        }
+        response = client.post("/message:send", json={"message": message})
+        assert response.status_code == 200, response.text
+        return response.json()["task"], response
+
+    def test_list_tasks_does_not_leak_across_callers(self, app):
+        alice = self._client(app)
+        bob = self._client(app)
+        task_a, _ = self._send(alice)
+        task_b, _ = self._send(bob, text="Does DSPy support A2A?")
+
+        listed_a = alice.get("/tasks").json()["tasks"]
+        listed_b = bob.get("/tasks").json()["tasks"]
+        ids_a = {t["id"] for t in listed_a}
+        ids_b = {t["id"] for t in listed_b}
+        assert task_a["id"] in ids_a
+        assert task_b["id"] not in ids_a
+        assert task_b["id"] in ids_b
+        assert task_a["id"] not in ids_b
+
+    def test_get_task_hides_other_callers_tasks(self, app):
+        alice = self._client(app)
+        bob = self._client(app)
+        task_a, _ = self._send(alice)
+        response = bob.get(f"/tasks/{task_a['id']}")
+        assert response.status_code == 404
+
+    def test_client_context_id_is_not_honoured_on_new_tasks(self, app):
+        client = self._client(app)
+        task, _ = self._send(client, contextId="attacker-chosen-context")
+        assert task["contextId"] != "attacker-chosen-context"
+
+    def test_follow_up_from_other_caller_is_not_found(self, app):
+        alice = self._client(app)
+        bob = self._client(app)
+        task_a, _ = self._send(alice)
+        response = bob.post(
+            "/message:send",
+            json={
+                "message": {
+                    "role": "ROLE_USER",
+                    "taskId": task_a["id"],
+                    "parts": [{"text": "hijack"}],
+                }
+            },
+        )
+        assert response.status_code == 404
+
+    def test_caller_header_scopes_tasks(self, app):
+        alice = self._client(app, headers={"X-SuperOptiX-Caller-Key": "alice-key-01"})
+        bob = self._client(app, headers={"X-SuperOptiX-Caller-Key": "bob-key-0002"})
+        task_a, _ = self._send(alice)
+        assert bob.get(f"/tasks/{task_a['id']}").status_code == 404
+        assert alice.get(f"/tasks/{task_a['id']}").status_code == 200
+
+    def test_sets_caller_cookie_on_first_request(self, app):
+        client = self._client(app)
+        _, response = self._send(client)
+        assert "sox_a2a_caller" in response.cookies
