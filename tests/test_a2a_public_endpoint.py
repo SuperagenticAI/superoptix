@@ -254,6 +254,7 @@ class TestPublicCallerIsolation:
 
     @pytest.fixture()
     def app(self):
+        pytest.importorskip("fastapi.testclient")
         from superoptix.protocols.a2a.public.app import create_public_app
 
         return create_public_app("https://example.test")
