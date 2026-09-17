@@ -321,3 +321,30 @@ gRPC is not implemented. The TCK covers it, and the requirements are skipped
 rather than failed.
 
 The Agent Payments Protocol (AP2), published alongside 1.0, is out of scope.
+
+## A2A protocol threats (A2ABreak)
+
+[A2ABreak](https://arxiv.org/abs/2609.10871) (arXiv:2609.10871) is a
+specification-driven security analysis of A2A v1.0. It documents eleven
+protocol-level findings that a fully compliant adversary can exploit when the
+spec omits ownership, attestation, or integrity primitives. These are protocol
+risks, not SuperOptiX-specific CVEs.
+
+The published SuperOptiX catalogue (`isolate_callers=True`) hardens the
+cross-client surface that operators actually hit:
+
+- Client-supplied `contextId` on new tasks is ignored; the server mints one.
+- Tasks are bound to an opaque per-caller key (cookie `sox_a2a_caller` or header
+  `X-SuperOptiX-Caller-Key`).
+- `ListTasks`, `GetTask`, `CancelTask`, and `SubscribeToTask` only see that
+  caller's tasks, so anonymous `GET /tasks` cannot dump every history.
+
+Push notifications stay disabled (`pushNotifications: false`), which already
+mitigates the unverified-webhook finding.
+
+The `agent-card-review` skill also flags unattested skill claims and notes that
+JWS (when present) authenticates the publisher, not capability truthfulness.
+
+Operators embedding `create_a2a_fastapi_app` for multi-tenant anonymous traffic
+should pass `isolate_callers=True`. Authenticated or single-tenant deployments
+can leave the default (`False`) and still apply application-level ACLs.
