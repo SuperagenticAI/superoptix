@@ -112,7 +112,6 @@ class TestAgentCardReviewSkill:
             order[f["severity"]] for f in findings
         )
 
-
     def test_flags_unattested_skill_claims(self):
         card = {
             "name": "x",
@@ -248,6 +247,7 @@ class TestPublicEndpoint:
         )
         assert response.status_code == 200
         assert "Agent Card review" in json.dumps(response.json())
+
 
 class TestPublicCallerIsolation:
     """Anonymous multi-tenant harden for the public catalogue (A2ABreak)."""

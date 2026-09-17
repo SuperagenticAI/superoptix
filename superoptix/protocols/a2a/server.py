@@ -160,7 +160,6 @@ def _bool_or_none(value: Any) -> bool | None:
     return bool(value)
 
 
-
 # Opaque per-caller key for anonymous multi-tenant deployments (public catalogue).
 # Cookie or header identifies the caller without inventing full authentication.
 CALLER_COOKIE = "sox_a2a_caller"
@@ -173,16 +172,20 @@ def _resolve_caller_key(request: Any) -> tuple[str, bool]:
         header = (request.headers.get(CALLER_HEADER) or "").strip()
     except AttributeError:
         header = ""
-    if header and 8 <= len(header) <= 128 and all(
-        c.isalnum() or c in "-_" for c in header
+    if (
+        header
+        and 8 <= len(header) <= 128
+        and all(c.isalnum() or c in "-_" for c in header)
     ):
         return header, False
     try:
         cookie = (request.cookies.get(CALLER_COOKIE) or "").strip()
     except AttributeError:
         cookie = ""
-    if cookie and 8 <= len(cookie) <= 128 and all(
-        c.isalnum() or c in "-_" for c in cookie
+    if (
+        cookie
+        and 8 <= len(cookie) <= 128
+        and all(c.isalnum() or c in "-_" for c in cookie)
     ):
         return cookie, False
     return uuid.uuid4().hex, True
@@ -597,9 +600,7 @@ class _A2ATaskStore:
         Returns a Task, or a bare Message when the runtime asks for one via
         ``a2a_message_only`` — the spec allows either as a SendMessage result.
         """
-        caller_key = _caller_key_from_request(
-            request, isolate=self.isolate_callers
-        )
+        caller_key = _caller_key_from_request(request, isolate=self.isolate_callers)
         user_message = _user_message(message)
         await self._validate_message_references(user_message, caller_key=caller_key)
         task = await self._create_task(user_message, caller_key=caller_key)
@@ -651,9 +652,7 @@ class _A2ATaskStore:
         Validation runs before the iterator is returned so HTTP and JSON-RPC
         handlers can render protocol errors instead of a 500 from the stream.
         """
-        caller_key = _caller_key_from_request(
-            request, isolate=self.isolate_callers
-        )
+        caller_key = _caller_key_from_request(request, isolate=self.isolate_callers)
         user_message = _user_message(message)
         await self._validate_message_references(user_message, caller_key=caller_key)
 
@@ -674,9 +673,7 @@ class _A2ATaskStore:
                 message_text="Processing request",
                 publish=False,
             )
-            yield {
-                "task": await self.get(task_id, caller_key=caller_key) or task
-            }
+            yield {"task": await self.get(task_id, caller_key=caller_key) or task}
 
             result: Any = None
             try:
@@ -748,9 +745,7 @@ class _A2ATaskStore:
     async def cancel(
         self, task_id: str, *, request: Any | None = None
     ) -> Dict[str, Any]:
-        caller_key = _caller_key_from_request(
-            request, isolate=self.isolate_callers
-        )
+        caller_key = _caller_key_from_request(request, isolate=self.isolate_callers)
         task = await self.get(task_id, caller_key=caller_key)
         if not task:
             raise KeyError(task_id)
