@@ -95,7 +95,10 @@ class SkillRef:
 
 
 def skills_from_card(card: Dict[str, Any]) -> List[SkillRef]:
-    agent = str(card.get("name") or "agent")
+    # Prefer origin-bound URL over presentational card name (arXiv:2609.27624).
+    from superoptix.protocols.a2a.registry import agent_identity_from_card
+
+    agent = agent_identity_from_card(card)
     refs: List[SkillRef] = []
     for skill in card.get("skills") or []:
         if not isinstance(skill, dict):

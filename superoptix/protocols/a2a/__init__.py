@@ -2,6 +2,13 @@
 
 from superoptix.protocols.a2a.card_builder import build_a2a_agent_card_payload
 from superoptix.protocols.a2a.client import A2AClient
+from superoptix.protocols.a2a.registry import (
+    A2AAgentEntry,
+    A2ARegistry,
+    AmbiguousAgentName,
+    agent_identity_from_card,
+    normalize_url,
+)
 from superoptix.protocols.a2a.server import create_a2a_fastapi_app
 from superoptix.runtime import AgentRuntime
 from superoptix.runtime.adapters import (
@@ -14,6 +21,11 @@ from superoptix.runtime.adapters import (
 
 __all__ = [
     "A2AClient",
+    "A2AAgentEntry",
+    "A2ARegistry",
+    "AmbiguousAgentName",
+    "agent_identity_from_card",
+    "normalize_url",
     "AgentRuntime",
     "CompiledPipelineRuntimeAdapter",
     "CrewAIRuntimeAdapter",

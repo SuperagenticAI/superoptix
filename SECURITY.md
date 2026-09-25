@@ -22,3 +22,19 @@ We take the security of SuperOptiX very seriously. If you discover a security vu
     *   Any relevant configuration files or code snippets.
 
 We will acknowledge your report within 48 hours and provide an estimated timeline for a fix. We appreciate your cooperation in disclosing vulnerabilities responsibly.
+
+## A2A Agent Card name collision
+
+Agent Card `name` is presentational metadata, not a stable identity
+([arXiv:2609.27624](https://arxiv.org/abs/2609.27624)). Name-keyed peer routing
+caused wrong-peer dispatch in most OSS A2A integrations studied in that paper.
+
+SuperOptiX checklist (mirrors SuperQode):
+
+- Route and store peers by normalized URL (origin-bound ID), never by remote Agent Card name.
+- Treat card name as a local/presentational alias only.
+- Reject ambiguous alias lookups; never silently pick among colliding names.
+- Migrate any legacy name-keyed peer store to URL keys on load.
+- Keep connect/discover entrypoints URL-based.
+- Add regression tests: two peers, same card name, different URLs → first retained, second does not overwrite; alias get with two URLs raises.
+
