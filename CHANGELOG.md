@@ -7,12 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.11] - 2026-09-25
+
 ### Security
 
 - A2A peer registry and routing catalogue use origin-bound URL identity instead
   of Agent Card `name` (arXiv:2609.27624). Ambiguous aliases raise
   `AmbiguousAgentName`; legacy name-keyed stores migrate on load.
-
 
 ## [0.3.10] - 2026-09-11
 
