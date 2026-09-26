@@ -2056,13 +2056,12 @@ def _emit_gauge_record(
     on low confidence (SuperGauge RFC 0004). Live Jev requires
     ``superoptix[typesafe]``; otherwise a heuristic disposition is used.
     """
-    import json
     import os
     from pathlib import Path
 
     import yaml
 
-    from superoptix.gauge import apply_jev_judgment, build_record, write_record
+    from superoptix.gauge import build_record, write_record
 
     playbook_file = Path(playbook_path)
     with open(playbook_file, encoding="utf-8") as handle:
