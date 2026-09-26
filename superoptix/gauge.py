@@ -271,3 +271,116 @@ def add_reliability(record: dict[str, Any], runs: list[list[dict[str, Any]]]) ->
             "n": n,
         }
     )
+
+
+def apply_jev_judgment(
+    record: dict[str, Any],
+    judgment: Any,
+    *,
+    min_confidence: float = 0.75,
+    threshold_version: dict[str, Any] | None = None,
+    judged_measure_id: str | None = None,
+) -> dict[str, Any]:
+    """Project a System One Disposition onto an existing Agent Quality Record.
+
+    Maps Choice accept/warn/reject → decision ship/hold/reject (warn → hold).
+    Soft-holds accept when confidence is below ``min_confidence``. Pins
+    ``assurance.judge`` when model / pack_digest are present. Never inserts a
+    gate on confidence, Score, or Noul (SPEC §4.1 / RFC 0004).
+
+    ``judged_measure_id`` defaults to omitting a new measure. Pass an existing
+    registry id such as ``answer.grounded`` only when the Score grades that
+    property; do not invent ids here.
+    """
+    from superoptix.quality.jev import (
+        DEFAULT_MODEL_HINT,
+        judgment_from_choice_object,
+        pin_assurance_judge,
+        resolve_verdict,
+    )
+
+    disposition = judgment_from_choice_object(judgment)
+    verdict, soft_rationale = resolve_verdict(
+        disposition.choice,
+        disposition.confidence,
+        min_confidence=min_confidence,
+    )
+
+    decision = dict(record.get("decision") or {})
+    decision["verdict"] = verdict
+    parts = [
+        p
+        for p in (
+            disposition.rationale,
+            soft_rationale,
+            (
+                f"Choice {disposition.choice!r} (confidence "
+                f"{disposition.confidence:.2f}) → AQR {verdict}."
+            ),
+        )
+        if p
+    ]
+    decision["rationale"] = " ".join(parts)
+    record["decision"] = decision
+
+    model = disposition.model or DEFAULT_MODEL_HINT
+    record["assurance"] = pin_assurance_judge(
+        record.get("assurance"),
+        model=model,
+        pack_digest=disposition.pack_digest,
+        judge_id=disposition.judge_id,
+    )
+
+    measures = list(record.get("measures") or [])
+    if judged_measure_id and disposition.score is not None:
+        # Only when caller names an existing judged registry id.
+        if judged_measure_id in MODEL_GRADED or judged_measure_id.startswith(
+            "answer."
+        ):
+            measures.append(
+                {
+                    "id": judged_measure_id,
+                    "value": round(float(disposition.score), 3),
+                    "n": 1,
+                }
+            )
+            record["measures"] = measures
+
+    meta = dict(record.get("x-superoptix") or {})
+    jev_meta: dict[str, Any] = {
+        "disposition": disposition.to_dict(),
+        "min_confidence": float(min_confidence),
+        "choice_to_verdict": {
+            "accept": "ship",
+            "warn": "hold",
+            "reject": "reject",
+        },
+        "l1_note": (
+            "Emitter soft-hold and judged measures only. Path to L2 still needs "
+            "deterministic gates (compose SuperQode or real policy probes)."
+        ),
+    }
+    if threshold_version:
+        jev_meta["threshold_version"] = threshold_version
+    meta["jev"] = jev_meta
+    record["x-superoptix"] = meta
+    return record
+
+
+def write_record(record: dict[str, Any], out_path: str | Path) -> Path:
+    """Write an AQR as JSON (``.json`` suffix) or YAML (otherwise)."""
+    destination = Path(out_path)
+    if destination.suffix == ".json":
+        destination.write_text(json.dumps(record, indent=2), encoding="utf-8")
+    else:
+        try:
+            import yaml
+        except ImportError as exc:  # pragma: no cover
+            raise ImportError("PyYAML is required to write YAML records") from exc
+        destination.write_text(
+            yaml.safe_dump(
+                record, sort_keys=False, default_flow_style=False, width=100
+            ),
+            encoding="utf-8",
+        )
+    return destination

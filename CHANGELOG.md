@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Optional Jev / System One quality-control MVP for Agent Quality Records
+  (`superoptix.quality.jev`, `--gauge-jev` on `super agent evaluate`):
+  Choice accept/warn/reject → AQR ship/hold/reject, `assurance.judge` pin,
+  soft-hold on low confidence, Propose-Don't-Judge admission helper, and
+  typed disposition on agent-card-review. Extra: `pip install "superoptix[typesafe]"`
+  (alias `[jev]`; needs DSPy 3.4+). Docs: `docs/guides/jev-quality-control.md`.
+  Coordinates with SuperGauge RFC 0004 / RFC 0005; does not add `dspy[typesafe]`
+  as a core dependency and does not invent deterministic gates.
+
 ## [0.3.12] - 2026-09-26
 
 ### Security

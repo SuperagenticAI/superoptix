@@ -429,9 +429,35 @@ def agent_card_review(query: str) -> Dict[str, Any]:
     if not findings:
         lines.append("No issues found against the A2A 1.0 card checks.")
 
+    # Optional typed disposition (Choice accept/warn/reject) for AQR / Jev QC.
+    # Pure heuristic; live TypeSafe Score is available via superoptix.quality
+    # when the typesafe extra is installed. Free-text severity findings remain.
+    disposition = None
+    try:
+        from superoptix.quality.jev import heuristic_disposition_from_findings
+
+        disposition = heuristic_disposition_from_findings(
+            score=score, findings=findings
+        ).to_dict()
+    except Exception:
+        disposition = None
+
+    data = {"reviewed": True, "score": score, "findings": findings}
+    if disposition is not None:
+        data["disposition"] = disposition
+        lines.append("")
+        _verdict = {"accept": "ship", "warn": "hold", "reject": "reject"}.get(
+            disposition["choice"], "hold"
+        )
+        lines.append(
+            f"Typed disposition: {disposition['choice']} "
+            f"(confidence {disposition['confidence']:.2f}) "
+            f"→ AQR {_verdict}"
+        )
+
     return {
         "response": "\n".join(lines),
-        "data": {"reviewed": True, "score": score, "findings": findings},
+        "data": data,
     }
 
 

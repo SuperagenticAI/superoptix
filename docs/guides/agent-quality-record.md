@@ -118,3 +118,22 @@ shape across a repository harness and an agent on any supported runtime.
 - [Golden Workflow](golden-workflow.md)
 - [Routing quality](a2a-routing.md)
 - [SuperGauge specification](https://github.com/SuperagenticAI/supergauge)
+
+## Optional Jev / System One quality control
+
+When you also pass `--gauge-jev` (or set `SUPEROPTIX_JEV=1`), the emitter maps a
+typed Choice disposition onto the record: accept→ship, warn→hold, reject→reject,
+pins `assurance.judge`, and soft-holds on low confidence. Judged confidence
+never alone hard-gates ship. See [Jev quality control and AQR emit](jev-quality-control.md).
+
+Install the optional extra (DSPy 3.4+):
+
+```bash
+pip install "superoptix[typesafe]"
+export TYPESAFE_API_KEY=...
+super agent evaluate developer --gauge-out record.json --gauge-jev
+```
+
+Without the extra, a heuristic disposition is still recorded so the AQR shape
+stays reviewable. Live Jev replaces it when configured.
+
