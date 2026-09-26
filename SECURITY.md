@@ -23,6 +23,19 @@ We take the security of SuperOptiX very seriously. If you discover a security vu
 
 We will acknowledge your report within 48 hours and provide an estimated timeline for a fix. We appreciate your cooperation in disclosing vulnerabilities responsibly.
 
+## A2A protocol threats
+
+The Agent2Agent (A2A) protocol has known protocol-level risks documented in
+[A2ABreak](https://arxiv.org/abs/2609.10871) (arXiv:2609.10871). Examples include
+cross-client context injection, unattested skill claims, and related discovery
+or interruption gaps. SuperOptiX treats these as protocol risks for operators
+to understand; see `docs/guides/a2a-conformance.md` for how the public catalogue
+hardens multi-tenant task access and what card-review reports.
+
+If you believe you have found an implementation vulnerability in SuperOptiX
+itself (not a general A2A protocol limitation), please report it using the
+process above.
+
 ## A2A Agent Card name collision
 
 Agent Card `name` is presentational metadata, not a stable identity
@@ -37,4 +50,3 @@ SuperOptiX checklist (mirrors SuperQode):
 - Migrate any legacy name-keyed peer store to URL keys on load.
 - Keep connect/discover entrypoints URL-based.
 - Add regression tests: two peers, same card name, different URLs → first retained, second does not overwrite; alias get with two URLs raises.
-
