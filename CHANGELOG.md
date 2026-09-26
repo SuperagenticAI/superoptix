@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.12] - 2026-09-26
+
+### Security
+
+- A2ABreak harden for the public catalogue (PR #11): isolate anonymous callers
+  so `ListTasks` / `GetTask` / `CancelTask` / `SubscribeToTask` only see that
+  caller's tasks; ignore client-supplied `contextId` on new tasks.
+- `agent-card-review` flags unattested skill claims and notes that JWS (when
+  present) authenticates the publisher, not capability truthfulness.
+- Document A2ABreak protocol risks in SECURITY and the A2A conformance guide.
+
 ## [0.3.11] - 2026-09-25
 
 ### Security
