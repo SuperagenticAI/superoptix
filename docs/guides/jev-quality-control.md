@@ -28,7 +28,7 @@ export SUPEROPTIX_JEV_MODEL=jev-1.13.0
 ```
 
 Needs **DSPy 3.4+** for `dspy.experimental` Choice / Score / Noul / ReAnchor /
-TypeSafe. Soft-lock PR for 3.4.0 may land separately; the extra declares
+TypeSafe. Works with DSPy 3.4+ typesafe / Jev. The optional extra declares
 `dspy[typesafe]>=3.4` and does not block core installs.
 
 ## Evaluate with AQR + Jev QC

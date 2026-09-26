@@ -352,16 +352,17 @@ can leave the default (`False`) and still apply application-level ACLs.
 ## Agent name collision (origin-bound identity)
 
 Agent Card `name` is presentation metadata, not a stable peer identity
-([arXiv:2609.27624](https://arxiv.org/abs/2609.27624)). SuperOptiX keys the
-peer registry and routing catalogue by normalized agent URL:
+([A2A Agent Name Collision](https://arxiv.org/abs/2609.27624), arXiv:2609.27624).
+SuperOptiX keys the peer registry and routing catalogue by normalized agent URL:
 
 - Route and store peers by normalized URL (origin-bound ID), never by remote Agent Card name.
 - Treat card name as a local/presentational alias only.
-- Reject ambiguous alias lookups; never silently pick among colliding names.
+- Reject ambiguous alias lookups with `AmbiguousAgentName`; never silently pick among colliding names.
+- `skills_from_card` and routing skill refs use origin-bound URL identity, not `card.name`.
 - Migrate any legacy name-keyed peer store to URL keys on load.
 - Keep connect/discover entrypoints URL-based.
 - Add regression tests: two peers, same card name, different URLs → first retained, second does not overwrite; alias get with two URLs raises.
 
-See `superoptix.protocols.a2a.registry.A2ARegistry` and
-`agent_identity_from_card` used by the routing catalogue.
+See `superoptix.protocols.a2a.registry.A2ARegistry`,
+`agent_identity_from_card`, and `skills_from_card` in the routing catalogue.
 

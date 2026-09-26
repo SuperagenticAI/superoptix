@@ -194,6 +194,19 @@ Agents adapted by SuperOptiX keep using their MCP tools. SuperOptiX changes how
 an agent is reached rather than how it works, and exposing an agent as an MCP
 server is not supported.
 
+### A2ABreak harden (caller isolation)
+
+Protocol-level risks from [A2ABreak](https://arxiv.org/abs/2609.10871) are
+documented in [SECURITY](SECURITY.md) and the conformance guide. The public
+catalogue hardens the multi-tenant surface operators hit:
+
+- Caller isolation on `ListTasks` / `GetTask` / `CancelTask` / `SubscribeToTask`
+- Client-supplied `contextId` on new tasks is ignored; the server mints one
+- `agent-card-review` flags unattested skill claims and notes that JWS (when
+  present) authenticates the publisher, not capability truthfulness
+
+See [A2A conformance](https://superagenticai.github.io/superoptix/guides/a2a-conformance/).
+
 ## Discoverability
 
 A calling agent decides whether to invoke yours by reading `skills[].description`
@@ -210,6 +223,11 @@ itself:
 `superoptix.protocols.a2a.routing` scores this, and GEPA improves it by
 rewriting the descriptions. On the vague catalogue above it raises invocation
 from 12.5% to 75%.
+
+Peer identity is origin-bound: the registry and routing catalogue key by
+normalized agent URL, not Agent Card `name` ([A2A Agent Name Collision](https://arxiv.org/abs/2609.27624)).
+Ambiguous aliases raise `AmbiguousAgentName`. Skill refs from `skills_from_card`
+use that URL identity rather than `card.name`.
 
 ## Compiling from a specification
 
@@ -245,15 +263,33 @@ agent selects yours from a catalogue. That becomes a quality dimension once
 agents route work to one another.
 See [Agent Quality Records](https://superagenticai.github.io/superoptix/guides/agent-quality-record/).
 
+### Optional Jev / System One quality control
+
+Install `superoptix[typesafe]` (alias `[jev]`; works with DSPy 3.4+ typesafe /
+Jev) and pass `--gauge-jev` with `--gauge-out`. Choice `accept` / `warn` /
+`reject` maps to AQR `ship` / `hold` / `reject`. Low judged confidence soft-holds;
+it never alone hard-gates ship. Assurance pins `assurance.judge`. Evaluation-only
+records stay L1: soft-hold and judged measures do not invent deterministic gates.
+Aligned with SuperGauge [RFC 0004](https://github.com/SuperagenticAI/supergauge/blob/main/rfcs/0004-jev-systemone-interop.md).
+See [Jev quality control and AQR emit](https://superagenticai.github.io/superoptix/guides/jev-quality-control/).
+
+```bash
+pip install "superoptix[typesafe]"
+super agent evaluate developer --gauge-out record.json --gauge-jev
+```
+
 ## Documentation
 
 - [Adapting an existing agent](https://superagenticai.github.io/superoptix/guides/a2a-adapt/)
 - [A2A conformance](https://superagenticai.github.io/superoptix/guides/a2a-conformance/)
 - [Routing quality](https://superagenticai.github.io/superoptix/guides/a2a-routing/)
+- [Agent Quality Records](https://superagenticai.github.io/superoptix/guides/agent-quality-record/)
+- [Jev quality control + AQR](https://superagenticai.github.io/superoptix/guides/jev-quality-control/)
 - [Quick start](https://superagenticai.github.io/superoptix/quick-start/)
 - [CLI reference](https://superagenticai.github.io/superoptix/guides/cli-complete-guide/)
 - [Runtime feature matrix](https://superagenticai.github.io/superoptix/guides/framework-feature-matrix/)
 - [Troubleshooting](https://superagenticai.github.io/superoptix/guides/troubleshooting-by-symptom/)
+- [Security policy](SECURITY.md)
 
 Full documentation is at
 [superagenticai.github.io/superoptix](https://superagenticai.github.io/superoptix/).

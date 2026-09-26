@@ -10,6 +10,8 @@
   <a href="guides/a2a-adapt/" style="background: #1976d2; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 5px; display: inline-block; font-weight: bold;">Adapt an Agent</a>
   <a href="guides/a2a-conformance/" style="background: #424242; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 5px; display: inline-block; font-weight: bold;">Conformance</a>
   <a href="guides/a2a-routing/" style="background: #424242; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 5px; display: inline-block; font-weight: bold;">Routing Quality</a>
+  <a href="guides/agent-quality-record/" style="background: #424242; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 5px; display: inline-block; font-weight: bold;">Quality Records</a>
+  <a href="guides/jev-quality-control/" style="background: #424242; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 5px; display: inline-block; font-weight: bold;">Jev QC</a>
   <a href="quick-start/" style="background: #424242; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 5px; display: inline-block; font-weight: bold;">Quick Start</a>
 </div>
 
@@ -31,6 +33,10 @@ Eight runtimes are supported: DSPy, CrewAI, the OpenAI Agents SDK, Pydantic AI, 
 Being reachable is only half the problem. Whether another agent chooses to call yours depends on how its Agent Card describes it, so SuperOptiX measures that and improves it with GEPA. See [Routing quality](guides/a2a-routing/).
 
 The protocol implementation records zero failures against the official A2A Technology Compatibility Kit. Every requirement the TCK exercises against the conformance harness passes, 73 of 73 at MUST. A live agent runs at [a2a.superoptix.ai](https://a2a.superoptix.ai). See [A2A conformance](guides/a2a-conformance/).
+
+A2A peers are keyed by normalized URL, not Agent Card name ([name collision paper](https://arxiv.org/abs/2609.27624)). The public catalogue hardens multi-tenant task access against [A2ABreak](https://arxiv.org/abs/2609.10871) findings: caller isolation on task methods, ignore client `contextId`, and card-review for unattested skills plus JWS trust notes. See [SECURITY](https://github.com/SuperagenticAI/superoptix/blob/main/SECURITY.md).
+
+Write an [Agent Quality Record](guides/agent-quality-record.md) with `--gauge-out`, and optionally layer [Jev / System One quality control](guides/jev-quality-control.md) with `--gauge-jev` (`superoptix[typesafe]` / `[jev]`, works with DSPy 3.4+ typesafe / Jev). Choice accept/warn/reject maps to ship/hold/reject; low confidence soft-holds and never alone hard-gates ship.
 
 SuperOptiX also compiles agents from SuperSpec, a declarative YAML format, into native code for any supported runtime.
 
@@ -94,6 +100,24 @@ super agent optimize developer --framework dspy --auto light
       </ul>
     </td>
   </tr>
+  <tr>
+    <td style="padding: 20px; border: 2px solid #607D8B; background: rgba(96, 125, 139, 0.08); vertical-align: top; width: 50%;">
+      <h4 style="color: #607D8B; margin-top: 0;">Ship with quality evidence</h4>
+      <ul>
+        <li>Agent Quality Records via <code>--gauge-out</code> (SuperGauge)</li>
+        <li>Optional Jev / System One QC with <code>--gauge-jev</code></li>
+        <li>L1 honesty: no fake gates from judged confidence alone</li>
+      </ul>
+    </td>
+    <td style="padding: 20px; border: 2px solid #E91E63; background: rgba(233, 30, 99, 0.08); vertical-align: top; width: 50%;">
+      <h4 style="color: #E91E63; margin-top: 0;">A2A harden</h4>
+      <ul>
+        <li>URL-keyed peer registry; <code>AmbiguousAgentName</code> on collisions</li>
+        <li>Caller isolation on ListTasks / GetTask / CancelTask / SubscribeToTask</li>
+        <li>Card-review for unattested skills and JWS trust notes</li>
+      </ul>
+    </td>
+  </tr>
 </table>
 
 ---
@@ -113,6 +137,9 @@ super agent run developer --framework dspy --cloud --provider google-genai --mod
 ## Next Steps
 
 - [Golden Workflow](guides/golden-workflow.md)
+- [Agent Quality Records](guides/agent-quality-record.md)
+- [Jev quality control + AQR](guides/jev-quality-control.md)
+- [A2A conformance](guides/a2a-conformance.md)
 - [Troubleshooting by Symptom](guides/troubleshooting-by-symptom.md)
 - [Framework Feature Matrix](guides/framework-feature-matrix.md)
 - [CLI Complete Guide](guides/cli-complete-guide.md)
