@@ -348,3 +348,20 @@ JWS (when present) authenticates the publisher, not capability truthfulness.
 Operators embedding `create_a2a_fastapi_app` for multi-tenant anonymous traffic
 should pass `isolate_callers=True`. Authenticated or single-tenant deployments
 can leave the default (`False`) and still apply application-level ACLs.
+
+## Agent name collision (origin-bound identity)
+
+Agent Card `name` is presentation metadata, not a stable peer identity
+([arXiv:2609.27624](https://arxiv.org/abs/2609.27624)). SuperOptiX keys the
+peer registry and routing catalogue by normalized agent URL:
+
+- Route and store peers by normalized URL (origin-bound ID), never by remote Agent Card name.
+- Treat card name as a local/presentational alias only.
+- Reject ambiguous alias lookups; never silently pick among colliding names.
+- Migrate any legacy name-keyed peer store to URL keys on load.
+- Keep connect/discover entrypoints URL-based.
+- Add regression tests: two peers, same card name, different URLs → first retained, second does not overwrite; alias get with two URLs raises.
+
+See `superoptix.protocols.a2a.registry.A2ARegistry` and
+`agent_identity_from_card` used by the routing catalogue.
+

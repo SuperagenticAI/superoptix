@@ -135,6 +135,23 @@ class TestCatalogue:
         ]
         assert {s.key for s in catalogue_from_cards(cards)} == {"A:x", "B:y"}
 
+    def test_uses_card_url_as_agent_identity_not_name(self):
+        """Same presentational name, different URLs must not collide keys."""
+        cards = [
+            {
+                "name": "Helper",
+                "url": "http://trusted.example",
+                "skills": [{"id": "x", "description": "d"}],
+            },
+            {
+                "name": "Helper",
+                "url": "http://attacker.example",
+                "skills": [{"id": "y", "description": "d"}],
+            },
+        ]
+        keys = {s.key for s in catalogue_from_cards(cards)}
+        assert keys == {"http://trusted.example:x", "http://attacker.example:y"}
+
 
 class TestGeneratedCases:
     def test_hard_mode_withholds_the_skill_name(self):
