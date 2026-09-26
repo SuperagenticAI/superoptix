@@ -2012,6 +2012,11 @@ feature_specifications:
                     tier=getattr(args, "gauge_tier", "T1"),
                     sealed=bool(getattr(args, "gauge_sealed", False)),
                     engine=getattr(args, "engine", "dspy"),
+                    jev=bool(getattr(args, "gauge_jev", False)),
+                    jev_min_confidence=float(
+                        getattr(args, "gauge_jev_min_confidence", 0.75) or 0.75
+                    ),
+                    jev_model=getattr(args, "gauge_jev_model", None),
                 )
             except Exception as exc:  # emission must never fail an evaluation
                 console.print(f"⚠️  [yellow]Record not written:[/] {exc}")
@@ -2035,6 +2040,9 @@ def _emit_gauge_record(
     tier: str = "T1",
     sealed: bool = False,
     engine: str = "dspy",
+    jev: bool = False,
+    jev_min_confidence: float = 0.75,
+    jev_model: str | None = None,
 ) -> None:
     """Write an Agent Quality Record for a completed BDD evaluation.
 
@@ -2042,13 +2050,18 @@ def _emit_gauge_record(
     counts toward the held-out split. Where the playbook declares no split, the
     record reports zero held-out scenarios, which is accurate and caps the
     record at a lower level.
+
+    When ``jev`` is true, apply optional System One quality-control: map Choice
+    accept/warn/reject to ship/hold/reject, pin assurance.judge, and soft-hold
+    on low confidence (SuperGauge RFC 0004). Live Jev requires
+    ``superoptix[typesafe]``; otherwise a heuristic disposition is used.
     """
-    import json
+    import os
     from pathlib import Path
 
     import yaml
 
-    from superoptix.gauge import build_record
+    from superoptix.gauge import build_record, write_record
 
     playbook_file = Path(playbook_path)
     with open(playbook_file, encoding="utf-8") as handle:
@@ -2078,17 +2091,84 @@ def _emit_gauge_record(
         sealed=sealed,
     )
 
-    destination = Path(out_path)
-    if destination.suffix == ".json":
-        destination.write_text(json.dumps(record, indent=2), encoding="utf-8")
-    else:
-        destination.write_text(
-            yaml.safe_dump(
-                record, sort_keys=False, default_flow_style=False, width=100
-            ),
-            encoding="utf-8",
+    if jev or os.environ.get("SUPEROPTIX_JEV", "").strip() in {"1", "true", "yes"}:
+        record = _apply_optional_jev(
+            record,
+            results=results,
+            min_confidence=jev_min_confidence,
+            model=jev_model or os.environ.get("SUPEROPTIX_JEV_MODEL"),
         )
+
+    destination = write_record(record, out_path)
     console.print(f"📋 [green]Agent Quality Record:[/] {destination}")
+
+
+def _apply_optional_jev(
+    record: dict,
+    *,
+    results: list,
+    min_confidence: float = 0.75,
+    model: str | None = None,
+) -> dict:
+    """Attach Jev / System One disposition to an AQR (live or heuristic)."""
+    from superoptix.gauge import apply_jev_judgment
+    from superoptix.quality.jev import (
+        DEFAULT_MODEL_HINT,
+        digest_pack_bytes,
+        heuristic_disposition_from_evaluate,
+        typesafe_available,
+    )
+
+    scored = [r for r in results if r.get("status") in {"passed", "failed"}]
+    passed = sum(1 for r in scored if r.get("status") == "passed")
+    total = len(scored)
+    judgment = heuristic_disposition_from_evaluate(passed=passed, total=total)
+    pack = {
+        "id": "superoptix/evaluate-disposition@1",
+        "passed": passed,
+        "total": total,
+    }
+    # Prefer live Jev when the optional extra and API key are present.
+    if typesafe_available() and __import__("os").environ.get("TYPESAFE_API_KEY"):
+        try:
+            from superoptix.quality.typesafe_adapter import judge_evaluation_summary
+
+            summary = (
+                f"Agent evaluation: {passed}/{total} scenarios passed. "
+                f"Framework={record.get('x-superoptix', {}).get('framework')}. "
+                "Return Choice accept, warn, or reject for release disposition."
+            )
+            judgment = judge_evaluation_summary(
+                summary, model=model or DEFAULT_MODEL_HINT, pack=pack
+            )
+        except Exception as exc:
+            console.print(
+                f"⚠️  [yellow]Live Jev unavailable ({exc}); using heuristic disposition.[/]"
+            )
+            judgment = heuristic_disposition_from_evaluate(passed=passed, total=total)
+            # Attach pack digest even on heuristic path for replay honesty.
+            from dataclasses import replace
+
+            judgment = replace(
+                judgment,
+                model=model or DEFAULT_MODEL_HINT,
+                pack_digest=digest_pack_bytes(pack),
+            )
+    else:
+        from dataclasses import replace
+
+        judgment = replace(
+            judgment,
+            model=model or DEFAULT_MODEL_HINT,
+            pack_digest=digest_pack_bytes(pack),
+        )
+        if not typesafe_available():
+            console.print(
+                "[dim]Jev QC: heuristic disposition "
+                "(install superoptix[typesafe] + TYPESAFE_API_KEY for live Jev).[/]"
+            )
+
+    return apply_jev_judgment(record, judgment, min_confidence=min_confidence)
 
 
 def lint_agent(args):

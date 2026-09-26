@@ -69,6 +69,18 @@ frameworks-dspy = [
     "dspy>=3.3",  # PyPI package name
 ]
 
+# Optional Jev / System One (TypeSafe) quality-control adapters.
+# Pulls dspy[typesafe] which needs DSPy 3.4+. Not a core dependency.
+#   pip install "superoptix[typesafe]"
+#   # alias: pip install "superoptix[jev]"
+# Set TYPESAFE_API_KEY. Prefer pinning jev-1.13.0 (or newer versioned id).
+typesafe = [
+    "dspy[typesafe]>=3.4",
+]
+jev = [
+    "dspy[typesafe]>=3.4",
+]
+
 # OpenAI Agents SDK
 # NOTE: capped at <0.21 - openai-agents 0.22+ requires openai>=3.0, while
 # litellm (a DSPy dependency) still requires openai<3.0. Lift the cap once
@@ -571,6 +583,7 @@ markers = [
     "integration: marks tests as integration tests",
     "unit: marks tests as unit tests",
     "asyncio: marks async tests",
+    "typesafe: requires optional dspy[typesafe] / superoptix[typesafe] extra",
 ]
 
 [tool.coverage.run]

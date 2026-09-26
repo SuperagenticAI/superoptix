@@ -1668,6 +1668,30 @@ Use `super agent <command> --help` for more information on a specific command.
         action="store_true",
         help="Assert the held-out scenarios were closed to anything that tunes the agent.",
     )
+    test_parser.add_argument(
+        "--gauge-jev",
+        action="store_true",
+        help=(
+            "Optional Jev / System One quality-control on the emitted AQR: map "
+            "Choice accept/warn/reject to ship/hold/reject, pin assurance.judge, "
+            "and soft-hold on low confidence. Requires superoptix[typesafe] for "
+            "live Jev; otherwise uses a heuristic disposition. "
+            "See docs/guides/jev-quality-control.md."
+        ),
+    )
+    test_parser.add_argument(
+        "--gauge-jev-min-confidence",
+        type=float,
+        default=0.75,
+        metavar="FLOAT",
+        help="Emitter soft-hold floor for Choice confidence (default: 0.75).",
+    )
+    test_parser.add_argument(
+        "--gauge-jev-model",
+        default=None,
+        metavar="MODEL",
+        help="Versioned System One model id to pin (default: jev-1.13.0 or env).",
+    )
     test_parser.set_defaults(func=test_agent_bdd)
 
     # super agent tier-status
