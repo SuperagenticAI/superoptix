@@ -63,6 +63,9 @@ be structurally valid and substantively wrong, so the field is not optional.
 | `--gauge-out PATH` | off | Write the record. `.json` selects JSON, otherwise YAML |
 | `--gauge-tier {T0,T1,T2}` | `T1` | Risk tier the record claims |
 | `--gauge-sealed` | off | Assert the held-out scenarios were closed to anything that tunes the agent |
+| `--gauge-jev` | off | Optional Jev / System One QC (needs `superoptix[typesafe]` / `[jev]`) |
+| `--gauge-jev-min-confidence` | emitter default | Soft-hold when Choice accept confidence is below this |
+| `--gauge-jev-model` | env / default | Versioned judge model id pinned into `assurance.judge` |
 
 Record emission never fails an evaluation. A problem writing the file prints a
 warning and the evaluation result stands.

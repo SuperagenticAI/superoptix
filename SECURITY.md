@@ -42,11 +42,13 @@ Agent Card `name` is presentational metadata, not a stable identity
 ([arXiv:2609.27624](https://arxiv.org/abs/2609.27624)). Name-keyed peer routing
 caused wrong-peer dispatch in most OSS A2A integrations studied in that paper.
 
-SuperOptiX checklist (mirrors SuperQode):
+SuperOptiX checklist (mirrors SuperQode), citing the
+[A2A Agent Name Collision](https://arxiv.org/abs/2609.27624) paper:
 
 - Route and store peers by normalized URL (origin-bound ID), never by remote Agent Card name.
 - Treat card name as a local/presentational alias only.
-- Reject ambiguous alias lookups; never silently pick among colliding names.
+- Reject ambiguous alias lookups with `AmbiguousAgentName`; never silently pick among colliding names.
+- Keep `skills_from_card` / routing skill refs URL-keyed, not keyed by `card.name`.
 - Migrate any legacy name-keyed peer store to URL keys on load.
 - Keep connect/discover entrypoints URL-based.
 - Add regression tests: two peers, same card name, different URLs → first retained, second does not overwrite; alias get with two URLs raises.
