@@ -265,7 +265,9 @@ def heuristic_disposition_from_findings(
     )
 
 
-def judgment_from_choice_object(obj: Any, *, model: str | None = None) -> DispositionJudgment:
+def judgment_from_choice_object(
+    obj: Any, *, model: str | None = None
+) -> DispositionJudgment:
     """Normalize a DSPy Choice instance or Mapping into DispositionJudgment."""
     if isinstance(obj, DispositionJudgment):
         return obj

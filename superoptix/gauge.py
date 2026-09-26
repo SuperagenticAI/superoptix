@@ -334,9 +334,7 @@ def apply_jev_judgment(
     measures = list(record.get("measures") or [])
     if judged_measure_id and disposition.score is not None:
         # Only when caller names an existing judged registry id.
-        if judged_measure_id in MODEL_GRADED or judged_measure_id.startswith(
-            "answer."
-        ):
+        if judged_measure_id in MODEL_GRADED or judged_measure_id.startswith("answer."):
             measures.append(
                 {
                     "id": judged_measure_id,

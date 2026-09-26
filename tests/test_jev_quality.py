@@ -128,7 +128,9 @@ def test_heuristic_evaluate_and_card_review():
     assert card.choice == "accept"
     card_warn = heuristic_disposition_from_findings(
         score=70,
-        findings=[{"severity": "medium", "field": "securitySchemes", "issue": "absent"}],
+        findings=[
+            {"severity": "medium", "field": "securitySchemes", "issue": "absent"}
+        ],
     )
     assert card_warn.choice == "warn"
     card_reject = heuristic_disposition_from_findings(

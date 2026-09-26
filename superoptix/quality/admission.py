@@ -78,8 +78,10 @@ def admit_proposal(
             action = "reject"
         else:
             action = "hold"
-        rationale = soft or judgment.rationale or (
-            f"Referee Choice {judgment.choice!r} → AQR {verdict}"
+        rationale = (
+            soft
+            or judgment.rationale
+            or (f"Referee Choice {judgment.choice!r} → AQR {verdict}")
         )
         return AdmissionResult(
             action=action,

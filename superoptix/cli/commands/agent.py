@@ -2168,9 +2168,7 @@ def _apply_optional_jev(
                 "(install superoptix[typesafe] + TYPESAFE_API_KEY for live Jev).[/]"
             )
 
-    return apply_jev_judgment(
-        record, judgment, min_confidence=min_confidence
-    )
+    return apply_jev_judgment(record, judgment, min_confidence=min_confidence)
 
 
 def lint_agent(args):
