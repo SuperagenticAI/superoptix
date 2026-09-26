@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.13] - 2026-09-26
+
+### Changed
+
+- Soft-bump the locked DSPy version from 3.3.1 to 3.4.0 (PR #15). The floor
+  stays `dspy>=3.3` in `pyproject.toml`; this is a lock-only refresh.
+
+### Added
+
+- Optional Jev / System One quality control for Agent Quality Records (PR #16),
+  aligned with SuperGauge [RFC 0004](https://github.com/SuperagenticAI/supergauge/blob/main/rfcs/0004-jev-systemone-interop.md):
+  - Extras `superoptix[typesafe]` and alias `[jev]` (`dspy[typesafe]>=3.4`);
+    not a core dependency.
+  - CLI: `--gauge-jev`, `--gauge-jev-min-confidence`, `--gauge-jev-model`
+    (or `SUPEROPTIX_JEV=1`) on `super agent evaluate` with `--gauge-out`.
+  - Choice `accept` / `warn` / `reject` maps to AQR `ship` / `hold` / `reject`;
+    soft-hold when judged confidence is below the emitter minimum.
+  - L1 honesty: evaluation-only records stay L1; soft-hold and judged measures
+    do not invent deterministic gates (path to L2 still needs real policy probes).
+
 ### Added
 
 - Optional Jev / System One quality-control MVP for Agent Quality Records
