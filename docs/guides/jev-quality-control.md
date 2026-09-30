@@ -12,9 +12,10 @@ optional SuperOptiX adapters only.
 | **SuperGauge** | AQR schema, gate policy, assurance pinning, RFC 0004 / 0005, assurance-export packs |
 | **SuperOptiX** | Optional `dspy[typesafe]` adapters, Propose-Don't-Judge admission wiring, ReAnchor version tags, card-review typed Score/Choice, AQR emit when `--gauge-out` / `--gauge-jev` is used |
 
-Shared vocabulary: Choice `accept` / `warn` / `reject` maps to AQR decision
-`ship` / `hold` / `reject` (`warn` → hold / soft-hold). Judged scores, Noul, and
-confidence NEVER alone hard-gate ship.
+Choice `accept` supplies advice and retains an existing approval only when
+deterministic gates pass and the split is sealed. `warn` holds and `reject`
+rejects. Existing rejections remain in place. Release approval belongs to the
+release policy and its approver.
 
 ## Enable
 
@@ -42,18 +43,20 @@ super agent evaluate my-agent \
 ```
 
 Or set `SUPEROPTIX_JEV=1`. Without the typesafe extra or API key, SuperOptiX
-still writes a typed disposition from evaluate totals (heuristic) and pins
-`assurance.judge` with the requested model id and a pack digest. Live Jev
-replaces the heuristic when configured.
+writes a typed disposition from evaluate totals. The fallback is labelled
+`heuristic-evaluate`, its confidence is a proxy, and it creates no Jev judge
+pin. Live calls assess a pass-count and framework summary. This summary
+provides limited evidence about individual answers and tool trajectories.
 
 ## What gets written
 
-1. **Choice → decision**: accept→ship, warn→hold, reject→reject.
+1. **Choice advice**: acceptance retains prior ship approval with passing checks;
+   warning holds; rejection rejects. Evaluation records start on hold.
 2. **Soft-hold**: Choice accept with confidence below
    `--gauge-jev-min-confidence` becomes `decision.verdict: hold` with rationale.
    No gate entry is invented for confidence.
-3. **assurance.judge**: `id`, versioned `model`, recommended `pack_digest`.
-4. **x-superoptix.jev**: disposition payload, threshold version tag, L1 honesty note.
+3. **assurance.judge**: live-call `id`, versioned `model` and `pack_digest`.
+4. **x-superoptix.jev**: source, confidence kind, disposition and threshold version.
 
 Sample JSON (soft-hold):
 
@@ -76,10 +79,10 @@ Sample JSON (soft-hold):
 }
 ```
 
-## L1 honesty and path to L2
+## Conformance and release checks
 
 An evaluation-only SuperOptiX record remains **L1**. Soft-hold and judged
-measures do not create deterministic gates. A path to L2 still needs real
+measures do not create deterministic gates. A path to L2 needs
 deterministic gates (compose [SuperQode](https://superqode.dev) policy /
 SystemOne harness gates, or other policy probes). SuperOptiX does not invent
 fake gates.

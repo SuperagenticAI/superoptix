@@ -2051,10 +2051,10 @@ def _emit_gauge_record(
     record reports zero held-out scenarios, which is accurate and caps the
     record at a lower level.
 
-    When ``jev`` is true, apply optional System One quality-control: map Choice
-    accept/warn/reject to ship/hold/reject, pin assurance.judge, and soft-hold
-    on low confidence (SuperGauge RFC 0004). Live Jev requires
-    ``superoptix[typesafe]``; otherwise a heuristic disposition is used.
+    When ``jev`` is true, attach optional System One advice. Acceptance
+    retains approval only with passing checks. Warning holds and rejection
+    rejects. Live calls pin assurance.judge; heuristic fallbacks record their
+    source and confidence proxy separately (SuperGauge RFC 0004).
     """
     import os
     from pathlib import Path
@@ -2151,7 +2151,7 @@ def _apply_optional_jev(
 
             judgment = replace(
                 judgment,
-                model=model or DEFAULT_MODEL_HINT,
+                model=None,
                 pack_digest=digest_pack_bytes(pack),
             )
     else:
@@ -2159,7 +2159,7 @@ def _apply_optional_jev(
 
         judgment = replace(
             judgment,
-            model=model or DEFAULT_MODEL_HINT,
+            model=None,
             pack_digest=digest_pack_bytes(pack),
         )
         if not typesafe_available():

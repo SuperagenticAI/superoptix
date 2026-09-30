@@ -283,7 +283,7 @@ def apply_jev_judgment(
 ) -> dict[str, Any]:
     """Project a System One Disposition onto an existing Agent Quality Record.
 
-    Maps Choice accept/warn/reject → decision ship/hold/reject (warn → hold).
+    Records Choice advice. Acceptance preserves an existing approval; warn holds.
     Soft-holds accept when confidence is below ``min_confidence``. Pins
     ``assurance.judge`` when model / pack_digest are present. Never inserts a
     gate on confidence, Score, or Noul (SPEC §4.1 / RFC 0004).
@@ -307,12 +307,34 @@ def apply_jev_judgment(
     )
 
     decision = dict(record.get("decision") or {})
+    previous_verdict = decision.get("verdict")
+    gates = record.get("gates") or []
+    preservation_note = None
+    if previous_verdict == "reject":
+        verdict = "reject"
+        preservation_note = "Existing rejection retained."
+    elif verdict == "ship":
+        # Acceptance is advice. It can only retain approval already recorded.
+        if (
+            disposition.source.startswith("heuristic")
+            or previous_verdict != "ship"
+            or not gates
+            or any(
+                gate.get("result") != "pass" or gate.get("id") in MODEL_GRADED
+                for gate in gates
+            )
+            or not (record.get("task_set") or {}).get("sealed")
+        ):
+            verdict = "hold"
+            preservation_note = "Judge acceptance requires separate release approval and passing deterministic checks."
     decision["verdict"] = verdict
     parts = [
         p
         for p in (
+            decision.get("rationale"),
             disposition.rationale,
             soft_rationale,
+            preservation_note,
             (
                 f"Choice {disposition.choice!r} (confidence "
                 f"{disposition.confidence:.2f}) → AQR {verdict}."
@@ -323,13 +345,14 @@ def apply_jev_judgment(
     decision["rationale"] = " ".join(parts)
     record["decision"] = decision
 
-    model = disposition.model or DEFAULT_MODEL_HINT
-    record["assurance"] = pin_assurance_judge(
-        record.get("assurance"),
-        model=model,
-        pack_digest=disposition.pack_digest,
-        judge_id=disposition.judge_id,
-    )
+    if not disposition.source.startswith("heuristic"):
+        model = disposition.model or DEFAULT_MODEL_HINT
+        record["assurance"] = pin_assurance_judge(
+            record.get("assurance"),
+            model=model,
+            pack_digest=disposition.pack_digest,
+            judge_id=disposition.judge_id,
+        )
 
     measures = list(record.get("measures") or [])
     if judged_measure_id and disposition.score is not None:
@@ -348,11 +371,16 @@ def apply_jev_judgment(
     jev_meta: dict[str, Any] = {
         "disposition": disposition.to_dict(),
         "min_confidence": float(min_confidence),
+        "source": disposition.source,
+        "confidence_kind": "proxy"
+        if disposition.source.startswith("heuristic")
+        else "judge-reported",
         "choice_to_verdict": {
-            "accept": "ship",
+            "accept": "retain existing approval",
             "warn": "hold",
             "reject": "reject",
         },
+        "release_authorization": "acceptance cannot authorize ship",
         "l1_note": (
             "Emitter soft-hold and judged measures only. Path to L2 still needs "
             "deterministic gates (compose SuperQode or real policy probes)."

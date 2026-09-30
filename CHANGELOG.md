@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.14] - 2026-09-30
+
+### Fixed
+
+- Jev acceptance preserves existing holds and rejections. It can retain a ship
+  decision only when deterministic checks pass and the held-out split is sealed.
+- Heuristic evaluation fallbacks record their source and confidence proxy
+  separately and hold a previously approved release for review. Judge pins
+  identify live calls.
+- Existing decision rationale is retained when judge advice is attached.
+- CLI help and the quality-control guide describe the approval requirements.
+
+### Added
+
+- Regression coverage for release advice and unavailable judge services.
+
 ## [0.3.13] - 2026-09-26
 
 ### Changed

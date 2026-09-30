@@ -267,8 +267,9 @@ See [Agent Quality Records](https://superagenticai.github.io/superoptix/guides/a
 
 Install `superoptix[typesafe]` (alias `[jev]`; works with DSPy 3.4+ typesafe /
 Jev) and pass `--gauge-jev` with `--gauge-out`. Choice `accept` / `warn` /
-`reject` maps to AQR `ship` / `hold` / `reject`. Low judged confidence soft-holds;
-it never alone hard-gates ship. Assurance pins `assurance.judge`. Evaluation-only
+`reject` supplies release advice. Acceptance retains existing approval, warning
+holds, and rejection rejects. Live calls pin `assurance.judge`; heuristic
+fallbacks identify their source and confidence proxy in `x-superoptix.jev`. Evaluation-only
 records stay L1: soft-hold and judged measures do not invent deterministic gates.
 Aligned with SuperGauge [RFC 0004](https://github.com/SuperagenticAI/supergauge/blob/main/rfcs/0004-jev-systemone-interop.md).
 See [Jev quality control and AQR emit](https://superagenticai.github.io/superoptix/guides/jev-quality-control/).

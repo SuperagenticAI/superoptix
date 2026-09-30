@@ -1672,10 +1672,10 @@ Use `super agent <command> --help` for more information on a specific command.
         "--gauge-jev",
         action="store_true",
         help=(
-            "Optional Jev / System One quality-control on the emitted AQR: map "
-            "Choice accept/warn/reject to ship/hold/reject, pin assurance.judge, "
-            "and soft-hold on low confidence. Requires superoptix[typesafe] for "
-            "live Jev; otherwise uses a heuristic disposition. "
+            "Optional Jev advice on the emitted AQR. Acceptance retains existing "
+            "approval only with passing deterministic checks; warning holds and "
+            "rejection rejects. Live calls pin assurance.judge. Heuristic fallbacks "
+            "label their source and confidence proxy separately. "
             "See docs/guides/jev-quality-control.md."
         ),
     )
