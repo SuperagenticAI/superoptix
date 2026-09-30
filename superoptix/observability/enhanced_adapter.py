@@ -108,8 +108,11 @@ class ObservabilityEnhancedDSPyAdapter:
             try:
                 from openinference.instrumentation.dspy import DSPyInstrumentor
 
-                DSPyInstrumentor().instrument()
-                print("✅ Langfuse instrumentation enabled")
+                if "langfuse" in self.tracer.external_tracers:
+                    DSPyInstrumentor().instrument()
+                    print("✅ Langfuse instrumentation enabled")
+                else:
+                    print("⚠️  Langfuse credentials or SDK unavailable")
             except ImportError:
                 print("⚠️  Langfuse instrumentation not available")
 

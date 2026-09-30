@@ -242,6 +242,7 @@ def test_run_framework_agent_passes_model_config_to_crewai_pipeline(tmp_path: Pa
 
 
 def test_resolve_microsoft_client_config_for_google_genai(monkeypatch):
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
     monkeypatch.setenv("GOOGLE_API_KEY", "google-test-key")
 
     config = resolve_client_config(

@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from superoptix.observability import langfuse as langfuse_bridge
 from superoptix.observability.phoenix import log_phoenix_event
 
 
@@ -81,17 +82,9 @@ class SuperOptixTracer:
             print("⚠️  MLflow not available - install with: uv pip install mlflow")
 
         # Langfuse integration
-        try:
-            from langfuse import Langfuse
-
-            langfuse = Langfuse()
-            if langfuse.auth_check():
-                self.external_tracers["langfuse"] = langfuse
-                print(f"✅ Langfuse tracing enabled for agent {self.agent_id}")
-        except ImportError:
-            print("⚠️  Langfuse not available - install with: uv pip install langfuse")
-        except Exception:
-            print("⚠️  Langfuse authentication failed - check credentials")
+        langfuse = langfuse_bridge.setup_langfuse()
+        if langfuse is not None:
+            self.external_tracers["langfuse"] = langfuse
 
     @contextmanager
     def trace_operation(self, operation_name: str, component: str, **metadata):
@@ -116,7 +109,14 @@ class SuperOptixTracer:
             )
             self._add_trace_event(start_event)
 
-            yield event_id
+            with langfuse_bridge.operation(
+                self.external_tracers.get("langfuse"),
+                operation_name,
+                component,
+                self.agent_id,
+                metadata,
+            ):
+                yield event_id
 
             # Create success end event
             duration = (time.time() - start_time) * 1000
@@ -216,24 +216,16 @@ class SuperOptixTracer:
             except Exception as e:
                 print(f"Warning: MLflow logging failed: {e}")
 
-        # Langfuse integration
-        if "langfuse" in self.external_tracers:
-            try:
-                langfuse = self.external_tracers["langfuse"]
-                langfuse.trace(
-                    name=event.event_type,
-                    input=event.data,
-                    metadata={
-                        "component": event.component,
-                        "agent_id": self.agent_id,
-                        "event_id": event.event_id,
-                        "parent_id": event.parent_id,
-                        "status": event.status,
-                        "duration_ms": event.duration_ms,
-                    },
-                )
-            except Exception as e:
-                print(f"Warning: Langfuse logging failed: {e}")
+        # Operation start/end events are represented by their enclosing
+        # observation. Only standalone events need a separate observation.
+        if not event.event_type.endswith(("_start", "_end", "_error")):
+            langfuse_bridge.log_event(
+                self.external_tracers.get("langfuse"),
+                event.event_type,
+                self.agent_id,
+                event.component,
+                event.data,
+            )
 
         # Phoenix integration
         if "phoenix" in self.external_tracers:

@@ -1265,6 +1265,9 @@ def run_agent(args):
         # raise e
     finally:
         tracer.export_traces()
+        from superoptix.observability.langfuse import flush as flush_langfuse
+
+        flush_langfuse(tracer.external_tracers.get("langfuse"))
 
 
 def serve_agent(args):

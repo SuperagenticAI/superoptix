@@ -13,6 +13,7 @@ import dspy
 from dspy.utils.callback import BaseCallback
 
 from ..memory import AgentMemory
+from ..observability import langfuse as langfuse_bridge
 
 
 @dataclass
@@ -59,14 +60,9 @@ class SuperOptixTracer:
             pass
 
         # Langfuse integration
-        try:
-            from langfuse import Langfuse
-
-            langfuse = Langfuse()
-            if langfuse.auth_check():
-                self.external_tracers["langfuse"] = langfuse
-        except ImportError:
-            pass
+        langfuse = langfuse_bridge.setup_langfuse()
+        if langfuse is not None:
+            self.external_tracers["langfuse"] = langfuse
 
     @contextmanager
     def trace_operation(self, operation_name: str, component: str, **metadata):
@@ -91,7 +87,14 @@ class SuperOptixTracer:
             )
             self._add_trace_event(start_event)
 
-            yield event_id
+            with langfuse_bridge.operation(
+                self.external_tracers.get("langfuse"),
+                operation_name,
+                component,
+                self.agent_id,
+                metadata,
+            ):
+                yield event_id
 
             # Create success end event
             duration = (time.time() - start_time) * 1000
@@ -163,23 +166,14 @@ class SuperOptixTracer:
             except Exception:
                 pass  # Don't fail on tracing errors
 
-        # Langfuse integration
-        if "langfuse" in self.external_tracers:
-            try:
-                langfuse = self.external_tracers["langfuse"]
-                langfuse.trace(
-                    name=event.event_type,
-                    input=event.data,
-                    metadata={
-                        "component": event.component,
-                        "agent_id": self.agent_id,
-                        "event_id": event.event_id,
-                        "parent_id": event.parent_id,
-                        "status": event.status,
-                    },
-                )
-            except Exception:
-                pass  # Don't fail on tracing errors
+        if not event.event_type.endswith(("_start", "_end", "_error")):
+            langfuse_bridge.log_event(
+                self.external_tracers.get("langfuse"),
+                event.event_type,
+                self.agent_id,
+                event.component,
+                event.data,
+            )
 
     def get_trace_summary(self) -> Dict[str, Any]:
         """Get comprehensive trace summary."""
@@ -393,7 +387,8 @@ class ObservabilityEnhancedDSPyAdapter:
             try:
                 from openinference.instrumentation.dspy import DSPyInstrumentor
 
-                DSPyInstrumentor().instrument()
+                if "langfuse" in self.tracer.external_tracers:
+                    DSPyInstrumentor().instrument()
             except ImportError:
                 print("Warning: Langfuse instrumentation not available")
 

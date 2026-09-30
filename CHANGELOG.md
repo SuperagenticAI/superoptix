@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.15] - 2026-09-30
+
+### Added
+
+- Optional Langfuse SDK v4 observability bridge with nested span hierarchy,
+  structural metadata export, payload masking, and client flush on CLI exit.
+- Contract test coverage for Langfuse observation nesting, safe content masking,
+  and error reporting.
+
+### Changed
+
+- Update Langfuse guides and agent examples for SDK v4 setup and DSPy
+  OpenInference instrumentation.
+
 ## [0.3.14] - 2026-09-30
 
 ### Fixed

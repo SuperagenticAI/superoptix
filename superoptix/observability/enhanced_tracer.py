@@ -15,6 +15,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from superoptix.observability import langfuse as langfuse_bridge
 from superoptix.observability.phoenix import setup_phoenix
 from superoptix.observability.tracer import SuperOptixTracer
 
@@ -143,21 +144,10 @@ class EnhancedSuperOptixTracer(SuperOptixTracer):
 
         # Langfuse integration
         if backend in ["langfuse", "all"]:
-            try:
-                from langfuse import Langfuse
-
-                langfuse = Langfuse()
-                if langfuse.auth_check():
-                    self.external_tracers["langfuse"] = langfuse
-                    logger.info(
-                        f"✅ Langfuse tracing enabled for agent {self.agent_id}"
-                    )
-            except ImportError:
-                logger.warning(
-                    "⚠️  Langfuse not available - install with: uv pip install langfuse"
-                )
-            except Exception:
-                logger.warning("⚠️  Langfuse authentication failed - check credentials")
+            langfuse = langfuse_bridge.setup_langfuse()
+            if langfuse is not None:
+                self.external_tracers["langfuse"] = langfuse
+                logger.info("Langfuse tracing enabled for agent %s", self.agent_id)
 
         # Phoenix integration
         if backend in ["phoenix", "all"]:
@@ -449,19 +439,6 @@ class EnhancedSuperOptixTracer(SuperOptixTracer):
             except Exception as e:
                 logger.warning(f"MLflow logging failed: {e}")
 
-        # Langfuse
-        if "langfuse" in self.external_tracers:
-            try:
-                langfuse = self.external_tracers["langfuse"]
-                langfuse.generation(
-                    name=f"{metrics.agent_name}_run",
-                    metadata=metrics.to_dict(),
-                    usage={"total": metrics.tokens_used or 0},
-                    cost=metrics.cost_usd,
-                )
-            except Exception as e:
-                logger.warning(f"Langfuse logging failed: {e}")
-
         # Weights & Biases
         if "wandb" in self.external_tracers:
             try:
@@ -510,17 +487,6 @@ class EnhancedSuperOptixTracer(SuperOptixTracer):
                         mlflow.log_text(metrics.best_prompt, "best_prompt.txt")
             except Exception as e:
                 logger.warning(f"MLflow GEPA logging failed: {e}")
-
-        # Langfuse
-        if "langfuse" in self.external_tracers:
-            try:
-                langfuse = self.external_tracers["langfuse"]
-                langfuse.trace(
-                    name=f"{metrics.agent_name}_gepa_optimization",
-                    metadata=metrics.to_dict(),
-                )
-            except Exception as e:
-                logger.warning(f"Langfuse GEPA logging failed: {e}")
 
         # Weights & Biases
         if "wandb" in self.external_tracers:
