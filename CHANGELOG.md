@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.16] - 2026-09-30
+
+### Fixed
+
+- Enable DSPy OpenInference instrumentation for CLI runs using
+  `--observe langfuse` when the optional instrumentor is installed.
+- Preserve OpenTelemetry context in the DSPy timeout worker so model calls
+  appear beneath the agent observation in Langfuse.
+
+### Added
+
+- Regression coverage for context propagation into the timeout worker.
+
 ## [0.3.15] - 2026-09-30
 
 ### Added
@@ -904,4 +917,4 @@ Performance improvements and optimizations
 
 **🎯 Stay Updated**: Watch our repository and join our community to stay informed about the latest releases and features!
 
-**🤝 Contribute**: Help us build the future of agentic AI by contributing to SuperOptiX! 
+**🤝 Contribute**: Help us build the future of agentic AI by contributing to SuperOptiX!

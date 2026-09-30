@@ -39,10 +39,11 @@ To record DSPy model calls, install the DSPy OpenInference instrumentor:
 uv pip install openinference-instrumentation-dspy
 ```
 
-Set `observability.enable_langfuse: true` in the configuration used by
-`ObservabilityEnhancedDSPyAdapter`. The adapter enables instrumentation when a
-Langfuse client is configured. Agent CLI operations and DSPy spans share the
-active OpenTelemetry trace when DSPy runs inside the traced operation. See
+The CLI enables this instrumentor automatically for a DSPy agent run with
+`--observe langfuse` when the package is installed. For direct use of
+`ObservabilityEnhancedDSPyAdapter`, set `observability.enable_langfuse: true`
+in its configuration. Agent CLI operations and DSPy spans then share the
+active OpenTelemetry trace. See
 [Langfuse's DSPy integration](https://langfuse.com/integrations/frameworks/dspy).
 
 ## Data controls
