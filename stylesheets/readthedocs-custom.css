@@ -1,0 +1,46 @@
+/* Show right sidebar with TOC */
+.wy-nav-content {
+    max-width: none !important;
+    margin-right: 300px !important;
+}
+
+/* Force right sidebar to show */
+.rst-content .document {
+    max-width: none !important;
+}
+
+/* Right sidebar styling */
+.wy-nav-side.shift {
+    width: 300px !important;
+}
+
+/* Improve readability */
+.wy-nav-content-wrap {
+    margin-left: 300px !important;
+}
+
+/* Ensure TOC is visible */
+.toc-tree {
+    display: block !important;
+}
+
+/* Page TOC styling */
+.page-toc {
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    width: 250px !important;
+    height: 100vh !important;
+    overflow-y: auto !important;
+    padding: 20px !important;
+    background: #fcfcfc !important;
+    border-left: 1px solid #e1e4e5 !important;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .page-toc {
+        background: #1e1e1e !important;
+        border-left-color: #404040 !important;
+    }
+}
