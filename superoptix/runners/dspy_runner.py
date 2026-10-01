@@ -8,6 +8,7 @@ import sys
 import threading
 import time
 import warnings
+from contextvars import copy_context
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict
@@ -1175,10 +1176,11 @@ class DSPyRunner:
             return program(**kwargs)
 
         state: dict[str, Any] = {"done": False, "result": None, "error": None}
+        execution_context = copy_context()
 
         def _target():
             try:
-                state["result"] = program(**kwargs)
+                state["result"] = execution_context.run(program, **kwargs)
             except Exception as exc:
                 state["error"] = exc
             finally:

@@ -1078,6 +1078,14 @@ def run_agent(args):
     except ImportError:
         tracer = SuperOptixTracer(agent_id=args.name)
 
+    if (
+        getattr(args, "framework", "dspy") == "dspy"
+        and "langfuse" in tracer.external_tracers
+    ):
+        from superoptix.observability.langfuse import instrument_dspy
+
+        instrument_dspy()
+
     try:
         with tracer.trace_operation(
             "agent_run", f"agent.{args.name}", agent_name=args.name, query=args.goal

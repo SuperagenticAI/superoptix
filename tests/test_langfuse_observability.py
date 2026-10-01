@@ -1,12 +1,14 @@
 """Contract tests for the optional Langfuse SDK v4 bridge."""
 
 from contextlib import contextmanager
+from contextvars import ContextVar
 from types import SimpleNamespace
 
 import pytest
 
 from superoptix.observability import langfuse as bridge
 from superoptix.observability.enhanced_tracer import EnhancedSuperOptixTracer
+from superoptix.runners.dspy_runner import DSPyRunner
 
 
 class FakeClient:
@@ -38,8 +40,10 @@ def make_tracer(monkeypatch):
     client = FakeClient()
     monkeypatch.setattr(bridge, "setup_langfuse", lambda: client)
     tracer = EnhancedSuperOptixTracer(
-        "demo", enable_external_tracing=True,
-        observability_backend="langfuse", auto_load=False,
+        "demo",
+        enable_external_tracing=True,
+        observability_backend="langfuse",
+        auto_load=False,
     )
     return tracer, client
 
@@ -49,10 +53,14 @@ def test_nested_operations_and_safe_content(monkeypatch):
     tracer, client = make_tracer(monkeypatch)
     with tracer.trace_operation("agent_run", "agent.demo", query="private query"):
         with tracer.trace_operation("retrieve", "retriever", operation="retrieve"):
-            tracer.add_event("tool_result", "tool", {"status": "success", "output": "secret"})
+            tracer.add_event(
+                "tool_result", "tool", {"status": "success", "output": "secret"}
+            )
 
     assert [record["name"] for record in client.records] == [
-        "agent_run", "retrieve", "tool_result"
+        "agent_run",
+        "retrieve",
+        "tool_result",
     ]
     assert client.records[0]["as_type"] == "agent"
     assert client.records[1]["parent"] is client.records[0]
@@ -89,8 +97,10 @@ def test_exporter_failure_does_not_fail_agent(monkeypatch):
 
     monkeypatch.setattr(bridge, "setup_langfuse", BrokenClient)
     tracer = EnhancedSuperOptixTracer(
-        "demo", enable_external_tracing=True,
-        observability_backend="langfuse", auto_load=False,
+        "demo",
+        enable_external_tracing=True,
+        observability_backend="langfuse",
+        auto_load=False,
     )
     with tracer.trace_operation("agent_run", "agent.demo"):
         tracer.add_event("progress", "agent.demo", {"status": "success"})
@@ -102,15 +112,33 @@ def test_exporter_failure_does_not_fail_agent(monkeypatch):
 def test_otel_payload_mask_preserves_metrics(monkeypatch):
     pytest.importorskip("langfuse")
     monkeypatch.delenv("SUPEROPTIX_LANGFUSE_CAPTURE_CONTENT", raising=False)
-    params = SimpleNamespace(spans={
-        "span": SimpleNamespace(attributes={
-            "input.value": "private prompt",
-            "gen_ai.prompt.0.content": "private prompt",
-            "gen_ai.usage.input_tokens": 12,
-        }),
-    })
+    params = SimpleNamespace(
+        spans={
+            "span": SimpleNamespace(
+                attributes={
+                    "input.value": "private prompt",
+                    "gen_ai.prompt.0.content": "private prompt",
+                    "gen_ai.usage.input_tokens": 12,
+                }
+            ),
+        }
+    )
     result = bridge.mask_otel_spans(params=params)
     deleted = result.span_patches["span"].delete_attributes
     assert "input.value" in deleted
     assert "gen_ai.prompt.0.content" in deleted
     assert "gen_ai.usage.input_tokens" not in deleted
+
+
+def test_dspy_timeout_worker_preserves_trace_context(monkeypatch):
+    monkeypatch.setenv("SUPEROPTIX_DSPY_PROGRAM_TIMEOUT_SEC", "2")
+    trace_context = ContextVar("trace_context")
+    token = trace_context.set("parent-trace")
+    try:
+        runner = DSPyRunner.__new__(DSPyRunner)
+        assert (
+            runner._run_program_with_timeout(lambda: trace_context.get(), {})
+            == "parent-trace"
+        )
+    finally:
+        trace_context.reset(token)

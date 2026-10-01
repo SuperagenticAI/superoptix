@@ -9,6 +9,29 @@ from typing import Any
 logger = logging.getLogger(__name__)
 _clients = {}
 _clients_lock = threading.Lock()
+_dspy_instrumented = False
+_instrument_lock = threading.Lock()
+
+
+def instrument_dspy() -> bool:
+    """Enable DSPy model spans when its optional instrumentor is installed."""
+    global _dspy_instrumented
+    with _instrument_lock:
+        if _dspy_instrumented:
+            return True
+        try:
+            from openinference.instrumentation.dspy import DSPyInstrumentor
+
+            DSPyInstrumentor().instrument()
+            _dspy_instrumented = True
+            return True
+        except ImportError:
+            logger.warning(
+                "DSPy Langfuse spans unavailable: install openinference-instrumentation-dspy"
+            )
+        except Exception:
+            logger.exception("DSPy Langfuse instrumentation failed")
+    return False
 
 
 def mask_otel_spans(*, params):
