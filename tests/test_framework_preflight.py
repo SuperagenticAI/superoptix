@@ -117,3 +117,29 @@ def test_deepagents_ollama_gets_context_window():
     kw = chat_model_kwargs({"api_base": "http://h:11434/v1"}, "ollama:qwen2.5:1.5b")
     assert kw == {"base_url": "http://h:11434", "num_ctx": 16384}
     assert chat_model_kwargs({}, "openai:gpt-test") == {}
+
+
+def test_minimal_dspy_serve_maps_a2a_query_to_playbook_input(tmp_path):
+    from superoptix.cli.commands.agent import _MinimalDSPyServePipeline
+
+    path = tmp_path / "dev_playbook.yaml"
+    path.write_text(
+        yaml.safe_dump(
+            {
+                "spec": {
+                    "input_fields": [{"name": "feature_requirement"}],
+                    "output_fields": [{"name": "implementation"}],
+                }
+            }
+        )
+    )
+
+    class Module:
+        @staticmethod
+        def build_program():
+            return lambda feature_requirement: {"implementation": feature_requirement}
+
+    pipeline = _MinimalDSPyServePipeline(Module, path)
+    assert pipeline.run(query="add two numbers") == {
+        "implementation": "add two numbers"
+    }
