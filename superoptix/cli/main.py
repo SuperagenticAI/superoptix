@@ -145,7 +145,7 @@ warnings.filterwarnings(
 import asyncio
 import sys
 
-from argparse import ArgumentParser, RawDescriptionHelpFormatter
+from argparse import SUPPRESS, ArgumentParser, RawDescriptionHelpFormatter
 
 from rich.align import Align
 from rich.console import Console
@@ -181,6 +181,7 @@ from superoptix.cli.commands.agent import (
     serve_agent,
     show_tier_status,
     test_agent_bdd,
+    test_agent_gate,
 )
 from superoptix.cli.commands.dataset import (
     preview_dataset,
@@ -227,6 +228,33 @@ from superoptix.cli.commands.superspec import (
 
 
 console = Console()
+
+
+def _add_gauge_quality_args(parser) -> None:
+    """SuperGauge 2.0 flags shared by evaluate (opt-in) and test (defaults on)."""
+    parser.add_argument(
+        "--gauge-gates",
+        action="store_true",
+        help=(
+            "Add deterministic SuperGauge gates (output.parse_rate, "
+            "reliability.beats_trivial_baseline, reliability.pass_hat_k, "
+            "tool.correctness, trajectory.valid where data exists) and a "
+            "deterministic decision to the record."
+        ),
+    )
+    parser.add_argument(
+        "--k",
+        type=int,
+        default=1,
+        metavar="N",
+        help="Independent attempts for reliability.pass_hat_k (needs --gauge-out).",
+    )
+    parser.add_argument(
+        "--gate-floor",
+        action="append",
+        metavar="ID=VALUE",
+        help="Override a gate floor, e.g. --gate-floor output.parse_rate=0.99.",
+    )
 
 
 def show_comprehensive_docs(args):
@@ -1352,6 +1380,21 @@ Use `super agent <command> --help` for more information on a specific command.
         action="store_true",
         help="Clear DSPy cache before optimization to see real GEPA iterations (recommended for demos)",
     )
+    optimize_parser.add_argument(
+        "--gauge-out",
+        metavar="PATH",
+        default=None,
+        help=(
+            "After a successful DSPy GEPA run, evaluate the optimized agent on the "
+            "sealed held-out split and write a SuperGauge Agent Quality Record."
+        ),
+    )
+    optimize_parser.add_argument(
+        "--gauge-tier",
+        choices=["T0", "T1", "T2"],
+        default="T1",
+        help="Risk tier for the emitted record (default: T1)",
+    )
     optimize_parser.set_defaults(func=optimize_agent)
 
     # super agent dataset (NEW! Dataset management commands)
@@ -1692,7 +1735,102 @@ Use `super agent <command> --help` for more information on a specific command.
         metavar="MODEL",
         help="Versioned System One model id to pin (default: jev-1.13.0 or env).",
     )
+    _add_gauge_quality_args(test_parser)
     test_parser.set_defaults(func=test_agent_bdd)
+
+    # super agent test: CI gate over evaluate (2.0)
+    gate_parser = agent_subparsers.add_parser(
+        "test",
+        help="CI quality gate: evaluate, emit a SuperGauge record, exit non-zero unless ship.",
+        description=(
+            "Thin wrapper over 'super agent evaluate' for CI. Defaults to the sealed "
+            "held-out split from the last GEPA run, deterministic gates and a "
+            "built-in SuperGauge L2 conformance check. Exit 0 only when the "
+            "release is allowed (level >= --gate and >= L2, ship verdict, named "
+            "actor, passing gates), as SuperGauge check.py --require-ship; 1 otherwise."
+        ),
+        formatter_class=RawDescriptionHelpFormatter,
+    )
+    gate_parser.add_argument("name", help="Name of the agent to test")
+    gate_parser.add_argument(
+        "--engine", choices=["dspy", "optimas"], default="dspy", help=SUPPRESS
+    )
+    gate_parser.add_argument(
+        "--k",
+        type=int,
+        default=1,
+        metavar="N",
+        help="Independent attempts for reliability.pass_hat_k (default 1: not reported).",
+    )
+    gate_parser.add_argument(
+        "--gate",
+        choices=["L1", "L2", "L3", "L4"],
+        default="L2",
+        help="Minimum SuperGauge conformance level (default: L2).",
+    )
+    gate_parser.add_argument(
+        "--jev",
+        dest="gauge_jev",
+        action="store_true",
+        help="Advisory Jev review (live only). Can soft-hold or reject, never ship.",
+    )
+    gate_parser.add_argument(
+        "--jev-min-confidence",
+        dest="gauge_jev_min_confidence",
+        type=float,
+        default=0.75,
+        metavar="FLOAT",
+        help="Soft-hold floor for Jev Choice confidence (default: 0.75).",
+    )
+    gate_parser.add_argument(
+        "--jev-model",
+        dest="gauge_jev_model",
+        default=None,
+        metavar="MODEL",
+        help="Versioned Jev model id to request (default: jev-1.13.0 or env).",
+    )
+    gate_parser.add_argument(
+        "--gauge-out",
+        metavar="PATH",
+        default="agent-quality-record.yaml",
+        help="Where to write the record (default: agent-quality-record.yaml).",
+    )
+    gate_parser.add_argument(
+        "--gauge-tier", choices=["T0", "T1", "T2"], default="T1", help="Risk tier."
+    )
+    gate_parser.add_argument(
+        "--gate-floor",
+        action="append",
+        metavar="ID=VALUE",
+        help="Override a gate floor, e.g. --gate-floor output.parse_rate=0.99.",
+    )
+    gate_parser.add_argument(
+        "--checker",
+        metavar="PATH",
+        default=None,
+        help=(
+            "Also run a pinned SuperGauge conformance/check.py on the record "
+            "(env SUPERGAUGE_CHECKER)."
+        ),
+    )
+    gate_parser.add_argument(
+        "--actor",
+        default=None,
+        help=(
+            "Named release actor recorded in decision.actor (default: "
+            "SUPEROPTIX_RELEASE_ACTOR, GITHUB_ACTOR, then USER)."
+        ),
+    )
+    gate_parser.add_argument("-v", "--verbose", action="store_true")
+    gate_parser.set_defaults(
+        func=test_agent_gate,
+        gauge_sealed=True,
+        gauge_gates=True,
+        auto_tune=False,
+        ignore_checks=False,
+        format="table",
+        save_report=None,
+    )
 
     # super agent tier-status
     tier_status_parser = agent_subparsers.add_parser(

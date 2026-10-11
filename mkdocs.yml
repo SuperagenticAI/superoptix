@@ -111,6 +111,7 @@ nav:
       - '⭐ Golden Workflow': guides/golden-workflow.md
       - '🧭 Agent Quality Records': guides/agent-quality-record.md
       - 'Jev quality control + AQR': guides/jev-quality-control.md
+      - 'Testing agents with SuperOptiX': guides/testing-agents.md
       - '🌐 Multi-Framework Quick Start': tutorials/multi-framework-quickstart.md
       - '⚙️ Setup & Installation': setup.md
       - '🛠️ Troubleshooting by Symptom': guides/troubleshooting-by-symptom.md

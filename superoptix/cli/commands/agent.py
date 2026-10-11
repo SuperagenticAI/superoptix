@@ -88,6 +88,7 @@ class _MinimalDSPyBDDEvaluator:
             playbook = yaml.safe_load(f) or {}
 
         spec_data = playbook.get("spec", playbook)
+        self._spec_data = spec_data if isinstance(spec_data, dict) else {}
         scenarios = []
         if isinstance(spec_data, dict):
             feature_specs = spec_data.get("feature_specifications", {})
@@ -340,6 +341,51 @@ class _MinimalDSPyBDDEvaluator:
             "Consider using a more capable model (qwen3.5:9b or gpt-4).",
         ]
 
+    @property
+    def _output_contract(self):
+        from superoptix.gauge_checks import declared_output_contract
+
+        return declared_output_contract(getattr(self, "_spec_data", {}) or {})
+
+    def _gauge_fields(self, scenario: dict, inputs: dict, expected: dict) -> dict:
+        """Per-scenario data the SuperGauge record needs (2.0).
+
+        ``baseline_passed`` scores the declared trivial baseline (echo the
+        input back) under the same success condition as the agent, with no
+        model call.
+        """
+        from superoptix.optimizers.holdout import example_id, scenario_identity
+
+        echo = " ".join(str(v) for v in (inputs or {}).values())
+        fields = {
+            "sid": example_id(scenario_identity(scenario)),
+            "canary": bool(scenario.get("canary")),
+            "baseline_passed": bool(self._evaluate(echo, expected).get("passed")),
+            "success_condition": "superoptix.bdd.minimal@1",
+        }
+        if scenario.get("expected_tools"):
+            fields["expected_tools"] = list(scenario["expected_tools"])
+        if isinstance(scenario.get("trajectory"), dict):
+            fields["trajectory_constraints"] = dict(scenario["trajectory"])
+        return fields
+
+    def _gauge_result_fields(self, result) -> dict:
+        from superoptix.gauge_checks import output_parsed, tool_calls_from_trajectory
+
+        fields = {}
+        contract = self._output_contract
+        if contract:
+            fields["parsed"] = output_parsed(result, contract)
+        trajectory = None
+        if isinstance(result, dict):
+            trajectory = result.get("trajectory")
+        else:
+            trajectory = getattr(result, "trajectory", None)
+        calls = tool_calls_from_trajectory(trajectory)
+        if calls is not None:
+            fields["tool_calls"] = calls
+        return fields
+
     def run_bdd_test_suite(self, auto_tune: bool = False, ignore_checks: bool = False):
         del auto_tune  # minimal-mode adapter currently does not use auto-tune knobs
 
@@ -363,6 +409,7 @@ class _MinimalDSPyBDDEvaluator:
             scenario_name = scenario.get("name", "unnamed_specification")
             description = scenario.get("description", "No description provided")
 
+            gauge_fields = self._gauge_fields(scenario, inputs, expected_outputs)
             try:
                 result = self.run(**inputs)
                 actual_text = self._actual_to_text(result)
@@ -372,9 +419,11 @@ class _MinimalDSPyBDDEvaluator:
                     is_pass = True
                 if is_pass:
                     passed += 1
+                gauge_fields.update(self._gauge_result_fields(result))
 
                 detailed_results.append(
                     {
+                        **gauge_fields,
                         "scenario_name": scenario_name,
                         "description": description,
                         "passed": is_pass,
@@ -391,8 +440,11 @@ class _MinimalDSPyBDDEvaluator:
                     }
                 )
             except Exception as e:
+                if self._output_contract:
+                    gauge_fields["parsed"] = False
                 detailed_results.append(
                     {
+                        **gauge_fields,
                         "scenario_name": scenario_name,
                         "description": description,
                         "passed": bool(ignore_checks),
@@ -2013,9 +2065,13 @@ feature_specifications:
         # only where the run produced them, so a single-pass evaluation carries
         # no reliability measure and reaches a lower conformance level.
         gauge_out = getattr(args, "gauge_out", None)
+        gates_on = bool(getattr(args, "gauge_gates", False))
         if gauge_out:
+            repeats = _repeat_runs_for_reliability(
+                pipeline, args, runner.playbook_path, detailed_results
+            )
             try:
-                _emit_gauge_record(
+                record = _emit_gauge_record(
                     out_path=gauge_out,
                     agent_name=agent_name,
                     playbook_path=runner.playbook_path,
@@ -2028,9 +2084,18 @@ feature_specifications:
                         getattr(args, "gauge_jev_min_confidence", 0.75) or 0.75
                     ),
                     jev_model=getattr(args, "gauge_jev_model", None),
+                    repeat_results=repeats,
+                    deterministic_gates=gates_on,
+                    floors=_parse_gate_floors(getattr(args, "gate_floor", None)),
+                    holdout_path=getattr(runner, "holdout_path", None),
+                    checks_ignored=bool(getattr(args, "ignore_checks", False)),
+                    jev_live_only=bool(getattr(args, "gauge_jev_live_only", False)),
+                    actor=getattr(args, "actor", None),
                 )
             except Exception as exc:  # emission must never fail an evaluation
                 console.print(f"⚠️  [yellow]Record not written:[/] {exc}")
+                record = None
+            args._gauge_record = record
 
     except FileNotFoundError:
         console.print(f"❌ [bold red]Agent '{agent_name}' not found.[/]")
@@ -2054,7 +2119,14 @@ def _emit_gauge_record(
     jev: bool = False,
     jev_min_confidence: float = 0.75,
     jev_model: str | None = None,
-) -> None:
+    repeat_results: list | None = None,
+    deterministic_gates: bool = False,
+    floors: dict | None = None,
+    holdout_path=None,
+    checks_ignored: bool = False,
+    jev_live_only: bool = False,
+    actor: str | None = None,
+) -> dict:
     """Write an Agent Quality Record for a completed BDD evaluation.
 
     Scenarios are the task set; a scenario tagged `held-out` in the playbook
@@ -2072,7 +2144,8 @@ def _emit_gauge_record(
 
     import yaml
 
-    from superoptix.gauge import build_record, write_record
+    from superoptix.gauge import assemble_record, write_record
+    from superoptix.optimizers.holdout import read_holdout_record
 
     playbook_file = Path(playbook_path)
     with open(playbook_file, encoding="utf-8") as handle:
@@ -2082,27 +2155,59 @@ def _emit_gauge_record(
     feature_specs = spec_data.get("feature_specifications", {}) or {}
     scenarios = feature_specs.get("scenarios", []) or []
 
-    results = [
-        {
-            "id": str(item.get("scenario") or item.get("name") or index),
-            "status": "passed" if item.get("passed") else "failed",
-            "usage": item.get("usage") or {},
-        }
-        for index, item in enumerate(detailed_results)
-    ]
+    results = _gauge_results(detailed_results)
+    runs = [results] + [_gauge_results(run) for run in (repeat_results or [])]
 
-    record = build_record(
+    from superoptix.gauge import ledger_path_for, write_ledger
+
+    holdout_record = read_holdout_record(holdout_path) if holdout_path else None
+    ledger_file = ledger_path_for(out_path)
+    ledger_runs = [
+        [
+            {**row, "output": item.get("actual_output"), "error": item.get("error")}
+            for row, item in zip(_gauge_results(run), run)
+        ]
+        for run in [detailed_results] + list(repeat_results or [])
+    ]
+    ledger_events = write_ledger(ledger_file, ledger_runs)
+    record = assemble_record(
         agent_name=agent_name,
         playbook_path=playbook_file,
         playbook=playbook,
         scenarios=scenarios,
-        results=results,
+        runs=runs,
         framework=engine,
         tier=tier,
-        sealed=sealed,
+        seal_requested=sealed,
+        holdout_record=holdout_record,
+        deterministic_gates=deterministic_gates,
+        actor=actor,
+        floors=floors,
+        checks_ignored=checks_ignored,
+        ledger=str(ledger_file),
+        ledger_events=ledger_events,
     )
+    holdout_meta = (record.get("x-superoptix") or {}).get("holdout")
+    if sealed and holdout_meta and not holdout_meta.get("sealed"):
+        console.print(
+            f"⚠️  [yellow]Held-out split not sealed:[/] {holdout_meta.get('reason')}"
+        )
 
-    if jev or os.environ.get("SUPEROPTIX_JEV", "").strip() in {"1", "true", "yes"}:
+    use_jev = jev or os.environ.get("SUPEROPTIX_JEV", "").strip() in {
+        "1",
+        "true",
+        "yes",
+    }
+    if use_jev and jev_live_only:
+        from superoptix.quality.jev import typesafe_available
+
+        if not (typesafe_available() and os.environ.get("TYPESAFE_API_KEY")):
+            console.print(
+                "[dim]Jev skipped: live Jev needs superoptix[typesafe] and "
+                "TYPESAFE_API_KEY. The gate verdict comes from deterministic checks.[/]"
+            )
+            use_jev = False
+    if use_jev:
         record = _apply_optional_jev(
             record,
             results=results,
@@ -2112,6 +2217,176 @@ def _emit_gauge_record(
 
     destination = write_record(record, out_path)
     console.print(f"📋 [green]Agent Quality Record:[/] {destination}")
+    return record
+
+
+def test_agent_gate(args):
+    """``super agent test``: evaluate, emit a record, exit non-zero unless ship."""
+    import os
+    import sys
+
+    from superoptix.gauge_conformance import gate_exit_code, run_upstream_checker
+
+    args.gauge_jev_live_only = True
+    args._gauge_record = None
+    test_agent_bdd(args)
+    record = getattr(args, "_gauge_record", None)
+    if not record:
+        console.print("❌ [bold red]No Agent Quality Record was produced.[/]")
+        sys.exit(1)
+
+    level = getattr(args, "gate", "L2")
+    code, reached, failures = gate_exit_code(record, level)
+    verdict = (record.get("decision") or {}).get("verdict")
+    console.print(
+        f"🧾 Verdict [bold]{verdict}[/]; built-in precheck level {reached or 'none'} "
+        f"(required {level})."
+    )
+    for lv in ("L1", "L2", "release"):
+        for failure in failures[lv]:
+            console.print(f"   [yellow]{lv}[/] {failure}")
+    rationale = (record.get("decision") or {}).get("rationale")
+    if rationale:
+        console.print(f"   [dim]{rationale}[/]")
+
+    checker = getattr(args, "checker", None) or os.environ.get("SUPERGAUGE_CHECKER")
+    if checker:
+        upstream = run_upstream_checker(checker, args.gauge_out, level)
+        console.print(f"🔎 SuperGauge checker exit code: {upstream}")
+        code = upstream if upstream else code
+    sys.exit(code)
+
+
+def _emit_optimize_record(args, agent_name: str, optimization_result: dict) -> None:
+    """``optimize --gauge-out``: evaluate the optimized agent and emit a record.
+
+    The record comes from a normal evaluation of the optimized program with
+    the sealed held-out split and deterministic gates. GEPA's own train and
+    held-out scores are optimizer metrics, not SuperGauge measures, so they go
+    under ``x-superoptix.optimization``.
+    """
+    from types import SimpleNamespace
+
+    from superoptix.gauge import write_record
+
+    eval_args = SimpleNamespace(
+        name=agent_name,
+        project=getattr(args, "project", None),
+        engine="dspy",
+        target=None,
+        auto_tune=False,
+        verbose=False,
+        ignore_checks=False,
+        format="table",
+        save_report=None,
+        gauge_out=args.gauge_out,
+        gauge_tier=getattr(args, "gauge_tier", "T1"),
+        gauge_sealed=True,
+        gauge_gates=True,
+        gauge_jev=False,
+        k=1,
+        gate_floor=None,
+    )
+    console.print("[cyan]Evaluating the optimized agent for the quality record...[/]")
+    test_agent_bdd(eval_args)
+    record = getattr(eval_args, "_gauge_record", None)
+    if not record:
+        console.print("⚠️  [yellow]Optimization record not written.[/]")
+        return
+    keys = (
+        "optimizer",
+        "training_examples",
+        "heldout_examples",
+        "seed_train_score",
+        "optimized_train_score",
+        "reported_gain",
+        "seed_heldout_score",
+        "optimized_heldout_score",
+        "heldout_gain",
+    )
+    optimization = {k: optimization_result[k] for k in keys if k in optimization_result}
+    holdout = optimization_result.get("holdout") or {}
+    for k in ("split_digest", "valset_fraction", "seed", "fallback_reason"):
+        if holdout.get(k) is not None:
+            optimization[k] = holdout[k]
+    record.setdefault("x-superoptix", {})["optimization"] = optimization
+    write_record(record, args.gauge_out)
+
+
+def _gauge_results(detailed_results: list) -> list:
+    """Normalize BDD detailed results into SuperGauge result rows."""
+    rows = []
+    for index, item in enumerate(detailed_results or []):
+        name = str(item.get("scenario_name") or item.get("name") or index)
+        row = {
+            "id": str(item.get("sid") or name),
+            "name": name,
+            "status": "passed" if item.get("passed") else "failed",
+            "usage": item.get("usage") or {},
+        }
+        for key in (
+            "sid",
+            "canary",
+            "parsed",
+            "baseline_passed",
+            "success_condition",
+            "tool_calls",
+            "expected_tools",
+            "trajectory_constraints",
+        ):
+            if key in item:
+                row[key] = item[key]
+        rows.append(row)
+    return rows
+
+
+def _parse_gate_floors(values) -> dict:
+    """Parse repeated ``--gate-floor ID=VALUE`` flags."""
+    floors = {}
+    for raw in values or []:
+        key, sep, value = str(raw).partition("=")
+        if not sep:
+            raise ValueError(f"--gate-floor expects ID=VALUE, got {raw!r}")
+        floors[key.strip()] = float(value)
+    return floors
+
+
+def _repeat_runs_for_reliability(pipeline, args, playbook_path, first_results):
+    """Run the suite k-1 more times for pass^k, when it can be sound.
+
+    pass^k needs independent attempts: the DSPy response cache is disabled for
+    the repeats and agents with memory enabled are skipped, because carried
+    state breaks independence (measures/reliability.pass_hat_k.md).
+    """
+    k = int(getattr(args, "k", 1) or 1)
+    if k < 2 or not getattr(args, "gauge_out", None):
+        return []
+    try:
+        import yaml
+
+        with open(playbook_path, encoding="utf-8") as handle:
+            playbook = yaml.safe_load(handle) or {}
+        spec = playbook.get("spec", playbook) or {}
+        memory = spec.get("memory") or {}
+        if isinstance(memory, dict) and memory.get("enabled"):
+            console.print(
+                "⚠️  [yellow]pass^k skipped:[/] memory is enabled, attempts would not be independent."
+            )
+            return []
+        import dspy
+
+        dspy.configure_cache(enable_disk_cache=False, enable_memory_cache=False)
+    except Exception as exc:
+        console.print(f"⚠️  [yellow]pass^k skipped:[/] {exc}")
+        return []
+    runs = []
+    for attempt in range(2, k + 1):
+        console.print(f"[dim]Reliability attempt {attempt}/{k}...[/]")
+        out = pipeline.run_bdd_test_suite(
+            auto_tune=False, ignore_checks=bool(getattr(args, "ignore_checks", False))
+        )
+        runs.append(((out or {}).get("bdd_results") or {}).get("detailed_results", []))
+    return runs
 
 
 def _apply_optional_jev(
@@ -4751,9 +5026,20 @@ def optimize_agent(args):
             training_examples = optimization_result.get("training_examples", "N/A")
             score = optimization_result.get("score", "N/A")
 
+            def _gain(value):
+                return "n/a" if value is None else f"{value:+.3f}"
+
+            gain_lines = ""
+            if "reported_gain" in optimization_result:
+                gain_lines = (
+                    f"\n• Held-out Examples: {optimization_result.get('heldout_examples', 0)}"
+                    f"\n• Reported Gain (train): {_gain(optimization_result.get('reported_gain'))}"
+                    f"\n• Held-out Gain: {_gain(optimization_result.get('heldout_gain'))}"
+                )
+
             optimization_info = f"""📈 [bold]Performance Improvement:[/]
 • Training Examples: {training_examples}
-• Optimization Score: {score}
+• Optimization Score: {score}{gain_lines}
 
 💡 [bold]What changed:[/] DSPy optimized prompts and reasoning chains
 🚀 [bold]Ready for testing:[/] Enhanced agent performance validated"""
@@ -4806,6 +5092,9 @@ def optimize_agent(args):
             console.print(
                 f'🎯 [bold cyan]Next:[/] [cyan]super agent evaluate {agent_name}[/] or [cyan]super agent run {agent_name} --goal "your goal"[/]'
             )
+
+            if getattr(args, "gauge_out", None):
+                _emit_optimize_record(args, agent_name, optimization_result)
 
             # Success summary
             console.print("=" * 80)
