@@ -2894,7 +2894,30 @@ class _MinimalDSPyServePipeline:
             return {"response": getattr(result, "response")}
         return {"response": str(result)}
 
+    def _input_names(self) -> list[str]:
+        names = []
+        for field in self.spec.get("input_fields", []) or []:
+            if isinstance(field, dict) and field.get("name"):
+                names.append(str(field["name"]).strip())
+        return names
+
+    def _map_inputs(self, inputs: dict) -> dict:
+        """Map the A2A text (``query``) onto the program's own input fields.
+
+        The A2A server passes the user text as ``query``; a compiled playbook
+        names its inputs (e.g. ``feature_requirement``). Unknown keys are
+        dropped so ``forward()`` does not reject them.
+        """
+        names = self._input_names()
+        if not names:
+            return dict(inputs)
+        mapped = {k: v for k, v in inputs.items() if k in names}
+        if names[0] not in mapped and "query" in inputs:
+            mapped[names[0]] = inputs["query"]
+        return mapped
+
     def run(self, **inputs) -> dict:
+        inputs = self._map_inputs(inputs)
         if callable(self._program):
             result = self._program(**inputs)
         elif hasattr(self._program, "forward") and callable(self._program.forward):
@@ -3035,7 +3058,15 @@ def _instantiate_pipeline_from_module(
         return pipeline_class(**init_kwargs)
 
     if framework == "dspy" and hasattr(module, "build_program"):
+        import dspy as _dspy
+
         playbook_path = agent_dir / "playbook" / f"{agent_name}_playbook.yaml"
+        if not getattr(_dspy.settings, "lm", None):
+            # Same LM setup (and local-model preflight) as evaluate/test;
+            # without it every served request fails with "No LM is loaded".
+            DSPyRunner(
+                agent_name, project_name=agent_dir.parent.parent.name
+            ).configure_native_lm(module)
         return _MinimalDSPyServePipeline(module, playbook_path)
 
     raise ValueError("No Pipeline class or supported DSPy build_program() found")

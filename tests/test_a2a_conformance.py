@@ -319,7 +319,9 @@ class TestAgentCardCaching:
 
     def test_vary_names_the_negotiating_header(self, client):
         """The two renderings differ, so a cache has to key on the header."""
-        assert client.get(self.CARD).headers["vary"] == "A2A-Version"
+        # CORS middleware may add Origin; only A2A-Version is ours to assert.
+        vary = client.get(self.CARD).headers["vary"]
+        assert "A2A-Version" in [v.strip() for v in vary.split(",")]
 
     def test_matching_etag_returns_304(self, client):
         etag = client.get(self.CARD).headers["etag"]
