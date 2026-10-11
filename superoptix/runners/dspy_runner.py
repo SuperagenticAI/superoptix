@@ -93,6 +93,10 @@ def to_pascal_case(text: str) -> str:
     return "".join(pascal_words)
 
 
+def _fmt_gain(value: Any) -> str:
+    return "n/a" if value is None else f"{value:+.3f}"
+
+
 def to_snake_case(text: str) -> str:
     """Convert field names to snake_case to match generated DSPy signatures."""
     return str(text).strip().replace("-", "_").replace(" ", "_").lower()
@@ -170,6 +174,9 @@ class DSPyRunner:
         self.optimized_path = (
             self.agent_path / "pipelines" / f"{self.agent_name}_optimized.json"
         )
+        self.holdout_path = (
+            self.agent_path / "pipelines" / f"{self.agent_name}_holdout.json"
+        )
         self.playbook_path = self._find_playbook_file(self.agent_path / "playbook")
         self._rag_helper = None
         self._rag_initialized = False
@@ -186,6 +193,19 @@ class DSPyRunner:
                 return current_dir
             current_dir = current_dir.parent
         raise FileNotFoundError("Could not find .super file")
+
+    def _write_holdout_record(self, split: Any, gains: Dict[str, Any]) -> None:
+        """Persist the held-out split metadata next to the optimized weights.
+
+        Only ids and the digest are written; held-out content stays in the
+        playbook. ``super agent evaluate --gauge-sealed`` reads this file.
+        """
+        from superoptix.optimizers.holdout import write_holdout_record
+
+        try:
+            write_holdout_record(self.holdout_path, split, gains)
+        except Exception as exc:
+            console.print(f"[yellow]⚠️ Could not write held-out record: {exc}[/]")
 
     def _find_pipeline_file(self, pipelines_dir: Path) -> Path:
         """
@@ -1337,10 +1357,14 @@ class DSPyRunner:
 
                 # Build DSPy examples from scenarios.
                 examples = []
+                example_identities = []
                 for sc in scenarios:
                     if not isinstance(sc, dict):
                         continue
                     inp = sc.get("input", {}) or {}
+                    example_identities.append(
+                        {**inp, **(sc.get("expected_output", {}) or {})}
+                    )
                     if self._is_rag_enabled_in_spec(spec_data):
                         seed_query = str(inp.get(input_field, "")).strip()
                         if seed_query:
@@ -1532,14 +1556,46 @@ class DSPyRunner:
 
                 gepa = GEPA(**init_kwargs)
 
+                # Held-out split (2.0): GEPA never sees the held-out items, so
+                # the held-out gain is an honest estimate (arXiv:2610.09239).
+                from superoptix.optimizers.holdout import (
+                    DEFAULT_VALSET_FRACTION,
+                    gain_report,
+                    score_dspy_program,
+                    split_holdout,
+                )
+
+                split = split_holdout(
+                    examples,
+                    fraction=gepa_cfg.get("valset_fraction", DEFAULT_VALSET_FRACTION),
+                    seed=gepa_cfg.get("seed", 0),
+                    identities=example_identities,
+                )
+                if split.fallback_reason:
+                    console.print(
+                        "[yellow]⚠️ No held-out split: "
+                        f"{split.fallback_reason}. Reported gain is train-only.[/]"
+                    )
+                else:
+                    console.print(
+                        f"[cyan]Held-out split: {len(split.train)} train, "
+                        f"{len(split.heldout)} held out (seed={split.seed}).[/]"
+                    )
+                try:
+                    seed_program = program.deepcopy()
+                except Exception:
+                    import copy
+
+                    seed_program = copy.deepcopy(program)
+
                 compile_sig = inspect.signature(gepa.compile)
                 compile_params = compile_sig.parameters
                 compile_kwargs: Dict[str, Any] = {
                     "student": program,
-                    "trainset": examples,
+                    "trainset": split.train,
                 }
                 if "valset" in compile_params:
-                    compile_kwargs["valset"] = examples
+                    compile_kwargs["valset"] = split.train
                 if (
                     "max_full_evals" in compile_params
                     and gepa_cfg.get("max_full_evals") is not None
@@ -1584,6 +1640,23 @@ class DSPyRunner:
                         f"quality={avg_quality:.3f}, assertions={avg_assertion:.3f}, blended={avg_blended:.3f} "
                         f"(assertion_weight={assertion_metric_weight:.2f})"
                     )
+                # Score seed and optimized programs on train and held-out items.
+                gains = gain_report(
+                    score_dspy_program(seed_program, split.train, gepa_metric),
+                    score_dspy_program(optimized_program, split.train, gepa_metric),
+                    score_dspy_program(seed_program, split.heldout, gepa_metric),
+                    score_dspy_program(optimized_program, split.heldout, gepa_metric),
+                )
+                optimization_result["training_examples"] = len(split.train)
+                optimization_result["heldout_examples"] = len(split.heldout)
+                optimization_result["holdout"] = split.metadata()
+                optimization_result.update(gains)
+                self._write_holdout_record(split, gains)
+                console.print(
+                    "[cyan]📊 Gain:[/] reported (train) "
+                    f"{_fmt_gain(gains['reported_gain'])}, held-out "
+                    f"{_fmt_gain(gains['heldout_gain'])}"
+                )
                 optimization_result["completed_at"] = str(time.time())
                 return optimization_result
 
