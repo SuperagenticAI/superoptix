@@ -159,7 +159,7 @@ The A2A project publishes an official command-line client,
 [`a2a`](https://github.com/a2aproject/a2a-cli) (`a2aproject/a2a-cli`). Use it as a
 standardized third-party or CI client against any A2A agent, including the public
 SuperOptiX endpoint. SuperOptiX product surfaces stay `super a2a adapt`,
-`super a2a serve`, and the FastAPI bridge. The Go CLI is not vendored into
+`super agent serve`, and the FastAPI bridge. The Go CLI is not vendored into
 SuperOptiX.
 
 Install from the [a2a-cli releases](https://github.com/a2aproject/a2a-cli/releases)
