@@ -11,6 +11,7 @@ from urllib.parse import urlparse
 import dspy
 import requests
 
+from superoptix.protocols.a2a.bridge import V03, V1, normalize_version
 from superoptix.protocols.a2a.mappers import (
     extract_text_from_payload,
     normalize_a2a_payload,
@@ -85,6 +86,32 @@ class A2AClient(BaseProtocol):
         self.available_skills: List[Dict[str, Any]] = []
         self.selected_interface: Dict[str, Any] = {}
         self.task_cache: Dict[str, Dict[str, Any]] = {}
+        # One keep-alive session per client. Reusing the TCP/TLS connection
+        # across card fetch, send and task calls removes a handshake per
+        # request (arXiv:2610.04053 measures connection setup as a dominant
+        # share of short A2A round trips).
+        self._session: requests.Session | None = None
+
+    @property
+    def session(self) -> requests.Session:
+        """Return the keep-alive HTTP session, creating it on first use."""
+        if self._session is None:
+            self._session = requests.Session()
+        return self._session
+
+    def close(self) -> None:
+        """Release the pooled HTTP connections held by this client."""
+        if self._session is not None:
+            try:
+                self._session.close()
+            finally:
+                self._session = None
+
+    def __enter__(self) -> "A2AClient":
+        return self
+
+    def __exit__(self, *exc_info: Any) -> None:
+        self.disconnect()
 
     @staticmethod
     def _json_headers() -> Dict[str, str]:
@@ -98,7 +125,7 @@ class A2AClient(BaseProtocol):
         headers = dict(self._json_headers())
         headers.update(kwargs.pop("headers", {}) or {})
         headers = {key: value for key, value in headers.items() if value}
-        response = requests.request(
+        response = self.session.request(
             method,
             url,
             timeout=self.timeout,
@@ -126,12 +153,36 @@ class A2AClient(BaseProtocol):
 
     @staticmethod
     def _select_interface(card: Dict[str, Any]) -> Dict[str, Any]:
+        """Pick the interface to talk to.
+
+        Order of preference: highest normalized protocolVersion (1.0 before
+        0.3, unknown versions last), then binding preference
+        (_SUPPORTED_BINDINGS order), then card order.
+        """
         interfaces = list(card.get("supportedInterfaces") or [])
-        for binding in _SUPPORTED_BINDINGS:
-            for interface in interfaces:
-                if str(interface.get("protocolBinding") or "").upper() == binding:
-                    return dict(interface)
-        return dict(interfaces[0]) if interfaces else {}
+        if not interfaces:
+            return {}
+
+        def version_rank(interface: Dict[str, Any]) -> int:
+            raw = interface.get("protocolVersion") or card.get("protocolVersion")
+            normalized = normalize_version(raw)
+            if normalized == V1:
+                return 0
+            if normalized == V03:
+                return 1
+            return 2
+
+        def binding_rank(interface: Dict[str, Any]) -> int:
+            binding = str(interface.get("protocolBinding") or "").upper()
+            if binding in _SUPPORTED_BINDINGS:
+                return _SUPPORTED_BINDINGS.index(binding)
+            return len(_SUPPORTED_BINDINGS)
+
+        ranked = sorted(
+            enumerate(interfaces),
+            key=lambda pair: (version_rank(pair[1]), binding_rank(pair[1]), pair[0]),
+        )
+        return dict(ranked[0][1])
 
     def _make_message(
         self, message_text: str, *, task_id: str | None = None
@@ -251,6 +302,7 @@ class A2AClient(BaseProtocol):
     def disconnect(self) -> None:
         self.selected_interface = {}
         self._connected = False
+        self.close()
 
     def get_capabilities(self) -> Dict[str, Any]:
         card = self.agent_card or {}
