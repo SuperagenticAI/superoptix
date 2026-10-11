@@ -16,7 +16,12 @@ class _Module:
         self.calls.append(params)
 
 
-def test_configure_native_lm_uses_playbook_model(tmp_path: Path):
+def test_configure_native_lm_uses_playbook_model(tmp_path: Path, monkeypatch):
+    # CI has no Ollama server; the reachability probe is covered elsewhere.
+    monkeypatch.setattr(
+        "superoptix.runners.dspy_runner.ensure_local_model_reachable",
+        lambda *a, **k: None,
+    )
     playbook = tmp_path / "p.yaml"
     playbook.write_text(
         "spec:\n  language_model:\n    provider: ollama\n    model: qwen2.5:1.5b\n"
