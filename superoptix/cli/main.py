@@ -1809,18 +1809,13 @@ Use `super agent <command> --help` for more information on a specific command.
         help="Manage multi-agent workflows",
         formatter_class=RawDescriptionHelpFormatter,
         description="""
-Orchestrate multiple agents to perform complex, coordinated tasks.
+Run several SuperOptiX agents as one workflow (sequential by default).
 
-SuperOptiX orchestras allow you to define workflows where agents collaborate
-to achieve a common goal. This command suite helps you create, manage, and
-run these powerful multi-agent systems.
+  super orchestra create <name>   Create an orchestra definition
+  super orchestra run <name>      Run it on a goal
+  super orchestra list            List orchestras in this project
 
-Recommended Workflow:
-  1. `super orchestra create <name>` - Create a new orchestra definition
-2. `super orchestra run <name>`    - Execute an orchestra with a specific task
-3. `super orchestra list`         - Browse all orchestras in your project
-
-Use `super orchestra <command> --help` for more information.
+Use `super orchestra <command> --help` for details.
         """,
     )
     orchestra_subparsers = orchestra_parser.add_subparsers(
@@ -1928,25 +1923,16 @@ To serve an agent compiled by SuperOptiX, use `super agent serve <name>`.
         help="Discover and install pre-built agents and tools",
         formatter_class=RawDescriptionHelpFormatter,
         description="""
-Unified discovery hub for AI agents and tools - your component marketplace.
+Browse and install the pre-built agents and tools that ship with SuperOptiX.
 
-Browse, search, and install agents and tools from SuperOptiX's comprehensive library.
-Perfect for discovering new capabilities and finding the right components for your project.
+  super marketplace                       Overview
+  super marketplace browse agents         List agents
+  super marketplace browse tools          List tools
+  super marketplace search "web"          Search agents and tools
+  super marketplace show <component>      Show one component
+  super marketplace install agent <name>  Same as super agent pull <name>
 
-Quick Start:
-  super marketplace                    - Dashboard overview with stats
-super marketplace browse agents      - Browse all available agents  
-      super marketplace browse tools       - Browse all available tools
-    super marketplace search "web"       - Universal search across components
-      super marketplace featured          - See popular components
-
-Advanced Discovery:
-  super marketplace browse industries  - Explore agent industries
-super marketplace browse categories  - Explore tool categories
-super marketplace show <component>   - Detailed component information
-super marketplace install agent <name> - Quick install (same as super agent pull)
-
-Use `super marketplace <command> --help` for more information.
+Use `super marketplace <command> --help` for details.
         """,
     )
     marketplace_subparsers = marketplace_parser.add_subparsers(
@@ -2033,37 +2019,17 @@ Use `super marketplace <command> --help` for more information.
         help="Playbook DSL: generate, validate, analyze playbooks",
         formatter_class=RawDescriptionHelpFormatter,
         description="""
-🎭 SuperSpec DSL - Agent Playbook Definition Language
+Write and check SuperSpec agent playbooks (YAML).
 
-🚀 Create, validate, and manage AI agent playbooks with SuperSpec DSL!
-
-📚 Quick Start:
   super spec generate genies my-agent --namespace software
   super spec validate my-agent_playbook.yaml
   super spec analyze ./agents/
+  super spec info <playbook>      Show one playbook
+  super spec schema               Show the playbook schema
+  super spec bootstrap <ns>       Generate playbooks for a namespace
 
-🎯 Available Commands:
-  generate  - 🎨 Create new agent playbook templates
-  validate  - ✅ Check playbook syntax and structure
-  analyze   - 📊 Get insights about your playbooks
-  info      - 📋 Show detailed playbook information
-  schema    - 📚 Explore DSL schema and features
-  bootstrap - 🚀 Generate multiple agents for a namespace
-
-✨ Key Features:
-  • 🎯 Tier-based agent templates (Oracles and Genies)
-  • ✅ Comprehensive validation with detailed error reporting
-  • 📊 Project-wide agent analysis and insights
-  • 🚀 Namespace bootstrapping for rapid development
-  • 📋 Rich schema documentation and guidance
-
-💡 Common Workflow:
-  1. super spec generate genies developer --namespace software
-  2. super spec validate developer.yaml
-  3. super agent compile developer
-  4. super spec analyze ./agents
-
-Use 'super spec <command> --help' for more information.
+Typical flow: generate, validate, then super agent compile <name>.
+Use `super spec <command> --help` for details.
         """,
     )
     superspec_subparsers = superspec_parser.add_subparsers(
@@ -2368,7 +2334,7 @@ Use 'super spec <command> --help' for more information.
     )
     bootstrap_parser.set_defaults(func=bootstrap_namespace)
 
-    # Model management commands - SuperOptiX Model Intelligence System
+    # Model management commands
     def handle_model_list(args):
         """Handle model list command."""
         from superoptix.cli.commands.model import list_models
@@ -2500,51 +2466,27 @@ Use 'super spec <command> --help' for more information.
         help="Manage local and cloud models (Ollama, MLX, HF, LM Studio)",
         formatter_class=RawDescriptionHelpFormatter,
         description="""
-🚀 SuperOptiX Model Intelligence System - Advanced model management for agentic AI.
+Manage the models your agents run on: local (Ollama, MLX, HuggingFace,
+LM Studio) and hosted.
 
-Manage installed models across different backends with SuperOptiX branding and philosophy.
-Focus on models you actually have installed, with guidance on how to get more.
+  super model list                  Installed models
+  super model install qwen3.5:2b    Pull an Ollama model (default backend)
+  super model info qwen3.5:2b       Model details
+  super model backends              Backend status
+  super model discover              Where to find more models
 
-✨ Quick Examples:
-  super model list                           # List installed models
-  super model discover                       # Model discovery guide
-  super model install qwen3.5:2b           # Install Ollama model (default)
-  super model info qwen3.5:2b               # Get model details
-  super model backends                       # Check backend status
-  super model dspy ollama/qwen3.5:2b        # Create DSPy client
+Backends:
+  Ollama     ollama serve (localhost:11434), then super model install <name>
+  MLX        super model server mlx <repo> --port 8000
+  HF         super model server huggingface <repo> --port 8001
+  LM Studio  start the server in the app (localhost:1234)
 
-🔧 Supported Backends & Examples:
-
-🦙 Ollama (Local Models - Default):
-  • Install: super model install qwen3.5:2b (auto-pulls with ollama)
-  • Serve: ollama serve (runs on localhost:11434)
-  • Use: super model dspy ollama/qwen3.5:2b
-
-🍎 MLX (Apple Silicon):
-  • Install: super model install -b mlx mlx-community/Llama-3.2-3B-Instruct-4bit
-  • Serve: super model server mlx mlx-community/Llama-3.2-3B-Instruct-4bit --port 8000
-  • Use: super model dspy mlx-community/Llama-3.2-3B-Instruct-4bit
-
-🤗 HuggingFace (Transformers):
-  • Install: super model install -b huggingface microsoft/Phi-4
-  • Serve: super model server huggingface microsoft/Phi-4 --port 8001
-  • Use: super model dspy microsoft/Phi-4
-
-🎮 LM Studio (Desktop App):
-  • Install: Download via LM Studio app
-  • Serve: Start server in LM Studio app (localhost:1234)
-  • Use: super model dspy lmstudio/your-model-name
-
-🎯 SuperOptiX Features:
-  • Shows only installed models by default
-  • Provides discovery guides for model sources
-  • Seamless DSPy integration
-  • SuperOptiX-branded model intelligence
+Set the model in the playbook under spec.language_model.
         """,
     )
     model_subparsers = model_parser.add_subparsers(
         dest="model_command",
-        help="SuperOptiX Model Intelligence commands",
+        help="Model commands",
         required=False,
     )
     model_parser.set_defaults(func=lambda args: model_parser.print_help())

@@ -333,7 +333,7 @@ class _MinimalDSPyBDDEvaluator:
             "capability_assessment": capability,
             "suggested_upgrade": "None needed"
             if avg_score >= 0.6
-            else "Consider qwen3.5:9b or gpt-4 for better performance",
+            else "A larger model may score higher",
             "performance_category": "excellent"
             if avg_score >= 0.8
             else "good"
@@ -363,8 +363,8 @@ class _MinimalDSPyBDDEvaluator:
             ]
         return [
             f"Poor performance. {len(failed)} scenarios failing.",
-            "Strong recommendation: Run optimization before production use.",
-            "Consider using a more capable model (qwen3.5:9b or gpt-4).",
+            "Run super agent optimize <agent_name> before relying on this agent.",
+            "A larger model may help; set it in spec.language_model.",
         ]
 
     @property
@@ -964,7 +964,7 @@ def _compile_single_agent(agent_name: str, args, tier_level: str = None):
                 f"❌ [bold red]COMPILATION FAILED[/]\n\n"
                 f"[red]Error:[/] {str(e)}\n"
                 f"[yellow]Agent:[/] {agent_name}\n"
-                f"[yellow]Framework:[/] DSPy (default — other frameworks coming soon)\n\n"
+                f"[yellow]Framework:[/] DSPy (default; pick another with --framework)\n\n"
                 f"[cyan]💡 Troubleshooting Tips:[/]\n"
                 f"• Ensure agent playbook exists and is valid YAML\n"
                 f"• Check that you're in a valid super project directory\n"

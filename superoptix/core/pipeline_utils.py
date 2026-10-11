@@ -1281,7 +1281,7 @@ class BDDTestMixin:
         # Suggest model upgrades based on performance
         suggested_upgrade = "None needed"
         if avg_score < 0.6:
-            suggested_upgrade = "Consider qwen3.5:9b or gpt-4 for better performance"
+            suggested_upgrade = "A larger model may score higher"
         elif avg_score < 0.4:
             suggested_upgrade = (
                 "Strongly recommend gpt-4 or claude-3 for reliable results"
@@ -1353,10 +1353,10 @@ class BDDTestMixin:
                 f"Poor performance. {len(failed_results)} scenarios failing."
             )
             recommendations.append(
-                "Strong recommendation: Run optimization before production use."
+                "Run super agent optimize <agent_name> before relying on this agent."
             )
             recommendations.append(
-                "Consider using a more capable model (qwen3.5:9b or gpt-4)."
+                "A larger model may help; set it in spec.language_model."
             )
             recommendations.append("Review scenario complexity vs model capabilities.")
 
