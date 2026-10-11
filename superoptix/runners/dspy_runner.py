@@ -1357,10 +1357,14 @@ class DSPyRunner:
 
                 # Build DSPy examples from scenarios.
                 examples = []
+                example_identities = []
                 for sc in scenarios:
                     if not isinstance(sc, dict):
                         continue
                     inp = sc.get("input", {}) or {}
+                    example_identities.append(
+                        {**inp, **(sc.get("expected_output", {}) or {})}
+                    )
                     if self._is_rag_enabled_in_spec(spec_data):
                         seed_query = str(inp.get(input_field, "")).strip()
                         if seed_query:
@@ -1565,6 +1569,7 @@ class DSPyRunner:
                     examples,
                     fraction=gepa_cfg.get("valset_fraction", DEFAULT_VALSET_FRACTION),
                     seed=gepa_cfg.get("seed", 0),
+                    identities=example_identities,
                 )
                 if split.fallback_reason:
                     console.print(

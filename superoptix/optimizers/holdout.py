@@ -88,6 +88,7 @@ def split_holdout(
     *,
     min_heldout: int = MIN_HELDOUT,
     min_train: int = MIN_TRAIN,
+    identities: Optional[Sequence[Any]] = None,
 ) -> HoldoutSplit:
     """Split ``examples`` into a training part and a seeded held-out part.
 
@@ -96,8 +97,16 @@ def split_holdout(
     training items, every example is used for training, nothing is held out,
     a warning is logged and ``fallback_reason`` says why. Callers must then
     report the gain as train-only.
+
+    ``identities`` optionally gives, per example, the payload hashed for the
+    held-out ids and digest (for example the raw playbook scenario
+    ``{**input, **expected_output}`` before retrieval augmentation), so the
+    evaluator can recompute the same digest from the playbook.
     """
     items = list(examples)
+    keys = list(identities) if identities is not None else items
+    if len(keys) != len(items):
+        raise ValueError("identities must have one entry per example")
     try:
         fraction = float(fraction)
     except (TypeError, ValueError):
@@ -133,14 +142,22 @@ def split_holdout(
     heldout_idx = set(order[:n_heldout])
     train = [ex for i, ex in enumerate(items) if i not in heldout_idx]
     heldout = [ex for i, ex in enumerate(items) if i in heldout_idx]
+    heldout_keys = [k for i, k in enumerate(keys) if i in heldout_idx]
     return HoldoutSplit(
         train=train,
         heldout=heldout,
         fraction=fraction,
         seed=seed,
-        digest=split_digest(heldout),
-        heldout_ids=sorted(example_id(ex) for ex in heldout),
+        digest=split_digest(heldout_keys),
+        heldout_ids=sorted(example_id(k) for k in heldout_keys),
     )
+
+
+def scenario_identity(scenario: Dict[str, Any]) -> Dict[str, Any]:
+    """Identity payload of a playbook scenario: ``{**input, **expected_output}``."""
+    inputs = scenario.get("input", {}) or {}
+    expected = scenario.get("expected_output", {}) or {}
+    return {**inputs, **expected}
 
 
 def _as_float(value: Any) -> float:

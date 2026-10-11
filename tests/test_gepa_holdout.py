@@ -120,3 +120,27 @@ def test_routing_optimizer_never_shows_heldout_cases_to_gepa(monkeypatch):
     assert len(seen["dataset"]) == 8 and seen["valset"] == seen["dataset"]
     assert result.split_digest and result.heldout_improvement is not None
     assert "held-out" in result.summary()
+
+
+def test_identities_drive_ids_and_match_playbook_recompute():
+    from superoptix.optimizers.holdout import example_id, scenario_identity
+
+    scenarios = [
+        {"input": {"q": f"q{i}"}, "expected_output": {"a": f"a{i}"}} for i in range(10)
+    ]
+    augmented = [
+        dspy.Example(q="CONTEXT " + s["input"]["q"], a=s["expected_output"]["a"])
+        for s in scenarios
+    ]
+    split = split_holdout(
+        augmented, 0.2, seed=3, identities=[scenario_identity(s) for s in scenarios]
+    )
+    recomputed = sorted(
+        example_id(scenario_identity(s))
+        for s in scenarios
+        if example_id(scenario_identity(s)) in set(split.heldout_ids)
+    )
+    assert recomputed == split.heldout_ids
+    assert split_digest(
+        [scenario_identity(s) for s in scenarios if example_id(scenario_identity(s)) in set(split.heldout_ids)]
+    ) == split.digest
