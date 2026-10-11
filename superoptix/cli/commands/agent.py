@@ -977,6 +977,50 @@ def _compile_single_agent(agent_name: str, args, tier_level: str = None):
         return False
 
 
+def _framework_model_target(args, framework: str, playbook_path) -> dict:
+    """Provider, model and api_base a non-DSPy pipeline will use.
+
+    ``playbook_path`` is a playbook file or an already loaded playbook dict.
+    CLI overrides (--provider/--model/--local) win over the playbook's
+    ``spec.language_model``, matching how the generated pipelines resolve it.
+    """
+    lm_cfg: dict = {}
+    try:
+        if isinstance(playbook_path, dict):
+            playbook = playbook_path
+        else:
+            with open(playbook_path) as f:
+                playbook = yaml.safe_load(f) or {}
+        spec = playbook.get("spec", playbook) or {}
+        lm_cfg = spec.get("language_model") or spec.get("model") or {}
+        if not isinstance(lm_cfg, dict):
+            lm_cfg = {"model": str(lm_cfg)}
+    except (OSError, yaml.YAMLError):
+        lm_cfg = {}
+    overrides = _build_framework_model_config(args, framework)
+    return {
+        "provider": overrides.get("provider") or lm_cfg.get("provider"),
+        "model": overrides.get("model") or lm_cfg.get("model") or "",
+        "api_base": lm_cfg.get("api_base") or lm_cfg.get("base_url"),
+    }
+
+
+def _preflight_framework_model(args, framework: str, playbook_path) -> None:
+    """Fail loudly before a non-DSPy run when its local Ollama model is down.
+
+    Raises :class:`LocalModelUnreachableError`. A no-op for hosted providers
+    and for the Claude Agent SDK, which never targets a local model.
+    """
+    from superoptix.core.local_lm import ensure_local_model_reachable
+
+    if framework in {"dspy", "claude-sdk"}:
+        return
+    target = _framework_model_target(args, framework, playbook_path)
+    ensure_local_model_reachable(
+        target["model"], target["api_base"], provider=target["provider"]
+    )
+
+
 def _run_framework_agent(args, framework: str):
     """
     Run an agent compiled with a non-DSPy framework.
@@ -1012,7 +1056,17 @@ def _run_framework_agent(args, framework: str):
             f"[yellow]Compile it first with:[/]\n"
             f"  [cyan]super agent compile {args.name} --framework {framework}[/]"
         )
-        return
+        sys.exit(1)
+
+    from superoptix.core.local_lm import LocalModelUnreachableError
+
+    try:
+        _preflight_framework_model(
+            args, framework, agent_dir / "playbook" / f"{args.name}_playbook.yaml"
+        )
+    except LocalModelUnreachableError as e:
+        console.print(f"[bold red]❌ Model unreachable:[/] {e}")
+        sys.exit(1)
 
     try:
         os.environ["SUPEROPTIX_OBSERVE_BACKEND"] = (
@@ -1034,7 +1088,7 @@ def _run_framework_agent(args, framework: str):
 
         if not pipeline_class:
             console.print(f"[bold red]❌ No Pipeline class found in {pipeline_path}[/]")
-            return
+            sys.exit(1)
 
         # Instantiate and run
         init_kwargs = {}
@@ -1113,8 +1167,8 @@ def _run_framework_agent(args, framework: str):
             # Sync pipeline
             result = pipeline.run(**run_kwargs)
         else:
-            console.print(f"[bold red]❌ Pipeline class has no run() method[/]")
-            return
+            console.print("[bold red]❌ Pipeline class has no run() method[/]")
+            sys.exit(1)
 
         # Display result
         console.print("\n[bold green]✅ Agent execution completed![/]\n")
@@ -1131,9 +1185,14 @@ def _run_framework_agent(args, framework: str):
         console.print(
             f"\n[bold red]❌ Failed to run {framework_display} pipeline:[/] {e}"
         )
-        import traceback
+        if _is_lm_transport_error(e):
+            console.print("[red]The model server refused the connection.[/]")
+        else:
+            import traceback
 
-        console.print(traceback.format_exc())
+            console.print(traceback.format_exc())
+        # Never exit 0 on a failed run.
+        sys.exit(1)
 
 
 def _is_lm_transport_error(exc: BaseException) -> bool:
@@ -1411,6 +1470,16 @@ def serve_agent(args):
         console.print(f"   Expected: {pipeline_path}")
         return
 
+    from superoptix.core.local_lm import LocalModelUnreachableError
+
+    try:
+        _preflight_framework_model(
+            args, framework, agent_dir / "playbook" / f"{agent_name}_playbook.yaml"
+        )
+    except LocalModelUnreachableError as exc:
+        console.print(f"\n[bold red]❌ Model unreachable:[/] {exc}")
+        sys.exit(1)
+
     try:
         module = _import_module_from_path(
             f"{agent_name}_{framework.replace('-', '_')}_serve",
@@ -1430,7 +1499,7 @@ def serve_agent(args):
         import traceback
 
         console.print(traceback.format_exc())
-        return
+        sys.exit(1)
 
     try:
         import uvicorn
@@ -3631,6 +3700,18 @@ def _run_universal_gepa_optimization(args, agent_name, project_root, playbook):
 
     console.print("\n🔬 [bold cyan]Running Universal GEPA Optimization[/]")
     console.print(f"   Framework: [yellow]{framework}[/]")
+
+    from superoptix.core.local_lm import LocalModelUnreachableError
+
+    try:
+        _preflight_framework_model(
+            args,
+            framework,
+            playbook or {},
+        )
+    except LocalModelUnreachableError as exc:
+        console.print(f"[bold red]❌ Model unreachable:[/] {exc}")
+        sys.exit(1)
 
     # Check for GEPA parameters from CLI
     cli_auto = getattr(args, "auto", None)

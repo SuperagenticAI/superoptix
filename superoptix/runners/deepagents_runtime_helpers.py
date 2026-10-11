@@ -58,6 +58,30 @@ def resolve_model(
     return f"{provider}:{model}"
 
 
+# DeepAgents ships a long built-in system prompt (planning, files, subagents)
+# that does not fit Ollama's small default context window.
+OLLAMA_DEEPAGENTS_NUM_CTX = 16384
+
+
+def chat_model_kwargs(
+    language_model: Dict[str, Any] | None, resolved_model: str
+) -> Dict[str, Any]:
+    """Extra ``init_chat_model`` kwargs for ``resolved_model``.
+
+    For Ollama this sets the server root and a context window large enough
+    for the DeepAgents system prompt (``language_model.num_ctx`` overrides).
+    """
+    if not str(resolved_model).startswith("ollama:"):
+        return {}
+    from superoptix.core.local_lm import ollama_root
+
+    lm_cfg = dict(language_model or {})
+    return {
+        "base_url": ollama_root(lm_cfg.get("api_base")),
+        "num_ctx": int(lm_cfg.get("num_ctx") or OLLAMA_DEEPAGENTS_NUM_CTX),
+    }
+
+
 def build_instructions(spec_data: Dict[str, Any] | None) -> str:
     spec = dict(spec_data or {})
     persona = dict(spec.get("persona", {}) or {})
