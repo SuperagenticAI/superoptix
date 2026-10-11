@@ -801,16 +801,12 @@ def main():
     )
     warnings.filterwarnings("ignore", module="pydantic.*", category=UserWarning)
     warnings.filterwarnings("ignore", module="pydantic_ai.*", category=UserWarning)
-    # warnings.filterwarnings("ignore", module="storage3.*", category=UserWarning)
-    # warnings.filterwarnings("ignore", module="storage3.*", category=DeprecationWarning)
-    # warnings.filterwarnings("ignore", message=r".*storage3.*", category=DeprecationWarning)
     warnings.filterwarnings(
         "ignore", message=r".*pydantic\.config\.Extra.*", category=DeprecationWarning
     )
     warnings.filterwarnings(
         "ignore", message=r".*PydanticDeprecatedSince20.*", category=DeprecationWarning
     )
-    # warnings.filterwarnings("ignore", module="supabase.*", category=UserWarning)
 
     # Track CLI usage (anonymous)
     try:
@@ -1120,12 +1116,6 @@ Use `super agent <command> --help` for more information on a specific command.
         dest="local_ollama",
         action="store_true",
         help="Generate Ollama runtime code path (default behavior is already Ollama-first; this flag is kept for explicitness).",
-    )
-    compile_parser.add_argument(
-        "--local-models",
-        dest="local_ollama",
-        action="store_true",
-        help="Deprecated alias for --local-ollama.",
     )
     compile_mode_group = compile_parser.add_mutually_exclusive_group()
     compile_mode_group.add_argument(

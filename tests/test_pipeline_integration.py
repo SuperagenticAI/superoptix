@@ -129,10 +129,8 @@ class TestPipelineIntegration:
         """Test that optimizer factory works with pipeline utilities."""
         from superoptix.core.pipeline_utils import PipelineUtilities
 
-        # Test get_optimizer method
-        optimizer = PipelineUtilities.get_optimizer("oracles", k=5)
-        assert optimizer is not None
-        assert hasattr(optimizer, "compile")
+        # get_optimizer was removed in 2.0; it is no longer exposed
+        assert not hasattr(PipelineUtilities, "get_optimizer")
 
         # Test get_custom_optimizer method
         optimizer = PipelineUtilities.get_custom_optimizer(

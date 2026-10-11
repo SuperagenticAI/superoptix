@@ -1768,16 +1768,6 @@ class PipelineUtilities:
             return dspy.Predict(signature_class)
 
     @staticmethod
-    def get_optimizer(tier: str, k: int = 5):
-        """Get appropriate optimizer for tier - DEPRECATED: Use get_custom_optimizer instead."""
-        from .optimizer_factory import DSPyOptimizerFactory
-
-        # Use the new factory for better optimizer selection
-        return DSPyOptimizerFactory.create_tier_optimized_optimizer(
-            tier=tier, training_data_size=k, optimizer_config=None
-        )
-
-    @staticmethod
     def get_custom_optimizer(optimizer_name: str, params: dict = None, lm=None):
         """Get custom optimizer by name with parameters using the new factory."""
         from .optimizer_factory import DSPyOptimizerFactory
@@ -1944,7 +1934,13 @@ class TrainingMixin(UsageTrackingMixin, EvaluationMixin, BDDTestMixin):
         if k is None:
             k = 8 if tier == "genies" else 5
 
-        optimizer = PipelineUtilities.get_optimizer(tier, k=min(len(training_data), k))
+        from .optimizer_factory import DSPyOptimizerFactory
+
+        optimizer = DSPyOptimizerFactory.create_tier_optimized_optimizer(
+            tier=tier,
+            training_data_size=min(len(training_data), k),
+            optimizer_config=None,
+        )
 
         try:
             with self.usage_tracking_context():
