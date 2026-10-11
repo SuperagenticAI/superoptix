@@ -255,6 +255,36 @@ spec:
         skip_perfect_score: true      # Skip if already perfect
 ```
 
+### Held-out split (2.0)
+
+GEPA picks candidates by their score on its validation set. Before 2.0 that set
+was the full training set, so the reported gain was measured on the items GEPA
+had just tuned against and overstated real improvement (arXiv:2610.09239).
+
+From 2.0 the native DSPy runner and `optimize_routing` hold out a seeded share
+of the scenarios that GEPA never sees:
+
+```yaml
+spec:
+  optimization:
+    optimizer:
+      name: GEPA
+      params:
+        valset_fraction: 0.2   # default; 0 disables the split
+        seed: 0                # also seeds the split
+```
+
+The optimize output now reports two numbers:
+
+- reported gain (train): seed vs optimized on the items GEPA used
+- held-out gain: seed vs optimized on held-out items; trust this one
+
+At least 2 held-out and 2 training items are required. Smaller datasets skip
+the split with a warning, the held-out gain is shown as `n/a`, and the run is
+train-only. Split metadata (sizes, seed, held-out example ids, and a sha256
+digest of the held-out content, never the content itself) is written to
+`pipelines/<agent>_holdout.json`; the SuperGauge sealed-holdout evidence reads it.
+
 ### Using the --fresh Flag
 
 The `--fresh` flag clears the DSPy cache before optimization, ensuring you see real GEPA iterations instead of cached responses.

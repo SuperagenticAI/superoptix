@@ -38,18 +38,40 @@ class OptimizationResult:
     optimized_descriptions: Dict[str, str]
     validation_score: float | None = None
     validation_router: str | None = None
+    heldout_baseline_score: float | None = None
+    heldout_optimized_score: float | None = None
+    heldout_size: int = 0
+    train_size: int = 0
+    split_digest: str | None = None
+    holdout_fallback_reason: str | None = None
 
     @property
     def improvement(self) -> float:
+        """Reported gain, measured on the cases GEPA optimised against."""
         return self.optimized_score - self.baseline_score
+
+    @property
+    def heldout_improvement(self) -> float | None:
+        """Gain on held-out cases GEPA never saw. None without a split."""
+        if self.heldout_baseline_score is None or self.heldout_optimized_score is None:
+            return None
+        return self.heldout_optimized_score - self.heldout_baseline_score
 
     def summary(self) -> str:
         line = (
-            f"invocation {self.baseline_score:.1%} → {self.optimized_score:.1%} "
-            f"({self.improvement:+.1%})"
+            f"invocation (train) {self.baseline_score:.1%} → "
+            f"{self.optimized_score:.1%} ({self.improvement:+.1%})"
         )
+        if self.heldout_improvement is not None:
+            line += (
+                f" | held-out {self.heldout_baseline_score:.1%} → "
+                f"{self.heldout_optimized_score:.1%} "
+                f"({self.heldout_improvement:+.1%}, n={self.heldout_size})"
+            )
+        elif self.holdout_fallback_reason:
+            line += f" | no held-out split: {self.holdout_fallback_reason}"
         if self.validation_score is not None:
-            line += f" | held-out {self.validation_router}: {self.validation_score:.1%}"
+            line += f" | {self.validation_router}: {self.validation_score:.1%}"
         return line
 
 
@@ -120,6 +142,8 @@ def optimize_routing(
     validation_router: Router | None = None,
     max_metric_calls: int = 60,
     objective: str | None = None,
+    valset_fraction: float = 0.2,
+    seed: int = 0,
 ) -> OptimizationResult:
     """Run GEPA over the card's routing surface.
 
@@ -129,7 +153,11 @@ def optimize_routing(
         validation_router: a *different* router used to re-score the winner.
             Optimising and scoring with one router measures that router's
             reading habits, not interoperability; a gain that survives the swap
-            is a real one.
+            is a real one. It scores the held-out cases when a split exists.
+        valset_fraction: share of cases held out from GEPA (seeded by
+            ``seed``). Seed and optimised descriptions are scored on them so
+            the held-out gain is not inflated by selection on the same cases
+            (arXiv:2610.09239). Small case sets fall back to no split.
     """
     from gepa.optimize_anything import (
         EngineConfig,
@@ -138,18 +166,24 @@ def optimize_routing(
         optimize_anything,
     )
 
-    router = router or LexicalRouter()
-    seed = seed_candidate(skills)
-    dataset = list(cases)
+    from superoptix.optimizers.holdout import split_holdout
 
-    baseline = score_routing(router, _apply(skills, seed), dataset).invocation_rate
+    router = router or LexicalRouter()
+    seed_descriptions = seed_candidate(skills)
+    split = split_holdout(list(cases), fraction=valset_fraction, seed=seed)
+    dataset = list(split.train)
+    heldout = list(split.heldout)
+
+    baseline = score_routing(
+        router, _apply(skills, seed_descriptions), dataset
+    ).invocation_rate
     evaluator = make_evaluator(skills, router)
 
     result = optimize_anything(
-        seed,
+        seed_descriptions,
         evaluator=evaluator,
         dataset=dataset,
-        valset=dataset,
+        valset=dataset,  # held-out cases are never shown to GEPA
         objective=objective
         or (
             "Rewrite each agent skill description so that a calling agent "
@@ -172,24 +206,39 @@ def optimize_routing(
         ),
     )
 
-    best = _best_candidate(result, seed)
+    best = _best_candidate(result, seed_descriptions)
     optimized = score_routing(router, _apply(skills, best), dataset).invocation_rate
+
+    heldout_baseline = heldout_optimized = None
+    if heldout:
+        heldout_baseline = score_routing(
+            router, _apply(skills, seed_descriptions), heldout
+        ).invocation_rate
+        heldout_optimized = score_routing(
+            router, _apply(skills, best), heldout
+        ).invocation_rate
 
     validation_score = None
     validation_name = None
     if validation_router is not None:
         validation_score = score_routing(
-            validation_router, _apply(skills, best), dataset
+            validation_router, _apply(skills, best), heldout or dataset
         ).invocation_rate
         validation_name = validation_router.name
 
     return OptimizationResult(
         baseline_score=baseline,
         optimized_score=optimized,
-        baseline_descriptions=dict(seed),
+        baseline_descriptions=dict(seed_descriptions),
         optimized_descriptions=dict(best),
         validation_score=validation_score,
         validation_router=validation_name,
+        heldout_baseline_score=heldout_baseline,
+        heldout_optimized_score=heldout_optimized,
+        heldout_size=len(heldout),
+        train_size=len(dataset),
+        split_digest=split.digest,
+        holdout_fallback_reason=split.fallback_reason,
     )
 
 

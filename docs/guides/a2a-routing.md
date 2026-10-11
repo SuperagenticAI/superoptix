@@ -99,6 +99,16 @@ result = optimize_routing(
 print(result.summary())
 ```
 
+Since 2.0, `optimize_routing` also holds out a seeded share of the cases
+(`valset_fraction=0.2`, `seed=0`) that GEPA never sees. `result.improvement`
+is the reported gain on the cases GEPA optimised against;
+`result.heldout_improvement` is the gain on the held-out cases and is the
+number to trust (selection on the same cases inflates the reported gain, see
+arXiv:2610.09239). `result.split_digest` identifies the held-out set. With too
+few cases the split is skipped, `heldout_improvement` is `None` and
+`holdout_fallback_reason` says why. When a split exists, `validation_router`
+re-scores on the held-out cases.
+
 An improvement that survives the swap is real. One that does not has taught you
 something more useful than a number.
 
