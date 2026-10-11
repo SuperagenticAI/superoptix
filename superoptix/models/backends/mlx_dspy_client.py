@@ -1,130 +1,162 @@
+"""DSPy LM for local MLX servers, as a DSPy engine.
+
+DSPy 3.4 deprecates custom ``BaseLM.forward`` LMs and DSPy 3.5 removes them
+(https://dspy.ai/current/community/normalized-lm-api-migration/). This module
+implements the replacement: an engine with ``complete(Request) -> Response``
+that speaks the MLX server's OpenAI-compatible chat endpoint, wrapped in a
+normal ``dspy.LM``.
+
+    lm = create_mlx_lm("mlx-community/Llama-3.2-3B-Instruct-4bit")
+    dspy.configure(lm=lm)
+
+``MLXDSPyClient(...)`` is kept as a factory with the old constructor
+arguments; it now returns a ``dspy.LM``, not a ``BaseLM`` subclass.
 """
-Custom DSPy client for MLX models that works with local MLX servers
-"""
+
+from __future__ import annotations
+
+import logging
+from typing import Any, Dict, List
 
 import requests
-import logging
-
-from dspy.clients.base_lm import BaseLM
 
 logger = logging.getLogger(__name__)
 
+_FINISH_REASONS = {"stop", "length", "tool_call", "content_filter", "error"}
 
-class MLXDSPyClient(BaseLM):
-    """
-    Custom DSPy client for MLX models that works with local MLX servers.
 
-    This client calls MLX's server API directly, similar to how OllamaDirect works.
-    """
+def _lm15():
+    try:
+        from dspy import lm15
+    except ImportError as exc:  # pragma: no cover - floor is dspy>=3.4
+        raise ImportError(
+            "The MLX DSPy engine needs DSPy 3.4 or newer (dspy.lm15). "
+            'Install with: pip install "dspy>=3.4"'
+        ) from exc
+    return lm15
+
+
+def _request_to_chat(request: Any) -> List[Dict[str, str]]:
+    messages: List[Dict[str, str]] = []
+    system = request.system
+    if system:
+        if not isinstance(system, str):
+            system = "".join(str(getattr(p, "text", "") or "") for p in system)
+        messages.append({"role": "system", "content": system})
+    for message in request.messages:
+        role = str(message.role)
+        if role == "developer":
+            role = "system"
+        messages.append({"role": role, "content": message.text or ""})
+    return messages
+
+
+class MLXEngine:
+    """Synchronous DSPy engine for an MLX server (OpenAI-compatible API)."""
 
     def __init__(
         self,
-        model: str,
         api_base: str = "http://localhost:8000",
-        temperature: float = 0.0,
-        max_tokens: int = 4000,
-        **kwargs,
-    ):
-        """
-        Create a custom MLX DSPy client.
-
-        Args:
-            model: The MLX model name (e.g., "mlx-community/Llama-3.2-3B-Instruct-4bit")
-            api_base: The MLX server base URL
-            temperature: Sampling temperature
-            max_tokens: Maximum tokens to generate
-            **kwargs: Additional parameters
-        """
-        self.model = model
+        timeout: float = 120,
+        session: requests.Session | None = None,
+    ) -> None:
         self.api_base = api_base.rstrip("/")
-        self.temperature = temperature
-        self.max_tokens = max_tokens
-        self.kwargs = kwargs
-        self.history = []
+        self.timeout = timeout
+        self._session = session or requests.Session()
 
-    def forward(self, prompt=None, messages=None, **kwargs):
-        """
-        Forward pass through the MLX API.
+    def close(self) -> None:
+        self._session.close()
 
-        Args:
-            prompt: Simple prompt string
-            messages: List of message dicts with 'role' and 'content'
-            **kwargs: Additional parameters
-
-        Returns:
-            Response in OpenAI format for compatibility
-        """
-        # Build messages
-        if messages is None:
-            messages = [{"role": "user", "content": prompt}]
-
-        # Merge kwargs
-        request_kwargs = {**self.kwargs, **kwargs}
-
-        # Build request payload for MLX server
-        payload = {
-            "model": self.model,
-            "messages": messages,
+    def complete(self, request: Any) -> Any:
+        lm15 = _lm15()
+        config = request.config
+        payload: Dict[str, Any] = {
+            "model": request.model.split("/", 1)[1]
+            if request.model.startswith("mlx/")
+            else request.model,
+            "messages": _request_to_chat(request),
             "stream": False,
-            "temperature": request_kwargs.get("temperature", self.temperature),
-            "max_tokens": request_kwargs.get("max_tokens", self.max_tokens),
         }
-
-        # Add any additional parameters
-        for key, value in request_kwargs.items():
-            if key not in ["temperature", "max_tokens"]:
-                payload[key] = value
-
+        if config.max_tokens is not None:
+            payload["max_tokens"] = config.max_tokens
+        if config.temperature is not None:
+            payload["temperature"] = config.temperature
+        if config.top_p is not None:
+            payload["top_p"] = config.top_p
+        if config.stop:
+            payload["stop"] = list(config.stop)
         try:
-            # Make direct API call to MLX server
-            response = requests.post(
+            response = self._session.post(
                 f"{self.api_base}/v1/chat/completions",
                 json=payload,
-                headers={"Content-Type": "application/json"},
-                timeout=120,  # 2 minute timeout
+                timeout=self.timeout,
             )
-
-            if response.status_code == 200:
-                result = response.json()
-
-                # Store in history for compatibility
-                self.history.append({"messages": messages, "response": result})
-
-                # Ensure all subfields are dicts/lists/primitives (should be by default)
-                return result
-            else:
-                error_msg = f"MLX API error: {response.status_code} - {response.text}"
-                logger.error(error_msg)
-                raise RuntimeError(error_msg)
-
-        except requests.exceptions.RequestException as e:
-            error_msg = f"Failed to connect to MLX server: {e}"
-            logger.error(error_msg)
-            raise RuntimeError(error_msg)
-
-    async def aforward(self, prompt=None, messages=None, **kwargs):
-        """Async forward - currently just calls sync version"""
-        return self.forward(prompt=prompt, messages=messages, **kwargs)
-
-    def __call__(self, prompt=None, messages=None, **kwargs):
-        """Make the client callable"""
-        return self.forward(prompt=prompt, messages=messages, **kwargs)
-
-    def copy(self, **kwargs):
-        """Create a copy of this client with updated parameters"""
-        new_kwargs = {**self.kwargs, **kwargs}
-        return MLXDSPyClient(
-            model=self.model,
-            api_base=self.api_base,
-            temperature=new_kwargs.get("temperature", self.temperature),
-            max_tokens=new_kwargs.get("max_tokens", self.max_tokens),
-            **{
-                k: v
-                for k, v in new_kwargs.items()
-                if k not in ["temperature", "max_tokens"]
-            },
+        except requests.exceptions.Timeout as exc:
+            raise lm15.TimeoutError(f"MLX server timed out: {exc}") from exc
+        except requests.exceptions.RequestException as exc:
+            raise lm15.TransportError(f"Failed to reach MLX server: {exc}") from exc
+        if response.status_code >= 500:
+            raise lm15.ServerError(
+                f"MLX API error: {response.status_code} - {response.text}"
+            )
+        if response.status_code != 200:
+            raise lm15.InvalidRequestError(
+                f"MLX API error: {response.status_code} - {response.text}"
+            )
+        data = response.json()
+        choice = (data.get("choices") or [{}])[0]
+        text = str((choice.get("message") or {}).get("content") or "")
+        finish = str(choice.get("finish_reason") or "stop")
+        if finish not in _FINISH_REASONS:
+            finish = "stop"
+        usage = data.get("usage") or {}
+        return lm15.Response(
+            id=data.get("id"),
+            model=request.model,
+            message=lm15.Message.assistant(text),
+            finish_reason=finish,
+            usage=lm15.Usage(
+                input_tokens=usage.get("prompt_tokens"),
+                output_tokens=usage.get("completion_tokens"),
+                total_tokens=usage.get("total_tokens"),
+            ),
         )
 
-    def inspect_history(self, n: int = 1):
-        """Inspect recent interactions"""
-        return self.history[-n:] if self.history else []
+
+def create_mlx_lm(
+    model: str,
+    api_base: str = "http://localhost:8000",
+    temperature: float = 0.0,
+    max_tokens: int = 4000,
+    timeout: float = 120,
+    **kwargs: Any,
+) -> Any:
+    """Return a ``dspy.LM`` backed by :class:`MLXEngine`."""
+    import dspy
+
+    _lm15()
+    name = model if model.startswith("mlx/") else f"mlx/{model}"
+    return dspy.LM(
+        name,
+        engine=MLXEngine(api_base=api_base, timeout=timeout),
+        temperature=temperature,
+        max_tokens=max_tokens,
+        **kwargs,
+    )
+
+
+def MLXDSPyClient(  # noqa: N802 - kept for import compatibility
+    model: str,
+    api_base: str = "http://localhost:8000",
+    temperature: float = 0.0,
+    max_tokens: int = 4000,
+    **kwargs: Any,
+) -> Any:
+    """Backward-compatible factory. Returns a ``dspy.LM`` (engine based)."""
+    return create_mlx_lm(
+        model,
+        api_base=api_base,
+        temperature=temperature,
+        max_tokens=max_tokens,
+        **kwargs,
+    )

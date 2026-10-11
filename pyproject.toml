@@ -52,7 +52,7 @@ dependencies = [
     # `ml-cross-platform` extras. Keeping them here added ~545 MB to every
     # install (torch alone is 491 MB) for an optional local-inference backend.
     #   uv pip install "superoptix[huggingface]"   # to use that backend
-    "dspy>=3.3",  # GEPA lives in DSPy 3.x - floor prevents silent back-solve to 2.6.x
+    "dspy>=3.4",  # 3.4 ships dspy.lm15 engines; 2.0 needs them (3.5 removes BaseLM.forward LMs)
     "litellm>=1.98,!=1.82.7,!=1.82.8",  # Block compromised March 2026 releases
     "pydantic",  # Required for data validation
     "python-dotenv",  # Required for environment variables
@@ -66,7 +66,7 @@ dependencies = [
 
 # DSPy - kept as a separate extra so it can be pinned independently
 frameworks-dspy = [
-    "dspy>=3.3",  # PyPI package name
+    "dspy>=3.4",  # PyPI package name
 ]
 
 # Optional Jev / System One (TypeSafe) quality-control adapters.
@@ -141,7 +141,7 @@ frameworks-claude-sdk = [
 # All frameworks except CrewAI (see the CrewAI chromadb note above).
 # Keep these bounds in sync with the individual frameworks-* extras above.
 frameworks = [
-    "dspy>=3.3",
+    "dspy>=3.4",
     "openai-agents>=0.20,<0.21",
     "openai>=2.54,<3",
     "google-adk>=2.7",
@@ -370,7 +370,7 @@ docs = [
 #       Cannot be combined with [all] due to google-adk dependency conflict
 all = [
     # Framework dependencies - keep in sync with the frameworks-* extras above
-    "dspy>=3.3",
+    "dspy>=3.4",
     "openai-agents>=0.20,<0.21",
     "openai>=2.54,<3",
     "google-adk>=2.7",
@@ -413,7 +413,7 @@ all = [
 # NOTE: LogFire excluded due to opentelemetry-sdk conflict with google-adk
 all-with-mlx = [
     # Framework dependencies - keep in sync with the frameworks-* extras above
-    "dspy>=3.3",
+    "dspy>=3.4",
     "openai-agents>=0.20,<0.21",
     "openai>=2.54,<3",
     "google-adk>=2.7",
