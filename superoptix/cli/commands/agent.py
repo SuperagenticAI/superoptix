@@ -916,10 +916,10 @@ def _compile_single_agent(agent_name: str, args, tier_level: str = None):
             if compile_profile == "minimal":
                 next_steps = f"""🚀 [bold bright_cyan]NEXT STEPS[/]
 
-[cyan]super agent run {agent_name} --goal "goal"[/] - Execute minimal DSPy pipeline
-[cyan]super agent compile {agent_name} --optimize[/] - Generate full optimization/evaluation pipeline
-[cyan]super agent evaluate {agent_name}[/] - Run BDD evaluation (after optimized compile)
-[cyan]super agent optimize {agent_name}[/] - Run optimizer (after optimized compile)
+[cyan]super agent run {agent_name} --goal "goal"[/] - Execute the DSPy pipeline
+[cyan]super agent evaluate {agent_name}[/] - Run BDD evaluation
+[cyan]super agent optimize {agent_name} --gauge-out record.json[/] - Optimize with GEPA and record quality
+[cyan]super agent test {agent_name}[/] - CI quality gate
 """
             else:
                 next_steps = f"""🚀 [bold bright_cyan]NEXT STEPS[/]
@@ -943,7 +943,7 @@ def _compile_single_agent(agent_name: str, args, tier_level: str = None):
         # Simple workflow guide (normal mode)
         if compile_profile == "minimal":
             console.print(
-                f'🎯 [bold cyan]Next:[/] [cyan]super agent run {agent_name} --goal "your goal"[/], then [cyan]super agent evaluate {agent_name}[/] and [cyan]super agent test {agent_name}[/] (recompile with [cyan]--optimize[/] to enable evaluate/optimize/test)'
+                f'🎯 [bold cyan]Next:[/] [cyan]super agent run {agent_name} --goal "your goal"[/], then [cyan]super agent evaluate {agent_name}[/], [cyan]super agent optimize {agent_name} --gauge-out record.json[/] and [cyan]super agent test {agent_name}[/]'
             )
         else:
             console.print(

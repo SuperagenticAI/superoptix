@@ -829,10 +829,10 @@ class AgentCompiler:
                     )
                     console.print()
                     console.print(
-                        "[dim]   • No evaluation/optimization scaffolding in generated code[/]"
+                        "[dim]   • evaluate, optimize and test work on this pipeline as is[/]"
                     )
                     console.print(
-                        "[dim]   • Recompile with --optimize for full train/evaluate support[/]"
+                        "[dim]   • --optimize adds optional training scaffolding to the generated code[/]"
                     )
                 elif compile_profile == "optimized":
                     console.print(

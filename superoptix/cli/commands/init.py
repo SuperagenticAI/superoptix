@@ -385,7 +385,7 @@ def init_project(args):
    [cyan]super agent pull developer[/]  [dim]# swap 'developer' for any agent name[/]
 
 [yellow]3. Compile, run and evaluate it:[/]
-   [cyan]super agent compile developer --optimize[/]
+   [cyan]super agent compile developer[/]
    [cyan]super agent run developer --goal "..."[/]
    [cyan]super agent evaluate developer[/]
 

@@ -1331,9 +1331,7 @@ class DSPyRunner:
                     border_style="bright_magenta",
                 )
             )
-            console.print(
-                f"\n[yellow]🚀 Starting optimization using '[bold]{strategy}[/]' strategy...[/]"
-            )
+            console.print("\n[yellow]🚀 Starting GEPA optimization...[/]")
 
             # Import and execute the pipeline module
             import importlib.util
