@@ -1,5 +1,5 @@
 """
-SuperOptiX Model Intelligence System - CLI commands for model management.
+CLI commands for model management.
 """
 
 from typing import Optional
@@ -25,7 +25,7 @@ from ...models.utils import (
 )
 from ...models.config import get_superoptix_model_discovery_settings
 
-app = typer.Typer(name="model", help="🚀 SuperOptiX Model Intelligence System")
+app = typer.Typer(name="model", help="Manage the models your agents run on")
 
 
 @app.command("list")
