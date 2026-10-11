@@ -22,6 +22,7 @@ from superoptix.vendor.deepagents.graph import create_deep_agent
 from superoptix.runners.deepagents_runtime_helpers import (
     build_instructions as superoptix_build_instructions,
     resolve_model as superoptix_resolve_model,
+    chat_model_kwargs as superoptix_chat_model_kwargs,
 {% set tools_cfg = (spec.get("tools", {}) or {}) %}
 {% set dspy_tools_cfg = ((spec.get("dspy", {}) or {}).get("tools", {}) or {}) %}
 )
@@ -108,7 +109,10 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
         )
 
         self._model_name = resolved_model
-        self._model = init_chat_model(resolved_model)
+        self._model = init_chat_model(
+            resolved_model,
+            **superoptix_chat_model_kwargs(LANGUAGE_MODEL, resolved_model),
+        )
         self._tools = tools
         self._agent_graph = None
 

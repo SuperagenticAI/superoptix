@@ -140,6 +140,30 @@ def _tool_to_schema(tool: Any) -> Dict[str, Any]:
     return {}
 
 
+def _adk_model(
+    model: str,
+    language_model: Dict[str, Any],
+    model_config: Dict[str, Any] | None,
+) -> Any:
+    """Return what ADK's ``Agent(model=...)`` needs for ``model``.
+
+    ADK resolves bare strings as Gemini model names, so a local Ollama model
+    has to go through ADK's LiteLLM wrapper (``ollama_chat/<name>``).
+    """
+    runtime_cfg = dict(model_config or {})
+    provider = _normalize_provider(
+        runtime_cfg.get("provider") or language_model.get("provider") or "google"
+    )
+    if provider != "ollama":
+        return model
+    from google.adk.models.lite_llm import LiteLlm
+
+    from superoptix.core.local_lm import ollama_model_id, ollama_root
+
+    api_base = runtime_cfg.get("api_base") or language_model.get("api_base")
+    return LiteLlm(model=ollama_model_id(model), api_base=ollama_root(api_base))
+
+
 def create_agent_runner(
     *,
     spec_data: Dict[str, Any],
@@ -159,6 +183,9 @@ def create_agent_runner(
     model = resolve_model(
         spec_data.get("language_model", {}) or {}, model_config=model_config
     )
+    agent_model = _adk_model(
+        model, spec_data.get("language_model", {}) or {}, model_config
+    )
     setup_phoenix_for_spec(
         agent_id=agent_name,
         spec_data=spec_data,
@@ -174,7 +201,7 @@ def create_agent_runner(
 
     agent_kwargs: Dict[str, Any] = {
         "name": agent_name.replace("-", "_"),
-        "model": model,
+        "model": agent_model,
         "description": description,
         "instruction": instruction,
         "tools": tools or [],

@@ -5,8 +5,23 @@ from __future__ import annotations
 import os
 from typing import Any, Dict
 
+from superoptix.core.local_lm import ollama_openai_base
+
 
 GOOGLE_OPENAI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
+
+
+_KNOWN_PROVIDERS = {
+    "ollama",
+    "openai",
+    "azure",
+    "google-genai",
+    "anthropic",
+    "mistral",
+    "groq",
+    "deepseek",
+    "openrouter",
+}
 
 
 def _normalize_provider(provider: Any) -> str:
@@ -51,7 +66,9 @@ def resolve_client_config(
     api_base = str(api_base_source or "").strip()
 
     model_prefix, model_suffix = _strip_provider_prefix(model)
-    if model_prefix:
+    # Only a real provider counts as a prefix: "qwen2.5:1.5b" is an Ollama
+    # name:tag, not provider "qwen2.5" with model "1.5b".
+    if model_prefix and _normalize_provider(model_prefix) in _KNOWN_PROVIDERS:
         prefix_norm = _normalize_provider(model_prefix)
         if model_suffix:
             provider = prefix_norm
@@ -74,7 +91,8 @@ def resolve_client_config(
             "client_type": "openai",
             "kwargs": {
                 "api_key": "ollama",
-                "base_url": api_base or "http://localhost:11434/v1",
+                # Ollama's OpenAI-compatible API lives under /v1.
+                "base_url": ollama_openai_base(api_base or None),
                 "model_id": model,
             },
         }
@@ -104,3 +122,34 @@ def resolve_client_config(
         "client_type": "openai",
         "kwargs": kwargs,
     }
+
+
+def create_chat_client(client_config: Dict[str, Any]) -> Any:
+    """Build an Agent Framework chat client from :func:`resolve_client_config`.
+
+    Copes with Agent Framework API drift: 1.19 dropped
+    ``agent_framework.azure.AzureOpenAIChatClient`` (Azure moved onto
+    ``OpenAIChatClient(azure_endpoint=...)``) and renamed ``model_id`` to
+    ``model``. Servers reached through ``base_url`` (Ollama, Gemini's OpenAI
+    endpoint) get the Chat Completions client, which every OpenAI-compatible
+    server implements.
+    """
+    import inspect
+
+    from agent_framework import openai as af_openai
+
+    kwargs = dict(client_config.get("kwargs") or {})
+    cls = af_openai.OpenAIChatClient
+    if client_config.get("client_type") == "azure":
+        try:
+            from agent_framework.azure import AzureOpenAIChatClient as cls
+        except ImportError:
+            kwargs["azure_endpoint"] = kwargs.pop("endpoint", None)
+            kwargs["model"] = kwargs.pop("deployment_name", None)
+    elif kwargs.get("base_url"):
+        cls = getattr(af_openai, "OpenAIChatCompletionClient", None) or cls
+
+    params = inspect.signature(cls.__init__).parameters
+    if "model_id" in kwargs and "model_id" not in params and "model" in params:
+        kwargs["model"] = kwargs.pop("model_id")
+    return cls(**kwargs)

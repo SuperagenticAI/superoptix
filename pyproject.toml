@@ -108,6 +108,7 @@ frameworks-microsoft = [
 # DeepAgents (LangChain) - 0.5.6+ with pluggable backends
 frameworks-deepagents = [
     "deepagents>=0.7,<0.8",  # 0.7.x backend abstraction; used via create_deep_agent
+    "langchain-ollama>=0.3",  # local Ollama models via init_chat_model("ollama:...")
 ]
 
 # Pydantic AI - Type-safe agent framework (full package)
