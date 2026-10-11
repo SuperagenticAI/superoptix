@@ -84,21 +84,9 @@ class TestCardTranslation:
             "name": "A",
             "protocolVersion": "1.0",
             "supportedInterfaces": [
-                {
-                    "url": "https://x/rpc",
-                    "protocolBinding": "JSONRPC",
-                    "protocolVersion": "1.0",
-                },
-                {
-                    "url": "https://x",
-                    "protocolBinding": "HTTP+JSON",
-                    "protocolVersion": "1.0",
-                },
-                {
-                    "url": "https://x/rpc",
-                    "protocolBinding": "JSONRPC",
-                    "protocolVersion": "0.3",
-                },
+                {"url": "https://x/rpc", "protocolBinding": "JSONRPC", "protocolVersion": "1.0"},
+                {"url": "https://x", "protocolBinding": "HTTP+JSON", "protocolVersion": "1.0"},
+                {"url": "https://x/rpc", "protocolBinding": "JSONRPC", "protocolVersion": "0.3"},
             ],
         }
 
@@ -125,12 +113,7 @@ class TestNegotiationOverHttp:
     def _send(self, client, version):
         return client.post(
             "/message:send",
-            json={
-                "message": {
-                    "role": "ROLE_USER",
-                    "parts": [{"text": "does dspy support a2a"}],
-                }
-            },
+            json={"message": {"role": "ROLE_USER", "parts": [{"text": "does dspy support a2a"}]}},
             headers={"A2A-Version": version},
         ).json()["task"]
 
@@ -147,9 +130,7 @@ class TestNegotiationOverHttp:
 
     def test_the_card_is_negotiated_too(self, client):
         one = client.get("/.well-known/agent-card.json", headers={"A2A-Version": "1.0"})
-        legacy = client.get(
-            "/.well-known/agent-card.json", headers={"A2A-Version": "0.3"}
-        )
+        legacy = client.get("/.well-known/agent-card.json", headers={"A2A-Version": "0.3"})
         assert one.json()["protocolVersion"] == "1.0"
         assert legacy.json()["protocolVersion"] == "0.3"
 
@@ -186,7 +167,9 @@ class TestNegotiationOverHttp:
                 "jsonrpc": "2.0",
                 "id": "1",
                 "method": "SendMessage",
-                "params": {"message": {"role": "ROLE_USER", "parts": [{"text": "hi"}]}},
+                "params": {
+                    "message": {"role": "ROLE_USER", "parts": [{"text": "hi"}]}
+                },
             },
             headers={"A2A-Version": "0.3"},
         ).json()

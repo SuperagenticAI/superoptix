@@ -364,13 +364,7 @@ class TestLegacyMethodNames:
         body = self._call(
             client,
             "message/send",
-            {
-                "message": {
-                    "role": "user",
-                    "messageId": "m1",
-                    "parts": [{"kind": "text", "text": "hi"}],
-                }
-            },
+            {"message": {"role": "user", "messageId": "m1", "parts": [{"kind": "text", "text": "hi"}]}},
         )
         assert "error" not in body, body
         task = body["result"]
@@ -419,10 +413,7 @@ class TestLegacyMethodNames:
 
     def test_push_config_reports_it_is_unsupported(self, client):
         body = self._call(client, "tasks/pushNotificationConfig/set", {})
-        assert (
-            body["error"]["code"]
-            == a2a_errors.PUSH_NOTIFICATION_NOT_SUPPORTED.jsonrpc_code
-        )
+        assert body["error"]["code"] == a2a_errors.PUSH_NOTIFICATION_NOT_SUPPORTED.jsonrpc_code
 
     def test_the_1_0_names_still_work(self, client):
         body = self._call(client, "GetTask", {"id": "missing"})

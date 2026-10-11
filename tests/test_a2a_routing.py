@@ -36,34 +36,18 @@ _VAGUE = [
 ]
 
 _SPECIFIC = [
-    SkillRef(
-        "billing",
-        "billing",
-        "Handle billing query",
-        "Resolve invoice disputes, duplicate charges, payment failures and "
-        "subscription price questions",
-    ),
-    SkillRef(
-        "refunds",
-        "refunds",
-        "Process refund",
-        "Decide and process refund and money-back requests, including returns "
-        "and partial refunds",
-    ),
-    SkillRef(
-        "tech",
-        "tech",
-        "Technical support",
-        "Debug product crashes, upload errors, broken integrations that stop "
-        "syncing, and login failures",
-    ),
-    SkillRef(
-        "accounts",
-        "accounts",
-        "Account help",
-        "Change workspace seats, account settings, permissions and the email "
-        "on a login",
-    ),
+    SkillRef("billing", "billing", "Handle billing query",
+             "Resolve invoice disputes, duplicate charges, payment failures and "
+             "subscription price questions"),
+    SkillRef("refunds", "refunds", "Process refund",
+             "Decide and process refund and money-back requests, including returns "
+             "and partial refunds"),
+    SkillRef("tech", "tech", "Technical support",
+             "Debug product crashes, upload errors, broken integrations that stop "
+             "syncing, and login failures"),
+    SkillRef("accounts", "accounts", "Account help",
+             "Change workspace seats, account settings, permissions and the email "
+             "on a login"),
 ]
 
 # Caller vocabulary. Nobody recites a skill's title when they ask for help.
@@ -74,9 +58,7 @@ _CASES = [
     RoutingCase("can I return this and get a refund", "refunds:refunds", "s"),
     RoutingCase("the app crashes when I upload a file", "tech:tech", "s"),
     RoutingCase("our integration stopped syncing and throws errors", "tech:tech", "s"),
-    RoutingCase(
-        "please add three more seats to our workspace", "accounts:accounts", "s"
-    ),
+    RoutingCase("please add three more seats to our workspace", "accounts:accounts", "s"),
     RoutingCase("I need to change the email on my login", "accounts:accounts", "s"),
 ]
 
@@ -174,9 +156,7 @@ class TestCatalogue:
 class TestGeneratedCases:
     def test_hard_mode_withholds_the_skill_name(self):
         """A query that echoes the title lets a useless description win on it."""
-        skills = [
-            SkillRef("A", "x", "Refund Processing", "d", examples=("money back",))
-        ]
+        skills = [SkillRef("A", "x", "Refund Processing", "d", examples=("money back",))]
         hard = generate_cases(skills, per_skill=4, hard=True)
         assert hard
         assert not any("refund processing" in c.query.lower() for c in hard)

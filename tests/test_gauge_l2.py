@@ -67,10 +67,7 @@ PLAYBOOK = {
 
 def _write_playbook(tmp_path, scenarios):
     pb = {**PLAYBOOK}
-    pb["spec"] = {
-        **PLAYBOOK["spec"],
-        "feature_specifications": {"scenarios": scenarios},
-    }
+    pb["spec"] = {**PLAYBOOK["spec"], "feature_specifications": {"scenarios": scenarios}}
     path = tmp_path / "agent_playbook.yaml"
     path.write_text(yaml.safe_dump(pb), encoding="utf-8")
     return path, pb
@@ -86,9 +83,7 @@ def _holdout_record(tmp_path, scenarios):
     return yaml.safe_load(path.read_text())
 
 
-def _results(
-    scenarios, *, passed=True, parsed=True, canary_passed=False, baseline=False
-):
+def _results(scenarios, *, passed=True, parsed=True, canary_passed=False, baseline=False):
     rows = []
     for s in scenarios:
         canary = bool(s.get("canary"))
@@ -191,9 +186,7 @@ def test_gates_are_deterministic_and_canonical(tmp_path):
         "assurance.holdout_sealed",
     }
     assert all(not g["id"].startswith("x-") for g in rec["gates"])
-    base = [
-        m for m in rec["measures"] if m["id"] == "reliability.beats_trivial_baseline"
-    ][0]
+    base = [m for m in rec["measures"] if m["id"] == "reliability.beats_trivial_baseline"][0]
     assert base["baseline"]["id"] == "echo-input" and base["value"] is True
     parse = [m for m in rec["measures"] if m["id"] == "output.parse_rate"][0]
     assert parse["schema_digest"].startswith("sha256:")
@@ -289,9 +282,7 @@ def test_judge_records_served_model_and_keeps_ship(tmp_path):
 
 
 def test_jev_warn_soft_holds_a_passing_record(tmp_path):
-    warn = DispositionJudgment(
-        choice="warn", confidence=0.9, source="typesafe-live", model="jev-1.13.0"
-    )
+    warn = DispositionJudgment(choice="warn", confidence=0.9, source="typesafe-live", model="jev-1.13.0")
     rec = apply_jev_judgment(_record(tmp_path), warn)
     assert rec["decision"]["verdict"] == "hold"
 
@@ -312,15 +303,7 @@ def test_served_model_helper():
 def test_upstream_reference_example_passes():
     ref = CHECKER.parent.parent / "l3-superoptix-hardened-ship.yaml"
     proc = subprocess.run(
-        [
-            sys.executable,
-            str(CHECKER),
-            str(ref),
-            "--level",
-            "L2",
-            "--require-ship",
-            "--quiet",
-        ]
+        [sys.executable, str(CHECKER), str(ref), "--level", "L2", "--require-ship", "--quiet"]
     )
     assert proc.returncode == 0
 
@@ -394,11 +377,7 @@ def test_builtin_precheck_matches_upstream_levels(tmp_path):
         out_path = tmp_path / "r.yaml"
         write_record(rec, out_path)
         proc = subprocess.run(
-            [sys.executable, str(CHECKER), str(out_path)],
-            capture_output=True,
-            text=True,
+            [sys.executable, str(CHECKER), str(out_path)], capture_output=True, text=True
         )
         upstream = proc.stdout.strip().splitlines()[-1].split(":")[-1].strip()
-        assert highest_level(check_levels(rec)) == (
-            None if upstream == "none" else upstream
-        ), kwargs
+        assert highest_level(check_levels(rec)) == (None if upstream == "none" else upstream), kwargs
