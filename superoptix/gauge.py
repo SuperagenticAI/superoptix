@@ -80,7 +80,7 @@ def _authority_from_playbook(playbook: dict[str, Any]) -> dict[str, Any]:
         if (t.get("name") if isinstance(t, dict) else t)
     )
     if names:
-        authority["capabilities"] = names
+        authority["capabilities"] = sorted(set(names))
 
     runtime = spec.get("runtime") or {}
     sandbox = runtime.get("sandbox") or spec.get("sandbox")
@@ -96,6 +96,18 @@ def _authority_from_playbook(playbook: dict[str, Any]) -> dict[str, Any]:
         else:
             authority["egress"] = "unrestricted"
 
+    # SuperGauge requires grant_digest or acs_policy_version. SuperOptiX has no
+    # ACS policy, so the grant is the authority-relevant playbook content in
+    # force for the run (tools, runtime, sandbox, network), digested.
+    grant = {
+        "tools": spec.get("tools") or [],
+        "runtime": spec.get("runtime") or {},
+        "sandbox": spec.get("sandbox"),
+        "network": spec.get("network"),
+    }
+    authority["grant_digest"] = sha256_bytes(
+        json.dumps(grant, sort_keys=True, default=str).encode()
+    )
     return authority
 
 
@@ -327,6 +339,13 @@ def apply_jev_judgment(
         ):
             verdict = "hold"
             preservation_note = "Judge acceptance requires separate release approval and passing deterministic checks."
+    from superoptix.gauge_checks import mechanical_override
+
+    if mechanical_override(record, disposition.choice == "accept"):
+        verdict = "reject" if verdict == "reject" else "hold"
+        preservation_note = (
+            (preservation_note + " ") if preservation_note else ""
+        ) + "Deterministic integrity failed; judged acceptance overridden (RFC 0005)."
     decision["verdict"] = verdict
     parts = [
         p
@@ -382,10 +401,17 @@ def apply_jev_judgment(
         },
         "release_authorization": "acceptance cannot authorize ship",
         "l1_note": (
-            "Emitter soft-hold and judged measures only. Path to L2 still needs "
-            "deterministic gates (compose SuperQode or real policy probes)."
+            "Jev is advisory: it can soft-hold or reject, never ship, and never "
+            "backs a gate. L2 comes from deterministic gates, a sealed held-out "
+            "split and canary probes (super agent test)."
         ),
     }
+    if disposition.requested_model and disposition.requested_model != (
+        disposition.model
+    ):
+        jev_meta["requested_model"] = disposition.requested_model
+    if not disposition.source.startswith("heuristic"):
+        jev_meta["model_source"] = "served" if disposition.model_served else "requested"
     if threshold_version:
         jev_meta["threshold_version"] = threshold_version
     meta["jev"] = jev_meta
@@ -393,9 +419,52 @@ def apply_jev_judgment(
     return record
 
 
-def write_record(record: dict[str, Any], out_path: str | Path) -> Path:
-    """Write an AQR as JSON (``.json`` suffix) or YAML (otherwise)."""
+def sidecar_path(out_path: str | Path) -> Path:
+    """Where SuperOptiX metadata for a record is written (``<stem>.superoptix.json``)."""
     destination = Path(out_path)
+    return destination.with_name(destination.stem + ".superoptix.json")
+
+
+def ledger_path_for(out_path: str | Path) -> Path:
+    """Evaluation ledger written next to a record (``<stem>.ledger.jsonl``)."""
+    destination = Path(out_path)
+    return destination.with_name(destination.stem + ".ledger.jsonl")
+
+
+def write_ledger(path: str | Path, runs: list[list[dict[str, Any]]]) -> int:
+    """Write per-run, per-scenario evaluation rows as JSON lines. Returns rows."""
+    destination = Path(path)
+    count = 0
+    with destination.open("w", encoding="utf-8") as handle:
+        for attempt, run in enumerate(runs, start=1):
+            for row in run:
+                handle.write(
+                    json.dumps({"attempt": attempt, **row}, sort_keys=True, default=str)
+                    + "\n"
+                )
+                count += 1
+    return count
+
+
+def write_record(record: dict[str, Any], out_path: str | Path) -> Path:
+    """Write an AQR as JSON (``.json`` suffix) or YAML (otherwise).
+
+    The SuperGauge schema allows no extra top-level keys, so ``x-*`` metadata
+    (for example ``x-superoptix``) is split into a sidecar file
+    (:func:`sidecar_path`) and the record itself stays schema-valid.
+    """
+    destination = Path(out_path)
+    extensions = {k: v for k, v in record.items() if str(k).startswith("x-")}
+    record = {k: v for k, v in record.items() if not str(k).startswith("x-")}
+    if extensions:
+        sidecar_path(destination).write_text(
+            json.dumps(
+                {"record_id": record.get("record_id"), **extensions},
+                indent=2,
+                default=str,
+            ),
+            encoding="utf-8",
+        )
     if destination.suffix == ".json":
         destination.write_text(json.dumps(record, indent=2), encoding="utf-8")
     else:
@@ -410,3 +479,149 @@ def write_record(record: dict[str, Any], out_path: str | Path) -> Path:
             encoding="utf-8",
         )
     return destination
+
+
+def _declared_tools(playbook: dict[str, Any]) -> list[str] | None:
+    spec = playbook.get("spec") or playbook
+    tools = spec.get("tools")
+    if not isinstance(tools, list) or not tools:
+        return None
+    names = []
+    for tool in tools:
+        name = tool.get("name") if isinstance(tool, dict) else tool
+        if name:
+            names.append(str(name))
+    return names or None
+
+
+def assemble_record(
+    *,
+    agent_name: str,
+    playbook_path: str | Path,
+    playbook: dict[str, Any],
+    scenarios: list[dict[str, Any]],
+    runs: list[list[dict[str, Any]]],
+    framework: str,
+    tier: str = "T1",
+    seal_requested: bool = False,
+    holdout_record: dict[str, Any] | None = None,
+    deterministic_gates: bool = False,
+    floors: dict[str, float] | None = None,
+    actor: str | None = None,
+    checks_ignored: bool = False,
+    ledger: str | None = None,
+    ledger_events: int | None = None,
+) -> dict[str, Any]:
+    """Build an AQR from one or more evaluation runs (SuperOptiX 2.0).
+
+    ``runs[0]`` is the primary evaluation; extra runs are independent repeats
+    used only for ``reliability.pass_hat_k``. With ``seal_requested`` the
+    sealed flag is derived from the GEPA held-out split (``holdout_record``),
+    never asserted. With ``deterministic_gates`` the record carries gates on
+    the deterministic measures the run produced and a deterministic decision.
+    """
+    from superoptix import gauge_checks as gc
+
+    actor = actor or os.environ.get("USER") or "unknown"
+    primary = list(runs[0]) if runs else []
+    canaries = [r for r in primary if r.get("canary")]
+    candidates = [r for r in primary if not r.get("canary")]
+
+    seal = None
+    if seal_requested:
+        seal = gc.seal_holdout(scenarios, holdout_record)
+
+    split = None
+    evaluated = candidates
+    if seal is not None and seal.sealed:
+        wanted = set(seal.heldout_ids)
+        evaluated = [r for r in candidates if r.get("sid") in wanted]
+        split = "held-out"
+
+    record = build_record(
+        agent_name=agent_name,
+        playbook_path=playbook_path,
+        playbook=playbook,
+        scenarios=[s for s in scenarios if not gc.is_canary(s)],
+        results=evaluated,
+        framework=framework,
+        tier=tier,
+        sealed=False,
+        canary_ids=[str(r.get("name") or r.get("id")) for r in canaries] or None,
+        actor=actor,
+        ledger=ledger,
+        ledger_format="superoptix.bdd-ledger/1",
+        ledger_events=ledger_events,
+    )
+    # The ledger records outputs but cannot re-run the agent.
+    record["assurance"]["evidence"]["replayable"] = False
+    meta = record["x-superoptix"]
+    if split:
+        for m in record["measures"]:
+            if m["id"] == "task.completion":
+                m["split"] = split
+
+    outcomes = gc.canary_outcomes(
+        [{**r, "id": r.get("name") or r.get("id")} for r in canaries]
+    )
+    fired = [c for c in outcomes if c["observed"] != c["expected"]]
+    if outcomes:
+        record["assurance"]["integrity"] = {"canaries": outcomes}
+
+    if seal is not None:
+        task_set = record["task_set"]
+        sealed = bool(seal.sealed and not fired)
+        task_set["sealed"] = sealed
+        task_set["held_in"] = seal.held_in
+        task_set["held_out"] = seal.held_out
+        if seal.digest and seal.sealed:
+            task_set["manifest_digest"] = seal.digest
+        reason = seal.reason
+        if seal.sealed and fired:
+            reason = "canary probe passed; split quarantined"
+        meta["holdout"] = {"sealed": sealed, "reason": reason}
+        if seal.digest:
+            meta["holdout"]["split_digest"] = seal.digest
+        record["measures"].append({"id": "assurance.holdout_sealed", "value": sealed})
+
+    if deterministic_gates:
+        if checks_ignored:
+            meta["gates_note"] = "--ignore-checks was set; no gates recorded"
+        else:
+            spec = playbook.get("spec") or playbook
+            contract = gc.declared_output_contract(spec)
+            extra: list[dict[str, Any]] = []
+            parse = gc.parse_rate_measure(evaluated, contract, split)
+            if parse:
+                extra.append(parse)
+            scored = [r for r in evaluated if r.get("status") in {"passed", "failed"}]
+            if scored and all(
+                isinstance(r.get("baseline_passed"), bool)
+                and r.get("success_condition") == scored[0].get("success_condition")
+                for r in scored
+            ):
+                cand = sum(r["status"] == "passed" for r in scored) / len(scored)
+                base = sum(r["baseline_passed"] for r in scored) / len(scored)
+                extra.append(
+                    gc.beats_baseline_measure(
+                        candidate_value=cand,
+                        baseline_value=base,
+                        n=len(scored),
+                        split=split,
+                    )
+                )
+            ids = {r.get("id") for r in evaluated}
+            repeats = [[r for r in run if r.get("id") in ids] for run in runs]
+            extra.extend(gc.pass_hat_k_measures(repeats, split))
+            tools = gc.tool_correctness_measure(
+                evaluated, _declared_tools(playbook), split
+            )
+            if tools:
+                extra.append(tools)
+            trajectory = gc.trajectory_measure(evaluated, split)
+            if trajectory:
+                extra.append(trajectory)
+            record["measures"].extend(extra)
+            record["gates"] = gc.build_gates(record["measures"], floors)
+        gc.decide(record, actor)
+    return record

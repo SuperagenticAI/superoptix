@@ -55,8 +55,19 @@ provides limited evidence about individual answers and tool trajectories.
 2. **Soft-hold**: Choice accept with confidence below
    `--gauge-jev-min-confidence` becomes `decision.verdict: hold` with rationale.
    No gate entry is invented for confidence.
-3. **assurance.judge**: live-call `id`, versioned `model` and `pack_digest`.
-4. **x-superoptix.jev**: source, confidence kind, disposition and threshold version.
+3. **assurance.judge**: live-call `id`, `model` and `pack_digest`. Since 2.0
+   `model` is the model the provider reported for the call that ran
+   (`response_model` in the DSPy LM history), not only the one requested. When
+   the provider reports none, the requested id is used and the sidecar says
+   `model_source: requested`. A requested alias such as `jev-latest` is kept as
+   `requested_model` in the sidecar.
+4. **Mechanical override (RFC 0005)**: if Jev accepts but a deterministic gate
+   failed or a canary passed, the judged acceptance loses:
+   `assurance.integrity.mechanical_override: true` and the verdict is `hold`
+   (or `reject` if Jev rejected).
+5. **x-superoptix.jev** (in the `record.superoptix.json` sidecar, since the
+   SuperGauge schema has no extension slot): source, confidence kind,
+   disposition and threshold version.
 
 Sample JSON (soft-hold):
 
@@ -81,11 +92,27 @@ Sample JSON (soft-hold):
 
 ## Conformance and release checks
 
-An evaluation-only SuperOptiX record remains **L1**. Soft-hold and judged
-measures do not create deterministic gates. A path to L2 needs
-deterministic gates (compose [SuperQode](https://superqode.dev) policy /
-SystemOne harness gates, or other policy probes). SuperOptiX does not invent
-fake gates.
+Jev never makes a record L2 and never authorises a release.
+
+- Gates come only from deterministic measures (see
+  [Agent Quality Records](agent-quality-record.md#deterministic-gates-20)).
+  Jev confidence, Score and Noul are never gates.
+- Jev can only move a verdict down: accept keeps an existing deterministic
+  `ship`; warn soft-holds; reject rejects. A heuristic (no live Jev)
+  disposition cannot keep `ship`.
+- In `super agent test --jev`, Jev runs only when the live judge is available.
+  Without `superoptix[typesafe]` and `TYPESAFE_API_KEY` it is skipped with a
+  notice instead of adding a pass-rate heuristic.
+
+Limits to keep in mind:
+
+- Jev confidence is the judge's own number, not a calibrated probability.
+  `assurance.judge.calibration` is emitted only from real calibration data, and
+  SuperOptiX has none yet (ReAnchor support is planned for 2.1).
+- Jev here judges an evaluation summary. It is not a zero-shot router and does
+  not see individual answers or tool trajectories.
+- The integration is experimental. Treat Jev as advice, never as release
+  authority.
 
 ## Card review
 

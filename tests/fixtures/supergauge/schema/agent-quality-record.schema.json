@@ -1,0 +1,904 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://super-agentic.ai/schema/supergauge/0.1/agent-quality-record.schema.json",
+  "title": "Agent Quality Record",
+  "description": "One record, emitted at the point where somebody decides whether an agent may reach production. Conformance level L1 is defined as validating against this schema.",
+  "type": "object",
+  "required": [
+    "supergauge",
+    "record_id",
+    "emitted_at",
+    "profile",
+    "subject",
+    "task_set",
+    "measures",
+    "gates",
+    "assurance",
+    "decision"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "supergauge": {
+      "description": "Specification version this record conforms to.",
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+$"
+    },
+    "record_id": {
+      "description": "Opaque, unique within the emitting organisation.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "emitted_at": {
+      "description": "RFC 3339 timestamp, UTC.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "profile": {
+      "description": "The bar this release was held to. The profile is the only thing entitled to state which gates are mandatory and what they must clear.",
+      "type": "object",
+      "required": [
+        "id",
+        "version",
+        "tier"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:[-/][a-z0-9._-]+)*$"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tier": {
+          "$ref": "#/$defs/tier"
+        }
+      }
+    },
+    "subject": {
+      "description": "What was measured. Identity alone is insufficient: authority is required, because an agent measured under one execution policy and shipped under another produces a record that is valid and false.",
+      "type": "object",
+      "required": [
+        "agent",
+        "harness_digest",
+        "authority"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "agent": {
+          "type": "string",
+          "minLength": 1
+        },
+        "harness_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "code_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "model": {
+          "type": "object",
+          "required": [
+            "provider",
+            "id"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "provider": {
+              "type": "string",
+              "minLength": 1
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "digest": {
+              "$ref": "#/$defs/digest"
+            }
+          }
+        },
+        "authority": {
+          "description": "The policy actually in force during measurement, never a declared intent.",
+          "type": "object",
+          "additionalProperties": false,
+          "anyOf": [
+            {
+              "required": [
+                "grant_digest"
+              ]
+            },
+            {
+              "required": [
+                "acs_policy_version"
+              ]
+            }
+          ],
+          "properties": {
+            "grant_digest": {
+              "$ref": "#/$defs/digest"
+            },
+            "acs_policy_version": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sandbox": {
+              "type": "string",
+              "minLength": 1
+            },
+            "egress": {
+              "type": "string",
+              "enum": [
+                "deny-by-default",
+                "allow-list",
+                "unrestricted"
+              ]
+            },
+            "capabilities": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uniqueItems": true
+            }
+          }
+        },
+        "agent_card": {
+          "description": "Optional A2A Agent Card binding. Digests the published card at ship time; does not replace authority. See rfcs/0002-a2a-agent-card-binding.md.",
+          "type": "object",
+          "required": [
+            "well_known_url",
+            "card_digest"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "well_known_url": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Absolute URL of the Agent Card (typically /.well-known/agent-card.json)."
+            },
+            "card_digest": {
+              "$ref": "#/$defs/digest"
+            },
+            "version": {
+              "type": "string",
+              "minLength": 1
+            },
+            "etag": {
+              "type": "string",
+              "minLength": 1
+            },
+            "skill_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uniqueItems": true,
+              "description": "Allowlist of skill ids; MUST be a subset of skills on the digested card."
+            }
+          }
+        }
+      }
+    },
+    "task_set": {
+      "description": "What the subject was measured against.",
+      "type": "object",
+      "required": [
+        "manifest_digest",
+        "sealed"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "manifest_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "held_in": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "held_out": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sealed": {
+          "description": "True only where no optimizer, tuning loop or prompt-authoring process has read the held-out split. Where this cannot be established it MUST be false.",
+          "type": "boolean"
+        },
+        "canary_ids": {
+          "description": "Contamination probes. A fired probe blocks a ship verdict.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "measures": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "value"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/measureId"
+          },
+          "value": {
+            "type": [
+              "number",
+              "boolean"
+            ]
+          },
+          "split": {
+            "$ref": "#/$defs/split"
+          },
+          "n": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "k": {
+            "type": "integer",
+            "minimum": 2
+          },
+          "unit": {
+            "type": "string",
+            "minLength": 1
+          },
+          "pack": {
+            "description": "Versioned pack that produced this value, as <pack>@<version>.",
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:[-/][a-z0-9._-]+)*@[0-9]+\\.[0-9]+$"
+          },
+          "schema_digest": {
+            "$ref": "#/$defs/digest",
+            "description": "Optional digest of the declared output contract. See measures/output.parse_rate.md."
+          },
+          "baseline": {
+            "description": "Declared trivial baseline for a comparison measure. See measures/reliability.beats_trivial_baseline.md.",
+            "type": "object",
+            "required": [
+              "id",
+              "value"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "value": {
+                "type": [
+                  "number",
+                  "boolean"
+                ]
+              },
+              "measure": {
+                "$ref": "#/$defs/measureId"
+              },
+              "candidate_value": {
+                "type": [
+                  "number",
+                  "boolean"
+                ]
+              },
+              "margin": {
+                "type": "number",
+                "minimum": 0
+              }
+            }
+          }
+        },
+        "allOf": [
+          {
+            "description": "A pass^k or pass@k value is meaningless without k.",
+            "if": {
+              "properties": {
+                "id": {
+                  "enum": [
+                    "reliability.pass_hat_k",
+                    "reliability.pass_at_k"
+                  ]
+                }
+              },
+              "required": [
+                "id"
+              ]
+            },
+            "then": {
+              "required": [
+                "k"
+              ]
+            }
+          },
+          {
+            "description": "A trivial-baseline comparison is meaningless without the baseline it compared against.",
+            "if": {
+              "properties": {
+                "id": {
+                  "const": "reliability.beats_trivial_baseline"
+                }
+              },
+              "required": [
+                "id"
+              ]
+            },
+            "then": {
+              "required": [
+                "baseline"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "gates": {
+      "description": "Conditions that had to hold. Deterministic only; a model-graded measure can never satisfy one.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "result"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/measureId"
+          },
+          "result": {
+            "type": "string",
+            "enum": [
+              "pass",
+              "fail"
+            ]
+          },
+          "floor": {
+            "type": "number"
+          },
+          "split": {
+            "$ref": "#/$defs/split"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "acs",
+              "assert",
+              "native",
+              "custom"
+            ]
+          }
+        }
+      }
+    },
+    "assurance": {
+      "description": "Why the measures above can be believed.",
+      "type": "object",
+      "required": [
+        "evidence",
+        "evaluator_independent"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "judge": {
+          "description": "Required where any measure is model-graded.",
+          "type": "object",
+          "required": [
+            "id",
+            "model"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "model": {
+              "type": "string",
+              "minLength": 1
+            },
+            "human_agreement_kappa": {
+              "type": "number",
+              "minimum": -1,
+              "maximum": 1
+            },
+            "sampled": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "pack_digest": {
+              "$ref": "#/$defs/digest",
+              "description": "Optional digest of the frozen question pack used with a System One / typed judge. See rfcs/0004-jev-systemone-interop.md."
+            },
+            "calibration_ece": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Optional Expected Calibration Error (or documented calibration summary in [0, 1]) for the pinned judge when measured."
+            },
+            "calibration": {
+              "description": "Optional calibration metadata for the pinned judge (for example Jev ReAnchor). Descriptive only: it never makes judged evidence gate-eligible. See rfcs/0004-jev-systemone-interop.md.",
+              "type": "object",
+              "required": [
+                "method"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Calibration method id, for example reanchor."
+                },
+                "params": {
+                  "type": "object",
+                  "description": "Method parameters as fitted, for example ReAnchor anchors and temperature."
+                },
+                "params_digest": {
+                  "$ref": "#/$defs/digest",
+                  "description": "Digest of the canonical JSON serialization of params, or of the fitted calibrator artifact."
+                },
+                "fold": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "n"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Id of the calibration fold. MUST NOT overlap the sealed held-out split."
+                    },
+                    "n": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "ece": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "description": "Expected Calibration Error on the fold after calibration."
+                    },
+                    "agreement_with_human": {
+                      "type": "number",
+                      "minimum": -1,
+                      "maximum": 1,
+                      "description": "Agreement statistic (Cohen's kappa) between calibrated judge and human labels on the fold."
+                    }
+                  }
+                },
+                "calibrated_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        },
+        "evidence": {
+          "type": "object",
+          "required": [
+            "ledger",
+            "format",
+            "replayable"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "ledger": {
+              "type": "string",
+              "minLength": 1
+            },
+            "format": {
+              "type": "string",
+              "pattern": "^(opentelemetry/1\\.[0-9x]+|superqode\\.harness-protocol/1|[a-z0-9._-]+/[0-9]+)$"
+            },
+            "events": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "replayable": {
+              "type": "boolean"
+            }
+          }
+        },
+        "evaluator_independent": {
+          "description": "True only where the grader saw the artifact and resulting world state, and not the worker's own transcript, plan or self-report.",
+          "type": "boolean"
+        },
+        "integrity": {
+          "description": "Optional test-integrity / reward-hack resistance evidence. See rfcs/0005-test-integrity-reward-hack.md.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "metric_custody": {
+              "type": "string",
+              "enum": [
+                "external",
+                "shared",
+                "agent-writable"
+              ],
+              "description": "Where protected metrics and grader oracles live relative to the agent write scope."
+            },
+            "recompute_digest": {
+              "$ref": "#/$defs/digest",
+              "description": "Digest of an independent held-out recompute attestation."
+            },
+            "recompute_party": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Identity of the party that performed independent recompute."
+            },
+            "protected_metric_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "description": "Measure ids whose oracles are outside agent control for this record."
+            },
+            "canaries": {
+              "type": "array",
+              "description": "Canary / unpassable probe outcomes (expected vs observed).",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "expected",
+                  "observed"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "expected": {
+                    "type": "string",
+                    "enum": [
+                      "pass",
+                      "fail"
+                    ]
+                  },
+                  "observed": {
+                    "type": "string",
+                    "enum": [
+                      "pass",
+                      "fail"
+                    ]
+                  }
+                }
+              }
+            },
+            "hermetic_workspace": {
+              "type": "boolean",
+              "description": "True when the agent workspace lacked exfiltration paths to grader secrets or mutable reward files."
+            },
+            "capability_disjoint_roles": {
+              "type": "boolean",
+              "description": "True when no single component both proposed the change under review and applied or graded it."
+            },
+            "review_feedback": {
+              "type": "string",
+              "enum": [
+                "opaque",
+                "generic-reject",
+                "detailed"
+              ],
+              "description": "How much iterative judge or panel feedback the agent saw across attempts."
+            },
+            "mechanical_override": {
+              "type": "boolean",
+              "description": "True when a judged PASS was overridden because deterministic integrity checks failed."
+            }
+          }
+        }
+      }
+    },
+    "decision": {
+      "type": "object",
+      "required": [
+        "verdict",
+        "actor"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "verdict": {
+          "type": "string",
+          "enum": [
+            "ship",
+            "hold",
+            "reject"
+          ]
+        },
+        "actor": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rolls_back_to": {
+          "$ref": "#/$defs/digest"
+        },
+        "signature": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+:.+$"
+        },
+        "question": {
+          "type": "string",
+          "minLength": 1
+        },
+        "options": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "supply_chain": {
+      "description": "Optional supply-chain attestation digests and MCP pins. Record-only; SuperGauge does not generate BOMs. See rfcs/0003-supply-chain-aibom-slsa.md.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "aibom_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "aibom_format": {
+          "type": "string",
+          "minLength": 1
+        },
+        "slsa_provenance_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "provenance_format": {
+          "type": "string",
+          "minLength": 1
+        },
+        "model_digests": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "provider",
+              "id",
+              "digest"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "provider": {
+                "type": "string",
+                "minLength": 1
+              },
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "digest": {
+                "$ref": "#/$defs/digest"
+              }
+            }
+          }
+        },
+        "tool_digests": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "digest"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "digest": {
+                "$ref": "#/$defs/digest"
+              }
+            }
+          }
+        },
+        "mcp_servers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "version": {
+                "type": "string",
+                "minLength": 1
+              },
+              "digest": {
+                "$ref": "#/$defs/digest"
+              },
+              "endpoint_digest": {
+                "$ref": "#/$defs/digest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "export": {
+      "description": "Optional export-profile metadata: which external assurance/transparency packs this record maps onto. Not a score. See packs/assurance-export.md.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "profiles": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "version"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Export pack id, e.g. sg/aiuc-1 or sg/eu-art50."
+              },
+              "version": {
+                "type": "string",
+                "minLength": 1
+              },
+              "standard_cut": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Optional external standard cut date (YYYY-MM-DD), e.g. AIUC-1 2026-07-15."
+              },
+              "controls": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "description": "Optional control ids or checklist labels claimed as covered by evidence on this record."
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "description": "Ship rule, first clause. A ship verdict requires every gate to have passed.",
+      "if": {
+        "properties": {
+          "decision": {
+            "properties": {
+              "verdict": {
+                "const": "ship"
+              }
+            }
+          }
+        },
+        "required": [
+          "decision"
+        ]
+      },
+      "then": {
+        "properties": {
+          "gates": {
+            "items": {
+              "properties": {
+                "result": {
+                  "const": "pass"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "Ship rule, second clause. An unsealed held-out split cannot carry a ship verdict at any measured value.",
+      "if": {
+        "properties": {
+          "decision": {
+            "properties": {
+              "verdict": {
+                "const": "ship"
+              }
+            }
+          }
+        },
+        "required": [
+          "decision"
+        ]
+      },
+      "then": {
+        "properties": {
+          "task_set": {
+            "properties": {
+              "sealed": {
+                "const": true
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "Tier T2 requires a recorded human decision, not only an approval, and a signature.",
+      "if": {
+        "properties": {
+          "profile": {
+            "properties": {
+              "tier": {
+                "const": "T2"
+              }
+            }
+          }
+        },
+        "required": [
+          "profile"
+        ]
+      },
+      "then": {
+        "properties": {
+          "decision": {
+            "required": [
+              "verdict",
+              "actor",
+              "question",
+              "options",
+              "rationale",
+              "signature"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "tier": {
+      "type": "string",
+      "enum": [
+        "T0",
+        "T1",
+        "T2"
+      ]
+    },
+    "split": {
+      "type": "string",
+      "enum": [
+        "held-in",
+        "held-out",
+        "all"
+      ]
+    },
+    "measureId": {
+      "description": "A registered measure id, or an x- prefixed local extension. Records using x- measures reach L1 only.",
+      "type": "string",
+      "pattern": "^(x-)?[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+    }
+  }
+}

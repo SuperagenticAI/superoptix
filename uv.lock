@@ -9046,6 +9046,7 @@ surrealdb = [
     { name = "surrealdb" },
 ]
 testing = [
+    { name = "jsonschema" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "pytest-cov" },
@@ -9139,6 +9140,7 @@ requires-dist = [
     { name = "huggingface-hub", marker = "extra == 'huggingface'" },
     { name = "huggingface-hub", marker = "extra == 'ml-cross-platform'" },
     { name = "jinja2" },
+    { name = "jsonschema", marker = "extra == 'testing'" },
     { name = "lancedb", marker = "extra == 'all'" },
     { name = "lancedb", marker = "extra == 'all-with-mlx'" },
     { name = "lancedb", marker = "extra == 'lancedb'" },

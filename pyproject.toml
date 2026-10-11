@@ -353,6 +353,7 @@ testing = [
     "pytest-cov",
     "pytest-mock",
     "responses",
+    "jsonschema",  # SuperGauge conformance checker L1 schema validation in tests
 ]
 
 # Documentation dependencies

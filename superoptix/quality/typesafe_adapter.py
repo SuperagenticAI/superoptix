@@ -59,6 +59,22 @@ def card_review_score_type() -> Any:
     ]
 
 
+def served_model(lm: Any) -> str | None:
+    """Model id the provider reported for the last call, if it reported one.
+
+    RFC 0005 asks for the judge that actually ran, not the one requested; an
+    alias such as ``jev-latest`` can resolve to a different version.
+    """
+    history = getattr(lm, "history", None) or []
+    if not history:
+        return None
+    last = history[-1] or {}
+    served = last.get("response_model") if isinstance(last, dict) else None
+    if not served and isinstance(last, dict):
+        served = getattr(last.get("response"), "model", None)
+    return str(served) if served else None
+
+
 def make_typesafe_lm(model: str | None = None, **kwargs: Any) -> Any:
     """Construct ``dspy.experimental.TypeSafe`` without importing at module load."""
     *_rest, TypeSafe = _import_experimental()
@@ -107,7 +123,9 @@ def judge_evaluation_summary(
     value = getattr(answer, "value", answer)
     confidence = float(getattr(answer, "confidence", 0.0) or 0.0)
     probs = getattr(answer, "probabilities", None)
-    resolved_model = getattr(lm, "model", None) or model or DEFAULT_MODEL_HINT
+    requested = model or DEFAULT_MODEL_HINT
+    served = served_model(lm)
+    resolved_model = served or getattr(lm, "model", None) or requested
     return DispositionJudgment(
         choice=str(value).lower(),  # type: ignore[arg-type]
         confidence=confidence,
@@ -117,6 +135,8 @@ def judge_evaluation_summary(
         judge_id=DEFAULT_JUDGE_ID,
         rationale="Live Jev Choice over evaluation summary.",
         source="typesafe-live",
+        requested_model=str(requested),
+        model_served=bool(served),
     )
 
 
