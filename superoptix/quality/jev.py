@@ -56,6 +56,8 @@ class DispositionJudgment:
     judge_id: str = DEFAULT_JUDGE_ID
     rationale: str | None = None
     source: str = "heuristic"
+    requested_model: str | None = None
+    model_served: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         payload = asdict(self)

@@ -1359,7 +1359,9 @@ class DSPyRunner:
                 examples = []
                 example_identities = []
                 for sc in scenarios:
-                    if not isinstance(sc, dict):
+                    # Canary scenarios are contamination probes; the optimizer
+                    # must never see them.
+                    if not isinstance(sc, dict) or sc.get("canary"):
                         continue
                     inp = sc.get("input", {}) or {}
                     example_identities.append(
