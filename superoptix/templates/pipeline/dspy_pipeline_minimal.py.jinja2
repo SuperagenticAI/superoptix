@@ -45,8 +45,8 @@ MODEL_OVERRIDE = None
 GEPA_CONFIG = {
     "enabled": True,
     "auto": "{{ opt_params.get('auto', 'light') }}",
-    "task_model": "{{ opt_params.get('task_model', 'qwen3.5:9b') }}",
-    "teacher_model": "{{ opt_params.get('teacher_model', 'qwen3.5:9b') }}",
+    "task_model": "{{ opt_params.get('task_model', '') }}",
+    "teacher_model": "{{ opt_params.get('teacher_model', '') }}",
     "reflection_lm": "{{ opt_params.get('reflection_lm', '') }}",
     "candidate_selection_strategy": "{{ opt_params.get('candidate_selection_strategy', 'pareto') }}",
     "skip_perfect_score": {{ opt_params.get('skip_perfect_score', True) }},
@@ -107,11 +107,17 @@ def setup_lm(model_name, api_key, temperature, max_tokens, api_base=None):
     """
     lm_kwargs = {
         "model": model_name,
-        "api_key": api_key,
         "temperature": temperature,
         "max_tokens": max_tokens,
     }
+    # Ollama is keyless: DSPy 3.4+ rejects an empty key and wants a /v1 base.
+    if api_key:
+        lm_kwargs["api_key"] = api_key
     if api_base:
+        if model_name.startswith(("ollama_chat/", "ollama/")):
+            api_base = api_base.rstrip("/")
+            if not api_base.endswith("/v1"):
+                api_base = f"{api_base}/v1"
         lm_kwargs["api_base"] = api_base
     lm = dspy.LM(**lm_kwargs)
     dspy.configure(lm=lm)
