@@ -141,6 +141,13 @@ def test_identities_drive_ids_and_match_playbook_recompute():
         if example_id(scenario_identity(s)) in set(split.heldout_ids)
     )
     assert recomputed == split.heldout_ids
-    assert split_digest(
-        [scenario_identity(s) for s in scenarios if example_id(scenario_identity(s)) in set(split.heldout_ids)]
-    ) == split.digest
+    assert (
+        split_digest(
+            [
+                scenario_identity(s)
+                for s in scenarios
+                if example_id(scenario_identity(s)) in set(split.heldout_ids)
+            ]
+        )
+        == split.digest
+    )

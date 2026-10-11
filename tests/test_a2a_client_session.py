@@ -129,4 +129,4 @@ def test_select_interface_unknown_version_ranks_last_and_falls_back_to_first():
         ]
     )
     assert A2AClient._select_interface(card)["url"] == "u2"
-    assert A2AClient._select_interface(_card([]) ) == {}
+    assert A2AClient._select_interface(_card([])) == {}

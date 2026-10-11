@@ -38,10 +38,12 @@ class DSPyAdapter:
         provider = self.config["llm"]["provider"].lower()
 
         if provider == "ollama":
-            lm = self.dspy.LM(
-                f"ollama_chat/{self.config['llm']['model']}",
+            from superoptix.core.local_lm import build_dspy_lm
+
+            lm = build_dspy_lm(
+                self.config["llm"]["model"],
+                provider="ollama",
                 api_base=self.config["llm"]["api_base"],
-                api_key="",
             )
         elif provider == "openai":
             if "OPENAI_API_KEY" not in os.environ:

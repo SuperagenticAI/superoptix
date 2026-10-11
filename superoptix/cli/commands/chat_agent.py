@@ -119,10 +119,11 @@ class ConversationalAgent:
             model = config.get("model", "mock")
 
             if provider == "ollama":
-                api_base = config.get("api_base", "http://localhost:11434")
+                from superoptix.core.local_lm import build_dspy_lm
 
-                # Create LM instance
-                lm = dspy.LM(f"ollama/{model}", api_base=api_base)
+                lm = build_dspy_lm(
+                    model, provider="ollama", api_base=config.get("api_base")
+                )
 
                 # DON'T configure DSPy globally - it interferes with agent execution!
                 # Each module should configure its own LM locally

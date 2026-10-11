@@ -346,12 +346,12 @@ class ObservabilityEnhancedDSPyAdapter:
             provider = self.config["llm"].get("provider", "ollama").lower()
 
             if provider == "ollama":
-                lm = self.dspy.LM(
-                    f"ollama_chat/{self.config['llm'].get('model', 'qwen3.5:2b')}",
-                    api_base=self.config["llm"].get(
-                        "api_base", "http://localhost:11434"
-                    ),
-                    api_key="",
+                from superoptix.core.local_lm import build_dspy_lm
+
+                lm = build_dspy_lm(
+                    self.config["llm"].get("model", "qwen3.5:2b"),
+                    provider="ollama",
+                    api_base=self.config["llm"].get("api_base"),
                 )
             elif provider == "openai":
                 if "OPENAI_API_KEY" not in os.environ:

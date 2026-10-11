@@ -277,7 +277,9 @@ class TestEmit:
     def test_ir_records_what_gepa_may_rewrite(self, spec, tmp_path: Path):
         """The IR is the optimisation target; identity fields are off limits."""
         written = emit(spec, tmp_path, public_url="http://127.0.0.1:8000")
-        ir = json.loads(next(p for p in written if p.name == "agentspec.json").read_text())
+        ir = json.loads(
+            next(p for p in written if p.name == "agentspec.json").read_text()
+        )
         assert ir["optimizable"] == ["skills[].description", "skills[].examples"]
         assert ir["metadata"]["entrypoint"] == "mycrew:crew"
 
@@ -403,7 +405,8 @@ class TestRemainingFrameworks:
 
     def test_openai_agent_uses_its_tool_descriptions(self):
         agent = _OpenAIAgent(
-            "OrderBot", "Help customers",
+            "OrderBot",
+            "Help customers",
             tools=[_OATool("lookup_order", "Look up a customer order by its id")],
         )
         spec = detect(agent).introspect(agent, entrypoint="m:orders")
@@ -418,15 +421,19 @@ class TestRemainingFrameworks:
         keyed on those claimed it. `handoffs` is the discriminator.
         """
         agent = _PydanticAgent(
-            "RefundBot", "Handle refunds",
+            "RefundBot",
+            "Handle refunds",
             tools={"issue_refund": _OATool("issue_refund", "Issue a refund")},
         )
         assert detect(agent).framework == "pydantic-ai"
 
     def test_pydantic_ai_reads_its_function_toolset(self):
         agent = _PydanticAgent(
-            "RefundBot", "Handle refunds",
-            tools={"issue_refund": _OATool("issue_refund", "Issue a refund on an order")},
+            "RefundBot",
+            "Handle refunds",
+            tools={
+                "issue_refund": _OATool("issue_refund", "Issue a refund on an order")
+            },
         )
         spec = detect(agent).introspect(agent, entrypoint="m:refunds")
         assert spec.skills[0].id == "issue-refund"
@@ -452,16 +459,23 @@ class TestRemainingFrameworks:
         assert "Plans multi-step work" in spec.skills[0].description
 
     def test_claude_agent_definition(self):
-        definition = _ClaudeDefinition("Reviews pull requests for defects", "You review code")
+        definition = _ClaudeDefinition(
+            "Reviews pull requests for defects", "You review code"
+        )
         spec = detect(definition).introspect(definition, entrypoint="m:reviewer")
         assert spec.framework == "claude-sdk"
         assert "Reviews pull requests" in spec.skills[0].description
 
     def test_deepagents_reads_its_subagents(self):
-        graph = _DeepGraph([
-            {"name": "researcher", "description": "Searches sources and cites them"},
-            {"name": "writer", "description": "Drafts prose from research notes"},
-        ])
+        graph = _DeepGraph(
+            [
+                {
+                    "name": "researcher",
+                    "description": "Searches sources and cites them",
+                },
+                {"name": "writer", "description": "Drafts prose from research notes"},
+            ]
+        )
         spec = detect(graph).introspect(graph, entrypoint="m:graph")
         assert spec.framework == "deepagents"
         assert {s.id for s in spec.skills} == {"researcher", "writer"}
@@ -475,8 +489,14 @@ class TestRemainingFrameworks:
 
     def test_all_eight_frameworks_are_registered(self):
         assert set(available()) == {
-            "claude-sdk", "crewai", "deepagents", "dspy",
-            "google-adk", "microsoft", "openai", "pydantic-ai",
+            "claude-sdk",
+            "crewai",
+            "deepagents",
+            "dspy",
+            "google-adk",
+            "microsoft",
+            "openai",
+            "pydantic-ai",
         }
 
     def test_every_introspector_has_an_invoker(self):

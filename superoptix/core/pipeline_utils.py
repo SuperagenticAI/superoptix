@@ -18,6 +18,11 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 import dspy
+from superoptix.core.local_lm import (
+    build_dspy_lm,
+    dspy_lm_kwargs,
+    ensure_local_model_reachable,
+)
 
 # SuperOptiX Imports
 from superoptix.observability.tracer import SuperOptixTracer
@@ -152,31 +157,37 @@ class ModelSetupMixin:
 
         # Add provider-specific configuration
         if provider == "ollama":
-            lm_config.update(
-                {
-                    "api_base": model_config.get("api_base", "http://localhost:11434"),
-                    "api_key": "",  # No API key needed for Ollama
-                    "max_retries": 2,
-                    "timeout": 30,
-                }
+            # Keyless /v1 config for DSPy 3.4+ (see superoptix.core.local_lm).
+            lm_config = dspy_lm_kwargs(
+                lm_config.pop("model"),
+                provider="ollama",
+                api_base=model_config.get("api_base"),
+                max_retries=2,
+                timeout=30,
+                **lm_config,
             )
         elif provider == "mlx":
             # Use custom_openai provider for MLX (LiteLLM supports MLX through custom_openai)
-            lm_config.update(
-                {
-                    "model": f"custom_openai/{model_name}",
-                    "api_base": model_config.get("api_base", "http://localhost:8000"),
-                    "api_key": "dummy-key",  # MLX doesn't require real API key, but LiteLLM expects one
-                    "max_retries": 2,
-                    "timeout": 30,
-                }
+            lm_config.pop("model")
+            lm_config = dspy_lm_kwargs(
+                f"custom_openai/{model_name}",
+                provider="mlx",
+                api_base=model_config.get("api_base", "http://localhost:8000"),
+                max_retries=2,
+                timeout=30,
+                **lm_config,
             )
         elif model_config.get("api_base"):
             lm_config["api_base"] = model_config["api_base"]
 
         try:
+            if provider == "ollama":
+                # Fail loudly instead of printing a success we never verified.
+                ensure_local_model_reachable(
+                    lm_config["model"], lm_config.get("api_base")
+                )
             lm = dspy.LM(**lm_config)
-            print(f"✅ Model connection successful: {provider}/{model_name}")
+            print(f"✅ Model configured: {provider}/{model_name}")
 
             # Log successful initialization if tracer is available
             if hasattr(self, "tracer"):
@@ -219,18 +230,10 @@ class ModelSetupMixin:
         temperature = lm_config.get("temperature", 0.0)
         max_tokens = lm_config.get("max_tokens", 32000)
         if provider == "ollama":
-            model_str = (
-                f"ollama_chat/{model_name}"
-                if not model_name.startswith("ollama_chat/")
-                else model_name
-            )
-            print(
-                f"[REFLECTION_LM DEBUG] Using Ollama LM: {model_str}, api_base=http://localhost:11434"
-            )
-            return LM(
-                model_str,
-                api_base="http://localhost:11434",
-                api_key="",
+            return build_dspy_lm(
+                model_name,
+                provider="ollama",
+                api_base=lm_config.get("api_base"),
                 temperature=temperature,
                 max_tokens=max_tokens,
             )
@@ -1737,10 +1740,9 @@ class PipelineUtilities:
     ) -> dspy.LM:
         """Quick model setup for simple use cases."""
         if provider == "ollama":
-            return dspy.LM(
-                model=f"ollama_chat/{model_name}",
-                api_base="http://localhost:11434",
-                api_key="",
+            return build_dspy_lm(
+                model_name,
+                provider="ollama",
                 temperature=temperature,
                 max_tokens=2000,
                 max_retries=2,

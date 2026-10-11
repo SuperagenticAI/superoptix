@@ -20,7 +20,10 @@ def test_ollama_drops_empty_key_and_adds_v1():
 
 
 def test_ollama_without_base_and_existing_v1():
-    assert "api_base" not in _dspy_lm_kwargs({"model_name": "ollama_chat/m"})
+    # No base configured: the default Ollama /v1 base is used explicitly.
+    assert _dspy_lm_kwargs({"model_name": "ollama_chat/m"})["api_base"] == (
+        "http://localhost:11434/v1"
+    )
     kw = _dspy_lm_kwargs({"model_name": "ollama/m", "api_base": "http://h:1/v1"})
     assert kw["api_base"] == "http://h:1/v1"
 

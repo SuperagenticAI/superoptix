@@ -19,6 +19,12 @@ from rich.console import Console
 from rich.live import Live
 from rich.panel import Panel
 from rich.table import Table
+from superoptix.core.local_lm import (
+    LocalModelUnreachableError,
+    dspy_lm_kwargs,
+    ensure_local_model_reachable,
+    ollama_model_id,
+)
 from superoptix.observability.phoenix import (
     instrument_framework_with_phoenix,
     phoenix_session_span,
@@ -143,32 +149,31 @@ def resolve_pipeline_class(module: Any, agent_name: str) -> Any:
 
 
 def _dspy_lm_kwargs(params: Dict[str, Any], **extra: Any) -> Dict[str, Any]:
-    """Build dspy.LM kwargs from resolved params.
+    """Build dspy.LM kwargs from resolved params via the shared local LM helper.
 
-    DSPy 3.4+ routes ``ollama_chat/`` through its lm15 engine, which treats an
-    empty api_key as a missing credential and expects an OpenAI-compatible
-    base URL ending in ``/v1``. Ollama is keyless, so omit the key and
-    normalize the base.
+    See :mod:`superoptix.core.local_lm` for the DSPy 3.4+ Ollama handling.
     """
-    model = params["model_name"]
-    kwargs: Dict[str, Any] = {"model": model}
-    api_key = params.get("api_key")
-    api_base = params.get("api_base")
-    if str(model).startswith(("ollama_chat/", "ollama/")):
-        api_key = api_key or None
-        if api_base:
-            api_base = str(api_base).rstrip("/")
-            if not api_base.endswith("/v1"):
-                api_base = f"{api_base}/v1"
-    if api_key:
-        kwargs["api_key"] = api_key
-    if api_base:
-        kwargs["api_base"] = api_base
-    for key in ("temperature", "max_tokens"):
-        if params.get(key) is not None:
-            kwargs[key] = params[key]
-    kwargs.update(extra)
-    return kwargs
+    options: Dict[str, Any] = {
+        "temperature": params.get("temperature"),
+        "max_tokens": params.get("max_tokens"),
+    }
+    options.update(extra)
+    return dspy_lm_kwargs(
+        params["model_name"],
+        provider=params.get("provider"),
+        api_key=params.get("api_key"),
+        api_base=params.get("api_base"),
+        **options,
+    )
+
+
+def _preflight_lm(params: Dict[str, Any]) -> None:
+    """Fail loudly if a local Ollama model is unreachable (no-op otherwise)."""
+    ensure_local_model_reachable(
+        params.get("model_name", ""),
+        params.get("api_base"),
+        provider=params.get("provider"),
+    )
 
 
 class DSPyRunner:
@@ -178,6 +183,9 @@ class DSPyRunner:
         self, agent_name: str, project_name: str = None, project_root: Path = None
     ):
         self.agent_name = agent_name.lower()
+        # Set when run() fails, so callers can exit non-zero instead of
+        # treating a swallowed error as success.
+        self.last_error: Exception | None = None
 
         # Use provided project root or find it
         if project_root:
@@ -866,15 +874,7 @@ class DSPyRunner:
             )
 
         if provider == "ollama":
-            normalized_model = model.strip()
-            if normalized_model.startswith("ollama_chat/"):
-                model_name = normalized_model
-            else:
-                if normalized_model.startswith("ollama:"):
-                    normalized_model = normalized_model.split(":", 1)[1]
-                elif normalized_model.startswith("ollama/"):
-                    normalized_model = normalized_model.split("/", 1)[1]
-                model_name = f"ollama_chat/{normalized_model}"
+            model_name = ollama_model_id(model)
             api_base = str(lm_config.get("api_base", "")).strip() or None
             return {
                 "model_name": model_name,
@@ -966,6 +966,7 @@ class DSPyRunner:
                 provider_override=provider,
                 runtime_mode=effective_runtime_mode,
             )
+            _preflight_lm(lm_params)
             module.setup_lm(**lm_params)
         else:
             self._configure_dspy_lm_from_playbook(
@@ -993,6 +994,9 @@ class DSPyRunner:
             provider_override=provider_override,
             runtime_mode=runtime_mode,
         )
+        # Fail loudly (clear error, no fake success) if Ollama is down or the
+        # model is not pulled. No-op for hosted providers.
+        _preflight_lm(lm_params)
         lm = dspy.LM(**_dspy_lm_kwargs(lm_params))
         dspy.configure(lm=lm)
         return lm
@@ -1418,6 +1422,7 @@ class DSPyRunner:
 
                 # Configure task LM (student)
                 if hasattr(module, "setup_lm") and callable(module.setup_lm):
+                    _preflight_lm(task_params)
                     module.setup_lm(**task_params)
                     self._configure_dspy_adapter(spec_data, module)
                 else:
@@ -1998,6 +2003,7 @@ class DSPyRunner:
                         provider_override=effective_provider_override,
                         runtime_mode=effective_runtime_mode,
                     )
+                    _preflight_lm(lm_params)
                     module.setup_lm(**lm_params)
                     self._configure_dspy_adapter(spec_data, module)
                 else:
@@ -2544,11 +2550,19 @@ class DSPyRunner:
         except FileNotFoundError as e:
             if "memory_enabled" in locals() and memory_enabled:
                 self._end_memory_interaction(success=False, error=str(e))
+            self.last_error = e
             console.print(f"\n[red]❌ Error:[/] {e}")
             return None
+        except LocalModelUnreachableError as e:
+            if "memory_enabled" in locals() and memory_enabled:
+                self._end_memory_interaction(success=False, error=str(e))
+            self.last_error = e
+            # Propagate so callers (CLI, A2A) fail loudly with a clear message.
+            raise
         except Exception as e:
             if "memory_enabled" in locals() and memory_enabled:
                 self._end_memory_interaction(success=False, error=str(e))
+            self.last_error = e
             console.print(f"\n[red]❌ An unexpected error occurred:[/] {e}")
             import traceback
 

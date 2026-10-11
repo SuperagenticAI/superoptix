@@ -11,7 +11,6 @@ import superoptix  # noqa: F401  (import superoptix before dspy)
 from tests.test_gauge_l2 import _scenarios, _write_playbook
 
 
-
 def test_cli_has_test_command_and_flags(capsys):
     from superoptix.cli.main import main
 
@@ -55,7 +54,7 @@ def test_minimal_evaluator_emits_gauge_fields(tmp_path):
     assert isinstance(rows[0]["baseline_passed"], bool)
 
 
-_PIPELINE = '''
+_PIPELINE = """
 class _Program:
     def __call__(self, query):
         if query.startswith("unanswerable"):
@@ -68,7 +67,7 @@ class _Program:
 
 def build_program():
     return _Program()
-'''
+"""
 
 
 def _project(tmp_path, monkeypatch, *, with_holdout=True):
@@ -89,11 +88,19 @@ def _project(tmp_path, monkeypatch, *, with_holdout=True):
     (root / ".super").write_text("project: demo\n")
     (agent / "pipelines" / "bot_pipeline.py").write_text(_PIPELINE)
     scenarios = _scenarios(n=10, canaries=2)
-    pb = {**PLAYBOOK, "spec": {**PLAYBOOK["spec"], "feature_specifications": {"scenarios": scenarios}}}
+    pb = {
+        **PLAYBOOK,
+        "spec": {
+            **PLAYBOOK["spec"],
+            "feature_specifications": {"scenarios": scenarios},
+        },
+    }
     (agent / "playbook" / "bot_playbook.yaml").write_text(yaml.safe_dump(pb))
     if with_holdout:
         usable = [s for s in scenarios if not s.get("canary")]
-        split = split_holdout(usable, 0.2, identities=[scenario_identity(s) for s in usable])
+        split = split_holdout(
+            usable, 0.2, identities=[scenario_identity(s) for s in usable]
+        )
         write_holdout_record(
             agent / "pipelines" / "bot_holdout.json", split, gain_report(0, 0, 0, 0)
         )
@@ -118,15 +125,31 @@ def test_agent_test_end_to_end_ships_and_passes_pinned_checker(tmp_path, monkeyp
     root = _project(tmp_path, monkeypatch)
     code = _run_cli(
         [
-            "agent", "test", "bot", "--k", "2", "--gauge-out", "rec.yaml",
-            "--checker", str(CHECKER), "--actor", "release-bot@example.com",
+            "agent",
+            "test",
+            "bot",
+            "--k",
+            "2",
+            "--gauge-out",
+            "rec.yaml",
+            "--checker",
+            str(CHECKER),
+            "--actor",
+            "release-bot@example.com",
         ]
     )
     assert code == 0
     for name in ("rec.yaml", "rec.ledger.jsonl", "rec.superoptix.json"):
         assert (root / name).exists(), name
     proc = subprocess.run(
-        [sys.executable, str(CHECKER), str(root / "rec.yaml"), "--level", "L2", "--require-ship"],
+        [
+            sys.executable,
+            str(CHECKER),
+            str(root / "rec.yaml"),
+            "--level",
+            "L2",
+            "--require-ship",
+        ],
         capture_output=True,
         text=True,
     )
