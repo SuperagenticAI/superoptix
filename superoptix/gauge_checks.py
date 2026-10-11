@@ -7,7 +7,7 @@ data a measure needs. Nothing here defaults a measure, invents a gate or
 promotes judged evidence to a gate.
 
 Measure and gate ids come from the SuperGauge registry as of
-SuperagenticAI/supergauge PR #6 (commit 5ce6b58):
+SuperagenticAI/supergauge PR #6 (merged as a5920cc, tag checker-v0.1.0):
 ``output.parse_rate``, ``reliability.beats_trivial_baseline``,
 ``reliability.pass_hat_k``, ``trajectory.valid``, ``tool.correctness`` and
 ``assurance.holdout_sealed``.
@@ -21,9 +21,9 @@ import re
 from dataclasses import dataclass, field
 from typing import Any, Dict, Iterable, List, Optional, Sequence
 
-# SuperGauge checker pin. TODO: switch to tag checker-v0.1.0 once
-# SuperagenticAI/supergauge PR #6 merges (they tag the merge commit).
-SUPERGAUGE_CHECKER_REV = "5ce6b583af317928956ebd182d63b9ce1bd2aca9"
+# SuperGauge checker pin: tag checker-v0.1.0 (squash merge of PR #6).
+SUPERGAUGE_CHECKER_TAG = "checker-v0.1.0"
+SUPERGAUGE_CHECKER_REV = "a5920cce2f81b55673756860143ba39835d35f1a"
 
 # Deterministic measures SuperOptiX may gate on. Judged measures never appear.
 DETERMINISTIC_GATE_IDS = (
@@ -489,6 +489,10 @@ def decide(record: Dict[str, Any], actor: str) -> Dict[str, Any]:
         reasons.append("held-out split not sealed")
     if not task_set.get("canary_ids"):
         reasons.append("no contamination probes (canary scenarios)")
+    if not named_actor(actor):
+        reasons.append(
+            "no named release actor (set SUPEROPTIX_RELEASE_ACTOR or --actor)"
+        )
     fired = [
         c["id"]
         for c in integrity.get("canaries") or []
@@ -504,6 +508,30 @@ def decide(record: Dict[str, Any], actor: str) -> Dict[str, Any]:
     )
     record["decision"] = {"verdict": verdict, "actor": actor, "rationale": rationale}
     return record
+
+
+def named_actor(actor: Any) -> bool:
+    """SuperGauge release approval needs a named actor, not empty or unknown."""
+    return (
+        isinstance(actor, str)
+        and bool(actor.strip())
+        and actor.strip().lower() != "unknown"
+    )
+
+
+def release_actor(explicit: Optional[str] = None) -> str:
+    """Who approves: --actor, SUPEROPTIX_RELEASE_ACTOR, GITHUB_ACTOR, USER."""
+    import os
+
+    for value in (
+        explicit,
+        os.environ.get("SUPEROPTIX_RELEASE_ACTOR"),
+        os.environ.get("GITHUB_ACTOR"),
+        os.environ.get("USER"),
+    ):
+        if value and value.strip():
+            return value.strip()
+    return "unknown"
 
 
 def mechanical_override(record: Dict[str, Any], judged_pass: bool) -> bool:

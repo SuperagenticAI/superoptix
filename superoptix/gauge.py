@@ -522,7 +522,7 @@ def assemble_record(
     """
     from superoptix import gauge_checks as gc
 
-    actor = actor or os.environ.get("USER") or "unknown"
+    actor = gc.release_actor(actor)
     primary = list(runs[0]) if runs else []
     canaries = [r for r in primary if r.get("canary")]
     candidates = [r for r in primary if not r.get("canary")]

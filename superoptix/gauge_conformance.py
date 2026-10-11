@@ -1,7 +1,8 @@
 """Built-in SuperGauge conformance precheck used by ``super agent test``.
 
 Mirrors the L1 presence and L2 rules of SuperGauge ``conformance/check.py`` at
-the pinned revision (``gauge_checks.SUPERGAUGE_CHECKER_REV``) so the CLI can
+the pinned revision (``gauge_checks.SUPERGAUGE_CHECKER_REV``, tag
+checker-v0.1.0), including the ``--require-ship`` release rules so the CLI can
 gate without network access. It is a precheck, not the authority: pass
 ``--checker /path/to/supergauge/conformance/check.py`` (or set
 ``SUPERGAUGE_CHECKER``) to run the pinned upstream checker as well. The
@@ -68,6 +69,24 @@ def check_levels(record: Dict[str, Any]) -> Dict[str, List[str]]:
         if gate.get("floor") is not None and gate.get("id") not in reported:
             failures["L2"].append(f"gate {gate.get('id')} has a floor but no measure")
 
+    for gate in gates:
+        if gate.get("floor") is None:
+            continue
+        matches = [
+            m
+            for m in record.get("measures") or []
+            if m.get("id") == gate.get("id")
+            and (gate.get("split") is None or m.get("split") == gate["split"])
+        ]
+        if len(matches) != 1:
+            failures["L2"].append(f"gate {gate.get('id')} needs one matching measure")
+            continue
+        value = matches[0].get("value")
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            failures["L2"].append(f"gate {gate.get('id')} needs a numeric value")
+        elif gate.get("result") == "pass" and value < gate["floor"]:
+            failures["L2"].append(f"gate {gate.get('id')} reports pass below its floor")
+
     by_id = {m.get("id"): m for m in record.get("measures") or []}
     phk = by_id.get("reliability.pass_hat_k")
     if phk is None or (phk.get("k") or 0) < 2:
@@ -97,14 +116,37 @@ def highest_level(failures: Dict[str, List[str]]) -> Optional[str]:
     return reached
 
 
+def release_blockers(record: Dict[str, Any], reached: Optional[str]) -> List[str]:
+    """``--require-ship`` rules: L2+, ship verdict, named actor, passing gates."""
+    from superoptix.gauge_checks import named_actor
+
+    decision = record.get("decision") or {}
+    blockers = []
+    if decision.get("verdict") != "ship":
+        blockers.append("release requires decision.verdict: ship")
+    if not named_actor(decision.get("actor")):
+        blockers.append("release requires a named decision.actor")
+    gates = record.get("gates") or []
+    if not gates or any(g.get("result") != "pass" for g in gates):
+        blockers.append("release requires passing deterministic gates")
+    if reached is None or LEVELS.index(reached) < LEVELS.index("L2"):
+        blockers.append("release requires L2 or higher")
+    return blockers
+
+
 def gate_exit_code(
     record: Dict[str, Any], level: str
 ) -> Tuple[int, Optional[str], Dict[str, List[str]]]:
-    """Exit code with checker semantics: 2 not ship (checked first), 1 below level."""
+    """Exit code with ``check.py --level LEVEL --require-ship`` semantics.
+
+    0 when the release is allowed and the level is met, otherwise 1. Release
+    blockers are returned under the ``release`` key.
+    """
     failures = check_levels(record)
     reached = highest_level(failures)
-    if (record.get("decision") or {}).get("verdict") != "ship":
-        return 2, reached, failures
+    failures["release"] = release_blockers(record, reached)
+    if failures["release"]:
+        return 1, reached, failures
     if reached is None or LEVELS.index(reached) < LEVELS.index(level):
         return 1, reached, failures
     return 0, reached, failures

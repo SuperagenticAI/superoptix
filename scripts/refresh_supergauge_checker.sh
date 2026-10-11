@@ -2,7 +2,7 @@
 # Re-vendor the SuperGauge conformance checker at a pinned revision.
 # Usage: scripts/refresh_supergauge_checker.sh [REV]
 set -euo pipefail
-REV="${1:-5ce6b583af317928956ebd182d63b9ce1bd2aca9}"
+REV="${1:-a5920cce2f81b55673756860143ba39835d35f1a}"
 DEST="$(cd "$(dirname "$0")/.." && pwd)/tests/fixtures/supergauge"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT

@@ -330,8 +330,9 @@ def test_written_record_is_schema_valid_and_metadata_goes_to_sidecar(tmp_path):
 def test_failing_fixture_fails_checker(tmp_path):
     rec = _record(tmp_path, parsed=False)
     code, out = _check(rec, tmp_path, "--level", "L2", "--require-ship")
-    assert code == 2, out
-    assert gate_exit_code(rec, "L2")[0] == 2
+    assert code == 1, out
+    assert "release blocked" in out
+    assert gate_exit_code(rec, "L2")[0] == 1
 
 
 def test_unsealed_fixture_is_below_l2(tmp_path):
@@ -340,7 +341,32 @@ def test_unsealed_fixture_is_below_l2(tmp_path):
     assert code == 1, out
     assert "held-out split is not sealed" in out
     code, _, failures = gate_exit_code(rec, "L2")
-    assert code == 2 and any("not sealed" in f for f in failures["L2"])
+    assert code == 1 and any("not sealed" in f for f in failures["L2"])
+    code, out = _check(rec, tmp_path, "--level", "L2", "--require-ship")
+    assert code == 1 and "release blocked" in out
+
+
+def test_unnamed_actor_cannot_ship(tmp_path, monkeypatch):
+    for var in ("SUPEROPTIX_RELEASE_ACTOR", "GITHUB_ACTOR", "USER"):
+        monkeypatch.delenv(var, raising=False)
+    scenarios = _scenarios()
+    path, pb = _write_playbook(tmp_path, scenarios)
+    rec = assemble_record(
+        agent_name="demo",
+        playbook_path=path,
+        playbook=pb,
+        scenarios=scenarios,
+        runs=[_results(scenarios) for _ in range(3)],
+        framework="dspy",
+        seal_requested=True,
+        holdout_record=_holdout_record(tmp_path, scenarios),
+        deterministic_gates=True,
+        ledger=str(tmp_path / "l.jsonl"),
+        ledger_events=36,
+    )
+    assert rec["decision"]["verdict"] == "hold"
+    assert "named release actor" in rec["decision"]["rationale"]
+    assert gate_exit_code(rec, "L2")[0] == 1
 
 
 def test_builtin_precheck_matches_upstream_levels(tmp_path):

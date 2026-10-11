@@ -124,8 +124,9 @@ Notes on what each one means here:
   and are written into each gate entry, so the record shows what was enforced.
 
 The decision is deterministic: `ship` only when there is at least one gate,
-every gate passes, the split is sealed, at least one canary scenario ran and
-none passed. Otherwise `hold`, with the reasons in `decision.rationale`.
+every gate passes, the split is sealed, at least one canary scenario ran,
+none passed, and a named release actor is known (`--actor`,
+`SUPEROPTIX_RELEASE_ACTOR`, `GITHUB_ACTOR` or `USER`; never `unknown`). Otherwise `hold`, with the reasons in `decision.rationale`.
 
 Canary scenarios are contamination probes: scenarios whose expected output
 cannot be produced by legitimate means. Mark them in the playbook:
@@ -180,7 +181,7 @@ Be precise about what each level means here.
 Any SuperGauge implementation reads it. The published suite:
 
 ```bash
-SG_REV=5ce6b583af317928956ebd182d63b9ce1bd2aca9   # pin; checker-v0.1.0 once tagged
+SG_REV=a5920cce2f81b55673756860143ba39835d35f1a   # tag checker-v0.1.0
 git clone --filter=blob:none --no-checkout https://github.com/SuperagenticAI/supergauge .supergauge
 git -C .supergauge sparse-checkout set conformance schema measures
 git -C .supergauge checkout "$SG_REV"

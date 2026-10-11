@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import re
 import sys
 from pathlib import Path
@@ -82,7 +83,11 @@ def load(path: Path) -> dict[str, Any]:
         pass
 
     RecordLoader.yaml_implicit_resolvers = {
-        key: [(tag, regexp) for tag, regexp in resolvers if tag != "tag:yaml.org,2002:timestamp"]
+        key: [
+            (tag, regexp)
+            for tag, regexp in resolvers
+            if tag != "tag:yaml.org,2002:timestamp"
+        ]
         for key, resolvers in yaml.SafeLoader.yaml_implicit_resolvers.items()
     }
     return yaml.load(text, Loader=RecordLoader)
@@ -112,7 +117,10 @@ def check_l1(record: dict[str, Any], result: Result) -> None:
     subject = record.get("subject") or {}
     for field, value in (
         ("subject.harness_digest", subject.get("harness_digest")),
-        ("task_set.manifest_digest", (record.get("task_set") or {}).get("manifest_digest")),
+        (
+            "task_set.manifest_digest",
+            (record.get("task_set") or {}).get("manifest_digest"),
+        ),
     ):
         if value is not None and not DIGEST.match(str(value)):
             result.fail("L1", f"{field} is not a full sha256 digest")
@@ -129,7 +137,9 @@ def check_l2(record: dict[str, Any], result: Result) -> None:
 
     for gate in gates:
         if gate.get("id") in MODEL_GRADED:
-            result.fail("L2", f"gate {gate.get('id')} is model-graded and cannot back a gate")
+            result.fail(
+                "L2", f"gate {gate.get('id')} is model-graded and cannot back a gate"
+            )
 
     if not task_set.get("sealed"):
         result.fail("L2", "held-out split is not sealed")
@@ -141,14 +151,50 @@ def check_l2(record: dict[str, Any], result: Result) -> None:
     if decision.get("verdict") == "ship":
         failed = [g.get("id") for g in gates if g.get("result") != "pass"]
         if failed:
-            result.fail("L2", f"ship verdict with failing gates: {', '.join(map(str, failed))}")
+            result.fail(
+                "L2", f"ship verdict with failing gates: {', '.join(map(str, failed))}"
+            )
 
     # Every gate has to point at a measure the record actually reports.
     reported = {m.get("id") for m in record.get("measures") or []}
     for gate in gates:
         gid = gate.get("id")
         if gate.get("floor") is not None and gid not in reported:
-            result.fail("L2", f"gate {gid} sets a floor but no such measure is reported")
+            result.fail(
+                "L2", f"gate {gid} sets a floor but no such measure is reported"
+            )
+    for failure in gate_floor_failures(record):
+        result.fail("L2", failure)
+
+
+def gate_floor_failures(record: dict[str, Any]) -> list[str]:
+    """Compare recorded minimum floors with their matching measures."""
+    failures = []
+    for gate in record.get("gates") or []:
+        floor = gate.get("floor")
+        if floor is None:
+            continue
+        gid = gate.get("id")
+        matches = [
+            m
+            for m in record.get("measures") or []
+            if m.get("id") == gid
+            and (gate.get("split") is None or m.get("split") == gate["split"])
+        ]
+        if len(matches) != 1:
+            failures.append(f"gate {gid} requires one matching measure for its floor")
+            continue
+        value = matches[0].get("value")
+        if any(
+            isinstance(n, bool)
+            or not isinstance(n, (int, float))
+            or not math.isfinite(n)
+            for n in (floor, value)
+        ):
+            failures.append(f"gate {gid} requires finite numeric floor and value")
+        elif gate.get("result") == "pass" and value < floor:
+            failures.append(f"gate {gid} reports pass below its floor")
+    return failures
 
 
 def check_l3(record: dict[str, Any], result: Result) -> None:
@@ -200,14 +246,35 @@ def registered_measures() -> set[str]:
     return {p.stem for p in REGISTRY_DIR.glob("*.md")}
 
 
+def release_failures(record: dict[str, Any]) -> list[str]:
+    """Check recorded release approval after conformance validation."""
+    decision = record.get("decision") or {}
+    failures = []
+    if decision.get("verdict") != "ship":
+        failures.append("release requires decision.verdict: ship")
+    actor = decision.get("actor")
+    if (
+        not isinstance(actor, str)
+        or not actor.strip()
+        or actor.strip().lower() == "unknown"
+    ):
+        failures.append("release requires a named decision.actor")
+    gates = record.get("gates") or []
+    if not gates or any(g.get("result") != "pass" for g in gates):
+        failures.append("release requires passing deterministic gates")
+    return failures
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Check an Agent Quality Record.")
     parser.add_argument("record", type=Path)
-    parser.add_argument("--level", choices=LEVELS, help="exit non-zero below this level")
+    parser.add_argument(
+        "--level", choices=LEVELS, help="exit non-zero below this level"
+    )
     parser.add_argument(
         "--require-ship",
         action="store_true",
-        help="exit non-zero unless decision.verdict is ship",
+        help="require L2 or higher, a ship verdict, a named actor and passing gates",
     )
     parser.add_argument("--quiet", action="store_true")
     args = parser.parse_args()
@@ -232,18 +299,25 @@ def main() -> int:
             unknown = [
                 m.get("id")
                 for m in record.get("measures") or []
-                if m.get("id") not in known and not str(m.get("id", "")).startswith("x-")
+                if m.get("id") not in known
+                and not str(m.get("id", "")).startswith("x-")
             ]
             if unknown:
-                print(f"\nnote: measures not in the registry: {', '.join(map(str, unknown))}")
+                print(
+                    f"\nnote: measures not in the registry: {', '.join(map(str, unknown))}"
+                )
 
         print(f"\nhighest level met: {result.level or 'none'}")
 
-    verdict = (record.get("decision") or {}).get("verdict")
-    if args.require_ship and verdict != "ship":
-        if not args.quiet:
-            print(f"require-ship: verdict is {verdict!r}, not 'ship'")
-        return 2
+    if args.require_ship:
+        blockers = release_failures(record)
+        if result.level is None or LEVELS.index(result.level) < LEVELS.index("L2"):
+            blockers.append("release requires L2 or higher")
+        if blockers:
+            if not args.quiet:
+                for blocker in blockers:
+                    print(f"release blocked: {blocker}")
+            return 1
 
     if args.level:
         reached = result.level
