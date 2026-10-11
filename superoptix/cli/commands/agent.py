@@ -4987,7 +4987,7 @@ def optimize_agent(args):
             Panel(
                 f"🤖 [bold bright_green]OPTIMIZATION IN PROGRESS[/]\n\n"
                 f"🎯 [bold]Agent:[/] {agent_name.title()}\n"
-                f"🔧 [bold]Strategy:[/] DSPy BootstrapFewShot\n"
+                f"🔧 [bold]Strategy:[/] DSPy GEPA (sealed held-out split)\n"
                 f"📊 [bold]Data Source:[/] BDD scenarios from playbook\n"
                 f"💾 [bold]Output:[/] [cyan]{optimized_path.relative_to(project_root)}[/]",
                 title="⚡ Optimization Details",
@@ -5010,6 +5010,15 @@ def optimize_agent(args):
                 ),
                 provider_override=getattr(args, "provider", None),
                 model_override=getattr(args, "model", None),
+                gepa_overrides={
+                    "auto": getattr(args, "auto", None),
+                    "max_metric_calls": getattr(args, "max_metric_calls", None),
+                    "max_full_evals": getattr(args, "max_full_evals", None),
+                    "reflection_lm": getattr(args, "reflection_lm", None),
+                    "reflection_minibatch_size": getattr(
+                        args, "reflection_minibatch_size", None
+                    ),
+                },
             )
         )
 

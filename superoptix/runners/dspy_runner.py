@@ -142,6 +142,35 @@ def resolve_pipeline_class(module: Any, agent_name: str) -> Any:
     return None
 
 
+def _dspy_lm_kwargs(params: Dict[str, Any], **extra: Any) -> Dict[str, Any]:
+    """Build dspy.LM kwargs from resolved params.
+
+    DSPy 3.4+ routes ``ollama_chat/`` through its lm15 engine, which treats an
+    empty api_key as a missing credential and expects an OpenAI-compatible
+    base URL ending in ``/v1``. Ollama is keyless, so omit the key and
+    normalize the base.
+    """
+    model = params["model_name"]
+    kwargs: Dict[str, Any] = {"model": model}
+    api_key = params.get("api_key")
+    api_base = params.get("api_base")
+    if str(model).startswith(("ollama_chat/", "ollama/")):
+        api_key = api_key or None
+        if api_base:
+            api_base = str(api_base).rstrip("/")
+            if not api_base.endswith("/v1"):
+                api_base = f"{api_base}/v1"
+    if api_key:
+        kwargs["api_key"] = api_key
+    if api_base:
+        kwargs["api_base"] = api_base
+    for key in ("temperature", "max_tokens"):
+        if params.get(key) is not None:
+            kwargs[key] = params[key]
+    kwargs.update(extra)
+    return kwargs
+
+
 class DSPyRunner:
     """Runner for DSPy-based agents."""
 
@@ -849,7 +878,7 @@ class DSPyRunner:
             api_base = str(lm_config.get("api_base", "")).strip() or None
             return {
                 "model_name": model_name,
-                "api_key": "",
+                "api_key": None,
                 "api_base": api_base,
                 "temperature": temperature,
                 "max_tokens": max_tokens,
@@ -919,13 +948,7 @@ class DSPyRunner:
             provider_override=provider_override,
             runtime_mode=runtime_mode,
         )
-        lm = dspy.LM(
-            model=lm_params["model_name"],
-            api_key=lm_params["api_key"],
-            api_base=lm_params.get("api_base"),
-            temperature=lm_params["temperature"],
-            max_tokens=lm_params["max_tokens"],
-        )
+        lm = dspy.LM(**_dspy_lm_kwargs(lm_params))
         dspy.configure(lm=lm)
         return lm
 
@@ -1225,6 +1248,7 @@ class DSPyRunner:
         runtime_mode: str = "auto",
         provider_override: str | None = None,
         model_override: str | None = None,
+        gepa_overrides: Dict[str, Any] | None = None,
     ) -> Dict[str, Any]:
         """Optimize the agent pipeline using DSPy optimization techniques."""
         optimization_result = {
@@ -1299,6 +1323,15 @@ class DSPyRunner:
                     if isinstance(module_gepa_cfg, dict):
                         # Module snapshot takes precedence for visible pipeline-config overrides.
                         gepa_cfg.update(module_gepa_cfg)
+                # Explicit CLI GEPA flags win over playbook and pipeline config.
+                cli_gepa = {
+                    k: v for k, v in (gepa_overrides or {}).items() if v is not None
+                }
+                if cli_gepa.get("max_metric_calls") or cli_gepa.get("max_full_evals"):
+                    if not cli_gepa.get("auto"):
+                        gepa_cfg.pop("auto", None)
+                        cli_gepa.pop("auto", None)
+                gepa_cfg.update(cli_gepa)
 
                 scenarios = []
                 if "feature_specifications" in spec_data and spec_data[
@@ -1354,6 +1387,19 @@ class DSPyRunner:
                     self._configure_dspy_adapter(spec_data, module)
 
                 program = module.build_program()
+
+                # Fail fast when the task LM is unreachable; otherwise every
+                # rollout errors, scores 0 and the run reports a fake success.
+                try:
+                    probe_lm = dspy.settings.lm
+                    if probe_lm is not None:
+                        probe_lm("ping", max_tokens=4)
+                except Exception as e:
+                    optimization_result["error"] = (
+                        f"Task LM is not reachable, aborting before GEPA: {e}"
+                    )
+                    optimization_result["completed_at"] = str(time.time())
+                    return optimization_result
 
                 # Build DSPy examples from scenarios.
                 examples = []
@@ -1430,10 +1476,7 @@ class DSPyRunner:
                     )
 
                 reflection_lm = dspy.LM(
-                    model=teacher_params["model_name"],
-                    api_key=teacher_params["api_key"],
-                    temperature=1.0,
-                    max_tokens=32000,
+                    **_dspy_lm_kwargs(teacher_params, temperature=1.0, max_tokens=32000)
                 )
 
                 assertion_metric_weight = 0.3
@@ -1528,8 +1571,16 @@ class DSPyRunner:
                     return optimization_result
                 import inspect
 
-                auto = "light"
-                auto = gepa_cfg.get("auto", auto)
+                # GEPA takes exactly one budget: max_metric_calls, then
+                # max_full_evals, then auto (default light). Budgets are
+                # GEPA.__init__ arguments, not compile() arguments.
+                max_metric_calls = gepa_cfg.get("max_metric_calls")
+                max_full_evals = gepa_cfg.get("max_full_evals")
+                auto = None
+                if max_metric_calls:
+                    max_full_evals = None
+                elif not max_full_evals:
+                    auto = gepa_cfg.get("auto") or "light"
 
                 # Build GEPA kwargs dynamically to stay compatible across DSPy versions.
                 init_sig = inspect.signature(GEPA.__init__)
@@ -1538,6 +1589,8 @@ class DSPyRunner:
                 init_kwargs: Dict[str, Any] = {"metric": gepa_metric}
                 optional_init_cfg = {
                     "auto": auto,
+                    "max_metric_calls": max_metric_calls,
+                    "max_full_evals": max_full_evals,
                     "reflection_lm": reflection_lm,
                     "candidate_selection_strategy": gepa_cfg.get(
                         "candidate_selection_strategy"
