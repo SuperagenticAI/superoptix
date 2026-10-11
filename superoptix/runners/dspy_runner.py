@@ -932,6 +932,51 @@ class DSPyRunner:
             "max_tokens": max_tokens,
         }
 
+    def configure_native_lm(
+        self,
+        module: Any,
+        runtime_mode: str = "auto",
+        provider_override: str | None = None,
+        model_override: str | None = None,
+    ) -> None:
+        """Configure the task LM for a native (build_program) DSPy module.
+
+        Used by standalone evaluation (``super agent evaluate`` / ``test``),
+        which otherwise runs the program with no LM configured.
+        """
+        spec_data: Dict[str, Any] = {}
+        if self.playbook_path.exists():
+            with open(self.playbook_path, "r") as f:
+                playbook = yaml.safe_load(f) or {}
+            spec_data = playbook.get("spec", playbook) or {}
+        allow_local_ollama = bool(getattr(module, "ALLOW_LOCAL_OLLAMA", False))
+        effective_runtime_mode = (runtime_mode or "auto").lower()
+        if effective_runtime_mode == "auto":
+            effective_runtime_mode = str(
+                getattr(module, "RUNTIME_MODE", "auto") or "auto"
+            ).lower()
+        provider = provider_override or getattr(module, "PROVIDER_OVERRIDE", None)
+        model = model_override or getattr(module, "MODEL_OVERRIDE", None)
+        if hasattr(module, "setup_lm") and callable(module.setup_lm):
+            lm_params = self._resolve_dspy_lm_params(
+                spec_data,
+                allow_local_ollama=allow_local_ollama,
+                purpose="task",
+                model_override=model,
+                provider_override=provider,
+                runtime_mode=effective_runtime_mode,
+            )
+            module.setup_lm(**lm_params)
+        else:
+            self._configure_dspy_lm_from_playbook(
+                spec_data,
+                allow_local_ollama=allow_local_ollama,
+                model_override=model,
+                provider_override=provider,
+                runtime_mode=effective_runtime_mode,
+            )
+        self._configure_dspy_adapter(spec_data, module)
+
     def _configure_dspy_lm_from_playbook(
         self,
         spec_data: Dict[str, Any],

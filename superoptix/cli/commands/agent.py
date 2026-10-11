@@ -7,6 +7,7 @@ import importlib.resources
 import importlib.util
 import json
 import os
+import re
 import subprocess
 import sys
 import textwrap
@@ -118,6 +119,12 @@ class _MinimalDSPyBDDEvaluator:
     def _expected_to_text(expected_outputs: dict) -> str:
         if not expected_outputs:
             return ""
+        # expected_keywords is a check, not an expected output value.
+        expected_outputs = {
+            k: v for k, v in expected_outputs.items() if k != "expected_keywords"
+        }
+        if not expected_outputs:
+            return ""
         if len(expected_outputs) == 1:
             return str(next(iter(expected_outputs.values()))).strip()
         return json.dumps(expected_outputs, sort_keys=True, ensure_ascii=True)
@@ -134,15 +141,23 @@ class _MinimalDSPyBDDEvaluator:
             return json.dumps(result, sort_keys=True, ensure_ascii=True)
         if hasattr(result, "toDict") and callable(result.toDict):
             try:
-                return json.dumps(result.toDict(), sort_keys=True, ensure_ascii=True)
+                data = result.toDict()
+                if isinstance(data, dict) and len(data) == 1:
+                    return str(next(iter(data.values()))).strip()
+                return json.dumps(data, sort_keys=True, ensure_ascii=True)
             except Exception:
                 pass
         return str(result).strip()
 
     @staticmethod
+    def _tokens(text: str) -> set[str]:
+        # Word tokens, so JSON quotes and punctuation do not break matches.
+        return set(re.findall(r"\w+", text.lower()))
+
+    @staticmethod
     def _semantic_similarity(actual: str, expected: str) -> float:
-        actual_words = set(actual.lower().split())
-        expected_words = set(expected.lower().split())
+        actual_words = _MinimalDSPyBDDEvaluator._tokens(actual)
+        expected_words = _MinimalDSPyBDDEvaluator._tokens(expected)
         if not expected_words:
             return 1.0 if not actual_words else 0.5
         intersection = actual_words.intersection(expected_words)
@@ -189,14 +204,14 @@ class _MinimalDSPyBDDEvaluator:
             "those",
         }
         expected_keywords = {
-            word.lower()
-            for word in expected.split()
-            if len(word) > 3 and word.lower() not in common_words
+            word
+            for word in _MinimalDSPyBDDEvaluator._tokens(expected)
+            if len(word) > 3 and word not in common_words
         }
         actual_keywords = {
-            word.lower()
-            for word in actual.split()
-            if len(word) > 3 and word.lower() not in common_words
+            word
+            for word in _MinimalDSPyBDDEvaluator._tokens(actual)
+            if len(word) > 3 and word not in common_words
         }
         if not expected_keywords:
             return 1.0
@@ -233,6 +248,16 @@ class _MinimalDSPyBDDEvaluator:
 
     def _evaluate(self, actual_text: str, expected_outputs: dict) -> dict:
         expected_text = self._expected_to_text(expected_outputs)
+        required = (expected_outputs or {}).get("expected_keywords") or []
+        if isinstance(required, str):
+            required = [required]
+        missing = [
+            str(k)
+            for k in required
+            if str(k).lower() not in (actual_text or "").lower()
+        ]
+        if not expected_text and required:
+            expected_text = " ".join(str(k) for k in required)
         if not actual_text:
             return {
                 "passed": False,
@@ -258,10 +283,12 @@ class _MinimalDSPyBDDEvaluator:
             + structure_score * 0.2
             + length_score * 0.1
         )
-        passed = confidence_score >= 0.6
+        passed = confidence_score >= 0.6 and not missing
 
         failure_reason = None
-        if not passed:
+        if missing:
+            failure_reason = f"missing expected keywords: {', '.join(missing)}"
+        elif not passed:
             if semantic_score < 0.5:
                 failure_reason = "semantic meaning differs significantly"
             elif keyword_score < 0.3:
@@ -1618,6 +1645,10 @@ def test_agent_bdd(args):
             and hasattr(module, "build_program")
             and callable(module.build_program)
         ):
+            import dspy as _dspy
+
+            if not getattr(_dspy.settings, "lm", None):
+                runner.configure_native_lm(module)
             pipeline = _MinimalDSPyBDDEvaluator(module, runner.playbook_path)
             console.print("[green]Pipeline loaded successfully[/]")
             console.print(
