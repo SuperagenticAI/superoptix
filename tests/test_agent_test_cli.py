@@ -71,6 +71,23 @@ def build_program():
 '''
 
 
+@pytest.fixture(autouse=True)
+def _isolated_dspy_lm(monkeypatch):
+    """Give each CLI run a clean DSPy LM slot and a dummy hosted key.
+
+    The playbook targets a hosted provider, and the fake pipeline never calls
+    the LM, so a placeholder key is enough. Resetting the global LM keeps one
+    test's configuration from leaking into the next.
+    """
+    import dspy
+
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test-not-used")
+    previous = dspy.settings.lm
+    dspy.configure(lm=None)
+    yield
+    dspy.configure(lm=previous)
+
+
 def _project(tmp_path, monkeypatch, *, with_holdout=True):
     import yaml
 
