@@ -7,10 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [2.0.0] - Unreleased (pending review, no release date)
+## [2.0.0rc1] - 2026-10-11 (pre-release)
+
+First release candidate of SuperOptiX 2.0, published as a PyPI pre-release.
+`pip install superoptix` stays on 0.3.16; opt in with
+`pip install --pre superoptix==2.0.0rc1` or
+`uv tool install --prerelease allow superoptix==2.0.0rc1`.
 
 SuperOptiX 2.0 makes optimization numbers honest and agent quality records
-checkable. See [Migrating to 2.0](docs/guides/migrating-to-2.0.md).
+checkable. Highlights:
+
+- GEPA held-out split: a seeded 20% of scenarios is never shown to the
+  optimizer; reported (train) gain and held-out gain are shown side by side.
+- A2A: keep-alive sessions and protocolVersion-first interface selection.
+- DSPy 3.5 readiness: `dspy>=3.4`, engine-based `dspy.LM` for MLX.
+- Agent quality on [SuperGauge](https://github.com/SuperagenticAI/supergauge)
+  (checker-v0.1.0, a5920cc): sealed holdout, deterministic L2 gates, RFC 0005
+  integrity evidence, the `super agent test` CI gate and
+  `super agent optimize --gauge-out`.
+- One shared Ollama/local LM helper that fails loudly when the server is
+  unreachable.
+- CLI refresh around the three pillars, plus removals of deprecated commands
+  and aliases.
+
+See [Migrating to 2.0](docs/guides/migrating-to-2.0.md).
 
 ### Breaking
 
@@ -54,7 +74,7 @@ checkable. See [Migrating to 2.0](docs/guides/migrating-to-2.0.md).
 - A2A keep-alive: one `requests.Session` per `A2AClient`, one client per URL
   in `A2ARegistry`, context manager support (arXiv:2610.04053).
 
-## [0.3.16] - 2026-09-30
+### Changed
 
 - CLI refresh to match the 2.0 positioning ("Optimization and Quality layer for
   AI agents"; "Optimize agents. Connect over A2A. Ship with quality."):
@@ -67,6 +87,8 @@ checkable. See [Migrating to 2.0](docs/guides/migrating-to-2.0.md).
   --gauge-out`, `test` and `serve`, and no longer reference flags that do not
   exist (`super agent run --interactive`, `compile --basic`,
   `super spec generate genie`).
+
+## [0.3.16] - 2026-09-30
 
 ### Fixed
 
