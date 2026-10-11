@@ -8835,7 +8835,7 @@ wheels = [
 
 [[package]]
 name = "superoptix"
-version = "0.3.16"
+version = "2.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "colorama" },
