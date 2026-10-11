@@ -77,8 +77,8 @@ def show_animated_welcome():
     # Animated tagline
     taglines = [
         "💬 Conversational AI for Building AI Agents",
-        "🎯 Full-Stack Agent Optimization Framework",
-        "🚀 Build. Optimize. Deploy.",
+        "🎯 Optimization and Quality layer for AI agents",
+        "🚀 Optimize agents. Connect over A2A. Ship with quality.",
     ]
 
     for tagline in taglines:

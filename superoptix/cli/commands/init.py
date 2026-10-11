@@ -255,8 +255,8 @@ uv pip install -e .
 │   ├── knowledge/
 │   ├── memory/
 │   ├── tools/
-│   └── guardrails/
-    ├── protocols/
+│   ├── guardrails/
+│   ├── protocols/
 │   ├── evals/
 │   └── optimizers/
 ├── .env                # Environment variables
@@ -264,7 +264,7 @@ uv pip install -e .
 ├── .pre-commit-config.yaml  # Pre-commit hooks configuration
 ├── pyproject.toml      # Project metadata and dependencies (uv-compatible)
 ├── README.md           # Project documentation
-    ├── .super                # SuperOptiX project metadata
+├── .super              # SuperOptiX project metadata
 ├── tests/
 │   ├── conftest.py
 │   └── test_agents.py
@@ -367,8 +367,8 @@ def init_project(args):
         console.print("\n" + "=" * 80)
         console.print(
             Panel(
-                f"🎉 [bold bright_green]SUCCESS![/] Your full-blown shippable Agentic System '[bold bright_cyan]{system_name}[/]' is ready!\n\n"
-                f"🚀 [bold]You now own a complete agentic AI system in '[bold bright_cyan]{system_name}[/]'.[/]\n\nStart making it production-ready by evaluating, optimizing, and orchestrating with advanced agent engineering.",
+                f"🎉 [bold bright_green]SUCCESS![/] Project '[bold bright_cyan]{system_name}[/]' is ready.\n\n"
+                "Optimize agents. Connect over A2A. Ship with quality.",
                 style="bright_green",
                 border_style="bright_green",
             )
@@ -379,15 +379,22 @@ def init_project(args):
 
 [yellow]1. Move to your new project root and confirm setup:[/]
    [cyan]cd {system_name}[/]
-   [dim]# You should see a .super file here – always run super commands from this directory[/]
+   [dim]# You should see a .super file here; always run super commands from this directory[/]
 
 [yellow]2. Pull your first agent:[/]
    [cyan]super agent pull developer[/]  [dim]# swap 'developer' for any agent name[/]
 
-[yellow]3. Explore the marketplace:[/]
-   [cyan]super market[/]
+[yellow]3. Compile, run and evaluate it:[/]
+   [cyan]super agent compile developer --optimize[/]
+   [cyan]super agent run developer --goal "..."[/]
+   [cyan]super agent evaluate developer[/]
 
-[yellow]4. Need the full guide?[/]
+[yellow]4. Optimize, gate and connect:[/]
+   [cyan]super agent optimize developer --gauge-out record.json[/]  [dim]# GEPA, held-out gain[/]
+   [cyan]super agent test developer --actor you@example.com[/]  [dim]# CI quality gate[/]
+   [cyan]super agent serve developer[/]  [dim]# A2A endpoint[/]
+
+[yellow]5. Need the full guide?[/]
    [cyan]super docs[/]"""
 
         console.print(
@@ -402,7 +409,7 @@ def init_project(args):
         # Final message
         console.print("=" * 80)
         console.print(
-            "🎯 [bold bright_green]Welcome to your Agentic System![/] Ready to build intelligent agents? 🚀"
+            "🎯 [bold bright_green]Welcome to SuperOptiX.[/] Optimize agents. Connect over A2A. Ship with quality."
         )
         console.print(f"📍 [bold]Next steps:[/] [cyan]cd {system_name}[/]")
         console.print("=" * 80 + "\n")

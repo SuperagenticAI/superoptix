@@ -75,8 +75,25 @@ gain is train-only.
 | --- | --- |
 | `super agent compile --local-models` | `--local-ollama` |
 | `PipelineUtilities.get_optimizer(tier, k)` | `PipelineUtilities.get_custom_optimizer(...)` or `DSPyOptimizerFactory.create_tier_optimized_optimizer(...)` |
+| `super agent tier-status` (`ts`) | Nothing needed. Playbook tiers stay in the playbook (`super agent pull --tier`, `super spec generate oracles` or `genies`). Bare `super agent` now prints help. |
 
-## 6. Packaging
+## 6. CLI help and output
+
+The CLI text now matches the 2.0 positioning: optimization and quality layer
+for AI agents, with three pillars.
+
+- `super --help` and `super agent --help` list commands pillar-first:
+  optimize (`super agent optimize`), connect over A2A (`super a2a adapt`,
+  `super agent serve`), ship with quality (`super agent evaluate`,
+  `super agent test`). Only the listing order changed; every command and alias
+  parses as before.
+- `super docs`, `super init` and the `pull`/`compile` next steps point at
+  `optimize --gauge-out`, `test` and `serve`. They no longer suggest
+  `super agent run --interactive`, `compile --basic` or
+  `super spec generate genie` (none existed; use `genies`).
+- Scripts that parse the banner or help text should match the new wording.
+
+## 7. Packaging
 
 - Version `2.0.0`, classifier `Development Status :: 5 - Production/Stable`.
 - `jsonschema` is in the `testing` extra (SuperGauge L1 validation in tests).

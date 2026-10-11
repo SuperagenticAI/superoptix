@@ -20,7 +20,7 @@ def marketplace_dashboard(args):
     """Show the main marketplace dashboard with overview and stats."""
     console.print("\n🏪 [bold bright_cyan]SuperOptiX Marketplace[/bold bright_cyan]")
     console.print("═" * 70)
-    console.print("[dim]Your one-stop shop for AI agents and tools[/dim]\n")
+    console.print("[dim]Discover pre-built agents and tools[/dim]\n")
 
     # Get stats
     agent_stats = _get_agent_stats()

@@ -33,7 +33,6 @@ warnings.filterwarnings("ignore", message="unclosed database", category=Resource
 
 from superoptix.cli.utils import run_async
 from superoptix.compiler.agent_compiler import AgentCompiler
-from superoptix.models.tier_system import TierLevel, tier_system
 from superoptix.observability.tracer import SuperOptixTracer
 from superoptix.runners.dspy_runner import DSPyRunner
 from superoptix.ui.designer_factory import DesignerFactory
@@ -944,7 +943,7 @@ def _compile_single_agent(agent_name: str, args, tier_level: str = None):
         # Simple workflow guide (normal mode)
         if compile_profile == "minimal":
             console.print(
-                f'🎯 [bold cyan]Next:[/] [cyan]super agent run {agent_name} --goal "your goal"[/] (optional: recompile with [cyan]--optimize[/] for evaluate/optimize features)'
+                f'🎯 [bold cyan]Next:[/] [cyan]super agent run {agent_name} --goal "your goal"[/], then [cyan]super agent evaluate {agent_name}[/] and [cyan]super agent test {agent_name}[/] (recompile with [cyan]--optimize[/] to enable evaluate/optimize/test)'
             )
         else:
             console.print(
@@ -2301,7 +2300,8 @@ def test_agent_gate(args):
     )
     for lv in ("L1", "L2", "release"):
         for failure in failures[lv]:
-            console.print(f"   [yellow]{lv}[/] {failure}")
+            label = "blocked:" if lv == "release" else lv
+            console.print(f"   [yellow]{label}[/] {failure}")
     rationale = (record.get("decision") or {}).get("rationale")
     if rationale:
         console.print(f"   [dim]{rationale}[/]")
@@ -3160,6 +3160,9 @@ def add_agent(args):
 
 [cyan]super agent compile {target_ref}[/] - Generate executable pipeline
 [cyan]super agent run {target_ref} --goal "goal"[/] - Execute agent
+[cyan]super agent optimize {target_ref} --gauge-out record.json[/] - Optimize (GEPA) and record quality
+[cyan]super agent test {target_ref}[/] - CI quality gate
+[cyan]super agent serve {target_ref}[/] - Serve over A2A
 
 [dim]💡 Comprehensive guide: [cyan]super docs[/] | 🔍 More agents: [cyan]super market[/][/]"""
 
@@ -3592,103 +3595,6 @@ def list_pre_built_agents(args):
     except Exception as e:
         console.print(f"\n[bold red]❌ Failed to list pre-built agents:[/] {e}")
         sys.exit(1)
-
-
-def show_tier_status(args):
-    """Show current tier status and available features."""
-    # Get user tier from config or default to ORACLES
-    user_tier = getattr(args, "tier", None)
-    if user_tier is None:
-        user_tier = TierLevel.ORACLES
-    elif isinstance(user_tier, str):
-        user_tier = TierLevel(user_tier.lower())
-
-    console.print("\n[bold blue]🎯 Current Tier Status[/bold blue]")
-
-    # Show current tier
-    tier_panel = Panel(
-        f"[bold green]{user_tier.value.title()}[/bold green]",
-        title="Your Active Tier",
-        border_style="green",
-    )
-    console.print(tier_panel)
-
-    # Show available features
-    console.print(
-        f"\n[bold cyan]✅ Features Available in {user_tier.value.title()} Tier[/bold cyan]"
-    )
-    accessible_features = tier_system.get_accessible_features(user_tier)
-
-    available_table = Table()
-    available_table.add_column("Feature", style="green")
-    available_table.add_column("Description", style="white")
-    available_table.add_column("Status", style="blue")
-
-    for feature in accessible_features:
-        status = "Beta" if feature.beta else "Available"
-        if feature.enterprise_only:
-            status += " (Enterprise)"
-
-        available_table.add_row(
-            feature.name,
-            feature.description[:60] + "..."
-            if len(feature.description) > 60
-            else feature.description,
-            status,
-        )
-
-    console.print(available_table)
-
-    # Show upgrade options
-    next_tier_features = []
-    for tier_level in TierLevel:
-        if (
-            tier_system.tier_hierarchy[tier_level]
-            > tier_system.tier_hierarchy[user_tier]
-        ):
-            tier_features = [
-                f for f in tier_system.features.values() if f.min_tier == tier_level
-            ]
-            if tier_features:
-                next_tier_features.extend(
-                    tier_features[:3]
-                )  # Show first 3 features from next tier
-                break
-
-    if next_tier_features:
-        console.print("\n[bold yellow]🚀 Upgrade to unlock more features[/bold yellow]")
-
-        upgrade_table = Table(title="Next Tier Features")
-        upgrade_table.add_column("Feature", style="yellow")
-        upgrade_table.add_column("Description", style="white")
-        upgrade_table.add_column("Required Tier", style="red")
-
-        for feature in next_tier_features:
-            upgrade_table.add_row(
-                feature.name,
-                feature.description[:50] + "..."
-                if len(feature.description) > 50
-                else feature.description,
-                feature.min_tier.value.title(),
-            )
-
-        console.print(upgrade_table)
-
-        # Show upgrade info
-        upgrade_info = Panel(
-            """
-[bold]🔓 Ready to upgrade?[/bold]
-
-• Visit: https://super-agentic.ai/upgrade
-• Email: upgrade@super-agentic.ai
-• Schedule a demo: https://calendly.com/shashikant-super-agentic/30min
-
-[dim]Get access to advanced DSPy capabilities, priority support, and early access to beta features.[/dim]
-            """,
-            title="Upgrade Information",
-            border_style="yellow",
-        )
-        console.print(upgrade_info)
 
 
 def _run_universal_gepa_optimization(args, agent_name, project_root, playbook):
@@ -5122,7 +5028,7 @@ def optimize_agent(args):
             # Show verbose panels only in verbose mode
             if getattr(args, "verbose", False):
                 # Auto-tuning notice (verbose only)
-                auto_tune_info = """🧠 [bold]Smart Optimization:[/] DSPy BootstrapFewShot
+                auto_tune_info = """🧠 [bold]Optimizer:[/] GEPA (train split; held-out gain reported separately)
 
 ⚡ [bold]Automatic improvements:[/] Better prompts, reasoning chains
 🎯 [bold]Quality assurance:[/] Test before production use"""

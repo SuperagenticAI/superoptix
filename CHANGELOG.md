@@ -32,6 +32,10 @@ checkable. See [Migrating to 2.0](docs/guides/migrating-to-2.0.md).
   `--local-ollama`) and `PipelineUtilities.get_optimizer` (use
   `get_custom_optimizer` or `DSPyOptimizerFactory`).
 - Classifier is now `Development Status :: 5 - Production/Stable`.
+- Removed `super agent tier-status` (alias `ts`). It showed old tier and
+  upgrade messaging and crashed (`'FeatureConfig' object has no attribute
+  'enterprise_only'`). Bare `super agent` now prints the agent help instead.
+  Playbook tiers (`--tier oracles|genies`) are unchanged.
 
 ### Added
 
@@ -51,6 +55,18 @@ checkable. See [Migrating to 2.0](docs/guides/migrating-to-2.0.md).
   in `A2ARegistry`, context manager support (arXiv:2610.04053).
 
 ## [0.3.16] - 2026-09-30
+
+- CLI refresh to match the 2.0 positioning ("Optimization and Quality layer for
+  AI agents"; "Optimize agents. Connect over A2A. Ship with quality."):
+  `super --help`, `super agent --help`, the version panel, `super init` and the
+  conversational welcome now lead with the three pillars (optimize, connect
+  over A2A, ship with quality). Commands are listed pillar-first; parsing and
+  aliases are unchanged. `super agent optimize --help` describes GEPA with the
+  held-out split; `super a2a --help` points to `super agent serve`. `super
+  docs`, `super init`, `pull` and `compile` next steps now include `optimize
+  --gauge-out`, `test` and `serve`, and no longer reference flags that do not
+  exist (`super agent run --interactive`, `compile --basic`,
+  `super spec generate genie`).
 
 ### Fixed
 
