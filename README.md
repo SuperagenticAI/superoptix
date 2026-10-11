@@ -240,10 +240,9 @@ super agent compile developer --framework dspy
 super agent run developer --framework dspy --goal "Design a migration strategy"
 ```
 
-GEPA optimization is available on the compiled agent:
+GEPA optimization works on the same compiled agent, no recompile needed:
 
 ```bash
-super agent compile developer --framework dspy --optimize
 super agent optimize developer --framework dspy --auto light
 ```
 

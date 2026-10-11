@@ -54,8 +54,7 @@ super agent compile developer --framework dspy
 # Run
 super agent run developer --framework dspy --goal "Design a migration plan"
 
-# Optional optimization path
-super agent compile developer --framework dspy --optimize
+# Optimize the same compiled agent (no recompile needed)
 super agent optimize developer --framework dspy --auto light
 ```
 
