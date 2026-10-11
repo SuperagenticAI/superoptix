@@ -1137,6 +1137,18 @@ def _run_framework_agent(args, framework: str):
         console.print(traceback.format_exc())
 
 
+def _is_lm_transport_error(exc: BaseException) -> bool:
+    """True for DSPy/LiteLLM connection failures (server down, refused)."""
+    seen = set()
+    while exc is not None and id(exc) not in seen:
+        seen.add(id(exc))
+        name = type(exc).__name__
+        if name in {"LMTransportError", "APIConnectionError", "ConnectError"}:
+            return True
+        exc = exc.__cause__ or exc.__context__
+    return False
+
+
 def run_agent(args):
     """Handle running an agent pipeline by delegating to the appropriate runner."""
     # Get observability backend from args
@@ -1266,7 +1278,7 @@ def run_agent(args):
             force_runtime = hasattr(args, "force_optimize") and args.force_optimize
             # Use optimization unless explicitly disabled
             use_optimization = True  # Always try to use pre-optimized if available
-            run_async(
+            run_result = run_async(
                 runner.run(
                     query=args.goal,
                     use_optimization=use_optimization,
@@ -1281,6 +1293,11 @@ def run_agent(args):
                     model_override=getattr(args, "model", None),
                 )
             )
+
+            if run_result is None and getattr(runner, "last_error", None):
+                # The runner already printed the details; do not report success.
+                console.print("\n[bold red]❌ Agent run failed.[/]")
+                sys.exit(1)
 
             # Add next steps guidance after successful run - only in verbose mode
             if getattr(args, "verbose", False):
@@ -1339,15 +1356,22 @@ def run_agent(args):
                 )
                 console.print()
     except Exception as e:
-        # The runner already prints detailed errors, so we just note that the run failed.
-        console.print("\n[bold red]❌ Agent run failed.[/]")
-        console.print(f"[red]Debug: {type(e).__name__}: {e}")
-        import traceback
+        from superoptix.core.local_lm import LocalModelUnreachableError
 
-        console.print(traceback.format_exc())
+        console.print("\n[bold red]❌ Agent run failed.[/]")
         tracer.add_event(
             "agent_run_failed", f"agent.{args.name}", {"error": str(e)}, status="error"
         )
+        if isinstance(e, LocalModelUnreachableError) or _is_lm_transport_error(e):
+            # Clear, actionable message instead of a raw traceback.
+            console.print(f"[red]Model unreachable: {e}[/]", markup=True)
+        else:
+            console.print(f"[red]Debug: {type(e).__name__}: {e}")
+            import traceback
+
+            console.print(traceback.format_exc())
+        # Never exit 0 on a failed run.
+        sys.exit(1)
         # Optionally, re-raise if you want the script to exit with a non-zero code
         # raise e
     finally:
@@ -1463,11 +1487,13 @@ def serve_agent(args):
         console.print("Install:", markup=False)
         console.print('uv pip install "superoptix[a2a]"', markup=False)
         console.print(str(exc), style="dim", markup=False)
+        sys.exit(1)
     except Exception as exc:
         console.print(f"\n[bold red]❌ Failed to start A2A server:[/] {exc}")
         import traceback
 
         console.print(traceback.format_exc())
+        sys.exit(1)
 
 
 def test_agent_bdd(args):

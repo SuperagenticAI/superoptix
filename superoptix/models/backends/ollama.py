@@ -6,7 +6,6 @@ import re
 import subprocess
 import shutil
 from datetime import datetime
-from pathlib import Path
 from typing import List, Optional, Dict, Any
 from urllib.parse import urlparse
 from rich.console import Console
@@ -321,46 +320,14 @@ class SuperOptiXOllamaBackend(SuperOptiXBaseBackend):
             }
 
     async def create_dspy_client(self, model_name: str, **kwargs):
-        """Create a DSPy-compatible client for Ollama."""
-        try:
-            # Try to use the direct Ollama client from DSPy if available
-            import sys
+        """Create a DSPy LM for Ollama (keyless, /v1 base; see core.local_lm)."""
+        from superoptix.core.local_lm import build_dspy_lm
 
-            sys.path.insert(
-                0, str(Path(__file__).parent.parent.parent.parent / "dspy-latest")
-            )
-            from dspy.clients.ollama_direct import OllamaDirect
-
-            # Extract parameters and avoid conflicts
-            temperature = kwargs.pop("temperature", 0.0)
-            max_tokens = kwargs.pop("max_tokens", 4000)
-
-            return OllamaDirect(
-                model=model_name,
-                api_base=self.host,
-                temperature=temperature,
-                max_tokens=max_tokens,
-                **kwargs,
-            )
-        except ImportError:
-            # Fall back to standard DSPy LM with ollama prefix
-            import sys
-
-            sys.path.insert(
-                0, str(Path(__file__).parent.parent.parent.parent / "dspy-latest")
-            )
-            import dspy
-
-            # Extract parameters and avoid conflicts
-            temperature = kwargs.pop("temperature", 0.0)
-            max_tokens = kwargs.pop("max_tokens", 4000)
-
-            return dspy.LM(
-                model=f"ollama/{model_name}",
-                temperature=temperature,
-                max_tokens=max_tokens,
-                **kwargs,
-            )
+        kwargs.setdefault("temperature", 0.0)
+        kwargs.setdefault("max_tokens", 4000)
+        api_base = kwargs.pop("api_base", None) or self.host
+        kwargs.pop("api_key", None)
+        return build_dspy_lm(model_name, provider="ollama", api_base=api_base, **kwargs)
 
     def _parse_size(self, size_str: str) -> Optional[int]:
         """Parse size string from ollama list output."""

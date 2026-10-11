@@ -10,6 +10,7 @@ import logging
 from typing import Any, Callable, Dict, Optional
 
 import dspy
+from superoptix.core.local_lm import dspy_lm_kwargs
 from dspy.teleprompt import (
     GEPA,
     SIMBA,
@@ -209,49 +210,32 @@ class DSPyOptimizerFactory:
             if isinstance(params["reflection_lm"], str):
                 # Convert string model name to LM instance
                 reflection_lm_model = params["reflection_lm"]
-                reflection_lm_provider = params.get("reflection_lm_provider", "ollama")
+                reflection_lm_provider = params.pop("reflection_lm_provider", "ollama")
 
-                if reflection_lm_provider == "ollama":
-                    if not reflection_lm_model.startswith("ollama_chat/"):
-                        reflection_lm_model = f"ollama_chat/{reflection_lm_model}"
-                    params["reflection_lm"] = dspy.LM(
-                        model=reflection_lm_model,
-                        provider="ollama",
-                        api_base="http://localhost:11434",
-                        api_key="",
-                        temperature=1.0,
-                        max_tokens=32000,
-                    )
-                else:
-                    params["reflection_lm"] = dspy.LM(
-                        model=reflection_lm_model,
+                params["reflection_lm"] = dspy.LM(
+                    **dspy_lm_kwargs(
+                        reflection_lm_model,
                         provider=reflection_lm_provider,
+                        api_base=params.pop("reflection_lm_api_base", None),
                         temperature=1.0,
                         max_tokens=32000,
                     )
+                )
         elif lm_config:
             # Use provided LM config for reflection LM
             reflection_lm_model = lm_config.get("model", "qwen3:8b")
             reflection_lm_provider = lm_config.get("provider", "ollama")
 
-            if reflection_lm_provider == "ollama":
-                if not reflection_lm_model.startswith("ollama_chat/"):
-                    reflection_lm_model = f"ollama_chat/{reflection_lm_model}"
-                params["reflection_lm"] = dspy.LM(
-                    model=reflection_lm_model,
-                    provider="ollama",
-                    api_base="http://localhost:11434",
-                    api_key="",
-                    temperature=1.0,
-                    max_tokens=32000,
-                )
-            else:
-                params["reflection_lm"] = dspy.LM(
-                    model=reflection_lm_model,
+            params["reflection_lm"] = dspy.LM(
+                **dspy_lm_kwargs(
+                    reflection_lm_model,
                     provider=reflection_lm_provider,
+                    api_base=lm_config.get("api_base"),
+                    api_key=lm_config.get("api_key"),
                     temperature=1.0,
                     max_tokens=32000,
                 )
+            )
 
         # Handle metric configuration
         if isinstance(params.get("metric"), str):

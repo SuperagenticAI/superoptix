@@ -620,21 +620,14 @@ class UniversalGEPA:
         if isinstance(self.reflection_lm, str):
             normalized_model = self._normalize_reflection_model_name(self.reflection_lm)
             try:
-                import dspy
+                import dspy  # noqa: F401  (availability check)
 
-                api_base = (
-                    "http://localhost:11434"
-                    if normalized_model.startswith("ollama_chat/")
-                    else None
-                )
-                api_key = "" if normalized_model.startswith("ollama_chat/") else None
+                from superoptix.core.local_lm import build_dspy_lm
 
-                lm = dspy.LM(
-                    model=normalized_model,
+                lm = build_dspy_lm(
+                    normalized_model,
                     temperature=1.0,
                     max_tokens=32000,
-                    api_base=api_base,
-                    api_key=api_key,
                 )
 
                 def _dspy_lm(prompt):

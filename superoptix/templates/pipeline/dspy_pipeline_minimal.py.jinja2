@@ -105,20 +105,16 @@ def setup_lm(model_name, api_key, temperature, max_tokens, api_base=None):
         lm = dspy.LM(...)
         dspy.configure(lm=lm)
     """
-    lm_kwargs = {
-        "model": model_name,
-        "temperature": temperature,
-        "max_tokens": max_tokens,
-    }
-    # Ollama is keyless: DSPy 3.4+ rejects an empty key and wants a /v1 base.
-    if api_key:
-        lm_kwargs["api_key"] = api_key
-    if api_base:
-        if model_name.startswith(("ollama_chat/", "ollama/")):
-            api_base = api_base.rstrip("/")
-            if not api_base.endswith("/v1"):
-                api_base = f"{api_base}/v1"
-        lm_kwargs["api_base"] = api_base
+    # Keyless /v1 Ollama handling for DSPy 3.4+ lives in one shared helper.
+    from superoptix.core.local_lm import dspy_lm_kwargs
+
+    lm_kwargs = dspy_lm_kwargs(
+        model_name,
+        api_key=api_key,
+        api_base=api_base,
+        temperature=temperature,
+        max_tokens=max_tokens,
+    )
     lm = dspy.LM(**lm_kwargs)
     dspy.configure(lm=lm)
     return lm
