@@ -54,7 +54,7 @@ class TestDSPyOptimizerFactory:
         assert optimizer is not None
         assert hasattr(optimizer, "compile")
 
-    @patch("superoptix.core.optimizer_factory.dspy.LM")
+    @patch("superoptix.core.optimizer_factory.ReflectionLM")
     def test_create_gepa_optimizer(self, mock_lm):
         """Test creating GEPA optimizer with reflection LM."""
         mock_lm_instance = Mock()
