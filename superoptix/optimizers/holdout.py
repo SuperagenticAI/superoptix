@@ -236,3 +236,81 @@ def read_holdout_record(path: Any) -> Optional[Dict[str, Any]]:
     except (OSError, ValueError):
         return None
     return data if isinstance(data, dict) else None
+
+
+def predictor_instructions(program: Any) -> Dict[str, str]:
+    """Map each named predictor of a DSPy program to its signature instructions."""
+    out: Dict[str, str] = {}
+    named = getattr(program, "named_predictors", None)
+    if not callable(named):
+        return out
+    try:
+        pairs = list(named())
+    except Exception:
+        return out
+    for name, pred in pairs:
+        sig = getattr(pred, "signature", None)
+        text = getattr(sig, "instructions", None)
+        if text is None:
+            text = getattr(pred, "instructions", "")
+        out[str(name)] = str(text or "")
+    return out
+
+
+UNCHANGED_SEED_WARNING = (
+    "GEPA returned the unchanged seed program (no instruction changed and no "
+    "score gain). The reflection model may have returned invalid structured "
+    "JSON proposals. Treat this run as zero gain."
+)
+
+
+def unchanged_seed_report(
+    seed_program: Any,
+    optimized_program: Any,
+    gains: Optional[Dict[str, Any]] = None,
+    *,
+    tolerance: float = 1e-9,
+) -> Dict[str, Any]:
+    """Advisory check: did GEPA return the seed program or produce zero gain?
+
+    ``unchanged_seed`` is true when every predictor's instructions equal the
+    seed's. ``zero_gain`` is true when the held-out gain (or the train gain
+    if there is no held-out split) is known and not above ``tolerance``.
+    ``warning`` is set when either holds. This is advisory and never a gate.
+    """
+    gains = gains or {}
+    seed_instr = predictor_instructions(seed_program)
+    opt_instr = predictor_instructions(optimized_program)
+    compared = bool(seed_instr) and bool(opt_instr)
+    changed = sorted(
+        name
+        for name in set(seed_instr) | set(opt_instr)
+        if seed_instr.get(name) != opt_instr.get(name)
+    )
+    unchanged = compared and not changed
+
+    gain = gains.get("heldout_gain")
+    gain_source = "heldout"
+    if gain is None:
+        gain = gains.get("reported_gain")
+        gain_source = "train"
+    if gain is None:
+        gain_source = None
+    zero_gain = gain is not None and float(gain) <= tolerance
+
+    warning = None
+    if unchanged:
+        warning = UNCHANGED_SEED_WARNING
+    elif zero_gain:
+        warning = (
+            f"GEPA produced no {gain_source} gain ({float(gain):+.4f}) although "
+            f"instructions changed for: {', '.join(changed) or 'n/a'}."
+        )
+    return {
+        "unchanged_seed": unchanged,
+        "instructions_compared": compared,
+        "changed_predictors": changed,
+        "zero_gain": zero_gain,
+        "gain_source": gain_source,
+        "warning": warning,
+    }

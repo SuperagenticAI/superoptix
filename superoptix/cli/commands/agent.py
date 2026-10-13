@@ -2435,6 +2435,9 @@ def _emit_optimize_record(args, agent_name: str, optimization_result: dict) -> N
     for k in ("split_digest", "valset_fraction", "seed", "fallback_reason"):
         if holdout.get(k) is not None:
             optimization[k] = holdout[k]
+    gepa_check = optimization_result.get("gepa")
+    if isinstance(gepa_check, dict):
+        optimization["gepa"] = dict(gepa_check)
     record.setdefault("x-superoptix", {})["optimization"] = optimization
     write_record(record, args.gauge_out)
 
@@ -5119,6 +5122,13 @@ def optimize_agent(args):
                     f"\n• Held-out Examples: {optimization_result.get('heldout_examples', 0)}"
                     f"\n• Reported Gain (train): {_gain(optimization_result.get('reported_gain'))}"
                     f"\n• Held-out Gain: {_gain(optimization_result.get('heldout_gain'))}"
+                )
+
+            gepa_check = optimization_result.get("gepa") or {}
+            if gepa_check.get("warning"):
+                gain_lines += (
+                    "\n⚠️  [bold yellow]GEPA warning (advisory):[/] "
+                    f"{gepa_check['warning']}"
                 )
 
             optimization_info = f"""📈 [bold]Performance Improvement:[/]

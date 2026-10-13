@@ -1666,6 +1666,7 @@ class DSPyRunner:
                     gain_report,
                     score_dspy_program,
                     split_holdout,
+                    unchanged_seed_report,
                 )
 
                 split = split_holdout(
@@ -1754,6 +1755,18 @@ class DSPyRunner:
                 optimization_result["heldout_examples"] = len(split.heldout)
                 optimization_result["holdout"] = split.metadata()
                 optimization_result.update(gains)
+                # Advisory (never a gate): flag a seed-identical or zero-gain
+                # result so it cannot pass silently, e.g. when the reflection
+                # LM returned invalid structured JSON proposals.
+                seed_check = unchanged_seed_report(
+                    seed_program, optimized_program, gains
+                )
+                optimization_result["gepa"] = seed_check
+                gains = {**gains, "gepa": seed_check}
+                if seed_check["warning"]:
+                    console.print(
+                        f"[bold yellow]⚠️ GEPA warning:[/] {seed_check['warning']}"
+                    )
                 self._write_holdout_record(split, gains)
                 console.print(
                     "[cyan]📊 Gain:[/] reported (train) "
