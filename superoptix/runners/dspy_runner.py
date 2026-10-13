@@ -14,6 +14,8 @@ from pathlib import Path
 from typing import Any, Dict
 
 import dspy
+
+from superoptix.core.reflection_lm import ReflectionLM
 import yaml
 from rich.console import Console
 from rich.live import Live
@@ -1523,7 +1525,7 @@ class DSPyRunner:
                         runtime_mode=effective_runtime_mode,
                     )
 
-                reflection_lm = dspy.LM(
+                reflection_lm = ReflectionLM(
                     **_dspy_lm_kwargs(teacher_params, temperature=1.0, max_tokens=32000)
                 )
 

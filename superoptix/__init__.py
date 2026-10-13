@@ -25,7 +25,11 @@ import os
 # which makes the import order irrelevant. Remove once DSPy fixes lazy_import.
 try:
     import numpy.linalg  # noqa: F401
-except ImportError:  # numpy is a core dependency, but never hard-fail on import
+except Exception:  # noqa: BLE001
+    # numpy is a core dependency, but never hard-fail on import. When dspy was
+    # imported first, its lazy numpy proxy can raise TypeError here
+    # ("data type 'bool' not understood"); swallowing it lets numpy finish
+    # initialising on first real use instead of crashing ``import superoptix``.
     pass
 
 # ============================================================================

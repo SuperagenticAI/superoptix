@@ -10,6 +10,8 @@ import logging
 from typing import Any, Callable, Dict, Optional
 
 import dspy
+
+from superoptix.core.reflection_lm import ReflectionLM
 from superoptix.core.local_lm import dspy_lm_kwargs
 from dspy.teleprompt import (
     GEPA,
@@ -212,7 +214,7 @@ class DSPyOptimizerFactory:
                 reflection_lm_model = params["reflection_lm"]
                 reflection_lm_provider = params.pop("reflection_lm_provider", "ollama")
 
-                params["reflection_lm"] = dspy.LM(
+                params["reflection_lm"] = ReflectionLM(
                     **dspy_lm_kwargs(
                         reflection_lm_model,
                         provider=reflection_lm_provider,
@@ -226,7 +228,7 @@ class DSPyOptimizerFactory:
             reflection_lm_model = lm_config.get("model", "qwen3:8b")
             reflection_lm_provider = lm_config.get("provider", "ollama")
 
-            params["reflection_lm"] = dspy.LM(
+            params["reflection_lm"] = ReflectionLM(
                 **dspy_lm_kwargs(
                     reflection_lm_model,
                     provider=reflection_lm_provider,
