@@ -18,6 +18,11 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 import dspy
+from superoptix.core.local_lm import (
+    build_dspy_lm,
+    dspy_lm_kwargs,
+    ensure_local_model_reachable,
+)
 
 # SuperOptiX Imports
 from superoptix.observability.tracer import SuperOptixTracer
@@ -152,31 +157,37 @@ class ModelSetupMixin:
 
         # Add provider-specific configuration
         if provider == "ollama":
-            lm_config.update(
-                {
-                    "api_base": model_config.get("api_base", "http://localhost:11434"),
-                    "api_key": "",  # No API key needed for Ollama
-                    "max_retries": 2,
-                    "timeout": 30,
-                }
+            # Keyless /v1 config for DSPy 3.4+ (see superoptix.core.local_lm).
+            lm_config = dspy_lm_kwargs(
+                lm_config.pop("model"),
+                provider="ollama",
+                api_base=model_config.get("api_base"),
+                max_retries=2,
+                timeout=30,
+                **lm_config,
             )
         elif provider == "mlx":
             # Use custom_openai provider for MLX (LiteLLM supports MLX through custom_openai)
-            lm_config.update(
-                {
-                    "model": f"custom_openai/{model_name}",
-                    "api_base": model_config.get("api_base", "http://localhost:8000"),
-                    "api_key": "dummy-key",  # MLX doesn't require real API key, but LiteLLM expects one
-                    "max_retries": 2,
-                    "timeout": 30,
-                }
+            lm_config.pop("model")
+            lm_config = dspy_lm_kwargs(
+                f"custom_openai/{model_name}",
+                provider="mlx",
+                api_base=model_config.get("api_base", "http://localhost:8000"),
+                max_retries=2,
+                timeout=30,
+                **lm_config,
             )
         elif model_config.get("api_base"):
             lm_config["api_base"] = model_config["api_base"]
 
         try:
+            if provider == "ollama":
+                # Fail loudly instead of printing a success we never verified.
+                ensure_local_model_reachable(
+                    lm_config["model"], lm_config.get("api_base")
+                )
             lm = dspy.LM(**lm_config)
-            print(f"✅ Model connection successful: {provider}/{model_name}")
+            print(f"✅ Model configured: {provider}/{model_name}")
 
             # Log successful initialization if tracer is available
             if hasattr(self, "tracer"):
@@ -219,18 +230,10 @@ class ModelSetupMixin:
         temperature = lm_config.get("temperature", 0.0)
         max_tokens = lm_config.get("max_tokens", 32000)
         if provider == "ollama":
-            model_str = (
-                f"ollama_chat/{model_name}"
-                if not model_name.startswith("ollama_chat/")
-                else model_name
-            )
-            print(
-                f"[REFLECTION_LM DEBUG] Using Ollama LM: {model_str}, api_base=http://localhost:11434"
-            )
-            return LM(
-                model_str,
-                api_base="http://localhost:11434",
-                api_key="",
+            return build_dspy_lm(
+                model_name,
+                provider="ollama",
+                api_base=lm_config.get("api_base"),
                 temperature=temperature,
                 max_tokens=max_tokens,
             )
@@ -1278,7 +1281,7 @@ class BDDTestMixin:
         # Suggest model upgrades based on performance
         suggested_upgrade = "None needed"
         if avg_score < 0.6:
-            suggested_upgrade = "Consider qwen3.5:9b or gpt-4 for better performance"
+            suggested_upgrade = "A larger model may score higher"
         elif avg_score < 0.4:
             suggested_upgrade = (
                 "Strongly recommend gpt-4 or claude-3 for reliable results"
@@ -1350,10 +1353,10 @@ class BDDTestMixin:
                 f"Poor performance. {len(failed_results)} scenarios failing."
             )
             recommendations.append(
-                "Strong recommendation: Run optimization before production use."
+                "Run super agent optimize <agent_name> before relying on this agent."
             )
             recommendations.append(
-                "Consider using a more capable model (qwen3.5:9b or gpt-4)."
+                "A larger model may help; set it in spec.language_model."
             )
             recommendations.append("Review scenario complexity vs model capabilities.")
 
@@ -1737,10 +1740,9 @@ class PipelineUtilities:
     ) -> dspy.LM:
         """Quick model setup for simple use cases."""
         if provider == "ollama":
-            return dspy.LM(
-                model=f"ollama_chat/{model_name}",
-                api_base="http://localhost:11434",
-                api_key="",
+            return build_dspy_lm(
+                model_name,
+                provider="ollama",
                 temperature=temperature,
                 max_tokens=2000,
                 max_retries=2,
@@ -1766,16 +1768,6 @@ class PipelineUtilities:
         except Exception as e:
             print(f"Warning: Failed to create ReAct agent: {e}")
             return dspy.Predict(signature_class)
-
-    @staticmethod
-    def get_optimizer(tier: str, k: int = 5):
-        """Get appropriate optimizer for tier - DEPRECATED: Use get_custom_optimizer instead."""
-        from .optimizer_factory import DSPyOptimizerFactory
-
-        # Use the new factory for better optimizer selection
-        return DSPyOptimizerFactory.create_tier_optimized_optimizer(
-            tier=tier, training_data_size=k, optimizer_config=None
-        )
 
     @staticmethod
     def get_custom_optimizer(optimizer_name: str, params: dict = None, lm=None):
@@ -1944,7 +1936,13 @@ class TrainingMixin(UsageTrackingMixin, EvaluationMixin, BDDTestMixin):
         if k is None:
             k = 8 if tier == "genies" else 5
 
-        optimizer = PipelineUtilities.get_optimizer(tier, k=min(len(training_data), k))
+        from .optimizer_factory import DSPyOptimizerFactory
+
+        optimizer = DSPyOptimizerFactory.create_tier_optimized_optimizer(
+            tier=tier,
+            training_data_size=min(len(training_data), k),
+            optimizer_config=None,
+        )
 
         try:
             with self.usage_tracking_context():

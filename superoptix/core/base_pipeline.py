@@ -139,9 +139,12 @@ class SuperOptixPipeline(dspy.Module, ABC, metaclass=SuperOptixMeta):
             model_name = self.config.get("model", tier_models[self.tier_level])
             provider = self.config.get("provider", "ollama")
 
-            self.lm = dspy.LM(
-                model=f"ollama_chat/{model_name}",
-                api_base=self.config.get("api_base", "http://localhost:11434"),
+            from superoptix.core.local_lm import build_dspy_lm
+
+            self.lm = build_dspy_lm(
+                model_name,
+                provider="ollama",
+                api_base=self.config.get("api_base"),
                 temperature=self.config.get("temperature", 0.1),
                 max_tokens=self.config.get("max_tokens", 2000),
             )

@@ -60,6 +60,29 @@ class A2ARegistry:
     def __init__(self, config_path: Optional[str] = None):
         self._agents: Dict[str, A2AAgentEntry] = {}
         self._config_path = config_path or ".superoptix/a2a_agents.json"
+        # One A2AClient (and so one keep-alive HTTP session) per peer URL.
+        self._clients: Dict[str, Any] = {}
+
+    def client_for(self, url: str) -> Any:
+        """Return the cached A2AClient for this URL, creating it if needed."""
+        from superoptix.protocols.a2a.client import A2AClient
+
+        key = self._key(url)
+        client = self._clients.get(key)
+        if client is None:
+            client = A2AClient(agent_url=url)
+            self._clients[key] = client
+        return client
+
+    def _drop_client(self, key: str) -> None:
+        client = self._clients.pop(key, None)
+        if client is not None:
+            client.disconnect()
+
+    def close(self) -> None:
+        """Close every cached client session."""
+        for key in list(self._clients):
+            self._drop_client(key)
 
     def _key(self, url: str) -> str:
         return normalize_url(url)
@@ -111,11 +134,9 @@ class A2ARegistry:
         Returns:
             True if the agent is reachable, False otherwise.
         """
-        from superoptix.protocols.a2a.client import A2AClient
-
         key = self._key(url)
         try:
-            client = A2AClient(agent_url=url)
+            client = self.client_for(url)
             if not client.connect():
                 raise RuntimeError("connect failed")
             card = client.agent_card or {}
@@ -150,6 +171,7 @@ class A2ARegistry:
             key = self._key(name)
             if key in self._agents:
                 del self._agents[key]
+                self._drop_client(key)
                 return True
             return False
         if len(matches) > 1:
@@ -157,7 +179,9 @@ class A2ARegistry:
                 f"Agent name {name!r} matches {len(matches)} URLs; "
                 "remove by URL instead."
             )
-        del self._agents[self._key(matches[0].url)]
+        key = self._key(matches[0].url)
+        del self._agents[key]
+        self._drop_client(key)
         return True
 
     def remove_by_url(self, url: str) -> bool:
@@ -165,6 +189,7 @@ class A2ARegistry:
         key = self._key(url)
         if key in self._agents:
             del self._agents[key]
+            self._drop_client(key)
             return True
         return False
 
@@ -174,11 +199,9 @@ class A2ARegistry:
         The registry key is the URL. The card ``name`` is stored only as a
         presentational alias and must not collide with another URL's alias.
         """
-        from superoptix.protocols.a2a.client import A2AClient
-
         key = self._key(url)
         try:
-            client = A2AClient(agent_url=url)
+            client = self.client_for(url)
             if not client.connect():
                 return None
             card = client.agent_card or {}

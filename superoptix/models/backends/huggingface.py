@@ -576,7 +576,7 @@ class SuperOptiXHuggingFaceBackend(SuperOptiXBaseBackend):
     async def create_dspy_client(self, model_name: str, **kwargs):
         """Create a DSPy-compatible client for HuggingFace using LiteLLM custom_openai."""
         try:
-            import dspy
+            import dspy  # noqa: F401  (availability check)
 
             # Get configuration from kwargs
             api_base = kwargs.get("api_base", "http://localhost:8001")
@@ -588,8 +588,10 @@ class SuperOptiXHuggingFaceBackend(SuperOptiXBaseBackend):
 
             # Create DSPy LM with custom_openai provider
             # This assumes you have a HuggingFace server running with OpenAI-compatible API
-            lm = dspy.LM(
-                model=f"custom_openai/{model_name}",
+            from superoptix.core.local_lm import build_dspy_lm
+
+            lm = build_dspy_lm(
+                f"custom_openai/{model_name}",
                 api_base=api_base,
                 api_key=api_key,
                 temperature=temperature,

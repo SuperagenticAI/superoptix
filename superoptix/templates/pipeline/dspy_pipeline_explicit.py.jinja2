@@ -212,14 +212,14 @@ class {{ agent_name | to_pascal_case }}Pipeline:
         # Provider-specific LM configuration (explicit handling for each provider)
         if provider == 'ollama':
             # Ollama requires 'ollama_chat/' prefix for chat models
-            model_str = f'ollama_chat/{model}' if not model.startswith('ollama_chat/') else model
-            self.lm = dspy.LM(
-                model=model_str,
+            # Keyless /v1 Ollama config for DSPy 3.4+ (shared helper).
+            from superoptix.core.local_lm import build_dspy_lm
+            self.lm = build_dspy_lm(
+                model,
                 provider='ollama',
-                api_base='http://localhost:11434',
-                api_key='',
+                api_base=lm_config.get('api_base'),
                 temperature=temperature,
-                max_tokens=max_tokens
+                max_tokens=max_tokens,
             )
         else:
             # Generic LM configuration for other providers (OpenAI, Anthropic, etc.)
@@ -1144,12 +1144,11 @@ class {{ agent_name | to_pascal_case }}Pipeline:
 
                     # For Ollama, add the prefix
                     if provider == "ollama":
-                        reflection_model = f"ollama_chat/{reflection_lm_model}" if not reflection_lm_model.startswith("ollama_chat/") else reflection_lm_model
-                        reflection_lm = dspy.LM(
-                            model=reflection_model,
+                        from superoptix.core.local_lm import build_dspy_lm
+                        reflection_lm = build_dspy_lm(
+                            reflection_lm_model,
                             provider="ollama",
-                            api_base="http://localhost:11434",
-                            api_key="",
+                            api_base=lm_config.get("api_base"),
                             temperature=1.0,
                             max_tokens=32000
                         )
@@ -1652,7 +1651,7 @@ class {{ agent_name | to_pascal_case }}Pipeline:
         # Suggest model upgrades based on performance
         suggested_upgrade = "None needed"
         if avg_score < 0.6:
-            suggested_upgrade = "Consider qwen3.5:9b or gpt-4 for better performance"
+            suggested_upgrade = "A larger model may score higher"
         elif avg_score < 0.4:
             suggested_upgrade = (
                 "Strongly recommend gpt-4 or claude-3 for reliable results"
@@ -1724,10 +1723,10 @@ class {{ agent_name | to_pascal_case }}Pipeline:
                 f"Poor performance. {len(failed_results)} scenarios failing."
             )
             recommendations.append(
-                "Strong recommendation: Run optimization before production use."
+                "Run super agent optimize <agent_name> before relying on this agent."
             )
             recommendations.append(
-                "Consider using a more capable model (qwen3.5:9b or gpt-4)."
+                "A larger model may help; set it in spec.language_model."
             )
             recommendations.append("Review scenario complexity vs model capabilities.")
 

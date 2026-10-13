@@ -117,26 +117,6 @@ warnings.filterwarnings(
 # 5. Suppress warnings from storage3 module (Supabase dependency)
 # This is a common source of PydanticDeprecatedSince20 warnings
 # CRITICAL: Must suppress before supabase imports storage3
-# warnings.filterwarnings(
-#     "ignore",
-#     module="storage3.*",
-#     category=UserWarning,
-# )
-# warnings.filterwarnings(
-#     "ignore",
-#     module="storage3.*",
-#     category=DeprecationWarning,
-# )
-# warnings.filterwarnings(
-#     "ignore",
-#     message=r".*storage3.*",
-#     category=UserWarning,
-# )
-# warnings.filterwarnings(
-#     "ignore",
-#     message=r".*storage3.*",
-#     category=DeprecationWarning,
-# )
 warnings.filterwarnings(
     "ignore",
     message=r".*pydantic\.config\.Extra.*",
@@ -149,16 +129,6 @@ warnings.filterwarnings(
 )
 
 # 6. Suppress warnings from supabase module (may use Pydantic)
-# warnings.filterwarnings(
-#     "ignore",
-#     module="supabase.*",
-#     category=UserWarning,
-# )
-# warnings.filterwarnings(
-#     "ignore",
-#     message=r".*supabase.*[Pp]ydantic.*",
-#     category=UserWarning,
-# )
 
 # ============================================================================
 # VERSION
@@ -171,7 +141,7 @@ try:
 
     __version__ = _pkg_version("superoptix")
 except (ImportError, PackageNotFoundError):  # source checkout without install
-    __version__ = "0.3.16"
+    __version__ = "2.0.0rc1"
 
 # ============================================================================
 # FINAL SAFETY: Re-apply filters after all imports (defense in depth)

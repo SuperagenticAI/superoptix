@@ -7,7 +7,7 @@ allow-direct-references = true
 
 [project]
 name = "superoptix"
-version = "0.3.16"
+version = "2.0.0rc1"
 description = "Optimization and Quality layer for AI agents. Optimize agents. Connect over A2A. Ship with quality. Adapts existing DSPy, CrewAI, OpenAI Agents SDK, Pydantic AI, Google ADK, Claude Agent SDK, DeepAgents and Microsoft agents for A2A connect and interop without rewriting them."
 authors = [
     {name = "Superagentic AI", email = "hello@super-agentic.ai"},
@@ -22,7 +22,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 keywords = ["ai", "agents", "dspy", "orchestration", "multi-agent", "autonomous", "artificial-intelligence", "machine-learning", "llm", "framework", "optimization", "evaluation", "rag", "memory", "observability", "prompt-engineering", "bdd", "testing", "superspec", "dspy-ai", "agent-framework", "ai-agents", "llm-framework", "prompt-optimization", "context-engineering", "agent-orchestration", "ai-development", "agent-development", "llm-optimization", "ai-testing", "agent-testing", "vector-database", "semantic-search", "ai-memory", "agent-memory", "ai-observability", "agent-observability"]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: Apache Software License",
@@ -52,7 +52,7 @@ dependencies = [
     # `ml-cross-platform` extras. Keeping them here added ~545 MB to every
     # install (torch alone is 491 MB) for an optional local-inference backend.
     #   uv pip install "superoptix[huggingface]"   # to use that backend
-    "dspy>=3.3",  # GEPA lives in DSPy 3.x - floor prevents silent back-solve to 2.6.x
+    "dspy>=3.4",  # 3.4 ships dspy.lm15 engines; 2.0 needs them (3.5 removes BaseLM.forward LMs)
     "litellm>=1.98,!=1.82.7,!=1.82.8",  # Block compromised March 2026 releases
     "pydantic",  # Required for data validation
     "python-dotenv",  # Required for environment variables
@@ -66,7 +66,7 @@ dependencies = [
 
 # DSPy - kept as a separate extra so it can be pinned independently
 frameworks-dspy = [
-    "dspy>=3.3",  # PyPI package name
+    "dspy>=3.4",  # PyPI package name
 ]
 
 # Optional Jev / System One (TypeSafe) quality-control adapters.
@@ -108,6 +108,7 @@ frameworks-microsoft = [
 # DeepAgents (LangChain) - 0.5.6+ with pluggable backends
 frameworks-deepagents = [
     "deepagents>=0.7,<0.8",  # 0.7.x backend abstraction; used via create_deep_agent
+    "langchain-ollama>=0.3",  # local Ollama models via init_chat_model("ollama:...")
 ]
 
 # Pydantic AI - Type-safe agent framework (full package)
@@ -141,7 +142,7 @@ frameworks-claude-sdk = [
 # All frameworks except CrewAI (see the CrewAI chromadb note above).
 # Keep these bounds in sync with the individual frameworks-* extras above.
 frameworks = [
-    "dspy>=3.3",
+    "dspy>=3.4",
     "openai-agents>=0.20,<0.21",
     "openai>=2.54,<3",
     "google-adk>=2.7",
@@ -353,6 +354,7 @@ testing = [
     "pytest-cov",
     "pytest-mock",
     "responses",
+    "jsonschema",  # SuperGauge conformance checker L1 schema validation in tests
 ]
 
 # Documentation dependencies
@@ -370,7 +372,7 @@ docs = [
 #       Cannot be combined with [all] due to google-adk dependency conflict
 all = [
     # Framework dependencies - keep in sync with the frameworks-* extras above
-    "dspy>=3.3",
+    "dspy>=3.4",
     "openai-agents>=0.20,<0.21",
     "openai>=2.54,<3",
     "google-adk>=2.7",
@@ -413,7 +415,7 @@ all = [
 # NOTE: LogFire excluded due to opentelemetry-sdk conflict with google-adk
 all-with-mlx = [
     # Framework dependencies - keep in sync with the frameworks-* extras above
-    "dspy>=3.3",
+    "dspy>=3.4",
     "openai-agents>=0.20,<0.21",
     "openai>=2.54,<3",
     "google-adk>=2.7",

@@ -7,6 +7,7 @@ import importlib.resources
 import importlib.util
 import json
 import os
+import re
 import subprocess
 import sys
 import textwrap
@@ -32,7 +33,6 @@ warnings.filterwarnings("ignore", message="unclosed database", category=Resource
 
 from superoptix.cli.utils import run_async
 from superoptix.compiler.agent_compiler import AgentCompiler
-from superoptix.models.tier_system import TierLevel, tier_system
 from superoptix.observability.tracer import SuperOptixTracer
 from superoptix.runners.dspy_runner import DSPyRunner
 from superoptix.ui.designer_factory import DesignerFactory
@@ -88,6 +88,7 @@ class _MinimalDSPyBDDEvaluator:
             playbook = yaml.safe_load(f) or {}
 
         spec_data = playbook.get("spec", playbook)
+        self._spec_data = spec_data if isinstance(spec_data, dict) else {}
         scenarios = []
         if isinstance(spec_data, dict):
             feature_specs = spec_data.get("feature_specifications", {})
@@ -117,6 +118,12 @@ class _MinimalDSPyBDDEvaluator:
     def _expected_to_text(expected_outputs: dict) -> str:
         if not expected_outputs:
             return ""
+        # expected_keywords is a check, not an expected output value.
+        expected_outputs = {
+            k: v for k, v in expected_outputs.items() if k != "expected_keywords"
+        }
+        if not expected_outputs:
+            return ""
         if len(expected_outputs) == 1:
             return str(next(iter(expected_outputs.values()))).strip()
         return json.dumps(expected_outputs, sort_keys=True, ensure_ascii=True)
@@ -133,15 +140,23 @@ class _MinimalDSPyBDDEvaluator:
             return json.dumps(result, sort_keys=True, ensure_ascii=True)
         if hasattr(result, "toDict") and callable(result.toDict):
             try:
-                return json.dumps(result.toDict(), sort_keys=True, ensure_ascii=True)
+                data = result.toDict()
+                if isinstance(data, dict) and len(data) == 1:
+                    return str(next(iter(data.values()))).strip()
+                return json.dumps(data, sort_keys=True, ensure_ascii=True)
             except Exception:
                 pass
         return str(result).strip()
 
     @staticmethod
+    def _tokens(text: str) -> set[str]:
+        # Word tokens, so JSON quotes and punctuation do not break matches.
+        return set(re.findall(r"\w+", text.lower()))
+
+    @staticmethod
     def _semantic_similarity(actual: str, expected: str) -> float:
-        actual_words = set(actual.lower().split())
-        expected_words = set(expected.lower().split())
+        actual_words = _MinimalDSPyBDDEvaluator._tokens(actual)
+        expected_words = _MinimalDSPyBDDEvaluator._tokens(expected)
         if not expected_words:
             return 1.0 if not actual_words else 0.5
         intersection = actual_words.intersection(expected_words)
@@ -188,14 +203,14 @@ class _MinimalDSPyBDDEvaluator:
             "those",
         }
         expected_keywords = {
-            word.lower()
-            for word in expected.split()
-            if len(word) > 3 and word.lower() not in common_words
+            word
+            for word in _MinimalDSPyBDDEvaluator._tokens(expected)
+            if len(word) > 3 and word not in common_words
         }
         actual_keywords = {
-            word.lower()
-            for word in actual.split()
-            if len(word) > 3 and word.lower() not in common_words
+            word
+            for word in _MinimalDSPyBDDEvaluator._tokens(actual)
+            if len(word) > 3 and word not in common_words
         }
         if not expected_keywords:
             return 1.0
@@ -232,6 +247,16 @@ class _MinimalDSPyBDDEvaluator:
 
     def _evaluate(self, actual_text: str, expected_outputs: dict) -> dict:
         expected_text = self._expected_to_text(expected_outputs)
+        required = (expected_outputs or {}).get("expected_keywords") or []
+        if isinstance(required, str):
+            required = [required]
+        missing = [
+            str(k)
+            for k in required
+            if str(k).lower() not in (actual_text or "").lower()
+        ]
+        if not expected_text and required:
+            expected_text = " ".join(str(k) for k in required)
         if not actual_text:
             return {
                 "passed": False,
@@ -257,10 +282,12 @@ class _MinimalDSPyBDDEvaluator:
             + structure_score * 0.2
             + length_score * 0.1
         )
-        passed = confidence_score >= 0.6
+        passed = confidence_score >= 0.6 and not missing
 
         failure_reason = None
-        if not passed:
+        if missing:
+            failure_reason = f"missing expected keywords: {', '.join(missing)}"
+        elif not passed:
             if semantic_score < 0.5:
                 failure_reason = "semantic meaning differs significantly"
             elif keyword_score < 0.3:
@@ -306,7 +333,7 @@ class _MinimalDSPyBDDEvaluator:
             "capability_assessment": capability,
             "suggested_upgrade": "None needed"
             if avg_score >= 0.6
-            else "Consider qwen3.5:9b or gpt-4 for better performance",
+            else "A larger model may score higher",
             "performance_category": "excellent"
             if avg_score >= 0.8
             else "good"
@@ -336,9 +363,54 @@ class _MinimalDSPyBDDEvaluator:
             ]
         return [
             f"Poor performance. {len(failed)} scenarios failing.",
-            "Strong recommendation: Run optimization before production use.",
-            "Consider using a more capable model (qwen3.5:9b or gpt-4).",
+            "Run super agent optimize <agent_name> before relying on this agent.",
+            "A larger model may help; set it in spec.language_model.",
         ]
+
+    @property
+    def _output_contract(self):
+        from superoptix.gauge_checks import declared_output_contract
+
+        return declared_output_contract(getattr(self, "_spec_data", {}) or {})
+
+    def _gauge_fields(self, scenario: dict, inputs: dict, expected: dict) -> dict:
+        """Per-scenario data the SuperGauge record needs (2.0).
+
+        ``baseline_passed`` scores the declared trivial baseline (echo the
+        input back) under the same success condition as the agent, with no
+        model call.
+        """
+        from superoptix.optimizers.holdout import example_id, scenario_identity
+
+        echo = " ".join(str(v) for v in (inputs or {}).values())
+        fields = {
+            "sid": example_id(scenario_identity(scenario)),
+            "canary": bool(scenario.get("canary")),
+            "baseline_passed": bool(self._evaluate(echo, expected).get("passed")),
+            "success_condition": "superoptix.bdd.minimal@1",
+        }
+        if scenario.get("expected_tools"):
+            fields["expected_tools"] = list(scenario["expected_tools"])
+        if isinstance(scenario.get("trajectory"), dict):
+            fields["trajectory_constraints"] = dict(scenario["trajectory"])
+        return fields
+
+    def _gauge_result_fields(self, result) -> dict:
+        from superoptix.gauge_checks import output_parsed, tool_calls_from_trajectory
+
+        fields = {}
+        contract = self._output_contract
+        if contract:
+            fields["parsed"] = output_parsed(result, contract)
+        trajectory = None
+        if isinstance(result, dict):
+            trajectory = result.get("trajectory")
+        else:
+            trajectory = getattr(result, "trajectory", None)
+        calls = tool_calls_from_trajectory(trajectory)
+        if calls is not None:
+            fields["tool_calls"] = calls
+        return fields
 
     def run_bdd_test_suite(self, auto_tune: bool = False, ignore_checks: bool = False):
         del auto_tune  # minimal-mode adapter currently does not use auto-tune knobs
@@ -363,6 +435,7 @@ class _MinimalDSPyBDDEvaluator:
             scenario_name = scenario.get("name", "unnamed_specification")
             description = scenario.get("description", "No description provided")
 
+            gauge_fields = self._gauge_fields(scenario, inputs, expected_outputs)
             try:
                 result = self.run(**inputs)
                 actual_text = self._actual_to_text(result)
@@ -372,9 +445,11 @@ class _MinimalDSPyBDDEvaluator:
                     is_pass = True
                 if is_pass:
                     passed += 1
+                gauge_fields.update(self._gauge_result_fields(result))
 
                 detailed_results.append(
                     {
+                        **gauge_fields,
                         "scenario_name": scenario_name,
                         "description": description,
                         "passed": is_pass,
@@ -391,8 +466,11 @@ class _MinimalDSPyBDDEvaluator:
                     }
                 )
             except Exception as e:
+                if self._output_contract:
+                    gauge_fields["parsed"] = False
                 detailed_results.append(
                     {
+                        **gauge_fields,
                         "scenario_name": scenario_name,
                         "description": description,
                         "passed": bool(ignore_checks),
@@ -838,10 +916,10 @@ def _compile_single_agent(agent_name: str, args, tier_level: str = None):
             if compile_profile == "minimal":
                 next_steps = f"""🚀 [bold bright_cyan]NEXT STEPS[/]
 
-[cyan]super agent run {agent_name} --goal "goal"[/] - Execute minimal DSPy pipeline
-[cyan]super agent compile {agent_name} --optimize[/] - Generate full optimization/evaluation pipeline
-[cyan]super agent evaluate {agent_name}[/] - Run BDD evaluation (after optimized compile)
-[cyan]super agent optimize {agent_name}[/] - Run optimizer (after optimized compile)
+[cyan]super agent run {agent_name} --goal "goal"[/] - Execute the DSPy pipeline
+[cyan]super agent evaluate {agent_name}[/] - Run BDD evaluation
+[cyan]super agent optimize {agent_name} --gauge-out record.json[/] - Optimize with GEPA and record quality
+[cyan]super agent test {agent_name}[/] - CI quality gate
 """
             else:
                 next_steps = f"""🚀 [bold bright_cyan]NEXT STEPS[/]
@@ -865,7 +943,7 @@ def _compile_single_agent(agent_name: str, args, tier_level: str = None):
         # Simple workflow guide (normal mode)
         if compile_profile == "minimal":
             console.print(
-                f'🎯 [bold cyan]Next:[/] [cyan]super agent run {agent_name} --goal "your goal"[/] (optional: recompile with [cyan]--optimize[/] for evaluate/optimize features)'
+                f'🎯 [bold cyan]Next:[/] [cyan]super agent run {agent_name} --goal "your goal"[/], then [cyan]super agent evaluate {agent_name}[/], [cyan]super agent optimize {agent_name} --gauge-out record.json[/] and [cyan]super agent test {agent_name}[/]'
             )
         else:
             console.print(
@@ -886,7 +964,7 @@ def _compile_single_agent(agent_name: str, args, tier_level: str = None):
                 f"❌ [bold red]COMPILATION FAILED[/]\n\n"
                 f"[red]Error:[/] {str(e)}\n"
                 f"[yellow]Agent:[/] {agent_name}\n"
-                f"[yellow]Framework:[/] DSPy (default — other frameworks coming soon)\n\n"
+                f"[yellow]Framework:[/] DSPy (default; pick another with --framework)\n\n"
                 f"[cyan]💡 Troubleshooting Tips:[/]\n"
                 f"• Ensure agent playbook exists and is valid YAML\n"
                 f"• Check that you're in a valid super project directory\n"
@@ -897,6 +975,50 @@ def _compile_single_agent(agent_name: str, args, tier_level: str = None):
             )
         )
         return False
+
+
+def _framework_model_target(args, framework: str, playbook_path) -> dict:
+    """Provider, model and api_base a non-DSPy pipeline will use.
+
+    ``playbook_path`` is a playbook file or an already loaded playbook dict.
+    CLI overrides (--provider/--model/--local) win over the playbook's
+    ``spec.language_model``, matching how the generated pipelines resolve it.
+    """
+    lm_cfg: dict = {}
+    try:
+        if isinstance(playbook_path, dict):
+            playbook = playbook_path
+        else:
+            with open(playbook_path) as f:
+                playbook = yaml.safe_load(f) or {}
+        spec = playbook.get("spec", playbook) or {}
+        lm_cfg = spec.get("language_model") or spec.get("model") or {}
+        if not isinstance(lm_cfg, dict):
+            lm_cfg = {"model": str(lm_cfg)}
+    except (OSError, yaml.YAMLError):
+        lm_cfg = {}
+    overrides = _build_framework_model_config(args, framework)
+    return {
+        "provider": overrides.get("provider") or lm_cfg.get("provider"),
+        "model": overrides.get("model") or lm_cfg.get("model") or "",
+        "api_base": lm_cfg.get("api_base") or lm_cfg.get("base_url"),
+    }
+
+
+def _preflight_framework_model(args, framework: str, playbook_path) -> None:
+    """Fail loudly before a non-DSPy run when its local Ollama model is down.
+
+    Raises :class:`LocalModelUnreachableError`. A no-op for hosted providers
+    and for the Claude Agent SDK, which never targets a local model.
+    """
+    from superoptix.core.local_lm import ensure_local_model_reachable
+
+    if framework in {"dspy", "claude-sdk"}:
+        return
+    target = _framework_model_target(args, framework, playbook_path)
+    ensure_local_model_reachable(
+        target["model"], target["api_base"], provider=target["provider"]
+    )
 
 
 def _run_framework_agent(args, framework: str):
@@ -934,7 +1056,17 @@ def _run_framework_agent(args, framework: str):
             f"[yellow]Compile it first with:[/]\n"
             f"  [cyan]super agent compile {args.name} --framework {framework}[/]"
         )
-        return
+        sys.exit(1)
+
+    from superoptix.core.local_lm import LocalModelUnreachableError
+
+    try:
+        _preflight_framework_model(
+            args, framework, agent_dir / "playbook" / f"{args.name}_playbook.yaml"
+        )
+    except LocalModelUnreachableError as e:
+        console.print(f"[bold red]❌ Model unreachable:[/] {e}")
+        sys.exit(1)
 
     try:
         os.environ["SUPEROPTIX_OBSERVE_BACKEND"] = (
@@ -956,7 +1088,7 @@ def _run_framework_agent(args, framework: str):
 
         if not pipeline_class:
             console.print(f"[bold red]❌ No Pipeline class found in {pipeline_path}[/]")
-            return
+            sys.exit(1)
 
         # Instantiate and run
         init_kwargs = {}
@@ -1035,8 +1167,8 @@ def _run_framework_agent(args, framework: str):
             # Sync pipeline
             result = pipeline.run(**run_kwargs)
         else:
-            console.print(f"[bold red]❌ Pipeline class has no run() method[/]")
-            return
+            console.print("[bold red]❌ Pipeline class has no run() method[/]")
+            sys.exit(1)
 
         # Display result
         console.print("\n[bold green]✅ Agent execution completed![/]\n")
@@ -1053,9 +1185,26 @@ def _run_framework_agent(args, framework: str):
         console.print(
             f"\n[bold red]❌ Failed to run {framework_display} pipeline:[/] {e}"
         )
-        import traceback
+        if _is_lm_transport_error(e):
+            console.print("[red]The model server refused the connection.[/]")
+        else:
+            import traceback
 
-        console.print(traceback.format_exc())
+            console.print(traceback.format_exc())
+        # Never exit 0 on a failed run.
+        sys.exit(1)
+
+
+def _is_lm_transport_error(exc: BaseException) -> bool:
+    """True for DSPy/LiteLLM connection failures (server down, refused)."""
+    seen = set()
+    while exc is not None and id(exc) not in seen:
+        seen.add(id(exc))
+        name = type(exc).__name__
+        if name in {"LMTransportError", "APIConnectionError", "ConnectError"}:
+            return True
+        exc = exc.__cause__ or exc.__context__
+    return False
 
 
 def run_agent(args):
@@ -1187,7 +1336,7 @@ def run_agent(args):
             force_runtime = hasattr(args, "force_optimize") and args.force_optimize
             # Use optimization unless explicitly disabled
             use_optimization = True  # Always try to use pre-optimized if available
-            run_async(
+            run_result = run_async(
                 runner.run(
                     query=args.goal,
                     use_optimization=use_optimization,
@@ -1202,6 +1351,11 @@ def run_agent(args):
                     model_override=getattr(args, "model", None),
                 )
             )
+
+            if run_result is None and getattr(runner, "last_error", None):
+                # The runner already printed the details; do not report success.
+                console.print("\n[bold red]❌ Agent run failed.[/]")
+                sys.exit(1)
 
             # Add next steps guidance after successful run - only in verbose mode
             if getattr(args, "verbose", False):
@@ -1260,15 +1414,22 @@ def run_agent(args):
                 )
                 console.print()
     except Exception as e:
-        # The runner already prints detailed errors, so we just note that the run failed.
-        console.print("\n[bold red]❌ Agent run failed.[/]")
-        console.print(f"[red]Debug: {type(e).__name__}: {e}")
-        import traceback
+        from superoptix.core.local_lm import LocalModelUnreachableError
 
-        console.print(traceback.format_exc())
+        console.print("\n[bold red]❌ Agent run failed.[/]")
         tracer.add_event(
             "agent_run_failed", f"agent.{args.name}", {"error": str(e)}, status="error"
         )
+        if isinstance(e, LocalModelUnreachableError) or _is_lm_transport_error(e):
+            # Clear, actionable message instead of a raw traceback.
+            console.print(f"[red]Model unreachable: {e}[/]", markup=True)
+        else:
+            console.print(f"[red]Debug: {type(e).__name__}: {e}")
+            import traceback
+
+            console.print(traceback.format_exc())
+        # Never exit 0 on a failed run.
+        sys.exit(1)
         # Optionally, re-raise if you want the script to exit with a non-zero code
         # raise e
     finally:
@@ -1309,6 +1470,16 @@ def serve_agent(args):
         console.print(f"   Expected: {pipeline_path}")
         return
 
+    from superoptix.core.local_lm import LocalModelUnreachableError
+
+    try:
+        _preflight_framework_model(
+            args, framework, agent_dir / "playbook" / f"{agent_name}_playbook.yaml"
+        )
+    except LocalModelUnreachableError as exc:
+        console.print(f"\n[bold red]❌ Model unreachable:[/] {exc}")
+        sys.exit(1)
+
     try:
         module = _import_module_from_path(
             f"{agent_name}_{framework.replace('-', '_')}_serve",
@@ -1328,7 +1499,7 @@ def serve_agent(args):
         import traceback
 
         console.print(traceback.format_exc())
-        return
+        sys.exit(1)
 
     try:
         import uvicorn
@@ -1384,11 +1555,13 @@ def serve_agent(args):
         console.print("Install:", markup=False)
         console.print('uv pip install "superoptix[a2a]"', markup=False)
         console.print(str(exc), style="dim", markup=False)
+        sys.exit(1)
     except Exception as exc:
         console.print(f"\n[bold red]❌ Failed to start A2A server:[/] {exc}")
         import traceback
 
         console.print(traceback.format_exc())
+        sys.exit(1)
 
 
 def test_agent_bdd(args):
@@ -1566,6 +1739,10 @@ def test_agent_bdd(args):
             and hasattr(module, "build_program")
             and callable(module.build_program)
         ):
+            import dspy as _dspy
+
+            if not getattr(_dspy.settings, "lm", None):
+                runner.configure_native_lm(module)
             pipeline = _MinimalDSPyBDDEvaluator(module, runner.playbook_path)
             console.print("[green]Pipeline loaded successfully[/]")
             console.print(
@@ -2013,9 +2190,13 @@ feature_specifications:
         # only where the run produced them, so a single-pass evaluation carries
         # no reliability measure and reaches a lower conformance level.
         gauge_out = getattr(args, "gauge_out", None)
+        gates_on = bool(getattr(args, "gauge_gates", False))
         if gauge_out:
+            repeats = _repeat_runs_for_reliability(
+                pipeline, args, runner.playbook_path, detailed_results
+            )
             try:
-                _emit_gauge_record(
+                record = _emit_gauge_record(
                     out_path=gauge_out,
                     agent_name=agent_name,
                     playbook_path=runner.playbook_path,
@@ -2028,9 +2209,18 @@ feature_specifications:
                         getattr(args, "gauge_jev_min_confidence", 0.75) or 0.75
                     ),
                     jev_model=getattr(args, "gauge_jev_model", None),
+                    repeat_results=repeats,
+                    deterministic_gates=gates_on,
+                    floors=_parse_gate_floors(getattr(args, "gate_floor", None)),
+                    holdout_path=getattr(runner, "holdout_path", None),
+                    checks_ignored=bool(getattr(args, "ignore_checks", False)),
+                    jev_live_only=bool(getattr(args, "gauge_jev_live_only", False)),
+                    actor=getattr(args, "actor", None),
                 )
             except Exception as exc:  # emission must never fail an evaluation
                 console.print(f"⚠️  [yellow]Record not written:[/] {exc}")
+                record = None
+            args._gauge_record = record
 
     except FileNotFoundError:
         console.print(f"❌ [bold red]Agent '{agent_name}' not found.[/]")
@@ -2054,7 +2244,14 @@ def _emit_gauge_record(
     jev: bool = False,
     jev_min_confidence: float = 0.75,
     jev_model: str | None = None,
-) -> None:
+    repeat_results: list | None = None,
+    deterministic_gates: bool = False,
+    floors: dict | None = None,
+    holdout_path=None,
+    checks_ignored: bool = False,
+    jev_live_only: bool = False,
+    actor: str | None = None,
+) -> dict:
     """Write an Agent Quality Record for a completed BDD evaluation.
 
     Scenarios are the task set; a scenario tagged `held-out` in the playbook
@@ -2072,7 +2269,8 @@ def _emit_gauge_record(
 
     import yaml
 
-    from superoptix.gauge import build_record, write_record
+    from superoptix.gauge import assemble_record, write_record
+    from superoptix.optimizers.holdout import read_holdout_record
 
     playbook_file = Path(playbook_path)
     with open(playbook_file, encoding="utf-8") as handle:
@@ -2082,27 +2280,59 @@ def _emit_gauge_record(
     feature_specs = spec_data.get("feature_specifications", {}) or {}
     scenarios = feature_specs.get("scenarios", []) or []
 
-    results = [
-        {
-            "id": str(item.get("scenario") or item.get("name") or index),
-            "status": "passed" if item.get("passed") else "failed",
-            "usage": item.get("usage") or {},
-        }
-        for index, item in enumerate(detailed_results)
-    ]
+    results = _gauge_results(detailed_results)
+    runs = [results] + [_gauge_results(run) for run in (repeat_results or [])]
 
-    record = build_record(
+    from superoptix.gauge import ledger_path_for, write_ledger
+
+    holdout_record = read_holdout_record(holdout_path) if holdout_path else None
+    ledger_file = ledger_path_for(out_path)
+    ledger_runs = [
+        [
+            {**row, "output": item.get("actual_output"), "error": item.get("error")}
+            for row, item in zip(_gauge_results(run), run)
+        ]
+        for run in [detailed_results] + list(repeat_results or [])
+    ]
+    ledger_events = write_ledger(ledger_file, ledger_runs)
+    record = assemble_record(
         agent_name=agent_name,
         playbook_path=playbook_file,
         playbook=playbook,
         scenarios=scenarios,
-        results=results,
+        runs=runs,
         framework=engine,
         tier=tier,
-        sealed=sealed,
+        seal_requested=sealed,
+        holdout_record=holdout_record,
+        deterministic_gates=deterministic_gates,
+        actor=actor,
+        floors=floors,
+        checks_ignored=checks_ignored,
+        ledger=str(ledger_file),
+        ledger_events=ledger_events,
     )
+    holdout_meta = (record.get("x-superoptix") or {}).get("holdout")
+    if sealed and holdout_meta and not holdout_meta.get("sealed"):
+        console.print(
+            f"⚠️  [yellow]Held-out split not sealed:[/] {holdout_meta.get('reason')}"
+        )
 
-    if jev or os.environ.get("SUPEROPTIX_JEV", "").strip() in {"1", "true", "yes"}:
+    use_jev = jev or os.environ.get("SUPEROPTIX_JEV", "").strip() in {
+        "1",
+        "true",
+        "yes",
+    }
+    if use_jev and jev_live_only:
+        from superoptix.quality.jev import typesafe_available
+
+        if not (typesafe_available() and os.environ.get("TYPESAFE_API_KEY")):
+            console.print(
+                "[dim]Jev skipped: live Jev needs superoptix[typesafe] and "
+                "TYPESAFE_API_KEY. The gate verdict comes from deterministic checks.[/]"
+            )
+            use_jev = False
+    if use_jev:
         record = _apply_optional_jev(
             record,
             results=results,
@@ -2112,6 +2342,180 @@ def _emit_gauge_record(
 
     destination = write_record(record, out_path)
     console.print(f"📋 [green]Agent Quality Record:[/] {destination}")
+    return record
+
+
+def test_agent_gate(args):
+    """``super agent test``: evaluate, emit a record, exit non-zero unless ship."""
+    import os
+    import sys
+
+    from superoptix.gauge_conformance import gate_exit_code, run_upstream_checker
+
+    args.gauge_jev_live_only = True
+    args._gauge_record = None
+    test_agent_bdd(args)
+    record = getattr(args, "_gauge_record", None)
+    if not record:
+        console.print("❌ [bold red]No Agent Quality Record was produced.[/]")
+        sys.exit(1)
+
+    level = getattr(args, "gate", "L2")
+    code, reached, failures = gate_exit_code(record, level)
+    verdict = (record.get("decision") or {}).get("verdict")
+    console.print(
+        f"🧾 Verdict [bold]{verdict}[/]; built-in precheck level {reached or 'none'} "
+        f"(required {level})."
+    )
+    for lv in ("L1", "L2", "release"):
+        for failure in failures[lv]:
+            label = "blocked:" if lv == "release" else lv
+            console.print(f"   [yellow]{label}[/] {failure}")
+    rationale = (record.get("decision") or {}).get("rationale")
+    if rationale:
+        console.print(f"   [dim]{rationale}[/]")
+
+    checker = getattr(args, "checker", None) or os.environ.get("SUPERGAUGE_CHECKER")
+    if checker:
+        upstream = run_upstream_checker(checker, args.gauge_out, level)
+        console.print(f"🔎 SuperGauge checker exit code: {upstream}")
+        code = upstream if upstream else code
+    sys.exit(code)
+
+
+def _emit_optimize_record(args, agent_name: str, optimization_result: dict) -> None:
+    """``optimize --gauge-out``: evaluate the optimized agent and emit a record.
+
+    The record comes from a normal evaluation of the optimized program with
+    the sealed held-out split and deterministic gates. GEPA's own train and
+    held-out scores are optimizer metrics, not SuperGauge measures, so they go
+    under ``x-superoptix.optimization``.
+    """
+    from types import SimpleNamespace
+
+    from superoptix.gauge import write_record
+
+    eval_args = SimpleNamespace(
+        name=agent_name,
+        project=getattr(args, "project", None),
+        engine="dspy",
+        target=None,
+        auto_tune=False,
+        verbose=False,
+        ignore_checks=False,
+        format="table",
+        save_report=None,
+        gauge_out=args.gauge_out,
+        gauge_tier=getattr(args, "gauge_tier", "T1"),
+        gauge_sealed=True,
+        gauge_gates=True,
+        gauge_jev=False,
+        k=1,
+        gate_floor=None,
+    )
+    console.print("[cyan]Evaluating the optimized agent for the quality record...[/]")
+    test_agent_bdd(eval_args)
+    record = getattr(eval_args, "_gauge_record", None)
+    if not record:
+        console.print("⚠️  [yellow]Optimization record not written.[/]")
+        return
+    keys = (
+        "optimizer",
+        "training_examples",
+        "heldout_examples",
+        "seed_train_score",
+        "optimized_train_score",
+        "reported_gain",
+        "seed_heldout_score",
+        "optimized_heldout_score",
+        "heldout_gain",
+    )
+    optimization = {k: optimization_result[k] for k in keys if k in optimization_result}
+    holdout = optimization_result.get("holdout") or {}
+    for k in ("split_digest", "valset_fraction", "seed", "fallback_reason"):
+        if holdout.get(k) is not None:
+            optimization[k] = holdout[k]
+    gepa_check = optimization_result.get("gepa")
+    if isinstance(gepa_check, dict):
+        optimization["gepa"] = dict(gepa_check)
+    record.setdefault("x-superoptix", {})["optimization"] = optimization
+    write_record(record, args.gauge_out)
+
+
+def _gauge_results(detailed_results: list) -> list:
+    """Normalize BDD detailed results into SuperGauge result rows."""
+    rows = []
+    for index, item in enumerate(detailed_results or []):
+        name = str(item.get("scenario_name") or item.get("name") or index)
+        row = {
+            "id": str(item.get("sid") or name),
+            "name": name,
+            "status": "passed" if item.get("passed") else "failed",
+            "usage": item.get("usage") or {},
+        }
+        for key in (
+            "sid",
+            "canary",
+            "parsed",
+            "baseline_passed",
+            "success_condition",
+            "tool_calls",
+            "expected_tools",
+            "trajectory_constraints",
+        ):
+            if key in item:
+                row[key] = item[key]
+        rows.append(row)
+    return rows
+
+
+def _parse_gate_floors(values) -> dict:
+    """Parse repeated ``--gate-floor ID=VALUE`` flags."""
+    floors = {}
+    for raw in values or []:
+        key, sep, value = str(raw).partition("=")
+        if not sep:
+            raise ValueError(f"--gate-floor expects ID=VALUE, got {raw!r}")
+        floors[key.strip()] = float(value)
+    return floors
+
+
+def _repeat_runs_for_reliability(pipeline, args, playbook_path, first_results):
+    """Run the suite k-1 more times for pass^k, when it can be sound.
+
+    pass^k needs independent attempts: the DSPy response cache is disabled for
+    the repeats and agents with memory enabled are skipped, because carried
+    state breaks independence (measures/reliability.pass_hat_k.md).
+    """
+    k = int(getattr(args, "k", 1) or 1)
+    if k < 2 or not getattr(args, "gauge_out", None):
+        return []
+    try:
+        import yaml
+
+        with open(playbook_path, encoding="utf-8") as handle:
+            playbook = yaml.safe_load(handle) or {}
+        spec = playbook.get("spec", playbook) or {}
+        memory = spec.get("memory") or {}
+        if isinstance(memory, dict) and memory.get("enabled"):
+            console.print(
+                "⚠️  [yellow]pass^k skipped:[/] memory is enabled, attempts would not be independent."
+            )
+            return []
+        import dspy
+
+        dspy.configure_cache(enable_disk_cache=False, enable_memory_cache=False)
+    except Exception as exc:
+        console.print(f"⚠️  [yellow]pass^k skipped:[/] {exc}")
+        return []
+    runs = []
+    for attempt in range(2, k + 1):
+        console.print(f"[dim]Reliability attempt {attempt}/{k}...[/]")
+        out = pipeline.run_bdd_test_suite(
+            auto_tune=False, ignore_checks=bool(getattr(args, "ignore_checks", False))
+        )
+        runs.append(((out or {}).get("bdd_results") or {}).get("detailed_results", []))
+    return runs
 
 
 def _apply_optional_jev(
@@ -2493,7 +2897,30 @@ class _MinimalDSPyServePipeline:
             return {"response": getattr(result, "response")}
         return {"response": str(result)}
 
+    def _input_names(self) -> list[str]:
+        names = []
+        for field in self.spec.get("input_fields", []) or []:
+            if isinstance(field, dict) and field.get("name"):
+                names.append(str(field["name"]).strip())
+        return names
+
+    def _map_inputs(self, inputs: dict) -> dict:
+        """Map the A2A text (``query``) onto the program's own input fields.
+
+        The A2A server passes the user text as ``query``; a compiled playbook
+        names its inputs (e.g. ``feature_requirement``). Unknown keys are
+        dropped so ``forward()`` does not reject them.
+        """
+        names = self._input_names()
+        if not names:
+            return dict(inputs)
+        mapped = {k: v for k, v in inputs.items() if k in names}
+        if names[0] not in mapped and "query" in inputs:
+            mapped[names[0]] = inputs["query"]
+        return mapped
+
     def run(self, **inputs) -> dict:
+        inputs = self._map_inputs(inputs)
         if callable(self._program):
             result = self._program(**inputs)
         elif hasattr(self._program, "forward") and callable(self._program.forward):
@@ -2634,7 +3061,15 @@ def _instantiate_pipeline_from_module(
         return pipeline_class(**init_kwargs)
 
     if framework == "dspy" and hasattr(module, "build_program"):
+        import dspy as _dspy
+
         playbook_path = agent_dir / "playbook" / f"{agent_name}_playbook.yaml"
+        if not getattr(_dspy.settings, "lm", None):
+            # Same LM setup (and local-model preflight) as evaluate/test;
+            # without it every served request fails with "No LM is loaded".
+            DSPyRunner(
+                agent_name, project_name=agent_dir.parent.parent.name
+            ).configure_native_lm(module)
         return _MinimalDSPyServePipeline(module, playbook_path)
 
     raise ValueError("No Pipeline class or supported DSPy build_program() found")
@@ -2828,6 +3263,9 @@ def add_agent(args):
 
 [cyan]super agent compile {target_ref}[/] - Generate executable pipeline
 [cyan]super agent run {target_ref} --goal "goal"[/] - Execute agent
+[cyan]super agent optimize {target_ref} --gauge-out record.json[/] - Optimize (GEPA) and record quality
+[cyan]super agent test {target_ref}[/] - CI quality gate
+[cyan]super agent serve {target_ref}[/] - Serve over A2A
 
 [dim]💡 Comprehensive guide: [cyan]super docs[/] | 🔍 More agents: [cyan]super market[/][/]"""
 
@@ -3262,103 +3700,6 @@ def list_pre_built_agents(args):
         sys.exit(1)
 
 
-def show_tier_status(args):
-    """Show current tier status and available features."""
-    # Get user tier from config or default to ORACLES
-    user_tier = getattr(args, "tier", None)
-    if user_tier is None:
-        user_tier = TierLevel.ORACLES
-    elif isinstance(user_tier, str):
-        user_tier = TierLevel(user_tier.lower())
-
-    console.print("\n[bold blue]🎯 Current Tier Status[/bold blue]")
-
-    # Show current tier
-    tier_panel = Panel(
-        f"[bold green]{user_tier.value.title()}[/bold green]",
-        title="Your Active Tier",
-        border_style="green",
-    )
-    console.print(tier_panel)
-
-    # Show available features
-    console.print(
-        f"\n[bold cyan]✅ Features Available in {user_tier.value.title()} Tier[/bold cyan]"
-    )
-    accessible_features = tier_system.get_accessible_features(user_tier)
-
-    available_table = Table()
-    available_table.add_column("Feature", style="green")
-    available_table.add_column("Description", style="white")
-    available_table.add_column("Status", style="blue")
-
-    for feature in accessible_features:
-        status = "Beta" if feature.beta else "Available"
-        if feature.enterprise_only:
-            status += " (Enterprise)"
-
-        available_table.add_row(
-            feature.name,
-            feature.description[:60] + "..."
-            if len(feature.description) > 60
-            else feature.description,
-            status,
-        )
-
-    console.print(available_table)
-
-    # Show upgrade options
-    next_tier_features = []
-    for tier_level in TierLevel:
-        if (
-            tier_system.tier_hierarchy[tier_level]
-            > tier_system.tier_hierarchy[user_tier]
-        ):
-            tier_features = [
-                f for f in tier_system.features.values() if f.min_tier == tier_level
-            ]
-            if tier_features:
-                next_tier_features.extend(
-                    tier_features[:3]
-                )  # Show first 3 features from next tier
-                break
-
-    if next_tier_features:
-        console.print("\n[bold yellow]🚀 Upgrade to unlock more features[/bold yellow]")
-
-        upgrade_table = Table(title="Next Tier Features")
-        upgrade_table.add_column("Feature", style="yellow")
-        upgrade_table.add_column("Description", style="white")
-        upgrade_table.add_column("Required Tier", style="red")
-
-        for feature in next_tier_features:
-            upgrade_table.add_row(
-                feature.name,
-                feature.description[:50] + "..."
-                if len(feature.description) > 50
-                else feature.description,
-                feature.min_tier.value.title(),
-            )
-
-        console.print(upgrade_table)
-
-        # Show upgrade info
-        upgrade_info = Panel(
-            """
-[bold]🔓 Ready to upgrade?[/bold]
-
-• Visit: https://super-agentic.ai/upgrade
-• Email: upgrade@super-agentic.ai
-• Schedule a demo: https://calendly.com/shashikant-super-agentic/30min
-
-[dim]Get access to advanced DSPy capabilities, priority support, and early access to beta features.[/dim]
-            """,
-            title="Upgrade Information",
-            border_style="yellow",
-        )
-        console.print(upgrade_info)
-
-
 def _run_universal_gepa_optimization(args, agent_name, project_root, playbook):
     """
     Run Universal GEPA optimization for any framework.
@@ -3393,6 +3734,18 @@ def _run_universal_gepa_optimization(args, agent_name, project_root, playbook):
 
     console.print("\n🔬 [bold cyan]Running Universal GEPA Optimization[/]")
     console.print(f"   Framework: [yellow]{framework}[/]")
+
+    from superoptix.core.local_lm import LocalModelUnreachableError
+
+    try:
+        _preflight_framework_model(
+            args,
+            framework,
+            playbook or {},
+        )
+    except LocalModelUnreachableError as exc:
+        console.print(f"[bold red]❌ Model unreachable:[/] {exc}")
+        sys.exit(1)
 
     # Check for GEPA parameters from CLI
     cli_auto = getattr(args, "auto", None)
@@ -4712,7 +5065,7 @@ def optimize_agent(args):
             Panel(
                 f"🤖 [bold bright_green]OPTIMIZATION IN PROGRESS[/]\n\n"
                 f"🎯 [bold]Agent:[/] {agent_name.title()}\n"
-                f"🔧 [bold]Strategy:[/] DSPy BootstrapFewShot\n"
+                f"🔧 [bold]Strategy:[/] DSPy GEPA (sealed held-out split)\n"
                 f"📊 [bold]Data Source:[/] BDD scenarios from playbook\n"
                 f"💾 [bold]Output:[/] [cyan]{optimized_path.relative_to(project_root)}[/]",
                 title="⚡ Optimization Details",
@@ -4735,6 +5088,15 @@ def optimize_agent(args):
                 ),
                 provider_override=getattr(args, "provider", None),
                 model_override=getattr(args, "model", None),
+                gepa_overrides={
+                    "auto": getattr(args, "auto", None),
+                    "max_metric_calls": getattr(args, "max_metric_calls", None),
+                    "max_full_evals": getattr(args, "max_full_evals", None),
+                    "reflection_lm": getattr(args, "reflection_lm", None),
+                    "reflection_minibatch_size": getattr(
+                        args, "reflection_minibatch_size", None
+                    ),
+                },
             )
         )
 
@@ -4751,9 +5113,27 @@ def optimize_agent(args):
             training_examples = optimization_result.get("training_examples", "N/A")
             score = optimization_result.get("score", "N/A")
 
+            def _gain(value):
+                return "n/a" if value is None else f"{value:+.3f}"
+
+            gain_lines = ""
+            if "reported_gain" in optimization_result:
+                gain_lines = (
+                    f"\n• Held-out Examples: {optimization_result.get('heldout_examples', 0)}"
+                    f"\n• Reported Gain (train): {_gain(optimization_result.get('reported_gain'))}"
+                    f"\n• Held-out Gain: {_gain(optimization_result.get('heldout_gain'))}"
+                )
+
+            gepa_check = optimization_result.get("gepa") or {}
+            if gepa_check.get("warning"):
+                gain_lines += (
+                    "\n⚠️  [bold yellow]GEPA warning (advisory):[/] "
+                    f"{gepa_check['warning']}"
+                )
+
             optimization_info = f"""📈 [bold]Performance Improvement:[/]
 • Training Examples: {training_examples}
-• Optimization Score: {score}
+• Optimization Score: {score}{gain_lines}
 
 💡 [bold]What changed:[/] DSPy optimized prompts and reasoning chains
 🚀 [bold]Ready for testing:[/] Enhanced agent performance validated"""
@@ -4770,7 +5150,7 @@ def optimize_agent(args):
             # Show verbose panels only in verbose mode
             if getattr(args, "verbose", False):
                 # Auto-tuning notice (verbose only)
-                auto_tune_info = """🧠 [bold]Smart Optimization:[/] DSPy BootstrapFewShot
+                auto_tune_info = """🧠 [bold]Optimizer:[/] GEPA (train split; held-out gain reported separately)
 
 ⚡ [bold]Automatic improvements:[/] Better prompts, reasoning chains
 🎯 [bold]Quality assurance:[/] Test before production use"""
@@ -4806,6 +5186,9 @@ def optimize_agent(args):
             console.print(
                 f'🎯 [bold cyan]Next:[/] [cyan]super agent evaluate {agent_name}[/] or [cyan]super agent run {agent_name} --goal "your goal"[/]'
             )
+
+            if getattr(args, "gauge_out", None):
+                _emit_optimize_record(args, agent_name, optimization_result)
 
             # Success summary
             console.print("=" * 80)

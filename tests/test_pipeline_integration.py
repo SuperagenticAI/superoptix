@@ -8,18 +8,9 @@ and that existing functionality is not broken.
 import pytest
 from unittest.mock import Mock, patch
 
-# Mock DSPy imports to avoid dependency issues in tests
-import sys
-from unittest.mock import MagicMock
-
-# Create mock dspy module
-mock_dspy = MagicMock()
-mock_dspy.LM = MagicMock()
-mock_dspy.configure = MagicMock()
-mock_dspy.Example = MagicMock()
-mock_dspy.ChainOfThought = MagicMock()
-mock_dspy.context = MagicMock()
-sys.modules["dspy"] = mock_dspy
+# Use the real dspy. Replacing sys.modules['dspy'] with a MagicMock at
+# import time leaked into every test collected after this file.
+import superoptix  # noqa: F401  (import superoptix before dspy)
 
 from superoptix.core.optimizer_factory import DSPyOptimizerFactory
 
@@ -129,10 +120,8 @@ class TestPipelineIntegration:
         """Test that optimizer factory works with pipeline utilities."""
         from superoptix.core.pipeline_utils import PipelineUtilities
 
-        # Test get_optimizer method
-        optimizer = PipelineUtilities.get_optimizer("oracles", k=5)
-        assert optimizer is not None
-        assert hasattr(optimizer, "compile")
+        # get_optimizer was removed in 2.0; it is no longer exposed
+        assert not hasattr(PipelineUtilities, "get_optimizer")
 
         # Test get_custom_optimizer method
         optimizer = PipelineUtilities.get_custom_optimizer(

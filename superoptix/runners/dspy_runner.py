@@ -19,6 +19,12 @@ from rich.console import Console
 from rich.live import Live
 from rich.panel import Panel
 from rich.table import Table
+from superoptix.core.local_lm import (
+    LocalModelUnreachableError,
+    dspy_lm_kwargs,
+    ensure_local_model_reachable,
+    ollama_model_id,
+)
 from superoptix.observability.phoenix import (
     instrument_framework_with_phoenix,
     phoenix_session_span,
@@ -93,6 +99,10 @@ def to_pascal_case(text: str) -> str:
     return "".join(pascal_words)
 
 
+def _fmt_gain(value: Any) -> str:
+    return "n/a" if value is None else f"{value:+.3f}"
+
+
 def to_snake_case(text: str) -> str:
     """Convert field names to snake_case to match generated DSPy signatures."""
     return str(text).strip().replace("-", "_").replace(" ", "_").lower()
@@ -138,6 +148,34 @@ def resolve_pipeline_class(module: Any, agent_name: str) -> Any:
     return None
 
 
+def _dspy_lm_kwargs(params: Dict[str, Any], **extra: Any) -> Dict[str, Any]:
+    """Build dspy.LM kwargs from resolved params via the shared local LM helper.
+
+    See :mod:`superoptix.core.local_lm` for the DSPy 3.4+ Ollama handling.
+    """
+    options: Dict[str, Any] = {
+        "temperature": params.get("temperature"),
+        "max_tokens": params.get("max_tokens"),
+    }
+    options.update(extra)
+    return dspy_lm_kwargs(
+        params["model_name"],
+        provider=params.get("provider"),
+        api_key=params.get("api_key"),
+        api_base=params.get("api_base"),
+        **options,
+    )
+
+
+def _preflight_lm(params: Dict[str, Any]) -> None:
+    """Fail loudly if a local Ollama model is unreachable (no-op otherwise)."""
+    ensure_local_model_reachable(
+        params.get("model_name", ""),
+        params.get("api_base"),
+        provider=params.get("provider"),
+    )
+
+
 class DSPyRunner:
     """Runner for DSPy-based agents."""
 
@@ -145,6 +183,9 @@ class DSPyRunner:
         self, agent_name: str, project_name: str = None, project_root: Path = None
     ):
         self.agent_name = agent_name.lower()
+        # Set when run() fails, so callers can exit non-zero instead of
+        # treating a swallowed error as success.
+        self.last_error: Exception | None = None
 
         # Use provided project root or find it
         if project_root:
@@ -170,6 +211,9 @@ class DSPyRunner:
         self.optimized_path = (
             self.agent_path / "pipelines" / f"{self.agent_name}_optimized.json"
         )
+        self.holdout_path = (
+            self.agent_path / "pipelines" / f"{self.agent_name}_holdout.json"
+        )
         self.playbook_path = self._find_playbook_file(self.agent_path / "playbook")
         self._rag_helper = None
         self._rag_initialized = False
@@ -186,6 +230,19 @@ class DSPyRunner:
                 return current_dir
             current_dir = current_dir.parent
         raise FileNotFoundError("Could not find .super file")
+
+    def _write_holdout_record(self, split: Any, gains: Dict[str, Any]) -> None:
+        """Persist the held-out split metadata next to the optimized weights.
+
+        Only ids and the digest are written; held-out content stays in the
+        playbook. ``super agent evaluate --gauge-sealed`` reads this file.
+        """
+        from superoptix.optimizers.holdout import write_holdout_record
+
+        try:
+            write_holdout_record(self.holdout_path, split, gains)
+        except Exception as exc:
+            console.print(f"[yellow]⚠️ Could not write held-out record: {exc}[/]")
 
     def _find_pipeline_file(self, pipelines_dir: Path) -> Path:
         """
@@ -817,19 +874,11 @@ class DSPyRunner:
             )
 
         if provider == "ollama":
-            normalized_model = model.strip()
-            if normalized_model.startswith("ollama_chat/"):
-                model_name = normalized_model
-            else:
-                if normalized_model.startswith("ollama:"):
-                    normalized_model = normalized_model.split(":", 1)[1]
-                elif normalized_model.startswith("ollama/"):
-                    normalized_model = normalized_model.split("/", 1)[1]
-                model_name = f"ollama_chat/{normalized_model}"
+            model_name = ollama_model_id(model)
             api_base = str(lm_config.get("api_base", "")).strip() or None
             return {
                 "model_name": model_name,
-                "api_key": "",
+                "api_key": None,
                 "api_base": api_base,
                 "temperature": temperature,
                 "max_tokens": max_tokens,
@@ -883,6 +932,52 @@ class DSPyRunner:
             "max_tokens": max_tokens,
         }
 
+    def configure_native_lm(
+        self,
+        module: Any,
+        runtime_mode: str = "auto",
+        provider_override: str | None = None,
+        model_override: str | None = None,
+    ) -> None:
+        """Configure the task LM for a native (build_program) DSPy module.
+
+        Used by standalone evaluation (``super agent evaluate`` / ``test``),
+        which otherwise runs the program with no LM configured.
+        """
+        spec_data: Dict[str, Any] = {}
+        if self.playbook_path.exists():
+            with open(self.playbook_path, "r") as f:
+                playbook = yaml.safe_load(f) or {}
+            spec_data = playbook.get("spec", playbook) or {}
+        allow_local_ollama = bool(getattr(module, "ALLOW_LOCAL_OLLAMA", False))
+        effective_runtime_mode = (runtime_mode or "auto").lower()
+        if effective_runtime_mode == "auto":
+            effective_runtime_mode = str(
+                getattr(module, "RUNTIME_MODE", "auto") or "auto"
+            ).lower()
+        provider = provider_override or getattr(module, "PROVIDER_OVERRIDE", None)
+        model = model_override or getattr(module, "MODEL_OVERRIDE", None)
+        if hasattr(module, "setup_lm") and callable(module.setup_lm):
+            lm_params = self._resolve_dspy_lm_params(
+                spec_data,
+                allow_local_ollama=allow_local_ollama,
+                purpose="task",
+                model_override=model,
+                provider_override=provider,
+                runtime_mode=effective_runtime_mode,
+            )
+            _preflight_lm(lm_params)
+            module.setup_lm(**lm_params)
+        else:
+            self._configure_dspy_lm_from_playbook(
+                spec_data,
+                allow_local_ollama=allow_local_ollama,
+                model_override=model,
+                provider_override=provider,
+                runtime_mode=effective_runtime_mode,
+            )
+        self._configure_dspy_adapter(spec_data, module)
+
     def _configure_dspy_lm_from_playbook(
         self,
         spec_data: Dict[str, Any],
@@ -899,13 +994,10 @@ class DSPyRunner:
             provider_override=provider_override,
             runtime_mode=runtime_mode,
         )
-        lm = dspy.LM(
-            model=lm_params["model_name"],
-            api_key=lm_params["api_key"],
-            api_base=lm_params.get("api_base"),
-            temperature=lm_params["temperature"],
-            max_tokens=lm_params["max_tokens"],
-        )
+        # Fail loudly (clear error, no fake success) if Ollama is down or the
+        # model is not pulled. No-op for hosted providers.
+        _preflight_lm(lm_params)
+        lm = dspy.LM(**_dspy_lm_kwargs(lm_params))
         dspy.configure(lm=lm)
         return lm
 
@@ -1205,6 +1297,7 @@ class DSPyRunner:
         runtime_mode: str = "auto",
         provider_override: str | None = None,
         model_override: str | None = None,
+        gepa_overrides: Dict[str, Any] | None = None,
     ) -> Dict[str, Any]:
         """Optimize the agent pipeline using DSPy optimization techniques."""
         optimization_result = {
@@ -1238,9 +1331,7 @@ class DSPyRunner:
                     border_style="bright_magenta",
                 )
             )
-            console.print(
-                f"\n[yellow]🚀 Starting optimization using '[bold]{strategy}[/]' strategy...[/]"
-            )
+            console.print("\n[yellow]🚀 Starting GEPA optimization...[/]")
 
             # Import and execute the pipeline module
             import importlib.util
@@ -1279,6 +1370,15 @@ class DSPyRunner:
                     if isinstance(module_gepa_cfg, dict):
                         # Module snapshot takes precedence for visible pipeline-config overrides.
                         gepa_cfg.update(module_gepa_cfg)
+                # Explicit CLI GEPA flags win over playbook and pipeline config.
+                cli_gepa = {
+                    k: v for k, v in (gepa_overrides or {}).items() if v is not None
+                }
+                if cli_gepa.get("max_metric_calls") or cli_gepa.get("max_full_evals"):
+                    if not cli_gepa.get("auto"):
+                        gepa_cfg.pop("auto", None)
+                        cli_gepa.pop("auto", None)
+                gepa_cfg.update(cli_gepa)
 
                 scenarios = []
                 if "feature_specifications" in spec_data and spec_data[
@@ -1320,6 +1420,7 @@ class DSPyRunner:
 
                 # Configure task LM (student)
                 if hasattr(module, "setup_lm") and callable(module.setup_lm):
+                    _preflight_lm(task_params)
                     module.setup_lm(**task_params)
                     self._configure_dspy_adapter(spec_data, module)
                 else:
@@ -1335,12 +1436,31 @@ class DSPyRunner:
 
                 program = module.build_program()
 
+                # Fail fast when the task LM is unreachable; otherwise every
+                # rollout errors, scores 0 and the run reports a fake success.
+                try:
+                    probe_lm = dspy.settings.lm
+                    if probe_lm is not None:
+                        probe_lm("ping", max_tokens=4)
+                except Exception as e:
+                    optimization_result["error"] = (
+                        f"Task LM is not reachable, aborting before GEPA: {e}"
+                    )
+                    optimization_result["completed_at"] = str(time.time())
+                    return optimization_result
+
                 # Build DSPy examples from scenarios.
                 examples = []
+                example_identities = []
                 for sc in scenarios:
-                    if not isinstance(sc, dict):
+                    # Canary scenarios are contamination probes; the optimizer
+                    # must never see them.
+                    if not isinstance(sc, dict) or sc.get("canary"):
                         continue
                     inp = sc.get("input", {}) or {}
+                    example_identities.append(
+                        {**inp, **(sc.get("expected_output", {}) or {})}
+                    )
                     if self._is_rag_enabled_in_spec(spec_data):
                         seed_query = str(inp.get(input_field, "")).strip()
                         if seed_query:
@@ -1404,10 +1524,7 @@ class DSPyRunner:
                     )
 
                 reflection_lm = dspy.LM(
-                    model=teacher_params["model_name"],
-                    api_key=teacher_params["api_key"],
-                    temperature=1.0,
-                    max_tokens=32000,
+                    **_dspy_lm_kwargs(teacher_params, temperature=1.0, max_tokens=32000)
                 )
 
                 assertion_metric_weight = 0.3
@@ -1502,8 +1619,16 @@ class DSPyRunner:
                     return optimization_result
                 import inspect
 
-                auto = "light"
-                auto = gepa_cfg.get("auto", auto)
+                # GEPA takes exactly one budget: max_metric_calls, then
+                # max_full_evals, then auto (default light). Budgets are
+                # GEPA.__init__ arguments, not compile() arguments.
+                max_metric_calls = gepa_cfg.get("max_metric_calls")
+                max_full_evals = gepa_cfg.get("max_full_evals")
+                auto = None
+                if max_metric_calls:
+                    max_full_evals = None
+                elif not max_full_evals:
+                    auto = gepa_cfg.get("auto") or "light"
 
                 # Build GEPA kwargs dynamically to stay compatible across DSPy versions.
                 init_sig = inspect.signature(GEPA.__init__)
@@ -1512,6 +1637,8 @@ class DSPyRunner:
                 init_kwargs: Dict[str, Any] = {"metric": gepa_metric}
                 optional_init_cfg = {
                     "auto": auto,
+                    "max_metric_calls": max_metric_calls,
+                    "max_full_evals": max_full_evals,
                     "reflection_lm": reflection_lm,
                     "candidate_selection_strategy": gepa_cfg.get(
                         "candidate_selection_strategy"
@@ -1532,14 +1659,47 @@ class DSPyRunner:
 
                 gepa = GEPA(**init_kwargs)
 
+                # Held-out split (2.0): GEPA never sees the held-out items, so
+                # the held-out gain is an honest estimate (arXiv:2610.09239).
+                from superoptix.optimizers.holdout import (
+                    DEFAULT_VALSET_FRACTION,
+                    gain_report,
+                    score_dspy_program,
+                    split_holdout,
+                    unchanged_seed_report,
+                )
+
+                split = split_holdout(
+                    examples,
+                    fraction=gepa_cfg.get("valset_fraction", DEFAULT_VALSET_FRACTION),
+                    seed=gepa_cfg.get("seed", 0),
+                    identities=example_identities,
+                )
+                if split.fallback_reason:
+                    console.print(
+                        "[yellow]⚠️ No held-out split: "
+                        f"{split.fallback_reason}. Reported gain is train-only.[/]"
+                    )
+                else:
+                    console.print(
+                        f"[cyan]Held-out split: {len(split.train)} train, "
+                        f"{len(split.heldout)} held out (seed={split.seed}).[/]"
+                    )
+                try:
+                    seed_program = program.deepcopy()
+                except Exception:
+                    import copy
+
+                    seed_program = copy.deepcopy(program)
+
                 compile_sig = inspect.signature(gepa.compile)
                 compile_params = compile_sig.parameters
                 compile_kwargs: Dict[str, Any] = {
                     "student": program,
-                    "trainset": examples,
+                    "trainset": split.train,
                 }
                 if "valset" in compile_params:
-                    compile_kwargs["valset"] = examples
+                    compile_kwargs["valset"] = split.train
                 if (
                     "max_full_evals" in compile_params
                     and gepa_cfg.get("max_full_evals") is not None
@@ -1584,6 +1744,35 @@ class DSPyRunner:
                         f"quality={avg_quality:.3f}, assertions={avg_assertion:.3f}, blended={avg_blended:.3f} "
                         f"(assertion_weight={assertion_metric_weight:.2f})"
                     )
+                # Score seed and optimized programs on train and held-out items.
+                gains = gain_report(
+                    score_dspy_program(seed_program, split.train, gepa_metric),
+                    score_dspy_program(optimized_program, split.train, gepa_metric),
+                    score_dspy_program(seed_program, split.heldout, gepa_metric),
+                    score_dspy_program(optimized_program, split.heldout, gepa_metric),
+                )
+                optimization_result["training_examples"] = len(split.train)
+                optimization_result["heldout_examples"] = len(split.heldout)
+                optimization_result["holdout"] = split.metadata()
+                optimization_result.update(gains)
+                # Advisory (never a gate): flag a seed-identical or zero-gain
+                # result so it cannot pass silently, e.g. when the reflection
+                # LM returned invalid structured JSON proposals.
+                seed_check = unchanged_seed_report(
+                    seed_program, optimized_program, gains
+                )
+                optimization_result["gepa"] = seed_check
+                gains = {**gains, "gepa": seed_check}
+                if seed_check["warning"]:
+                    console.print(
+                        f"[bold yellow]⚠️ GEPA warning:[/] {seed_check['warning']}"
+                    )
+                self._write_holdout_record(split, gains)
+                console.print(
+                    "[cyan]📊 Gain:[/] reported (train) "
+                    f"{_fmt_gain(gains['reported_gain'])}, held-out "
+                    f"{_fmt_gain(gains['heldout_gain'])}"
+                )
                 optimization_result["completed_at"] = str(time.time())
                 return optimization_result
 
@@ -1825,6 +2014,7 @@ class DSPyRunner:
                         provider_override=effective_provider_override,
                         runtime_mode=effective_runtime_mode,
                     )
+                    _preflight_lm(lm_params)
                     module.setup_lm(**lm_params)
                     self._configure_dspy_adapter(spec_data, module)
                 else:
@@ -2371,11 +2561,19 @@ class DSPyRunner:
         except FileNotFoundError as e:
             if "memory_enabled" in locals() and memory_enabled:
                 self._end_memory_interaction(success=False, error=str(e))
+            self.last_error = e
             console.print(f"\n[red]❌ Error:[/] {e}")
             return None
+        except LocalModelUnreachableError as e:
+            if "memory_enabled" in locals() and memory_enabled:
+                self._end_memory_interaction(success=False, error=str(e))
+            self.last_error = e
+            # Propagate so callers (CLI, A2A) fail loudly with a clear message.
+            raise
         except Exception as e:
             if "memory_enabled" in locals() and memory_enabled:
                 self._end_memory_interaction(success=False, error=str(e))
+            self.last_error = e
             console.print(f"\n[red]❌ An unexpected error occurred:[/] {e}")
             import traceback
 

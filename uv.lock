@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.11"
 resolution-markers = [
     "python_full_version >= '3.15'",
@@ -468,15 +468,15 @@ wheels = [
 
 [[package]]
 name = "agent-framework-ollama"
-version = "1.0.0b260813"
+version = "1.0.0b260311"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "agent-framework-core" },
     { name = "ollama" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/41/9d/8df2c13b55be7a33604c7c10f14b3bc57fe4c3fde74b0fdf99cb5baa6389/agent_framework_ollama-1.0.0b260813.tar.gz", hash = "sha256:f7a699d25d9493d366e84e66a8e0c44ceb26d991dfc8de74bdc77b480fd592a8", size = 10870, upload-time = "2026-08-14T02:39:39.223Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f1/44/c2768d347839fb1c41cbb1de12bcd12ded1a788fa9dd8836a98f2bcb3ed2/agent_framework_ollama-1.0.0b260311.tar.gz", hash = "sha256:4529656cc7b3a8f00376cbb3b72e5ec8a1ad475be9a2924911d565c49498c3bb", size = 9985, upload-time = "2026-03-11T23:19:57.969Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ea/64/a597d99e8f9171680a325b9738387526829f972b85b35fe7e944451132bb/agent_framework_ollama-1.0.0b260813-py3-none-any.whl", hash = "sha256:88f538fcfe312cbb7c64fe0ce415e176f9d8b13cbbc11be52b9f1176d747f875", size = 12961, upload-time = "2026-08-14T02:39:18.942Z" },
+    { url = "https://files.pythonhosted.org/packages/62/71/6e51cdabefa518a91c27d5790cce2916b62121d52123cd02283479b2b77e/agent_framework_ollama-1.0.0b260311-py3-none-any.whl", hash = "sha256:04f11f2639185686feab727db5ab3966a3447b03d9e8f7135673e1dac286a17d", size = 11843, upload-time = "2026-03-11T23:19:51.75Z" },
 ]
 
 [[package]]
@@ -2348,27 +2348,34 @@ wheels = [
 
 [[package]]
 name = "dspy"
-version = "3.4.0"
+version = "3.4.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyio" },
     { name = "cachetools" },
     { name = "cloudpickle" },
     { name = "diskcache" },
-    { name = "gepa" },
+    { name = "gepa", marker = "python_full_version < '3.15'" },
     { name = "json-repair" },
-    { name = "litellm" },
+    { name = "jsonschema" },
+    { name = "litellm", marker = "python_full_version < '3.15'" },
     { name = "openai" },
     { name = "orjson" },
     { name = "pydantic" },
+    { name = "pyyaml" },
     { name = "regex" },
     { name = "requests" },
     { name = "tenacity" },
     { name = "tqdm" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d2/1b/5b1964b0f1299aaca2b98300d73d972046ab70edb53c47674d6ace3c1bf1/dspy-3.4.0.tar.gz", hash = "sha256:4dea089c6bd1f8d314e1095e7f64b4b4ff64bb8a09549efee026c0a609f08c16", size = 887770, upload-time = "2026-09-25T04:04:25.439Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/00/5c/260210d87e0604b9086735a8dc1ef8ca4edd61bc9e8042a013ca36cf8b7e/dspy-3.4.1.tar.gz", hash = "sha256:6803449c11818efd10537da22e509a87af1bd30796053d1a6c82421f2afaa461", size = 926321, upload-time = "2026-10-12T23:07:25.395Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/17/96/31628d4231b5dd7edbe9eaf5c975d1055f4b79b337062a1f957dca6dd931/dspy-3.4.0-py3-none-any.whl", hash = "sha256:36de329ecdaf18e31977e26c61b587caa470a34f574f2fe6cb7f4c82bcbf97cc", size = 987510, upload-time = "2026-09-25T04:04:23.915Z" },
+    { url = "https://files.pythonhosted.org/packages/ad/2f/656f16206c9ba4e359b639e2605cf196a4e5c678c6d9aed0fae537701ec2/dspy-3.4.1-py3-none-any.whl", hash = "sha256:afda9e7f8b3d46be0829af19ac1153a6feaa6db5923f2b1011eef547fb15ce2d", size = 1027332, upload-time = "2026-10-12T23:07:23.761Z" },
+]
+
+[package.optional-dependencies]
+typesafe = [
+    { name = "typesafe-sdk" },
 ]
 
 [[package]]
@@ -3978,6 +3985,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/5f/17/dcf759ad83ab3566db1b02c8b21211f43085c66f3b5964f6fe573ffe8664/langchain_google_genai-4.3.7.tar.gz", hash = "sha256:8a57f936b1fbde52776fdde6673fdabd99cfa5cbbb122a926f1cff0ba00f6bc6", size = 373696, upload-time = "2026-08-27T20:44:05.203Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/47/2f/ade5d1a7ecfbc88f7de65c6610ef89d80905b29fa3dd28a764f7028f3d42/langchain_google_genai-4.3.7-py3-none-any.whl", hash = "sha256:8d4b1aa8f2c2e17b8e790d34a7e9a7b8e7d13e9a00175679d17647c235104bf9", size = 79611, upload-time = "2026-08-27T20:44:03.884Z" },
+]
+
+[[package]]
+name = "langchain-ollama"
+version = "1.1.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "langchain-core" },
+    { name = "ollama" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/d4/9b/6641afe8a5bf807e454fd464eddfc7eb2f2df53cb0b29744381171f9c609/langchain_ollama-1.1.0.tar.gz", hash = "sha256:f776f56f6782ae4da7692579b94a6575906118318d1023b455d7207f9d059811", size = 133075, upload-time = "2026-04-07T02:48:00.873Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/2c/b2/c2acb076590a98bee2816ed5f285e00df162a34238f9e276e175e14ebc35/langchain_ollama-1.1.0-py3-none-any.whl", hash = "sha256:43ac83a6eacb0f43855810739794dd55019e0d9b17bdcf3ecb3b1991ac3b59dd", size = 31413, upload-time = "2026-04-07T02:47:59.642Z" },
 ]
 
 [[package]]
@@ -5640,15 +5660,15 @@ wheels = [
 
 [[package]]
 name = "ollama"
-version = "0.5.3"
+version = "0.6.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx" },
     { name = "pydantic" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/91/6d/ae96027416dcc2e98c944c050c492789502d7d7c0b95a740f0bb39268632/ollama-0.5.3.tar.gz", hash = "sha256:40b6dff729df3b24e56d4042fd9d37e231cee8e528677e0d085413a1d6692394", size = 43331, upload-time = "2025-08-07T21:44:10.422Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b8/97/eeafe65594e4f4b25e443e068ef7d83aa3105b023e12e1c408c38669fc07/ollama-0.6.3.tar.gz", hash = "sha256:41fc49a8095c4a75939c4c1f8582e4d0671692fb6eac2a5a7ede8c9872b67096", size = 56868, upload-time = "2026-09-29T01:26:51.906Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/be/f6/2091e50b8b6c3e6901f6eab283d5efd66fb71c86ddb1b4d68766c3eeba0f/ollama-0.5.3-py3-none-any.whl", hash = "sha256:a8303b413d99a9043dbf77ebf11ced672396b59bec27e6d5db67c88f01b279d2", size = 13490, upload-time = "2025-08-07T21:44:09.353Z" },
+    { url = "https://files.pythonhosted.org/packages/4d/64/87505d9e006461233c21c8e66dc1ecee49c996090584b216abd0dd4a8322/ollama-0.6.3-py3-none-any.whl", hash = "sha256:6a20bc42c1a5f889295d7ec490d35e5132fc31f339561530f43a8abd4dbfe508", size = 16603, upload-time = "2026-09-29T01:26:50.451Z" },
 ]
 
 [[package]]
@@ -8830,7 +8850,7 @@ wheels = [
 
 [[package]]
 name = "superoptix"
-version = "0.3.16"
+version = "2.0.0rc1"
 source = { editable = "." }
 dependencies = [
     { name = "colorama" },
@@ -8957,6 +8977,7 @@ frameworks-claude-sdk = [
 ]
 frameworks-deepagents = [
     { name = "deepagents" },
+    { name = "langchain-ollama" },
 ]
 frameworks-dspy = [
     { name = "dspy" },
@@ -8982,6 +9003,9 @@ huggingface = [
     { name = "torch" },
     { name = "transformers" },
     { name = "uvicorn" },
+]
+jev = [
+    { name = "dspy", extra = ["typesafe"] },
 ]
 lancedb = [
     { name = "lancedb" },
@@ -9038,6 +9062,7 @@ surrealdb = [
     { name = "surrealdb" },
 ]
 testing = [
+    { name = "jsonschema" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "pytest-cov" },
@@ -9048,6 +9073,9 @@ turboagents = [
     { name = "chromadb" },
     { name = "sentence-transformers" },
     { name = "turboagents", extra = ["rag"] },
+]
+typesafe = [
+    { name = "dspy", extra = ["typesafe"] },
 ]
 ui = [
     { name = "pandas" },
@@ -9102,11 +9130,13 @@ requires-dist = [
     { name = "deepagents", marker = "extra == 'all-with-mlx'", specifier = ">=0.7,<0.8" },
     { name = "deepagents", marker = "extra == 'frameworks'", specifier = ">=0.7,<0.8" },
     { name = "deepagents", marker = "extra == 'frameworks-deepagents'", specifier = ">=0.7,<0.8" },
-    { name = "dspy", specifier = ">=3.3" },
-    { name = "dspy", marker = "extra == 'all'", specifier = ">=3.3" },
-    { name = "dspy", marker = "extra == 'all-with-mlx'", specifier = ">=3.3" },
-    { name = "dspy", marker = "extra == 'frameworks'", specifier = ">=3.3" },
-    { name = "dspy", marker = "extra == 'frameworks-dspy'", specifier = ">=3.3" },
+    { name = "dspy", specifier = ">=3.4" },
+    { name = "dspy", marker = "extra == 'all'", specifier = ">=3.4" },
+    { name = "dspy", marker = "extra == 'all-with-mlx'", specifier = ">=3.4" },
+    { name = "dspy", marker = "extra == 'frameworks'", specifier = ">=3.4" },
+    { name = "dspy", marker = "extra == 'frameworks-dspy'", specifier = ">=3.4" },
+    { name = "dspy", extras = ["typesafe"], marker = "extra == 'jev'", specifier = ">=3.4" },
+    { name = "dspy", extras = ["typesafe"], marker = "extra == 'typesafe'", specifier = ">=3.4" },
     { name = "faiss-cpu", marker = "extra == 'all'" },
     { name = "faiss-cpu", marker = "extra == 'all-with-mlx'" },
     { name = "faiss-cpu", marker = "extra == 'faiss'" },
@@ -9126,10 +9156,12 @@ requires-dist = [
     { name = "huggingface-hub", marker = "extra == 'huggingface'" },
     { name = "huggingface-hub", marker = "extra == 'ml-cross-platform'" },
     { name = "jinja2" },
+    { name = "jsonschema", marker = "extra == 'testing'" },
     { name = "lancedb", marker = "extra == 'all'" },
     { name = "lancedb", marker = "extra == 'all-with-mlx'" },
     { name = "lancedb", marker = "extra == 'lancedb'" },
     { name = "lancedb", marker = "extra == 'vectordb'" },
+    { name = "langchain-ollama", marker = "extra == 'frameworks-deepagents'", specifier = ">=0.3" },
     { name = "langfuse", marker = "extra == 'all'" },
     { name = "langfuse", marker = "extra == 'all-with-mlx'" },
     { name = "langfuse", marker = "extra == 'observability'" },
@@ -9247,7 +9279,7 @@ requires-dist = [
     { name = "weaviate-client", marker = "extra == 'vectordb'" },
     { name = "weaviate-client", marker = "extra == 'weaviate'" },
 ]
-provides-extras = ["frameworks-dspy", "frameworks-openai", "frameworks-google", "frameworks-microsoft", "frameworks-deepagents", "frameworks-pydantic-ai", "frameworks-claude-sdk", "frameworks", "mcp", "a2a", "protocols-a2a", "logfire", "phoenix", "dev", "ui", "chromadb", "lancedb", "faiss", "turboagents", "weaviate", "qdrant", "milvus", "surrealdb", "vectordb", "mlx", "ml-cross-platform", "huggingface", "redis", "observability", "web", "data", "cloud", "testing", "docs", "all", "all-with-mlx"]
+provides-extras = ["frameworks-dspy", "typesafe", "jev", "frameworks-openai", "frameworks-google", "frameworks-microsoft", "frameworks-deepagents", "frameworks-pydantic-ai", "frameworks-claude-sdk", "frameworks", "mcp", "a2a", "protocols-a2a", "logfire", "phoenix", "dev", "ui", "chromadb", "lancedb", "faiss", "turboagents", "weaviate", "qdrant", "milvus", "surrealdb", "vectordb", "mlx", "ml-cross-platform", "huggingface", "redis", "observability", "web", "data", "cloud", "testing", "docs", "all", "all-with-mlx"]
 
 [[package]]
 name = "surrealdb"
@@ -9584,6 +9616,24 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/16/f7/57713ba479fd405eb76de31404b2c744c289e336b2d999511ebf51e496f7/typer-0.27.2.tar.gz", hash = "sha256:269b7eb9d3c202ca84b4bc9618cb04ebb43d3d4d1e567e4c768607232c05f945", size = 204045, upload-time = "2026-08-28T10:26:55.046Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/dc/bf/205d0004930ede8f542fb58f601526fccf4ae7626075ca1e6c4de5d3d652/typer-0.27.2-py3-none-any.whl", hash = "sha256:b3a5fc4342d5fc8fda8fc3010b1cf117e9249aab7fae800c2eff62fd3842d97d", size = 123130, upload-time = "2026-08-28T10:26:53.752Z" },
+]
+
+[[package]]
+name = "typesafe-sdk"
+version = "0.7.4"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "httpx2" },
+    { name = "packaging" },
+    { name = "pydantic" },
+    { name = "pydantic-core" },
+    { name = "tenacity" },
+    { name = "truststore", marker = "sys_platform != 'emscripten'" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/94/12/3a897e9f424be6f4db0648a955f8fadbe62149d118a03614df897b5a2ec9/typesafe_sdk-0.7.4.tar.gz", hash = "sha256:a20dca217a746db1ac5534ac502de16e1f86a400b4ec09f8594e6221c2bc9558", size = 24388, upload-time = "2026-10-09T15:47:14.978Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a2/49/6cd65684e41e25069f4d12c09cd7e1e3f81477f06acb29bf0d1815e27d1e/typesafe_sdk-0.7.4-py3-none-any.whl", hash = "sha256:61cf3f2fe9da20b68c3d3fe2fb76bbb2f35f8c4a9a65a6b81c43a535d2a53210", size = 37700, upload-time = "2026-10-09T15:47:12.418Z" },
 ]
 
 [[package]]

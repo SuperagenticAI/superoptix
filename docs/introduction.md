@@ -27,7 +27,7 @@ SuperOptiX brings together declarative agent specification, universal GEPA optim
 
 ## What's New
 
-- ⚙️ **Minimal + Optimize Flow**: Default compile generates minimal framework-native pipelines, with expanded optimization flow enabled via `--optimize`.
+- ⚙️ **Minimal + Optimize Flow**: Default compile generates minimal framework-native pipelines, and evaluate, optimize and test work on them directly. `--optimize` adds optional training scaffolding.
 
 ## Core Philosophy
 

@@ -145,7 +145,7 @@ warnings.filterwarnings(
 import asyncio
 import sys
 
-from argparse import ArgumentParser, RawDescriptionHelpFormatter
+from argparse import SUPPRESS, ArgumentParser, RawDescriptionHelpFormatter
 
 from rich.align import Align
 from rich.console import Console
@@ -179,8 +179,8 @@ from superoptix.cli.commands.agent import (
     remove_agent,
     run_agent,
     serve_agent,
-    show_tier_status,
     test_agent_bdd,
+    test_agent_gate,
 )
 from superoptix.cli.commands.dataset import (
     preview_dataset,
@@ -227,6 +227,33 @@ from superoptix.cli.commands.superspec import (
 
 
 console = Console()
+
+
+def _add_gauge_quality_args(parser) -> None:
+    """SuperGauge 2.0 flags shared by evaluate (opt-in) and test (defaults on)."""
+    parser.add_argument(
+        "--gauge-gates",
+        action="store_true",
+        help=(
+            "Add deterministic SuperGauge gates (output.parse_rate, "
+            "reliability.beats_trivial_baseline, reliability.pass_hat_k, "
+            "tool.correctness, trajectory.valid where data exists) and a "
+            "deterministic decision to the record."
+        ),
+    )
+    parser.add_argument(
+        "--k",
+        type=int,
+        default=1,
+        metavar="N",
+        help="Independent attempts for reliability.pass_hat_k (needs --gauge-out).",
+    )
+    parser.add_argument(
+        "--gate-floor",
+        action="append",
+        metavar="ID=VALUE",
+        help="Override a gate floor, e.g. --gate-floor output.parse_rate=0.99.",
+    )
 
 
 def show_comprehensive_docs(args):
@@ -385,13 +412,13 @@ def show_comprehensive_docs(args):
     console.print(
         "🤖 [bold bright_green]STEP 5: CREATE YOUR FIRST AI AGENT WITH DSL[/]"
     )
-    console.print("   [yellow]Generate a sophisticated Genie-tier agent:[/]")
     console.print(
-        "   [cyan]super spec generate genie developer --namespace software[/]"
+        "   [yellow]Generate a Genies-tier agent (ReAct, tools, memory, RAG):[/]"
     )
     console.print(
-        "   [dim]🎯 This creates a tier-compliant agent with memory, tools, and RAG![/]"
+        "   [cyan]super spec generate genies developer --namespace software[/]"
     )
+    console.print("   [dim]Creates a playbook with memory, tools, and RAG enabled.[/]")
     console.print()
     console.print("   [yellow]Or start with a basic Oracles-tier agent:[/]")
     console.print(
@@ -445,14 +472,18 @@ def show_comprehensive_docs(args):
     )
     console.print("   [cyan]super agent optimize developer[/]")
     console.print(
-        "   [dim]🚀 Uses DSPy's BootstrapFewShot to enhance agent capabilities![/]"
+        "   [dim]Runs GEPA on a seeded train split and holds out 20% of scenarios.[/]"
     )
     console.print()
     console.print("   [yellow]What optimization does:[/]")
-    console.print("     • 📈 Learns from your BDD scenarios")
-    console.print("     • 🎯 Improves response accuracy and quality")
-    console.print("     • 💾 Creates optimized pipeline weights")
-    console.print("     • ⚡ Speeds up future executions")
+    console.print("     • 📈 Learns from the train split of your BDD scenarios")
+    console.print(
+        "     • 🎯 Reports the train gain and the held-out gain (quote the held-out gain)"
+    )
+    console.print("     • 💾 Saves optimized pipeline weights")
+    console.print(
+        "     • 🧾 With [cyan]--gauge-out record.json[/] writes a SuperGauge Agent Quality Record"
+    )
     console.print()
 
     # Step 9: Re-evaluate for Improvement
@@ -469,12 +500,20 @@ def show_comprehensive_docs(args):
 
     # Step 10: Run Your Agent
     console.print("🚀 [bold bright_green]STEP 10: RUN YOUR OPTIMIZED AGENT[/]")
-    console.print("   [cyan]super agent run developer[/]")
-    console.print("   [dim]🎉 Your agent is now ready for production use![/]")
+    console.print('   [cyan]super agent run developer --goal "..."[/]')
+    console.print("   [dim]Run the agent on a goal.[/]")
     console.print()
-    console.print("   [yellow]Interactive mode:[/]")
-    console.print("   [cyan]super agent run developer --interactive[/]")
-    console.print("   [dim]💬 Chat with your agent in real-time![/]")
+    console.print("   [yellow]Ship with quality (CI gate):[/]")
+    console.print("   [cyan]super agent test developer --actor you@example.com[/]")
+    console.print(
+        "   [dim]Exits 0 only when the SuperGauge record allows release (L2+, ship).[/]"
+    )
+    console.print()
+    console.print("   [yellow]Connect over A2A:[/]")
+    console.print("   [cyan]super agent serve developer[/]")
+    console.print(
+        "   [dim]Or adapt an agent built elsewhere: [cyan]super a2a adapt --entrypoint mod:obj[/][/]"
+    )
     console.print()
 
     # Step 11: Advanced Features
@@ -484,7 +523,7 @@ def show_comprehensive_docs(args):
     console.print("   [dim]🎼 Coordinate multiple agents in complex workflows[/]")
     console.print()
     console.print("   [yellow]Observability & Monitoring:[/]")
-    console.print("   [cyan]super observe[/]")
+    console.print("   [cyan]super observe dashboard[/]")
     console.print("   [dim]📊 Monitor agent performance and debug issues[/]")
     console.print()
     console.print("   [yellow]Marketplace Integration:[/]")
@@ -521,9 +560,11 @@ def show_comprehensive_docs(args):
     console.print("   [yellow]Getting Help:[/]")
     console.print("     • 📖 [cyan]super docs[/] - This comprehensive guide")
     console.print("     • 💬 [cyan]super --help[/] - Command-specific help")
-    console.print("     • 🌐 [cyan]https://superoptix.ai[/] - Full documentation")
     console.print(
-        "     • 🐛 [cyan]https://github.com/superoptix/superoptix[/] - Report issues"
+        "     • 🌐 [cyan]https://superagenticai.github.io/superoptix/[/] - Full documentation"
+    )
+    console.print(
+        "     • 🐛 [cyan]https://github.com/SuperagenticAI/superoptix[/] - Report issues"
     )
     console.print()
 
@@ -532,9 +573,7 @@ def show_comprehensive_docs(args):
     console.print("   [yellow]Get Help & Connect:[/]")
     console.print("     • 📧 Support: [blue]support@super-agentic.ai[/]")
     console.print()
-    console.print(
-        "   [green]🌟 Happy Building with SuperOptiX! Transform ideas into intelligent systems![/]"
-    )
+    console.print("   [green]Optimize agents. Connect over A2A. Ship with quality.[/]")
     console.print("=" * 90)
 
 
@@ -572,14 +611,14 @@ def show_superoptix_banner():
         # Add subtitle
         console.print()
         subtitle = Text(
-            "🌟 Next-Generation Agentic System Framework 🌟", style="bold cyan"
+            "Optimization and Quality layer for AI agents", style="bold cyan"
         )
         console.print(Align.center(subtitle))
 
         # Add welcome message
         console.print()
         welcome_msg = Text(
-            "🚀 Welcome to the future of AI agent development! 🚀", style="bold yellow"
+            "Optimize agents. Connect over A2A. Ship with quality.", style="bold yellow"
         )
         console.print(Align.center(welcome_msg))
 
@@ -590,10 +629,10 @@ def show_superoptix_banner():
         # Fallback for any display issues
         console.print()
         console.print(
-            "🌟 [bold bright_cyan]SuperOptiX - Next-Generation Agentic System Framework[/] 🌟"
+            "[bold bright_cyan]SuperOptiX: Optimization and Quality layer for AI agents[/]"
         )
         console.print(
-            "🚀 [bold yellow]Welcome to the future of AI agent development![/] 🚀"
+            "[bold yellow]Optimize agents. Connect over A2A. Ship with quality.[/]"
         )
         console.print()
 
@@ -603,11 +642,7 @@ def show_superoptix_banner():
 def show_welcome_screen(args):
     """Display a more graphical welcome screen with warmup message."""
     show_superoptix_banner()
-    console.print(
-        Align.center(
-            "Your one-stop shop for building, testing, and deploying autonomous agentic systems."
-        )
-    )
+    console.print(Align.center("Optimize agents. Connect over A2A. Ship with quality."))
     console.print()
 
     # Show warmup message for first-time users
@@ -616,7 +651,7 @@ def show_welcome_screen(args):
             "[bold green]🎉 Welcome to SuperOptiX![/bold green]\n\n"
             "[yellow]💡 Pro Tip:[/yellow] The first time you run any SuperOptiX command, "
             "Python may take a few seconds to prepare the environment. "
-            "This is normal and only happens once—subsequent runs will be much faster!\n\n"
+            "This is normal and only happens once; subsequent runs will be much faster!\n\n"
             "[cyan]🚀 Ready to get started?[/cyan]",
             title="[bold bright_cyan]🌟 First Time Setup[/bold bright_cyan]",
             border_style="bright_cyan",
@@ -629,13 +664,12 @@ def show_welcome_screen(args):
         """
 [bold bright_yellow]Common Commands:[/bold bright_yellow]
 
-      [bold cyan]super init[/bold cyan]         [grey50]Initialize a new project[/grey50]
-    [bold cyan]super marketplace[/bold cyan]  [grey50]🏪 Discover agents and tools[/grey50]
-    [bold cyan]super agent[/bold cyan]        [grey50]Manage agents (add, compile, test, run)[/grey50]
-    [bold cyan]super model[/bold cyan]        [grey50]🤖 Model intelligence system[/grey50]
-    [bold cyan]super spec[/bold cyan]   [grey50]🤖 Agent DSL (generate, validate, analyze)[/grey50]
-    [bold cyan]super orchestra[/bold cyan]         [grey50]Manage multi-agent workflows[/grey50]
-    [bold cyan]super docs[/bold cyan]         [grey50]Show comprehensive getting started guide[/grey50]
+    [bold cyan]super init[/bold cyan]            [grey50]Initialize a new project[/grey50]
+    [bold cyan]super agent optimize[/bold cyan]  [grey50]Optimize with GEPA (train vs held-out gain)[/grey50]
+    [bold cyan]super a2a adapt[/bold cyan]       [grey50]Connect an existing agent over A2A[/grey50]
+    [bold cyan]super agent serve[/bold cyan]     [grey50]Serve a compiled agent over A2A[/grey50]
+    [bold cyan]super agent test[/bold cyan]      [grey50]Ship with quality: SuperGauge record + CI gate[/grey50]
+    [bold cyan]super docs[/bold cyan]            [grey50]Getting started guide[/grey50]
 
 Use '[bold]super <command> --help[/]' for more information.
 """
@@ -658,8 +692,8 @@ def show_version_screen(args=None):
     console.print(
         Panel(
             f"[bold bright_yellow]SuperOptiX[/bold bright_yellow] [bold cyan]v{version}[/bold cyan]\n\n"
-            "[green]Agent-to-Agent (A2A) Interoperability and Optimization Layer[/green]\n"
-            "[bright_magenta]Adapt an existing agent to A2A 1.0 without rewriting it.[/bright_magenta]",
+            "[green]Optimization and Quality layer for AI agents[/green]\n"
+            "[bright_magenta]Optimize agents. Connect over A2A. Ship with quality.[/bright_magenta]",
             title="[bold bright_cyan]🚀 SuperOptiX Version[/bold bright_cyan]",
             border_style="bold magenta",
             padding=(1, 2),
@@ -744,6 +778,15 @@ def execute_with_loader(func, args, command_name="SuperOptiX"):
         sys.exit(1)
 
 
+def _order_help(subparsers_action, order):
+    """Reorder how subcommands are listed in --help. Parsing is unaffected."""
+    rank = {name: i for i, name in enumerate(order)}
+    subparsers_action.metavar = "{" + ",".join(order) + "}"
+    subparsers_action._choices_actions.sort(
+        key=lambda a: rank.get(a.dest.split(" ")[0], len(order))
+    )
+
+
 def check_conversational_mode():
     """Check if should enter conversational mode."""
     # Enter conversational mode if just 'super' with no arguments
@@ -773,16 +816,12 @@ def main():
     )
     warnings.filterwarnings("ignore", module="pydantic.*", category=UserWarning)
     warnings.filterwarnings("ignore", module="pydantic_ai.*", category=UserWarning)
-    # warnings.filterwarnings("ignore", module="storage3.*", category=UserWarning)
-    # warnings.filterwarnings("ignore", module="storage3.*", category=DeprecationWarning)
-    # warnings.filterwarnings("ignore", message=r".*storage3.*", category=DeprecationWarning)
     warnings.filterwarnings(
         "ignore", message=r".*pydantic\.config\.Extra.*", category=DeprecationWarning
     )
     warnings.filterwarnings(
         "ignore", message=r".*PydanticDeprecatedSince20.*", category=DeprecationWarning
     )
-    # warnings.filterwarnings("ignore", module="supabase.*", category=UserWarning)
 
     # Track CLI usage (anonymous)
     try:
@@ -802,77 +841,37 @@ def main():
 
     # Minimal help description
     description = """\
-Welcome to SuperOptiX! 🌟
+SuperOptiX: Optimization and Quality layer for AI agents.
+Optimize agents. Connect over A2A. Ship with quality.
 
-SuperOptiX is a revolutionary AI agent framework that brings enterprise-grade orchestration 
-to agentic AI development. Built on DSPy 3.3, it features intelligent BDD evaluation, 
-multi-layered memory systems, comprehensive observability, and a progressive tier system 
-that scales from simple automation to enterprise complexity.
+Works with agents you already have (DSPy, CrewAI, OpenAI Agents SDK, Pydantic AI,
+Google ADK, Claude Agent SDK, DeepAgents, Microsoft Agent Framework) without
+rewriting them.
 
-🚀 COMPLETE WORKFLOW:
-super init → super spec generate → super spec validate → super agent compile → super agent evaluate → super agent optimize → super agent evaluate → super agent run → super orchestra
+1. Optimize
+  super agent optimize <name>        GEPA on a seeded train split; reports the
+                                     train gain and the held-out gain
+2. Connect over A2A
+  super a2a adapt --entrypoint ...   Adapt an existing agent: Agent Card + server
+  super agent serve <name>           Serve a compiled SuperOptiX agent over A2A
+3. Ship with quality
+  super agent evaluate <name>        Run the playbook's BDD scenarios
+  super agent test <name>            CI gate: SuperGauge Agent Quality Record,
+                                     deterministic L2 gates, exit 0 only on ship
 
-Start your journey: super init my_project && cd my_project && super spec generate genie developer --namespace software
+Quickstart:
+  super init my_project && cd my_project
+  super agent pull developer
+  super agent compile developer
+  super agent run developer --goal "..."
+  super agent evaluate developer
+  super agent optimize developer --gauge-out record.json
+  super agent test developer --actor you@example.com
 
-✨ MIXIN-DEFAULT COMPILATION:
-• Default: Mixin templates (60% code reduction, enhanced modularity)
-• Legacy: Basic templates available via --basic flag for full control
+Supporting commands: spec, model, dataset, observe, orchestra, marketplace, docs.
+Use `super <command> --help` for details.
 
-🧪 ENHANCED BDD EVALUATION:
-• Intelligent model analysis with capability scoring
-• Auto-tuning evaluation criteria based on model performance  
-• Smart recommendations for model upgrades and scenario optimization
-• Professional test runner UI with comprehensive quality gates
-• Progressive difficulty assessment with actionable guidance
-
-🚀 MODEL INTELLIGENCE SYSTEM:
-• Multi-backend model management (Ollama, MLX, HuggingFace, LM Studio)
-• Smart model recommendations by use case and task
-• Local server management for all backends
-• Seamless DSPy integration with model-agnostic design
-• Model discovery guides and installation assistance
-
-COMPLETE MARKETPLACE:
-• Unified discovery hub for agents and tools across all industries
-• Universal search, category browsing, and intelligent recommendations
-• Project-aware installation and seamless workflow integration
-
-🛠️ MODULAR TOOLS ARCHITECTURE:
-• Clean separation across 17 industry categories
-• 29+ fully implemented tools with factory functions
-• Easy extension points for custom tool development
-• Seamless DSPy integration with backward compatibility
-
-Key Features:
-• 🎭 Progressive tier system (Oracles → Genies → Protocols)
-• 🧪 BDD-driven agent validation with auto-tuning
-• 🧠 Multi-layered memory systems (short-term, long-term, episodic)
-• 📊 Comprehensive observability and tracing
-• 🏪 Unified marketplace for agents and tools
-• 🔧 Modular tools architecture across industries
-• 🤖 Model-agnostic with intelligent recommendations
-• 🚀 Production-ready with enterprise features
-
-Core Commands:
-• `super init <name>`           - Initialize a new SuperOptiX project
-• `super agent <command>`       - Manage AI agents (pull, compile, evaluate, run)
-• `super model <command>`       - Model intelligence system (list, install, serve)
-• `super spec <command>`        - Agent DSL (generate, validate, analyze)
-• `super orchestra <command>`        - Multi-agent orchestration
-• `super observe <command>`     - Observability and monitoring
-• `super marketplace <command>` - Discover agents and tools
-• `super docs`                  - Comprehensive getting started guide
-
-Model Management Examples:
-• `super model list`                           - List installed models
-• `super model install qwen3.5:2b -b ollama` - Install Ollama model
-• `super model install mlx-community/phi-2 -b mlx` - Install MLX model
-• `super model server mlx phi-2 --port 8000`  - Start MLX server
-• `super model dspy ollama/qwen3.5:2b`       - Create DSPy client
-
-Use `super <command> --help` for more information on a specific command.
-
-📖 Learn more: https://github.com/SuperagenticAI/superoptix
+Docs: https://superagenticai.github.io/superoptix/
 """
 
     # Main command parser
@@ -903,7 +902,7 @@ Use `super <command> --help` for more information on a specific command.
     # Docs command
     docs_parser = subparsers.add_parser(
         "docs",
-        help="📚 Comprehensive guide with examples and getting started information",
+        help="Getting started guide",
     )
     docs_parser.set_defaults(func=show_comprehensive_docs)
 
@@ -968,37 +967,38 @@ Use `super <command> --help` for more information on a specific command.
 
     # Init command
     init_parser = subparsers.add_parser(
-        "init", help="🚀 Initialize a new agentic system - Your journey starts here!"
+        "init", help="Initialize a new SuperOptiX project"
     )
-    init_parser.add_argument("name", help="Name of the agent system")
+    init_parser.add_argument("name", help="Name of the project")
     init_parser.set_defaults(func=init_project)
 
     # Agent commands
     agent_parser = subparsers.add_parser(
         "agent",
         aliases=["ag"],
-        help="Manage AI agents",
+        help="Agents: pull, compile, run, optimize, evaluate, test, serve",
         formatter_class=RawDescriptionHelpFormatter,
         description="""
-Manage the lifecycle of AI agents in your SuperOptiX project.
+Manage agents in your SuperOptiX project.
 
-This command suite provides a comprehensive workflow to handle everything
-from adding and optimizing agents to testing and deploying them.
+Build:
+  super agent pull <name>        Pull a pre-built agent playbook
+  super agent compile <name>     Compile the playbook into a runnable pipeline
+  super agent run <name>         Run the agent on a goal
 
-Recommended Workflow:
-  1. `super agent pull <name>`       - Pull a pre-built agent into your project
-  2. `super agent compile <name>`   - Compile the agent's playbook into runnable code
-  3. `super agent optimize <name>`  - Enhance performance using DSPy optimization
-  4. `super agent evaluate <name>`   - Evaluate an agent using its BDD specification tests
-  5. `super agent run <name>`        - Execute the optimized agent with tasks
-  6. `super agent inspect <name>`    - View detailed information about an agent
-  7. `super agent rm <name>`         - Remove an agent from your project
+1. Optimize:
+  super agent optimize <name>    GEPA with a seeded held-out split; prints the
+                                 train gain and the held-out gain
 
-Advanced Commands:
-  • `super agent design`           - Interactively design custom agents
-  • `super agent lint`             - Validate playbook syntax and best practices
-  • `super agent list`             - Browse available agents and project status
+2. Connect over A2A:
+  super agent serve <name>       Serve the compiled agent as an A2A endpoint
+  (agents built elsewhere: super a2a adapt)
 
+3. Ship with quality:
+  super agent evaluate <name>    Run the playbook's BDD scenarios
+  super agent test <name>        CI gate: SuperGauge record, L2 gates, exit 0 on ship
+
+Other: inspect, lint, list, design, dataset, rm.
 Use `super agent <command> --help` for more information on a specific command.
         """,
     )
@@ -1092,12 +1092,6 @@ Use `super agent <command> --help` for more information on a specific command.
         dest="local_ollama",
         action="store_true",
         help="Generate Ollama runtime code path (default behavior is already Ollama-first; this flag is kept for explicitness).",
-    )
-    compile_parser.add_argument(
-        "--local-models",
-        dest="local_ollama",
-        action="store_true",
-        help="Deprecated alias for --local-ollama.",
     )
     compile_mode_group = compile_parser.add_mutually_exclusive_group()
     compile_mode_group.add_argument(
@@ -1222,8 +1216,8 @@ Use `super agent <command> --help` for more information on a specific command.
     optimize_parser = agent_subparsers.add_parser(
         "optimize",
         aliases=["op"],
-        help="Optimize an agent pipeline using DSPy or Optimas.",
-        description="Uses DSPy or Optimas optimization to improve the agent's performance.",
+        help="Optimize with GEPA; reports train and held-out gain.",
+        description="Optimizes the agent with GEPA (default engine dspy) on a seeded train split. 20 percent of scenarios are held out (optimization.optimizer.params.valset_fraction) and the output reports the train gain and the held-out gain; quote the held-out gain. --engine optimas selects the Optimas optimizers instead. --gauge-out writes a SuperGauge Agent Quality Record from the held-out split.",
         formatter_class=RawDescriptionHelpFormatter,
     )
     optimize_parser.add_argument("name", help="The name of the agent to optimize.")
@@ -1351,6 +1345,21 @@ Use `super agent <command> --help` for more information on a specific command.
         "--fresh",
         action="store_true",
         help="Clear DSPy cache before optimization to see real GEPA iterations (recommended for demos)",
+    )
+    optimize_parser.add_argument(
+        "--gauge-out",
+        metavar="PATH",
+        default=None,
+        help=(
+            "After a successful DSPy GEPA run, evaluate the optimized agent on the "
+            "sealed held-out split and write a SuperGauge Agent Quality Record."
+        ),
+    )
+    optimize_parser.add_argument(
+        "--gauge-tier",
+        choices=["T0", "T1", "T2"],
+        default="T1",
+        help="Risk tier for the emitted record (default: T1)",
     )
     optimize_parser.set_defaults(func=optimize_agent)
 
@@ -1692,24 +1701,105 @@ Use `super agent <command> --help` for more information on a specific command.
         metavar="MODEL",
         help="Versioned System One model id to pin (default: jev-1.13.0 or env).",
     )
+    _add_gauge_quality_args(test_parser)
     test_parser.set_defaults(func=test_agent_bdd)
 
-    # super agent tier-status
-    tier_status_parser = agent_subparsers.add_parser(
-        "tier-status",
-        aliases=["ts"],
-        help="Show tier status for agents.",
-        description="Displays the tier status and capabilities of agents in the project.",
+    # super agent test: CI gate over evaluate (2.0)
+    gate_parser = agent_subparsers.add_parser(
+        "test",
+        help="CI quality gate: evaluate, emit a SuperGauge record, exit non-zero unless ship.",
+        description=(
+            "Thin wrapper over 'super agent evaluate' for CI. Defaults to the sealed "
+            "held-out split from the last GEPA run, deterministic gates and a "
+            "built-in SuperGauge L2 conformance check. Exit 0 only when the "
+            "release is allowed (level >= --gate and >= L2, ship verdict, named "
+            "actor, passing gates), as SuperGauge check.py --require-ship; 1 otherwise."
+        ),
         formatter_class=RawDescriptionHelpFormatter,
     )
-    tier_status_parser.set_defaults(func=show_tier_status)
+    gate_parser.add_argument("name", help="Name of the agent to test")
+    gate_parser.add_argument(
+        "--engine", choices=["dspy", "optimas"], default="dspy", help=SUPPRESS
+    )
+    gate_parser.add_argument(
+        "--k",
+        type=int,
+        default=1,
+        metavar="N",
+        help="Independent attempts for reliability.pass_hat_k (default 1: not reported).",
+    )
+    gate_parser.add_argument(
+        "--gate",
+        choices=["L1", "L2", "L3", "L4"],
+        default="L2",
+        help="Minimum SuperGauge conformance level (default: L2).",
+    )
+    gate_parser.add_argument(
+        "--jev",
+        dest="gauge_jev",
+        action="store_true",
+        help="Advisory Jev review (live only). Can soft-hold or reject, never ship.",
+    )
+    gate_parser.add_argument(
+        "--jev-min-confidence",
+        dest="gauge_jev_min_confidence",
+        type=float,
+        default=0.75,
+        metavar="FLOAT",
+        help="Soft-hold floor for Jev Choice confidence (default: 0.75).",
+    )
+    gate_parser.add_argument(
+        "--jev-model",
+        dest="gauge_jev_model",
+        default=None,
+        metavar="MODEL",
+        help="Versioned Jev model id to request (default: jev-1.13.0 or env).",
+    )
+    gate_parser.add_argument(
+        "--gauge-out",
+        metavar="PATH",
+        default="agent-quality-record.yaml",
+        help="Where to write the record (default: agent-quality-record.yaml).",
+    )
+    gate_parser.add_argument(
+        "--gauge-tier", choices=["T0", "T1", "T2"], default="T1", help="Risk tier."
+    )
+    gate_parser.add_argument(
+        "--gate-floor",
+        action="append",
+        metavar="ID=VALUE",
+        help="Override a gate floor, e.g. --gate-floor output.parse_rate=0.99.",
+    )
+    gate_parser.add_argument(
+        "--checker",
+        metavar="PATH",
+        default=None,
+        help=(
+            "Also run a pinned SuperGauge conformance/check.py on the record "
+            "(env SUPERGAUGE_CHECKER)."
+        ),
+    )
+    gate_parser.add_argument(
+        "--actor",
+        default=None,
+        help=(
+            "Named release actor recorded in decision.actor (default: "
+            "SUPEROPTIX_RELEASE_ACTOR, GITHUB_ACTOR, then USER)."
+        ),
+    )
+    gate_parser.add_argument("-v", "--verbose", action="store_true")
+    gate_parser.set_defaults(
+        func=test_agent_gate,
+        gauge_sealed=True,
+        gauge_gates=True,
+        auto_tune=False,
+        ignore_checks=False,
+        format="table",
+        save_report=None,
+    )
 
     # Set default function for agent command if no subcommand is provided
-    agent_parser.set_defaults(
-        func=lambda args: (
-            agent_parser.print_help() if args.agent_command else show_tier_status({})
-        )
-    )
+    agent_parser.set_defaults(func=lambda args: agent_parser.print_help())
 
     # Harness commands
     # Orchestra commands
@@ -1719,18 +1809,13 @@ Use `super agent <command> --help` for more information on a specific command.
         help="Manage multi-agent workflows",
         formatter_class=RawDescriptionHelpFormatter,
         description="""
-Orchestrate multiple agents to perform complex, coordinated tasks.
+Run several SuperOptiX agents as one workflow (sequential by default).
 
-SuperOptiX orchestras allow you to define workflows where agents collaborate
-to achieve a common goal. This command suite helps you create, manage, and
-run these powerful multi-agent systems.
+  super orchestra create <name>   Create an orchestra definition
+  super orchestra run <name>      Run it on a goal
+  super orchestra list            List orchestras in this project
 
-Recommended Workflow:
-  1. `super orchestra create <name>` - Create a new orchestra definition
-2. `super orchestra run <name>`    - Execute an orchestra with a specific task
-3. `super orchestra list`         - Browse all orchestras in your project
-
-Use `super orchestra <command> --help` for more information.
+Use `super orchestra <command> --help` for details.
         """,
     )
     orchestra_subparsers = orchestra_parser.add_subparsers(
@@ -1778,10 +1863,10 @@ Use `super orchestra <command> --help` for more information.
     )
     run_orchestra_parser.set_defaults(func=run_orchestra)
 
-    # Marketplace commands
+    # A2A commands
     a2a_parser = subparsers.add_parser(
         "a2a",
-        help="🔌 Make an existing agent speak A2A 1.0",
+        help="Connect over A2A: adapt an existing agent to A2A 1.0",
         formatter_class=RawDescriptionHelpFormatter,
         description="""
 Adapt an agent you already built into an A2A 1.0 endpoint.
@@ -1794,6 +1879,8 @@ Examples:
   super a2a adapt --entrypoint mycrew:crew --framework crewai
   super a2a adapt --entrypoint app.rag:program --framework dspy --out ./a2a
   super a2a adapt --entrypoint mycrew:crew --url https://agents.example.com
+
+To serve an agent compiled by SuperOptiX, use `super agent serve <name>`.
 """,
     )
     a2a_sub = a2a_parser.add_subparsers(
@@ -1833,28 +1920,19 @@ Examples:
     marketplace_parser = subparsers.add_parser(
         "marketplace",
         aliases=["market", "mk"],
-        help="🏪 Discover and install agents and tools",
+        help="Discover and install pre-built agents and tools",
         formatter_class=RawDescriptionHelpFormatter,
         description="""
-Unified discovery hub for AI agents and tools - your component marketplace.
+Browse and install the pre-built agents and tools that ship with SuperOptiX.
 
-Browse, search, and install agents and tools from SuperOptiX's comprehensive library.
-Perfect for discovering new capabilities and finding the right components for your project.
+  super marketplace                       Overview
+  super marketplace browse agents         List agents
+  super marketplace browse tools          List tools
+  super marketplace search "web"          Search agents and tools
+  super marketplace show <component>      Show one component
+  super marketplace install agent <name>  Same as super agent pull <name>
 
-Quick Start:
-  super marketplace                    - Dashboard overview with stats
-super marketplace browse agents      - Browse all available agents  
-      super marketplace browse tools       - Browse all available tools
-    super marketplace search "web"       - Universal search across components
-      super marketplace featured          - See popular components
-
-Advanced Discovery:
-  super marketplace browse industries  - Explore agent industries
-super marketplace browse categories  - Explore tool categories
-super marketplace show <component>   - Detailed component information
-super marketplace install agent <name> - Quick install (same as super agent pull)
-
-Use `super marketplace <command> --help` for more information.
+Use `super marketplace <command> --help` for details.
         """,
     )
     marketplace_subparsers = marketplace_parser.add_subparsers(
@@ -1938,40 +2016,20 @@ Use `super marketplace <command> --help` for more information.
     superspec_parser = subparsers.add_parser(
         "spec",
         aliases=["sx-dsl"],
-        help="🤖 Agent DSL for playbook management",
+        help="Playbook DSL: generate, validate, analyze playbooks",
         formatter_class=RawDescriptionHelpFormatter,
         description="""
-🎭 SuperSpec DSL - Agent Playbook Definition Language
+Write and check SuperSpec agent playbooks (YAML).
 
-🚀 Create, validate, and manage AI agent playbooks with SuperSpec DSL!
-
-📚 Quick Start:
   super spec generate genies my-agent --namespace software
   super spec validate my-agent_playbook.yaml
   super spec analyze ./agents/
+  super spec info <playbook>      Show one playbook
+  super spec schema               Show the playbook schema
+  super spec bootstrap <ns>       Generate playbooks for a namespace
 
-🎯 Available Commands:
-  generate  - 🎨 Create new agent playbook templates
-  validate  - ✅ Check playbook syntax and structure
-  analyze   - 📊 Get insights about your playbooks
-  info      - 📋 Show detailed playbook information
-  schema    - 📚 Explore DSL schema and features
-  bootstrap - 🚀 Generate multiple agents for a namespace
-
-✨ Key Features:
-  • 🎯 Tier-based agent templates (Oracles and Genies)
-  • ✅ Comprehensive validation with detailed error reporting
-  • 📊 Project-wide agent analysis and insights
-  • 🚀 Namespace bootstrapping for rapid development
-  • 📋 Rich schema documentation and guidance
-
-💡 Common Workflow:
-  1. super spec generate genies developer --namespace software
-  2. super spec validate developer.yaml
-  3. super agent compile developer
-  4. super spec analyze ./agents
-
-Use 'super spec <command> --help' for more information.
+Typical flow: generate, validate, then super agent compile <name>.
+Use `super spec <command> --help` for details.
         """,
     )
     superspec_subparsers = superspec_parser.add_subparsers(
@@ -2276,7 +2334,7 @@ Use 'super spec <command> --help' for more information.
     )
     bootstrap_parser.set_defaults(func=bootstrap_namespace)
 
-    # Model management commands - SuperOptiX Model Intelligence System
+    # Model management commands
     def handle_model_list(args):
         """Handle model list command."""
         from superoptix.cli.commands.model import list_models
@@ -2405,54 +2463,30 @@ Use 'super spec <command> --help' for more information.
     model_parser = subparsers.add_parser(
         "model",
         aliases=["md"],
-        help="🚀 SuperOptiX Model Intelligence System",
+        help="Manage local and cloud models (Ollama, MLX, HF, LM Studio)",
         formatter_class=RawDescriptionHelpFormatter,
         description="""
-🚀 SuperOptiX Model Intelligence System - Advanced model management for agentic AI.
+Manage the models your agents run on: local (Ollama, MLX, HuggingFace,
+LM Studio) and hosted.
 
-Manage installed models across different backends with SuperOptiX branding and philosophy.
-Focus on models you actually have installed, with guidance on how to get more.
+  super model list                  Installed models
+  super model install qwen3.5:2b    Pull an Ollama model (default backend)
+  super model info qwen3.5:2b       Model details
+  super model backends              Backend status
+  super model discover              Where to find more models
 
-✨ Quick Examples:
-  super model list                           # List installed models
-  super model discover                       # Model discovery guide
-  super model install qwen3.5:2b           # Install Ollama model (default)
-  super model info qwen3.5:2b               # Get model details
-  super model backends                       # Check backend status
-  super model dspy ollama/qwen3.5:2b        # Create DSPy client
+Backends:
+  Ollama     ollama serve (localhost:11434), then super model install <name>
+  MLX        super model server mlx <repo> --port 8000
+  HF         super model server huggingface <repo> --port 8001
+  LM Studio  start the server in the app (localhost:1234)
 
-🔧 Supported Backends & Examples:
-
-🦙 Ollama (Local Models - Default):
-  • Install: super model install qwen3.5:2b (auto-pulls with ollama)
-  • Serve: ollama serve (runs on localhost:11434)
-  • Use: super model dspy ollama/qwen3.5:2b
-
-🍎 MLX (Apple Silicon):
-  • Install: super model install -b mlx mlx-community/Llama-3.2-3B-Instruct-4bit
-  • Serve: super model server mlx mlx-community/Llama-3.2-3B-Instruct-4bit --port 8000
-  • Use: super model dspy mlx-community/Llama-3.2-3B-Instruct-4bit
-
-🤗 HuggingFace (Transformers):
-  • Install: super model install -b huggingface microsoft/Phi-4
-  • Serve: super model server huggingface microsoft/Phi-4 --port 8001
-  • Use: super model dspy microsoft/Phi-4
-
-🎮 LM Studio (Desktop App):
-  • Install: Download via LM Studio app
-  • Serve: Start server in LM Studio app (localhost:1234)
-  • Use: super model dspy lmstudio/your-model-name
-
-🎯 SuperOptiX Features:
-  • Shows only installed models by default
-  • Provides discovery guides for model sources
-  • Seamless DSPy integration
-  • SuperOptiX-branded model intelligence
+Set the model in the playbook under spec.language_model.
         """,
     )
     model_subparsers = model_parser.add_subparsers(
         dest="model_command",
-        help="SuperOptiX Model Intelligence commands",
+        help="Model commands",
         required=False,
     )
     model_parser.set_defaults(func=lambda args: model_parser.print_help())
@@ -2629,7 +2663,7 @@ Note:
     observability_parser = subparsers.add_parser(
         "observe",
         aliases=["ob"],
-        help="Manage observability features",
+        help="Traces, dashboard and debugging for agent runs",
         formatter_class=RawDescriptionHelpFormatter,
     )
     observability_subparsers = observability_parser.add_subparsers(
@@ -2857,6 +2891,42 @@ Note:
         help="Dequantize instead of quantize",
     )
     quantize_parser.set_defaults(func=handle_model_quantize)
+
+    # List commands pillar-first in --help (optimize, connect, quality).
+    _order_help(
+        subparsers,
+        [
+            "init",
+            "agent",
+            "a2a",
+            "spec",
+            "model",
+            "dataset",
+            "observe",
+            "orchestra",
+            "marketplace",
+            "docs",
+            "version",
+        ],
+    )
+    _order_help(
+        agent_subparsers,
+        [
+            "pull",
+            "compile",
+            "run",
+            "optimize",
+            "serve",
+            "evaluate",
+            "test",
+            "inspect",
+            "lint",
+            "list",
+            "design",
+            "dataset",
+            "rm",
+        ],
+    )
 
     args = parser.parse_args()
 

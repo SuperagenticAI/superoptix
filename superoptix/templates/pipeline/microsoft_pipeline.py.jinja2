@@ -24,8 +24,7 @@ try:
 		from agent_framework import Agent as MicrosoftAgent
 	except ImportError:
 		from agent_framework import ChatAgent as MicrosoftAgent
-	from agent_framework.openai import OpenAIChatClient
-	from agent_framework.azure import AzureOpenAIChatClient
+	from agent_framework.openai import OpenAIChatClient  # noqa: F401
 	MICROSOFT_FRAMEWORK_AVAILABLE = True
 except ImportError as e:
 	MICROSOFT_FRAMEWORK_AVAILABLE = False
@@ -36,7 +35,10 @@ except ImportError as e:
 
 from superoptix.core.base_component import BaseComponent
 from superoptix.core.rag_mixin import RAGMixin
-from superoptix.runners.microsoft_runtime_helpers import resolve_client_config
+from superoptix.runners.microsoft_runtime_helpers import (
+	create_chat_client,
+	resolve_client_config,
+)
 
 COMPILED_SPEC_PATH = Path(__file__).resolve().parent / "{{ compiled_spec_filename }}"
 def _load_compiled_spec(path: Path) -> Dict[str, Any]:
@@ -171,12 +173,7 @@ class {{ agent_name | to_pascal_case }}Component(BaseComponent):
 			{{ spec.language_model | tojson }},
 			self._model_config,
 		)
-		client_type = client_config.get("client_type")
-		kwargs = dict(client_config.get("kwargs", {}) or {})
-		if client_type == "azure":
-			self._chat_client = AzureOpenAIChatClient(**kwargs)
-		else:
-			self._chat_client = OpenAIChatClient(**kwargs)
+		self._chat_client = create_chat_client(client_config)
 	
 	def _initialize_agent(self):
 		"""Initialize the Microsoft Agent Framework agent."""

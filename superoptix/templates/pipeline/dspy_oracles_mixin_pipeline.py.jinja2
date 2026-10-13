@@ -217,14 +217,14 @@ class {{ agent_name | to_pascal_case }}Pipeline(
         
         if provider == 'ollama':
             # Handle Ollama-specific configuration
-            model_str = f'ollama_chat/{model}' if not model.startswith('ollama_chat/') else model
-            self.lm = LM(
-                model=model_str,
+            # Keyless /v1 Ollama config for DSPy 3.4+ (shared helper).
+            from superoptix.core.local_lm import build_dspy_lm
+            self.lm = build_dspy_lm(
+                model,
                 provider='ollama',
-                api_base='http://localhost:11434',
-                api_key='',
+                api_base=lm_config.get('api_base'),
                 temperature=temperature,
-                max_tokens=max_tokens
+                max_tokens=max_tokens,
             )
         else:
             # Generic LM configuration

@@ -385,15 +385,17 @@ class SuperOptiXMLXBackend(SuperOptiXBaseBackend):
         try:
             # Use the same pattern as Ollama - dspy.LM with custom_openai/ prefix
             # LiteLLM supports MLX through the custom_openai provider
-            import dspy
+            import dspy  # noqa: F401  (availability check)
 
             # Extract parameters and avoid conflicts
             temperature = kwargs.pop("temperature", 0.7)
             max_tokens = kwargs.pop("max_tokens", 2048)
             api_base = kwargs.pop("api_base", "http://localhost:8000")
 
-            return dspy.LM(
-                model=f"custom_openai/{model_name}",
+            from superoptix.core.local_lm import build_dspy_lm
+
+            return build_dspy_lm(
+                f"custom_openai/{model_name}",
                 api_base=api_base,
                 temperature=temperature,
                 max_tokens=max_tokens,

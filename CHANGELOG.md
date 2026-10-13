@@ -7,6 +7,87 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0rc1] - 2026-10-11 (pre-release)
+
+First release candidate of SuperOptiX 2.0, published as a PyPI pre-release.
+`pip install superoptix` stays on 0.3.16; opt in with
+`pip install --pre superoptix==2.0.0rc1` or
+`uv tool install --prerelease allow superoptix==2.0.0rc1`.
+
+SuperOptiX 2.0 makes optimization numbers honest and agent quality records
+checkable. Highlights:
+
+- GEPA held-out split: a seeded 20% of scenarios is never shown to the
+  optimizer; reported (train) gain and held-out gain are shown side by side.
+- A2A: keep-alive sessions and protocolVersion-first interface selection.
+- DSPy 3.5 readiness: `dspy>=3.4`, engine-based `dspy.LM` for MLX.
+- Agent quality on [SuperGauge](https://github.com/SuperagenticAI/supergauge)
+  (checker-v0.1.0, a5920cc): sealed holdout, deterministic L2 gates, RFC 0005
+  integrity evidence, the `super agent test` CI gate and
+  `super agent optimize --gauge-out`.
+- One shared Ollama/local LM helper that fails loudly when the server is
+  unreachable.
+- CLI refresh around the three pillars, plus removals of deprecated commands
+  and aliases.
+
+See [Migrating to 2.0](docs/guides/migrating-to-2.0.md).
+
+### Breaking
+
+- GEPA holds out a seeded 20% of scenarios (`gepa.valset_fraction`, default
+  0.2) and never shows them to the optimizer. The single gain from 0.3.x is now
+  the "reported (train) gain"; the held-out gain is reported next to it
+  (arXiv:2610.09239). Same for `optimize_routing` (`valset_fraction`, `seed`).
+- `dspy>=3.4` is required. `MLXDSPyClient` is no longer a `BaseLM` subclass; it
+  returns an engine-based `dspy.LM` (DSPy 3.5 removes custom `BaseLM.forward`).
+- `--gauge-sealed` derives `sealed` from the GEPA held-out split instead of
+  asserting it; without a split the record says `sealed: false` and why.
+- Agent Quality Record files no longer contain `x-superoptix`; SuperOptiX
+  metadata moves to `<stem>.superoptix.json`. Records gain
+  `subject.authority.grant_digest` and an evaluation ledger
+  `<stem>.ledger.jsonl`, so they now validate against the SuperGauge schema.
+- A2A clients prefer the highest `protocolVersion` interface (1.0 over 0.3)
+  before binding preference; `disconnect()` also closes the HTTP session.
+- Removed the deprecated `super agent compile --local-models` alias (use
+  `--local-ollama`) and `PipelineUtilities.get_optimizer` (use
+  `get_custom_optimizer` or `DSPyOptimizerFactory`).
+- Classifier is now `Development Status :: 5 - Production/Stable`.
+- Removed `super agent tier-status` (alias `ts`). It showed old tier and
+  upgrade messaging and crashed (`'FeatureConfig' object has no attribute
+  'enterprise_only'`). Bare `super agent` now prints the agent help instead.
+  Playbook tiers (`--tier oracles|genies`) are unchanged.
+
+### Added
+
+- `super agent test`: CI gate that evaluates on the sealed held-out split, adds
+  deterministic SuperGauge gates and exits non-zero unless the release is
+  allowed (SuperGauge checker-v0.1.0 `--require-ship` semantics).
+- Deterministic gates on canonical SuperGauge ids: `output.parse_rate`,
+  `reliability.beats_trivial_baseline`, `reliability.pass_hat_k`,
+  `tool.correctness`, `trajectory.valid`, `assurance.holdout_sealed`.
+- Canary scenarios (`canary: true`) as contamination probes, recorded under
+  `assurance.integrity.canaries` (RFC 0005); excluded from GEPA training.
+- RFC 0005 mechanical override and the judge model that actually ran.
+- `super agent optimize --gauge-out` and `super agent evaluate --gauge-gates
+  --k --gate-floor`.
+- Pinned SuperGauge conformance checker in the test suite.
+- A2A keep-alive: one `requests.Session` per `A2AClient`, one client per URL
+  in `A2ARegistry`, context manager support (arXiv:2610.04053).
+
+### Changed
+
+- CLI refresh to match the 2.0 positioning ("Optimization and Quality layer for
+  AI agents"; "Optimize agents. Connect over A2A. Ship with quality."):
+  `super --help`, `super agent --help`, the version panel, `super init` and the
+  conversational welcome now lead with the three pillars (optimize, connect
+  over A2A, ship with quality). Commands are listed pillar-first; parsing and
+  aliases are unchanged. `super agent optimize --help` describes GEPA with the
+  held-out split; `super a2a --help` points to `super agent serve`. `super
+  docs`, `super init`, `pull` and `compile` next steps now include `optimize
+  --gauge-out`, `test` and `serve`, and no longer reference flags that do not
+  exist (`super agent run --interactive`, `compile --basic`,
+  `super spec generate genie`).
+
 ## [0.3.16] - 2026-09-30
 
 ### Fixed

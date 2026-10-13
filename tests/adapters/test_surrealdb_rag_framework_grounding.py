@@ -283,6 +283,7 @@ async def test_deepagents_surrealdb_rag_prompt_grounding(tmp_path: Path, monkeyp
     fake_deepagents_helpers.resolve_model = lambda language_model, model_config=None: (
         "anthropic:claude-sonnet-4-20250514"
     )  # noqa: ARG005
+    fake_deepagents_helpers.chat_model_kwargs = lambda language_model, resolved: {}  # noqa: ARG005
     monkeypatch.setitem(
         sys.modules,
         "superoptix.runners.deepagents_runtime_helpers",

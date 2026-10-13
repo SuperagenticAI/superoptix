@@ -743,8 +743,8 @@ def features(tier: str = None):
             "Sequential Only",
             "Basic task orchestration",
         )
-        table.add_row("Basic Optimization", "✅", "BootstrapFewShot")
-        table.add_row("Basic Evaluation", "✅", "Exact match, F1 score")
+        table.add_row("Optimization", "✅", "GEPA, per agent (super agent optimize)")
+        table.add_row("Evaluation", "✅", "BDD scenarios (super agent evaluate)")
 
         if agent_tier == AgentTier.GENIES:
             table.add_row("ReAct Tools", "✅", "Tool integration")
@@ -756,8 +756,6 @@ def features(tier: str = None):
 
         if agent_tier == AgentTier.ORACLES:
             console.print("[dim]💡 Upgrade to Genies tier for enhanced capabilities[/]")
-
-    console.print("\n[yellow]ℹ️  Advanced features available in commercial version[/]")
 
 
 @click.command()

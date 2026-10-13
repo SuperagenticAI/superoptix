@@ -1,0 +1,85 @@
+# Conformance-shaped example: a hardened L2 quality track as emitted by an agent
+# framework (SuperOptiX shape). Deterministic gates on parse rate, a trivial
+# baseline, a pass^k floor, trajectory validity and tool correctness all pass.
+# Jev is recorded as an advisory judge with calibration metadata; it backs no
+# gate. Digests are synthetic but well-formed.
+#
+#   python conformance/check.py conformance/examples/l3-superoptix-hardened-ship.yaml \
+#     --level L2 --require-ship
+supergauge: "0.1"
+record_id: aqr_01SOXHARDENEDL2
+emitted_at: "2026-10-11T08:30:00Z"
+
+profile: {id: sg/coding-agent, version: "0.1", tier: T1}
+
+subject:
+  agent: superoptix-support-agent
+  harness_digest: sha256:4e1f0c2b9d8a7e6f5c4b3a29180716f5e4d3c2b1a09f8e7d6c5b4a3928170615
+  code_digest: sha256:0a1b2c3d4e5f60718293a4b5c6d7e8f9a0b1c2d3e4f5061728394a5b6c7d8e9f
+  model: {provider: openai, id: gpt-5.1}
+  authority:
+    acs_policy_version: "2.1"
+    sandbox: docker
+    egress: deny-by-default
+    capabilities: [repo.read, test.run]
+
+task_set:
+  manifest_digest: sha256:7d6c5b4a39281706f5e4d3c2b1a09f8e7d6c5b4a3928170615f4e3d2c1b0a998
+  held_in: 150
+  held_out: 50
+  sealed: true
+  canary_ids: [tsk_canary_1, tsk_canary_2]
+
+measures:
+  - {id: output.parse_rate, value: 0.98, split: held-out, n: 50,
+     schema_digest: "sha256:1f2e3d4c5b6a79880716253443526170f8e9d0c1b2a3948576a6b5c4d3e2f1a0"}
+  - {id: task.completion, value: 0.84, split: held-out, n: 50}
+  - id: reliability.beats_trivial_baseline
+    value: true
+    split: held-out
+    n: 50
+    baseline: {id: majority-label, value: 0.42, measure: task.completion,
+               candidate_value: 0.84, margin: 0.1}
+  - {id: reliability.pass_hat_k, value: 0.72, k: 3, n: 50, split: held-out}
+  - {id: trajectory.valid, value: 0.96, split: held-out, n: 50}
+  - {id: tool.correctness, value: 0.97, split: held-out, n: 50}
+  - {id: assurance.holdout_sealed, value: true}
+  - {id: answer.grounded, value: 0.88, n: 40}
+
+gates:
+  - {id: policy.hard_rules, result: pass, source: acs}
+  - {id: output.parse_rate, floor: 0.95, split: held-out, result: pass}
+  - {id: reliability.beats_trivial_baseline, result: pass}
+  - {id: reliability.pass_hat_k, floor: 0.6, split: held-out, result: pass}
+  - {id: trajectory.valid, floor: 0.9, split: held-out, result: pass}
+  - {id: tool.correctness, floor: 0.9, split: held-out, result: pass}
+
+assurance:
+  judge:
+    id: typesafe/jev@1
+    model: jev-1.13.0
+    pack_digest: sha256:a1b2c3d4e5f60718293a4b5c6d7e8f90123456789abcdef0123456789abcdef0
+    human_agreement_kappa: 0.74
+    sampled: 40
+    calibration_ece: 0.05
+    calibration:
+      method: reanchor
+      params: {anchors: [0.2, 0.5, 0.8], temperature: 1.3}
+      params_digest: sha256:9e8d7c6b5a4938271605f4e3d2c1b0a99e8d7c6b5a4938271605f4e3d2c1b0a9
+      fold: {id: calib-fold-1, n: 40, ece: 0.05, agreement_with_human: 0.74}
+      calibrated_at: "2026-10-10T17:00:00Z"
+  evidence:
+    ledger: .superoptix/traces/
+    format: opentelemetry/1.x
+    events: 1210
+    replayable: true
+  evaluator_independent: true
+
+decision:
+  verdict: ship
+  actor: "release-bot@superoptix.example"
+  rationale: >
+    All deterministic gates passed on the sealed held-out split. Jev answered
+    with high calibrated confidence; it is recorded as advisory evidence and
+    backs no gate.
+  rolls_back_to: sha256:c120737106c0cd7a39102797cba5528781586a70469c289d3119c7f3dc4507e7

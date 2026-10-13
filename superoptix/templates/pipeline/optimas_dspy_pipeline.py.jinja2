@@ -59,19 +59,16 @@ class ThreadSafeDSPyLM:
 			with self._lock:
 				if self._lm is None:
 					try:
-						self._lm = dspy.LM(
-							model=self.model_name,
+						from superoptix.core.local_lm import build_dspy_lm
+						self._lm = build_dspy_lm(
+							self.model_name,
 							api_base=self.api_base,
 							api_key=self.api_key
 						)
 					except Exception as e:
-						# Fallback to basic configuration if there are issues
-						print(f"Warning: Could not configure DSPy LM with {self.model_name}: {e}")
-						self._lm = dspy.LM(
-							model="ollama/qwen3.5:2b",
-							api_base="http://localhost:11434",
-							api_key="ollama"
-						)
+						# No silent fallback to a different model: fail loudly.
+						print(f"Error: Could not configure DSPy LM with {self.model_name}: {e}")
+						raise
 		return self._lm
 	
 	def __getattr__(self, name):
