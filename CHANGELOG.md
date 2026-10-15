@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Documentation
+
+- CrewAI install guidance: the `chromadb` conflict is resolved upstream in
+  CrewAI 1.15.24 (`chromadb~=1.5.9`), so CrewAI now co-installs with the
+  `chromadb`, `turboagents` and `vectordb` extras. Docs recommend
+  `crewai>=1.15.24` and drop the stale `--no-deps` / `json-repair` workaround.
+  CrewAI stays out of `frameworks` because of an OpenTelemetry squeeze that
+  would pull `google-adk` back to 2.7.0.
+
 ## [2.0.0rc1] - 2026-10-11 (pre-release)
 
 First release candidate of SuperOptiX 2.0, published as a PyPI pre-release.

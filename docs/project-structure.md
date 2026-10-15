@@ -112,23 +112,13 @@ uv pip install "superoptix[vectordb]"
 uv pip install "superoptix[observability]"
 ```
 
-### ⚠️ Important: CrewAI Dependency Conflict
+### CrewAI
 
-**CrewAI has a known dependency conflict** with SuperOptiX due to incompatible `json-repair` version requirements:
+CrewAI is installed separately from the `frameworks` extra. The old `json-repair` and
+`chromadb` conflicts are resolved upstream, so a current CrewAI installs normally:
 
-- **DSPy 3.0.0** requires `json-repair>=0.30.0`
-- **CrewAI 1.15** requires `json-repair==0.25.2`
-
-**To use CrewAI with SuperOptiX, install it manually:**
 ```bash
-# Install SuperOptiX with DSPy support
-uv pip install "superoptix[optimas]"
-
-# Install CrewAI without dependencies
-uv pip install crewai>=1.15 --no-deps
-
-# Ensure compatible json-repair version
-uv pip install "json-repair>=0.30.0"
+uv pip install superoptix "crewai>=1.15.24"
 ```
 
 See our [Troubleshooting Guide](troubleshooting.md) for more details.

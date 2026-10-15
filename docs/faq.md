@@ -122,15 +122,21 @@ repository is gated behind that.
 
 ### Can I install CrewAI alongside SuperOptiX?
 
-Yes, as a separate step. CrewAI is left out of the `frameworks` extra because it requires
-`chromadb~=1.1.0`, while the `chromadb`, `turboagents` and `vectordb` extras require
-`chromadb>=1.5.5`.
+Yes, as a separate step:
 
 ```bash
-uv pip install superoptix "crewai>=1.15"
+uv pip install superoptix "crewai>=1.15.24"
 ```
 
-Use an environment without the `turboagents` or `vectordb` extras for that path.
+CrewAI 1.15.24 and later require `chromadb~=1.5.9`, which satisfies the `chromadb`,
+`turboagents` and `vectordb` extras (`chromadb>=1.5.5`), so you can combine CrewAI with
+them. Older CrewAI 1.15.x releases pinned `chromadb~=1.1.0`, so keep the `>=1.15.24` floor.
+
+CrewAI is still left out of the `frameworks` extra. CrewAI needs `opentelemetry-api>=1.42`,
+Microsoft Agent Framework's telemetry stack then needs `>=1.43`, and Google ADK 2.8+ caps it
+at `<=1.42.1`. Installing CrewAI next to the full `frameworks` extra works, but the resolver
+falls back to `google-adk` 2.7.0. If you need the latest ADK, keep CrewAI in its own
+environment.
 
 The `json-repair` conflict documented in older versions of this page is resolved upstream.
 CrewAI 1.15 and DSPy 3.3 agree on `json-repair` and co-install cleanly.
