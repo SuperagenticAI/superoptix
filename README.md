@@ -112,11 +112,13 @@ address the card advertises, and `--out` to choose the output directory.
 Install the matching extra to work with a runtime, for example
 `uv tool install superoptix --with "superoptix[frameworks-openai]"`.
 
-CrewAI installs separately, because it requires `chromadb~=1.1.0` while the
-vector store extras require `chromadb>=1.5.5`:
+CrewAI installs separately. Since CrewAI 1.15.24 it uses the same `chromadb`
+1.5.x line as the vector store extras, so it co-installs with them. It stays
+out of the `frameworks` extra because, combined with every other runtime, the
+OpenTelemetry pins pull Google ADK back to 2.7:
 
 ```bash
-uv tool install superoptix --with "crewai>=1.15"
+uv tool install superoptix --with "crewai>=1.15.24"
 ```
 
 ## Conformance

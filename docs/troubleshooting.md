@@ -8,45 +8,24 @@ For fast error-to-fix mapping, use [Troubleshooting by Symptom](guides/troublesh
 
 ### CrewAI Installation Conflicts
 
-**Problem:** You encounter dependency conflicts when trying to install CrewAI with SuperOptiX.
+**Problem:** You see a resolver conflict when installing CrewAI with SuperOptiX.
 
-**Error Message:**
-```
-ERROR: Cannot install crewai>=1.15 and dspy>=3.3 because these package versions have conflicting dependencies.
+**Cause:** Older CrewAI releases pinned versions that clash with SuperOptiX extras:
+`json-repair==0.25.2` (CrewAI before 1.15) and `chromadb~=1.1.0` (CrewAI 1.15.0 to 1.15.23).
+Both are resolved upstream. CrewAI 1.15.24 and later use `json-repair~=0.60.1` and
+`chromadb~=1.5.9`.
 
-The conflict is caused by:
-    dspy 3.0.0 depends on json-repair>=0.30.0
-    crewai 0.157.0 depends on json-repair==0.25.2
-```
-
-**Root Cause:**
-This is a **known dependency conflict** between CrewAI and DSPy due to incompatible `json-repair` version requirements:
-- **DSPy 3.0.0** requires `json-repair>=0.30.0`
-- **CrewAI 1.15** requires `json-repair==0.25.2` (exact version)
-
-**Solution:**
-Install CrewAI manually after installing SuperOptiX with DSPy support:
+**Solution:** Install a current CrewAI next to SuperOptiX. No `--no-deps` workaround is needed.
 
 ```bash
-# Install SuperOptiX with DSPy support (this gets compatible json-repair)
-uv pip install "superoptix[optimas]"
-
-# Install CrewAI without dependencies to avoid conflicts
-uv pip install crewai>=1.15 --no-deps
-
-# Ensure compatible json-repair version
-uv pip install "json-repair>=0.30.0"
+uv pip install superoptix "crewai>=1.15.24"
 ```
 
-**Why This Works:**
-- The `--no-deps` flag prevents pip from trying to resolve conflicting dependencies
-- We manually install the version of `json-repair` that satisfies both packages
-- Both packages work together at runtime despite metadata conflicts
-
-**Alternative Solutions:**
-1. **Use only CrewAI**: Install SuperOptiX without DSPy support, then add CrewAI normally
-2. **Wait for updates**: Monitor for newer CrewAI versions that might fix the dependency conflict
-3. **Use different versions**: Consider using older versions of DSPy if compatible with your needs
+**Google ADK note:** CrewAI is not in the `frameworks` extra. CrewAI needs
+`opentelemetry-api>=1.42`, Microsoft Agent Framework's telemetry stack then needs `>=1.43`,
+and Google ADK 2.8+ caps it at `<=1.42.1`. Combining CrewAI with the full `frameworks` extra
+resolves, but with `google-adk` 2.7.0. If you need the latest ADK, use a separate environment
+for CrewAI.
 
 ## 🔍 Build Issues
 

@@ -216,14 +216,12 @@ python --version
 uv tool upgrade superoptix
 ```
 
-**CrewAI Installation Conflicts**: If you encounter dependency conflicts when installing CrewAI with SuperOptiX:
+**CrewAI**: CrewAI is not part of the `frameworks` extra. Add it alongside SuperOptiX:
 ```bash
-# The issue: CrewAI requires json-repair==0.25.2, but DSPy needs json-repair>=0.30.0
-# Solution: Install manually with --no-deps flag
-uv tool install superoptix --with "superoptix[frameworks-dspy]"  # Install DSPy support first
-uv tool install superoptix --with crewai>=1.15  # Add CrewAI manually
-uv tool install superoptix --with "json-repair>=0.30.0"  # Ensure compatible version
+uv tool install superoptix --with "crewai>=1.15.24"
 ```
+The old `json-repair` and `chromadb` conflicts are resolved upstream (use CrewAI 1.15.24 or
+later). See the [FAQ](faq.md) for the remaining Google ADK note.
 
 ### Still Having Issues?
 

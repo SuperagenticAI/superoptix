@@ -126,20 +126,24 @@ frameworks-claude-sdk = [
 
 # CrewAI - installed alongside SuperOptiX rather than as an extra.
 #
-# The historically documented blocker (json-repair) is RESOLVED upstream:
-# crewai 1.15+ requires json-repair~=0.60.1, which satisfies DSPy 3.3's
-# json-repair>=0.30. CrewAI and DSPy now co-install cleanly.
+# json-repair: RESOLVED upstream (crewai 1.15+ needs json-repair~=0.60.1,
+# which satisfies DSPy's json-repair>=0.30).
 #
-# The live blocker is chromadb: crewai 1.15+ requires chromadb~=1.1.0, while
-# the chromadb / turboagents / vectordb extras require chromadb>=1.5.5.
-# Declaring that as a [tool.uv] conflict pushes `uv lock` past 10 minutes,
-# so CrewAI stays a one-line install instead:
+# chromadb: RESOLVED upstream in crewai 1.15.24 (2026-10-07), which moved to
+# chromadb~=1.5.9. That satisfies the chromadb / turboagents / vectordb extras
+# (chromadb>=1.5.5), so CrewAI now co-installs with the vector store extras:
 #
-#   uv pip install superoptix "crewai>=1.15"
+#   uv pip install superoptix "crewai>=1.15.24"
 #
-# Use a CrewAI-only environment (no turboagents/vectordb extras) for that path.
+# Remaining constraint: OpenTelemetry. crewai needs opentelemetry-api>=1.42,
+# agent-framework's microsoft-opentelemetry stack then needs >=1.43, and
+# google-adk 2.8+ caps opentelemetry-api<=1.42.1. With the full `frameworks`
+# extra the resolver therefore falls back to google-adk 2.7.0 (<=1.43).
+# Putting crewai in `frameworks` would drag ADK back for everyone, and a
+# [tool.uv] conflict pushes `uv lock` past 10 minutes, so CrewAI stays a
+# one-line install. Lift this once google-adk relaxes its OpenTelemetry cap.
 
-# All frameworks except CrewAI (see the CrewAI chromadb note above).
+# All frameworks except CrewAI (see the CrewAI note above).
 # Keep these bounds in sync with the individual frameworks-* extras above.
 frameworks = [
     "dspy>=3.4",
@@ -151,8 +155,8 @@ frameworks = [
     "deepagents>=0.7,<0.8",
     "pydantic-ai>=2.31,<2.32",
     "claude-agent-sdk>=0.2",
-    # crewai excluded: requires chromadb~=1.1.0 vs our >=1.5.5.
-    # Install separately: uv pip install superoptix "crewai>=1.15"
+    # crewai excluded: OpenTelemetry squeeze with google-adk (see CrewAI note).
+    # Install separately: uv pip install superoptix "crewai>=1.15.24"
 ]
 
 # MCP tool optimization (vendored from GEPA PR #105)
@@ -366,7 +370,7 @@ docs = [
 ]
 
 # All optional dependencies (excluding dev, Apple Silicon specific, CrewAI, and LogFire)
-# NOTE: Includes DSPy. CrewAI is a separate extra (chromadb version conflict).
+# NOTE: Includes DSPy. CrewAI is installed separately (OpenTelemetry vs google-adk, see CrewAI note).
 # NOTE: LogFire excluded due to opentelemetry-sdk conflict with google-adk
 #       LogFire must be installed separately: uv pip install "superoptix[logfire]"
 #       Cannot be combined with [all] due to google-adk dependency conflict
@@ -381,8 +385,8 @@ all = [
     "deepagents>=0.7,<0.8",
     "pydantic-ai>=2.31,<2.32",
     "claude-agent-sdk>=0.2",
-    # crewai excluded: requires chromadb~=1.1.0 vs our >=1.5.5.
-    # Install separately: uv pip install superoptix "crewai>=1.15"
+    # crewai excluded: OpenTelemetry squeeze with google-adk (see CrewAI note).
+    # Install separately: uv pip install superoptix "crewai>=1.15.24"
     # Protocol integrations (A2A v1 is implemented directly over FastAPI)
     "sse-starlette",
     # logfire - EXCLUDED (conflicts with google-adk's opentelemetry-sdk version)
@@ -411,7 +415,7 @@ all = [
 ]
 
 # All dependencies including Apple Silicon specific (use with caution on non-Apple platforms)
-# NOTE: Includes DSPy. CrewAI is a separate extra (chromadb version conflict).
+# NOTE: Includes DSPy. CrewAI is installed separately (OpenTelemetry vs google-adk, see CrewAI note).
 # NOTE: LogFire excluded due to opentelemetry-sdk conflict with google-adk
 all-with-mlx = [
     # Framework dependencies - keep in sync with the frameworks-* extras above
@@ -424,8 +428,8 @@ all-with-mlx = [
     "deepagents>=0.7,<0.8",
     "pydantic-ai>=2.31,<2.32",
     "claude-agent-sdk>=0.2",
-    # crewai excluded: requires chromadb~=1.1.0 vs our >=1.5.5.
-    # Install separately: uv pip install superoptix "crewai>=1.15"
+    # crewai excluded: OpenTelemetry squeeze with google-adk (see CrewAI note).
+    # Install separately: uv pip install superoptix "crewai>=1.15.24"
     # logfire - EXCLUDED (conflicts with google-adk's opentelemetry-sdk version)
     # Existing dependencies
     "streamlit",
