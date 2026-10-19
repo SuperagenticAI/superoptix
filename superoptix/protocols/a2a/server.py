@@ -145,6 +145,29 @@ def _int_or_none(value: Any) -> int | None:
         return None
 
 
+def _history_length_param(value: Any, *, legacy: bool) -> int | None:
+    """Read a historyLength value with the caller's spec-line semantics.
+
+    In 1.0 a zero asks for no history. The 0.3 line has no way to say "unset"
+    on its proto-derived wire, so a zero there means no limit (matching the
+    a2a-python compat layer, a2aproject/a2a-python#1311).
+    """
+    history_length = _int_or_none(value)
+    if legacy and history_length == 0:
+        return None
+    return history_length
+
+
+def _legacy_configuration(
+    configuration: Dict[str, Any] | None, *, legacy: bool
+) -> Dict[str, Any]:
+    """Drop a 0.3 historyLength of zero so it reads as unlimited."""
+    config = dict(configuration or {})
+    if legacy and _int_or_none(config.get("historyLength")) == 0:
+        config.pop("historyLength", None)
+    return config
+
+
 def _bool_or_none(value: Any) -> bool | None:
     if value is None or value == "":
         return None
@@ -1209,7 +1232,9 @@ may take a moment while the service starts.</p>
     ) -> Dict[str, Any]:
         task = await tasks.send_message(
             message=payload.get("message") or {},
-            configuration=payload.get("configuration") or {},
+            configuration=_legacy_configuration(
+                payload.get("configuration"), legacy=_wants_legacy(request)
+            ),
             request=request,
         )
         if "__a2a_message__" in task:
@@ -1252,7 +1277,11 @@ may take a moment while the service starts.</p>
     ) -> Any:
         caller_key = _caller_key_from_request(request, isolate=isolate_callers)
         task = await tasks.get(
-            task_id, history_length=historyLength, caller_key=caller_key
+            task_id,
+            history_length=_history_length_param(
+                historyLength, legacy=_wants_legacy(request)
+            ),
+            caller_key=caller_key,
         )
         if not task:
             return _http_error(a2a_errors.TASK_NOT_FOUND, "Task not found")
@@ -1338,7 +1367,9 @@ may take a moment while the service starts.</p>
             try:
                 task = await tasks.send_message(
                     message=params.get("message") or {},
-                    configuration=params.get("configuration") or {},
+                    configuration=_legacy_configuration(
+                        params.get("configuration"), legacy=legacy
+                    ),
                     request=request,
                 )
             except A2AProtocolError as exc:
@@ -1379,7 +1410,9 @@ may take a moment while the service starts.</p>
             caller_key = _caller_key_from_request(request, isolate=isolate_callers)
             task = await tasks.get(
                 str(task_id),
-                history_length=_int_or_none(params.get("historyLength")),
+                history_length=_history_length_param(
+                    params.get("historyLength"), legacy=legacy
+                ),
                 caller_key=caller_key,
             )
             if not task:

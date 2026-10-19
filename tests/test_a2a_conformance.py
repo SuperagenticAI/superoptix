@@ -472,6 +472,62 @@ class TestSendMessageHistoryLength:
         assert task["history"]
 
 
+class TestLegacyHistoryLengthZero:
+    """On the 0.3 line a historyLength of 0 means unlimited, not none.
+
+    Mirrors a2aproject/a2a-python#1311 so 0.3 clients see the same history
+    from SuperOptiX as from the reference SDK. 1.0 keeps zero as "no history".
+    """
+
+    V03 = {"A2A-Version": "0.3"}
+
+    def _rpc(self, client, method, params, headers=None):
+        return client.post(
+            RPC,
+            json={"jsonrpc": "2.0", "id": "1", "method": method, "params": params},
+            headers=headers or {},
+        ).json()
+
+    def _legacy_send(self, client, history_length=None, context_id=None):
+        message = {
+            "role": "user",
+            "messageId": "m-hist",
+            "parts": [{"kind": "text", "text": "hi"}],
+        }
+        if context_id:
+            message["contextId"] = context_id
+        params = {"message": message}
+        if history_length is not None:
+            params["configuration"] = {"historyLength": history_length}
+        body = self._rpc(client, "message/send", params)
+        assert "error" not in body, body
+        return body["result"]
+
+    def test_jsonrpc_send_zero_keeps_history(self, client):
+        task = self._legacy_send(client, history_length=0)
+        assert task.get("history"), task
+
+    def test_jsonrpc_get_zero_keeps_history(self, client):
+        task = self._legacy_send(client)
+        body = self._rpc(client, "tasks/get", {"id": task["id"], "historyLength": 0})
+        assert "error" not in body, body
+        assert body["result"].get("history"), body
+
+    def test_rest_get_zero_keeps_history_for_v03(self, client):
+        task = self._legacy_send(client)
+        response = client.get(
+            f"/tasks/{task['id']}", params={"historyLength": 0}, headers=self.V03
+        )
+        assert response.status_code == 200, response.text
+        assert response.json().get("history"), response.json()
+
+    def test_rest_get_zero_still_empties_history_for_v1(self, client):
+        task = self._legacy_send(client)
+        response = client.get(f"/tasks/{task['id']}", params={"historyLength": 0})
+        assert response.status_code == 200, response.text
+        assert response.json()["history"] == []
+
+
 class TestSpecMandatedErrorCodes:
     """The TCK asserts the specific error, not merely that one was returned."""
 
