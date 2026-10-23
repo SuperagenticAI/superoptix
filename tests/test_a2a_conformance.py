@@ -472,6 +472,62 @@ class TestSendMessageHistoryLength:
         assert task["history"]
 
 
+class TestLegacyHistoryLengthZero:
+    """On the 0.3 line a historyLength of 0 means unlimited, not none.
+
+    Mirrors a2aproject/a2a-python#1311 so 0.3 clients see the same history
+    from SuperOptiX as from the reference SDK. 1.0 keeps zero as "no history".
+    """
+
+    V03 = {"A2A-Version": "0.3"}
+
+    def _rpc(self, client, method, params, headers=None):
+        return client.post(
+            RPC,
+            json={"jsonrpc": "2.0", "id": "1", "method": method, "params": params},
+            headers=headers or {},
+        ).json()
+
+    def _legacy_send(self, client, history_length=None, context_id=None):
+        message = {
+            "role": "user",
+            "messageId": "m-hist",
+            "parts": [{"kind": "text", "text": "hi"}],
+        }
+        if context_id:
+            message["contextId"] = context_id
+        params = {"message": message}
+        if history_length is not None:
+            params["configuration"] = {"historyLength": history_length}
+        body = self._rpc(client, "message/send", params)
+        assert "error" not in body, body
+        return body["result"]
+
+    def test_jsonrpc_send_zero_keeps_history(self, client):
+        task = self._legacy_send(client, history_length=0)
+        assert task.get("history"), task
+
+    def test_jsonrpc_get_zero_keeps_history(self, client):
+        task = self._legacy_send(client)
+        body = self._rpc(client, "tasks/get", {"id": task["id"], "historyLength": 0})
+        assert "error" not in body, body
+        assert body["result"].get("history"), body
+
+    def test_rest_get_zero_keeps_history_for_v03(self, client):
+        task = self._legacy_send(client)
+        response = client.get(
+            f"/tasks/{task['id']}", params={"historyLength": 0}, headers=self.V03
+        )
+        assert response.status_code == 200, response.text
+        assert response.json().get("history"), response.json()
+
+    def test_rest_get_zero_still_empties_history_for_v1(self, client):
+        task = self._legacy_send(client)
+        response = client.get(f"/tasks/{task['id']}", params={"historyLength": 0})
+        assert response.status_code == 200, response.text
+        assert response.json()["history"] == []
+
+
 class TestSpecMandatedErrorCodes:
     """The TCK asserts the specific error, not merely that one was returned."""
 
@@ -559,3 +615,68 @@ class TestListTasksArtifacts:
         assert tasks
         # When requested, artifacts may be present (including empty arrays).
         assert any("artifacts" in task for task in tasks)
+
+
+class TestStreamingHistoryLength:
+    """SendStreamingMessage honours configuration.historyLength on Task events.
+
+    Mirrors a2aproject/a2a-python#1364, where the legacy stream handler ignored it.
+    """
+
+    @staticmethod
+    def _first_task_event(response) -> dict:
+        import json
+
+        for line in response.text.splitlines():
+            if not line.startswith("data:"):
+                continue
+            event = json.loads(line[len("data:") :].strip())
+            event = event.get("result", event)
+            if "task" in event:
+                return event["task"]
+            if event.get("kind") == "task":
+                return event
+        raise AssertionError(f"no task event in stream: {response.text!r}")
+
+    def _stream(self, client, history_length=None, headers=None):
+        body = {"message": {"role": "ROLE_USER", "parts": [{"text": "hi"}]}}
+        if history_length is not None:
+            body["configuration"] = {"historyLength": history_length}
+        response = client.post("/message:stream", json=body, headers=headers or {})
+        assert response.status_code == 200, response.text
+        return self._first_task_event(response)
+
+    def test_stream_without_limit_keeps_history(self, client):
+        assert self._stream(client).get("history")
+
+    def test_stream_zero_empties_history_for_v1(self, client):
+        assert self._stream(client, history_length=0)["history"] == []
+
+    def test_stream_jsonrpc_zero_keeps_history_for_v03(self, client):
+        import json
+
+        response = client.post(
+            RPC,
+            json={
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "message/stream",
+                "params": {
+                    "message": {
+                        "role": "user",
+                        "messageId": "m-1",
+                        "parts": [{"kind": "text", "text": "hi"}],
+                    },
+                    "configuration": {"historyLength": 0},
+                },
+            },
+        )
+        assert response.status_code == 200, response.text
+        events = [
+            json.loads(line[len("data:") :].strip())
+            for line in response.text.splitlines()
+            if line.startswith("data:")
+        ]
+        tasks = [e["result"]["task"] for e in events if "task" in e.get("result", {})]
+        assert tasks, events
+        assert tasks[0].get("history"), tasks[0]
