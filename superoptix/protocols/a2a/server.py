@@ -668,13 +668,17 @@ class _A2ATaskStore:
         self,
         *,
         message: Dict[str, Any],
+        configuration: Dict[str, Any] | None = None,
         request: Any | None = None,
     ) -> AsyncIterator[Dict[str, Any]]:
         """Validate then return the SSE event iterator.
 
         Validation runs before the iterator is returned so HTTP and JSON-RPC
         handlers can render protocol errors instead of a 500 from the stream.
+        ``configuration.historyLength`` trims the Task event's history, as it
+        does for SendMessage (a2aproject/a2a-python#1364).
         """
+        history_length = _int_or_none((configuration or {}).get("historyLength"))
         caller_key = _caller_key_from_request(request, isolate=self.isolate_callers)
         user_message = _user_message(message)
         await self._validate_message_references(user_message, caller_key=caller_key)
@@ -696,7 +700,8 @@ class _A2ATaskStore:
                 message_text="Processing request",
                 publish=False,
             )
-            yield {"task": await self.get(task_id, caller_key=caller_key) or task}
+            current_task = await self.get(task_id, caller_key=caller_key) or task
+            yield {"task": _apply_history_length(dict(current_task), history_length)}
 
             result: Any = None
             try:
@@ -1246,6 +1251,9 @@ may take a moment while the service starts.</p>
         try:
             iterator = await tasks.stream_message(
                 message=payload.get("message") or {},
+                configuration=_legacy_configuration(
+                    payload.get("configuration"), legacy=_wants_legacy(request)
+                ),
                 request=request,
             )
         except A2AProtocolError as exc:
@@ -1399,6 +1407,9 @@ may take a moment while the service starts.</p>
             try:
                 iterator = await tasks.stream_message(
                     message=params.get("message") or {},
+                    configuration=_legacy_configuration(
+                        params.get("configuration"), legacy=legacy
+                    ),
                     request=request,
                 )
             except A2AProtocolError as exc:

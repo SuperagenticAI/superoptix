@@ -615,3 +615,68 @@ class TestListTasksArtifacts:
         assert tasks
         # When requested, artifacts may be present (including empty arrays).
         assert any("artifacts" in task for task in tasks)
+
+
+class TestStreamingHistoryLength:
+    """SendStreamingMessage honours configuration.historyLength on Task events.
+
+    Mirrors a2aproject/a2a-python#1364, where the legacy stream handler ignored it.
+    """
+
+    @staticmethod
+    def _first_task_event(response) -> dict:
+        import json
+
+        for line in response.text.splitlines():
+            if not line.startswith("data:"):
+                continue
+            event = json.loads(line[len("data:") :].strip())
+            event = event.get("result", event)
+            if "task" in event:
+                return event["task"]
+            if event.get("kind") == "task":
+                return event
+        raise AssertionError(f"no task event in stream: {response.text!r}")
+
+    def _stream(self, client, history_length=None, headers=None):
+        body = {"message": {"role": "ROLE_USER", "parts": [{"text": "hi"}]}}
+        if history_length is not None:
+            body["configuration"] = {"historyLength": history_length}
+        response = client.post("/message:stream", json=body, headers=headers or {})
+        assert response.status_code == 200, response.text
+        return self._first_task_event(response)
+
+    def test_stream_without_limit_keeps_history(self, client):
+        assert self._stream(client).get("history")
+
+    def test_stream_zero_empties_history_for_v1(self, client):
+        assert self._stream(client, history_length=0)["history"] == []
+
+    def test_stream_jsonrpc_zero_keeps_history_for_v03(self, client):
+        import json
+
+        response = client.post(
+            RPC,
+            json={
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "message/stream",
+                "params": {
+                    "message": {
+                        "role": "user",
+                        "messageId": "m-1",
+                        "parts": [{"kind": "text", "text": "hi"}],
+                    },
+                    "configuration": {"historyLength": 0},
+                },
+            },
+        )
+        assert response.status_code == 200, response.text
+        events = [
+            json.loads(line[len("data:") :].strip())
+            for line in response.text.splitlines()
+            if line.startswith("data:")
+        ]
+        tasks = [e["result"]["task"] for e in events if "task" in e.get("result", {})]
+        assert tasks, events
+        assert tasks[0].get("history"), tasks[0]

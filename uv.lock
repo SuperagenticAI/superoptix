@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.11"
 resolution-markers = [
     "python_full_version >= '3.15'",
@@ -2369,6 +2369,11 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/d2/1b/5b1964b0f1299aaca2b98300d73d972046ab70edb53c47674d6ace3c1bf1/dspy-3.4.0.tar.gz", hash = "sha256:4dea089c6bd1f8d314e1095e7f64b4b4ff64bb8a09549efee026c0a609f08c16", size = 887770, upload-time = "2026-09-25T04:04:25.439Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/17/96/31628d4231b5dd7edbe9eaf5c975d1055f4b79b337062a1f957dca6dd931/dspy-3.4.0-py3-none-any.whl", hash = "sha256:36de329ecdaf18e31977e26c61b587caa470a34f574f2fe6cb7f4c82bcbf97cc", size = 987510, upload-time = "2026-09-25T04:04:23.915Z" },
+]
+
+[package.optional-dependencies]
+typesafe = [
+    { name = "typesafe-sdk" },
 ]
 
 [[package]]
@@ -8983,6 +8988,9 @@ huggingface = [
     { name = "transformers" },
     { name = "uvicorn" },
 ]
+jev = [
+    { name = "dspy", extra = ["typesafe"] },
+]
 lancedb = [
     { name = "lancedb" },
     { name = "sentence-transformers" },
@@ -9049,6 +9057,9 @@ turboagents = [
     { name = "sentence-transformers" },
     { name = "turboagents", extra = ["rag"] },
 ]
+typesafe = [
+    { name = "dspy", extra = ["typesafe"] },
+]
 ui = [
     { name = "pandas" },
     { name = "plotly" },
@@ -9107,6 +9118,8 @@ requires-dist = [
     { name = "dspy", marker = "extra == 'all-with-mlx'", specifier = ">=3.3" },
     { name = "dspy", marker = "extra == 'frameworks'", specifier = ">=3.3" },
     { name = "dspy", marker = "extra == 'frameworks-dspy'", specifier = ">=3.3" },
+    { name = "dspy", extras = ["typesafe"], marker = "extra == 'jev'", specifier = ">=3.4" },
+    { name = "dspy", extras = ["typesafe"], marker = "extra == 'typesafe'", specifier = ">=3.4" },
     { name = "faiss-cpu", marker = "extra == 'all'" },
     { name = "faiss-cpu", marker = "extra == 'all-with-mlx'" },
     { name = "faiss-cpu", marker = "extra == 'faiss'" },
@@ -9247,7 +9260,7 @@ requires-dist = [
     { name = "weaviate-client", marker = "extra == 'vectordb'" },
     { name = "weaviate-client", marker = "extra == 'weaviate'" },
 ]
-provides-extras = ["frameworks-dspy", "frameworks-openai", "frameworks-google", "frameworks-microsoft", "frameworks-deepagents", "frameworks-pydantic-ai", "frameworks-claude-sdk", "frameworks", "mcp", "a2a", "protocols-a2a", "logfire", "phoenix", "dev", "ui", "chromadb", "lancedb", "faiss", "turboagents", "weaviate", "qdrant", "milvus", "surrealdb", "vectordb", "mlx", "ml-cross-platform", "huggingface", "redis", "observability", "web", "data", "cloud", "testing", "docs", "all", "all-with-mlx"]
+provides-extras = ["frameworks-dspy", "typesafe", "jev", "frameworks-openai", "frameworks-google", "frameworks-microsoft", "frameworks-deepagents", "frameworks-pydantic-ai", "frameworks-claude-sdk", "frameworks", "mcp", "a2a", "protocols-a2a", "logfire", "phoenix", "dev", "ui", "chromadb", "lancedb", "faiss", "turboagents", "weaviate", "qdrant", "milvus", "surrealdb", "vectordb", "mlx", "ml-cross-platform", "huggingface", "redis", "observability", "web", "data", "cloud", "testing", "docs", "all", "all-with-mlx"]
 
 [[package]]
 name = "surrealdb"
@@ -9584,6 +9597,25 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/16/f7/57713ba479fd405eb76de31404b2c744c289e336b2d999511ebf51e496f7/typer-0.27.2.tar.gz", hash = "sha256:269b7eb9d3c202ca84b4bc9618cb04ebb43d3d4d1e567e4c768607232c05f945", size = 204045, upload-time = "2026-08-28T10:26:55.046Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/dc/bf/205d0004930ede8f542fb58f601526fccf4ae7626075ca1e6c4de5d3d652/typer-0.27.2-py3-none-any.whl", hash = "sha256:b3a5fc4342d5fc8fda8fc3010b1cf117e9249aab7fae800c2eff62fd3842d97d", size = 123130, upload-time = "2026-08-28T10:26:53.752Z" },
+]
+
+[[package]]
+name = "typesafe-sdk"
+version = "0.7.5"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anyio" },
+    { name = "httpx2" },
+    { name = "packaging" },
+    { name = "pydantic" },
+    { name = "pydantic-core" },
+    { name = "tenacity" },
+    { name = "truststore", marker = "sys_platform != 'emscripten'" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/26/4d/383aa14f4cfe5fb41023ea1cab52d7f79cc31ab200ee7314317cf89db744/typesafe_sdk-0.7.5.tar.gz", hash = "sha256:1eeeb0dc80a7161d84896db42a5016dc0a7c8872fa16540b70163e5357b6d398", size = 34152, upload-time = "2026-10-14T21:21:42.837Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1c/f6/bee4c3b49570c2d312057c9e37c1446cf37eb1b86bf5872f7a797e803326/typesafe_sdk-0.7.5-py3-none-any.whl", hash = "sha256:967a8b61494d536abb55ee3f3a2b10e81685cb6baad6ccdcab588bdc6c9b86d2", size = 49948, upload-time = "2026-10-14T21:21:41.337Z" },
 ]
 
 [[package]]
