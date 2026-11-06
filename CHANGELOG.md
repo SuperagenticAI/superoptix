@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Lift `frameworks-openai` to `openai-agents>=0.21` and `openai>=3,<4` now that
+  litellm 1.108+ accepts `openai>=2.20,<4` (verified with litellm 1.108.1,
+  openai-agents 0.24.0, openai 3.46.0).
+- Lift `frameworks-pydantic-ai` to `pydantic-ai>=2.31` (drop `<2.32`) now that
+  google-adk 2.13 allows `opentelemetry-api<=1.44` (verified with pydantic-ai 2.66.0).
+- Refresh CrewAI comments: chromadb conflict resolved upstream in crewai 1.15.24;
+  remaining exclusion from `frameworks` / `all` is crewai's `openai<3` vs the
+  openai-agents 0.21+ `openai>=3` requirement.
+
 ## [0.3.16] - 2026-09-30
 
 ### Fixed
